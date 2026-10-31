@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "ffdec_version": "26.4.0",
+  "java_major": "21",
+  "original_sha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "source_sha256": "77b37efa384e58f0b31f6bd31f553efb8f2001faec91d214fcda09d63e62215f",
+  "tag_count": 3491,
+  "modified_doabc_tag_indices": [
+    2782
+  ],
+  "all_non_doabc_tag_payloads_identical": true,
+  "tag_types_and_order_identical": true,
+  "frame_header_identical": true,
+  "original_swf_version": 9,
+  "output_swf_version": 10,
+  "output_sha256": "bf573da9f6dc7dae9538ccc3e458b1eba80dc7947ad16f520fde62388b3c4363",
+  "output_bytes": 2492144
+}

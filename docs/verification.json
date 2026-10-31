@@ -1,0 +1,24 @@
+{
+  "output": "elonashooter1.3-fixed.swf",
+  "original_sha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "fixed_sha256": "bf573da9f6dc7dae9538ccc3e458b1eba80dc7947ad16f520fde62388b3c4363",
+  "swf_version": 10,
+  "root_tag_count": 3491,
+  "changed_tag_indices": [
+    2782
+  ],
+  "non_code_resources_identical": true,
+  "localization_removed": true,
+  "original_ad_and_loader_flags_preserved": true,
+  "live_checks": {
+    "runtime": "Ruffle 0.7.1 web",
+    "original_english_ui": true,
+    "language_selector_absent": true,
+    "new_game_character_creation": true,
+    "proceed_reaches_combat": true,
+    "enemy_spawn_and_damage": true,
+    "normal_game_over": true,
+    "actionscript_errors_observed": 0,
+    "existing_nonfatal_network_warning": "Retired MochiAds endpoint blocked by Ruffle"
+  }
+}
