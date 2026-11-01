@@ -243,6 +243,58 @@ This uniform pause freeze is a deliberate port policy: the original projectile
 classes are inconsistent about checking pause. The code review establishes the
 input boundary; browser acceptance is recorded separately.
 
+## Shop Upgrade and MOD confirmation
+
+`shop-view.ts` retains the original two-click inventory interaction: pick up an
+item, then choose a destination. Upgrade is a separate selection mode entered
+through shop action `act2` (button 1815) when at least 4 AP are available.
+Stock, empty slots and non-guns are dimmed; selecting one cancels the mode.
+The original `actHelp` field at shop-local (232, 234.25) reads
+“Choose a weapon to upgrade. Click nowhere to cancel.” The shop window's
+settled offset remains (24.41238023502831, -22).
+
+Upgrade confirmation reuses dialog 2131 at stage (0, 0). Its question is
+“It costs you N gp. Really upgrade the weapon?” The before/after panels use
+original popup 1791 at (-12.55, 4.6) and (298.4, 10.6). Arrow 2129 is at
+(316, 117.15), rotated -90 degrees with its source scale. `invPopupUpdate`
+supplies the displayed name, value, damage, air/armor percentages, accuracy,
+ammo, reload time, rate, requirement, modification count/text and living-weapon
+progress. The source colors unmet requirements red and met requirements blue.
+Infinite-ammo guns show dashes for ammo/reload, except Gravity Gun 27.
+
+The extractor provides `itemPopup` with only the original static labels and
+parchment, plus `shopUpgradeArrow`. Dynamic field positions/fonts/bounds are
+recorded under `town-layout.json.itemPopup.children`. Original Refresh and
+Upgrade labels are now separate `townShopRefreshLabel` and
+`townShopUpgradeLabel` images, so their enabled appearance can differ. Both
+already include the shop's -22 y offset. The obsolete combined label image was
+removed. Regeneration remains `python tools/extract_web_assets.py`.
+
+The v9 UI reads `pendingTownAction` and the already generated
+`upgradeReference` from simulation state. Opening or restoring the view does
+not roll another preview. A pending action forces the Shop screen and places
+an interactive modal over town navigation. Upgrade confirmation displays the
+owned item and that saved preview; Yes spends the displayed gold and 4 AP.
+No or an outside click dismisses the preview without spending gold/AP. The
+port intentionally preserves all mounted modifications during Upgrade; the
+original parser can omit the final modification. This is a stated gameplay
+correction, not an original-parity claim.
+
+An owned MOD dropped onto an owned gun opens the original mounting question;
+the original `showDialog` does not show comparison panels for this action.
+Yes delegates validation and mounting to the simulation. Rejected mounting
+keeps both items. **No or an outside click swaps the MOD and gun**, matching the
+source `endDialog` branch for owned inventory; the ordinary UI explains this
+consequence. This is distinct from cancelling a sale or Upgrade. The original
+Yes/No artwork and common dialog shell are reused.
+
+Source anchors are `updateInvSlots` (1963), `invDrag` (2868), `endDialog`
+(4797 onward), `showDialog` (5782), `upgradeWeapon` (6654), `endEquipMode`
+(6711), `invPopupUpdate` (7619), and the shop action handler around line 13645
+of `src/original/MainTimeline.as`. These asset/source notes describe the
+integrated candidate; original-runtime comparisons and final browser acceptance
+are tracked separately.
+
 ## Fonts and drawing fidelity
 
 | SWF font ID | Face | Use |

@@ -18,6 +18,7 @@
     "test:second-town-reference": "node --experimental-strip-types scripts/compare-second-town-reference.ts",
     "test:castle-reference": "node --experimental-strip-types scripts/compare-castle-reference.ts",
     "test:projectile-reference": "node --experimental-strip-types scripts/compare-projectile-reference.ts",
+    "test:modification-reference": "node --experimental-strip-types scripts/compare-modification-reference.ts",
     "test:combat-reference": "node --experimental-strip-types scripts/compare-combat-reference.ts",
     "test:item-reference": "node --experimental-strip-types scripts/compare-item-reference.ts",
     "test:progression-reference": "node --experimental-strip-types scripts/compare-progression-reference.ts",

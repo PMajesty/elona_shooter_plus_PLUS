@@ -1,6 +1,6 @@
 {
   "date": "2026-11-02",
-  "milestone": "Connected Sheriff Days 1-2 with eight projectile guns, faithful lifecycles/input, explicit vertical-shot correction and v8 saves",
+  "milestone": "Connected Sheriff Days 1–2 with town weapon Upgrade, MOD mounting, retained final modifiers and v9 confirmation saves",
   "complete_port": false,
   "environment": {
     "os": "Windows",
@@ -10,7 +10,7 @@
     "vite": "8.3.5"
   },
   "automated": {
-    "simulation_tests_passed": 151,
+    "simulation_tests_passed": 167,
     "simulation_tests_failed": 0,
     "typescript": "passed",
     "production_build": "passed",
@@ -24,14 +24,18 @@
         "interruptions"
       ],
       "scenarios": 96,
-      "simulationFrames": 196363,
-      "checkpoints": 2207,
-      "rewardTransitions": 405,
-      "townActions": 364,
+      "simulationFrames": 196379,
+      "checkpoints": 2287,
+      "rewardTransitions": 417,
+      "townActions": 433,
       "restTransitions": 59,
       "secondDayVictories": 32,
       "equipmentSelections": 297,
-      "elapsedMs": 15738,
+      "modificationPreviews": 53,
+      "modsMounted": 16,
+      "weaponsUpgraded": 18,
+      "upgradeCancellations": 35,
+      "elapsedMs": 15490,
       "collision": "Production ordinary-enemy contours; boss uses the documented rectangular headless fallback",
       "limits": [
         "Port self-consistency, finite state and JSON replay only; not an original-game parity proof",
@@ -55,9 +59,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3275,
-          "kills": 29,
-          "checkpoints": 41
+          "ticks": 3297,
+          "kills": 30,
+          "checkpoints": 43
         },
         {
           "seed": 42,
@@ -85,9 +89,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3399,
-          "kills": 33,
-          "checkpoints": 42
+          "ticks": 3354,
+          "kills": 31,
+          "checkpoints": 44
         },
         {
           "seed": 2654435761,
@@ -115,9 +119,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3299,
-          "kills": 29,
-          "checkpoints": 41
+          "ticks": 3287,
+          "kills": 27,
+          "checkpoints": 43
         },
         {
           "seed": 1013904226,
@@ -145,9 +149,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3353,
-          "kills": 32,
-          "checkpoints": 42
+          "ticks": 3308,
+          "kills": 30,
+          "checkpoints": 44
         },
         {
           "seed": 3668339987,
@@ -177,7 +181,7 @@
           "daysCompleted": 2,
           "ticks": 3344,
           "kills": 31,
-          "checkpoints": 42
+          "checkpoints": 45
         },
         {
           "seed": 2027808452,
@@ -205,9 +209,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3206,
-          "kills": 27,
-          "checkpoints": 40
+          "ticks": 3251,
+          "kills": 29,
+          "checkpoints": 42
         },
         {
           "seed": 387276917,
@@ -217,7 +221,7 @@
           "daysCompleted": 1,
           "ticks": 2832,
           "kills": 2,
-          "checkpoints": 30
+          "checkpoints": 31
         },
         {
           "seed": 3041712678,
@@ -235,9 +239,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3356,
-          "kills": 32,
-          "checkpoints": 42
+          "ticks": 3299,
+          "kills": 29,
+          "checkpoints": 43
         },
         {
           "seed": 3041712678,
@@ -245,9 +249,9 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2550,
-          "kills": 6,
-          "checkpoints": 31
+          "ticks": 2531,
+          "kills": 5,
+          "checkpoints": 32
         },
         {
           "seed": 1401181143,
@@ -267,7 +271,7 @@
           "daysCompleted": 2,
           "ticks": 3320,
           "kills": 31,
-          "checkpoints": 42
+          "checkpoints": 45
         },
         {
           "seed": 1401181143,
@@ -277,7 +281,7 @@
           "daysCompleted": 1,
           "ticks": 2397,
           "kills": 0,
-          "checkpoints": 28
+          "checkpoints": 29
         },
         {
           "seed": 4055616904,
@@ -296,8 +300,8 @@
           "day": 2,
           "daysCompleted": 2,
           "ticks": 3392,
-          "kills": 30,
-          "checkpoints": 42
+          "kills": 31,
+          "checkpoints": 45
         },
         {
           "seed": 4055616904,
@@ -325,9 +329,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3342,
-          "kills": 32,
-          "checkpoints": 42
+          "ticks": 3297,
+          "kills": 30,
+          "checkpoints": 43
         },
         {
           "seed": 2415085369,
@@ -355,9 +359,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3261,
+          "ticks": 3228,
           "kills": 28,
-          "checkpoints": 41
+          "checkpoints": 43
         },
         {
           "seed": 774553834,
@@ -385,9 +389,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3357,
-          "kills": 27,
-          "checkpoints": 41
+          "ticks": 3402,
+          "kills": 31,
+          "checkpoints": 44
         },
         {
           "seed": 3428989595,
@@ -415,9 +419,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3276,
-          "kills": 28,
-          "checkpoints": 41
+          "ticks": 3366,
+          "kills": 32,
+          "checkpoints": 44
         },
         {
           "seed": 1788458060,
@@ -445,9 +449,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3309,
-          "kills": 30,
-          "checkpoints": 43
+          "ticks": 3264,
+          "kills": 27,
+          "checkpoints": 44
         },
         {
           "seed": 147926525,
@@ -477,7 +481,7 @@
           "daysCompleted": 2,
           "ticks": 3263,
           "kills": 28,
-          "checkpoints": 41
+          "checkpoints": 44
         },
         {
           "seed": 2802362286,
@@ -485,9 +489,9 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2222,
+          "ticks": 2216,
           "kills": 0,
-          "checkpoints": 26
+          "checkpoints": 27
         },
         {
           "seed": 1161830751,
@@ -505,9 +509,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3242,
-          "kills": 28,
-          "checkpoints": 41
+          "ticks": 3297,
+          "kills": 30,
+          "checkpoints": 43
         },
         {
           "seed": 1161830751,
@@ -535,9 +539,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3332,
-          "kills": 31,
-          "checkpoints": 42
+          "ticks": 3309,
+          "kills": 30,
+          "checkpoints": 44
         },
         {
           "seed": 3816266512,
@@ -567,7 +571,7 @@
           "daysCompleted": 2,
           "ticks": 3299,
           "kills": 29,
-          "checkpoints": 41
+          "checkpoints": 42
         },
         {
           "seed": 2175734977,
@@ -597,7 +601,7 @@
           "daysCompleted": 2,
           "ticks": 3344,
           "kills": 30,
-          "checkpoints": 42
+          "checkpoints": 45
         },
         {
           "seed": 535203442,
@@ -627,7 +631,7 @@
           "daysCompleted": 2,
           "ticks": 3287,
           "kills": 30,
-          "checkpoints": 41
+          "checkpoints": 43
         },
         {
           "seed": 3189639203,
@@ -655,9 +659,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3242,
-          "kills": 28,
-          "checkpoints": 41
+          "ticks": 3297,
+          "kills": 29,
+          "checkpoints": 44
         },
         {
           "seed": 1549107668,
@@ -685,9 +689,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3183,
-          "kills": 25,
-          "checkpoints": 40
+          "ticks": 3228,
+          "kills": 28,
+          "checkpoints": 42
         },
         {
           "seed": 4203543429,
@@ -716,8 +720,8 @@
           "day": 2,
           "daysCompleted": 2,
           "ticks": 3341,
-          "kills": 33,
-          "checkpoints": 41
+          "kills": 32,
+          "checkpoints": 45
         },
         {
           "seed": 2563011894,
@@ -745,9 +749,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3308,
-          "kills": 30,
-          "checkpoints": 41
+          "ticks": 3342,
+          "kills": 31,
+          "checkpoints": 44
         },
         {
           "seed": 922480359,
@@ -777,7 +781,7 @@
           "daysCompleted": 2,
           "ticks": 3215,
           "kills": 28,
-          "checkpoints": 40
+          "checkpoints": 43
         },
         {
           "seed": 3576916120,
@@ -807,7 +811,7 @@
           "daysCompleted": 2,
           "ticks": 3354,
           "kills": 31,
-          "checkpoints": 42
+          "checkpoints": 45
         },
         {
           "seed": 1936384585,
@@ -837,7 +841,7 @@
           "daysCompleted": 2,
           "ticks": 3230,
           "kills": 27,
-          "checkpoints": 41
+          "checkpoints": 42
         },
         {
           "seed": 295853050,
@@ -866,8 +870,8 @@
           "day": 2,
           "daysCompleted": 2,
           "ticks": 3266,
-          "kills": 27,
-          "checkpoints": 41
+          "kills": 28,
+          "checkpoints": 44
         },
         {
           "seed": 2950288811,
@@ -897,7 +901,7 @@
           "daysCompleted": 2,
           "ticks": 3219,
           "kills": 27,
-          "checkpoints": 41
+          "checkpoints": 43
         },
         {
           "seed": 1309757276,
@@ -927,7 +931,7 @@
           "daysCompleted": 2,
           "ticks": 3287,
           "kills": 30,
-          "checkpoints": 41
+          "checkpoints": 44
         },
         {
           "seed": 3964193037,
@@ -955,9 +959,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3242,
-          "kills": 28,
-          "checkpoints": 41
+          "ticks": 3197,
+          "kills": 26,
+          "checkpoints": 43
         },
         {
           "seed": 2323661502,
@@ -987,7 +991,7 @@
           "daysCompleted": 2,
           "ticks": 3288,
           "kills": 29,
-          "checkpoints": 41
+          "checkpoints": 45
         },
         {
           "seed": 683129967,
@@ -1553,7 +1557,9 @@
         "JSON state/callback replay to removal",
         "malformed saved progress rejected"
       ]
-    }
+    },
+    "test_output": ".build/modification-final-tests.txt",
+    "python_tools_compile": "passed"
   },
   "browser_checks": {
     "new_game": {
@@ -2219,6 +2225,66 @@
         "No complete browser raster/audio comparison; hard-light fractional placement differences documented in ui-reference",
         "Crossbow key3 selection/bolt was checked in earlier candidate before quantization corrections, not counted as a final-build browser trajectory proof"
       ]
+    },
+    "modifications": {
+      "candidate_bundle": "assets/index-BkYSbyM0.js",
+      "production_bundle": "assets/index-ZglOiIdp.js",
+      "candidate_provenance": ".build/browser-qa/modification-ui-provenance.json",
+      "candidate_boundary": "Actual second-town port checkpoint with one original Damage MOD added to an empty slot. Gold, AP, traits and mission unchanged. This is controlled UI coverage, not ordinary MOD acquisition or a full browser campaign.",
+      "transactions": [
+        "Owned MOD No swaps both item records",
+        "Owned MOD Yes consumes the MOD, refills ammo and preserves gold/AP/RNG",
+        "Upgrade preview costs no gold/AP before Yes, shows retained Damage MOD and red Shotgun6 requirement",
+        "Reload and Continue restore the exact pending preview without rerolling",
+        "Upgrade Yes spends1179 gold and4 AP once:1817→638 and4→0",
+        "Further Upgrade is rejected for insufficient AP"
+      ],
+      "full_simulation_comparison": ".build/browser-qa/modification-ui-comparison.json",
+      "pending_continue_exports_byte_identical_sha256": "9e3c0314952895748765245b351f4cb44979f7aaf1374be0a321e19f3481b2f4",
+      "final_build_changes_after_candidate": "Town import validation accepts historical reload metadata retained by original enchant, while active-battle guards remain; coverage footer updated. Shop transaction/UI code unchanged.",
+      "production_smoke": {
+        "status": "passed",
+        "bundle": "assets/index-ZglOiIdp.js",
+        "source": "projectile-production-ui-v8.json",
+        "actual": "modification-production-ui-v9.json",
+        "tick": 674,
+        "fullSimulationEquality": true,
+        "method": "Actual browser Import Save of preserved v8 checkpoint, immediate pause, Export Save compared with Simulation.fromSave. Initial Continue also restored v8 tick674, then advanced five ticks before pause; that first export is not claimed as zero-update equality.",
+        "newGame": {
+          "ammo": "5",
+          "appearance": "0",
+          "bossBars": "0",
+          "bossHealth": "[]",
+          "bowDrawing": "false",
+          "day": "1",
+          "enemies": "0",
+          "frameMs": "16.65",
+          "gold": "200",
+          "grenades": "5",
+          "hp": "40",
+          "inventory": "[3,11,null,null,null,null]",
+          "itemCooldowns": "[0,0,0,0,0]",
+          "kills": "0",
+          "loadMs": "5387",
+          "maxFrameMs": "16.66",
+          "paused": "true",
+          "phase": "battle",
+          "playerFrame": "109",
+          "projectiles": "[]",
+          "reloadAnimations": "0",
+          "reloadTicks": "0",
+          "screen": "battle",
+          "selectedSlot": "0",
+          "slowFrames": "0",
+          "tick": "0"
+        }
+      },
+      "production_observed_console_errors": [],
+      "limits": [
+        "No comparative pixel or performance benchmark",
+        "Pending-preview input was checked on candidate BkYSbyM0; final ZglOiIdp separately passed New Game and exact v8 import migration",
+        "Original comparison uses controlled shop methods and a mouse-coordinate seam; it does not establish native original pointer geometry"
+      ]
     }
   },
   "checkpoint_provenance": "Generated using public Simulation API, seed 42 and normal fire/reload inputs with rectangular fallback collision. No state edits. Imported through the normal file picker. These checks are not a complete manual playthrough or parity proof. New boss full/half/dead checks deliberately edit only boss HP/death frame in a copied checkpoint; they are controlled fixtures, not normal-play captures. Older victory/defeat checks predate the source-backed wave RNG correction. Latest loot checkpoint uses post-item-integration New Game with seed42; see .build/browser-qa/loot-expected.json. Older numerical checkpoints above are retained as dated evidence and are not expected outputs for the new initial RNG boundary. Latest Day2 checkpoint provenance is stored in browser_checks.equipment_rest_day2: real two-day inputs, production ordinary contours and documented boss fallback, no phase overrides.",
@@ -2250,7 +2316,9 @@
     ".build/browser-qa/day2-release.jpg",
     ".build/browser-qa/projectile-bow-final.jpg",
     ".build/browser-qa/projectile-gravity-final.jpg",
-    ".build/browser-qa/projectile-production-restored.jpg"
+    ".build/browser-qa/projectile-production-restored.jpg",
+    ".build/browser-qa/modification-upgrade-preview.jpg",
+    ".build/browser-qa/modification-production-restored.jpg"
   ],
   "preserved_baselines": {
     "original/elonashooter1.3.swf": {
@@ -3085,30 +3153,1048 @@
       ],
       "original_runs_identical": 2,
       "sourceSteps": 650
+    },
+    "modifications": {
+      "status": "passed",
+      "observedSnapshots": 104,
+      "comparedSnapshots": 88,
+      "fullyComparedSnapshots": 84,
+      "matchedSnapshots": 88,
+      "rawOriginalBugCases": [
+        {
+          "scenario": "upgrade_one_mod",
+          "beforeModCount": 1,
+          "previewModCount": 0,
+          "finalModText": ""
+        },
+        {
+          "scenario": "upgrade_repeated_mods",
+          "beforeModCount": 3,
+          "previewModCount": 2,
+          "finalModText": "Damage(Lv.2) Damage(Lv.1) "
+        },
+        {
+          "scenario": "upgrade_living_first",
+          "beforeModCount": 2,
+          "previewModCount": 1,
+          "finalModText": "Living Weapon(Lv.1) "
+        },
+        {
+          "scenario": "upgrade_living_last",
+          "beforeModCount": 2,
+          "previewModCount": 1,
+          "finalModText": "Damage(Lv.1) "
+        }
+      ],
+      "interventionCases": 4,
+      "comparisons": [
+        {
+          "scenario": "upgrade_plain_cancel_reopen",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_plain_cancel_reopen",
+          "step": 1,
+          "op": "enterUpgrade",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_plain_cancel_reopen",
+          "step": 2,
+          "op": "previewOriginal",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_plain_cancel_reopen",
+          "step": 3,
+          "op": "cancel",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_plain_cancel_reopen",
+          "step": 4,
+          "op": "enterUpgrade",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_plain_cancel_reopen",
+          "step": 5,
+          "op": "previewOriginal",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_plain_cancel_reopen",
+          "step": 6,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_plain_three_draws",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_plain_three_draws",
+          "step": 1,
+          "op": "enterUpgrade",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_plain_three_draws",
+          "step": 2,
+          "op": "previewOriginal",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_plain_three_draws",
+          "step": 3,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_one_mod_retained",
+          "step": 0,
+          "op": "before",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_one_mod_retained",
+          "step": 1,
+          "op": "enterUpgrade",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_one_mod_retained",
+          "step": 2,
+          "op": "previewOriginal",
+          "policy": "retain-final-mod",
+          "referenceCompared": false,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_one_mod_retained",
+          "step": 3,
+          "op": "retainFinalIntervention",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_one_mod_retained",
+          "step": 4,
+          "op": "confirm",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_repeated_mods_retained",
+          "step": 0,
+          "op": "before",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_repeated_mods_retained",
+          "step": 1,
+          "op": "enterUpgrade",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_repeated_mods_retained",
+          "step": 2,
+          "op": "previewOriginal",
+          "policy": "retain-final-mod",
+          "referenceCompared": false,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_repeated_mods_retained",
+          "step": 3,
+          "op": "retainFinalIntervention",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_repeated_mods_retained",
+          "step": 4,
+          "op": "confirm",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_living_first_retained",
+          "step": 0,
+          "op": "before",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_living_first_retained",
+          "step": 1,
+          "op": "enterUpgrade",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_living_first_retained",
+          "step": 2,
+          "op": "previewOriginal",
+          "policy": "retain-final-mod",
+          "referenceCompared": false,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_living_first_retained",
+          "step": 3,
+          "op": "retainFinalIntervention",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_living_first_retained",
+          "step": 4,
+          "op": "confirm",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_living_last_retained",
+          "step": 0,
+          "op": "before",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_living_last_retained",
+          "step": 1,
+          "op": "enterUpgrade",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_living_last_retained",
+          "step": 2,
+          "op": "previewOriginal",
+          "policy": "retain-final-mod",
+          "referenceCompared": false,
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_living_last_retained",
+          "step": 3,
+          "op": "retainFinalIntervention",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_living_last_retained",
+          "step": 4,
+          "op": "confirm",
+          "policy": "retain-final-mod",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_no_money",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_no_money",
+          "step": 1,
+          "op": "enterUpgrade",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_no_money",
+          "step": 2,
+          "op": "previewOriginal",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_no_money",
+          "step": 3,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_low_ap",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade_low_ap",
+          "step": 1,
+          "op": "enterUpgrade",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_damage",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_damage",
+          "step": 1,
+          "op": "pickup",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_damage",
+          "step": 2,
+          "op": "drop",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_damage",
+          "step": 3,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_damage_reload_metadata",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_damage_reload_metadata",
+          "step": 1,
+          "op": "pickup",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_damage_reload_metadata",
+          "step": 2,
+          "op": "drop",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_damage_reload_metadata",
+          "step": 3,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_repeat_damage",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_repeat_damage",
+          "step": 1,
+          "op": "pickup",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_repeat_damage",
+          "step": 2,
+          "op": "drop",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_repeat_damage",
+          "step": 3,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_full",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_full",
+          "step": 1,
+          "op": "pickup",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_full",
+          "step": 2,
+          "op": "drop",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_full",
+          "step": 3,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_ammo_gravity",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_ammo_gravity",
+          "step": 1,
+          "op": "pickup",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_ammo_gravity",
+          "step": 2,
+          "op": "drop",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_ammo_gravity",
+          "step": 3,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_ammo_bow",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_ammo_bow",
+          "step": 1,
+          "op": "pickup",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_ammo_bow",
+          "step": 2,
+          "op": "drop",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_ammo_bow",
+          "step": 3,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_reloading_bow",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_reloading_bow",
+          "step": 1,
+          "op": "pickup",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_reloading_bow",
+          "step": 2,
+          "op": "drop",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_reloading_bow",
+          "step": 3,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_auto_reload_magazine",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_auto_reload_magazine",
+          "step": 1,
+          "op": "pickup",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_auto_reload_magazine",
+          "step": 2,
+          "op": "drop",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_auto_reload_magazine",
+          "step": 3,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_living_duplicate",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_living_duplicate",
+          "step": 1,
+          "op": "pickup",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_living_duplicate",
+          "step": 2,
+          "op": "drop",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_living_duplicate",
+          "step": 3,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_living_new",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_living_new",
+          "step": 1,
+          "op": "pickup",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_living_new",
+          "step": 2,
+          "op": "drop",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_living_new",
+          "step": 3,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_repeat_auto_reload",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_repeat_auto_reload",
+          "step": 1,
+          "op": "pickup",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_repeat_auto_reload",
+          "step": 2,
+          "op": "drop",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_repeat_auto_reload",
+          "step": 3,
+          "op": "confirm",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_cancel_swaps",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_cancel_swaps",
+          "step": 1,
+          "op": "pickup",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_cancel_swaps",
+          "step": 2,
+          "op": "drop",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "mount_cancel_swaps",
+          "step": 3,
+          "op": "cancel",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "stock_mod_occupied_blocked",
+          "step": 0,
+          "op": "before",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "stock_mod_occupied_blocked",
+          "step": 1,
+          "op": "pickup",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "stock_mod_occupied_blocked",
+          "step": 2,
+          "op": "drop",
+          "policy": "original",
+          "referenceCompared": true,
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        }
+      ],
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "c1e013952b53b9e0686a592cf9de6f6b28ae3e00f7b214241e0736f0e499794a",
+      "traceSha256": "7b2c5cf07d8b0290aa62dd4149b2c7690334483ca2f47f7f18054a9e4e5f3ce7",
+      "boundary": "Original invDrag/showDialog/endDialog upgrade and MOD transactions versus production Simulation item/AP/gold/RNG/confirmation state",
+      "intentionalCorrection": "Raw original drops the final mounted modifier during Upgrade. Sixteen raw failure snapshots remain separate. Four retained scenarios apply the omitted modifier with original enchant, providing independent corrected expectations; Living Weapon progress is retained.",
+      "limits": [
+        "104 observations;88 production comparisons;84 compare full reference items. Four pre-intervention preview rows defer reference equality to the following independent original-enchant observation.",
+        "Two engineer/medal bonus diagnostics override the factory context; ordinary acquisition of those contexts is not implemented.",
+        "One pure-method case preserves nonzero reload metadata; ordinary town entry clears timers.",
+        "This covers solo Sheriff owned slots. Ally equipment, every weapon/MOD combination and later town contexts remain unverified."
+      ],
+      "original_runs_identical": 2
     }
   },
   "production_recovery": {
-    "release_directory": ".build/browser-projectile-release",
-    "previous_directory": ".build/browser-before-projectiles",
-    "current_bundle": "assets/index-BuAQ79IH.js",
-    "copied_release_files_hash_checked": 241,
-    "current_package": ".build/elona-shooter-browser-projectile-slice.zip",
-    "current_package_bytes": 7470391,
-    "current_package_sha256": "c2f645cc0cdbd772e277d74d0c30ac64002df3bd6972c0780d232078aaf63687",
-    "candidate_build_matches_production": true,
-    "previous_package": ".build/elona-shooter-browser-day2-slice.zip",
-    "previous_bundle": "assets/index-DD2-eZ9I.js",
-    "candidate_bundle": "assets/index-BuAQ79IH.js",
+    "release_directory": ".build/browser-modification-release",
+    "previous_directory": ".build/browser-before-modifications",
+    "current_bundle": "assets/index-ZglOiIdp.js",
+    "copied_release_files_hash_checked": 246,
+    "archive_files_hash_checked": 246,
+    "current_package": ".build/elona-shooter-browser-modification-slice.zip",
+    "current_package_bytes": 7560422,
+    "current_package_sha256": "bded099ee75523699d57af048638b452b9b0636d95bc2c75a615139e813064e5",
+    "candidate_build_matches_production": false,
+    "candidate_bundle": "assets/index-BkYSbyM0.js",
+    "candidate_difference": "Town import validation accepts historical reload metadata retained by original enchant, while active-battle guards remain; coverage footer updated. Shop transaction/UI code unchanged.",
+    "previous_package": ".build/elona-shooter-browser-projectile-slice.zip",
+    "previous_bundle": "assets/index-BuAQ79IH.js",
     "restored_battle": {
-      "source": ".build/browser-qa/day2-production-ui-v7.json",
-      "source_tick": 674,
-      "export": ".build/browser-qa/projectile-production-ui-v8.json",
+      "source": ".build/browser-qa/projectile-production-ui-v8.json",
+      "export": ".build/browser-qa/modification-production-ui-v9.json",
       "paused": true,
       "tick": 674,
       "ammo": 5,
       "hp": 40,
       "gold": 209,
-      "note": "Actual v7 browser Continue migrated to v8; full exported simulation equals independent fromSave with no elapsed update. Restored after New Game smoke check."
+      "note": "Exact full v8→v9 import/export migration restored after New Game check. Initial Continue restored the same state then advanced five ticks before pause; equality claim uses the later immediate-pause import."
     }
   }
 }

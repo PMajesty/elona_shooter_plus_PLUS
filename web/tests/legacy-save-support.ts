@@ -1,8 +1,17 @@
 import assert from 'node:assert/strict';
 import type { SimulationState } from '../src/simulation.ts';
 
-export function asLegacyV7Save(state: SimulationState): Record<string, any> {
+export function asLegacyV8Save(state: SimulationState): Record<string, any> {
   const value: Record<string, any> = structuredClone(state);
+  assert.equal(value.pendingTownAction, null);
+  delete value.upgradeReference;
+  delete value.pendingTownAction;
+  value.version = 8;
+  return value;
+}
+
+export function asLegacyV7Save(state: SimulationState): Record<string, any> {
+  const value = asLegacyV8Save(state);
   assert.equal(value.player.bowDrawing, false);
   assert.ok(value.projectiles.every((actor: { kind: string; weaponSlot: number | null }) => actor.kind === 'hand-grenade' && actor.weaponSlot === null));
   value.grenades = value.projectiles.map((actor: Record<string, number>) => ({

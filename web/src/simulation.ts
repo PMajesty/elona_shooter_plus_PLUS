@@ -9,6 +9,7 @@ import { TRAIT, SHERIFF_TRAITS, SHERIFF_CHOICE_ORDER, applySheriffChoice, availa
 import { shadowHitAtFrame } from './collision.ts';
 import { advanceProtection, explosionContains, explosionStats, planConsumableUse } from './consumables.ts';
 import { advanceProjectile, createProjectile, type ExplosionKind, type ProjectileState } from './projectiles.ts';
+import { createUpgradePreview, modMountFailure, upgradeCost, type TownEquipmentAction, type TownEquipmentOutcome } from './equipment.ts';
 
 export interface EnemyState {
   uid: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number;
@@ -21,7 +22,7 @@ export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCoun
 export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'>;
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
 export interface SimulationState {
-  version: 8; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1 | 2; tick: number; timerRemainder: number; rng: number; nextUid: number;
+  version: 9; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1 | 2; tick: number; timerRemainder: number; rng: number; nextUid: number;
   activeMission: ActiveMission; resultBefore: number; earnedMedals: number[]; perfectDays: number; bossesSpawned: number;
   hero: KnownHeroInitialization;
   castleHp: number; castleMaxHp: number; gold: number; totalMoney: number; kills: number; criticalKills: number;
@@ -37,6 +38,8 @@ export interface SimulationState {
   result: { reward: number; perfectBonus: number; upkeep: number; netReward: number };
   town: null | { ap: number; preparation: 'pending' } | ReadyTown;
   previousTown: ReadyTown | null;
+  upgradeReference: Item | null;
+  pendingTownAction: TownEquipmentAction | null;
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
 export interface SimulationEvent { type: 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
@@ -62,8 +65,9 @@ function validItem(value: unknown): value is Item {
   if ((value.num !== 0 && value.num !== 1) || value.graphic !== id + 10 || value.type !== expectedType || Number(value.lv) < 1 || Number(value.modMax) < 1 || typeof value.manualReload !== 'boolean' || typeof value.automatic !== 'boolean') return false;
   if (typeof value.name !== 'string' || value.name.length === 0 || value.name.length > 256 || typeof value.modText !== 'string' || value.modText.length > 4096) return false;
   if (expectedType === ITEM_TYPE.gun && (optional.some(key => !finite(value[key])) || Number(value.ammoMax) < 1 || Number(value.ammo) > Number(value.ammoMax) || Number(value.mod) > Number(value.modMax))) return false;
+  if (expectedType === ITEM_TYPE.mod && (Number(value.mod) > 13 || Number(value.modMax) > 3)) return false;
   if (expectedType === ITEM_TYPE.token && !finite(value.attack)) return false;
-  if (Number(value.reloadTime) > Number(value.reloadTimeMax) + 1 || (value.type === ITEM_TYPE.gun && value.ammo === value.ammoMax && Number(value.reloadTime) !== 0)) return false;
+  if (value.type !== ITEM_TYPE.gun && Number(value.reloadTime) > Number(value.reloadTimeMax) + 1) return false;
   return true;
 }
 
@@ -85,7 +89,7 @@ export class Simulation {
     this.pendingOpeningMission = generateLowLevelMission(0, 1, random);
     const generated = generateSheriffHero(random);
     this.state = {
-      version: 8, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero,
+      version: 9, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero,
       activeMission: this.missionParameters(this.pendingOpeningMission), resultBefore: STARTING_CLASS.money, earnedMedals: [40], perfectDays: 0, bossesSpawned: 0,
       castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, gold: STARTING_CLASS.money, totalMoney: 0, kills: 0, criticalKills: 0,
       aimX: 300, aimY: 240, fireHeld: false, pendingShot: false,
@@ -94,7 +98,7 @@ export class Simulation {
       enemies: [], projectiles: [], loot: [], result: { reward: 0, perfectBonus: 0, upkeep: 0, netReward: 0 },
       itemCooldowns: Array(5).fill(0), protection: { counter: 0, blueMultiplierAdd: 0 }, inventory: generated.inventory, lootOffers: Array(8).fill(null), postbattle: 'none', inventoryProvenance: 'original-generation',
       bossKilled: 0, skillChoices: [], traitsProvenance: 'known-starting-traits', bossKilledProvenance: 'observed',
-      town: null, previousTown: null,
+      town: null, previousTown: null, upgradeReference: null, pendingTownAction: null,
     };
     if (!options.deferOpeningWaves) this.startOpeningBattle();
   }
@@ -182,7 +186,7 @@ export class Simulation {
 
   startNextDay(): boolean {
     const town = this.state.town;
-    if (this.state.phase !== 'town' || this.state.day !== 1 || town?.preparation !== 'ready' || town.mission.level !== 1) return false;
+    if (this.state.phase !== 'town' || this.state.pendingTownAction || this.state.day !== 1 || town?.preparation !== 'ready' || town.mission.level !== 1) return false;
     const state = this.state;
     state.day = 2;
     state.previousTown = town;
@@ -745,7 +749,7 @@ export class Simulation {
 
   buyStock(stock: number, slot: number): PurchaseOutcome {
     const town = this.state.town;
-    if (this.state.phase !== 'town' || town?.preparation !== 'ready' || !Number.isInteger(stock) || stock < 0 || stock >= 8 || !Number.isInteger(slot) || slot < 0 || slot >= 6 || !isOccupiedItem(town.shop[stock])) return 'unavailable';
+    if (this.state.pendingTownAction || this.state.phase !== 'town' || town?.preparation !== 'ready' || !Number.isInteger(stock) || stock < 0 || stock >= 8 || !Number.isInteger(slot) || slot < 0 || slot >= 6 || !isOccupiedItem(town.shop[stock])) return 'unavailable';
     if (isOccupiedItem(this.state.inventory[slot])) return 'occupied';
     const price = Math.trunc(town.shop[stock]!.value);
     if (this.state.gold < price) return 'not-enough-gold';
@@ -755,11 +759,11 @@ export class Simulation {
   }
 
   moveTownItem(from: number, to: number): boolean {
-    return this.state.phase === 'town' && this.state.town?.preparation === 'ready' && swapInventorySlots(this.state.inventory, from, to);
+    return !this.state.pendingTownAction && this.state.phase === 'town' && this.state.town?.preparation === 'ready' && swapInventorySlots(this.state.inventory, from, to);
   }
 
   sellTownItem(slot: number): number | null {
-    if (this.state.phase !== 'town' || this.state.town?.preparation !== 'ready' || !Number.isInteger(slot) || slot < 0 || slot >= 6) return null;
+    if (this.state.pendingTownAction || this.state.phase !== 'town' || this.state.town?.preparation !== 'ready' || !Number.isInteger(slot) || slot < 0 || slot >= 6) return null;
     const item = this.state.inventory[slot];
     if (!isOccupiedItem(item)) return null;
     const price = itemPrice(item);
@@ -770,7 +774,7 @@ export class Simulation {
 
   applyShopToken(slot: number, stock: number): boolean {
     const town = this.state.town;
-    if (this.state.phase !== 'town' || town?.preparation !== 'ready' || !Number.isInteger(slot) || slot < 0 || slot >= 6 || !Number.isInteger(stock) || stock < 0 || stock >= 8) return false;
+    if (this.state.pendingTownAction || this.state.phase !== 'town' || town?.preparation !== 'ready' || !Number.isInteger(slot) || slot < 0 || slot >= 6 || !Number.isInteger(stock) || stock < 0 || stock >= 8) return false;
     const token = this.state.inventory[slot], item = town.shop[stock];
     if (!isOccupiedItem(token) || token.id !== 35 || !finite(token.attack) || token.attack < 0 || !isOccupiedItem(item)) return false;
     item.value = Math.min(999999999, Math.max(0, item.value - token.attack!));
@@ -779,12 +783,63 @@ export class Simulation {
   }
 
   freeRepair(): RepairOutcome {
-    if (this.state.phase !== 'town' || this.state.town === null) return 'unavailable';
+    if (this.state.pendingTownAction || this.state.phase !== 'town' || this.state.town === null) return 'unavailable';
     if (this.state.castleHp === this.state.castleMaxHp) return 'not-damaged';
     if (this.state.town.ap < 2) return 'not-enough-ap';
     this.state.town.ap -= 2;
     this.state.castleHp = this.state.castleMaxHp;
     return 'repaired';
+  }
+
+  private equipmentFactory(): ItemFactory {
+    // У одиночного шерифа пока нет инженера в отряде или медали переработки.
+    return new ItemFactory(() => this.random(), { day: this.state.day });
+  }
+
+  beginWeaponUpgrade(slot: number): TownEquipmentOutcome {
+    const state = this.state, town = state.town;
+    if (state.phase !== 'town' || town?.preparation !== 'ready' || state.pendingTownAction || !Number.isInteger(slot) || slot < 0 || slot >= 6) return 'unavailable';
+    if (town.ap < 4) return 'not-enough-ap';
+    const source = state.inventory[slot];
+    if (!isOccupiedItem(source) || source.type !== ITEM_TYPE.gun) return 'unavailable';
+    const preview = createUpgradePreview(this.equipmentFactory(), source, state.upgradeReference ?? undefined);
+    if (!validItem(preview)) return 'unavailable';
+    state.upgradeReference = preview;
+    state.pendingTownAction = { kind: 'upgrade', slot, cost: upgradeCost(source) };
+    return 'previewed';
+  }
+
+  beginModMount(modSlot: number, gunSlot: number): TownEquipmentOutcome {
+    const state = this.state;
+    if (state.phase !== 'town' || state.town?.preparation !== 'ready' || state.pendingTownAction || modSlot === gunSlot || [modSlot, gunSlot].some(slot => !Number.isInteger(slot) || slot < 0 || slot >= 6)) return 'unavailable';
+    const mod = state.inventory[modSlot], gun = state.inventory[gunSlot];
+    if (!isOccupiedItem(mod) || mod.type !== ITEM_TYPE.mod || !isOccupiedItem(gun) || gun.type !== ITEM_TYPE.gun) return 'unavailable';
+    state.pendingTownAction = { kind: 'mod', modSlot, gunSlot };
+    return 'previewed';
+  }
+
+  resolveTownEquipment(confirm: boolean): TownEquipmentOutcome {
+    const state = this.state, action = state.pendingTownAction, town = state.town;
+    if (state.phase !== 'town' || town?.preparation !== 'ready' || action === null) return 'unavailable';
+    state.pendingTownAction = null;
+    if (action.kind === 'upgrade') {
+      if (!confirm) return 'cancelled';
+      const source = state.inventory[action.slot], preview = state.upgradeReference;
+      if (!isOccupiedItem(source) || source.type !== ITEM_TYPE.gun || !isOccupiedItem(preview)) return 'unavailable';
+      if (state.gold < action.cost) return 'not-enough-gold';
+      if (town.ap < 4) return 'not-enough-ap';
+      town.ap -= 4; state.gold -= action.cost;
+      [state.inventory[action.slot], state.upgradeReference] = [preview, source];
+      return 'upgraded';
+    }
+    // No означает обычную перестановку; направление «оружие → MOD» обходит ветку монтажа.
+    if (!confirm) return swapInventorySlots(state.inventory, action.gunSlot, action.modSlot) ? 'swapped' : 'unavailable';
+    const mod = state.inventory[action.modSlot], gun = state.inventory[action.gunSlot];
+    const failure = modMountFailure(mod, gun);
+    if (failure) return failure;
+    this.equipmentFactory().enchant(gun!, mod!.mod, mod!.modMax);
+    mod!.num = 0;
+    return 'mounted';
   }
 
   chooseSkill(id: number): boolean {
@@ -801,7 +856,7 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
-    if (!record(value) || ![1, 2, 3, 4, 5, 6, 7, 8].includes(Number(value.version)) || typeof value.version !== 'number' || (value.day !== 1 && (value.version < 7 || value.day !== 2)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
+    if (!record(value) || ![1, 2, 3, 4, 5, 6, 7, 8, 9].includes(Number(value.version)) || typeof value.version !== 'number' || (value.day !== 1 && (value.version < 7 || value.day !== 2)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || ![2, ...(value.day === 2 ? [3] : [])].includes(Number(value.bossWave)) || (value.waveIndex === 5 && value.newWave !== true)) throw new Error('Invalid counters.');
@@ -887,6 +942,11 @@ export class Simulation {
     const simulation = new Simulation(1, { ...options, deferOpeningWaves: false });
     simulation.state = structuredClone(value) as unknown as SimulationState;
     simulation.state.projectiles = restoredProjectiles;
+    if (value.version < 9) {
+      // Старые версии не открывали эти диалоги: новый пустой слот не расходует RNG.
+      simulation.state.upgradeReference = null;
+      simulation.state.pendingTownAction = null;
+    }
     if (legacyProjectiles) {
       simulation.state.player.bowDrawing = false;
       delete (simulation.state as unknown as Record<string, unknown>).grenades;
@@ -929,7 +989,7 @@ export class Simulation {
         reconstructionRng >>>= 0;
         return reconstructionRng / 4294967296;
       };
-      simulation.state.version = 8;
+      simulation.state.version = 9;
       simulation.state.inventory = createStartingInventory(reconstructionRandom);
       simulation.state.lootOffers = Array(8).fill(null);
       simulation.state.postbattle = 'none';
@@ -970,7 +1030,7 @@ export class Simulation {
       if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > 4 || !validTownPreparation(state.previousTown, validItem, 1, state.activeMission.absorbFix)) throw new Error('Invalid previous town.');
     } else if (state.previousTown !== null) throw new Error('Unexpected previous town.');
     if (Number(value.version) < 3) {
-      state.version = 8;
+      state.version = 9;
       if (state.phase === 'victory' && state.postbattle === 'result') {
         // Старый результат пропускал награды босса и навыки; новые награды расходуют основной поток.
         state.postbattle = 'loot';
@@ -1007,9 +1067,27 @@ export class Simulation {
     } else if (state.town !== null) throw new Error('Town preparation precedes completed rewards.');
     // После боя исходные слоты могут быть переставлены; замороженные снаряды не возобновляются.
     if (state.phase === 'battle' && state.projectiles.some(actor => actor.weaponSlot !== null && state.inventory[actor.weaponSlot]?.type !== ITEM_TYPE.gun)) throw new Error('Projectile launch slot is not a gun.');
+    // enchant сохраняет старый таймер при заполнении патронов и уменьшении максимума; Rest обнуляет его.
+    if (state.phase === 'battle' && state.inventory.some(item => isOccupiedItem(item) && item.type === ITEM_TYPE.gun && (item.reloadTime > item.reloadTimeMax + 1 || item.ammo === item.ammoMax && item.reloadTime !== 0))) throw new Error('Invalid battle weapon reload state.');
     const drawnBow = state.inventory[state.player.selectedSlot];
     if (state.player.bowDrawing && (state.phase !== 'battle' || !isOccupiedItem(drawnBow) || ![24, 25].includes(drawnBow.id))) throw new Error('Invalid bow draw selection.');
-    state.version = 8;
+    if (state.upgradeReference !== null && (!validItem(state.upgradeReference) || !isOccupiedItem(state.upgradeReference) || state.upgradeReference.type !== ITEM_TYPE.gun)) throw new Error('Invalid upgrade reference.');
+    const pending = state.pendingTownAction;
+    if (pending !== null) {
+      if (!record(pending) || state.phase !== 'town' || state.town?.preparation !== 'ready') throw new Error('Invalid pending town equipment action.');
+      const ownedSlot = (slot: unknown): slot is number => Number.isInteger(slot) && Number(slot) >= 0 && Number(slot) < state.inventory.length;
+      if (pending.kind === 'upgrade') {
+        if (!ownedSlot(pending.slot) || state.town.ap < 4) throw new Error('Invalid pending weapon upgrade.');
+        const source = state.inventory[pending.slot], reference = state.upgradeReference;
+        if (!isOccupiedItem(source) || source.type !== ITEM_TYPE.gun || !reference || reference.id !== source.id || reference.lv !== source.lv + 1 || reference.modMax !== source.modMax || !Number.isInteger(pending.cost) || pending.cost !== int(source.value * 1.2) + 500) throw new Error('Invalid pending upgrade preview.');
+      } else if (pending.kind === 'mod') {
+        if (!ownedSlot(pending.modSlot) || !ownedSlot(pending.gunSlot) || pending.modSlot === pending.gunSlot) throw new Error('Invalid pending mod slots.');
+        const mod = state.inventory[pending.modSlot], gun = state.inventory[pending.gunSlot];
+        // Совместимость проверяется при подтверждении, поэтому ошибочный монтаж тоже сохраняем.
+        if (!isOccupiedItem(mod) || mod.type !== ITEM_TYPE.mod || !isOccupiedItem(gun) || gun.type !== ITEM_TYPE.gun) throw new Error('Invalid pending mod items.');
+      } else throw new Error('Unknown pending town equipment action.');
+    }
+    state.version = 9;
     // Уже оплаченный результат v4 не пересчитывается; недостающая первая лавка создаётся один раз.
     if (state.phase === 'town' && state.town?.preparation === 'pending') simulation.prepareTown();
     return simulation;

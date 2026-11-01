@@ -926,7 +926,8 @@
     "characterId": 1995,
     "frame": 80,
     "image": "townShop",
-    "labelsImage": "townShopLabels",
+    "refreshLabelsImage": "townShopRefreshLabel",
+    "upgradeLabelsImage": "townShopUpgradeLabel",
     "children": {
       "warning": {
         "characterId": 1803,
@@ -1384,6 +1385,360 @@
         "scaleX": 0.9980774,
         "scaleY": 1.0012512,
         "rotationDegrees": -90.0
+      }
+    }
+  },
+  "itemPopup": {
+    "characterId": 1791,
+    "clip": "itemPopup",
+    "children": {
+      "itemName": {
+        "characterId": 1769,
+        "x": 44.0,
+        "y": 7.15,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          44.0,
+          7.15
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 14.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            180.95,
+            19.85
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"14\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">Item Name</font></p>"
+        }
+      },
+      "priceText": {
+        "characterId": 1773,
+        "x": 242.7,
+        "y": 8.0,
+        "matrix": [
+          0.9997101,
+          0.0,
+          0.0,
+          1.0,
+          242.7,
+          8.0
+        ],
+        "scaleX": 0.9997101,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            77.25,
+            16.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">456</font></p>"
+        }
+      },
+      "reqText": {
+        "characterId": 1774,
+        "x": 242.0,
+        "y": 37.0,
+        "matrix": [
+          0.9997101,
+          0.0,
+          0.0,
+          1.0,
+          242.0,
+          37.0
+        ],
+        "scaleX": 0.9997101,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            79.5,
+            16.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">456</font></p>"
+        }
+      },
+      "modTxt": {
+        "characterId": 1776,
+        "x": 242.0,
+        "y": 49.4,
+        "matrix": [
+          0.9997101,
+          0.0,
+          0.0,
+          1.0,
+          242.0,
+          49.4
+        ],
+        "scaleX": 0.9997101,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            69.5,
+            16.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">456</font></p>"
+        }
+      },
+      "detailText": {
+        "characterId": 1777,
+        "x": 20.0,
+        "y": 66.5,
+        "matrix": [
+          0.9997101,
+          0.0,
+          0.0,
+          1.0,
+          20.0,
+          66.5
+        ],
+        "scaleX": 0.9997101,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 12.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            299.05,
+            61.5
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">456</font></p>"
+        }
+      },
+      "dmgText": {
+        "characterId": 1781,
+        "x": 48.85,
+        "y": 24.2,
+        "matrix": [
+          0.9997101,
+          0.0,
+          0.0,
+          1.0,
+          48.85,
+          24.2
+        ],
+        "scaleX": 0.9997101,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            58.15,
+            15.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">456</font></p>"
+        }
+      },
+      "rateText": {
+        "characterId": 1782,
+        "x": 48.85,
+        "y": 49.4,
+        "matrix": [
+          0.9997101,
+          0.0,
+          0.0,
+          1.0,
+          48.85,
+          49.4
+        ],
+        "scaleX": 0.9997101,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            58.15,
+            15.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">456</font></p>"
+        }
+      },
+      "ammoText": {
+        "characterId": 1783,
+        "x": 150.0,
+        "y": 37.0,
+        "matrix": [
+          0.9989319,
+          0.0,
+          0.0,
+          1.0,
+          150.0,
+          37.0
+        ],
+        "scaleX": 0.9989319,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            62.55,
+            15.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">456</font></p>"
+        }
+      },
+      "reloadText": {
+        "characterId": 1784,
+        "x": 150.0,
+        "y": 49.4,
+        "matrix": [
+          0.99890137,
+          0.0,
+          0.0,
+          1.0,
+          150.0,
+          49.4
+        ],
+        "scaleX": 0.99890137,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            59.55,
+            15.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">456</font></p>"
+        }
+      },
+      "dmgAirText": {
+        "characterId": 1786,
+        "x": 150.0,
+        "y": 24.5,
+        "matrix": [
+          0.9988861,
+          0.0,
+          0.0,
+          1.0,
+          150.0,
+          24.5
+        ],
+        "scaleX": 0.9988861,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            58.15,
+            15.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">456</font></p>"
+        }
+      },
+      "dmgArmorText": {
+        "characterId": 1788,
+        "x": 242.0,
+        "y": 23.5,
+        "matrix": [
+          0.9988861,
+          0.0,
+          0.0,
+          1.0,
+          242.0,
+          23.5
+        ],
+        "scaleX": 0.9988861,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            58.15,
+            15.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">456</font></p>"
+        }
+      },
+      "accuracyText": {
+        "characterId": 1790,
+        "x": 49.0,
+        "y": 36.0,
+        "matrix": [
+          0.9988861,
+          0.0,
+          0.0,
+          1.0,
+          49.0,
+          36.0
+        ],
+        "scaleX": 0.9988861,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            58.15,
+            15.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">456</font></p>"
+        }
       }
     }
   },

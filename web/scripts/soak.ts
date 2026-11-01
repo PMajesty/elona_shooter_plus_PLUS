@@ -7,6 +7,7 @@ import { isOccupiedItem, ITEM_TYPE } from '../src/items.ts';
 import { ENEMIES } from '../src/content.ts';
 import { ordinaryEnemyHit, type CollisionGeometry } from '../src/collision.ts';
 import { weaponStats } from '../src/combat-stats.ts';
+import { modMountFailure } from '../src/equipment.ts';
 
 const outputDirectory = resolve('../.build/soak');
 mkdirSync(outputDirectory, { recursive: true });
@@ -67,6 +68,7 @@ let townActions = 0;
 let restTransitions = 0;
 let secondDayVictories = 0;
 let equipmentSelections = 0;
+let modificationPreviews = 0, modsMounted = 0, weaponsUpgraded = 0, upgradeCancellations = 0;
 try {
   for (let index = 0; index < seedCount; index++) {
     // Мультипликативная последовательность охватывает разные 32-битные начальные состояния.
@@ -142,6 +144,38 @@ try {
           lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
           restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
           checkpoints++; townActions++;
+          const modSlot = simulation.state.inventory.findIndex(item => isOccupiedItem(item) && item.type === ITEM_TYPE.mod);
+          const gunSlot = simulation.state.inventory.findIndex(item => modSlot >= 0 && modMountFailure(simulation.state.inventory[modSlot], item) === null);
+          if (modSlot >= 0 && gunSlot >= 0) {
+            assert.equal(simulation.beginModMount(modSlot, gunSlot), 'previewed');
+            assert.equal(restored.beginModMount(modSlot, gunSlot), 'previewed');
+            assert.deepEqual(restored.state, simulation.state);
+            lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
+            restored = Simulation.fromSave(lastCheckpoint, simulationOptions); checkpoints++;
+            assert.equal(simulation.resolveTownEquipment(true), 'mounted');
+            assert.equal(restored.resolveTownEquipment(true), 'mounted');
+            assert.deepEqual(restored.state, simulation.state, 'Mounted weapon changed after restoring its confirmation.');
+            modsMounted++; townActions++;
+          }
+          if (simulation.state.town?.preparation === 'ready' && simulation.state.town.ap >= 4) {
+            const upgradeSlot = simulation.state.inventory.findIndex((item, index) => isOccupiedItem(item) && item.type === ITEM_TYPE.gun && (day === 2 || index > 1));
+            if (upgradeSlot >= 0) {
+              assert.equal(simulation.beginWeaponUpgrade(upgradeSlot), 'previewed');
+              assert.equal(restored.beginWeaponUpgrade(upgradeSlot), 'previewed');
+              assert.deepEqual(restored.state, simulation.state, 'Upgrade preview changed RNG or item after replay.');
+              lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
+              restored = Simulation.fromSave(lastCheckpoint, simulationOptions); checkpoints++; modificationPreviews++;
+              const action = simulation.state.pendingTownAction;
+              assert.ok(action?.kind === 'upgrade');
+              const confirm = simulation.state.gold >= action.cost && seed % 3 !== 0;
+              const outcome = simulation.resolveTownEquipment(confirm);
+              assert.equal(restored.resolveTownEquipment(confirm), outcome);
+              assert.equal(outcome, confirm ? 'upgraded' : 'cancelled');
+              assert.deepEqual(restored.state, simulation.state, 'Upgrade decision changed stored preview or resources.');
+              if (confirm) weaponsUpgraded++; else upgradeCancellations++;
+              townActions++;
+            }
+          }
           assert.equal(restored.freeRepair(), simulation.freeRepair());
           assert.deepEqual(restored.state, simulation.state, 'Town repair changed restored state.');
           lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
@@ -192,6 +226,7 @@ try {
   const report = {
     status: 'passed', seedCount, policies, scenarios: results.length, simulationFrames: frames,
     checkpoints: results.reduce((sum, result) => sum + result.checkpoints, 0), rewardTransitions, townActions, restTransitions, secondDayVictories, equipmentSelections,
+    modificationPreviews, modsMounted, weaponsUpgraded, upgradeCancellations,
     elapsedMs: Math.round(performance.now() - started),
     collision: 'Production ordinary-enemy contours; boss uses the documented rectangular headless fallback',
     limits: ['Port self-consistency, finite state and JSON replay only; not an original-game parity proof', 'Sheriff Days 1–2 only; boss shape geometry not exercised', 'No browser rendering, input latency, audio or wall-clock performance comparison'],

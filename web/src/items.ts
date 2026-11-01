@@ -146,9 +146,11 @@ export class ItemFactory {
     item.value = [0, 200, 600, 1200][item.lv] + [0, 2, 4, 8][item.lv] * MODS[modId].cost;
   }
 
-  private varyWeapon(item: Item): void {
-    let level: number;
-    if (this.context.weaponLevelMode) {
+  varyWeapon(item: Item, requestedLevel = -1): void {
+    let level = requestedLevel;
+    if (requestedLevel !== -1) {
+      level = Math.trunc(requestedLevel);
+    } else if (this.context.weaponLevelMode) {
       const skill = this.context.weaponSkillLevels[item.reqTrait!] ?? 0;
       level = int(this.random() * int((skill + 3 - item.reqLv!) / 2.5 + 1));
     } else level = int(limit(1 + int(this.random() * (this.context.day / 5 + 2)), 1, 2 + this.context.day / 8));

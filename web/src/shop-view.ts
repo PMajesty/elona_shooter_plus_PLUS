@@ -9,7 +9,7 @@ interface Placement {
 export interface ShopLayout {
   menuPosition: { x: number; y: number };
   shop: {
-    image: string; labelsImage: string; children: Record<string, Placement>;
+    image: string; refreshLabelsImage: string; upgradeLabelsImage: string; children: Record<string, Placement>;
     slots: {
       stock: { count: number; x: number; y: number; columns: number; stepX: number };
       inventory: { initialCount: number; x: number; y: number; columns: number; stepX: number; stepY: number };
@@ -17,12 +17,17 @@ export interface ShopLayout {
   };
   inventorySlot: { children: Record<string, Placement> };
   saleDialog: { image: string; children: Record<string, Placement> };
+  itemPopup: { clip: string; children: Record<string, Placement> };
 }
+type EquipmentAction = { kind: 'upgrade'; slot: number; cost: number } | { kind: 'mod'; modSlot: number; gunSlot: number };
 export interface ShopViewState {
   inventory: readonly (Item | null)[];
   shop: readonly (Item | null)[];
   gold: number;
   traits: Readonly<Record<number, number>>;
+  ap: number;
+  pendingTownAction: EquipmentAction | null;
+  upgradeReference: Item | null;
 }
 export interface ShopViewCallbacks {
   buy(stock: number, inventory: number): boolean;
@@ -33,15 +38,20 @@ export interface ShopViewCallbacks {
   message(text: string): void;
   close?(): void;
   applyToken?(inventory: number, stock: number): boolean;
+  beginUpgradeSelection(): void;
+  cancelUpgradeSelection(): void;
+  requestUpgrade(slot: number): void;
+  requestModMount(modSlot: number, gunSlot: number): void;
+  resolveEquipment(confirm: boolean): void;
 }
 type Area = 'stock' | 'inventory';
 const HINT = 'Drop an item on an empty space to sell the item.';
 const SKILL_WARNING = "*You don't have the required skill to use the weapon.";
+const WEAPON_SKILL: Readonly<Record<number, string>> = { 103: 'Small Gun', 104: 'Rifle', 105: 'Shotgun', 106: 'Big Gun' };
 
 function itemStats(item: Item, area: Area): string {
   const lines = [area === 'stock' ? `Price: ${itemPrice(item, true)} GP` : `Sale value: ${itemPrice(item)} GP`];
   if (item.type === ITEM_TYPE.gun) {
-    const skill: Record<number, string> = { 103: 'Small gun', 104: 'Rifle', 105: 'Shotgun', 106: 'Big gun' };
     const unlimited = item.ammoMax === 1 && item.id !== 27;
     // Это исходная формула подсказки; она не меняет время перезарядки в симуляции.
     const reload = unlimited ? '-' : `${Math.trunc(item.reloadTimeMax * 1000 / 30)}ms${item.manualReload ? '(M)' : ''}`;
@@ -49,22 +59,24 @@ function itemStats(item: Item, area: Area): string {
     lines.push(`Air: ${item.dmgAir}%    Armor: ${item.dmgArmor}%`);
     lines.push(`Accuracy: ${item.baseAccuracy}    Rate: ${Math.trunc(300 / (1000 / item.shootRate)) / 10}/sec`);
     lines.push(`Reload: ${reload}    Mods: ${item.mod}/${item.modMax}`);
-    lines.push(`Required: ${skill[item.reqTrait!] ?? 'Weapon skill'} ${item.reqLv}`);
+    lines.push(`Required: ${WEAPON_SKILL[item.reqTrait!] ?? 'Weapon skill'} ${item.reqLv}`);
     lines.push(item.modText || 'No Modification');
   } else {
     if (item.type === ITEM_TYPE.use && item.ammoMax > 0) lines.push(`Uses remaining: ${item.ammo}`);
     if (item.id === 11) lines.push(`When thrown to the ground, it exlodes and deals ${item.attack} damage to all enemies surrounding it.`);
     if (item.id === 12) lines.push(`Repairs ${item.attack} points of castle HP when used.`);
     if (item.id === 35) lines.push(`When dragged onto a shop item, the item get discounted by ${item.attack} gp.`);
-    if (item.type === ITEM_TYPE.mod) lines.push('A modification device that can be mounted on a weapon. Mounting is not available yet.');
+    if (item.type === ITEM_TYPE.mod) lines.push('A modification device that can be mounted on a weapon. Pick it up, then click an owned gun.');
   }
   return lines.join('\n');
 }
 
 /** Два нажатия выбирают источник и назначение; состояние предметов меняют только callbacks. */
-export function createShopView(scene: Phaser.Scene, state: ShopViewState, manifest: LootViewManifest, layout: ShopLayout, callbacks: ShopViewCallbacks, saleIndex: number | null = null): Phaser.GameObjects.Container {
+export function createShopView(scene: Phaser.Scene, state: ShopViewState, manifest: LootViewManifest, layout: ShopLayout, callbacks: ShopViewCallbacks, saleIndex: number | null = null, upgradeSelecting = false): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName('shop-view');
-  root.setData({ carrying: null, saleIndex });
+  const pending = state.pendingTownAction;
+  const modal = pending !== null || saleIndex !== null;
+  root.setData({ carrying: null, saleIndex, upgradeSelecting, pendingTownAction: pending });
   const menu = layout.menuPosition, panel = layout.shop;
   const image = (key: string, x = 0, y = 0, placement?: Placement) => {
     const asset = manifest.images[key];
@@ -99,6 +111,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
   const warning = text(panel.children.warning, '', menu.x, menu.y).setName('shop-skill-warning');
   const message = (value: string) => { status.setText(value); callbacks.message(value); };
   const needsSkill = (item: Item) => item.type === ITEM_TYPE.gun && (state.traits[item.reqTrait!] ?? 0) < (item.reqLv ?? 0);
+  if (upgradeSelecting) text(panel.children.actHelp, 'Choose a weapon to upgrade. Click nowhere to cancel.', menu.x, menu.y).setName('shop-upgrade-help');
 
   const tooltip = scene.add.container(0, 0).setVisible(false);
   const tooltipPlate = scene.add.rectangle(0, 0, 292, 40, 0xeee0bb, 0.98).setOrigin(0).setStrokeStyle(1, 0x6b5638);
@@ -112,7 +125,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
   const point = new Phaser.Math.Vector2();
   const localPointer = (pointer: Phaser.Input.Pointer) => root.getWorldTransformMatrix().applyInverse(pointer.worldX, pointer.worldY, point);
   const showTooltip = (item: Item, area: Area, pointer: Phaser.Input.Pointer) => {
-    if (carrying || saleIndex !== null) return;
+    if (carrying || modal) return;
     warning.setText(needsSkill(item) ? SKILL_WARNING : '');
     tooltipName.setText(item.name).setColor(item.lv > 1 ? '#0000cc' : '#20170e');
     tooltipStats.setText(itemStats(item, area)).setY(tooltipName.y + tooltipName.height + 4);
@@ -139,10 +152,11 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
     if (source.area === 'inventory') callbacks.requestSell(source.index);
     return true;
   };
-  button('button_windowClose', panel.children.closeButton, () => { if (!dropOutside()) callbacks.close?.(); }, menu.x, menu.y);
-  button('button_shopRefresh', panel.children.act1, () => { if (!dropOutside()) message('Refresh Stock is not available yet. No AP has been spent.'); }, menu.x, menu.y, false);
-  button('button_shopUpgrade', panel.children.act2, () => { if (!dropOutside()) message('Upgrade Weapon is not available yet. No item or AP has been spent.'); }, menu.x, menu.y, false);
-  image(panel.labelsImage, menu.x, 0).setAlpha(0.35);
+  button('button_windowClose', panel.children.closeButton, () => { if (upgradeSelecting) callbacks.cancelUpgradeSelection(); else if (!dropOutside()) callbacks.close?.(); }, menu.x, menu.y);
+  button('button_shopRefresh', panel.children.act1, () => { if (upgradeSelecting) callbacks.cancelUpgradeSelection(); else if (!dropOutside()) message('Refresh Stock is not available yet. No AP has been spent.'); }, menu.x, menu.y, false);
+  button('button_shopUpgrade', panel.children.act2, () => { if (!dropOutside()) callbacks.beginUpgradeSelection(); }, menu.x, menu.y, state.ap >= 4);
+  image(panel.refreshLabelsImage, menu.x, 0).setAlpha(0.35);
+  image(panel.upgradeLabelsImage, menu.x, 0).setAlpha(state.ap >= 4 ? 1 : 0.35);
 
   const addSlot = (area: Area, index: number, rawItem: Item | null, x: number, y: number) => {
     const item = isOccupiedItem(rawItem) ? rawItem : null;
@@ -150,6 +164,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
     const slotAsset = manifest.clips.inventorySlot;
     const plate = scene.add.image(x - slotAsset.originX, y - slotAsset.originY, 'inventorySlot', '1').setOrigin(0);
     root.add(plate);
+    if (upgradeSelecting && (area === 'stock' || item?.type !== ITEM_TYPE.gun)) plate.setAlpha(0.5);
     if (area === 'inventory') {
       ownedSlots.push({ item, plate });
       if (index < 5) text(layout.inventorySlot.children.shortNum, String(index + 1), x, y);
@@ -177,8 +192,13 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
     zone.on('pointerout', () => { if (!carrying) { tooltip.setVisible(false); warning.setText(''); } });
     zone.on('pointerdown', (pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
       event.stopPropagation();
-      if (saleIndex !== null) return;
+      if (modal) return;
       tooltip.setVisible(false); status.setText(HINT);
+      if (upgradeSelecting) {
+        if (area === 'inventory' && item?.type === ITEM_TYPE.gun) callbacks.requestUpgrade(index);
+        else callbacks.cancelUpgradeSelection();
+        return;
+      }
       if (!carrying) {
         if (!slotView) return;
         carrying = slotView; root.setData('carrying', { area, index });
@@ -203,7 +223,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
         clearCarry(); message('Choose an empty inventory slot to buy this item.'); return;
       }
       if (source.area === 'inventory' && source.item.type === ITEM_TYPE.mod && item?.type === ITEM_TYPE.gun) {
-        clearCarry(); message('Mounting mods is not available yet. Both items have been kept.'); return;
+        clearCarry(); callbacks.requestModMount(source.index, index); return;
       }
       clearCarry();
       // Callback может синхронно уничтожить вид; после него не трогаем графические объекты.
@@ -216,7 +236,56 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
   for (let index = 0; index < state.inventory.length; index++) addSlot('inventory', index, state.inventory[index], menu.x + inventory.x + index % inventory.columns * inventory.stepX, menu.y + inventory.y + Math.floor(index / inventory.columns) * inventory.stepY);
   root.bringToTop(status); root.bringToTop(warning); root.bringToTop(tooltip);
 
-  if (saleIndex !== null) {
+  const itemComparison = (item: Item, placement: Placement, label: string) => {
+    const popup = layout.itemPopup, asset = manifest.clips[popup.clip];
+    const frame = scene.add.image(placement.x, placement.y, popup.clip, '1')
+      .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setName(`shop-upgrade-${label}`);
+    root.add(frame);
+    const unlimited = item.ammoMax === 1 && item.id !== 27;
+    let details = item.modText || 'No Modification';
+    if (item.livingWeapon > 0) details += `\nIt's alive(Exp: ${Math.trunc((1 - item.livingWeapon / Math.trunc(25 * 2 ** item.modMax)) * 100)}%)`;
+    // invPopupUpdate читает сохранённый предмет; отрисовка не создаёт новый случайный вариант.
+    const values: Record<string, string> = {
+      itemName: item.name, priceText: String(itemPrice(item, true)), modTxt: `${item.mod}/${item.modMax}`,
+      dmgText: `${item.attack}${item.shell > 1 ? ` x${item.shell}` : ''}`, dmgAirText: `${item.dmgAir}%`, dmgArmorText: `${item.dmgArmor}%`,
+      accuracyText: String(item.baseAccuracy), ammoText: unlimited ? '-' : String(item.ammoMax),
+      reloadText: unlimited ? '-' : `${Math.trunc(item.reloadTimeMax * 1000 / 30)}ms${item.manualReload ? '(M)' : ''}`,
+      rateText: `${Math.trunc(300 / (1000 / item.shootRate)) / 10}/sec`,
+      reqText: `${WEAPON_SKILL[item.reqTrait!] ?? 'Weapon skill'} ${item.reqLv}`, detailText: details,
+    };
+    for (const [name, value] of Object.entries(values)) {
+      const field = popup.children[name], bounds = field.text!.bounds;
+      const object = text(field, value, placement.x, placement.y).setName(`shop-upgrade-${label}-${name}`);
+      object.setFixedSize(bounds[2] - bounds[0], bounds[3] - bounds[1]);
+      if (name === 'itemName') object.setColor(item.lv > 1 ? '#0000cc' : '#000000');
+      if (name === 'detailText') object.setColor(item.modText ? '#0000cc' : '#000000');
+      if (name === 'reqText') object.setColor(needsSkill(item) ? '#cc0000' : '#0000cc');
+    }
+  };
+  if (pending) {
+    const dialog = layout.saleDialog;
+    image(dialog.image);
+    const question = pending.kind === 'upgrade' ? `It costs you ${pending.cost} gp. Really upgrade the weapon?`
+      : 'Do you really want to mount the mod on this gun?';
+    text(dialog.children.question, question).setName('shop-equipment-question');
+    if (pending.kind === 'upgrade') {
+      const before = state.inventory[pending.slot], after = state.upgradeReference;
+      if (isOccupiedItem(before) && isOccupiedItem(after)) {
+        itemComparison(before, dialog.children.pop1, 'before');
+        itemComparison(after, dialog.children.pop2, 'after');
+        const placement = dialog.children.poparrow, asset = manifest.clips.shopUpgradeArrow;
+        root.add(scene.add.image(placement.x, placement.y, 'shopUpgradeArrow', '1')
+          .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight)
+          .setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees));
+      }
+    }
+    // Исходный MOD No переставляет два собственных предмета; это не отмена продажи.
+    const dismiss = scene.add.zone(0, 0, 620, 380).setOrigin(0).setInteractive(); root.add(dismiss);
+    dismiss.setName('shop-equipment-cancel-background');
+    dismiss.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); callbacks.resolveEquipment(false); });
+    button('button_dialogNo', dialog.children.no, () => callbacks.resolveEquipment(false)).setName('shop-equipment-no');
+    button('button_dialogYes', dialog.children.yes, () => callbacks.resolveEquipment(true)).setName('shop-equipment-yes');
+  } else if (saleIndex !== null) {
     const item = state.inventory[saleIndex], dialog = layout.saleDialog;
     image(dialog.image);
     if (isOccupiedItem(item)) text(dialog.children.question, `Do you really want to sell it for ${itemPrice(item)} gold?`);
@@ -228,7 +297,11 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
     if (isOccupiedItem(item)) button('button_dialogYes', dialog.children.yes, () => { callbacks.confirmSell(saleIndex); }).setName('shop-sale-yes');
   }
   // Общий обработчик не перекрывает городскую навигацию невидимым прямоугольником.
-  const outsideClick = () => { if (saleIndex === null) dropOutside(); };
+  const outsideClick = () => {
+    if (modal) return;
+    if (upgradeSelecting) callbacks.cancelUpgradeSelection();
+    else dropOutside();
+  };
   scene.input.on('pointerdown', outsideClick);
   scene.input.on('pointermove', moveCarried);
   root.once(Phaser.GameObjects.Events.DESTROY, () => {

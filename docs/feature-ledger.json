@@ -431,7 +431,7 @@
         "MainTimeline:11732 updateShopSlots"
       ],
       "status": "partial",
-      "implemented": "58 source item IDs with generation/modifier metadata and six persistent inventory slots. Both early towns use original stock/item art and prices. Two-click purchase into empty slots, complete-record owned swaps, confirmed sales and Shop Token discounts consume no RNG. Owned equipment and existing generated modifiers feed the next battle's weapon calculations. Occupied purchases and unsupported MOD mounting preserve items; Refresh Stock and Upgrade Weapon are unavailable.",
+      "implemented": "58 source item IDs with generation/modifier metadata and six persistent inventory slots. Both early towns support purchases into empty slots, complete-record swaps, confirmed sales and Shop Token discounts. Upgrade previews spend source RNG immediately; Yes spends4 AP and the shown gold, while cancellation retains the preview and RNG. Owned MOD confirmation preserves original compatibility guards, fixed enchant, refill and No→swap behavior. Occupied stock purchase remains blocked. Upgrade intentionally retains every installed modifier and Living Weapon progress, correcting the original final-mod loss.",
       "evidence": [
         "web/tests/item-reference.test.ts: 157 original snapshots including fields, ordinary/boss offers and RNG; prior 139 unchanged",
         "web/tests/inventory-save.test.ts: item persistence and swaps",
@@ -440,13 +440,18 @@
         "docs/shop-ui-reference.md: original slot geometry, prices, click/drop guards and sale contract",
         "docs/port-verification.json: browser Pistol purchase348 changes gold823 to475; statue cancellation preserves state; confirmed sale150 gives625",
         "web/tests/second-town-reference.test.ts: original Day 2 stock generation and retained shared-slot metadata",
-        "web/tests/equipment-reference.test.ts: actual original selection and firing/reload input behavior for owned equipment"
+        "web/tests/equipment-reference.test.ts: actual original selection and firing/reload input behavior for owned equipment",
+        "web/tests/modification-reference.test.ts:104 original observations,88 matching transaction comparisons,84 full reference comparisons;16 raw bug observations kept separate",
+        "web/tests/modification-gameplay.test.ts:mounted Damage/AutoFire affect actual combat, higher upgrade requirement rejects under-skilled firing",
+        "web/tests/modification-save.test.ts:v9 preview/confirmation persistence, legacy migration, guards and original reload metadata",
+        "web/docs/town-equipment-source.md:source anchors, transaction semantics, intentional correction and limits",
+        "docs/port-verification.json:browser_checks.modifications"
       ],
       "unverified": [
-        "Modifier mounting and all generated modifier/weapon combinations",
-        "Refresh Stock and Upgrade Weapon actions",
-        "Generation with nondefault party skills and contexts after Day 2",
-        "Projectile weapon families and unsampled weapon combat behavior"
+        "Refresh Stock",
+        "Every modifier/weapon combination and ally equipment",
+        "Generation with nondefault party skills and contexts after Day2",
+        "Unsampled weapon combat behavior; projectile-family evidence is recorded separately"
       ]
     },
     {
@@ -602,7 +607,7 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot with JSON import/export and Continue. Version 7 stores canonical inventory equipment/ammunition/reload state, selected slot, five consumable cooldowns, in-flight grenade damage, protection, five weapon-XP buckets, hero potentials/traits, enemy shadow/boss-damage/disarmed state, rewards and cumulative earnings. Day 1/2 saves retain active mission parameters, previous-town metadata, the current prepared town, AP, earned medals, perfect-day and boss-spawn counters. Versions 1–6 migrate without rerunning settled rewards or prepared towns; explicit provenance marks reconstructed data. Current saves require shadow history instead of silently deriving a replacement from the frame.",
+      "implemented": "One browser slot with JSON import/export and Continue. Version 7 stores canonical inventory equipment/ammunition/reload state, selected slot, five consumable cooldowns, in-flight grenade damage, protection, five weapon-XP buckets, hero potentials/traits, enemy shadow/boss-damage/disarmed state, rewards and cumulative earnings. Day 1/2 saves retain active mission parameters, previous-town metadata, the current prepared town, AP, earned medals, perfect-day and boss-spawn counters. Versions 1–6 migrate without rerunning settled rewards or prepared towns; explicit provenance marks reconstructed data. Current saves require shadow history instead of silently deriving a replacement from the frame. Version8 adds full projectile/bow lifecycles. Current version9 persists the upgrade reference and pending Upgrade/MOD confirmation; versions1–8 migrate, initializing these fields without RNG. Town reload metadata retained by enchant is accepted; active-battle timer validation remains strict.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",
@@ -617,7 +622,10 @@
         "web/tests/consumables-save.test.ts: per-slot cooldowns, saved grenade damage, protection and inactive artifact sentinel",
         "web/tests/weapon-experience.test.ts: five-category state, strict validation, non-Sheriff weapon promotions and scalar migration",
         "web/tests/day-two.test.ts: exact save replay through Rest, Day 2 combat, each reward stage and second-town entry",
-        "web/tests/town-save.test.ts: mission calendar/absorption validation and retained recruit slots"
+        "web/tests/town-save.test.ts: mission calendar/absorption validation and retained recruit slots",
+        "web/tests/modification-save.test.ts:pending Upgrade/MOD persistence and v1–8 migration",
+        "web/scripts/soak.ts:latest96 scenarios/196379frames/2287checkpoints through both days, including53 previews16 mounts18 upgrades35 cancellations",
+        "docs/port-verification.json:exact pending-preview Continue and final production v8→v9 import/export equality"
       ],
       "unverified": [
         "Six-slot parity",
@@ -645,7 +653,7 @@
         "ally1 and enemy_* frame scripts in original SWF"
       ],
       "status": "partial",
-      "implemented": "Selected original assets and reconstructed character timeline layers support the two-day Sheriff slice, town mission/castle/shop menus, original item/coin art and Free Repair/sale/Rest dialogs. The battle hotbar renders owned equipment, ammo and per-slot cooldowns; selected weapon presentation, repair/prayer/defend effects and sounds use original assets.",
+      "implemented": "Selected original assets and reconstructed character timeline layers support the two-day Sheriff slice, town mission/castle/shop menus, original item/coin art and Free Repair/sale/Rest dialogs. The battle hotbar renders owned equipment, ammo and per-slot cooldowns; selected weapon presentation, repair/prayer/defend effects and sounds use original assets. Original item popup, upgrade arrow and separate shop labels support before/after upgrade and MOD confirmations.",
       "evidence": [
         "docs/asset-manifest.json",
         "docs/ui-reference.md",

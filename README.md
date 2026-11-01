@@ -3,8 +3,9 @@
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
 Phaser 4. The current implementation covers **two connected Sheriff days**:
 choose one of 22 appearances, fight, collect ordinary and boss loot, choose earned
-skills, enter town, use the shop and Free Repair, then Rest to begin Day 2 with
-your retained equipment. Victory, defeat and save/restore work across these
+skills, enter town, buy/sell and upgrade weapons, mount MODs, use Free Repair,
+then Rest to begin Day 2 with your retained equipment. Victory, defeat and
+save/restore work across these
 stages. Original English artwork, fonts, audio and credits are retained.
 
 This is not yet the complete game. Day 3 onward, other classes, full town
@@ -76,9 +77,28 @@ survive save/restore. **Mission → Rest** opens the original Resting dialog;
 acknowledging it begins the prepared Day 2 battle. Rest does not heal the castle,
 spend AP or cost gold. Guns refill; consumable charges stay spent. Day 2 ends in
 its own rewards and prepared town, where further Rest is disabled. Recruiting,
-card actions, Refresh Stock, Upgrade Weapon and MOD mounting remain unavailable.
+card actions and Refresh Stock remain unavailable.
 
-Saves now use version 8; versions 1–7 are accepted. In-flight projectiles and
+In the shop, **Upgrade Weapon** requires **4 AP** to enter selection mode.
+Choose an owned gun to see its before/after comparison and gold cost;
+only Yes pays the displayed gold and spends the AP. Check the new weapon-skill
+requirement before confirming: upgrading does not grant that skill, and a red
+requirement means the weapon is currently unusable. **Upgrade keeps all mounted
+MODs and Living Weapon progress.** This intentionally fixes the original
+upgrade parser dropping the final modifier; it is not a claim to reproduce that
+defect. Opening a preview consumes the original random draws. Cancel keeps the
+gun, gold and AP, but does not rewind RNG; opening another preview generates a
+new one.
+
+To mount a MOD, pick it up from owned inventory and click an owned gun. Yes
+mounts a compatible MOD without spending AP or gold, and consumes the MOD.
+Rejected mounting keeps both items. **No or clicking outside this confirmation
+swaps the MOD and gun**, matching the original owned-inventory behavior; it does
+not cancel like a sale. Stock MODs must first be bought into an empty owned slot.
+
+Saves now use version 9; versions 1–8 are accepted. Pending Upgrade and MOD
+confirmations survive reload, preserving the chosen items and the exact stored
+upgrade preview without another random draw. In-flight projectiles and
 charged bows resume without relaunching or rerolling. Legacy hand grenades retain
 their stored positions, damage and remaining lifetime. Ammo and reload timers live
 on the owned items, with a selected slot, five item cooldowns and saved
@@ -143,17 +163,31 @@ covering every projectile family, hits, penetration, overlapping corpses, weapon
 switching and random draws. A separate native probe checks first-update timing;
 two vertical-shot diagnostics preserve the original failure and verify the
 intentional correction. These are bounded comparisons, not a complete replay of
-an original battle. The integrated v8 candidate passes **151 tests** and TypeScript checks. Release
+an original battle.
+
+Upgrade/MOD checks add **104 observations per run in two identical original runs**:
+**88 production comparisons pass**, including **84 complete reference-item
+comparisons**. Four comparisons defer reference-item equality to a separately
+captured corrective step. The other **16 observations** retain the raw original
+last-MOD-loss defect as source evidence. Corrected previews are compared against
+the original `enchant` method reapplied to the omitted modifier, with retained
+Living Weapon progress; expected corrected values do not come from the port.
+See [oracle notes](docs/oracle-notes.md) for this explicit comparison boundary.
+
+The integrated v9 candidate passes **167 tests** and TypeScript checks. Release
 and browser acceptance are tracked separately in
 [port verification](docs/port-verification.json).
 
 `npm.cmd run test:soak` automatically exercises 32 seeds with idle, aimed and
 interrupted-input policies. It checks finite state, battle completion and exact
 JSON save/replay state and event equality through both days, earned rewards,
-town preparation, repair, shop transactions and Rest. The latest run passed
-**96 scenarios, 196,363 frames and 2,207 checkpoints**, including **59 Rest
-transitions and 32 Day 2 victories**. Reports and reproducible failure
-checkpoints are written beneath `.build/soak/`. This is a stability check, not
+town preparation, repair, shop transactions, weapon modifications and Rest.
+The latest run passed **96 scenarios, 196,379 frames and 2,287 checkpoints**,
+including **417 reward transitions, 433 town actions, 59 Rest transitions,
+32 Day 2 victories and 297 equipment selections**. It exercised **53 upgrade
+previews, 18 confirmed upgrades, 35 cancellations and 16 mounted MODs**.
+Reports and reproducible failure checkpoints are written beneath `.build/soak/`.
+This is a stability check, not
 evidence that every original feature has been ported.
 
 `npm.cmd run test:projectile-soak` separately exercises eight projectile guns
@@ -181,6 +215,7 @@ python tools/build_castle_oracle.py
 python tools/build_rest_oracle.py
 python tools/build_second_town_oracle.py
 python tools/build_projectile_oracle.py
+python tools/build_modification_oracle.py
 python tools/serve_oracle.py
 ```
 
@@ -194,7 +229,9 @@ and Free Repair. Use `?suite=hero` for character creation/growth,
 for actual firing. Use `?suite=equipment` for selection/fire/reload input,
 `?suite=castle` for castle damage/protection, `?suite=rest` for Rest, and
 `?suite=second-town` for the second preparation, and `?suite=projectiles` for
-projectile launches and lifecycles (`npm.cmd run test:projectile-reference`). The town fixture excludes full
+projectile launches and lifecycles (`npm.cmd run test:projectile-reference`).
+Use `?suite=modifications` for weapon Upgrade and MOD mounting, then run
+`npm.cmd run test:modification-reference` from `web/`. The town fixture excludes full
 town preparation. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, use the matching comparison command: `npm.cmd run test:reference`,

@@ -23,7 +23,8 @@ CLIPS = {"charaPic": 677, "enemy_sheep": 910,
          "explosion": 2235, "itemPicture": 2113, "ammoBar": 2698, "radioButton": 2312,
          "grenadeBody": 2275, "grenadeShadow": 2199, "bossHealthFill": 2411, "shopCoin": 1442,
          "layhand": 2226, "itemTimer": 2370, "launcherGrenadeBody": 2238,
-         "rocketBody": 2246, "arrowBody": 2263, "flameBody": 2195, "explosionLarge": 2403}
+         "rocketBody": 2246, "arrowBody": 2263, "flameBody": 2195, "explosionLarge": 2403,
+         "shopUpgradeArrow": 2129}
 PROJECTILES = {"hand-grenade": (2276, "grenadeBody"), "grenade": (2239, "launcherGrenadeBody"),
                "rocket": (2247, "rocketBody"), "bolt": (2264, "arrowBody"),
                "arrow": (2265, "arrowBody"), "gravity": (2260, "gravityBody"),
@@ -302,6 +303,24 @@ def projectile_assets(xml, sprites, manifest):
     manifest["projectileVisuals"] = visuals
 
 
+def item_popup_asset(xml, sprite):
+    """Оставляет исходную рамку/подписи popup; значения до и после рисуются из сохранённого предмета."""
+    directory, svg_directory = WORK / "item-popup", WORK / "item-popup-svg"
+    if FORCE or not list(directory.glob("DefineSprite_1791*")):
+        derived = copy.deepcopy(xml)
+        target = next(tag for tag in derived.find("tags") if tag.get("spriteId") == "1791")
+        timeline = target.find("subTags")
+        for tag in list(timeline):
+            if tag.get("type", "").startswith("PlaceObject") and tag.get("name"):
+                timeline.remove(tag)
+        path, swf_path = WORK / "item-popup.xml", WORK / "item-popup.swf"
+        ET.ElementTree(derived).write(path, encoding="utf-8", xml_declaration=True)
+        ffdec(["-xml2swf", path, swf_path], "item-popup-swf")
+        ffdec(["-ignorebackground", "-selectid", "1791", "-export", "sprite", directory, swf_path], "item-popup-png")
+        ffdec(["-ignorebackground", "-selectid", "1791", "-format", "sprite:svg", "-export", "sprite", svg_directory, swf_path], "item-popup-svg")
+    return atlas("itemPopup", 1791, sprite, directory, svg_directory)
+
+
 def buttons(manifest):
     png_dir, svg_dir = ROOT / ".build/buttons", ROOT / ".build/buttons-svg"
     for directory, extension, format_args, log in [(png_dir, "png", [], "buttons"),
@@ -405,13 +424,15 @@ def town_layout(xml, sprites):
                         "children": placements(sprites[1995].find("subTags"), 40)},
             "castle": {"characterId": 1995, "frame": 54, "image": "townCastle", "labelsImage": "townCastleLabels",
                        "children": placements(sprites[1995].find("subTags"), 54)},
-            "shop": {"characterId": 1995, "frame": 80, "image": "townShop", "labelsImage": "townShopLabels",
+            "shop": {"characterId": 1995, "frame": 80, "image": "townShop",
+                     "refreshLabelsImage": "townShopRefreshLabel", "upgradeLabelsImage": "townShopUpgradeLabel",
                      "children": placements(sprites[1995].find("subTags"), 80),
                      "slots": {"stock": {"count": 8, "sourceStart": 0, "x": 140, "y": 160, "columns": 8, "stepX": 50, "op": 0},
                                "inventory": {"initialCount": 6, "sourceStart": 20, "x": 140, "y": 250, "columns": 8, "stepX": 50, "stepY": 48, "op": 1}}},
             "inventorySlot": {"characterId": 2121, "children": placements(sprites[2121].find("subTags"), 1)},
             "saleDialog": {"characterId": 2131, "frame": 1, "image": "shopSaleDialog",
                            "children": placements(sprites[2131].find("subTags"), 1)},
+            "itemPopup": {"characterId": 1791, "clip": "itemPopup", "children": placements(sprites[1791].find("subTags"), 1)},
             "repairDialog": {"characterId": 2437, "frame": 1, "image": "eventRepair",
                              "cardFrame": 2, "children": placements(sprites[2437].find("subTags"), 1)}}
 
@@ -448,6 +469,7 @@ def main():
                 "clips": {}, "sounds": {}, "fonts": {}}
     for name, i in CLIPS.items():
         manifest["clips"][name] = atlas(name, i, sprites[i])
+    manifest["clips"]["itemPopup"] = item_popup_asset(xml, sprites[1791])
     projectile_assets(xml, sprites, manifest)
     for layer in ["back", "front"]:
         manifest["clips"]["ally" + layer.capitalize()] = ally_effects(xml, sprites[838], layer)
@@ -481,10 +503,12 @@ def main():
     # Подписи лежат выше карточек-действий в исходной временной шкале.
     for name, frame, labels in [("townMissionLabels", 40, {"actRef1", "actRef2"}),
                                 ("townCastleLabels", 54, {"actRef1"}),
-                                ("townShopLabels", 80, {"actRef1", "actRef2"})]:
+                                ("townShopRefreshLabel", 80, {"actRef1"}),
+                                ("townShopUpgradeLabel", 80, {"actRef2"})]:
         selected = [tag for tag in placed_frame(sprites[1995].find("subTags"), frame)
                     if tag.get("name") in labels]
         manifest["images"][name] = static_screen(xml, name, selected, offset=(0, -22))
+    (DEST / "screens/townShopLabels.png").unlink(missing_ok=True)
     manifest["images"]["eventRepair"] = static_screen(xml, "eventRepair",
         placed_frame(sprites[2437].find("subTags"), 1), {"title", "text", "okButton"}, sprite_frames={2336: 2})
     manifest["images"]["eventRest"] = static_screen(xml, "eventRest",
@@ -546,6 +570,8 @@ def main():
             "townHud applies the original eventGene bgAlpha.alpha=1",
             "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",
             "Town action labels are separate original foreground layers above their card buttons",
+            "Shop Upgrade and Refresh labels are separate so each retains its own enabled state",
+            "Item comparison popup retains original static labels and renders saved before/after values separately",
             "Town scene and panels omit runtime HUD fields; Free Repair/Rest use original event card frames 2/11",
             "gene and result retain offset (0,-26); application applies menu slide X offset",
             "Item quantities and radio labels are rendered by the application",

@@ -17,7 +17,7 @@ interface ImageAsset { file: string; width: number; height: number; originX: num
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number }
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual> }
-interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8; appearance: number; simulation: unknown }
+interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9; appearance: number; simulation: unknown }
 type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
@@ -29,7 +29,7 @@ const bootStarted = performance.now();
 const USED_SOUNDS = new Set(['soundClick1', 'soundGun3', 'soundReloading2', 'soundReloaded2', 'soundThrow1', 'soundExp1', 'soundDead3', 'soundDead5', 'soundDead7', 'soundDeadChicken', 'soundDeadBoss1', 'soundDamage1', 'soundPop1', 'soundBattleBegin', 'soundBattleEnd', 'soundKilled', 'soundRampage', 'soundComplete', 'soundGold1', 'soundBgForest']);
 for (let index = 0; index < 5; index++) USED_SOUNDS.add(`soundGoodshot${index}`);
 USED_SOUNDS.add('soundReloaded1');
-for (const key of ['soundBgTown', 'soundRepair1', 'soundBeep', 'soundScroll1', 'soundPay1']) USED_SOUNDS.add(key);
+for (const key of ['soundBgTown', 'soundRepair1', 'soundBeep', 'soundScroll1', 'soundPay1', 'soundMod']) USED_SOUNDS.add(key);
 for (let index = 1; index <= 15; index++) USED_SOUNDS.add(`soundGun${index}`);
 for (const key of ['soundReloading1', 'soundReloading3', 'soundReloaded3', 'soundPray1', 'soundDefend', 'soundNight']) USED_SOUNDS.add(key);
 for (const key of ['soundBow2', 'soundFireball', 'soundRampageEnemy', 'soundPuls']) USED_SOUNDS.add(key);
@@ -122,7 +122,7 @@ class ElonaScene extends Phaser.Scene {
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Sheriff Days 1–2, rewards, town shop, Free Repair and Rest are playable. Number keys 1–5 use owned equipment and consumables; hold and release the mouse to draw and fire a bow. Ragnarok, other town actions, Day 3 onward and other classes are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Sheriff Days 1–2, rewards, the shop, weapon upgrades, MOD mounting, Free Repair and Rest are playable. Number keys 1–5 use owned equipment and consumables; hold and release the mouse to draw and fire a bow. Ragnarok, other town actions, Day 3 onward and other classes are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
   }
 
@@ -148,7 +148,8 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.lootOffers; delete container.dataset.inventory;
     delete container.dataset.skillChoices; delete container.dataset.selectedTrait; delete container.dataset.traits; delete container.dataset.skillPoints;
     delete container.dataset.actionPoints; delete container.dataset.townTab; delete container.dataset.repairDialog; delete container.dataset.townDialog;
-    delete container.dataset.shopStock; delete container.dataset.saleSlot;
+    delete container.dataset.shopStock; delete container.dataset.saleSlot; delete container.dataset.upgradeSelecting;
+    delete container.dataset.pendingTownAction; delete container.dataset.upgradePreview;
   }
 
   private image(key: string, x = 0, y = 0): Phaser.GameObjects.Image | undefined {
@@ -688,8 +689,11 @@ class ElonaScene extends Phaser.Scene {
     status.textContent = 'Choose a skill, review its improvement, then press Proceed to learn it.';
   }
 
-  private showTown(tab: TownTab = 'mission', dialog: TownDialog = null, saleSlot: number | null = null): void {
+  private showTown(tab: TownTab = 'mission', dialog: TownDialog = null, saleSlot: number | null = null, upgradeSelecting = false): void {
     if (!this.sim || this.sim.state.phase !== 'town' || !this.sim.state.town) return;
+    const pending = this.sim.state.pendingTownAction;
+    // Восстановление открывает то же подтверждение, не вызывая генерацию повторно.
+    if (pending) { tab = 'shop'; dialog = null; saleSlot = null; upgradeSelecting = false; }
     this.reset('town');
     this.root.add(createTownView(this, this.sim.state, manifest, this.cache.json.get('town-layout') as TownLayout, {
       select: next => { this.playSound('soundScroll1'); this.showTown(next); },
@@ -717,7 +721,8 @@ class ElonaScene extends Phaser.Scene {
     }, tab, dialog));
     if (tab === 'shop' && this.sim.state.town.preparation === 'ready') {
       const changed = (sound = 'soundPay1') => { this.playSound(sound); this.saveGame(false); this.showTown('shop'); };
-      this.root.add(createShopView(this, { inventory: this.sim.state.inventory, shop: this.sim.state.town.shop, gold: this.sim.state.gold, traits: this.sim.state.player.traits }, manifest, this.cache.json.get('town-layout') as ShopLayout, {
+      this.root.add(createShopView(this, { inventory: this.sim.state.inventory, shop: this.sim.state.town.shop, gold: this.sim.state.gold, traits: this.sim.state.player.traits,
+        ap: this.sim.state.town.ap, pendingTownAction: pending, upgradeReference: this.sim.state.upgradeReference }, manifest, this.cache.json.get('town-layout') as ShopLayout, {
         buy: (stock, slot) => {
           const outcome = this.sim!.buyStock(stock, slot);
           if (outcome === 'purchased') { changed(); return true; }
@@ -730,11 +735,40 @@ class ElonaScene extends Phaser.Scene {
         confirmSell: slot => { if (this.sim!.sellTownItem(slot) === null) return false; changed(); return true; },
         cancelSale: () => this.showTown('shop'),
         applyToken: (slot, stock) => { if (!this.sim!.applyShopToken(slot, stock)) return false; changed(); return true; },
+        beginUpgradeSelection: () => {
+          if (this.sim!.state.town!.ap < 4) { this.playSound('soundBeep'); status.textContent = "You don't have enough action points!"; return; }
+          this.playSound('soundClick1'); this.showTown('shop', null, null, true);
+        },
+        cancelUpgradeSelection: () => this.showTown('shop'),
+        requestUpgrade: slot => {
+          const outcome = this.sim!.beginWeaponUpgrade(slot);
+          if (outcome === 'previewed') { changed('soundScroll1'); return; }
+          this.playSound('soundBeep'); this.showTown('shop');
+          status.textContent = outcome === 'not-enough-ap' ? "You don't have enough action points!" : 'Choose an owned weapon to upgrade.';
+        },
+        requestModMount: (modSlot, gunSlot) => {
+          if (this.sim!.beginModMount(modSlot, gunSlot) === 'previewed') changed('soundScroll1');
+          else { this.playSound('soundBeep'); status.textContent = 'These items are no longer available.'; }
+        },
+        resolveEquipment: confirm => {
+          const outcome = this.sim!.resolveTownEquipment(confirm);
+          this.playSound('soundClick1'); this.saveGame(false); this.showTown('shop');
+          if (outcome === 'upgraded' || outcome === 'mounted') { this.playSound('soundMod'); return; }
+          const errors: Record<string, string> = {
+            'not-enough-gold': "You don't have enough money!", 'not-enough-ap': "You don't have enough action points!", 'no-mod-slot': "There's no available mod slot on this weapon!",
+            'incompatible-ammo-mod': "This weapon can't use ammo/reloading mods.", 'incompatible-auto-reload': "This weapon can't use Auto Reload mod.",
+            'already-living': 'This weapon is already alive.', unavailable: 'These items are no longer available.',
+          };
+          if (errors[outcome]) { this.playSound('soundBeep'); status.textContent = errors[outcome]; }
+        },
         message: value => { status.textContent = value; },
         close: () => this.showTown(null),
-      }, saleSlot));
+      }, saleSlot, upgradeSelecting));
       container.dataset.shopStock = JSON.stringify(this.sim.state.town.shop.map(item => isOccupiedItem(item) ? { id: item.id, value: Math.trunc(item.value) } : null));
       container.dataset.saleSlot = saleSlot === null ? '' : String(saleSlot);
+      container.dataset.upgradeSelecting = String(upgradeSelecting);
+      container.dataset.pendingTownAction = JSON.stringify(pending);
+      container.dataset.upgradePreview = JSON.stringify(pending?.kind === 'upgrade' ? this.sim.state.upgradeReference : null);
     }
     this.updateHud();
     container.dataset.actionPoints = String(this.sim.state.town.ap);
@@ -745,7 +779,10 @@ class ElonaScene extends Phaser.Scene {
     if (!this.ambient && this.cache.audio.exists('soundBgTown')) {
       this.ambient = this.sound.add('soundBgTown', { volume: 0.3, loop: true }); this.ambient.play();
     }
-    status.textContent = dialog === 'repair' ? 'The castle walls are repaired. Click to continue.'
+    status.textContent = pending?.kind === 'upgrade' ? 'Compare the weapon before and after upgrading. Upgrade keeps mounted mods. Yes spends the shown gold and 4 AP.'
+      : pending?.kind === 'mod' ? 'Yes mounts the MOD. No or clicking elsewhere swaps these two inventory items.'
+      : upgradeSelecting ? 'Choose an owned weapon to upgrade. Click elsewhere to cancel. Upgrade keeps mounted mods.'
+      : dialog === 'repair' ? 'The castle walls are repaired. Click to continue.'
       : dialog === 'rest' ? 'Click to finish resting and begin Day 2.'
       : tab === 'shop' ? (saleSlot === null ? 'Click stock, then an empty owned slot to buy. Drop an owned item outside its slots to sell; confirmation is required.' : 'Confirm the sale with Yes, or click elsewhere to keep the item.')
       : `Shop buys and sells items. Castle → Free Repair restores the walls for 2 AP. ${this.sim.state.day === 1 ? 'Mission → Rest begins Day 2.' : 'Day 3 is not available yet.'}`;
@@ -769,7 +806,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   makeSave(): PortSave | undefined {
-    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 8, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
+    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 9, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
   }
 
   saveGame(notify = true): boolean {
@@ -782,7 +819,7 @@ class ElonaScene extends Phaser.Scene {
 
   private parseSave(raw: unknown): { simulation: Simulation; appearance: number } {
     const save = raw as Partial<PortSave> | null;
-    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5, 6, 7, 8].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
+    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5, 6, 7, 8, 9].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
     return { simulation: Simulation.fromSave(save.simulation, this.simulationOptions()), appearance: save.appearance! };
   }
 
