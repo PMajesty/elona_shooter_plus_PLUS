@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { ItemFactory, isOccupiedItem, type Item } from '../src/items.ts';
+import { ItemFactory, createStartingInventory, isOccupiedItem, type Item } from '../src/items.ts';
 import { Simulation } from '../src/simulation.ts';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/original-item-trace.json', import.meta.url), 'utf8'));
@@ -18,26 +18,21 @@ function legacySave(simulation: Simulation): Record<string, any> {
   const value: Record<string, any> = simulation.toSave();
   value.version = 1;
   if (value.phase === 'victory' && value.town === null) value.gold += value.result.netReward;
-  for (const field of ['inventory', 'lootOffers', 'postbattle', 'inventoryProvenance', 'legacyReconstructionSeed', 'bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance', 'town', 'totalMoney']) delete value[field];
+  for (const field of ['inventory', 'lootOffers', 'postbattle', 'inventoryProvenance', 'legacyReconstructionSeed', 'bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance', 'town', 'totalMoney', 'hero']) delete value[field];
   delete value.player.traits;
   return value;
 }
 
-test('New Game generates original starter items before the opening mission consumes RNG', () => {
-  const prototype = Simulation.prototype as unknown as { generateOpeningMission(): void };
-  const original = prototype.generateOpeningMission;
-  const boundaries: number[] = [];
-  prototype.generateOpeningMission = function (this: Simulation) { boundaries.push(this.state.rng); original.call(this); };
-  try {
-    for (const row of snapshots.filter((row: { scenario: string }) => row.scenario === 'starting')) {
-      const simulation = new Simulation(row.seed);
-      assert.deepEqual(simulation.state.inventory, row.slots.map(itemFromOriginal));
-      assert.equal(boundaries.at(-1), row.rngState);
-      assert.equal(simulation.state.version, 5);
-      assert.equal(simulation.state.inventoryProvenance, 'original-generation');
-      assert.equal(simulation.state.postbattle, 'none');
-    }
-  } finally { prototype.generateOpeningMission = original; }
+test('standalone starter-item boundary retains its independent original fixture', () => {
+  for (const row of snapshots.filter((row: { scenario: string }) => row.scenario === 'starting')) {
+    let rng = row.seed;
+    const random = () => {
+      rng ^= rng << 13; rng ^= rng >>> 17; rng ^= rng << 5; rng >>>= 0;
+      return rng / 4294967296;
+    };
+    assert.deepEqual(createStartingInventory(random), row.slots.map(itemFromOriginal));
+    assert.equal(rng, row.rngState);
+  }
 });
 
 test('battle completion generates captured original ordinary loot once and synchronizes equipment', () => {
@@ -168,7 +163,7 @@ test('v1 victory reconstructs only its recorded loot queue once, preserving the 
   assert.deepEqual(Simulation.fromSave(migrated.toSave()).state, migrated.state);
 });
 
-test('v5 save rejects invalid item fields and inconsistent loot stages without editing the input', () => {
+test('current save rejects invalid item fields and inconsistent loot stages without editing the input', () => {
   const saved = new Simulation(42).toSave();
   const changes = [
     { inventory: [] }, { inventory: Array(6) }, { lootOffers: Array(7).fill(null) }, { lootOffers: Array(8) }, { postbattle: 'loot' },

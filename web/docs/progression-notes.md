@@ -20,10 +20,11 @@ first-day save schema does not support.
 The known starting traits are Sheriff 6 = 1, Shotgun 105 = 2 and Fury 121 = 1.
 The class trait follows character level. Original hidden base aiming 900 and
 teamwork 901 each start at a random value from 1 to 10 and can grow on level-up.
-Those character-generation rolls and growth are not yet ported. Their values
-remain absent, not fabricated; their known existence still counts toward the
-original owned-trait limit. `traitsProvenance` records that boundary. No new
-character-generation RNG draws are inserted into the established battle stream.
+Version 6 integrates these rolls and their saved growth potentials through
+`hero.ts`; source generation and growth match 12 captured original snapshots.
+New Game orders mission preparation before hero rolls/equipment and wave
+generation after the selected character reroll. See `hero-notes.md` for the
+exact boundary and legacy reconstruction provenance.
 
 Trait descriptions, preview labels, maximum levels and effect calculations are
 ported. Choosing a skill persists its level. Its use in subsequent combat,
@@ -44,7 +45,9 @@ settlement to the result stage. All older inputs are cloned before migration.
 
 Battle migration preserves the saved combat RNG, player counters, enemies,
 waves and existing item instances. Known starting traits are reconstructed,
-with Sheriff set to the saved character level; hidden base values stay unknown.
+with Sheriff set to the saved character level. Version 6 reconstructs missing
+hidden hero values using a separate recorded stream; this replacement data does
+not recover their historical values or alter the saved battle RNG.
 Boss kills are inferred from a recorded dead boss or an already-spawned boss
 that has disappeared after its wave was reached. A living or queued boss takes
 precedence over the victory phase. Provenance explicitly marks these inferred
@@ -85,18 +88,18 @@ changes neither gold nor RNG. A repeated repair at full HP costs nothing.
 There is no daily-used flag. Modal acknowledgment is UI state, while repaired
 HP, AP, inventory and the town phase persist through saves.
 
-This is the first-town **actions boundary**, not complete original town entry.
-Original `frame71` generates shop stock, cards, the next mission, a recruit and
-medal adjustments before saving. Those generators are still pending; no dummy
-random draws are inserted for them. `town.preparation` remains `pending`, and
-Day 2 cannot start. Its saved RNG is the exact port boundary for adding the real
-preparation sequence later. Equipment selection and learned skills must affect
-combat before another day is enabled.
+The implemented first town now generates stock, cards, next-mission data,
+a recruit and entry flags in the original order, then persists the complete
+prepared state. Town saves require `preparation: 'ready'`; result saves retain
+`pending` until entry. Existing v4 town saves perform this preparation once
+without repeating settlement. Free Repair and shop transactions preserve the
+prepared records. Recruiting, card actions and Rest remain unavailable.
+Equipment selection and the remaining learned-skill effects must be integrated
+before another day becomes playable.
 
-Town saves accept rearranged inventory. Validation requires completed rewards,
-positive castle HP, integer AP in 0–4 and the explicit pending preparation marker.
-Results before town entry must still have all four AP. It rejects town state on
-unfinished rewards or battle saves and rejects unsupported Day 2 data.
+Town validation requires completed rewards, positive castle HP and integer
+AP in 0–4. Results before town entry must still have all four AP. It rejects
+unfinished rewards, battle saves with town data and unsupported Day 2 data.
 
 Source anchors: `renewResult`, 3411; `townEvent`, 6417; `frame71`, 3157;
 `showEventDialog` Free Repair branch, 10561; `noAp`, 4743; castle action,
@@ -123,5 +126,5 @@ legacy migration, rejected selections and repeat claims. These are integration
 checks. The accepted independent original-method fixture contains nine snapshots:
 three controlled seeds at Capable levels 0, 1 and 2. It matches candidate order,
 eligibility, choices, all 15 skill previews, raw effect calculations and RNG
-accounting. It does not establish later combat effects, character growth or
-original pointer interaction. See `docs/oracle-notes.md` for capture provenance.
+accounting. That choice fixture does not establish later combat effects or original
+pointer interaction; separate hero and shoot fixtures cover their stated boundaries. See `docs/oracle-notes.md` for capture provenance.

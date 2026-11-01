@@ -1,0 +1,594 @@
+{
+  "format": "elona-original-prepared-wave-trace",
+  "version": 1,
+  "runtime": "@ruffle-rs/ruffle 0.7.1",
+  "capturedAt": "2026-11-01T21:20:27.132Z",
+  "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "instrumentedSwfSha256": "24be20f2efd05a35f93f26c76d9b4e5a27565dba1deb144c83590f4e2cd2bac3",
+  "traceSha256": "af377da869b98a344e655fe11f8181102195f63b043937d9175802878c9eafa6",
+  "clock": "Original level1 mission preparation on day1 followed by wave generation on day2; Rest interaction and live combat are separate checks.",
+  "records": [
+    {
+      "clock": "synchronous-original-prepared-waves",
+      "kind": "prepared-waves",
+      "rng": "xorshift32",
+      "seeds": [
+        42,
+        1,
+        3735928559
+      ],
+      "type": "ready",
+      "version": 1
+    },
+    {
+      "bossWave": 3,
+      "day": 2,
+      "drawCount": 150,
+      "kind": "prepared-waves",
+      "loot": [
+        1117
+      ],
+      "missionAfter": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 3,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 1,
+        "group": [
+          6,
+          6,
+          5,
+          6,
+          5
+        ],
+        "hire": false,
+        "hpFix": 1,
+        "level": 1,
+        "loot": [
+          1117
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 625,
+        "powerOrg": 920,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 620,
+        "spawnRate": 14.8,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionBefore": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 3,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 1,
+        "group": [],
+        "hire": false,
+        "hpFix": 1,
+        "level": 1,
+        "loot": [
+          1117
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 920,
+        "powerOrg": 920,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 620,
+        "spawnRate": 14.8,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionLevel": 1,
+      "powerOrg": 920,
+      "preparationDay": 1,
+      "preparationDrawCount": 2,
+      "preparationRngState": 2836018348,
+      "reward": 620,
+      "rngState": 2052753070,
+      "seed": 42,
+      "spawnRate": 14.8,
+      "type": "snapshot",
+      "version": 1,
+      "waves": [
+        {
+          "delays": [
+            173.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            3,
+            3,
+            3,
+            19,
+            19,
+            3
+          ],
+          "index": 0,
+          "initialCount": 6
+        },
+        {
+          "delays": [
+            123.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            3,
+            19,
+            3,
+            17,
+            17,
+            3
+          ],
+          "index": 1,
+          "initialCount": 6
+        },
+        {
+          "delays": [
+            123.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            3,
+            3,
+            3,
+            3,
+            19
+          ],
+          "index": 2,
+          "initialCount": 5
+        },
+        {
+          "delays": [
+            123.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            3,
+            19,
+            17,
+            999,
+            3,
+            17
+          ],
+          "index": 3,
+          "initialCount": 6
+        },
+        {
+          "delays": [
+            123.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            3,
+            17,
+            3,
+            19,
+            17
+          ],
+          "index": 4,
+          "initialCount": 5
+        }
+      ]
+    },
+    {
+      "bossWave": 2,
+      "day": 2,
+      "drawCount": 153,
+      "kind": "prepared-waves",
+      "loot": [
+        1117
+      ],
+      "missionAfter": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 2,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 1,
+        "group": [
+          6,
+          6,
+          8,
+          6,
+          5
+        ],
+        "hire": false,
+        "hpFix": 1,
+        "level": 1,
+        "loot": [
+          1117
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 625,
+        "powerOrg": 920,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 620,
+        "spawnRate": 14.8,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionBefore": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 2,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 1,
+        "group": [],
+        "hire": false,
+        "hpFix": 1,
+        "level": 1,
+        "loot": [
+          1117
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 920,
+        "powerOrg": 920,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 620,
+        "spawnRate": 14.8,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionLevel": 1,
+      "powerOrg": 920,
+      "preparationDay": 1,
+      "preparationDrawCount": 2,
+      "preparationRngState": 67634689,
+      "reward": 620,
+      "rngState": 2755605728,
+      "seed": 1,
+      "spawnRate": 14.8,
+      "type": "snapshot",
+      "version": 1,
+      "waves": [
+        {
+          "delays": [
+            173.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            19,
+            3,
+            19,
+            3,
+            3,
+            3
+          ],
+          "index": 0,
+          "initialCount": 6
+        },
+        {
+          "delays": [
+            123.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            3,
+            17,
+            17,
+            19,
+            17,
+            3
+          ],
+          "index": 1,
+          "initialCount": 6
+        },
+        {
+          "delays": [
+            123.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            17,
+            17,
+            3,
+            19,
+            999,
+            17,
+            17,
+            17
+          ],
+          "index": 2,
+          "initialCount": 8
+        },
+        {
+          "delays": [
+            123.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            3,
+            17,
+            17,
+            17,
+            3,
+            17
+          ],
+          "index": 3,
+          "initialCount": 6
+        },
+        {
+          "delays": [
+            123.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            3,
+            17,
+            3,
+            17,
+            3
+          ],
+          "index": 4,
+          "initialCount": 5
+        }
+      ]
+    },
+    {
+      "bossWave": 2,
+      "day": 2,
+      "drawCount": 150,
+      "kind": "prepared-waves",
+      "loot": [
+        1117
+      ],
+      "missionAfter": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 2,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 1,
+        "group": [
+          6,
+          6,
+          7,
+          4,
+          5
+        ],
+        "hire": false,
+        "hpFix": 1,
+        "level": 1,
+        "loot": [
+          1117
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 625,
+        "powerOrg": 920,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 620,
+        "spawnRate": 14.8,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionBefore": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 2,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 1,
+        "group": [],
+        "hire": false,
+        "hpFix": 1,
+        "level": 1,
+        "loot": [
+          1117
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 920,
+        "powerOrg": 920,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 620,
+        "spawnRate": 14.8,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionLevel": 1,
+      "powerOrg": 920,
+      "preparationDay": 1,
+      "preparationDrawCount": 2,
+      "preparationRngState": 2384302402,
+      "reward": 620,
+      "rngState": 1268101570,
+      "seed": 3735928559,
+      "spawnRate": 14.8,
+      "type": "snapshot",
+      "version": 1,
+      "waves": [
+        {
+          "delays": [
+            173.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            3,
+            19,
+            3,
+            19,
+            3,
+            3
+          ],
+          "index": 0,
+          "initialCount": 6
+        },
+        {
+          "delays": [
+            123.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            17,
+            19,
+            3,
+            3,
+            17,
+            17
+          ],
+          "index": 1,
+          "initialCount": 6
+        },
+        {
+          "delays": [
+            123.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8,
+            21.8
+          ],
+          "enemies": [
+            17,
+            3,
+            999,
+            17,
+            17,
+            19,
+            3
+          ],
+          "index": 2,
+          "initialCount": 7
+        },
+        {
+          "delays": [
+            123.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            3,
+            19,
+            3,
+            3
+          ],
+          "index": 3,
+          "initialCount": 4
+        },
+        {
+          "delays": [
+            123.8,
+            14.8,
+            14.8,
+            14.8,
+            14.8
+          ],
+          "enemies": [
+            3,
+            3,
+            17,
+            19,
+            17
+          ],
+          "index": 4,
+          "initialCount": 5
+        }
+      ]
+    },
+    {
+      "kind": "prepared-waves",
+      "ok": true,
+      "seeds": [
+        42,
+        1,
+        3735928559
+      ],
+      "snapshots": 3,
+      "type": "complete",
+      "version": 1
+    }
+  ]
+}

@@ -29,7 +29,8 @@ function restore(simulation: Simulation): Simulation {
 function legacyVictory(simulation: Simulation, version: 1 | 2 | 3): Record<string, any> {
   const value: Record<string, any> = simulation.toSave();
   if (value.town === null) value.gold += value.result.netReward;
-  value.version = version; delete value.town; delete value.totalMoney;
+  value.version = version; delete value.town; delete value.totalMoney; delete value.hero;
+  delete value.player.traits[900]; delete value.player.traits[901];
   if (version < 3) {
     for (const field of ['bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance']) delete value[field];
     delete value.player.traits;
@@ -126,7 +127,7 @@ test('version 1–3 pending reward migration reverses early payment and restores
     const untouched = structuredClone(oldSave);
     let migrated = Simulation.fromSave(oldSave);
     assert.deepEqual(oldSave, untouched);
-    assert.equal(migrated.state.version, 5);
+    assert.equal(migrated.state.version, 6);
     assert.equal(migrated.state.gold, oldSave.gold - oldSave.result.netReward);
     assert.equal(migrated.state.rng, oldSave.rng);
     assert.equal(migrated.state.town, null);
@@ -152,7 +153,8 @@ test('an old version 3 completed result receives AP without receiving its settle
   assert.equal(migrated.state.gold, oldSave.gold);
   assert.equal(migrated.state.postbattle, 'result');
   assert.deepEqual(migrated.state.inventory, oldSave.inventory);
-  assert.deepEqual(migrated.state.player.traits, oldSave.player.traits);
+  assert.deepEqual(Object.fromEntries(Object.entries(migrated.state.player.traits).filter(([id]) => id !== '900' && id !== '901')), oldSave.player.traits);
+  assert.equal(migrated.state.hero.provenance, 'legacy-reconstructed');
   assert.deepEqual(migrated.state.town, { ap: 4, preparation: 'pending' });
   assert.notEqual(migrated.state.rng, oldSave.rng);
   assert.deepEqual(Simulation.fromSave(oldSave).state, migrated.state);
@@ -163,13 +165,14 @@ test('version 4 town migration prepares its missing stock once without repeating
   const simulation = afterBattle();
   completeRewards(simulation);
   const oldSave: Record<string, any> = simulation.toSave();
-  oldSave.version = 4; delete oldSave.totalMoney;
+  oldSave.version = 4; delete oldSave.totalMoney; delete oldSave.hero;
+  delete oldSave.player.traits[900]; delete oldSave.player.traits[901];
   oldSave.phase = 'town'; oldSave.town = { ap: 2, preparation: 'pending' };
   oldSave.castleHp = 40; oldSave.lootOffers.fill(null);
   const untouched = structuredClone(oldSave);
   const migrated = Simulation.fromSave(oldSave);
   assert.deepEqual(oldSave, untouched);
-  assert.equal(migrated.state.version, 5);
+  assert.equal(migrated.state.version, 6);
   assert.equal(migrated.state.phase, 'town');
   assert.equal(migrated.state.town?.preparation, 'ready');
   assert.equal(migrated.state.town?.ap, 2);
@@ -177,7 +180,10 @@ test('version 4 town migration prepares its missing stock once without repeating
   assert.equal(migrated.state.gold, oldSave.gold);
   assert.equal(migrated.state.totalMoney, oldSave.result.reward + oldSave.result.perfectBonus);
   assert.deepEqual(migrated.state.inventory, oldSave.inventory);
-  assert.deepEqual(migrated.state.player, oldSave.player);
+  const migratedPlayer = structuredClone(migrated.state.player);
+  delete migratedPlayer.traits[900]; delete migratedPlayer.traits[901];
+  assert.deepEqual(migratedPlayer, oldSave.player);
+  assert.equal(migrated.state.hero.provenance, 'legacy-reconstructed');
   assert.notEqual(migrated.state.rng, oldSave.rng);
   assert.deepEqual(Simulation.fromSave(oldSave).state, migrated.state);
   const prepared = migrated.toSave();

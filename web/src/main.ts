@@ -14,7 +14,7 @@ import './style.css';
 interface ImageAsset { file: string; width: number; height: number; originX: number; originY: number }
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string> }
-interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5; appearance: number; simulation: unknown }
+interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5 | 6; appearance: number; simulation: unknown }
 type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
@@ -207,6 +207,7 @@ class ElonaScene extends Phaser.Scene {
 
   showGene(): void {
     this.reset('gene');
+    this.sim = new Simulation(Date.now(), { ...this.simulationOptions(), deferOpeningWaves: true });
     this.image(manifest.images.townHud ? 'townHud' : 'town');
     this.drawHud();
     const background = new Set(this.root.list);
@@ -216,7 +217,7 @@ class ElonaScene extends Phaser.Scene {
       const x = 176 + index % 11 * 32;
       const y = 131 + Math.floor(index / 11) * 30;
       this.clip('charaPic', index * 10 + 5, x - 11.95, y - 14.7)?.setScale(1, 0.9530487);
-      this.zone(x - 14, y - 17, 30, 31, () => { this.appearance = index; this.moveSelection(); });
+      this.zone(x - 14, y - 17, 30, 31, () => { this.appearance = index; this.sim?.rerollOpeningHero(); this.moveSelection(); });
     }
     this.selection = this.add.rectangle(0, 0, 28, 29).setStrokeStyle(1, 0x8c3420).setOrigin(0);
     this.root.add(this.selection); this.moveSelection();
@@ -225,7 +226,10 @@ class ElonaScene extends Phaser.Scene {
       if (manifest.clips.radioButton) this.clip('radioButton', index === 2 ? 2 : 1, 180, y);
       else this.root.add(this.add.circle(180, y, 6, index === 2 ? 0xa24b28 : 0x8f8d7e).setStrokeStyle(1, 0x514b36));
       this.text(194, y - 7, name, 14, index === 2 ? '#22170e' : '#7e7765');
-      if (index !== 2) this.zone(171, y - 8, 90, 18, () => { status.textContent = `${name} has not been ported yet. Sheriff is available in this first playable slice.`; });
+      this.zone(171, y - 8, 90, 18, () => {
+        if (index === 2) this.sim?.rerollOpeningHero();
+        else status.textContent = `${name} has not been ported yet. Sheriff is available in this first playable slice.`;
+      });
     });
     this.text(280, 205, 'Starts with a shotgun.', 13, '#2d315b');
     this.text(294, 224, 'Sheriff\nShotgun 2\nFury', 13).setLineSpacing(4);
@@ -246,7 +250,7 @@ class ElonaScene extends Phaser.Scene {
   private simulationOptions() { return { hitTest: (enemy: Readonly<EnemyState>, x: number, y: number) => this.hitTest(enemy, x, y) }; }
 
   startGame(): void {
-    this.sim = new Simulation(Date.now(), this.simulationOptions());
+    if (!this.sim?.startOpeningBattle()) this.sim = new Simulation(Date.now(), this.simulationOptions());
     this.enterBattle();
     this.saveGame(false);
     this.playSound('soundBattleBegin');
@@ -642,7 +646,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   makeSave(): PortSave | undefined {
-    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 5, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
+    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 6, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
   }
 
   saveGame(notify = true): boolean {
@@ -655,7 +659,7 @@ class ElonaScene extends Phaser.Scene {
 
   private parseSave(raw: unknown): { simulation: Simulation; appearance: number } {
     const save = raw as Partial<PortSave> | null;
-    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
+    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5, 6].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
     return { simulation: Simulation.fromSave(save.simulation, this.simulationOptions()), appearance: save.appearance! };
   }
 

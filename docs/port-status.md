@@ -52,8 +52,8 @@ sequence rather than rushing speculative changes.
 Other starting classes are visible but unavailable. Full town management, Day 2
 and later days, recruiting, card actions, equipment combat effects and importing
 original Flash saves are not implemented. Chosen skills persist, but their effects on later
-combat and town systems remain to be connected. The player's hidden base
-aiming/teamwork rolls and growth remain unknown. Finishing the opening battle advances through
+combat and town systems remain to be connected. New characters now retain source-derived hidden potentials, base aiming/teamwork
+rolls and level-up growth; old saves explicitly reconstruct missing values. Finishing the opening battle advances through
 ordinary loot, earned boss loot, earned skill choices and results, then enters
 the first town. Prepared cards, a recruit and next-mission data do not yet expose
 their actions or enable the next day. Refresh Stock, Upgrade Weapon and MOD
@@ -75,6 +75,8 @@ headless simulation callers can supply their own hit-test callback.
 The ordinary collision path also receives persisted shadow state: a sheep
 returning from attack to walking retains the original shadow exclusion.
 
+`hero.ts` owns source character rolls/growth, `missions.ts` the shared covered
+mission/wave generators, and `combat-stats.ts` the audited weapon calculations.
 `items.ts` owns generated item instances and loot; `progression.ts` owns the
 implemented Sheriff choices and previews. `loot-view.ts` and `skill-view.ts`
 render these stages through the normal postbattle flow. `town-preparation.ts`
@@ -88,15 +90,19 @@ includes its random-generator state so a restored port save can continue its own
 sequence. That generator is not Flash's `Math.random()` and does not reproduce
 the original game's random sequence.
 
-Version 5 stores full generated items, boss-kill tracking, postbattle stage,
+Version 6 stores hidden hero potentials, base traits and their provenance, plus
+full generated items, boss-kill tracking, postbattle stage,
 pending skill choices, known trait levels, prepared town state, cumulative
 earned money and reconstruction provenance. New
-Game generates starter equipment with the ordinary gameplay RNG before mission
-generation. Version 1 saves lacked item metadata; their migration uses a separate
+Game generates the mission before hero identity/base rolls and equipment;
+Proceed generates waves after the final character reroll. Clicking a portrait
+or the selected Sheriff class rerolls that character, as in updateGene. Version 1 saves lacked item metadata; their migration uses a separate
 deterministic reconstruction stream while preserving saved combat state and RNG.
 Version 2 item instances remain intact. Both older versions reconstruct known
-traits and infer boss-kill state with explicit provenance; hidden stats remain
-absent. A legacy result that omitted boss/skill rewards resumes at the first
+traits and infer boss-kill state with explicit provenance. All pre-v6 saves
+receive missing hero values from a separate recorded reconstruction stream.
+This preserves the saved combat RNG, items and ordinary traits; it cannot recover
+unknown historical potentials or growth. A legacy result that omitted boss/skill rewards resumes at the first
 still-owed stage, consuming normal saved RNG once for newly generated rewards.
 Subsequent current-version reloads do not reroll them. Versions 1–3 paid the
 settlement early; migration reverses that advance while rewards are pending and
@@ -155,7 +161,7 @@ pressing Space after cooldown replenished them to five. The production bundle
 also loaded under `/elona/` and reached combat through New Game and Proceed,
 with enemies visibly spawning and no observed console errors.
 
-The integrated regression suite passes **78 tests**, covering simulation, items,
+The integrated regression suite passes **105 tests**, covering simulation, items,
 reward transitions, town preparation, shop transactions, migration, invalid
 imports and original-reference fixtures. Typecheck and the release build also
 pass. Detailed run evidence and release checks are
@@ -181,8 +187,8 @@ feedback and an altered random stream are detected. The original comparisons
 already exposed and corrected omitted special-loot and fly-filter random draws.
 
 A separate automatic run exercised 96 first-day scenarios across 32 seeds and
-three input policies, including 1,296 JSON save/resume checkpoints, 222 reward
-transitions, 164 town actions and 121,588 simulation frames. Restored state and
+three input policies; the current checkpoint, transition and frame counts are
+recorded in port-verification.json. Restored state and
 events matched uninterrupted runs through ordinary loot, boss prizes, skill
 choices, results, first-town preparation, repair and shop transactions. This
 checks port stability and replay, not fidelity to unimplemented original rules.
@@ -255,6 +261,23 @@ recorded separately in `port-verification.json`. The
 older `verification.json` and `build-verification.json` describe the preserved
 SWF startup fix, not browser-port completeness.
 
+The v6 fidelity release adds 12 independent hero creation/growth snapshots,
+three prepared second-day wave snapshots and 22 actual `shoot()` snapshots.
+All were captured twice identically from the diagnostic original. Normal gunfire
+now preserves its two per-hit random rolls, shell-dependent SENSE threshold and
+boss-hit conditional rolls; projectile `procHit` retains its distinct boundary.
+Living-weapon evolution precedes level-up growth, including its original ammo
+refill and random draws. Full weapon selection/automatic behavior and later
+combat remain unfinished. These are port corrections, not original-game bug fixes.
+
+Actual browser v6 creation/export/Continue retained the hero, traits, inventory
+and RNG. Firing and manual reload worked. Importing the previous v5 town save
+retained stock, owned items, AP, HP, gold and RNG; reconstructed hero values have
+explicit provenance. The final CHnStNxq bundle reloaded that v6 town exactly.
+The source baselines remain unchanged, and the previous BLu2nmPa build is retained
+in `.build/browser-before-growth`. The current deployment package is
+`.build/elona-shooter-browser-growth-slice.zip`.
+
 Known limits:
 
 - Rasterized Flash exports can differ from Flash/Ruffle filtering, text and
@@ -265,8 +288,8 @@ Known limits:
   an atlas or source table do not imply the corresponding full feature works.
 - Chosen Sheriff traits are saved, but their effects, equipment requirements,
   weapon changes and modifier mounting are not connected to future combat.
-  The player's hidden base aiming/teamwork rolls and their level-up growth are
-  not ported; the generated recruit's fields are a separate implemented path.
+  Hero creation/growth is now covered independently; other classes, weapon
+  selection, automatic fire/reload and remaining combat/town effects still need integration.
 - Town supports ordered first-town preparation, Free Repair and shop transactions.
   Recruiting, card/search actions, stock refresh, weapon upgrades and MOD mounting
   remain unavailable. Prepared mission data does not establish a playable Day 2.
@@ -295,8 +318,9 @@ The initial living sister is assumed until sister damage is ported.
 The contour comparison exposed and corrected early-enemy targeting that had been
 too strict with alpha masks. The accepted sheep attack-to-walk case then exposed
 76 false-positive hits caused by discarding shadow history; persisted state now
-matches all 19 sampled grids exactly. Other animation histories, full shotgun
-spread and corpse interactions remain unverified. Investigate clock ordering
+matches all 19 sampled grids exactly. The separate shoot fixture now compares
+full shotgun spread and selected corpse intersections. Other animation histories,
+weapon families and overlapping-target combinations remain unverified. Investigate clock ordering
 when needed to explain a material pacing or behavior difference. A test-only instrumented SWF and
 automatic browser runner live under `.build/oracle/`; builders and runner source
 are in `tools/`. Preserve the production preview while candidates are validated.
@@ -309,7 +333,8 @@ The original victory path is Clear, normal loot, earned boss loot, earned skill
 choices, financial result and town. Item instances and the mandatory first-day
 reward stages now lead through results into prepared Day 1 town, Free Repair,
 shop transactions and a saved town state. Ordered first-town preparation is now
-compared with original `frame71`, including RNG order. The next useful boundary
+compared with original `frame71`, including RNG order. Hero growth and the
+normal-shotgun firing path now have independent original traces. The next useful boundary
 is connecting owned equipment and chosen skills to actual combat, then making
 Rest enter the prepared mission through ordinary UI. Recruiting, cards and other
 town actions require their own source behavior and integration; their generated

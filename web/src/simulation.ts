@@ -1,4 +1,7 @@
-import { ENEMIES, ENEMY_SELECTION_ORDER, FIRST_DAY, GRENADE, SHOTGUN, SIMULATION_HZ, STARTING_CLASS, TIMER_HZ, WORLD, type EnemyKind, type Rect } from './content.ts';
+import { ENEMIES, FIRST_DAY, GRENADE, SHOTGUN, SIMULATION_HZ, STARTING_CLASS, TIMER_HZ, WORLD, type EnemyKind, type Rect } from './content.ts';
+import { generateLowLevelMission, generateLowLevelWaves, type LowLevelMission } from './missions.ts';
+import { generateSheriffHero, isKnownHeroInitialization, levelUpHero, reconstructSheriffHero, type KnownHeroInitialization } from './hero.ts';
+import { advanceReload, combatTrait, criticalType, hitscanHit, livingWeaponKill, rampageDuration, recoverAccuracy, reloadTimer, shotDamage, shotSpread, weaponHitDamage, weaponHitEffects, weaponStats } from './combat-stats.ts';
 import { BASE_ITEM_FIELDS, ITEM_TYPE, ItemFactory, collectLoot as collectLootItem, createStartingInventory, isOccupiedItem, itemPrice, swapInventorySlots, type Item } from './items.ts';
 import { prepareFirstTown, type FirstTownPreparation } from './town-preparation.ts';
 import { validTownPreparation } from './town-save.ts';
@@ -8,14 +11,15 @@ import { shadowHitAtFrame } from './collision.ts';
 export interface EnemyState {
   uid: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number;
   speed: number; speedOrg: number; attack: number; gold: number; exp: number;
-  knockBack: number; attacking: boolean; attacked: boolean; frame: number; shadowHit: boolean;
+  knockBack: number; disarmed: number; attacking: boolean; attacked: boolean; frame: number; shadowHit: boolean;
   deathTicks: number; drop: number; removed: boolean;
-  bossAction: number; bossCount: number; bossIdle: number; bossFireNum: number; bossWeapon: number;
+  bossAction: number; bossCount: number; bossIdle: number; bossFireNum: number; bossWeapon: number; bossDamage: number;
 }
 export interface GrenadeState { uid: number; x: number; y: number; startX: number; startY: number; targetX: number; targetY: number; speed: number; remaining: number }
 export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCount: number }
 export interface SimulationState {
-  version: 5; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1; tick: number; timerRemainder: number; rng: number; nextUid: number;
+  version: 6; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1; tick: number; timerRemainder: number; rng: number; nextUid: number;
+  hero: KnownHeroInitialization;
   castleHp: number; castleMaxHp: number; gold: number; totalMoney: number; kills: number; criticalKills: number;
   aimX: number; aimY: number; fireHeld: boolean; pendingShot: boolean;
   player: { classId: 'sheriff'; level: number; exp: number; skillPoints: number; traits: TraitLevels; weaponExp: number; ammo: number; reloadTicks: number; shootTimer: number; accuracyFix: number; rampageTicks: number; grenades: number; grenadeCooldown: number };
@@ -28,8 +32,8 @@ export interface SimulationState {
   town: null | { ap: number; preparation: 'pending' } | ({ ap: number; preparation: 'ready' } & FirstTownPreparation);
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; reload?: boolean; grenade?: boolean }
-export interface SimulationEvent { type: 'shot' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold'; x?: number; y?: number; amount?: number; critical?: boolean; enemyUid?: number; goodShotIndex?: number; pellets?: { x: number; y: number }[] }
-export interface SimulationOptions { hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean }
+export interface SimulationEvent { type: 'shot' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold'; x?: number; y?: number; amount?: number; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; pellets?: { x: number; y: number }[] }
+export interface SimulationOptions { hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean }
 export type LootArea = 'offers' | 'inventory';
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
 export type PurchaseOutcome = 'purchased' | 'occupied' | 'not-enough-gold' | 'unavailable';
@@ -58,37 +62,60 @@ export class Simulation {
   state: SimulationState;
   events: SimulationEvent[] = [];
   private options: SimulationOptions;
+  private pendingOpeningMission?: LowLevelMission;
 
   constructor(seed = Date.now(), options: SimulationOptions = {}) {
     this.options = options;
+    let initialRng = seed >>> 0 || 1;
+    const random = () => {
+      initialRng ^= initialRng << 13; initialRng ^= initialRng >>> 17; initialRng ^= initialRng << 5;
+      initialRng >>>= 0;
+      return initialRng / 4294967296;
+    };
+    // New Game готовит миссию до первого updateGene; волны появляются после Proceed.
+    this.pendingOpeningMission = generateLowLevelMission(0, 1, random);
+    const generated = generateSheriffHero(random);
     this.state = {
-      version: 5, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: seed >>> 0 || 1, nextUid: 1,
+      version: 6, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero,
       castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, gold: STARTING_CLASS.money, totalMoney: 0, kills: 0, criticalKills: 0,
       aimX: 300, aimY: 240, fireHeld: false, pendingShot: false,
-      player: { classId: 'sheriff', level: 1, exp: 0, skillPoints: 0, traits: createSheriffTraits(), weaponExp: 0, ammo: SHOTGUN.magazine, reloadTicks: 0, shootTimer: 0, accuracyFix: 0, rampageTicks: 0, grenades: GRENADE.quantity, grenadeCooldown: 0 },
+      player: { classId: 'sheriff', level: 1, exp: 0, skillPoints: 0, traits: generated.traits, weaponExp: 0, ammo: SHOTGUN.magazine, reloadTicks: 0, shootTimer: 0, accuracyFix: 0, rampageTicks: 0, grenades: GRENADE.quantity, grenadeCooldown: 0 },
       waveIndex: FIRST_DAY.waves, waves: [], bossWave: 2, newWave: true, spawnTimer: 30, noDamage: true,
       enemies: [], grenades: [], loot: [], result: { reward: 0, perfectBonus: 0, upkeep: 0, netReward: 0 },
-      inventory: [], lootOffers: Array(8).fill(null), postbattle: 'none', inventoryProvenance: 'original-generation',
+      inventory: generated.inventory, lootOffers: Array(8).fill(null), postbattle: 'none', inventoryProvenance: 'original-generation',
       bossKilled: 0, skillChoices: [], traitsProvenance: 'known-starting-traits', bossKilledProvenance: 'observed',
       town: null,
     };
-    this.state.inventory = createStartingInventory(() => this.random());
-    this.generateOpeningMission();
+    if (!options.deferOpeningWaves) this.startOpeningBattle();
+  }
+
+  rerollOpeningHero(): boolean {
+    if (!this.pendingOpeningMission) return false;
+    const generated = generateSheriffHero(() => this.random(), this.state.inventory);
+    this.state.hero = generated.hero;
+    Object.assign(this.state.player, { level: generated.level, exp: generated.exp, skillPoints: generated.skillPoints, traits: generated.traits });
+    this.state.inventory = generated.inventory;
+    return true;
+  }
+
+  startOpeningBattle(): boolean {
+    if (!this.pendingOpeningMission) return false;
+    this.applyOpeningMission(this.pendingOpeningMission);
+    this.pendingOpeningMission = undefined;
+    return true;
   }
 
   private generateOpeningMission(): void {
-    this.state.waves = [];
-    this.state.loot = [];
-    this.state.waveIndex = FIRST_DAY.waves;
-    this.state.newWave = true;
-    this.state.spawnTimer = 30;
-    // generateSpecialLoot() наполняет ту же очередь, куда затем попадают трофеи врагов.
-    if (this.random() > 0.97) this.state.loot.push(1038);
-    this.state.loot.push(ENEMIES.rat.id + 1100);
-    // Оригинал вычисляет случайную волну босса, затем принудительно задаёт 2 для миссии 0.
-    this.random();
-    this.state.bossWave = 2;
-    for (let index = 0; index < FIRST_DAY.waves; index++) this.state.waves.push(this.generateWave(index));
+    this.applyOpeningMission(generateLowLevelMission(0, 1, () => this.random()));
+  }
+
+  private applyOpeningMission(mission: LowLevelMission): void {
+    this.state.loot = [...mission.loot];
+    this.state.waveIndex = mission.wave;
+    this.state.newWave = mission.newWave;
+    this.state.spawnTimer = mission.time;
+    this.state.bossWave = mission.bossWave;
+    this.state.waves = generateLowLevelWaves(mission, 1, () => this.random()).waves;
   }
 
   private random(): number {
@@ -98,56 +125,16 @@ export class Simulation {
     return this.state.rng / 4294967296;
   }
 
-  private generateWave(index: number): WaveState {
-    const enemies: EnemyKind[] = [];
-    const delays: number[] = [];
-    const used: EnemyKind[] = [];
-    const power = int(FIRST_DAY.power - FIRST_DAY.power / 2.5 * index / FIRST_DAY.waves);
-    const randLv = (level: number, factor: number) => int(level * (1 - this.random() * (1 - this.random() * factor)));
-    const select = (level: number, budget: number, flags: string[]) => {
-      const target = int(level - this.random() * this.random() * level);
-      // Проверка мухи в исходном selectEnemy расходует число даже до проверки её недоступного уровня.
-      this.random();
-      let chosen: EnemyKind | undefined;
-      for (const kind of ENEMY_SELECTION_ORDER) {
-        const definition = ENEMIES[kind];
-        if (definition.level > level) continue;
-        if (chosen && Math.abs(target - definition.level) > Math.abs(target - ENEMIES[chosen].level)) continue;
-        if (flags.some(flag => !definition.flags.includes(flag)) || used.includes(kind)) continue;
-        chosen = kind;
-      }
-      if (!chosen) chosen = this.random() > 0.7 ? 'rat' : 'sheep';
-      used.push(chosen);
-      const count = Math.max(1, int(power * budget / 100 / ENEMIES[chosen].power));
-      for (let n = 0; n < count; n++) enemies.push(chosen);
-    };
-    // На первом дне условия особых групп ложны, но Flash всё равно расходует четыре случайных числа.
-    this.random(); this.random(); this.random(); this.random();
-    select(randLv(0, 0.25), 15, ['BATCH']);
-    select(randLv(0, 0.5), 20, ['BATCH']);
-    select(2, 20, []);
-    select(randLv(0, 0.4), 15, ['BATCH']);
-    if (index === this.state.bossWave) enemies.push('boss');
-    for (let n = 0; n < enemies.length; n++) {
-      const enemyPower = ENEMIES[enemies[n]].power;
-      delays[n] = FIRST_DAY.spawnRate + int(enemyPower / 100) + (enemyPower >= 300 ? 2 : 0);
-      const swap = int(this.random() * enemies.length);
-      [enemies[n], enemies[swap]] = [enemies[swap], enemies[n]];
-    }
-    delays[0] += 90 + 20 + (index === 0 ? 50 : 0);
-    return { enemies, delays, initialCount: enemies.length };
-  }
-
   tick(input: Input = {}): void {
     this.events = [];
-    if (this.state.phase !== 'battle') return;
+    if (this.state.phase !== 'battle' || this.pendingOpeningMission) return;
     if (finite(input.aimX)) this.state.aimX = input.aimX;
     if (finite(input.aimY)) this.state.aimY = input.aimY;
     const firePressed = input.firePressed || (input.fireHeld && !this.state.fireHeld);
     this.state.fireHeld = Boolean(input.fireHeld);
     const player = this.state.player;
     this.state.tick++;
-    player.shootTimer = Math.max(-10000, player.shootTimer - SHOTGUN.shootRate);
+    player.shootTimer = Math.max(-10000, player.shootTimer - this.state.inventory[0]!.shootRate);
     if (player.rampageTicks > 0) player.rampageTicks--;
     if (player.grenadeCooldown > 0) player.grenadeCooldown--;
     if (input.reload) this.requestReload();
@@ -169,24 +156,37 @@ export class Simulation {
   }
 
   fireAt(x: number, y: number): boolean {
-    if (!finite(x) || !finite(y) || this.state.phase !== 'battle') return false;
+    if (!finite(x) || !finite(y) || this.state.phase !== 'battle' || this.pendingOpeningMission) return false;
     this.state.aimX = x; this.state.aimY = y;
     const player = this.state.player;
+    const item = this.state.inventory[0]!;
+    const stats = weaponStats(item, player.traits);
+    if (!stats.canFire) return false;
     if (player.reloadTicks > 0) { player.reloadTicks = 0; this.syncBattleInventory(); this.events.push({ type: 'reloaded' }); return false; }
     if (player.shootTimer > 0) return false;
     if (player.ammo <= 0) { this.state.pendingShot = false; this.requestReload(); return false; }
-    const spread = 13 * (100 + player.accuracyFix * player.accuracyFix * 1000) / SHOTGUN.baseAccuracy;
-    player.shootTimer = SHOTGUN.shotTimer;
+    const spread = shotSpread(item, player.traits, player.accuracyFix);
+    player.shootTimer = stats.shootTimer;
     player.ammo--;
     this.syncBattleInventory();
-    player.accuracyFix += SHOTGUN.accuracyDecay;
-    const damage = int(SHOTGUN.damage * (player.rampageTicks > 0 ? 1.5 : 1));
+    player.accuracyFix += stats.recoil;
+    let damage = shotDamage(item, player.traits, { rampage: player.rampageTicks > 0 });
     const pellets: { x: number; y: number }[] = [];
-    for (let i = 0; i < SHOTGUN.pellets; i++) {
+    for (let i = 0; i < stats.shells; i++) {
       const hitX = int(x + this.random() * spread - this.random() * spread);
       const hitY = int(y + this.random() * spread - this.random() * spread);
       pellets.push({ x: hitX, y: hitY });
-      this.processPellet(hitX, hitY, damage);
+      for (const enemy of this.state.enemies) {
+        if (enemy.removed || !this.hitEnemy(enemy, hitX, hitY)) continue;
+        // Обычный shoot и projectile procHit имеют разные правила RNG и отбрасывания.
+        const hit = hitscanHit(item, player.traits, damage, {
+          senseRoll: this.random(), oneHitRoll: this.random(), shells: stats.shells,
+          weakPoint: inside(ENEMIES[enemy.kind].critical, hitX - enemy.x, hitY - enemy.y),
+          alive: enemy.hp > 0, boss: enemy.kind === 'boss',
+        });
+        damage = hit.damage;
+        this.damageEnemy(enemy, damage, hit.critical, true, hitX, hitY);
+      }
     }
     this.events.push({ type: 'shot', x: WORLD.playerX, y: WORLD.playerY, pellets });
     return true;
@@ -196,22 +196,25 @@ export class Simulation {
     let hitLivingEnemy = false;
     for (const enemy of this.state.enemies) {
       if (enemy.removed) continue;
-      const hit = this.options.hitTest?.(enemy, x, y) ?? inside(ENEMIES[enemy.kind].body, x - enemy.x, y - enemy.y);
+      const hit = this.hitEnemy(enemy, x, y);
       if (!hit) continue;
       // Исходный procHit проверяет SENSE даже у начального шерифа с нулевым навыком.
-      this.random();
-      const critical = enemy.hp > 0 && inside(ENEMIES[enemy.kind].critical, x - enemy.x, y - enemy.y);
+      const critical = criticalType(this.state.player.traits, this.random(), inside(ENEMIES[enemy.kind].critical, x - enemy.x, y - enemy.y), enemy.hp > 0);
       if (enemy.hp > 0) hitLivingEnemy = true;
-      enemy.knockBack = 5 + Math.sqrt(this.state.player.level);
+      enemy.knockBack = combatTrait(TRAIT.SHERIFF, this.state.player.traits);
       this.damageEnemy(enemy, damage, critical, true, x, y);
     }
     return hitLivingEnemy;
   }
 
+  private hitEnemy(enemy: EnemyState, x: number, y: number): boolean {
+    return this.options.hitTest?.(enemy, x, y) ?? inside(ENEMIES[enemy.kind].body, x - enemy.x, y - enemy.y);
+  }
+
   requestReload(): boolean {
     const player = this.state.player;
     if (this.state.phase !== 'battle' || player.shootTimer > 0 || player.reloadTicks > 0 || player.ammo >= SHOTGUN.magazine) return false;
-    player.reloadTicks = SHOTGUN.reloadTimer;
+    player.reloadTicks = reloadTimer(this.state.inventory[0]!, player.traits);
     this.syncBattleInventory();
     this.events.push({ type: 'reload' });
     return true;
@@ -253,14 +256,10 @@ export class Simulation {
     const player = state.player;
     if (state.castleHp <= 0) { state.phase = 'defeat'; this.events.push({ type: 'defeat' }); return; }
     if (player.reloadTicks > 0) {
-      player.reloadTicks--;
-      if (player.rampageTicks > 0 && player.reloadTicks % 3 === 2) player.reloadTicks--;
-      if (player.reloadTicks <= 0) {
-        player.ammo++;
-        player.reloadTicks = player.ammo === SHOTGUN.magazine ? 0 : SHOTGUN.reloadTimer;
-        // Оригинальный reloading() повторно вызывает reload() после каждого промежуточного патрона.
-        this.events.push({ type: player.reloadTicks ? 'reload' : 'reloaded' });
-      }
+      const loaded = advanceReload({ ...state.inventory[0]!, ammo: player.ammo, reloadTime: player.reloadTicks }, player.traits, player.rampageTicks > 0);
+      player.ammo = loaded.ammo;
+      player.reloadTicks = loaded.reloadTime;
+      if (loaded.restarted || loaded.completion) this.events.push({ type: loaded.restarted ? 'reload' : 'reloaded' });
     }
     this.syncBattleInventory();
     if (state.newWave) {
@@ -283,10 +282,7 @@ export class Simulation {
         }
       }
     }
-    if (player.accuracyFix > 0) player.accuracyFix -= 0.02;
-    let rangePenalty = Math.abs(500 - state.aimX);
-    rangePenalty = rangePenalty < 100 ? 0 : rangePenalty / 1800;
-    player.accuracyFix = Math.min(0.6, Math.max(player.accuracyFix, rangePenalty));
+    player.accuracyFix = recoverAccuracy(state.inventory[0]!, player.traits, player.accuracyFix, state.aimX);
   }
 
   private spawnEnemy(kind: EnemyKind): void {
@@ -298,30 +294,55 @@ export class Simulation {
     // Даже при нулевых strength/THREAT исходное умножение и деление влияют на последний бит Number.
     const speed = (definition.speedBase + this.random() * definition.speedRandom) * 100 / 100;
     const y = int(this.random() * (kind === 'boss' ? 105 : definition.airborne ? 70 : WORLD.groundWidth) + (kind === 'boss' ? 195 : definition.airborne ? 40 : WORLD.groundLine));
-    this.state.enemies.push({ uid: this.state.nextUid++, kind, x: -20, y, hp: definition.hp, maxHp: definition.hp, speed, speedOrg: speed, attack: definition.attack, gold, exp: 1 + int(definition.power * 0.4), knockBack: 0, attacking: false, attacked: false, frame: kind === 'rat' ? 14 : 1, shadowHit: shadowHitAtFrame(kind, kind === 'rat' ? 14 : 1), deathTicks: 0, drop: 0, removed: false, bossAction: kind === 'boss' ? 3 : 0, bossCount, bossIdle: 0, bossFireNum: 0, bossWeapon });
+    this.state.enemies.push({ uid: this.state.nextUid++, kind, x: -20, y, hp: definition.hp, maxHp: definition.hp, speed, speedOrg: speed, attack: definition.attack, gold, exp: 1 + int(definition.power * 0.4), knockBack: 0, disarmed: 0, attacking: false, attacked: false, frame: kind === 'rat' ? 14 : 1, shadowHit: shadowHitAtFrame(kind, kind === 'rat' ? 14 : 1), deathTicks: 0, drop: 0, removed: false, bossAction: kind === 'boss' ? 3 : 0, bossCount, bossIdle: 0, bossFireNum: 0, bossWeapon, bossDamage: 0 });
   }
 
-  private damageEnemy(enemy: EnemyState, raw: number, critical: boolean, weapon: boolean, x: number, y: number): void {
+  private damageEnemy(enemy: EnemyState, raw: number, criticalValue: number | boolean, weapon: boolean, x: number, y: number): void {
     if (enemy.hp <= 0) return;
+    const critical = Boolean(criticalValue);
     const definition = ENEMIES[enemy.kind];
-    let damage = raw * (critical ? 2 : 1);
-    if (weapon && definition.airborne) damage = int(damage * SHOTGUN.airDamagePercent / 100);
-    if (weapon && definition.knockResistance) enemy.knockBack = int((5 + Math.sqrt(this.state.player.level)) * definition.knockResistance) + 3;
+    const item = weapon ? this.state.inventory[0] : null;
+    const hit = weaponHitDamage(item, this.state.player.traits, raw, { critical, target: definition.airborne ? 'air' : 'normal', bossGuard: enemy.kind === 'boss' && enemy.bossAction === 6 });
+    const damage = hit.damage;
+    if (item) {
+      const effects = weaponHitEffects(item, this.state.player.traits, { ...enemy, resKnock: definition.knockResistance }, {
+        damageBeforeGuard: hit.beforeGuard, castleHp: this.state.castleHp, castleMaxHp: this.state.castleMaxHp,
+        leechRoll: item.leech && this.state.castleHp > 0 ? this.random() : undefined,
+      });
+      Object.assign(enemy, { speed: effects.speed, speedOrg: effects.speedOrg, attack: effects.attack, disarmed: effects.disarmed, knockBack: effects.knockBack });
+      this.state.castleHp = effects.castleHp;
+    }
     enemy.hp -= damage;
-    this.events.push({ type: 'hit', x, y, amount: damage, critical, enemyUid: enemy.uid });
-    if (enemy.hp > 0) return;
+    this.events.push({ type: 'hit', x, y, amount: damage, critical, criticalType: Number(criticalValue), enemyUid: enemy.uid });
+    if (enemy.hp > 0) {
+      if (enemy.kind === 'boss') {
+        enemy.bossDamage += damage * (enemy.bossAction === 5 ? 2 : 1);
+        // Проверка уровня стоит после случайных условий даже у босса миссии 0.
+        if (enemy.bossAction !== 6) {
+          const accumulated = enemy.bossDamage >= this.random() * enemy.maxHp * 2;
+          if (!accumulated) this.random();
+        }
+      }
+      return;
+    }
     const player = this.state.player;
     this.state.kills++; player.weaponExp++;
+    const dropThreshold = player.rampageTicks > 0 ? 100 : 150;
+    if (item && item.livingWeapon > 0) {
+      Object.assign(item, livingWeaponKill(item, () => this.random(), { day: this.state.day }));
+      player.ammo = item.ammo;
+    }
     let experience = enemy.exp;
-    if (definition.level + 3 < player.level) experience *= 100 / (100 + (player.level - definition.level) * 75);
+    const enemyLevel = enemy.kind === 'boss' ? FIRST_DAY.missionLevel : definition.level;
+    if (enemyLevel + 3 < player.level) experience *= 100 / (100 + (player.level - enemyLevel) * 75);
+    enemy.exp = int(experience);
+    if (critical && player.rampageTicks <= 0 && --player.rampageTicks === -7) { player.rampageTicks = rampageDuration(player.traits); this.events.push({ type: 'rampage' }); }
     // В исходнике опыт приводится к int через trainerFix() для текущего героя.
     player.exp += int(experience);
-    if (player.exp >= 1000) { player.exp %= 1000; player.level++; player.traits[TRAIT.SHERIFF] = player.level; player.skillPoints++; this.events.push({ type: 'level-up', amount: player.level }); }
-    const dropThreshold = player.rampageTicks > 0 ? 100 : 150;
+    if (player.exp >= 1000) this.levelUp();
     let goodShotIndex: number | undefined;
     if (critical) {
       this.state.criticalKills++;
-      if (player.rampageTicks <= 0 && --player.rampageTicks === -7) { player.rampageTicks = int(300 * 113 / 100); this.events.push({ type: 'rampage' }); }
       // Здесь пока действует начальное условие sister.dead == false; повреждение сестры не реализовано.
       goodShotIndex = int(this.random() * 5);
     }
@@ -333,6 +354,12 @@ export class Simulation {
     enemy.frame = enemy.kind === 'sheep' ? 107 : enemy.kind === 'rat' ? 93 : enemy.kind === 'chicken' ? 208 : enemy.kind === 'boss' ? 281 : 1;
     enemy.shadowHit = shadowHitAtFrame(enemy.kind, enemy.frame, enemy.shadowHit);
     this.events.push({ type: 'kill', x: enemy.x, y: enemy.y, critical, enemyUid: enemy.uid, goodShotIndex });
+  }
+
+  private levelUp(): void {
+    const growth = levelUpHero(this.state.player, this.state.hero, () => this.random());
+    Object.assign(this.state.player, { level: growth.level, exp: growth.exp, skillPoints: growth.skillPoints, traits: growth.traits });
+    this.events.push({ type: 'level-up', amount: growth.level });
   }
 
   private damageCastle(amount: number): void {
@@ -459,7 +486,7 @@ export class Simulation {
     player.rampageTicks = 0;
     player.grenadeCooldown = 0;
     player.exp += 250;
-    if (player.exp >= 1000) { player.exp %= 1000; player.level++; player.traits[TRAIT.SHERIFF] = player.level; player.skillPoints++; this.events.push({ type: 'level-up', amount: player.level }); }
+    if (player.exp >= 1000) this.levelUp();
     this.state.pendingShot = false;
     const perfectBonus = this.state.noDamage ? FIRST_DAY.reward * 0.3 : 0;
     this.state.result = { reward: FIRST_DAY.reward, perfectBonus, upkeep: FIRST_DAY.upkeep, netReward: FIRST_DAY.reward + perfectBonus - FIRST_DAY.upkeep };
@@ -597,10 +624,13 @@ export class Simulation {
     return true;
   }
 
-  toSave(): SimulationState { return structuredClone(this.state); }
+  toSave(): SimulationState {
+    if (this.pendingOpeningMission) throw new Error('Character creation is not a resumable battle.');
+    return structuredClone(this.state);
+  }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
-    if (!record(value) || ![1, 2, 3, 4, 5].includes(Number(value.version)) || typeof value.version !== 'number' || value.day !== 1 || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
+    if (!record(value) || ![1, 2, 3, 4, 5, 6].includes(Number(value.version)) || typeof value.version !== 'number' || value.day !== 1 || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || value.bossWave !== 2 || (value.waveIndex === 5 && value.newWave !== true)) throw new Error('Invalid counters.');
@@ -620,7 +650,7 @@ export class Simulation {
     const allIds = [...ids, ...value.grenades.map(grenade => (grenade as Record<string, unknown>).uid)];
     if (Number(value.nextUid) < 1 || new Set(allIds).size !== allIds.length || allIds.some(id => !Number.isInteger(id) || Number(id) < 1 || Number(id) >= Number(value.nextUid))) throw new Error('Invalid next entity identifier.');
     if (!Array.isArray(value.loot) || value.loot.length > 200 || value.loot.some(item => !Number.isInteger(item) || !Object.hasOwn(BASE_ITEM_FIELDS, item > 1000 ? item - 1000 : item)) || !record(value.result) || ['reward', 'perfectBonus', 'upkeep', 'netReward'].some(key => !finite((value.result as Record<string, unknown>)[key]))) throw new Error('Invalid results.');
-    const simulation = new Simulation(1, options);
+    const simulation = new Simulation(1, { ...options, deferOpeningWaves: false });
     simulation.state = structuredClone(value) as unknown as SimulationState;
     if (value.version < 5) {
       // До v5 продаж не было: только уже завершённый расчёт v4 мог увеличить totalMoney.
@@ -633,7 +663,11 @@ export class Simulation {
       if (simulation.state.phase === 'victory') simulation.state.gold -= simulation.state.result.netReward;
     }
     // Старый формат не сохранял историю тени; восстанавливаем прежнюю геометрию без новых случайных чисел.
-    for (const enemy of simulation.state.enemies) enemy.shadowHit ??= shadowHitAtFrame(enemy.kind, enemy.frame);
+    for (const enemy of simulation.state.enemies) {
+      enemy.shadowHit ??= shadowHitAtFrame(enemy.kind, enemy.frame);
+      if (value.version < 6) { enemy.bossDamage = 0; enemy.disarmed = 0; }
+      if (!finite(enemy.bossDamage) || enemy.bossDamage < 0 || !finite(enemy.disarmed) || enemy.disarmed < 0) throw new Error('Invalid boss damage accumulator.');
+    }
     if (Number(value.version) < 3) {
       const state = simulation.state;
       state.player.traits = { ...createSheriffTraits(), [TRAIT.SHERIFF]: state.player.level };
@@ -654,7 +688,7 @@ export class Simulation {
         reconstructionRng >>>= 0;
         return reconstructionRng / 4294967296;
       };
-      simulation.state.version = 5;
+      simulation.state.version = 6;
       simulation.state.inventory = createStartingInventory(reconstructionRandom);
       simulation.state.lootOffers = Array(8).fill(null);
       simulation.state.postbattle = 'none';
@@ -672,7 +706,7 @@ export class Simulation {
       if (!Number.isInteger(state.legacyReconstructionSeed) || state.legacyReconstructionSeed! < 1 || state.legacyReconstructionSeed! > 0xffffffff) throw new Error('Invalid legacy inventory provenance.');
     } else if (state.inventoryProvenance !== 'original-generation' || state.legacyReconstructionSeed !== undefined) throw new Error('Invalid inventory provenance.');
     if (Number(value.version) < 3) {
-      state.version = 5;
+      state.version = 6;
       if (state.phase === 'victory' && state.postbattle === 'result') {
         // Старый результат пропускал награды босса и навыки; новые награды расходуют основной поток.
         state.postbattle = 'loot';
@@ -680,6 +714,14 @@ export class Simulation {
       }
     }
     if (!Number.isInteger(state.bossKilled) || state.bossKilled < 0 || state.bossKilled > 1 || !['observed', 'legacy-inferred'].includes(state.bossKilledProvenance) || !['known-starting-traits', 'legacy-reconstructed'].includes(state.traitsProvenance)) throw new Error('Invalid progression provenance.');
+    if (value.version < 6) {
+      // Утраченные потенциалы нельзя восстановить; отдельный поток сохраняет боевой RNG и вещи.
+      const reconstructed = reconstructSheriffHero(state.player.level, state.rng);
+      state.hero = reconstructed.hero;
+      state.player.traits[TRAIT.BASE_AIMING] ??= reconstructed.baseAiming;
+      state.player.traits[TRAIT.BASE_TEAMWORK] ??= reconstructed.baseTeamwork;
+    }
+    if (!isKnownHeroInitialization(state.hero) || ![TRAIT.BASE_AIMING, TRAIT.BASE_TEAMWORK].every(id => Number.isInteger(state.player.traits[id]) && state.player.traits[id] >= 1)) throw new Error('Invalid hero initialization.');
     if (!record(state.player.traits) || Object.entries(state.player.traits).some(([id, level]) => !Object.hasOwn(SHERIFF_TRAITS, id) || !Number.isInteger(level) || level < 0 || level > SHERIFF_TRAITS[Number(id)].maxLevel) || state.player.traits[TRAIT.SHERIFF] !== state.player.level || (state.player.traits[TRAIT.SHOTGUN] ?? 0) < 2 || (state.player.traits[TRAIT.FURY] ?? 0) < 1) throw new Error('Invalid Sheriff traits.');
     // Пустой список не даёт исходному listTrait2 ни одного допустимого навыка даже до fallback.
     if (state.phase === 'victory' && state.player.skillPoints > 0 && availableSheriffTraits(state.player.level, state.player.traits).length === 0) throw new Error('Pending skill points have no available Sheriff skill.');
@@ -696,10 +738,10 @@ export class Simulation {
       const town = state.town as unknown;
       if (!record(town) || !Number.isInteger(town.ap) || Number(town.ap) < 0 || Number(town.ap) > 4 || (state.phase === 'victory' && (town.ap !== 4 || town.preparation !== 'pending')) || state.castleHp <= 0) throw new Error('Invalid first-town state.');
       if (town.preparation === 'ready') {
-        if (value.version !== 5 || state.phase !== 'town' || !validTownPreparation(town, validItem) || state.lootOffers.some(item => item !== null)) throw new Error('Invalid prepared town.');
-      } else if (town.preparation !== 'pending' || (value.version === 5 && state.phase === 'town')) throw new Error('Missing town preparation.');
+        if (value.version < 5 || state.phase !== 'town' || !validTownPreparation(town, validItem) || state.lootOffers.some(item => item !== null)) throw new Error('Invalid prepared town.');
+      } else if (town.preparation !== 'pending' || (value.version >= 5 && state.phase === 'town')) throw new Error('Missing town preparation.');
     } else if (state.town !== null) throw new Error('Town preparation precedes completed rewards.');
-    state.version = 5;
+    state.version = 6;
     // Уже оплаченный результат v4 не пересчитывается; недостающая первая лавка создаётся один раз.
     if (state.phase === 'town' && state.town?.preparation === 'pending') simulation.prepareTown();
     return simulation;

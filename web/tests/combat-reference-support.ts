@@ -59,7 +59,7 @@ function capture(record: CombatReferenceRecord) {
   enemy.x = 200; enemy.y = 220; enemy.frame = record.before.frame;
   const before = projection(enemy);
   state.rng = record.seed!; draws = 0; simulation.events = [];
-  assert.equal(typeof boundary.processPellet, 'function', 'The comparison requires the same point processor used by fireAt.');
+  assert.equal(typeof boundary.processPellet, 'function', 'This comparison requires the projectile procHit processor; normal shoot has a separate fixture.');
   // Оригинал задаёт только результат проверки силуэта; критическую область проверяет сам порт.
   const hit = boundary.processPellet(record.point.x, record.point.y, record.rawDamage!);
   let hpBefore = before.hp;

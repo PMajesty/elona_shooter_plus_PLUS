@@ -274,8 +274,11 @@ The independent port comparator now passes all 21 snapshots. Its first report
 matched only 11: it exposed missing SENSE and critical-kill voice-selection
 draws, a changed rat drop, and two one-bit speed differences. Preserving the
 original multiplication/division order fixed speed without a tolerance. The
-ordinary `fireAt` now uses the same `processPellet` path tested by the comparator;
-the temporary damage-only test adapter was removed. Accepted original records
+earlier `fireAt` incorrectly reused the `processPellet` path tested by this
+comparator. The source audit separated normal `shoot` from projectile `procHit`:
+normal firing consumes a second hit roll and dilutes SENSE by shell count.
+This fixture remains a projectile-method comparison; the separate shoot
+fixture exercises production `fireAt`. Accepted original records
 and a negative control for the missing SENSE roll are in the ordinary suite.
 
 The comparator supplies the original vector body/shadow classification to the
@@ -491,6 +494,10 @@ Focused tests exercise the actual simulation attack, Sheriff knockback, alive
 loop, death and save/restore paths. Old saves that lack the flag cannot reveal
 past attacks; they retain the former frame-derived behavior without consuming
 RNG, then persist subsequent state. Explicit non-boolean flags are rejected.
+For example, a saved sheep already returned from attack frame 32 to alive frame
+5 can be inferred as accepting shadow hits, although its original retained
+flag was false. Neither its current frame nor its position can recover that
+missing history.
 This corrects a demonstrated port discrepancy, not the separately reported
 late-game hitbox problem.
 
@@ -749,3 +756,109 @@ After two successful identical captures, run `npm.cmd run test:town-preparation-
 from `web/`. The ordinary test suite uses the accepted fixture without requiring
 a browser or ignored build cache. Expected state comes from the captured
 ActionScript, never from TypeScript generation.
+
+## Prepared second-day wave oracle
+
+`tools/build_prepared_wave_oracle.py` calls the original `generateMission(1)`
+while the calendar is day 1, records the prepared mission and RNG boundary,
+then advances the calendar to day 2 and calls original `preGenerateWave()`.
+The generation methods remain unchanged. This isolates the actual boundary
+needed after Rest; it does not invoke or validate the Rest dialog.
+
+The original capture at 2026-11-01 21:20:27 UTC contains two identical runs,
+each with ready, three snapshots and successful completion. The production
+module `web/src/missions.ts` matches all three seeds (42, 1, 3735928559),
+including both boss-wave positions, every mission field before and after
+generation, enemy ID arrays, initial counts, fractional spawn delays and exact
+RNG draw counts/states. The existing three opening-wave snapshots also match
+the extracted common module without changing their accepted fixture.
+
+The prepared mission keeps the Rat statue from calendar day 1; regenerating
+it after advancing to day 2 would wrongly produce a Sheep statue. Its spawn
+rate is 14.8, and the initial delay adjustment uses fixed level 1. No additional
+enemy kinds are selected: Sheep, Rat, Chicken, Crow and Boss cover this level.
+Boss health and live behavior are outside this generation comparison.
+
+- Original SWF SHA-256: `4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663`.
+- Instrumented SWF SHA-256: `24be20f2efd05a35f93f26c76d9b4e5a27565dba1deb144c83590f4e2cd2bac3`.
+- Captured trace SHA-256: `af377da869b98a344e655fe11f8181102195f63b043937d9175802878c9eafa6`.
+
+Build verification preserves all 3491 root tags, non-code payloads, ordering
+and frame header; only DoABC tag 2782 changes. The accepted fixture is
+`web/tests/fixtures/original-prepared-wave-trace.json`; ignored runtime and
+comparison reports are `.build/oracle/prepared-waves-*-report.json`.
+
+Regenerate with `python tools/build_prepared_wave_oracle.py`, run
+`python tools/serve_oracle.py --port 5176`, then capture two runs at
+`http://127.0.0.1:5176/?suite=prepared-waves`. From `web/`, run
+`npm.cmd run test:prepared-wave-reference`. The focused fixture test is
+`node --experimental-strip-types --test tests/prepared-wave-reference.test.ts`.
+This covers normal low-level missions without medals or party bonuses;
+calendar transitions, equipment, live spawning and subsequent combat require
+their own integration evidence.
+
+### Missing cumulative boss damage in older saves
+
+The v6 simulation persists `EnemyState.bossDamage`, the original accumulated
+damage used by the boss's conditional shield check. Saves from v1–v5 never
+stored it, so migration initializes this field to zero rather than claiming to
+reconstruct the preceding hits. Loading preserves the saved RNG state, but
+later conditional RNG consumption can differ from the unavailable original
+history. This matters even below the shield's required level because the
+source evaluates its random conditions before the level check. New v6 saves
+retain the accumulator across save/restore. The separate missing-shadow-flag
+limitation is documented above; neither migration recovers missing history.
+
+### Actual shooting, modified weapons and kill ordering
+
+`tools/build_shoot_oracle.py` invokes the original `shoot(_pc)` after controlled
+setup. It replaces only two manual mouse reads with fixed-input getters,
+wraps MainTimeline/enemy random calls, and adds observation hooks. The builder
+verifies the original shoot body is recoverable by removing those changes.
+All 3491 root tags, non-code payloads, tag order and frame header are preserved;
+only DoABC tag 2782 changes. Original files remain unchanged.
+
+The earlier assumption that the accepted `procHit` comparison covered normal
+shooting was insufficient. `shoot` spends SENSE and ONE_HIT_KILL rolls at every
+geometry hit, including corpses; `procHit` spends only SENSE and does not divide
+its chance by shell count. The old fixture remains valid for its projectile
+boundary. Nonlethal boss hits also spend one or two conditional rolls before
+the source checks the boss's level. Living weapon evolution precedes XP growth,
+whose two potential rolls precede voice/drop rolls.
+
+Two Ruffle runs produced identical **22-snapshot traces**, all matched by
+production `Simulation.fireAt`: eleven scenarios with seeds 42 and
+3735928559. Coverage includes misses, ordinary/weak-point hits, actual corpse
+intersections, Dr Holliday shells, SENSE evaluation away from weak points,
+learned skills with modified shotguns, lethal hits, living-weapon evolution
+combined with level-up, and two nonlethal boss accumulator conditions. Checks
+include pellet coordinates and RNG position, damage/critical type/HP events,
+all 33 weapon fields, XP/traits/kills/loot, slowing/knockback, boss damage,
+every RNG value, draw count and final state. Observed counts include 24 for
+complete misses, 36 for six corpse hits, 40 for lethal shots, 44 for combined
+living-weapon/level-up shots, and 48 versus 42 for the boss conditions.
+
+The first capture matched, but inspection found two named cases aimed into
+transparent sheep pixels. Their aim was corrected using the accepted original
+geometry grid, then both runs were recaptured before acceptance. Initial
+passing capture/comparison artifacts remain in `.build/oracle/` with the
+`-before-target-adjustment` suffix. A diagnostic private-field access error was
+fixed by putting the boss accumulator setup setter inside the enemy class.
+
+The comparator supplies original vector membership and captured pre-shot state
+as inputs; it does not claim production geometry or initialization parity.
+SENSE success is **not observed** for these fixed seeds: its non-weak-point
+evaluation, failed outcomes and draw order are covered. Idle/burst/frenzy,
+earned-gold attribution and display bounds are observed but not compared.
+There is no frame/timer advancement, audio, rendered-frame, sister collision,
+full AI or chain/bow/projectile-lifecycle comparison. Diagnostic SENSE and
+growth inputs are explicit test states, not reconstructed hero history.
+
+- Original SWF SHA-256: `4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663`.
+- Accepted diagnostic SWF SHA-256: `62e14f1154c4068acf0778ac8b5b215c7abacc8f7146d1d821f536624502a217`.
+- Accepted trace SHA-256: `cadfce66833c709c76c6dd582c8b3ff5637402ea28dfbbf0b843414199b0464a`.
+
+Accepted data: `web/tests/fixtures/original-shoot-trace.json`. Regenerate with
+`python tools/build_shoot_oracle.py`, capture `?suite=shoot` on the local oracle
+server, then run `npm.cmd run test:shoot-reference` from `web/`. The focused
+regression is `node --experimental-strip-types --test tests/shoot-reference.test.ts`.

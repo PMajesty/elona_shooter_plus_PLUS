@@ -1,4 +1,5 @@
 import { ItemFactory, type Item } from './items.ts';
+import { generateLowLevelMission } from './missions.ts';
 import { generateFirstTownRecruit, type FirstTownRecruit } from './recruits.ts';
 
 export interface FirstTownMission {
@@ -44,16 +45,7 @@ export function prepareFirstTown(random: () => number, input: FirstTownPreparati
   }
 
   // Миссия уровня 1 готовится ещё вечером дня 1; календарная статуя поэтому снова Rat.
-  const loot: number[] = [];
-  if (random() > 0.97) loot.push(1038);
-  loot.push(1117);
-  const mission: FirstTownMission = {
-    level: 1, fixedLv: 1, strength: 0, power: 920, powerOrg: 920, reward: 620,
-    hire: false, ragnarok: false, wave: 5, spawnRate: 15 - 1 / 5, group: [],
-    waveType: 0, loot, newWave: true, time: 30, bossDay: false,
-    bossWave: 2 + Math.trunc(random() * 5 / 3), note: '', hpFix: 1, dmgFix: 1,
-    expFix: 1, absorbFix: 0, bossKilled: 0, noDamage: true, criticalCount: 0, resultOther: 0,
-  };
+  const mission = generateLowLevelMission(1, 1, random) as FirstTownMission;
   const recruit = generateFirstTownRecruit(random, { previousSlots: input.recruitSlots });
   // При выбранных исходных условиях townMedalBonus/startTownMedal не добавляют бросков или эффектов.
   const flags = { specialSale: 0, egg: true, partyHeld: false, prayed: false, robbed: 0, taunted: 0 } as const;

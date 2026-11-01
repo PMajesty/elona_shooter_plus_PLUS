@@ -9,8 +9,8 @@ restore your progress through these stages. Original English artwork, fonts,
 audio and credits are retained.
 
 This is not yet the complete game. Other classes, full town management, recruiting
-and card actions, Day 2 and later days, equipment combat effects, hidden player
-stats, and original Flash save conversion remain to be ported. Earned skills are selected
+and card actions, Day 2 and later days, equipment selection and remaining combat effects, and original Flash save
+conversion remain to be ported. Earned skills are selected
 and saved; their effects must be connected to future combat before later days
 are enabled. See [port status](docs/port-status.md) for coverage and differences.
 The complete preserved Flash game and its Ruffle startup fix remain available
@@ -62,9 +62,12 @@ Shop Tokens discount stock. Town HP, AP, prepared data and full inventory record
 survive save/restore. Recruiting, card actions, Refresh Stock, Upgrade Weapon,
 MOD mounting and Day 2 remain unavailable.
 
-Saves now use version 5; versions 1–4 are accepted. Missing older item or trait
-metadata is reconstructed with explicit provenance; hidden player stats remain unknown. Battle
-migration preserves combat RNG. An older result that skipped earned rewards
+Saves now use version 6; versions 1–5 are accepted. New characters retain the
+original hidden growth potentials and base aiming/teamwork rolls. Portrait and
+selected-Sheriff clicks reroll the character before Proceed, as in the source.
+Older missing hero data is reconstructed with explicit provenance on a separate
+random stream; its lost history cannot be recovered. Migration preserves the
+saved combat RNG and owned item records. An older result that skipped earned rewards
 resumes at the still-owed stage, generating those rewards once with the saved
 RNG. Earlier versions paid gold before reward selection; migration preserves
 the final balance while moving payment to results and initializing AP once.
@@ -100,7 +103,9 @@ original ActionScript game. The accepted fixtures currently cover 72 reload
 snapshots, first-day wave generation under three controlled random seeds and
 21 spawn/single-pellet snapshots, 157 item/loot snapshots, nine Sheriff skill
 choice cases, 11 result-settlement/Free Repair snapshots, 16 first-town preparation
-snapshots including all nine recruit classes, and 19 ordinary-enemy
+snapshots including all nine recruit classes, 12 character creation/growth
+snapshots, three prepared second-day wave snapshots, 22 actual shotgun-firing
+snapshots, and 19 ordinary-enemy
 collision grids containing 77,824 sampled points from the original display shapes. The pellet
 tests supply original geometry as input; separate contour tests exercise the
 same collision implementation used in the browser. Coverage is documented in
@@ -127,6 +132,9 @@ python tools/build_geometry_oracle.py
 python tools/build_loot_oracle.py
 python tools/build_progression_oracle.py
 python tools/build_town_oracle.py
+python tools/build_hero_oracle.py
+python tools/build_prepared_wave_oracle.py
+python tools/build_shoot_oracle.py
 python tools/serve_oracle.py
 ```
 
@@ -135,7 +143,9 @@ Open `http://127.0.0.1:5176/` for reload or
 `http://127.0.0.1:5176/?suite=combat` for spawn/hit scenarios, `?suite=geometry`
 for shape-hit grids, `?suite=loot` for item generation, or `?suite=progression`
 for Sheriff skill choices and previews, or `?suite=town` for result settlement
-and Free Repair. The town fixture excludes full town preparation. Each page runs the original
+and Free Repair. Use `?suite=hero` for character creation/growth,
+`?suite=prepared-waves` for the prepared next-mission waves, and `?suite=shoot`
+for actual firing. The town fixture excludes full town preparation. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, use the matching comparison command: `npm.cmd run test:reference`,
 `npm.cmd run test:wave-reference`, `npm.cmd run test:combat-reference`,

@@ -75,9 +75,11 @@
         "MainTimeline:2075 generatePlayer"
       ],
       "status": "partial",
-      "implemented": "Title, portrait choices and Sheriff entry into the opening battle.",
+      "implemented": "Title, 22 portraits, Sheriff creation with original identity/base potentials and equipment rolls, source portrait/class rerolls, deferred wave generation at Proceed and persistent hero data.",
       "evidence": [
-        "docs/port-verification.json:browser_checks.new_game"
+        "docs/port-verification.json:browser_checks.new_game",
+        "web/tests/hero-reference.test.ts: 12 actual original generation/growth snapshots, exact RNG",
+        "web/tests/hero-save.test.ts: initialization order, rerolls, once-only Proceed and migration"
       ],
       "unverified": [
         "Complete scene-by-scene visual comparison",
@@ -114,7 +116,7 @@
         "Other seven playable classes",
         "Guardian and starting companions",
         "Class-specific mechanics beyond Sheriff first-battle use",
-        "Player hidden base aiming/teamwork generation and growth; combat effects of earned traits"
+        "Remaining combat and party effects of earned traits"
       ]
     },
     {
@@ -126,17 +128,18 @@
         "MainTimeline:4617 refreshPlayer"
       ],
       "status": "partial",
-      "implemented": "Initial Sheriff shotgun rules, critical hits, knockback and original ordinary-enemy filled-contour hit testing with persisted shadow state; bosses retain separate alpha geometry.",
+      "implemented": "Initial Sheriff shotgun rules, critical hits, knockback and original ordinary-enemy filled-contour hit testing with persisted shadow state; bosses retain separate alpha geometry. Actual firing now preserves both per-hit rolls, shell dilution, source weapon quantities, leech/slow/knockback, living-weapon evolution before growth, and nonlethal boss accumulator RNG. The independent shoot fixture checks selected modified-Sheriff states as well as the ordinary starter.",
       "evidence": [
         "web/tests/simulation.test.ts:cooldown and queued-input tests",
         "docs/port-verification.json:browser_checks.shooting",
         "web/tests/combat-reference.test.ts:21 original spawn/point snapshots; port critical rules with original geometry supplied",
         "web/tests/geometry-reference.test.ts: 19 original grids / 77,824 points through production contours and shadow-state transitions",
-        "web/tests/enemy-shadow.test.ts: actual attack/knockback/alive/death, save restore and missing-history fallback"
+        "web/tests/enemy-shadow.test.ts: actual attack/knockback/alive/death, save restore and missing-history fallback",
+        "web/tests/shoot-reference.test.ts: 22 actual original shoot snapshots, all random draws and original geometry as input"
       ],
       "unverified": [
         "Unsampled frames/positions and other animation histories; boss and dropping-rat geometry",
-        "Full shotgun spread and corpse interactions against original",
+        "Other overlapping-target/corpse/animation combinations and successful random SENSE criticals",
         "All weapon families and trait combinations",
         "Native frame/input timing"
       ],
@@ -295,12 +298,13 @@
         "MainTimeline:8323 wave progression"
       ],
       "status": "partial",
-      "implemented": "Original mission zero displayed as Day 1, five scheduled waves, ordered rewards/results and first-town entry. Town prepares mission level 1 while the displayed day is still 1; Rest and Day 2 combat remain disabled.",
+      "implemented": "Original mission zero displayed as Day 1, five scheduled waves, ordered rewards/results and first-town entry. Town prepares mission level 1 while the displayed day is still 1; Rest and Day 2 combat remain disabled. Shared source-derived low-level generator also reproduces prepared level1/day2 waves; this does not enable Day2 gameplay.",
       "evidence": [
         "web/tests/simulation.test.ts:first mission and completion",
         "docs/port-verification.json:browser_checks.victory_checkpoint",
         "web/tests/wave-reference.test.ts:three original generation traces including draw counts and raw loot",
-        "web/tests/town-preparation-reference.test.ts: original first-town mission fields and RNG within 16 preparation snapshots"
+        "web/tests/town-preparation-reference.test.ts: original first-town mission fields and RNG within 16 preparation snapshots",
+        "web/tests/prepared-wave-reference.test.ts: 3 actual source snapshots including fractional timing and prepared loot"
       ],
       "unverified": [
         "Native spawn/combat event sequence",
@@ -382,7 +386,7 @@
         "MainTimeline:9380 trait registrations"
       ],
       "status": "partial",
-      "implemented": "First-battle kill/completion XP, levels and earned Sheriff choices; all 15 original candidate definitions, eligibility/order/descriptions/previews, Capable options, duplicate retries and selected-level persistence. Normal postbattle UI spends each earned point once before results.",
+      "implemented": "First-battle kill/completion XP, levels and earned Sheriff choices; all 15 original candidate definitions, eligibility/order/descriptions/previews, Capable options, duplicate retries and selected-level persistence. Normal postbattle UI spends each earned point once before results. Hidden potentials and base aiming/teamwork are recorded; kill/completion level-up consumes both original growth rolls.",
       "evidence": [
         "web/tests/simulation.test.ts:first-battle result",
         "docs/port-verification.json:browser_checks.victory_checkpoint",
@@ -390,11 +394,12 @@
         "web/tests/progression-save.test.ts:complete opening battle, all reward-stage save/restore, legacy migration and rejected/repeated choices",
         "web/src/skill-view.ts:original-art skill menu and preview selection",
         "web/src/main.ts:updateHud uses original exp/10 display conversion (MainTimeline8157–8158)",
-        "web/docs/progression-notes.md:source formulas, hidden-stat provenance and deferred effects"
+        "web/docs/progression-notes.md:source formulas, hidden-stat provenance and deferred effects",
+        "web/tests/hero-reference.test.ts: controlled original level-up and RNG",
+        "web/tests/hero-save.test.ts: saved growth and legacy reconstruction"
       ],
       "unverified": [
         "Chosen-trait effects in future combat, equipment requirements, party and town systems",
-        "Player hidden base aiming/teamwork rolls and level-up growth",
         "Weapon skill growth",
         "Other classes, all 52 registered traits and later/exhausted-pool interactions"
       ]
@@ -506,7 +511,7 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot with JSON import/export; version 5 preserves generated items including inactive num0 records, boss-kill state, reward stage, pending skill choices, known traits, enemy shadow history, town AP and prepared shop/cards/mission/recruit/flags/searched, plus cumulative earned money. Versions 1–4 migrate with explicit reconstruction provenance. Omitted rewards and preparation run once; version 4 town migration does not repeat settlement or reset AP/HP.",
+      "implemented": "One browser slot with JSON import/export; version 6 preserves generated items including inactive num0 records, boss-kill state, reward stage, pending skill choices, known traits, enemy shadow history, town AP and prepared shop/cards/mission/recruit/flags/searched, plus cumulative earned money. Versions 1–5 migrate with explicit reconstruction provenance. Omitted rewards and preparation run once; version 4 town migration does not repeat settlement or reset AP/HP. New saves include hero potentials, growth traits, enemy boss-damage accumulator and disarmed state. Older hero values use a separate recorded reconstruction seed; unknown historical boss damage initializes to zero.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",
@@ -527,7 +532,7 @@
       "intentionalDifferences": [
         "Current JSON format accepts only browser-port saves; it is not Flash SharedObject-compatible.",
         "Version 1 browser saves lacked generated item metadata. Reconstructed metadata has explicit provenance; original Flash save conversion remains missing.",
-        "Legacy trait and boss-kill information is reconstructed/inferred with explicit provenance; missing hidden stats remain unknown. Battle RNG is preserved, while previously omitted result rewards consume normal RNG once.",
+        "Legacy trait and boss-kill information is reconstructed/inferred with explicit provenance; missing hero stats receive explicitly marked deterministic replacement values in v6. Battle RNG is preserved, while previously omitted result rewards consume normal RNG once.",
         "Versions 1–3 paid settlement before reward selection. Version 4 reverses that advance for pending rewards, pays once at results and preserves the final balance; completed old results receive missing result/AP draws once.",
         "Old enemy saves without shadow history keep their former frame-derived behavior; subsequent transitions persist the flag.",
         "Version 5 retains inactive item metadata because original generation can reuse it. Metadata previously discarded by older browser versions cannot be recovered.",

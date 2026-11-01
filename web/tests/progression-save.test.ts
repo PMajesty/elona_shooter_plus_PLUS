@@ -19,7 +19,7 @@ function asVersion2(state: SimulationState): Record<string, any> {
   const value: Record<string, any> = structuredClone(state);
   value.version = 2;
   if (value.phase === 'victory' && value.town === null) value.gold += value.result.netReward;
-  for (const field of ['bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance', 'town', 'totalMoney']) delete value[field];
+  for (const field of ['bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance', 'town', 'totalMoney', 'hero']) delete value[field];
   delete value.player.traits;
   return value;
 }
@@ -94,14 +94,15 @@ test('v2 battle migration preserves existing item metadata and its combat random
   const untouched = structuredClone(oldSave);
   const migrated = Simulation.fromSave(oldSave);
   assert.deepEqual(oldSave, untouched);
-  assert.equal(migrated.state.version, 5);
+  assert.equal(migrated.state.version, 6);
   assert.equal(migrated.state.rng, oldSave.rng);
   assert.deepEqual(migrated.state.inventory, oldSave.inventory);
   assert.deepEqual(migrated.state.waves, oldSave.waves);
   assert.deepEqual(migrated.state.enemies, oldSave.enemies);
   assert.equal(migrated.state.traitsProvenance, 'legacy-reconstructed');
-  assert.equal(migrated.state.player.traits[TRAIT.BASE_AIMING], undefined);
-  assert.equal(migrated.state.player.traits[TRAIT.BASE_TEAMWORK], undefined);
+  assert.equal(migrated.state.hero.provenance, 'legacy-reconstructed');
+  assert.ok(migrated.state.player.traits[TRAIT.BASE_AIMING] >= 1);
+  assert.ok(migrated.state.player.traits[TRAIT.BASE_TEAMWORK] >= 1);
   assert.equal(migrated.state.bossKilled, 0);
   roundTrip(migrated);
 });
@@ -143,7 +144,7 @@ test('legacy boss inference distinguishes a removed dead boss from a surviving o
   assert.equal(migrated.state.postbattle, 'skill');
 });
 
-test('v5 corruption cannot enter reward stages with invalid traits, duplicate choices or missing entitlement', () => {
+test('current save corruption cannot enter reward stages with invalid traits, duplicate choices or missing entitlement', () => {
   const simulation = completeOpeningBattle();
   simulation.finishLoot(); simulation.finishLoot();
   const saved = simulation.toSave();
