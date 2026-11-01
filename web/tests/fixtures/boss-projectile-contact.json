@@ -1,0 +1,198 @@
+{
+  "format": "elona-boss-projectile-contact",
+  "version": 1,
+  "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "boundary": "Original extracted atlas alpha and ally1 placement matrices at one known contact; no Flash vector or native scheduler parity claim.",
+  "regenerate": "python tools/extract_boss_projectile_contact.py",
+  "appearance": 54,
+  "point": {
+    "x": 191,
+    "y": 212
+  },
+  "samples": [
+    {
+      "name": "before",
+      "pose": {
+        "x": 200,
+        "y": 220,
+        "frame": 24,
+        "facing": -1
+      },
+      "hit": false,
+      "components": [
+        {
+          "texture": "allyBack",
+          "textureFrame": 24,
+          "local": [
+            26.75,
+            12.0
+          ],
+          "pixel": [
+            26,
+            12
+          ],
+          "atlasPixel": [
+            137,
+            12
+          ],
+          "insideFrame": true,
+          "alpha": 0,
+          "origin": [
+            17.75,
+            20.0
+          ]
+        },
+        {
+          "texture": "allyFront",
+          "textureFrame": 24,
+          "local": [
+            39.45,
+            5.0
+          ],
+          "pixel": [
+            39,
+            5
+          ],
+          "atlasPixel": [
+            155,
+            41
+          ],
+          "insideFrame": true,
+          "alpha": 0,
+          "origin": [
+            30.45,
+            13.0
+          ]
+        },
+        {
+          "texture": "charaPic",
+          "textureFrame": 542,
+          "local": [
+            21.7,
+            9.95
+          ],
+          "pixel": [
+            21,
+            9
+          ],
+          "atlasPixel": [
+            165,
+            265
+          ],
+          "insideFrame": true,
+          "alpha": 0,
+          "body": "chara1",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            -12.7,
+            -17.95
+          ],
+          "origin": [
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "after",
+      "pose": {
+        "x": 200,
+        "y": 220,
+        "frame": 201,
+        "facing": 1
+      },
+      "hit": true,
+      "components": [
+        {
+          "texture": "allyBack",
+          "textureFrame": 201,
+          "local": [
+            8.75,
+            12.0
+          ],
+          "pixel": [
+            8,
+            12
+          ],
+          "atlasPixel": [
+            119,
+            12
+          ],
+          "insideFrame": true,
+          "alpha": 0,
+          "origin": [
+            17.75,
+            20.0
+          ]
+        },
+        {
+          "texture": "allyFront",
+          "textureFrame": 201,
+          "local": [
+            21.45,
+            5.0
+          ],
+          "pixel": [
+            21,
+            5
+          ],
+          "atlasPixel": [
+            21,
+            5
+          ],
+          "insideFrame": true,
+          "alpha": 0,
+          "origin": [
+            30.45,
+            13.0
+          ]
+        },
+        {
+          "texture": "charaPic",
+          "textureFrame": 541,
+          "local": [
+            3.4499999999999993,
+            7.817019214233228
+          ],
+          "pixel": [
+            3,
+            7
+          ],
+          "atlasPixel": [
+            123,
+            263
+          ],
+          "insideFrame": true,
+          "alpha": 255,
+          "body": "chara1",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.9530487,
+            -12.45,
+            -15.45
+          ],
+          "origin": [
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    }
+  ],
+  "stableNeighborSamples": 9,
+  "assetSha256": {
+    "ally-animation.json": "d98453e1e017b1a31571fe4f03c991877cf81d0ce31b9683685319d4b2922e7c",
+    "sprites/allyBack.json": "79d7fafab91c9f29aace274c670051496459d01cfc94ab7f717d0d6c3ae0e6a9",
+    "sprites/allyBack.png": "7490e93a41c6b62cdb7e70799ff75f1484f2de8a0023b67c26b3dc967d6abb3c",
+    "sprites/allyFront.json": "3edcce5ddae85d8b339457fe5c9bc3f63a769d9f20cd9b3b111dc58c6c9006a6",
+    "sprites/allyFront.png": "2178f3a6d684e1ff26a0e5219189e0369f8295626521a61e020f588776bba0ab",
+    "sprites/charaPic.json": "f0304c8f13a49ee918daf05d97ec141571fa0efa835c0241644a528a39dae296",
+    "sprites/charaPic.png": "33736cfff6ceb3c156b4f31097b3de25677bf50f391a8f1d5081183c5676f784"
+  }
+}

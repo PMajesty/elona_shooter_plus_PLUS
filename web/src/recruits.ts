@@ -28,9 +28,9 @@ export const RECRUIT_NAMES: readonly string[] = [
 export interface FirstTownRecruit {
   exist: true; sex: number; name: string; devType: RecruitClass;
   potentialAim: number; potentialTeam: number; trait: Record<number, number>;
-  lv: 1; sp: 0; trained: 0; optBoss: true; optWall: true;
+  lv: 1 | 2; sp: 0 | 1; trained: 0; optBoss: true; optWall: true;
   kill: 0; earn: 0; money: 200; nextTrait: number; ai: 0; forcus: -1;
-  cost: 400; exp: 0; wexp: [0, 0, 0, 0, 0]; pic: number;
+  cost: 400 | 450; exp: 0; wexp: [0, 0, 0, 0, 0]; pic: number;
   items: Record<number, Item>;
 }
 
@@ -39,21 +39,27 @@ export interface RecruitGenerationOptions {
   itemContext?: Omit<Partial<ItemContext>, 'day'>;
 }
 
-/** Совместимая граница первого города; общий алгоритм также покрывает дни 2 и 3. */
+/** Совместимая граница первого города; общий алгоритм также покрывает дни 2–4. */
 export function generateFirstTownRecruit(random: () => number, options: RecruitGenerationOptions = {}): FirstTownRecruit {
   return generateEarlyTownRecruit(random, 1, options);
 }
 
-/** В дни 1–3 уровень всегда 1, но исходный бросок всё равно расходуется. */
-export function generateEarlyTownRecruit(random: () => number, day: 1 | 2 | 3, options: RecruitGenerationOptions = {}): FirstTownRecruit {
-  if (day !== 1 && day !== 2 && day !== 3) throw new RangeError('Recruit generation is limited to the first three towns.');
-  const level = (Math.trunc(random() * day * 0.3) + Math.trunc(day / 5) + 1) as 1;
+/** В дни 1–3 уровень всегда 1; в день 4 исходный бросок может дать уровень 2. */
+export function generateEarlyTownRecruit(random: () => number, day: 1 | 2 | 3 | 4, options: RecruitGenerationOptions = {}): FirstTownRecruit {
+  if (![1, 2, 3, 4].includes(day)) throw new RangeError('Recruit generation is limited to the first four towns.');
+  const level = (Math.trunc(random() * day * 0.3) + Math.trunc(day / 5) + 1) as 1 | 2;
   const sex = Math.trunc(random() * 2);
   const name = RECRUIT_NAMES[Math.trunc(random() * RECRUIT_NAMES.length)];
   const devType = (Math.trunc(random() * 9) + 1) as RecruitClass;
   const potentialAim = random() / 1.25 + 0.1;
   const potentialTeam = random() / 1.25 + 0.1;
   const trait: Record<number, number> = { [devType]: 1, 900: 1 + Math.trunc(random() * 10), 901: 1 + Math.trunc(random() * 10) };
+  // generatePlayer вызывает levelUp(false) до nextTrait, портрета и экипировки; очки не расходуются.
+  for (let currentLevel = 1; currentLevel < level; currentLevel++) {
+    trait[devType] = currentLevel + 1;
+    if (random() < potentialAim) trait[900]++;
+    if (random() < potentialTeam) trait[901]++;
+  }
   const nextTrait = Math.trunc(random() * 100);
   const pic = Math.trunc(random() * 22);
   const factory = new ItemFactory(random, { ...options.itemContext, day });
@@ -114,8 +120,8 @@ export function generateEarlyTownRecruit(random: () => number, day: 1 | 2 | 3, o
   }
   return {
     exist: true, sex, name, devType, potentialAim, potentialTeam, trait,
-    lv: level, sp: 0, trained: 0, optBoss: true, optWall: true,
+    lv: level, sp: (level - 1) as 0 | 1, trained: 0, optBoss: true, optWall: true,
     kill: 0, earn: 0, money: 200, nextTrait, ai: 0, forcus: -1,
-    cost: (level * 50 + 350) as 400, exp: 0, wexp: [0, 0, 0, 0, 0], pic, items,
+    cost: (level * 50 + 350) as 400 | 450, exp: 0, wexp: [0, 0, 0, 0, 0], pic, items,
   };
 }

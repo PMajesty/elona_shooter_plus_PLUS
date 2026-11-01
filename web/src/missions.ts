@@ -1,7 +1,7 @@
 import { ENEMIES, type EnemyKind } from './content.ts';
 
 export interface LowLevelMission {
-  level: 0 | 1 | 2 | 3; fixedLv: number; strength: 0; power: number; powerOrg: number; reward: number;
+  level: 0 | 1 | 2 | 3 | 4; fixedLv: number; strength: 0; power: number; powerOrg: number; reward: number;
   hire: false; ragnarok: false; wave: 5; spawnRate: number; group: number[];
   waveType: 0; loot: number[]; newWave: true; time: 30; bossDay: false; bossWave: number;
   note: ''; hpFix: 1; dmgFix: 1; expFix: 1; absorbFix: number; bossKilled: 0;
@@ -12,8 +12,8 @@ export interface GeneratedWave { enemies: EnemyKind[]; delays: number[]; initial
 export interface GeneratedWaves { waves: GeneratedWave[]; power: number; group: number[] }
 
 // Миссия готовится до Rest; календарный день определяет гарантированный предмет.
-export function generateLowLevelMission(level: 0 | 1 | 2 | 3, calendarDay: 1 | 2 | 3, random: () => number, options: { absorbFix?: number } = {}): LowLevelMission {
-  if (![0, 1, 2, 3].includes(level) || ![1, 2, 3].includes(calendarDay)) throw new RangeError('Only mission preparation for the first three towns is supported.');
+export function generateLowLevelMission(level: 0 | 1 | 2 | 3 | 4, calendarDay: 1 | 2 | 3 | 4, random: () => number, options: { absorbFix?: number } = {}): LowLevelMission {
+  if (![0, 1, 2, 3, 4].includes(level) || ![1, 2, 3, 4].includes(calendarDay)) throw new RangeError('Only mission preparation for the first four towns is supported.');
   const absorbFix = options.absorbFix ?? 0;
   if (![0, 0.01, 0.02, 0.03, 0.04].includes(absorbFix)) throw new RangeError('Unsupported medal absorption.');
   const loot: number[] = [];
@@ -21,6 +21,7 @@ export function generateLowLevelMission(level: 0 | 1 | 2 | 3, calendarDay: 1 | 2
   if (calendarDay === 1) loot.push(1117);
   if (calendarDay === 2) loot.push(1103);
   if (calendarDay === 3) loot.push(1035);
+  if (calendarDay === 4) loot.push(1102);
   const rolledBossWave = 2 + Math.trunc(random() * 5 / 3);
   const power = 800 + level * 50 + level * 70;
   return {
@@ -59,8 +60,8 @@ const SELECTION_ENEMIES: readonly SelectionEnemy[] = [
 
 // Источник: generateWave/selectEnemy/randLv/preGenerateWave. Миссия готовится до Rest,
 // а календарный день меняется до генерации волн; переданную миссию не создаём заново.
-export function generateLowLevelWaves(mission: Readonly<LowLevelMission>, calendarDay: 1 | 2 | 3, random: () => number): GeneratedWaves {
-  if (![0, 1, 2].includes(mission.level) || mission.fixedLv !== mission.level || mission.wave !== 5 || mission.bossDay || ![1, 2, 3].includes(calendarDay)) throw new RangeError('Unsupported low-level wave configuration.');
+export function generateLowLevelWaves(mission: Readonly<LowLevelMission>, calendarDay: 1 | 2 | 3 | 4, random: () => number): GeneratedWaves {
+  if (![0, 1, 2, 3].includes(mission.level) || mission.fixedLv !== mission.level || mission.wave !== 5 || mission.bossDay || ![1, 2, 3, 4].includes(calendarDay)) throw new RangeError('Unsupported low-level wave configuration.');
   const waves: GeneratedWave[] = [];
   let power = mission.powerOrg;
   for (let index = 0; index < mission.wave; index++) {
@@ -99,14 +100,22 @@ export function generateLowLevelWaves(mission: Readonly<LowLevelMission>, calend
       const count = Math.max(1, Math.trunc(power * budget / 100 / chosen.power));
       for (let n = 0; n < count; n++) enemies.push(kind);
     };
-    // Четыре условия специальных волн потребляют броски до проверки низкого уровня.
-    random(); random(); random(); random();
-    select(randLv(mission.level, 0.25), 15, ['BATCH']);
-    if (mission.level > 1) select(randLv(mission.level, 0.8), 15, []);
-    select(randLv(mission.level, 0.5), 20, ['BATCH']);
-    select(mission.level + 2, 20, []);
-    if (mission.level > 1) select(randLv(mission.level, 1), 15, []);
-    select(randLv(mission.level, 0.4), 15, ['BATCH']);
+    // AIR ещё недоступен, но его условие расходует бросок до проверки уровня.
+    random();
+    if (random() < 0.1 && mission.level > 2) {
+      // BATCH1 прерывает цепочку: броски RANGED и BATCH2 здесь не выполняются.
+      select(randLv(mission.level, 0.7), 40, ['BATCH']);
+      select(mission.level + 2, 20, []);
+      select(randLv(mission.level, 1), 60, ['BATCH']);
+    } else {
+      random(); random();
+      select(randLv(mission.level, 0.25), 15, ['BATCH']);
+      if (mission.level > 1) select(randLv(mission.level, 0.8), 15, []);
+      select(randLv(mission.level, 0.5), 20, ['BATCH']);
+      select(mission.level + 2, 20, []);
+      if (mission.level > 1) select(randLv(mission.level, 1), 15, []);
+      select(randLv(mission.level, 0.4), 15, ['BATCH']);
+    }
     if (index === mission.bossWave) enemies.push('boss');
     for (let n = 0; n < enemies.length; n++) {
       const enemyPower = ENEMIES[enemies[n]].power;

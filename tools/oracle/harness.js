@@ -4,8 +4,11 @@ const stage = document.querySelector('#stage');
 const PREFIX = 'ELONA_ORACLE:';
 const STARTUP_PREFIX = 'ELONA_STARTUP:';
 const requestedSuite = new URLSearchParams(location.search).get('suite');
-const suite = ['waves', 'prepared-waves', 'third-day-waves', 'archer', 'hero', 'shoot', 'equipment', 'rest', 'second-town', 'third-town', 'castle', 'projectiles', 'modifications', 'combat', 'geometry', 'loot', 'progression', 'town', 'town-preparation'].includes(requestedSuite) ? requestedSuite : 'reload';
+const suite = ['waves', 'prepared-waves', 'third-day-waves', 'fourth-day-waves', 'archer', 'boss-ai', 'hero', 'shoot', 'equipment', 'rest', 'second-town', 'third-town', 'fourth-town', 'castle', 'projectiles', 'modifications', 'combat', 'geometry', 'loot', 'progression', 'town', 'town-preparation'].includes(requestedSuite) ? requestedSuite : 'reload';
 const suites = {
+  'fourth-town': {swf:'/fourth-town-reference.swf',build:'/fourth-town-build-report.json',report:'/api/fourth-town-report',clock:'Original day4 town generation, MOD-sale overwrite and medal60/61 absorption, plus controlled level-two recruit growth in all nine classes; native town interaction is separate.'},
+  'fourth-day-waves': {swf:'/fourth-day-waves-reference.swf',build:'/fourth-day-waves-build-report.json',report:'/api/fourth-day-waves-report',clock:'Original mission3 prepared on day3, then waves on day4, including controlled BATCH1 random boundaries; live combat is separate.'},
+  'boss-ai': {swf:'/boss-ai-reference.swf',build:'/boss-ai-build-report.json',report:'/api/boss-ai-report',clock:'Original boss AI then explicit ally1 child-frame step; native timeline scheduling is not asserted.'},
   archer: {swf:'/archer-reference.swf',build:'/archer-build-report.json',report:'/api/archer-report',clock:'Original Archer AI, explicit child-frame stepping, arrow effects and filled shape grids; native scheduling remains separate.'},
   'third-day-waves': {swf:'/third-day-waves-reference.swf',build:'/third-day-waves-build-report.json',report:'/api/third-day-waves-report',clock:'Original mission2 prepared on day2, then waves on day3, including controlled zero and high random boundaries.'},
   reload: {swf:'/reference.swf',build:'/build-report.json',report:'/api/report',clock:'Manual calls to original methods; native frame/timer scheduling is outside this check.'},

@@ -433,3 +433,19 @@ The installed Phaser 4.2.1 API was checked against its implementation and
 UI/vector/effect textures retain their existing sampling. Browser inspection
 confirms the integrated game still renders, but this is not complete live
 Flash-versus-port image parity or a claim that every source of blur is resolved.
+
+## Fourth-day boss presentation and collision
+
+Version11 renders the simulation-owned source boss frames and saved facing.
+The walk cycle is200–211, firing10–24 and shield221–236 with the original held
+stop. The separate effect1459/frame140–145 export retains its six source frames
+and alpha sequence; it follows the enemy parent and does not inherit mc facing.
+Boss pistol/SMG sounds use the original mappings and positional pan.
+
+Projectile collision now synchronizes the boss actor immediately before its
+geometry test. Previously, AI could move/turn the boss inside a simulation tick
+while a projectile still tested the cached previous pose. The durable
+`boss-projectile-sync` fixture demonstrates a specific miss versus a40damage hit.
+The browser's four-update export matched the synchronized replay exactly. This
+checks the port's current alpha renderer; original-vector/raster parity remains
+a separate limitation. See `web/docs/boss-notes.md` and the fixture provenance.

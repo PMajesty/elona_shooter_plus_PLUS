@@ -1,14 +1,14 @@
 # Elona Shooter Plus PLUS
 
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
-Phaser 4. The current implementation covers **three connected Sheriff days**:
+Phaser 4. The current implementation covers **four connected Sheriff days**:
 choose one of 22 appearances, fight, collect ordinary and boss loot, choose earned
 skills, enter town, buy/sell and upgrade weapons, mount MODs, use Free Repair,
-then Rest into Days 2 and 3 with your retained equipment. Victory, defeat,
+then Rest into Days 2, 3 and 4 with your retained equipment. Victory, defeat,
 rewards, town entry and save/restore work across these stages. Original English
 artwork, fonts, audio and credits are retained.
 
-This is not yet the complete game. Day 4 onward, other classes, full town
+This is not yet the complete game. Day 5 onward, other classes, full town
 management, recruiting and card actions, Ragnarok and
 original Flash save conversion remain to be ported. Ordinary firearms use owned
 item statistics and weapon-skill requirements; the covered Sheriff combat skills
@@ -81,13 +81,16 @@ owned slot to buy it. Owned items can be moved or swapped; dropping one outside
 the slots asks to sell it. Only Yes confirms, and any other dialog click cancels.
 Shop Tokens discount stock. Town HP, AP, prepared data and full inventory records
 survive save/restore. **Mission → Rest** opens the original Resting dialog;
-acknowledging it begins the prepared next battle, up to Day 3. Rest does not heal
+acknowledging it begins the prepared next battle, up to Day 4. Rest does not heal
 the castle, spend AP or cost gold. Guns refill; consumable charges stay spent.
-Days 2 and 3 each end in their own rewards and prepared town. Further Rest is
-disabled in the third town: Day 4 needs the next wave branch and boss shield
-behavior, followed by level-2 recruit growth and the source's fourth-town
-MOD-sale stock overwrite. Recruiting, card actions and Refresh Stock remain
-unavailable.
+Days 2–4 each end in their own rewards and prepared town. Day 4 adds the source's
+harder BATCH1 wave pattern and boss shield. The boss turns when retreating,
+plays its original firing and shield frames, and reduces guarded damage to
+one tenth plus one. The fourth town generates the original MOD sale with a
+guaranteed Auto Reload Mod and may prepare a level-2 recruit. Four perfect
+days award the next protection medal for future mission preparation. Rest
+beyond Day 4 remains unavailable until Day 5's AIR waves and Fly are implemented.
+Recruiting, card actions and Refresh Stock remain unavailable.
 
 In the shop, **Upgrade Weapon** requires **4 AP** to enter selection mode.
 Choose an owned gun to see its before/after comparison and gold cost;
@@ -194,18 +197,28 @@ display widths at the left knockback boundary. This fixture explicitly steps
 enemy AI and child frames; native timeline scheduling and browser rendering
 remain separate checks. It introduces no intentional behavior correction.
 
-The integrated v10 candidate passes **180 tests**. Browser acceptance for this
-slice is pending; release and browser evidence are tracked separately in
+Day 4 adds **seven original wave cases**, **16 town/recruit observations**, and
+**305 boss observations** (301 AI states plus four guarded/open hit cases).
+The harder wave branch, shield, facing, animation stops, damage and exact RNG
+match the captured original within those controlled scenarios. The renderer
+also now tests a projectile against the boss's current pose. A controlled browser
+regression distinguishes the former miss from the corrected 40-damage hit.
+
+The integrated **v11** release passes **198 tests**. Browser Rest into Day4,
+Continue and an in-progress shield match their full expected saved states;
+Continue exports are byte-identical. Candidate and production use the same
+bundle. Evidence and limits are recorded in
 [port verification](docs/port-verification.json).
 
 `npm.cmd run test:soak` automatically exercises 32 seeds with idle, aimed and
 interrupted-input policies. It checks finite state, battle completion and exact
-JSON save/replay state and event equality through all three days, earned rewards,
+JSON save/replay state and event equality through all four days, earned rewards,
 town preparation, repair, shop transactions, weapon modifications and Rest.
-The latest run passed **96 scenarios, 261,877 frames and 3,037 checkpoints**,
-including **542 reward transitions, 593 town actions, 91 Rest transitions,
-32 Day 2 victories and 32 Day 3 victories**. It exercised **85 upgrade
-previews, 24 confirmed upgrades, 61 cancellations and 16 mounted MODs**.
+The latest run passed **96 scenarios, 331,167 frames and 3,774 checkpoints**,
+including **657 reward transitions, 702 town actions and 123 Rest transitions**.
+It reached **32 Day2 wins, 32 Day3 wins and 25 Day4 wins**, and exercised
+**111 upgrade previews, 34 upgrades, 77 cancellations and 19 mounted MODs**.
+Defeats under the bounded test policies remain valid outcomes.
 Reports and reproducible failure checkpoints are written beneath `.build/soak/`.
 This is a stability check, not
 evidence that every original feature has been ported.

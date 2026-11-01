@@ -9,7 +9,7 @@
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
     "images": 85,
-    "clips": 32,
+    "clips": 33,
     "sounds": 89,
     "fonts": 5
   },
@@ -27,6 +27,7 @@
     "allyBack and allyFront retain source depths around separately selected charaPic poses",
     "Projectile metadata preserves original mc/shadow registration and layer order",
     "Archer retains all 210 original frames and filled collision contours; its separate enemy arrow retains stage-overlay registration",
+    "shieldHit contains original effect1459 frames140-145 with frame-script alpha metadata; source frame146 removes it",
     "gravityBody flattens original nested pulse frames 1-13 with the inherited mc color transform",
     "Gravity hard-light is decomposed into original-alpha multiply/add textures for the WebGL renderer",
     "sheepShadow and crowShadow preserve shadow-only alpha masks for original hit exclusion",

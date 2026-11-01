@@ -979,6 +979,27 @@
       "uniqueFrames": 1,
       "characterId": 1791
     },
+    "shieldHit": {
+      "image": "sprites/shieldHit.png",
+      "json": "sprites/shieldHit.json",
+      "originX": 14.95,
+      "originY": 15.85,
+      "frameWidth": 35,
+      "frameHeight": 32,
+      "labels": {},
+      "count": 6,
+      "uniqueFrames": 3,
+      "characterId": 1459,
+      "sourceFrameStart": 140,
+      "frameAlpha": [
+        0.7,
+        0.7,
+        0.5,
+        0.5,
+        0.2,
+        0.2
+      ]
+    },
     "gravityBody": {
       "image": "sprites/gravityBody.png",
       "json": "sprites/gravityBody.json",

@@ -138,7 +138,7 @@ export class ItemFactory {
     return item;
   }
 
-  private setMod(item: Item, modId: number): void {
+  setMod(item: Item, modId: number): void {
     item.mod = modId;
     item.lv = item.id === 8 ? 1 : item.id === 9 ? 2 : 3;
     item.modMax = item.lv; item.type = ITEM_TYPE.mod;

@@ -1261,7 +1261,7 @@ mutation, and the largest Day3 recruit level roll.
 This boundary uses default castle upgrades, the solo Sheriff party and only the
 reachable absorption medal. It does not cover town interactions or Day4 combat.
 Town4 requires the source MOD-sale overwrite and potentially level2 recruits;
-these branches are deliberately outside the three-town helper's accepted range.
+those branches have a separate fourth-town comparison below.
 
 - Accepted diagnostic SWF SHA-256: `e9ea5b163839b742a4de75e44f57dc2612ee65f88a97f84f511cb2b00f727052`.
 - Accepted trace SHA-256: `d0ee4e7c2c90099e16c70554a579014241658ab717ad32da34774e3686b37155`.
@@ -1307,3 +1307,85 @@ establish late-game hitbox correctness. See
 Regenerate with `python tools/build_archer_oracle.py`, capture `?suite=archer`,
 then run `npm.cmd run test:archer-reference` from `web/`. Focused tests:
 `node --experimental-strip-types --test tests/archer-reference.test.ts`.
+
+## Fourth-day waves and the BATCH1 threshold
+
+`tools/build_fourth_day_wave_oracle.py` preserves the original generation methods
+and observes `generateMission(3)` on calendar day 3 followed by `preGenerateWave()`
+on calendar day 4. Two identical Ruffle runs captured seven cases. All seven match
+the production generators exactly on first comparison: every enemy and delay,
+mission state/loot, group counts, RNG draw count and final RNG state.
+
+Seeds 42, 1 and 3735928559 consume 238, 229 and 239 draws and generate 54, 64 and 53 enemies.
+Seed 1 takes BATCH1 in its first wave and ordinary groups in the other four;
+all three seeded cases contain Archer, Crow, Chicken, Rat, Sheep and Boss.
+Explicit constant inputs 0 and 0.099999 take BATCH1 in all five waves; 0.1 and 0.99
+take ordinary waves. The captured first selector starts after six versus eight
+draws, proving the source skips the RANGED/BATCH2 condition draws on BATCH1.
+These constants are legal diagnostic RNG inputs, not claims about production
+seed frequency. The prepared mission retains calendar day 3's Shop Token 1035.
+
+All 3491 tags and non-code payloads are preserved; only DoABC 2782 changes.
+The accepted fixture retains original branch/selection observations. Two focused
+tests verify provenance, the real seeded branch and strict threshold, and reject
+changed draw counts, RNG states, rare enemies and delays. Earlier Day1–3 wave
+fixtures remain unchanged. This boundary does not establish enemy AI, boss shield,
+native scheduling or whole-battle parity. Mission 4/calendar day 4 preparation is
+enabled separately with Archer statue 1102; fifth-day waves remain unsupported.
+
+- Accepted diagnostic SWF SHA-256: `6c9331c90896523c9875448fa19b974ec75da86c611369f9cc7daf072541b1eb`.
+- Accepted trace SHA-256: `2ad4fe00fe9058d1d1c25cfd1fb81fad1fb37b27d312ab3d6ff45280081ba2e4`.
+- Accepted fixture: `web/tests/fixtures/original-fourth-day-wave-trace.json`.
+- Runtime capture: `.build/oracle/fourth-day-waves-browser-report.json`, dated `2026-11-01T23:30:39.201Z`.
+
+Regenerate with `python tools/build_fourth_day_wave_oracle.py`, capture
+`?suite=fourth-day-waves`, then run `npm.cmd run test:fourth-day-wave-reference`
+from `web/`. Focused tests: `node --experimental-strip-types --test tests/fourth-day-wave-reference.test.ts tests/missions.test.ts`.
+
+## Fourth-town MOD sale and recruit growth
+
+`tools/build_fourth_town_oracle.py` runs the original frame71 preparation block
+on calendar day 4. Two identical Ruffle runs captured **16 observations**: six
+complete towns (seeds 42/1/3735928559 with no medals or both medals 60/61), plus
+ten controlled calls to original `generateRecruit`. All 16 match production on
+their first comparison, including every recorded item/recruit/mission field,
+retained slot metadata, source save-boundary RNG and final RNG state.
+
+The town cases preserve the full `generateShop` order (MainTimeline:5246): normal
+stock first, the guaranteed gun replacement, two MOD-sale replacements, then
+`generateStuff(8)` and `setMod(10)` for the guaranteed Auto Reload Mod Lv.1. The
+discarded stock and random MOD still consume their original draws. Normal mode
+resets `specialSale` to 0 after generating these offers. Mission preparation uses
+calendar 4's Archer statue 1102 after the optional Ragnarok roll, with absorption
+0 or 0.02 according to the fixture medals. The existing search value is retained.
+
+Recruit probes run all nine original classes at level 2, with one additional
+Sheriff case reversing the hidden-growth outcomes. A documented twelve-value
+random prefix controls level, class and growth inputs while the underlying
+xorshift stream still advances on every call. These are input-boundary probes,
+not claims about naturally occurring seeded recruitment. Original
+`generatePlayer` at 2075 invokes `levelUp(false)` at 10480 before nextTrait,
+portrait and items: class rank becomes 2, two growth draws affect hidden
+aiming/teamwork, SP1 remains unspent, and cost becomes 450. No skill-choice method
+is invoked. Old Militia slots 47/48 remain intact when the next class does not
+overwrite them.
+
+All 3491 resource tags/non-code payloads are preserved; only DoABC2782 changes.
+First/second/third-town accepted fixtures remain unchanged. Five focused tests
+cover the accepted trace/hash, an extra-draw negative control, MOD-sale/calendar
+behavior, all-class growth order, and valid/invalid grown-recruit saves.
+
+This boundary assumes the current solo/default-castle setup. Hiring, other town
+actions, native menu interaction and Day5 combat remain outside this fixture.
+The Day4 active battle keeps its historical absorption; the newly earned fourth
+perfect-day medal affects the next prepared mission, checked separately by the
+integrated Day4 save tests. See `web/docs/fourth-town-source.md` for the source map.
+
+- Accepted diagnostic SWF SHA-256: `e6ebdbce8fef70797598da6799ef18ebd2a5607ce93ef1d81ad8b2138d1fd9d9`.
+- Accepted trace SHA-256: `6be479171ce4dbc85e5784d0b55108c02e1a43d2902cc49ddb11a5bf45dadb00`.
+- Accepted fixture: `web/tests/fixtures/original-fourth-town-trace.json`.
+- Runtime capture: `.build/oracle/fourth-town-browser-report.json`, dated `2026-11-01T23:30:33.794Z`.
+
+Regenerate with `python tools/build_fourth_town_oracle.py`, capture
+`?suite=fourth-town`, then run `npm.cmd run test:fourth-town-reference` from `web/`.
+Focused checks: `node --experimental-strip-types --test tests/fourth-town.test.ts tests/fourth-town-reference.test.ts`.

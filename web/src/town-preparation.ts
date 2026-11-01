@@ -3,7 +3,7 @@ import { generateLowLevelMission } from './missions.ts';
 import { generateEarlyTownRecruit, type FirstTownRecruit } from './recruits.ts';
 
 export interface FirstTownMission {
-  level: 1 | 2 | 3; fixedLv: 1 | 2 | 3; strength: 0; power: 920 | 1040 | 1160; powerOrg: 920 | 1040 | 1160; reward: 620 | 640 | 660;
+  level: 1 | 2 | 3 | 4; fixedLv: 1 | 2 | 3 | 4; strength: 0; power: 920 | 1040 | 1160 | 1280; powerOrg: 920 | 1040 | 1160 | 1280; reward: 620 | 640 | 660 | 680;
   hire: false; ragnarok: false; wave: 5; spawnRate: number; group: number[];
   waveType: 0; loot: number[]; newWave: true; time: 30; bossDay: false; bossWave: number;
   note: ''; hpFix: 1; dmgFix: 1; expFix: 1; absorbFix: number; bossKilled: 0;
@@ -30,8 +30,8 @@ export function prepareFirstTown(random: () => number, input: FirstTownPreparati
   return prepareEarlyTown(random, 1, input);
 }
 
-export function prepareEarlyTown(random: () => number, day: 1 | 2 | 3, input: FirstTownPreparationInput = {}): FirstTownPreparation {
-  if (day !== 1 && day !== 2 && day !== 3) throw new RangeError('Town preparation is limited to days 1 through 3.');
+export function prepareEarlyTown(random: () => number, day: 1 | 2 | 3 | 4, input: FirstTownPreparationInput = {}): FirstTownPreparation {
+  if (![1, 2, 3, 4].includes(day)) throw new RangeError('Town preparation is limited to days 1 through 4.');
   const factory = new ItemFactory(random, { day });
   // clearGameInv сохраняет поля даже у пустых слотов; первая лавка использует только 0 и 1.
   const shop = Array.from({ length: 8 }, (_, index) => input.priorOffers?.[index] ? { ...input.priorOffers[index], num: 0 } as Item : null);
@@ -40,6 +40,14 @@ export function prepareEarlyTown(random: () => number, day: 1 | 2 | 3, input: Fi
   }
   // Исходный generateShop сначала тратит броски слота 0, затем заменяет его гарантированным оружием.
   shop[0] = factory.randomItem(Math.trunc(random() * day * 200) + 200, 4, shop[0]!);
+  if (day === 4) {
+    // Распродажа заменяет уже созданный товар: исходные броски и поля слотов остаются значимыми.
+    for (let index = 0; index < 2; index++) {
+      shop[index] = factory.randomItem(Math.trunc(random() * day * 75) + 500, 3, shop[index]!);
+    }
+    shop[0] = factory.generate(8, shop[0]!);
+    factory.setMod(shop[0], 10);
+  }
 
   const cardPool = [1, 1, 1, 2, 3, 4, 5, 6, 7];
   const cards: number[] = [];

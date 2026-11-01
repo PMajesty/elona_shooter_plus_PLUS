@@ -9,6 +9,9 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / ".build/oracle/browser-report.json"
 REPORTS = {
+    "/api/fourth-town-report": ROOT / ".build/oracle/fourth-town-browser-report.json",
+    "/api/fourth-day-waves-report": ROOT / ".build/oracle/fourth-day-waves-browser-report.json",
+    "/api/boss-ai-report": ROOT / ".build/oracle/boss-ai-browser-report.json",
     "/api/archer-report": ROOT / ".build/oracle/archer-browser-report.json",
     "/api/third-day-waves-report": ROOT / ".build/oracle/third-day-waves-browser-report.json",
     "/api/report": REPORT,
@@ -31,6 +34,12 @@ REPORTS = {
     "/api/town-preparation-report": ROOT / ".build/oracle/town-preparation-browser-report.json",
 }
 ROUTES = {
+    "/fourth-town-reference.swf": ROOT / ".build/oracle/fourth-town-reference.swf",
+    "/fourth-town-build-report.json": ROOT / ".build/oracle/fourth-town-build-report.json",
+    "/fourth-day-waves-reference.swf": ROOT / ".build/oracle/fourth-day-waves-reference.swf",
+    "/fourth-day-waves-build-report.json": ROOT / ".build/oracle/fourth-day-waves-build-report.json",
+    "/boss-ai-reference.swf": ROOT / ".build/oracle/boss-ai-reference.swf",
+    "/boss-ai-build-report.json": ROOT / ".build/oracle/boss-ai-build-report.json",
     "/archer-reference.swf": ROOT / ".build/oracle/archer-reference.swf",
     "/archer-build-report.json": ROOT / ".build/oracle/archer-build-report.json",
     "/third-day-waves-reference.swf": ROOT / ".build/oracle/third-day-waves-reference.swf",

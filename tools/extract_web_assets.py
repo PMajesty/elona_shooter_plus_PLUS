@@ -323,6 +323,37 @@ def item_popup_asset(xml, sprite):
     return atlas("itemPopup", 1791, sprite, directory, svg_directory)
 
 
+def shield_hit_asset(xml, sprite):
+    """Извлекает только исходные кадры 140–145 эффекта защищённого попадания."""
+    directory, svg_directory = WORK / "shield-hit", WORK / "shield-hit-svg"
+    segment = copy.deepcopy(sprite)
+    segment.set("frameCount", "6")
+    timeline = segment.find("subTags")
+    timeline.clear()
+    depths = []
+    for frame in range(140, 146):
+        for depth in depths:
+            timeline.append(ET.Element("item", type="RemoveObject2Tag", depth=depth, forceWriteAsLong="false"))
+        selected = placed_frame(sprite.find("subTags"), frame)
+        timeline.extend(selected)
+        depths = [tag.get("depth") for tag in selected]
+        timeline.append(ET.Element("item", type="ShowFrameTag", forceWriteAsLong="false"))
+    timeline.append(ET.Element("item", type="EndTag", forceWriteAsLong="false"))
+    if FORCE or not list(directory.glob("DefineSprite_1459*")):
+        derived = copy.deepcopy(xml)
+        target = next(tag for tag in derived.find("tags") if tag.get("spriteId") == "1459")
+        target.set("frameCount", "6")
+        target.remove(target.find("subTags"))
+        target.append(copy.deepcopy(timeline))
+        path, swf_path = WORK / "shield-hit.xml", WORK / "shield-hit.swf"
+        ET.ElementTree(derived).write(path, encoding="utf-8", xml_declaration=True)
+        ffdec(["-xml2swf", path, swf_path], "shield-hit-swf")
+        ffdec(["-ignorebackground", "-selectid", "1459", "-export", "sprite", directory, swf_path], "shield-hit-png")
+        ffdec(["-ignorebackground", "-selectid", "1459", "-format", "sprite:svg", "-export", "sprite", svg_directory, swf_path], "shield-hit-svg")
+    return {**atlas("shieldHit", 1459, segment, directory, svg_directory),
+            "sourceFrameStart": 140, "frameAlpha": [0.7, 0.7, 0.5, 0.5, 0.2, 0.2]}
+
+
 def buttons(manifest):
     png_dir, svg_dir = ROOT / ".build/buttons", ROOT / ".build/buttons-svg"
     for directory, extension, format_args, log in [(png_dir, "png", [], "buttons"),
@@ -472,6 +503,7 @@ def main():
     for name, i in CLIPS.items():
         manifest["clips"][name] = atlas(name, i, sprites[i])
     manifest["clips"]["itemPopup"] = item_popup_asset(xml, sprites[1791])
+    manifest["clips"]["shieldHit"] = shield_hit_asset(xml, sprites[1459])
     projectile_assets(xml, sprites, manifest)
     for layer in ["back", "front"]:
         manifest["clips"]["ally" + layer.capitalize()] = ally_effects(xml, sprites[838], layer)
@@ -581,6 +613,7 @@ def main():
             "allyBack and allyFront retain source depths around separately selected charaPic poses",
             "Projectile metadata preserves original mc/shadow registration and layer order",
             "Archer retains all 210 original frames and filled collision contours; its separate enemy arrow retains stage-overlay registration",
+            "shieldHit contains original effect1459 frames140-145 with frame-script alpha metadata; source frame146 removes it",
             "gravityBody flattens original nested pulse frames 1-13 with the inherited mc color transform",
             "Gravity hard-light is decomposed into original-alpha multiply/add textures for the WebGL renderer",
             "sheepShadow and crowShadow preserve shadow-only alpha masks for original hit exclusion",

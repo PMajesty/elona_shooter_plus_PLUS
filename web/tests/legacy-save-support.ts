@@ -6,6 +6,7 @@ export function asLegacyV9Save(state: SimulationState): Record<string, any> {
   assert.ok(value.day <= 2);
   assert.equal(value.enemyArrows.length, 0);
   assert.ok(value.enemies.every((enemy: {kind: string}) => enemy.kind !== 'archer'));
+  for (const enemy of value.enemies) delete enemy.bossFacing;
   delete value.enemyArrows;
   value.version = 9;
   return value;

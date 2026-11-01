@@ -138,8 +138,26 @@ test('a perfect second day earns absorption for the next town mission without re
   assert.equal(simulation.state.town.mission.loot.at(-1), 1035);
   simulation = restore(simulation);
   const thirdTown = simulation.toSave();
+  assert.equal(simulation.startNextDay(), true);
+  assert.equal(simulation.state.day, 4);
+  assert.deepEqual(simulation.state.previousTown, thirdTown.town);
+  simulation = restore(simulation);
+  let fourthBossSeen = false;
+  playBattle(simulation, () => {
+    const boss = simulation.state.enemies.find(enemy => enemy.kind === 'boss');
+    if (boss) { fourthBossSeen = true; assert.equal(boss.maxHp, 225); assert.equal(boss.appearance, 54); }
+  });
+  assert.equal(fourthBossSeen, true);
+  assert.equal(simulation.state.result.reward, 660);
+  simulation = claimRewards(simulation);
+  assert.equal(simulation.enterTown(), true);
+  assert.ok(simulation.state.town?.preparation === 'ready');
+  assert.equal(simulation.state.town.mission.level, 4);
+  assert.equal(simulation.state.town.shop[0]!.mod, 10);
+  simulation = restore(simulation);
+  const fourthTown = simulation.toSave();
   assert.equal(simulation.startNextDay(), false);
-  assert.deepEqual(simulation.toSave(), thirdTown);
+  assert.deepEqual(simulation.toSave(), fourthTown);
 });
 
 test('weapon experience requires strictly more than 44 at Shotgun level 2 and discards excess after one increase', () => {

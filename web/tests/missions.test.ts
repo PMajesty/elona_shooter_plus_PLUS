@@ -46,12 +46,26 @@ test('second-town preparation retains medal absorption and its calendar loot int
   assert.equal(generated.waves.flatMap(wave => wave.enemies).filter(kind => kind === 'boss').length, 1);
 });
 
-test('third-town preparation guarantees its Shop Token while the next boss-shield battle remains unsupported', () => {
+test('third-town preparation retains its Shop Token through the fourth battle', () => {
   let draws = 0;
   const mission = generateLowLevelMission(3, 3, () => { draws++; return 0.99; }, { absorbFix: 0.02 });
   assert.equal(draws, 2);
   assert.equal(mission.powerOrg, 1160); assert.equal(mission.reward, 660); assert.equal(mission.spawnRate, 14.4);
   assert.equal(mission.absorbFix, 0.02);
   assert.deepEqual(mission.loot, [1038, 1035]);
-  assert.throws(() => generateLowLevelWaves(mission, 3, () => 0.5), /Unsupported low-level wave configuration/);
+  const before = structuredClone(mission);
+  const generated = generateLowLevelWaves(mission, 4, () => 0.5);
+  assert.deepEqual(mission, before);
+  assert.equal(generated.waves.length, 5);
+  assert.equal(generated.waves.flatMap(wave => wave.enemies).filter(kind => kind === 'boss').length, 1);
+});
+
+test('fourth-town preparation guarantees the Archer statue but does not enable fifth-day waves', () => {
+  let draws = 0;
+  const mission = generateLowLevelMission(4, 4, () => { draws++; return 0.99; }, { absorbFix: 0.02 });
+  assert.equal(draws, 2);
+  assert.equal(mission.powerOrg, 1280); assert.equal(mission.reward, 680); assert.equal(mission.spawnRate, 14.2);
+  assert.equal(mission.absorbFix, 0.02);
+  assert.deepEqual(mission.loot, [1038, 1102]);
+  assert.throws(() => generateLowLevelWaves(mission, 4, () => 0.5), /Unsupported low-level wave configuration/);
 });
