@@ -39,9 +39,15 @@ export interface RecruitGenerationOptions {
   itemContext?: Omit<Partial<ItemContext>, 'day'>;
 }
 
-/** Первый generateRecruit: уровень всегда 1, но исходный бросок всё равно расходуется. */
+/** Совместимая граница первого города; общий алгоритм также покрывает вечер второго дня. */
 export function generateFirstTownRecruit(random: () => number, options: RecruitGenerationOptions = {}): FirstTownRecruit {
-  const level = (Math.trunc(random() * 1 * 0.3) + Math.trunc(1 / 5) + 1) as 1;
+  return generateEarlyTownRecruit(random, 1, options);
+}
+
+/** В дни 1 и 2 уровень всегда 1, но исходный бросок всё равно расходуется. */
+export function generateEarlyTownRecruit(random: () => number, day: 1 | 2, options: RecruitGenerationOptions = {}): FirstTownRecruit {
+  if (day !== 1 && day !== 2) throw new RangeError('Recruit generation is limited to the first two towns.');
+  const level = (Math.trunc(random() * day * 0.3) + Math.trunc(day / 5) + 1) as 1;
   const sex = Math.trunc(random() * 2);
   const name = RECRUIT_NAMES[Math.trunc(random() * RECRUIT_NAMES.length)];
   const devType = (Math.trunc(random() * 9) + 1) as RecruitClass;
@@ -50,7 +56,7 @@ export function generateFirstTownRecruit(random: () => number, options: RecruitG
   const trait: Record<number, number> = { [devType]: 1, 900: 1 + Math.trunc(random() * 10), 901: 1 + Math.trunc(random() * 10) };
   const nextTrait = Math.trunc(random() * 100);
   const pic = Math.trunc(random() * 22);
-  const factory = new ItemFactory(random, { ...options.itemContext, day: 1 });
+  const factory = new ItemFactory(random, { ...options.itemContext, day });
   const items: Record<number, Item> = {};
   const generate = (slot: number, id: number) => {
     items[slot] = factory.generate(id, items[slot] ?? options.previousSlots?.[slot] ?? undefined);

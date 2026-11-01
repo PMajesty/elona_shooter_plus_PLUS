@@ -187,6 +187,26 @@ export function duelistHitFrenzy(item: Readonly<Item>, traits: CombatTraits, fre
 }
 
 export type ProjectileKind = 'grenade' | 'rocket' | 'bolt' | 'arrow' | 'gravity' | 'flame';
+
+export interface WeaponPresentation { sound: string; shootFrame: number; idleFrame: number; endFrame: number }
+const WEAPON_PRESENTATION: Readonly<Record<number, readonly [string, number, number, number]>> = {
+    1: ['gun6', 10, 24, 10], 2: ['gun2', 10, 24, 10],
+    3: ['gun3', 95, 109, 95], 4: ['gun4', 95, 109, 95],
+    5: ['gun7', 120, 134, 120], 13: ['gun5', 120, 134, 120],
+    16: ['gun2', 145, 159, 145], 17: ['gun8', 120, 134, 120],
+    18: ['gun9', 10, 24, 10], 19: ['gun10', 95, 109, 95],
+    20: ['gun12', 95, 109, 95], 21: ['gun11', 170, 184, 184],
+    22: ['gun13', 170, 184, 184], 23: ['gun14', 70, 84, 86],
+    24: ['gun15', 70, 84, 86], 25: ['gun15', 70, 84, 86],
+    26: ['gun14', 70, 84, 86], 27: ['fireball', 70, 84, 86],
+    36: ['gun1', 120, 134, 120], 40: ['rampageEnemy', 70, 84, 86],
+};
+/** Четыре используемых поля исходного getWeaponInfo; неизвестные ID сохраняют исходную запасную позу. */
+export function weaponPresentation(id: number): WeaponPresentation {
+  const [sound, shootFrame, idleFrame, endFrame] = WEAPON_PRESENTATION[id] ?? ['gun1', 10, 24, 10];
+  return { sound, shootFrame, idleFrame, endFrame };
+}
+
 const PROJECTILES: Readonly<Partial<Record<number, ProjectileKind>>> = { 21: 'grenade', 22: 'rocket', 23: 'bolt', 26: 'bolt', 24: 'arrow', 25: 'arrow', 27: 'gravity', 40: 'flame' };
 export function weaponBehavior(item: Readonly<Item>) {
   const projectile = item.special ? PROJECTILES[item.id] ?? null : null;

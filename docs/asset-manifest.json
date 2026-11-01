@@ -8,8 +8,8 @@
   "frameNames": "Original one-based Flash timeline frame numbers as strings",
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
-    "images": 83,
-    "clips": 18,
+    "images": 84,
+    "clips": 20,
     "sounds": 89,
     "fonts": 5
   },
@@ -19,7 +19,7 @@
     "townHud applies the original eventGene bgAlpha.alpha=1",
     "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",
     "Town action labels are separate original foreground layers above their card buttons",
-    "Town scene and panels omit runtime HUD fields; Free Repair uses original event card frame 2",
+    "Town scene and panels omit runtime HUD fields; Free Repair/Rest use original event card frames 2/11",
     "gene and result retain offset (0,-26); application applies menu slide X offset",
     "Item quantities and radio labels are rendered by the application",
     "allyBack and allyFront retain source depths around separately selected charaPic poses",

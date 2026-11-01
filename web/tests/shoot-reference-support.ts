@@ -68,8 +68,8 @@ function capture(record: ShootReferenceRecord) {
   state.inventory[0] = inputItem;
   Object.assign(state.player, {
     level: before.player.level, exp: before.player.exp, skillPoints: before.player.skillPoints, traits: structuredClone(before.player.traits),
-    ammo: inputItem.ammo, reloadTicks: inputItem.reloadTime, shootTimer: before.player.shootTimer,
-    accuracyFix: before.player.accuracyFix, rampageTicks: before.player.rampage, weaponExp: before.player.weaponExp,
+    selectedSlot: 0, shootTimer: before.player.shootTimer,
+    accuracyFix: before.player.accuracyFix, rampageTicks: before.player.rampage, weaponExp: [0, 0, 0, before.player.weaponExp, 0],
   });
   state.hero.potentialAim = before.player.potentialAim; state.hero.potentialTeam = before.player.potentialTeam;
   state.kills = before.player.kills; state.criticalKills = before.player.criticalKills; state.loot = [...before.player.loot];
@@ -100,7 +100,7 @@ function capture(record: ShootReferenceRecord) {
     level: state.player.level, exp: state.player.exp, skillPoints: state.player.skillPoints, traits: state.player.traits,
     potentialAim: state.hero.potentialAim, potentialTeam: state.hero.potentialTeam,
     shootTimer: state.player.shootTimer, accuracyFix: state.player.accuracyFix, rampage: state.player.rampageTicks,
-    kills: state.kills, weaponExp: state.player.weaponExp, criticalKills: state.criticalKills, loot: state.loot, castleHp: state.castleHp,
+    kills: state.kills, weaponExp: state.player.weaponExp[3], criticalKills: state.criticalKills, loot: state.loot, castleHp: state.castleHp,
   };
   const afterEnemy = (target: EnemyState) => ({
     hp: target.hp, attack: target.attack, speed: target.speed, speedOrg: target.speedOrg, knockBack: target.knockBack,

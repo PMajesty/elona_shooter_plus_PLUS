@@ -32,7 +32,7 @@ export function compareReloadTrace(records: ReferenceRecord[], omitIntermediateF
       cases.add(record.scenario!);
       simulation = new Simulation(42);
       // Одинаковые входные условия; последующие результаты берутся только из оригинального SWF.
-      simulation.state.player.ammo = record.ammo!;
+      simulation.state.inventory[0]!.ammo = record.ammo!;
       simulation.state.player.rampageTicks = record.rampage!;
       simulation.state.newWave = false;
       simulation.state.spawnTimer = 100000;
@@ -55,7 +55,7 @@ export function compareReloadTrace(records: ReferenceRecord[], omitIntermediateF
       default: throw new Error(`Unknown original operation: ${label}`);
     }
     const expected = { ammo: record.ammo, reloadTicks: record.reloadTicks, rampage: record.rampage, paused: record.paused };
-    const actual = { ammo: simulation.state.player.ammo, reloadTicks: simulation.state.player.reloadTicks, rampage: simulation.state.player.rampageTicks, paused };
+    const actual = { ammo: simulation.weapon!.ammo, reloadTicks: simulation.weapon!.reloadTime, rampage: simulation.state.player.rampageTicks, paused };
     assert.deepEqual(actual, expected, `${label}: state differs from original`);
     let intents = simulation.events.filter(event => event.type === 'reload' || event.type === 'reloaded');
     if (omitIntermediateFeedback && record.op === 'timer') intents = intents.filter(event => event.type !== 'reload');

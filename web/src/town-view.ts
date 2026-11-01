@@ -3,6 +3,7 @@ import type { LootViewManifest } from './loot-view.ts';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
 
 export type TownTab = 'mission' | 'castle' | 'shop' | null;
+export type TownDialog = 'repair' | 'rest' | null;
 interface Placement {
   x: number; y: number; scaleX: number; scaleY: number; rotationDegrees: number;
   text?: { fontId: number; fontSize: number; bounds: number[]; align: number; color: string };
@@ -17,13 +18,13 @@ export interface TownLayout {
 }
 interface TownViewState {
   day: number; gold: number; castleHp: number; castleMaxHp: number;
-  player: { level: number; exp: number; ammo: number };
-  town: { ap: number } | null; inventory: (Item | null)[];
+  player: { level: number; exp: number; selectedSlot: number };
+  town: { ap: number; preparation: string } | null; inventory: (Item | null)[];
 }
-interface Callbacks { select(tab: TownTab): void; repair(): void; dismiss(): void; message(value: string): void }
+interface Callbacks { select(tab: TownTab): void; repair(): void; rest(): void; dismiss(): void; message(value: string): void }
 
 /** Городские координаты и повороты берутся из исходного кадра 71 и его окон. */
-export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, repairDialog: boolean): Phaser.GameObjects.Container {
+export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, dialog: TownDialog): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName('town-view');
   const image = (key: string, x = 0, y = 0, placement?: Placement) => {
     const asset = manifest.images[key];
@@ -53,7 +54,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     return object;
   };
   image('townScene');
-  const selected = state.inventory[0];
+  const selected = state.inventory[state.player.selectedSlot];
   const occupied = isOccupiedItem(selected);
   image('ammo_fill', 290.9, 11).setScale(occupied && selected.ammoMax > 0 ? selected.ammo / selected.ammoMax : 0, 1);
   const hud = { dayText: String(state.day), moneyText: String(state.gold), castleHPText: `${state.castleHp}/${state.castleMaxHp}`,
@@ -71,6 +72,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
   }
   if (tab && tab !== 'shop') {
     const panel = layout[tab], { x, y } = layout.menuPosition;
+    const canRest = state.day === 1 && state.town?.preparation === 'ready';
     // Вертикальный сдвиг уже запечён в статическую панель; её кнопкам он нужен отдельно.
     image(panel.image, x, 0);
     button('button_windowClose', panel.children.closeButton, () => callbacks.select(null), x, y);
@@ -78,18 +80,20 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
       text(panel.children.unkeep, '40', x, y);
       button('button_freeRepair', panel.children.act1, callbacks.repair, x, y);
     } else {
-      button('button_townRest', panel.children.act1, () => callbacks.message('The next day is not available yet. Equipment and learned skills are still being integrated into combat.'), x, y, false);
+      button('button_townRest', panel.children.act1, () => canRest ? callbacks.rest() : callbacks.message('Day 3 is not available yet.'), x, y, canRest);
       button('button_townHire', panel.children.act2, () => callbacks.message('Hiring companions is not available yet.'), x, y, false);
     }
-    image(panel.labelsImage, x, 0).setAlpha(tab === 'mission' ? 0.35 : 1);
+    image(panel.labelsImage, x, 0).setAlpha(tab === 'mission' && !canRest ? 0.35 : 1);
   }
-  if (repairDialog) {
-    const dialog = layout.repairDialog;
-    image(dialog.image);
-    text(dialog.children.title, 'Free Repair!');
-    text(dialog.children.text, 'Citizens acknowledge your hard work and decided to rebuild the castle walls for free!');
-    image('button_eventOk', dialog.children.okButton.x, dialog.children.okButton.y, dialog.children.okButton);
-    // Исходный procEventDialog закрывает подтверждение любым нажатием, не повторяя ремонт.
+  if (dialog) {
+    const placement = layout.repairDialog;
+    image(dialog === 'rest' ? 'eventRest' : placement.image);
+    text(placement.children.title, dialog === 'rest' ? 'Resting' : 'Free Repair!');
+    text(placement.children.text, dialog === 'rest'
+      ? 'The day is finally over! You relax for the first time today and settle down to enjoy the warm, cozy bed.'
+      : 'Citizens acknowledge your hard work and decided to rebuild the castle walls for free!');
+    image('button_eventOk', placement.children.okButton.x, placement.children.okButton.y, placement.children.okButton);
+    // Исходный procEventDialog принимает любое нажатие; отдых начинается только после него.
     const dismiss = scene.add.zone(0, 0, 620, 380).setOrigin(0).setInteractive({ useHandCursor: true });
     dismiss.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); callbacks.dismiss(); });
     root.add(dismiss);

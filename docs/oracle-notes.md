@@ -862,3 +862,160 @@ Accepted data: `web/tests/fixtures/original-shoot-trace.json`. Regenerate with
 `python tools/build_shoot_oracle.py`, capture `?suite=shoot` on the local oracle
 server, then run `npm.cmd run test:shoot-reference` from `web/`. The focused
 regression is `node --experimental-strip-types --test tests/shoot-reference.test.ts`.
+
+## Equipment selection, held fire and reload input
+
+`tools/build_equipment_oracle.py` derives a separate diagnostic SWF after genuine
+Sheriff New Game initialization. It invokes the actual `KeyDown`, mouse handlers,
+`onEnterFrame`, and `onTick` methods in an empty world. Input events precede each
+controlled frame; an explicit 20/30 accumulator schedules timer calls. MainTimeline
+and enemy RNG use the established seeded wrapper. Fixed coordinate reads cover
+mouse-down, shooting and accuracy recovery; grenade trajectory is not compared.
+All 3491 tags and every non-code resource remain preserved; only DoABC 2782 changes.
+
+Two Ruffle runs produced identical **56-snapshot traces across 16 scenarios**.
+All 56 matched production `useSlot`, `requestReload`, and `tick` on the first
+comparison. Checks cover all 33 fields of all six inventory slots, selection,
+consumable cooldowns, physical held input versus queued shooting, shot cooldown,
+recoil/reload progression, the three `getWeaponInfo` animation indices, random
+draw count and final state. Initial generated items are captured inputs; their
+generation is tested by the separate item oracle.
+
+Observed branches include selecting the same slot to cancel reload; preserving
+cooldown while switching; ignoring empty/6th slots; selecting but refusing to fire
+an unsuitable gun or non-gun; Space's pre-frame cooldown guard; manual cancellation
+versus magazine reload retaining a queued shot; automatic versus semi-automatic
+held fire; switching while held; firing during automatic reload; its exact idle
+threshold and immediate first timer step; and an empty trigger that reloads
+without automatically resuming fire. A grenade-use probe leaves the selected
+weapon/reload unchanged and refuses a second use while its 101-update cooldown
+exists. Automatic hold produced three shots/120 draws, while semi-automatic hold
+produced one shot/24 draws until another press.
+
+This tests imposed callback ordering, not native Flash event scheduling. Actor
+current frame, chain/burst bookkeeping and audio are observed or source-audited
+but are not runtime comparisons here. There are no enemy hits, AI or projectile
+lifecycle claims. Actual manual aim for the zero-frame grenade-use probe is
+irrelevant to the compared inventory/cooldown state. The accepted reload and
+shoot fixtures retain their original expectations; only their adapters changed
+to read canonical item ammo/reload fields after save version 7 integration.
+
+- Accepted diagnostic SWF SHA-256: `85ba31143d1e5d3f15f96103e5aa34dcb4a107027d8c376002200764e6266406`.
+- Accepted trace SHA-256: `f27efba72ad9b8fd2c08db038e8c4d7910359914181757ab798038822cb2b7f1`.
+- Accepted fixture: `web/tests/fixtures/original-equipment-trace.json`.
+
+Regenerate with `python tools/build_equipment_oracle.py`, capture `?suite=equipment`,
+then run `npm.cmd run test:equipment-reference` from `web/`. The focused regression
+is `node --experimental-strip-types --test tests/equipment-reference.test.ts`.
+
+## Rest into the second battle
+
+`tools/build_rest_oracle.py` exercises the original Rest dialog and
+acknowledgment, `frame65`/Begin, and `frame27` battle setup. It skips only the
+decorative Begin wait by invoking the original frame handler at delay 89;
+the transition methods remain unchanged. Each of three seeds captures before,
+dialog, after acknowledgment and battle ready. Cases include zero AP, full and
+damaged walls, spent consumables, partially loaded guns, and medal-60 absorption.
+
+The capture at 2026-11-01 21:47:43 UTC produced two identical runs with 12
+snapshots each. The production `Simulation.startNextDay()` matches all three
+final transitions: day, HP, money, retained AP, selected slot, all initialized
+item fields, gun refills, remaining consumables, shot/recoil/rampage resets,
+mission parameters, wave arrays and exact RNG state. Opening/acknowledging Rest
+consumes no random numbers; battle-entry wave generation consumes 146, 152 and
+147 draws for these controlled inputs. Repeated Rest is rejected.
+
+The comparison reports **three transitions from twelve source observations**.
+It does not count the captured source dialog states as independently tested
+port DOM states. Source `resultTaken`, burst, frenzy, idle count and unmodeled
+mission bookkeeping are recorded but excluded. A wholly uninitialized inventory
+slot normalizes to `null`, including the source's new empty-slot reload timer;
+later `generateStuff` always overwrites that timer. Initialized inactive item
+metadata is retained and compared.
+
+- Diagnostic SWF SHA-256: `637eeeda598260f7b433083dd67920455c6b19f16e97c69eee825c63ef6582ff`.
+- Trace SHA-256: `64ced0b7d0c4b7126cb236fb46b9fe6beb3971e4c68193cb01532ca077a97719`.
+- Accepted fixture: `web/tests/fixtures/original-rest-trace.json`.
+
+Regenerate with `python tools/build_rest_oracle.py`, capture `?suite=rest`, then
+run `npm.cmd run test:rest-reference` from `web/`. The focused test is
+`node --experimental-strip-types --test tests/rest-reference.test.ts`.
+Normal solo play is covered; hired companions, Hardcore save deletion, purchased
+sisters, visible transition timing and dialog interaction require separate checks.
+
+## Second-town preparation
+
+`tools/build_second_town_oracle.py` reuses the independently extracted original
+`frame71` preparation block. Six cases cover seeds 42, 1 and 3735928559 with
+medal 60 absent/present, prior offer metadata, retained Militia slots 45/47/48,
+and an existing search value. The capture at 2026-11-01 21:51:59 UTC produced
+two identical runs; `prepareEarlyTown` matches all six snapshots and exact RNG.
+All 33 shop-item fields, retained recruit items, other recruit fields, cards,
+mission parameters, flags and search state are compared.
+
+Day-2 shop budgets and item generation use calendar 2. The recruit's level is
+still 1, but its level draw remains mandatory. Preparing the next mission gives
+level 2, power 1040, base reward 640, spawn rate 14.6 and a Sheep statue. Medal 60
+adds 0.01 absorption without an extra draw. Third-day waves remain unsupported.
+The accepted first-town fixture is unchanged.
+
+- Diagnostic SWF SHA-256: `34546d7cad84d9c6ebc881d477be8f923715910cd1599a36a0edf3edc47df331`.
+- Trace SHA-256: `782e453a7525ba7616301fcd397c64256f2fb2a0267b5429d60a81287d4b58ae`.
+- Accepted fixture: `web/tests/fixtures/original-second-town-trace.json`.
+
+Regenerate with `python tools/build_second_town_oracle.py`, capture
+`?suite=second-town`, then run `npm.cmd run test:second-town-reference` from
+`web/`. The focused test is
+`node --experimental-strip-types --test tests/second-town-reference.test.ts`.
+Both builders preserve all 3491 root tags, non-code payloads, ordering and frame
+header; only DoABC tag 2782 changes. The original SWF fingerprint remains
+`4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663`.
+See `web/docs/rest-notes.md` for source transition, medal and settlement boundaries.
+
+## Castle damage, party skills and protection expiry
+
+`tools/build_castle_oracle.py` invokes original `damageCastle(undefined, damage)`
+after genuine Sheriff initialization. Seventeen scenarios cover full/low HP,
+Defender success/failure, Insurance alone and before a blocked hit, Last Hope
+success/gate failure/empty ally/low HP/already-active rampage, combined skills,
+protection before skills, protection expiry/fade end, and medal absorption
+truncation/minimum damage. Three cases invoke an original frame before the hit.
+The damage, frame, absorption, rampage and shake bodies are preserved; only RNG
+wrapping and defense-sound observation are added. All 3491 tags and non-code
+payloads remain preserved, with only DoABC 2782 changed.
+
+Two Ruffle runs produced identical **17-snapshot traces**. Production
+`Simulation.damageCastle` and protection advancement through normal `tick`
+matched all 17 on the first comparison. Inputs are explicit skill levels,
+HP/money/protection state and seeds; expected results come solely from the
+original. Comparisons include HP, money and totalMoney, skill effect values,
+protection counter/blue fade before and after the hit, rampage, defense events,
+every random value, draw count and final state.
+
+The source audit exposed missing random consumption in the previous HP-only
+castle-damage implementation; integration was corrected before this capture was
+compared. The original spends two or three draws even with no relevant skills.
+Protection blocks before Insurance and consumes zero draws. Insurance pays
+before Defender, whose successful cancellation consumes one draw. Last Hope
+can choose a nonexistent ally, and its HP check is reversed relative to its
+description: level 1 activated at 37/40 HP but not 3/40 HP. A successful activation
+consumes five draws, including two in `shake()` before Fury-adjusted rampage is
+set to 339. The same `rampageOn` source dependency also applies those two shake
+draws to ordinary critical-kill rampage, though this fixture triggers it only
+through Last Hope. Protection counter 1 becomes −1 before the tested hit and
+allows damage; −99 completes the visual fade at counter/blue zero.
+
+The boundary is solo Sheriff with five ally positions and only the hero present.
+Guardian/attacker callbacks, sandbags, subsequent shake frames, rendered/audio
+effects, native Flash scheduler ordering, enemy attack timelines and defeat/town
+transitions are outside it. Sandbag is explicitly zero; absorbFix tests use
+0/.01/.04. Initial HP can become negative after a hit; defeat is a later timer
+transition and is not invented by the diagnostic.
+
+- Accepted diagnostic SWF SHA-256: `227cad13133c31a7e753a740a9983dfda596b6ba1864e83ff21c89c1cd44a700`.
+- Accepted trace SHA-256: `72c9aa59822465b0b744161bc220210b4313740a679db318111e3dac364b718d`.
+- Accepted fixture: `web/tests/fixtures/original-castle-trace.json`.
+
+Regenerate with `python tools/build_castle_oracle.py`, capture `?suite=castle`,
+then run `npm.cmd run test:castle-reference` from `web/`. The focused regression
+is `node --experimental-strip-types --test tests/castle-reference.test.ts`.

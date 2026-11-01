@@ -3,9 +3,10 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { Simulation, type Input, type SimulationOptions } from '../src/simulation.ts';
-import { isOccupiedItem } from '../src/items.ts';
+import { isOccupiedItem, ITEM_TYPE } from '../src/items.ts';
 import { ENEMIES } from '../src/content.ts';
 import { ordinaryEnemyHit, type CollisionGeometry } from '../src/collision.ts';
+import { weaponStats } from '../src/combat-stats.ts';
 
 const outputDirectory = resolve('../.build/soak');
 mkdirSync(outputDirectory, { recursive: true });
@@ -23,20 +24,29 @@ const simulationOptions: SimulationOptions = { hitTest: (enemy, x, y) => {
 
 function inputFor(simulation: Simulation, policy: Policy): Input {
   if (policy === 'idle') return {};
-  const { player, enemies, tick } = simulation.state;
+  const { enemies, tick, inventory, itemCooldowns } = simulation.state;
+  const weapon = simulation.weapon;
+  const grenade = inventory[1];
   const target = enemies.filter(enemy => enemy.hp > 0 && enemy.x > 20).sort((left, right) => right.x - left.x)[0];
   const aiming = { aimX: target?.x ?? 450, aimY: target?.y ?? 240 };
   if (policy === 'aimed') return {
     ...aiming,
-    firePressed: Boolean(target) && player.reloadTicks === 0 && player.ammo > 0,
-    reload: player.ammo === 0 || (!target && player.ammo < 3),
-    grenade: Boolean(target?.kind === 'boss') && player.grenades > 0 && player.grenadeCooldown === 0,
+    firePressed: Boolean(target) && Boolean(weapon && weapon.reloadTime === 0 && weapon.ammo > 0),
+    reload: Boolean(weapon && (weapon.ammo === 0 || (!target && weapon.ammo < 3))),
+    slot: target?.kind === 'boss' && isOccupiedItem(grenade) && grenade.ammo > 0 && itemCooldowns[1] === 0 ? 1 : undefined,
   };
+  const usableSlots = inventory.slice(0, 5).flatMap((item, slot) => {
+    if (!isOccupiedItem(item)) return [];
+    if (item.type === ITEM_TYPE.gun && !item.special && weaponStats(item, simulation.state.player.traits).canFire) return [slot];
+    if ([11, 12, 37].includes(item.id) && itemCooldowns[slot] === 0) return [slot];
+    return [];
+  });
   return {
     ...aiming,
     aimX: tick % 7 === 0 ? 510 : aiming.aimX,
     fireHeld: tick % 37 < 24, firePressed: tick % 29 === 0,
-    reload: tick % 41 === 0, grenade: tick % 127 === 0,
+    reload: tick % 41 === 0,
+    slot: tick % 127 === 0 && usableSlots.length ? usableSlots[Math.floor(tick / 127) % usableSlots.length] : undefined,
   };
 }
 
@@ -47,13 +57,16 @@ function assertFinite(value: unknown, path = 'state'): void {
 }
 
 const started = performance.now();
-const results: { seed: number; policy: Policy; phase: string; ticks: number; kills: number; checkpoints: number }[] = [];
+const results: { seed: number; policy: Policy; phase: string; day: number; daysCompleted: number; ticks: number; kills: number; checkpoints: number }[] = [];
 let scenario: { seed: number; policy: Policy } | undefined;
 let lastCheckpoint: unknown;
 let inputs: Input[] = [];
 let frames = 0;
 let rewardTransitions = 0;
 let townActions = 0;
+let restTransitions = 0;
+let secondDayVictories = 0;
+let equipmentSelections = 0;
 try {
   for (let index = 0; index < seedCount; index++) {
     // Мультипликативная последовательность охватывает разные 32-битные начальные состояния.
@@ -64,83 +77,124 @@ try {
       let restored = Simulation.fromSave(JSON.parse(JSON.stringify(simulation.toSave())), simulationOptions);
       lastCheckpoint = simulation.toSave(); inputs = [];
       let checkpoints = 1;
-      for (let frame = 0; frame < 6000 && simulation.state.phase === 'battle'; frame++) {
-        const input = inputFor(simulation, policy);
-        inputs.push(input);
-        simulation.tick(input); restored.tick(input); frames++;
-        assert.deepEqual(restored.state, simulation.state, `Save/replay state diverged at tick ${simulation.state.tick}`);
-        assert.deepEqual(restored.events, simulation.events, `Save/replay events diverged at tick ${simulation.state.tick}`);
-        assertFinite(simulation.state); assertFinite(simulation.events, 'events');
-        assert.ok(simulation.state.player.ammo >= 0 && simulation.state.player.ammo <= 5);
-        assert.ok(simulation.state.player.grenades >= 0 && simulation.state.player.grenades <= 5);
-        if (frame % 137 === 136) {
+      let daysCompleted = 0;
+      for (let day = 1; day <= 2; day++) {
+        assert.equal(simulation.state.day, day);
+        for (let frame = 0; frame < 6000 && simulation.state.phase === 'battle'; frame++) {
+          const input = inputFor(simulation, policy);
+          inputs.push(input);
+          simulation.tick(input); restored.tick(input); frames++;
+          equipmentSelections += simulation.events.filter(event => event.type === 'select').length;
+          assert.deepEqual(restored.state, simulation.state, `Save/replay state diverged at tick ${simulation.state.tick}`);
+          assert.deepEqual(restored.events, simulation.events, `Save/replay events diverged at tick ${simulation.state.tick}`);
+          assertFinite(simulation.state); assertFinite(simulation.events, 'events');
+          for (const item of simulation.state.inventory) {
+            if (!item) continue;
+            if (item.type === ITEM_TYPE.gun) assert.ok(item.ammo >= 0 && item.ammo <= item.ammoMax);
+            // generateStuff независимо бросает ammo и ammoMax гранаты: 8 зарядов при максимуме 3 допустимы.
+            if (item.id === 11) assert.ok(Number.isInteger(item.ammo) && item.ammo >= 0 && item.ammo <= 8);
+          }
+          assert.equal(simulation.state.itemCooldowns.length, 5);
+          assert.ok(simulation.state.itemCooldowns.every(time => Number.isInteger(time) && time >= 0));
+          assert.equal(simulation.state.player.weaponExp.length, 5);
+          assert.ok(simulation.state.player.weaponExp.every(amount => Number.isInteger(amount) && amount >= 0));
+          if (frame % 137 === 136) {
+            lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
+            restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
+            inputs = []; checkpoints++;
+          }
+        }
+        assert.notEqual(simulation.state.phase, 'battle', `Day ${day} did not terminate within 6000 frames.`);
+        if (policy === 'idle') assert.equal(simulation.state.phase, 'defeat');
+        if (simulation.state.phase === 'victory') { daysCompleted++; if (day === 2) secondDayVictories++; }
+        let rewardActions = 0;
+        while (simulation.state.phase === 'victory' && simulation.state.postbattle !== 'result') {
+          assert.ok(rewardActions++ < 30, 'Earned rewards did not reach results.');
+          const state = simulation.state;
+          if (state.postbattle === 'loot' || state.postbattle === 'boss-loot') {
+            const offer = state.lootOffers.findIndex(isOccupiedItem);
+            const slot = state.inventory.findIndex(item => !isOccupiedItem(item));
+            if (offer >= 0 && slot >= 0) {
+              assert.equal(simulation.collectLoot(offer, slot), true);
+              assert.equal(restored.collectLoot(offer, slot), true);
+            } else {
+              assert.equal(simulation.finishLoot(), true);
+              assert.equal(restored.finishLoot(), true);
+            }
+          } else {
+            assert.equal(state.postbattle, 'skill');
+            // Семена и последовательные награды выбирают разные исходные варианты развития.
+            const choice = state.skillChoices[(seed + rewardActions + day) % state.skillChoices.length];
+            assert.equal(simulation.chooseSkill(choice), true);
+            assert.equal(restored.chooseSkill(choice), true);
+          }
+          assert.deepEqual(restored.state, simulation.state, 'Reward replay changed the offered items or skills.');
+          assertFinite(simulation.state);
           lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
           restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
-          inputs = []; checkpoints++;
+          assert.deepEqual(restored.state, simulation.state, 'Reward save/restore rerolled state.');
+          checkpoints++; rewardTransitions++;
         }
-      }
-      assert.notEqual(simulation.state.phase, 'battle', 'Opening battle did not terminate within 6000 frames.');
-      if (policy === 'idle') assert.equal(simulation.state.phase, 'defeat');
-      let rewardActions = 0;
-      while (simulation.state.phase === 'victory' && simulation.state.postbattle !== 'result') {
-        assert.ok(rewardActions++ < 30, 'Earned rewards did not reach results.');
-        const state = simulation.state;
-        if (state.postbattle === 'loot' || state.postbattle === 'boss-loot') {
-          const offer = state.lootOffers.findIndex(isOccupiedItem);
-          const slot = state.inventory.findIndex(item => !isOccupiedItem(item));
-          if (offer >= 0 && slot >= 0) {
-            assert.equal(simulation.collectLoot(offer, slot), true);
-            assert.equal(restored.collectLoot(offer, slot), true);
-          } else {
-            assert.equal(simulation.finishLoot(), true);
-            assert.equal(restored.finishLoot(), true);
+        if (simulation.state.phase === 'victory') {
+          assert.equal(simulation.enterTown(), true);
+          assert.equal(restored.enterTown(), true);
+          assert.deepEqual(restored.state, simulation.state, 'Town entry changed restored state.');
+          lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
+          restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
+          checkpoints++; townActions++;
+          assert.equal(restored.freeRepair(), simulation.freeRepair());
+          assert.deepEqual(restored.state, simulation.state, 'Town repair changed restored state.');
+          lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
+          restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
+          assert.deepEqual(restored.state, simulation.state, 'Town save/restore changed AP, HP or rewards.');
+          checkpoints++; townActions++;
+          // Прицельная политика сохраняет дробовик; другая проверяет бой после покупки случайного товара.
+          const saleSlot = policy === 'aimed'
+            ? simulation.state.inventory.findIndex((item, index) => index > 1 && isOccupiedItem(item) && item.type !== ITEM_TYPE.gun)
+            : 0;
+          if (saleSlot >= 0) {
+            assert.notEqual(simulation.sellTownItem(saleSlot), null);
+            assert.notEqual(restored.sellTownItem(saleSlot), null);
+            assert.deepEqual(restored.state, simulation.state, 'Town sale changed restored state.');
+            assert.equal(simulation.buyStock(0, saleSlot), restored.buyStock(0, saleSlot));
+            assert.deepEqual(restored.state, simulation.state, 'Town purchase changed restored state.');
+            townActions += 2;
           }
-        } else {
-          assert.equal(state.postbattle, 'skill');
-          const choice = state.skillChoices[0];
-          assert.equal(simulation.chooseSkill(choice), true);
-          assert.equal(restored.chooseSkill(choice), true);
+          lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
+          restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
+          checkpoints++;
+          if (day === 1) {
+            const previous = simulation.toSave();
+            assert.equal(simulation.startNextDay(), true);
+            assert.equal(restored.startNextDay(), true);
+            assert.equal(simulation.state.gold, previous.gold);
+            assert.equal(simulation.state.castleHp, previous.castleHp);
+            assert.deepEqual(simulation.state.previousTown, previous.town);
+            assert.deepEqual(restored.state, simulation.state, 'Rest changed restored mission or equipment.');
+            lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
+            restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
+            assert.deepEqual(restored.state, simulation.state, 'Day 2 checkpoint changed prepared waves.');
+            checkpoints++; restTransitions++; inputs = [];
+          } else {
+            const completed = simulation.toSave();
+            assert.equal(simulation.startNextDay(), false);
+            assert.deepEqual(simulation.toSave(), completed);
+          }
         }
-        assert.deepEqual(restored.state, simulation.state, 'Reward replay changed the offered items or skills.');
-        assertFinite(simulation.state);
-        lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
-        restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
-        assert.deepEqual(restored.state, simulation.state, 'Reward save/restore rerolled state.');
-        checkpoints++; rewardTransitions++;
-      }
-      if (simulation.state.phase === 'victory') {
-        assert.equal(simulation.enterTown(), true);
-        assert.equal(restored.enterTown(), true);
-        assert.deepEqual(restored.state, simulation.state, 'Town entry changed restored state.');
-        lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
-        restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
-        checkpoints++; townActions++;
-        assert.equal(restored.freeRepair(), simulation.freeRepair());
-        assert.deepEqual(restored.state, simulation.state, 'Town repair changed restored state.');
-        lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
-        restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
-        assert.deepEqual(restored.state, simulation.state, 'Town save/restore changed AP, HP or rewards.');
-        checkpoints++; townActions++;
-        // Продажа освобождает слот с сохранением метаданных; покупка переносит весь предмет.
-        assert.notEqual(simulation.sellTownItem(0), null);
-        assert.notEqual(restored.sellTownItem(0), null);
-        assert.deepEqual(restored.state, simulation.state, 'Town sale changed restored state.');
-        assert.equal(simulation.buyStock(0, 0), restored.buyStock(0, 0));
-        assert.deepEqual(restored.state, simulation.state, 'Town purchase changed restored state.');
-        lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
-        restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
-        checkpoints++; townActions += 2;
+        if (simulation.state.phase !== 'battle') break;
       }
       assert.deepEqual(Simulation.fromSave(simulation.toSave(), simulationOptions).state, simulation.state);
-      results.push({ ...scenario, phase: simulation.state.phase, ticks: simulation.state.tick, kills: simulation.state.kills, checkpoints });
+      results.push({ ...scenario, phase: simulation.state.phase, day: simulation.state.day, daysCompleted, ticks: simulation.state.tick, kills: simulation.state.kills, checkpoints });
     }
   }
+  assert.ok(restTransitions > 0, 'No scenario reached Day 2.');
+  assert.ok(secondDayVictories > 0, 'No scenario completed Day 2.');
   const report = {
     status: 'passed', seedCount, policies, scenarios: results.length, simulationFrames: frames,
-    checkpoints: results.reduce((sum, result) => sum + result.checkpoints, 0), rewardTransitions, townActions,
+    checkpoints: results.reduce((sum, result) => sum + result.checkpoints, 0), rewardTransitions, townActions, restTransitions, secondDayVictories, equipmentSelections,
     elapsedMs: Math.round(performance.now() - started),
     collision: 'Production ordinary-enemy contours; boss uses the documented rectangular headless fallback',
-    limits: ['Port self-consistency, finite state and JSON replay only; not an original-game parity proof', 'First-day Sheriff only; boss shape geometry not exercised', 'No browser rendering, input latency, audio or wall-clock performance comparison'],
+    limits: ['Port self-consistency, finite state and JSON replay only; not an original-game parity proof', 'Sheriff Days 1–2 only; boss shape geometry not exercised', 'No browser rendering, input latency, audio or wall-clock performance comparison'],
     results,
   };
   writeFileSync(resolve(outputDirectory, 'report.json'), JSON.stringify(report, null, 2) + '\n');

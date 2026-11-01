@@ -1,18 +1,18 @@
 # Elona Shooter Plus PLUS
 
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
-Phaser 4. The current build is a **first playable slice**: choose one of 22
-appearances, play the Sheriff's original opening battle, collect ordinary loot
-and earned boss prizes, choose earned Sheriff skills, reach results, enter the
-first town, use Free Repair and buy or sell at the shop, or reach defeat. Save and
-restore your progress through these stages. Original English artwork, fonts,
-audio and credits are retained.
+Phaser 4. The current implementation covers **two connected Sheriff days**:
+choose one of 22 appearances, fight, collect ordinary and boss loot, choose earned
+skills, enter town, use the shop and Free Repair, then Rest to begin Day 2 with
+your retained equipment. Victory, defeat and save/restore work across these
+stages. Original English artwork, fonts, audio and credits are retained.
 
-This is not yet the complete game. Other classes, full town management, recruiting
-and card actions, Day 2 and later days, equipment selection and remaining combat effects, and original Flash save
-conversion remain to be ported. Earned skills are selected
-and saved; their effects must be connected to future combat before later days
-are enabled. See [port status](docs/port-status.md) for coverage and differences.
+This is not yet the complete game. Day 3 onward, other classes, full town
+management, recruiting and card actions, Ragnarok, projectile weapons and
+original Flash save conversion remain to be ported. Ordinary firearms use owned
+item statistics and weapon-skill requirements; the covered Sheriff combat skills
+affect play. Unsupported actions remain unavailable. See
+[port status](docs/port-status.md) for coverage, evidence and differences.
 The complete preserved Flash game and its Ruffle startup fix remain available
 as the comparison and recovery baseline.
 
@@ -33,15 +33,21 @@ appearance and press **Proceed**. Sheriff is the implemented class.
 | Control | Action |
 | --- | --- |
 | Mouse | Aim |
-| Left click | Fire; interrupt a reload |
+| Left click | Fire; interrupt a manual reload |
 | Space | Reload; resume while paused |
-| 2 | Throw a grenade at the cursor |
+| 1–5 | Select a firearm or use the item in that inventory slot |
 | Esc | Pause / resume |
 
 Losing browser focus pauses combat. The game saves locally in this browser;
 **Continue** restores that save. **Export Save** and **Import Save** transfer a
 browser-port save as a JSON file. These saves use a separate format from Flash
 and do not automatically follow you to another browser or website.
+
+The starting grenade is in slot 2. Grenades, Repair Hammers and the Holy Grail
+use their original charge/cooldown or protection rules. Using a consumable keeps
+the selected weapon. Hammers consume a charge even at full HP; the Grail is
+single-use. Firearms require their indicated weapon skill. Reloading, automatic
+fire and automatic reload follow the selected item's properties.
 
 After victory, the reward sequence is **ordinary loot → earned boss prizes →
 earned skill choices → results**. Click an item to pick it up and click a slot to
@@ -59,10 +65,19 @@ recruit once. Open the Shop tab, click stock to pick it up, then click an empty
 owned slot to buy it. Owned items can be moved or swapped; dropping one outside
 the slots asks to sell it. Only Yes confirms, and any other dialog click cancels.
 Shop Tokens discount stock. Town HP, AP, prepared data and full inventory records
-survive save/restore. Recruiting, card actions, Refresh Stock, Upgrade Weapon,
-MOD mounting and Day 2 remain unavailable.
+survive save/restore. **Mission → Rest** opens the original Resting dialog;
+acknowledging it begins the prepared Day 2 battle. Rest does not heal the castle,
+spend AP or cost gold. Guns refill; consumable charges stay spent. Day 2 ends in
+its own rewards and prepared town, where further Rest is disabled. Recruiting,
+card actions, Refresh Stock, Upgrade Weapon and MOD mounting remain unavailable.
 
-Saves now use version 6; versions 1–5 are accepted. New characters retain the
+Saves now use version 7; versions 1–6 are accepted. Ammo and reload timers live
+on the owned items, with a selected slot, five item cooldowns and saved
+protection state. Weapon experience is tracked separately for Small Gun, Big
+Gun, Rifle, Shotgun and other items. Legacy scalar experience maps to Shotgun;
+the old ammo/cooldown fields migrate without rerolling inventory. Day 2 saves
+retain the prepared mission and prior town, including the historical absorption
+bonus that applied when battle began. New characters retain the
 original hidden growth potentials and base aiming/teamwork rolls. Portrait and
 selected-Sheriff clicks reroll the character before Proceed, as in the source.
 Older missing hero data is reconstructed with explicit provenance on a separate
@@ -105,19 +120,25 @@ snapshots, first-day wave generation under three controlled random seeds and
 choice cases, 11 result-settlement/Free Repair snapshots, 16 first-town preparation
 snapshots including all nine recruit classes, 12 character creation/growth
 snapshots, three prepared second-day wave snapshots, 22 actual shotgun-firing
-snapshots, and 19 ordinary-enemy
+snapshots, 56 equipment/input snapshots, 17 castle-damage/protection snapshots,
+three final Rest transitions from 12 original observations, six second-town
+preparation snapshots, and 19 ordinary-enemy
 collision grids containing 77,824 sampled points from the original display shapes. The pellet
 tests supply original geometry as input; separate contour tests exercise the
 same collision implementation used in the browser. Coverage is documented in
 the feature ledger rather than inferred from the number of passing tests.
 Negative controls verify that missing shell feedback and altered RNG consumption
 are detected. Expected original results are never regenerated from the port.
+The integrated v7 candidate passes **135 tests** and TypeScript checks. Release
+and browser acceptance are tracked separately in
+[port verification](docs/port-verification.json).
 
 `npm.cmd run test:soak` automatically exercises 32 seeds with idle, aimed and
 interrupted-input policies. It checks finite state, battle completion and exact
-JSON save/replay state and event equality, including every earned reward stage,
-first-town preparation, repair and shop transactions.
-Reports and reproducible failure
+JSON save/replay state and event equality through both days, earned rewards,
+town preparation, repair, shop transactions and Rest. The latest run passed
+**96 scenarios, 193,607 frames and 2,167 checkpoints**, including **56 Rest
+transitions and 32 Day 2 victories**. Reports and reproducible failure
 checkpoints are written beneath `.build/soak/`. This is a stability check, not
 evidence that every original feature has been ported.
 
@@ -135,6 +156,10 @@ python tools/build_town_oracle.py
 python tools/build_hero_oracle.py
 python tools/build_prepared_wave_oracle.py
 python tools/build_shoot_oracle.py
+python tools/build_equipment_oracle.py
+python tools/build_castle_oracle.py
+python tools/build_rest_oracle.py
+python tools/build_second_town_oracle.py
 python tools/serve_oracle.py
 ```
 
@@ -145,7 +170,10 @@ for shape-hit grids, `?suite=loot` for item generation, or `?suite=progression`
 for Sheriff skill choices and previews, or `?suite=town` for result settlement
 and Free Repair. Use `?suite=hero` for character creation/growth,
 `?suite=prepared-waves` for the prepared next-mission waves, and `?suite=shoot`
-for actual firing. The town fixture excludes full town preparation. Each page runs the original
+for actual firing. Use `?suite=equipment` for selection/fire/reload input,
+`?suite=castle` for castle damage/protection, `?suite=rest` for Rest, and
+`?suite=second-town` for the second preparation. The town fixture excludes full
+town preparation. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, use the matching comparison command: `npm.cmd run test:reference`,
 `npm.cmd run test:wave-reference`, `npm.cmd run test:combat-reference`,

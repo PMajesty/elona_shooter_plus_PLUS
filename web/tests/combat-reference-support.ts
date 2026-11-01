@@ -72,7 +72,7 @@ function capture(record: CombatReferenceRecord) {
     coverage: 'single-point-original-geometry-input' as const,
     before, after: projection(enemy), hit, damageEvents, drawCount: draws, rngState: state.rng,
     playerDelta: {
-      exp: state.player.exp, kills: state.kills, weaponExp: state.player.weaponExp,
+      exp: state.player.exp, kills: state.kills, weaponExp: state.player.weaponExp[3],
       rampage: state.player.rampageTicks, criticalKills: state.criticalKills, loot: state.loot,
     },
   };

@@ -4,13 +4,17 @@ const stage = document.querySelector('#stage');
 const PREFIX = 'ELONA_ORACLE:';
 const STARTUP_PREFIX = 'ELONA_STARTUP:';
 const requestedSuite = new URLSearchParams(location.search).get('suite');
-const suite = ['waves', 'prepared-waves', 'hero', 'shoot', 'combat', 'geometry', 'loot', 'progression', 'town', 'town-preparation'].includes(requestedSuite) ? requestedSuite : 'reload';
+const suite = ['waves', 'prepared-waves', 'hero', 'shoot', 'equipment', 'rest', 'second-town', 'castle', 'combat', 'geometry', 'loot', 'progression', 'town', 'town-preparation'].includes(requestedSuite) ? requestedSuite : 'reload';
 const suites = {
   reload: {swf:'/reference.swf',build:'/build-report.json',report:'/api/report',clock:'Manual calls to original methods; native frame/timer scheduling is outside this check.'},
   waves: {swf:'/waves-reference.swf',build:'/waves-build-report.json',report:'/api/waves-report',clock:'Synchronous original mission and wave generation under controlled xorshift32; no live enemy AI.'},
   'prepared-waves': {swf:'/prepared-waves-reference.swf',build:'/prepared-waves-build-report.json',report:'/api/prepared-waves-report',clock:'Original level1 mission preparation on day1 followed by wave generation on day2; Rest interaction and live combat are separate checks.'},
   hero: {swf:'/hero-reference.swf',build:'/hero-build-report.json',report:'/api/hero-report',clock:'Original Sheriff creation and level-up methods with controlled randomness; UI and subsequent combat are separate checks.'},
   shoot: {swf:'/shoot-reference.swf',build:'/shoot-build-report.json',report:'/api/shoot-report',clock:'Synchronous original shoot with controlled aim and randomness; original vector hits are observed per pellet, and native port geometry needs separate checks.'},
+  equipment: {swf:'/equipment-reference.swf',build:'/equipment-build-report.json',report:'/api/equipment-report',clock:'Controlled original equipment input and player steps; native event scheduling is outside this comparison.'},
+  rest: {swf:'/rest-reference.swf',build:'/rest-build-report.json',report:'/api/rest-report',clock:'Original Rest dialog and acknowledgment through battle entry; the decorative Begin wait is skipped with the original frame handler, and town preparation is a separate check.'},
+  'second-town': {swf:'/second-town-reference.swf',build:'/second-town-build-report.json',report:'/api/second-town-report',clock:'Original day2 town preparation with retained recruit and item metadata; medal60 absorption is compared, and day3 combat is outside this boundary.'},
+  castle: {swf:'/castle-reference.swf',build:'/castle-build-report.json',report:'/api/castle-report',clock:'Controlled original castle damage, protection and solo trait effects; native enemy attack scheduling is outside this comparison.'},
   combat: {swf:'/combat-reference.swf',build:'/combat-build-report.json',report:'/api/combat-report',clock:'Synchronous original spawn and single-pellet hit methods under controlled xorshift32; full shotgun spread and native scheduling are outside this check.'},
   geometry: {swf:'/geometry-reference.swf',build:'/geometry-build-report.json',report:'/api/geometry-report',clock:'Original vector body/shadow point grids after explicit frame setup; one synchronous case per diagnostic frame, not native battle scheduling.'},
   loot: {swf:'/loot-reference.swf',build:'/loot-build-report.json',report:'/api/loot-report',clock:'Synchronous original item and loot generation under controlled xorshift32; inventory interaction and campaign transitions are separate checks.'},

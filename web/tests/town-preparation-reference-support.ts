@@ -16,12 +16,12 @@ export interface TownPreparationReferenceRecord {
 
 const ITEM_FIELDS: (keyof Item)[] = ['num', 'id', 'graphic', 'type', 'reloadTime', 'reloadTimeMax', 'ammo', 'ammoMax', 'value', 'mod', 'modMax', 'shell', 'manualReload', 'automatic', 'modText', 'lv', 'typeMinor', 'special', 'leech', 'impact', 'shootRate', 'rare', 'autoReload', 'livingWeapon', 'name', 'baseAccuracy', 'accuracyDec', 'attack', 'dmgAir', 'dmgArmor', 'reqTrait', 'reqLv', 'range'];
 
-function rawSlot(item: Item | null): RawItem {
+export function rawSlot(item: Item | null): RawItem {
   // Никогда не теряем num=0 экземпляр: лишь совершенно новый слот имеет только num/value=0.
   return Object.fromEntries(ITEM_FIELDS.map(field => [field, item ? item[field] ?? null : field === 'num' || field === 'value' ? 0 : null]));
 }
 
-function inputSlot(raw: RawItem): Item | null {
+export function inputSlot(raw: RawItem): Item | null {
   if (raw.id === null) {
     assert.deepEqual(raw, rawSlot(null), 'An uninitialized slot contains unexpected metadata.');
     return null;
@@ -29,7 +29,7 @@ function inputSlot(raw: RawItem): Item | null {
   return Object.fromEntries(Object.entries(raw).filter(([, value]) => value !== null)) as unknown as Item;
 }
 
-function project(town: FirstTownPreparation) {
+export function project(town: FirstTownPreparation) {
   return {
     ...town,
     shop: town.shop.map(rawSlot),

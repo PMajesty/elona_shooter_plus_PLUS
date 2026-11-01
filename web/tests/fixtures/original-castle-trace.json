@@ -1,0 +1,1477 @@
+{
+  "format": "elona-original-castle-trace",
+  "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "instrumentedSwfSha256": "227cad13133c31a7e753a740a9983dfda596b6ba1864e83ff21c89c1cd44a700",
+  "traceSha256": "72c9aa59822465b0b744161bc220210b4313740a679db318111e3dac364b718d",
+  "runtime": "@ruffle-rs/ruffle 0.7.1",
+  "boundary": "Actual original damageCastle(undefined,damage), with optional original frame before hit, versus production Simulation.damageCastle/tick",
+  "records": [
+    {
+      "attacker": "undefined-solo-no-guardian",
+      "clock": "manual-original-frame-before-damageCastle",
+      "hero": 0,
+      "kind": "castle",
+      "maxAlly": 5,
+      "rng": "xorshift32",
+      "sandbag": 0,
+      "scenarios": 17,
+      "type": "ready",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 37,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "damage": 3,
+        "hp": 40,
+        "name": "unskilled_full",
+        "seed": 42
+      },
+      "defendEvents": 0,
+      "drawCount": 3,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.002643892541527748
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.660311977379024
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.11095708678476512
+        }
+      ],
+      "kind": "castle",
+      "rngState": 476557059,
+      "scenario": "unskilled_full",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": -1,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 2,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 2,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "damage": 3,
+        "hp": 2,
+        "name": "unskilled_low",
+        "seed": 3735928559
+      },
+      "defendEvents": 0,
+      "drawCount": 2,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.2792530485894531
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.5551386629231274
+        }
+      ],
+      "kind": "castle",
+      "rngState": 2384302402,
+      "scenario": "unskilled_low",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "damage": 3,
+        "defender": 1,
+        "hp": 40,
+        "name": "defender_blocks",
+        "seed": 42
+      },
+      "defendEvents": 1,
+      "drawCount": 1,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.002643892541527748
+        }
+      ],
+      "kind": "castle",
+      "rngState": 11355432,
+      "scenario": "defender_blocks",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 37,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "damage": 3,
+        "defender": 1,
+        "hp": 40,
+        "name": "defender_fails",
+        "seed": 3735928559
+      },
+      "defendEvents": 0,
+      "drawCount": 2,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.2792530485894531
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.5551386629231274
+        }
+      ],
+      "kind": "castle",
+      "rngState": 2384302402,
+      "scenario": "defender_fails",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 37,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 3,
+        "lastHope": 0,
+        "money": 103,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 503
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 3,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 3,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "damage": 3,
+        "hp": 40,
+        "insurance": 2,
+        "name": "insurance",
+        "seed": 42
+      },
+      "defendEvents": 0,
+      "drawCount": 3,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.002643892541527748
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.660311977379024
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.11095708678476512
+        }
+      ],
+      "kind": "castle",
+      "rngState": 476557059,
+      "scenario": "insurance",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 3,
+        "lastHope": 0,
+        "money": 103,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 503
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 3,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 3,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "damage": 3,
+        "defender": 1,
+        "hp": 40,
+        "insurance": 2,
+        "name": "insurance_before_block",
+        "seed": 42
+      },
+      "defendEvents": 1,
+      "drawCount": 1,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.002643892541527748
+        }
+      ],
+      "kind": "castle",
+      "rngState": 11355432,
+      "scenario": "insurance_before_block",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 37,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 339,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "damage": 3,
+        "hp": 40,
+        "lastHope": 1,
+        "name": "last_hope_full",
+        "seed": 42
+      },
+      "defendEvents": 0,
+      "drawCount": 5,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.002643892541527748
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.660311977379024
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.11095708678476512
+        },
+        {
+          "index": 4,
+          "state": 3648046016,
+          "value": 0.8493769019842148
+        },
+        {
+          "index": 5,
+          "state": 3759983556,
+          "value": 0.8754393914714456
+        }
+      ],
+      "kind": "castle",
+      "rngState": 3759983556,
+      "scenario": "last_hope_full",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 3,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 6,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 6,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "damage": 3,
+        "hp": 6,
+        "lastHope": 1,
+        "name": "last_hope_low",
+        "seed": 42
+      },
+      "defendEvents": 0,
+      "drawCount": 3,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.002643892541527748
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.660311977379024
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.11095708678476512
+        }
+      ],
+      "kind": "castle",
+      "rngState": 476557059,
+      "scenario": "last_hope_low",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 37,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "damage": 3,
+        "hp": 40,
+        "lastHope": 1,
+        "name": "last_hope_empty_ally",
+        "seed": 801
+      },
+      "defendEvents": 0,
+      "drawCount": 3,
+      "draws": [
+        {
+          "index": 1,
+          "state": 216023411,
+          "value": 0.05029686982743442
+        },
+        {
+          "index": 2,
+          "state": 2634695060,
+          "value": 0.6134377466514707
+        },
+        {
+          "index": 3,
+          "state": 1915603464,
+          "value": 0.4460111875087023
+        }
+      ],
+      "kind": "castle",
+      "rngState": 1915603464,
+      "scenario": "last_hope_empty_ally",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 37,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "damage": 3,
+        "hp": 40,
+        "lastHope": 1,
+        "name": "last_hope_gate_fails",
+        "seed": 3735928559
+      },
+      "defendEvents": 0,
+      "drawCount": 2,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.2792530485894531
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.5551386629231274
+        }
+      ],
+      "kind": "castle",
+      "rngState": 2384302402,
+      "scenario": "last_hope_gate_fails",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 37,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 100,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 100,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 100,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "damage": 3,
+        "hp": 40,
+        "lastHope": 1,
+        "name": "last_hope_already_active",
+        "rampage": 100,
+        "seed": 42
+      },
+      "defendEvents": 0,
+      "drawCount": 3,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.002643892541527748
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.660311977379024
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.11095708678476512
+        }
+      ],
+      "kind": "castle",
+      "rngState": 476557059,
+      "scenario": "last_hope_already_active",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 37,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 3,
+        "lastHope": 19,
+        "money": 103,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 339,
+        "sandbag": 0,
+        "totalMoney": 503
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 3,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 3,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "damage": 3,
+        "defender": 1,
+        "hp": 40,
+        "insurance": 2,
+        "lastHope": 1,
+        "name": "combined",
+        "seed": 812
+      },
+      "defendEvents": 0,
+      "drawCount": 5,
+      "draws": [
+        {
+          "index": 1,
+          "state": 215343326,
+          "value": 0.05013852519914508
+        },
+        {
+          "index": 2,
+          "state": 2835443609,
+          "value": 0.660178160527721
+        },
+        {
+          "index": 3,
+          "state": 447984096,
+          "value": 0.10430442541837692
+        },
+        {
+          "index": 4,
+          "state": 4252988231,
+          "value": 0.9902259872760624
+        },
+        {
+          "index": 5,
+          "state": 1910817612,
+          "value": 0.4448968945071101
+        }
+      ],
+      "kind": "castle",
+      "rngState": 1910817612,
+      "scenario": "combined",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 3,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0.1,
+          "counter": 249
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 3,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0.1,
+          "counter": 249
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 5,
+        "fury": 13,
+        "immune": false,
+        "insurance": 3,
+        "lastHope": 19,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 250
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "damage": 3,
+        "defender": 1,
+        "frames": 1,
+        "hp": 40,
+        "insurance": 2,
+        "lastHope": 1,
+        "name": "protection_blocks_before_skills",
+        "protection": 250,
+        "seed": 42
+      },
+      "defendEvents": 1,
+      "drawCount": 0,
+      "draws": [],
+      "kind": "castle",
+      "rngState": 42,
+      "scenario": "protection_blocks_before_skills",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 37,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 1.2,
+          "counter": -1
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 1.2,
+          "counter": -1
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 1.3,
+          "counter": 1
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "blue": 1.3,
+        "damage": 3,
+        "frames": 1,
+        "hp": 40,
+        "name": "protection_expires",
+        "protection": 1,
+        "seed": 42
+      },
+      "defendEvents": 0,
+      "drawCount": 3,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.002643892541527748
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.660311977379024
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.11095708678476512
+        }
+      ],
+      "kind": "castle",
+      "rngState": 476557059,
+      "scenario": "protection_expires",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "castleHp": 37,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0.05,
+          "counter": -99
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "blue": 0.05,
+        "damage": 3,
+        "frames": 1,
+        "hp": 40,
+        "name": "protection_fade_finishes",
+        "protection": -99,
+        "seed": 42
+      },
+      "defendEvents": 0,
+      "drawCount": 3,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.002643892541527748
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.660311977379024
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.11095708678476512
+        }
+      ],
+      "kind": "castle",
+      "rngState": 476557059,
+      "scenario": "protection_fade_finishes",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0.04,
+        "castleHp": 34,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0.04,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0.04,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "absorbFix": 0.04,
+        "damage": 7,
+        "hp": 40,
+        "name": "absorb_truncation",
+        "seed": 3735928559
+      },
+      "defendEvents": 0,
+      "drawCount": 2,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.2792530485894531
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.5551386629231274
+        }
+      ],
+      "kind": "castle",
+      "rngState": 2384302402,
+      "scenario": "absorb_truncation",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0.01,
+        "castleHp": 39,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "afterFrames": {
+        "absorbFix": 0.01,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0.01,
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "defender": 0,
+        "fury": 13,
+        "immune": false,
+        "insurance": 0,
+        "lastHope": 0,
+        "money": 100,
+        "protection": {
+          "blueMultiplierAdd": 0,
+          "counter": 0
+        },
+        "rampage": 0,
+        "sandbag": 0,
+        "totalMoney": 500
+      },
+      "config": {
+        "absorbFix": 0.01,
+        "damage": 1,
+        "hp": 40,
+        "name": "absorb_minimum",
+        "seed": 3735928559
+      },
+      "defendEvents": 0,
+      "drawCount": 2,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.2792530485894531
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.5551386629231274
+        }
+      ],
+      "kind": "castle",
+      "rngState": 2384302402,
+      "scenario": "absorb_minimum",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "kind": "castle",
+      "ok": true,
+      "snapshots": 17,
+      "type": "complete",
+      "version": 1
+    }
+  ]
+}

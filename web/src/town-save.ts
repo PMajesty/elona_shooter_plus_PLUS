@@ -7,19 +7,23 @@ const integer = (value: unknown, low: number, high: number): value is number => 
 const fieldsEqual = (value: Record<string, unknown>, fields: Record<string, unknown>) => Object.entries(fields).every(([key, expected]) => value[key] === expected);
 
 /** Проверяем сохранённые результаты генерации, не повторяя случайные броски при загрузке. */
-export function validTownPreparation(value: unknown, validItem: (item: unknown) => item is Item): value is FirstTownPreparation {
+export function validTownPreparation(value: unknown, validItem: (item: unknown) => item is Item, day: 1 | 2 = 1, expectedAbsorbFix?: number): value is FirstTownPreparation {
+  if (day !== 1 && day !== 2) return false;
   if (!record(value) || !Array.isArray(value.shop) || value.shop.length !== 8 || Array.from(value.shop).some(item => item !== null && !validItem(item))) return false;
   if (!Array.isArray(value.cards) || value.cards.length !== 5 || value.cards.some(id => !integer(id, -7, -1))) return false;
   for (let id = -7; id <= -1; id++) if (value.cards.filter(card => card === id).length > (id === -1 ? 3 : 1)) return false;
   if (!integer(value.searched, 0, 999) || !record(value.flags) || !fieldsEqual(value.flags, { specialSale: 0, egg: true, partyHeld: false, prayed: false, robbed: 0, taunted: 0 })) return false;
   const mission = value.mission;
+  const power = 800 + day * 50 + day * 70;
   if (!record(mission) || !fieldsEqual(mission, {
-    level: 1, fixedLv: 1, strength: 0, power: 920, powerOrg: 920, reward: 620,
-    hire: false, ragnarok: false, wave: 5, spawnRate: 14.8, waveType: 0,
+    level: day, fixedLv: day, strength: 0, power, powerOrg: power, reward: 600 + day * 20,
+    hire: false, ragnarok: false, wave: 5, spawnRate: 15 - day / 5, waveType: 0,
     newWave: true, time: 30, bossDay: false, note: '', hpFix: 1, dmgFix: 1,
-    expFix: 1, absorbFix: 0, bossKilled: 0, noDamage: true, criticalCount: 0, resultOther: 0,
+    expFix: 1, bossKilled: 0, noDamage: true, criticalCount: 0, resultOther: 0,
   }) || !Array.isArray(mission.group) || mission.group.length !== 0 || !integer(mission.bossWave, 2, 3)) return false;
-  if (!Array.isArray(mission.loot) || !([1117].join() === mission.loot.join() || [1038, 1117].join() === mission.loot.join()) || mission.loot.some(id => typeof id !== 'number')) return false;
+  if (![0, 0.01, 0.02, 0.03, 0.04].includes(Number(mission.absorbFix)) || typeof mission.absorbFix !== 'number' || (expectedAbsorbFix !== undefined && mission.absorbFix !== expectedAbsorbFix)) return false;
+  const statue = day === 1 ? 1117 : 1103;
+  if (!Array.isArray(mission.loot) || !([statue].join() === mission.loot.join() || [1038, statue].join() === mission.loot.join()) || mission.loot.some(id => typeof id !== 'number')) return false;
   const recruit = value.recruit;
   if (!record(recruit) || !fieldsEqual(recruit, {
     exist: true, lv: 1, sp: 0, trained: 0, optBoss: true, optWall: true,
@@ -32,7 +36,9 @@ export function validTownPreparation(value: unknown, validItem: (item: unknown) 
   if (Object.entries(recruit.trait).some(([id, level]) => !allowedTraits.has(Number(id)) || !integer(level, 1, Number(id) >= 900 ? 10 : 3))) return false;
   const items = recruit.items;
   if (!record(items)) return false;
-  const slots = recruit.devType === 4 ? ['45', '47', '48'] : ['45'];
-  if (Object.keys(items).length !== slots.length || slots.some(slot => !validItem(items[slot]) || (items[slot] as Item).num !== 1)) return false;
+  const requiredSlots = recruit.devType === 4 ? ['45', '47', '48'] : ['45'];
+  // После смены кандидата прежние слоты ополченца остаются частью исходного инвентаря.
+  if (Object.keys(items).some(slot => !['45', '47', '48'].includes(slot) || !validItem(items[slot]))
+    || requiredSlots.some(slot => !validItem(items[slot]) || (items[slot] as Item).num !== 1)) return false;
   return true;
 }

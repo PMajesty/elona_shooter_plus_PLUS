@@ -642,6 +642,13 @@
       "height": 17,
       "originX": 1.0,
       "originY": 0.0
+    },
+    "eventRest": {
+      "file": "screens/eventRest.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
     }
   },
   "clips": {
@@ -912,6 +919,30 @@
       "count": 189,
       "uniqueFrames": 9,
       "characterId": 981
+    },
+    "layhand": {
+      "image": "sprites/layhand.png",
+      "json": "sprites/layhand.json",
+      "originX": 48.0,
+      "originY": 529.0,
+      "frameWidth": 97,
+      "frameHeight": 545,
+      "labels": {},
+      "count": 31,
+      "uniqueFrames": 24,
+      "characterId": 2226
+    },
+    "itemTimer": {
+      "image": "sprites/itemTimer.png",
+      "json": "sprites/itemTimer.json",
+      "originX": -29.950000000000003,
+      "originY": 2.5,
+      "frameWidth": 96,
+      "frameHeight": 24,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2370
     }
   },
   "sounds": {

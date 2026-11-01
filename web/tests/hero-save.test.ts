@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { Simulation } from '../src/simulation.ts';
 import { generateSheriffHero, levelUpHero } from '../src/hero.ts';
 import { generateLowLevelMission, generateLowLevelWaves } from '../src/missions.ts';
+import { asLegacyV6Save } from './legacy-save-support.ts';
 
 function stream(seed: number) {
   let state = seed >>> 0 || 1;
@@ -25,7 +26,7 @@ test('New Game integrates mission then hero then waves without mixing their RNG 
     assert.deepEqual(simulation.state.loot, mission.loot);
     assert.deepEqual(simulation.state.waves, waves.waves);
     assert.equal(simulation.state.rng, reference.state());
-    assert.equal(simulation.state.version, 6);
+    assert.equal(simulation.state.version, 7);
     assert.deepEqual(Simulation.fromSave(simulation.toSave()).state, simulation.state);
   }
 });
@@ -38,7 +39,7 @@ test('creation rerolls only the hero and Proceed prepares waves once after the s
   assert.equal(simulation.state.rng, reference.state());
   const beforeTick = structuredClone(simulation.state);
   assert.throws(() => simulation.toSave());
-  simulation.tick({ firePressed: true, grenade: true });
+  simulation.tick({ firePressed: true, slot: 1 });
   assert.deepEqual(simulation.state, beforeTick);
   for (let index = 0; index < 2; index++) {
     hero = generateSheriffHero(reference.random, hero.inventory);
@@ -89,7 +90,7 @@ test('v5 migration reconstructs only missing hero data without changing owned it
   simulation.state.player.traits[107] = 3; simulation.state.player.exp = 275;
   simulation.state.inventory[0]!.name = 'Preserved legacy shotgun';
   simulation.state.inventory[0]!.value += 1 / 3;
-  const legacy: Record<string, any> = simulation.toSave();
+  const legacy = asLegacyV6Save(simulation.toSave());
   legacy.version = 5; delete legacy.hero;
   delete legacy.player.traits[900]; delete legacy.player.traits[901];
   const before = structuredClone(legacy);

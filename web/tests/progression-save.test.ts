@@ -3,20 +3,21 @@ import assert from 'node:assert/strict';
 import { Simulation, type SimulationState } from '../src/simulation.ts';
 import { isOccupiedItem } from '../src/items.ts';
 import { TRAIT, SHERIFF_TRAITS, SHERIFF_CHOICE_ORDER } from '../src/progression.ts';
+import { asLegacyV6Save } from './legacy-save-support.ts';
 
 function completeOpeningBattle(): Simulation {
   const simulation = new Simulation(42);
   for (let i = 0; i < 5000 && simulation.state.phase === 'battle'; i++) {
     const enemy = simulation.state.enemies.filter(candidate => candidate.hp > 0 && candidate.x > 20).sort((a, b) => b.x - a.x)[0];
-    const player = simulation.state.player;
-    simulation.tick({ aimX: enemy?.x ?? 450, aimY: enemy?.y ?? 240, firePressed: Boolean(enemy) && player.reloadTicks === 0 && player.ammo > 0, reload: player.ammo === 0 || (!enemy && player.ammo < 3) });
+    const weapon = simulation.weapon!;
+    simulation.tick({ aimX: enemy?.x ?? 450, aimY: enemy?.y ?? 240, firePressed: Boolean(enemy) && weapon.reloadTime === 0 && weapon.ammo > 0, reload: weapon.ammo === 0 || (!enemy && weapon.ammo < 3) });
   }
   assert.equal(simulation.state.phase, 'victory');
   return simulation;
 }
 
 function asVersion2(state: SimulationState): Record<string, any> {
-  const value: Record<string, any> = structuredClone(state);
+  const value = asLegacyV6Save(state);
   value.version = 2;
   if (value.phase === 'victory' && value.town === null) value.gold += value.result.netReward;
   for (const field of ['bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance', 'town', 'totalMoney', 'hero']) delete value[field];
@@ -94,11 +95,11 @@ test('v2 battle migration preserves existing item metadata and its combat random
   const untouched = structuredClone(oldSave);
   const migrated = Simulation.fromSave(oldSave);
   assert.deepEqual(oldSave, untouched);
-  assert.equal(migrated.state.version, 6);
+  assert.equal(migrated.state.version, 7);
   assert.equal(migrated.state.rng, oldSave.rng);
   assert.deepEqual(migrated.state.inventory, oldSave.inventory);
   assert.deepEqual(migrated.state.waves, oldSave.waves);
-  assert.deepEqual(migrated.state.enemies, oldSave.enemies);
+  assert.deepEqual(migrated.state.enemies, oldSave.enemies.map((enemy: { kind: string }) => ({ ...enemy, appearance: enemy.kind === 'boss' ? 51 : 0 })));
   assert.equal(migrated.state.traitsProvenance, 'legacy-reconstructed');
   assert.equal(migrated.state.hero.provenance, 'legacy-reconstructed');
   assert.ok(migrated.state.player.traits[TRAIT.BASE_AIMING] >= 1);

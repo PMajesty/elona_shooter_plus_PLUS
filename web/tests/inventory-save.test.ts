@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { ItemFactory, createStartingInventory, isOccupiedItem, type Item } from '../src/items.ts';
 import { Simulation } from '../src/simulation.ts';
+import { asLegacyV6Save } from './legacy-save-support.ts';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/original-item-trace.json', import.meta.url), 'utf8'));
 const snapshots = fixture.records.filter((row: { type: string }) => row.type === 'snapshot');
@@ -15,7 +16,7 @@ function victory(): Simulation {
   return simulation;
 }
 function legacySave(simulation: Simulation): Record<string, any> {
-  const value: Record<string, any> = simulation.toSave();
+  const value = asLegacyV6Save(simulation.toSave());
   value.version = 1;
   if (value.phase === 'victory' && value.town === null) value.gold += value.result.netReward;
   for (const field of ['inventory', 'lootOffers', 'postbattle', 'inventoryProvenance', 'legacyReconstructionSeed', 'bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance', 'town', 'totalMoney', 'hero']) delete value[field];
@@ -41,8 +42,8 @@ test('battle completion generates captured original ordinary loot once and synch
   const simulation = new Simulation(12);
   simulation.state.loot = [...row.inputQueue];
   simulation.state.rng = row.seed;
-  simulation.state.player.ammo = 1;
-  simulation.state.player.grenades = 2;
+  simulation.state.inventory[0]!.ammo = 1;
+  simulation.state.inventory[1]!.ammo = 2;
   finishDay(simulation);
   assert.equal(simulation.state.phase, 'victory');
   assert.equal(simulation.state.postbattle, 'loot');
@@ -130,9 +131,17 @@ test('v1 battle migration is deterministic, preserves combat state and never mut
   const first = Simulation.fromSave(oldSave), second = Simulation.fromSave(oldSave);
   assert.deepEqual(oldSave, untouched);
   assert.deepEqual(first.state, second.state);
-  for (const [field, expected] of Object.entries(oldSave)) if (!['version', 'player'].includes(field)) assert.deepEqual(first.state[field as keyof typeof first.state], expected, field);
-  const { traits: _traits, ...restoredPlayer } = first.state.player;
-  assert.deepEqual(restoredPlayer, oldSave.player);
+  for (const [field, expected] of Object.entries(oldSave)) if (!['version', 'player', 'grenades', 'enemies'].includes(field)) assert.deepEqual(first.state[field as keyof typeof first.state], expected, field);
+  assert.deepEqual(first.state.enemies, oldSave.enemies.map((enemy: { kind: string }) => ({ ...enemy, appearance: enemy.kind === 'boss' ? 51 : 0 })));
+  assert.deepEqual(first.state.grenades, oldSave.grenades.map((grenade: object) => ({ ...grenade, damage: 45 })));
+  assert.deepEqual(first.state.protection, { counter: 0, blueMultiplierAdd: 0 });
+  const { traits: _traits, selectedSlot, weaponExp, ...restoredPlayer } = first.state.player;
+  const { ammo, reloadTicks, grenades, grenadeCooldown, weaponExp: oldWeaponExp, ...oldPlayer } = oldSave.player;
+  assert.deepEqual(restoredPlayer, oldPlayer);
+  assert.deepEqual(weaponExp, [0, 0, 0, oldWeaponExp, 0]);
+  assert.equal(selectedSlot, 0);
+  assert.equal(first.state.inventory[0]!.reloadTime, reloadTicks);
+  assert.deepEqual(first.state.itemCooldowns, [0, grenadeCooldown, 0, 0, 0]);
   assert.equal(first.state.inventoryProvenance, 'legacy-v1-reconstructed');
   assert.equal(first.state.legacyReconstructionSeed, oldSave.rng);
   assert.equal(first.state.inventory[0]!.ammo, oldSave.player.ammo);
@@ -171,7 +180,7 @@ test('current save rejects invalid item fields and inconsistent loot stages with
     { inventoryProvenance: 'unknown' }, { legacyReconstructionSeed: 42 },
     { inventoryProvenance: 'legacy-v1-reconstructed', legacyReconstructionSeed: 0 },
     { loot: [1001.5] }, { loot: [999] },
-    ...[{ id: 999 }, { type: 3 }, { graphic: 999 }, { ammo: -1 }, { ammo: 2 }, { value: Infinity }, { automatic: 'true' }, { attack: undefined }, { name: '' }].map(change => ({ inventory: [{ ...saved.inventory[0], ...change }, ...saved.inventory.slice(1)] })),
+    ...[{ id: 999 }, { type: 3 }, { graphic: 999 }, { ammo: -1 }, { ammo: 6 }, { value: Infinity }, { automatic: 'true' }, { attack: undefined }, { name: '' }].map(change => ({ inventory: [{ ...saved.inventory[0], ...change }, ...saved.inventory.slice(1)] })),
   ];
   for (const change of changes) {
     const candidate = { ...saved, ...change };

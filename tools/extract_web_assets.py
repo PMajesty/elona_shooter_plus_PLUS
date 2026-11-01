@@ -21,7 +21,8 @@ DEST = ROOT / "web/public/assets"
 CLIPS = {"charaPic": 677, "enemy_sheep": 910,
          "enemy_chicken": 1063, "enemy_rat": 1295, "enemy_crow": 981,
          "explosion": 2235, "itemPicture": 2113, "ammoBar": 2698, "radioButton": 2312,
-         "grenadeBody": 2275, "grenadeShadow": 2199, "bossHealthFill": 2411, "shopCoin": 1442}
+         "grenadeBody": 2275, "grenadeShadow": 2199, "bossHealthFill": 2411, "shopCoin": 1442,
+         "layhand": 2226, "itemTimer": 2370}
 BUTTONS = {"button_newGame": 2521, "button_continue": 2542, "button_help": 2579,
            "button_proceed": 1547, "button_gameMods": 1881,
            "button_townMission": 2753, "button_townCastle": 2763,
@@ -98,7 +99,7 @@ def static_screen(xml, name, tags, omit=(), offset=(0, 0), sprite_frames=None):
                 "height": image.height, "originX": 0, "originY": 0}
     output = copy.deepcopy(xml)
     target = output.find("tags")
-    # Диалог ремонта выбирает исходную карточку кадра 2 до появления окна.
+    # Диалоги выбирают исходную карточку до появления окна.
     for symbol, frame in (sprite_frames or {}).items():
         sprite = next(t for t in target if t.get("spriteId") == str(symbol))
         subtags = sprite.find("subTags")
@@ -403,6 +404,8 @@ def main():
         manifest["images"][name] = static_screen(xml, name, selected, offset=(0, -22))
     manifest["images"]["eventRepair"] = static_screen(xml, "eventRepair",
         placed_frame(sprites[2437].find("subTags"), 1), {"title", "text", "okButton"}, sprite_frames={2336: 2})
+    manifest["images"]["eventRest"] = static_screen(xml, "eventRest",
+        placed_frame(sprites[2437].find("subTags"), 1), {"title", "text", "okButton"}, sprite_frames={2336: 11})
     manifest["images"]["shopSaleDialog"] = static_screen(xml, "shopSaleDialog",
         placed_frame(sprites[2131].find("subTags"), 1), {"question", "yes", "no", "pop1", "pop2", "poparrow"})
     for name, image_id in {"background": 2491, "clouds": 2494, "town": 2743, "parchment": 1477}.items():
@@ -460,7 +463,7 @@ def main():
             "townHud applies the original eventGene bgAlpha.alpha=1",
             "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",
             "Town action labels are separate original foreground layers above their card buttons",
-            "Town scene and panels omit runtime HUD fields; Free Repair uses original event card frame 2",
+            "Town scene and panels omit runtime HUD fields; Free Repair/Rest use original event card frames 2/11",
             "gene and result retain offset (0,-26); application applies menu slide X offset",
             "Item quantities and radio labels are rendered by the application",
             "allyBack and allyFront retain source depths around separately selected charaPic poses",

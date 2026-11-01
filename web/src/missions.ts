@@ -1,19 +1,21 @@
 import { ENEMIES, type EnemyKind } from './content.ts';
 
 export interface LowLevelMission {
-  level: 0 | 1; fixedLv: number; strength: 0; power: number; powerOrg: number; reward: number;
+  level: 0 | 1 | 2; fixedLv: number; strength: 0; power: number; powerOrg: number; reward: number;
   hire: false; ragnarok: false; wave: 5; spawnRate: number; group: number[];
   waveType: 0; loot: number[]; newWave: true; time: 30; bossDay: false; bossWave: number;
-  note: ''; hpFix: 1; dmgFix: 1; expFix: 1; absorbFix: 0; bossKilled: 0;
+  note: ''; hpFix: 1; dmgFix: 1; expFix: 1; absorbFix: number; bossKilled: 0;
   noDamage: true; criticalCount: 0; resultOther: 0;
 }
 
 export interface GeneratedWave { enemies: EnemyKind[]; delays: number[]; initialCount: number }
 export interface GeneratedWaves { waves: GeneratedWave[]; power: number; group: number[] }
 
-// Ограничение явно отражает покрытые обычные миссии без медалей и улучшений.
-export function generateLowLevelMission(level: 0 | 1, calendarDay: 1 | 2, random: () => number): LowLevelMission {
-  if ((level !== 0 && level !== 1) || (calendarDay !== 1 && calendarDay !== 2)) throw new RangeError('Only the opening and prepared second-day missions are supported.');
+// Миссия 2 готовится вечером второго дня; её бой ещё не входит в эту границу.
+export function generateLowLevelMission(level: 0 | 1 | 2, calendarDay: 1 | 2, random: () => number, options: { absorbFix?: number } = {}): LowLevelMission {
+  if (![0, 1, 2].includes(level) || (calendarDay !== 1 && calendarDay !== 2)) throw new RangeError('Only mission preparation for the first two towns is supported.');
+  const absorbFix = options.absorbFix ?? 0;
+  if (![0, 0.01, 0.02, 0.03, 0.04].includes(absorbFix)) throw new RangeError('Unsupported medal absorption.');
   const loot: number[] = [];
   if (random() > 0.97) loot.push(1038);
   loot.push(calendarDay === 1 ? 1117 : 1103);
@@ -23,7 +25,7 @@ export function generateLowLevelMission(level: 0 | 1, calendarDay: 1 | 2, random
     level, fixedLv: level, strength: 0, power, powerOrg: power, reward: 600 + level * 20,
     hire: false, ragnarok: false, wave: 5, spawnRate: 15 - level / 5, group: [], waveType: 0,
     loot, newWave: true, time: 30, bossDay: false, bossWave: level === 0 ? 2 : rolledBossWave,
-    note: '', hpFix: 1, dmgFix: 1, expFix: 1, absorbFix: 0, bossKilled: 0,
+    note: '', hpFix: 1, dmgFix: 1, expFix: 1, absorbFix, bossKilled: 0,
     noDamage: true, criticalCount: 0, resultOther: 0,
   };
 }

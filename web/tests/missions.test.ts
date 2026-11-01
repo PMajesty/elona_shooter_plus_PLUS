@@ -29,3 +29,15 @@ test('prepared second-day waves retain calendar-one mission loot and fractional 
   assert.ok(generated.waves.every(wave => wave.delays.every(delay => !Number.isInteger(delay))));
   assert.equal(generated.waves.flatMap(wave => wave.enemies).filter(kind => kind === 'boss').length, 1);
 });
+
+test('second-town preparation retains medal absorption without enabling unsupported third-day waves', () => {
+  let draws = 0;
+  const mission = generateLowLevelMission(2, 2, () => { draws++; return 0.5; }, { absorbFix: 0.01 });
+  assert.equal(draws, 2);
+  assert.equal(mission.powerOrg, 1040);
+  assert.equal(mission.reward, 640);
+  assert.equal(mission.spawnRate, 14.6);
+  assert.equal(mission.absorbFix, 0.01);
+  assert.deepEqual(mission.loot, [1103]);
+  assert.throws(() => generateLowLevelWaves(mission, 2, () => 0.5), /Unsupported low-level wave configuration/);
+});
