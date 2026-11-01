@@ -233,6 +233,18 @@ export class ItemFactory {
     return { offers, queue };
   }
 
+  bossLoot(bossKilled: number, modifiersOnly = false, previousOffers: readonly (Item | null)[] = []): (Item | null)[] {
+    const offers: (Item | null)[] = Array(8).fill(null);
+    const looterFix = this.context.looter === 0 ? 1 : 1.05 + this.context.looter * 0.08;
+    const targetValue = int((this.context.day * 60 + 500) * looterFix);
+    for (let index = 0; index < Math.min(int(bossKilled / 2) + 1, 8); index++) {
+      // clearGameInv обнуляет num, но не остальные поля; опция модов пропускает случайный выбор режима.
+      const mode = modifiersOnly || this.random() > 0.8 ? 3 : 2;
+      offers[index] = this.randomItem(targetValue, mode, previousOffers[index] ?? undefined);
+    }
+    return offers;
+  }
+
   startingInventory(): (Item | null)[] {
     const slots: (Item | null)[] = Array(PLAYER_INVENTORY_SLOTS).fill(null);
     // generatePlayer сначала создаёт гранаты, затем временный лук, заменяемый оружием класса.

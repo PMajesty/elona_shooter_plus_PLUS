@@ -37,3 +37,19 @@ test('source selling preserves statue value, truncates equipment value, and remo
   assert.equal(sellInventoryItem(slots, 0), null);
   assert.equal(slots[1], gun);
 });
+
+test('boss prizes replace old offers without mutating their metadata and cap the reward slots', () => {
+  // Первый кандидат — мод ID 8, поэтому отклонённое оружие не перезаписывает старые поля.
+  const factory = new ItemFactory(() => 0.18);
+  const previous = Array.from({ length: 8 }, () => factory.generate(3));
+  previous[0].num = 0;
+  const before = structuredClone(previous);
+  const offers = factory.bossLoot(16, true, previous);
+  assert.equal(offers.length, 8);
+  assert.ok(offers.every(item => item?.type === 5 && item.num === 1));
+  assert.deepEqual(previous, before);
+  assert.equal(offers[0]?.baseAccuracy, previous[0].baseAccuracy);
+  const fewer = factory.bossLoot(1, true, previous);
+  assert.equal(fewer.filter(Boolean).length, 1);
+  assert.ok(fewer.slice(1).every(item => item === null));
+});

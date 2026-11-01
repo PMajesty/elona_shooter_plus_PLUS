@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { ITEM_TYPE, itemPrice, type Item } from './items.ts';
 
 export type LootArea = 'offers' | 'inventory';
-export interface LootViewState { inventory: (Item | null)[]; lootOffers: (Item | null)[] }
+export interface LootViewState { inventory: (Item | null)[]; lootOffers: (Item | null)[]; bossKilled?: number }
 export interface LootViewManifest {
   images: Record<string, { originX: number; originY: number; width: number; height: number }>;
   clips: Record<string, { originX: number; originY: number; frameWidth: number; frameHeight: number }>;
@@ -45,7 +45,7 @@ function stats(item: Item): string {
 }
 
 /** Исходный выбор двумя нажатиями: взять предмет, затем указать ячейку назначения. */
-export function createLootView(scene: Phaser.Scene, state: LootViewState, manifest: LootViewManifest, callbacks: LootViewCallbacks): Phaser.GameObjects.Container {
+export function createLootView(scene: Phaser.Scene, state: LootViewState, manifest: LootViewManifest, callbacks: LootViewCallbacks, mode: 'ordinary' | 'boss' = 'ordinary'): Phaser.GameObjects.Container {
   const root = scene.add.container(MENU_X, 0);
   root.setName('ordinary-loot-view');
   const text = (x: number, y: number, value: string, size = 13, color = '#322316') => {
@@ -57,7 +57,8 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
     const object = scene.add.image(x - asset.originX, y - asset.originY, key).setOrigin(0);
     root.add(object); return object;
   };
-  image('loot', 0, 0);
+  image(mode === 'boss' ? 'lootBoss' : 'loot', 0, 0);
+  if (mode === 'boss') text(295, 78, `You've successfully killed ${state.bossKilled ?? 0} boss(es) therefore received some prizes!`, 12).setWordWrapWidth(238);
   const background = scene.add.zone(-MENU_X, 0, 620, 380).setOrigin(0).setInteractive();
   root.add(background);
   const status = text(140, 262, '', 12, '#8e2f20').setWordWrapWidth(390);

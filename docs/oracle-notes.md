@@ -15,6 +15,11 @@ Its observations come from executing the original `reload`, `reloading`,
 
 ## Initialization and clock boundary
 
+The shared test bootstrap sets only `frame1`'s `skipLoader` and `skipAd` flags
+to 1. Original `frame3` still enters the original initialization branch. This
+removes the retired ad and animated intro from method fixtures; it does not
+change game clocks, gameplay initialization, comparison methods or assets.
+
 After the original title initializer completes, the injected driver follows the
 same New Game branch as the mouse handler, selects Sheriff through `updateGene`,
 and sets the original Proceed fade. Original event transitions call
@@ -49,6 +54,10 @@ With the tested Ruffle 0.7.1 build, attach the public
 `player.ruffle().traceObserver` immediately after awaiting `load()`: setting it
 before the internal player exists loses the observer. The fixture's normal
 startup frames leave time to attach before the scenarios run.
+Separate `ELONA_STARTUP:` records report frame/phase progress and elapsed time
+until battle initialization. They are saved under `report.startup` and excluded
+from canonical method-record equality, because startup timing is not an expected
+gameplay result.
 Each structured record is one trace line prefixed `ELONA_ORACLE:` followed by
 JSON. Other original traces are not oracle records. Automatic execution needs
 no mouse or keyboard input. With script access enabled, an optional callback
@@ -288,10 +297,10 @@ copied from the port.
 An earlier browser attempt timed out at the Kongregate intro before any oracle
 records appeared. Another in-app browser tab was active during the initial
 attempt; closing it and reloading the sole visible oracle tab subsequently
-completed both runs without rebuilding the SWF. Inactive-surface throttling is
-the suspected cause, not an isolated causal finding. Keep the oracle surface
-visible when capturing these browser-driven fixtures and treat a pre-oracle
-startup timeout separately from a failed original-method assertion.
+completed both runs without rebuilding the SWF. Inactive-surface throttling was
+a hypothesis, not an isolated causal finding. The later startup probe below
+identified slow intro progression and removed that dependency from test builds;
+a pre-oracle timeout remains distinct from a failed original-method assertion.
 
 A read-only integrity check exported MainTimeline back from the actual combat
 SWF and confirmed that the deferred-title startup fix, `oracleBootstrap`,
@@ -308,7 +317,7 @@ suite. Original vector `mc.hitTestPoint(x, y, true)` and the original shadow
 display object supply all mask data. No exported raster masks or TypeScript
 collision rules are copied into the reference.
 
-The accepted 18-case capture covers these requested frames at registration position (200, 220):
+The initial 18-case capture covers these requested frames at registration position (200, 220):
 
 | Enemy | Original ID | Requested frames |
 | --- | --- | --- |
@@ -316,6 +325,9 @@ The accepted 18-case capture covers these requested frames at registration posit
 | Rat | 17 | 14, 41, 93 |
 | Chicken | 19 | 5, 37, 105, 208 |
 | Crow | 6 | 3, 30, 46 |
+
+The accepted 19-case fixture adds a sheep explicitly visiting frames 32 then 5
+at (200, 220), so two identical final poses can have different shadow state.
 
 Each type also uses its first listed frame at requested position
 (200.375, 220.625). The trace records the actual coordinates returned by Flash
@@ -352,7 +364,7 @@ Protocol version 1 uses `kind: 'geometry'` and the usual trace prefix:
   `bodyBits` samples the complete original enemy clip, `shadowBits` samples its
   shadow, and `combinedBits` is
   `body && !(shadowHit === false && shadow)`, matching original `procHit`.
-- `complete`: `ok: true`, `snapshots: 18`, `sampledPoints: 73728`.
+- `complete`: `ok: true`, `snapshots: 19`, `sampledPoints: 77824`.
 - `error`: `message` and the current `caseIndex`.
 
 The archived `.build/oracle/geometry-before-sheep-transition/geometry-browser-report.json` confirms two successful,
@@ -373,9 +385,14 @@ outside those regions is not asserted by these snapshots.
 
 ### Contour comparison and accepted fixture
 
-The captured original trace was accepted after both complete runs matched. Its
-capture time is `2026-11-01T19:44:48.562Z`; the trace SHA-256 is
-`f682b7ee1d364767d3063ff2ff7ed821bc95d3f297a745eff93249801c7b49f8`.
+The current original trace was accepted after both complete 19-case runs matched.
+Its capture time is `2026-11-01T20:22:50.995Z`; the trace SHA-256 is
+`9c6b91049b5b901016e4f26f3a1e05fac349df4bb1497ad7af1405b46b9e5f6e`.
+Its instrumented SWF SHA-256 is
+`f533d0e01c221a042bcf8cd0aa215261632b461dc275249dc1f3a66f6d7d89d9`.
+The complete browser report is 513,722 bytes, with 21 records per run. Its first
+18 snapshots are identical to the archived initial capture; the added case is
+the sheep 32-to-5 transition described below.
 The checked-in `web/tests/fixtures/original-geometry-trace.json` preserves those
 original records, runtime, capture time, original/instrumented SWF hashes and
 trace hash. Expected hit bits come from the original SWF, not the port's output.
@@ -422,7 +439,7 @@ Before evidence remains in `.build/oracle/geometry-comparison-before.json` and
 `.build/oracle/geometry-comparison-report.json`. `.build/` is an ignored local
 evidence cache; the accepted original fixture and regression test are checked in.
 
-The result proves the sampled combined predicate at these 18 poses/positions.
+The result proves the sampled combined predicate at these 19 poses/positions.
 It does not establish all animation frames, the continuous subpixel domain,
 geometry outside the grids, native Adobe Flash behavior, boss geometry or
 dropping rats. The extractor fixes nested sprite timelines at frame 1; the only
@@ -434,32 +451,48 @@ random draw when a pellet intersects a corpse, making that a meaningful future
 comparison rather than a cosmetic-only omission. Full shotgun targeting and
 moving-enemy integration need their own checks.
 
-Review also identified a source-supported state-history risk, not yet confirmed
-by a runtime grid: sheep frame 32 sets `shadowHit = false`, while Sheriff
-knockback returns the clip to the `alive` label at frame 5 without an apparent
-restoring assignment. The port currently derives shadow exclusion from the
-current frame alone. The fixture's fresh frame-5 sheep does not exercise the
-32-to-5 transition, so its passing grid cannot establish that transition's shadow
-behavior. A bounded original transition capture is the next informative check;
-this frame-only assumption already existed in the former alpha-mask path.
+### Startup diagnosis and sheep shadow history
 
-The builder now includes one additional sheep case with `poseFrames: [32, 5]`,
-making its pending suite 19 snapshots and 77,824 sampled points. That diagnostic
-SWF compiled with resource preservation and SHA-256
-`052ba65780b52e584bcf9a18ddb68ccc2378ec3436c11ffe103c6f451f69cae7`.
-Browser attempts stalled during the intro without emitting oracle records;
-bounded visibility and explicit background-execution experiments did not obtain
-a transition observation. These are harness-startup failures, not geometry-test
-failures. A failed attempt is preserved in
-`.build/oracle/geometry-background-startup-failure.json`; the prior successful
-SWF, build report, browser capture and exact comparison are archived under
-`.build/oracle/geometry-before-sheep-transition/`.
-The checked-in fixture and accepted production comparison therefore still have
-18 cases. The 32-to-5 behavior remains unverified, and no persisted-shadow-state
-change was made for this milestone. Do not substitute the compiled 19-case
-builder's status for successful runtime capture or update fixture expectations
-from a timeout. Reference-startup diagnosis can resume separately without
-blocking the validated playable slice.
+The first 19-case attempts timed out with no canonical records. An early
+`ELONA_STARTUP` observer then proved that the intro was advancing, rather than
+establishing a stalled timeline or missing observer. In that capture, the logo
+advanced about five frames per second and the title appeared at 44,126 ms;
+character creation was still progressing when the unchanged 60-second budget
+expired. The exact cause of the slow browser scheduling was not isolated.
+The probe SWF, build report and capture are preserved as
+`.build/oracle/startup-diagnosis/slow-intro-*`. Earlier visibility/background
+options did not establish a remedy and were removed.
+
+The bounded remedy skips only the diagnostic copy's ad/intro flags through
+`instrument_startup()` in `tools/build_oracle.py`. The original init, New Game,
+Sheriff selection, Proceed fade and battle initialization still execute. In the
+successful two-run capture, title appeared at startup tick 3 in both runs, and
+both suites completed within the original 60-second timeout. The reference
+runner no longer needs repeated user-assisted intro restarts for this case.
+This result does not assert a general browser scheduling fix. No original
+ActionScript baseline, runtime game clock or resource was changed.
+
+The added original sheep case visits frame 32 and then frame 5. It observes
+`shadowHit: false`, giving 410 combined hits; a fresh frame-5 sheep gives 486.
+The previous frame-only port rule produced exactly 76 false positives and no
+false negatives, all in the added case. That before report is preserved in
+`.build/oracle/geometry-shadow-history-before.json`.
+
+The port now persists `EnemyState.shadowHit`. Its shared `shadowHitAtFrame`
+helper follows original frame-script assignments: sheep frame 1/107 enables
+shadow hits, frame 32 disables them, and frame 5 retains the existing state.
+The production collision path receives that state. The comparator reconstructs
+it from the captured spawn/pose sequence through the same production helper;
+it does not feed the expected original flag into the port calculation. The
+current comparison matches all 77,824 points with zero false positives or
+negatives, without changing the contour asset or tolerances.
+
+Focused tests exercise the actual simulation attack, Sheriff knockback, alive
+loop, death and save/restore paths. Old saves that lack the flag cannot reveal
+past attacks; they retain the former frame-derived behavior without consuming
+RNG, then persist subsequent state. Explicit non-boolean flags are rejected.
+This corrects a demonstrated port discrepancy, not the separately reported
+late-game hitbox problem.
 
 ### Regenerating and comparing geometry
 
@@ -473,7 +506,7 @@ python tools/serve_oracle.py --port 5176
 Open `http://127.0.0.1:5176/?suite=geometry` in a visible browser and keep that
 surface active until both runs finish. The harness saves the complete original
 report to `.build/oracle/geometry-browser-report.json`. A compiler success alone
-does not replace this capture. The current builder targets the pending 19-case
+does not replace this capture. The current builder targets the accepted 19-case
 suite above. Retain the accepted fixture unless a new original
 capture has been checked for provenance, successful completion and repeatability.
 
@@ -483,7 +516,7 @@ In another terminal, regenerate assets and run the production comparison:
 python tools/extract_web_assets.py
 cd web
 node --experimental-strip-types scripts/compare-geometry-reference.ts
-node --experimental-strip-types --test tests/geometry-reference.test.ts
+node --experimental-strip-types --test tests/geometry-reference.test.ts tests/enemy-shadow.test.ts
 ```
 
 The main asset extractor includes contour generation and preserves the original
@@ -493,10 +526,9 @@ asset. The comparator requires two identical successful original runs and writes
 every mismatch, if any, to its report; any discrepancy makes it exit nonzero.
 The ordinary regression test uses the checked-in original fixture and production
 geometry asset, so it does not need a new browser capture or ignored build cache.
-While the 19-case capture remains pending, the archived accepted comparison can
-be rerun from `web/` with
+The archived initial 18-case comparison can still be rerun from `web/` with
 `node --experimental-strip-types scripts/compare-geometry-reference.ts ../.build/oracle/geometry-before-sheep-transition/geometry-browser-report.json`.
-The default report path currently belongs to the unsuccessful follow-up capture.
+The default report path now contains the successful 19-case follow-up capture.
 
 This is a reference observation, not a requirement to preserve collision bugs.
 Per the current user direction, observable gameplay pacing and balance matter;
@@ -510,29 +542,35 @@ new intended behavior with its own regression check.
 ## Original item and ordinary-loot oracle
 
 `tools/build_loot_oracle.py` runs the preserved ActionScript `generateStuff`,
-`randomStuff` and `generateLoot` methods after actual Sheriff initialization,
+`randomStuff`, `generateLoot` and `generateLootBoss` methods after actual Sheriff initialization,
 with a controlled xorshift32 stream. The boundary covers day 1, zero Engineer
 and Looter, no recycle medal and normal weapon-level mode. Starting-item cases
 include the original grenade → temporary bow → shotgun calls and overrides;
 they exclude the preceding character-generation random draws.
 
-The capture on 2026-11-01 used `@ruffle-rs/ruffle 0.7.1`. Both runtime runs were
-identical: each contained ready, 139 snapshots and successful completion. All
-139 snapshots matched on the first production comparison:
+The capture at 2026-11-01 20:25:09 UTC used `@ruffle-rs/ruffle 0.7.1`. Both runtime
+runs were identical: each contained ready, 157 snapshots and successful
+completion. All 157 snapshots matched the production comparison, and the
+original 139 snapshot records were unchanged from the previously accepted trace:
 
 - 116 base-item cases: all 58 original IDs at seeds 42 and 3735928559.
 - 15 random-item cases: modes 0–4 at seeds 42, 1 and 3735928559, target value 500.
 - Six ordinary-loot cases: queues `[1117]` and `[1117,6,28,30]` at those three seeds.
 - Two starting-item sequences at seeds 42 and 3735928559.
+- 18 boss-prize cases: three seeds across counts 1/2/16, the eight-slot cap,
+  modifier-only selection and fresh/reused slots (including `num = 0` metadata).
 
-Comparison checks all 33 observed item fields, ordinary offer slots and consumed
+Comparison checks all 33 observed item fields, ordinary/boss offer slots and consumed
 guarantee markers, plus exact RNG draw count and final state. The build preserves
 all 3491 root tags, non-code payloads, tag order and frame header; only DoABC tag
 2782 changes. The diagnostic SWF uses version 10 for the compiler output.
+The shared diagnostic startup sets only the original `skipLoader`/`skipAd`
+flags to skip the intro; actual New Game, Sheriff initialization and compared
+methods still execute. Separate startup observations are excluded from the trace.
 
 - Original SWF SHA-256: `4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663`.
-- Instrumented SWF SHA-256: `f3442688510f347914d2fd7dcd2e379bb676dbd4b727053140072e2f7df72289`.
-- Captured trace SHA-256: `4737eab10c90f8bbb87e550e1ff7070c14fb03f303efefee47cffaa743af4c2b`.
+- Instrumented SWF SHA-256: `82b73f64662cd400a54a4a6fb1197c25e14247706c455e8a08bf5e30791c9aa9`.
+- Captured trace SHA-256: `31ddf186413fd024af1e38c253ba8af5231ca3eaeb7d6ef56691b57c0c549efe`.
 
 Evidence is saved in `.build/oracle/loot-build-report.json`,
 `.build/oracle/loot-browser-report.json` and
@@ -558,7 +596,46 @@ browser or ignored build cache. Replacing that accepted fixture requires a
 checked original capture, not regeneration from TypeScript expectations.
 
 These cases establish item-generation parity within the stated boundary, not
-drag/drop or visual parity, boss prizes, skill progression, town/shop behavior,
+pointer-interaction or visual parity, skill progression, town/shop behavior,
 modifier mounting, later days or playable support for every generated weapon.
 See [item integration notes](../web/docs/items-notes.md) for the current
-Simulation v2 save migration and ordinary-loot screen.
+Simulation v3 save migration and ordinary/boss loot screens.
+
+## Original Sheriff skill-choice oracle
+
+`tools/build_progression_oracle.py` exercises the preserved `listTrait`,
+`listTrait2` and trait `REF`/`CALC` methods after actual Sheriff initialization.
+The test boundary supplies level 2, known initial traits and controlled hidden
+base values, with Focus disabled. It is a method comparison; preceding character
+generation and growth are outside the boundary.
+
+The capture at 2026-11-01 20:27:08 UTC used `@ruffle-rs/ruffle 0.7.1`. Both runs
+were identical, each with ready, nine snapshots and successful completion.
+All nine snapshots match the production progression module: seeds 42, 1 and
+3735928559 at Capable levels 0, 1 and 2. Checks cover the original candidate
+order, eligible pool, three to five selected skills, all 15 current/next effect
+descriptions and preview labels, level requirements, maximum levels, raw effect
+calculations, RNG draw count and final state.
+
+- Original SWF SHA-256: `4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663`.
+- Instrumented SWF SHA-256: `43871c046326abf03f452e386a52dd94b1c8b15e918a8f794fa6700766d9f240`.
+- Captured trace SHA-256: `258e2b8b174de014162b651be314f15a46cf0fd64f5066f7a2dc2f5b064071c1`.
+
+The build preserves all non-code tag payloads, ordering and frame metadata.
+It uses the shared diagnostic intro/ad skip and separate startup observations.
+Evidence is under `.build/oracle/progression-*-report.json`; the accepted fixture
+is `web/tests/fixtures/original-progression-trace.json`.
+
+Regenerate with `python tools/build_progression_oracle.py`, start
+`python tools/serve_oracle.py --port 5176`, then open
+`http://127.0.0.1:5176/?suite=progression`. After two successful identical runs,
+run `npm.cmd run test:progression-reference` from `web/`. Ordinary `npm.cmd test`
+uses the accepted fixture without requiring a browser or ignored build cache.
+Expected values must come from a checked original capture, never the port.
+
+This boundary does not operate original radio buttons or commit a selection.
+Other classes, Focus, exhausted-pool fallback, hidden-stat growth, subsequent
+combat effects and live visual matching remain separate work. Current REF labels
+and category/max-label metadata are captured but not compared by this screen
+adapter. Browser checks independently cover selecting, previewing, committing,
+reload/Continue and migration from the earlier result screen.

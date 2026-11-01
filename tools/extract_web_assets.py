@@ -303,13 +303,15 @@ def main():
     omit_result = {"closeButton", "field", "before", "now", "taken", "reward", "wage", "castle", "other",
                    "tax", "mc_playMore", "procButton"}
     omit_loot = {"closeButton", "popup", "warning", "procButton"}
+    omit_level = {"closeButton", "procButton", "itemDesc", "itemDesc2", "now"}
     for name, timeline, frame, omit, offset in [
         ("title", tags, 22, omit_title, (0, 0)), ("battle", tags, 27, omit_battle, (0, 0)),
         ("townHud", tags, 65, omit_battle | {"missionButton", "shopButton", "castleButton", "charaButton", "equipButton", "medalButton"}, (0, 0)),
         ("gene", sprites[1995].find("subTags"), 125, omit_gene, (0, -26)),
         ("result", sprites[1995].find("subTags"), 14, omit_result, (0, -26)),
         ("loot", sprites[1995].find("subTags"), 89, omit_loot, (0, -26)),
-        ("lootBoss", sprites[1995].find("subTags"), 100, omit_loot | {"lootText"}, (0, -26))]:
+        ("lootBoss", sprites[1995].find("subTags"), 100, omit_loot | {"lootText"}, (0, -26)),
+        ("level", sprites[1995].find("subTags"), 148, omit_level, (0, -26))]:
         manifest["images"][name] = static_screen(xml, name, placed_frame(timeline, frame), omit, offset)
     for name, image_id in {"background": 2491, "clouds": 2494, "town": 2743, "parchment": 1477}.items():
         source = next((CACHE / "images").glob(f"{image_id}.*"))

@@ -1,6 +1,7 @@
 # Browser port status
 
-Current milestone: **opening battle, ordinary loot and persistent inventory**, not a complete remake.
+Current milestone: **opening battle, ordinary and boss loot, earned Sheriff
+skill choices and persistent rewards**, not a complete remake.
 The browser game runs independently of Flash and Ruffle. The preserved game
 remains the reference for behavior, content and appearance.
 
@@ -35,12 +36,17 @@ sequence rather than rushing speculative changes.
 - Local browser saves, Continue, and validated JSON save import / export.
 - Ordinary postbattle loot with original item instances, six inventory slots,
   click-to-pick/place swaps and one-time generation preserved through saves.
+- Boss prizes when the opening boss was killed, followed by earned Sheriff
+  skill choices with original candidate order, eligibility, descriptions and
+  previews. Offers, pending choices and selected traits survive reloads.
 
-Other starting classes are visible but unavailable. Town management, advancing
-to later days, recruitment, equipment/shop interactions, boss prizes, earned skill
-choices, and importing original Flash saves are not implemented. Finishing
-the opening battle allows ordinary loot collection, saves its result and returns to the title; it does not begin
-a complete campaign.
+Other starting classes are visible but unavailable. Town management, Day 2 and
+later days, recruitment, equipment/shop interactions and importing original Flash
+saves are not implemented. Chosen skills persist, but their effects on later
+combat and town systems remain to be connected. Hidden base aiming/teamwork
+rolls and growth remain unknown. Finishing the opening battle advances through
+ordinary loot, earned boss loot, earned skill choices and results, then returns
+to the title; it does not begin a complete campaign.
 
 ## Architecture
 
@@ -55,17 +61,30 @@ character poses and original frame actions. Ordinary-enemy browser hit testing
 uses original filled shape contours and placement matrices. Bitmap transparency
 does not define the original hit regions. Bosses retain a separate alpha path;
 headless simulation callers can supply their own hit-test callback.
+The ordinary collision path also receives persisted shadow state: a sheep
+returning from attack to walking retains the original shadow exclusion.
+
+`items.ts` owns generated item instances and loot; `progression.ts` owns the
+implemented Sheriff choices and previews. `loot-view.ts` and `skill-view.ts`
+render these stages through the normal postbattle flow. Combat effects of new
+equipment and earned traits are a separate, unfinished integration boundary.
 
 `storage.ts` stores a versioned browser-port save in local storage. The simulation
 includes its random-generator state so a restored port save can continue its own
 sequence. That generator is not Flash's `Math.random()` and does not reproduce
 the original game's random sequence.
 
-Version 2 stores full generated items, loot offers, postbattle stage and inventory
-provenance. New Game generates starter equipment with the ordinary gameplay RNG
-before mission generation. Version 1 saves lacked item metadata; their migration
-uses a separate deterministic reconstruction stream while preserving saved combat
-state and battle RNG. This limitation is explicit in the saved provenance.
+Version 3 stores full generated items, boss-kill tracking, postbattle stage,
+pending skill choices, known trait levels and reconstruction provenance. New
+Game generates starter equipment with the ordinary gameplay RNG before mission
+generation. Version 1 saves lacked item metadata; their migration uses a separate
+deterministic reconstruction stream while preserving saved combat state and RNG.
+Version 2 item instances remain intact. Both older versions reconstruct known
+traits and infer boss-kill state with explicit provenance; hidden stats remain
+absent. A legacy result that omitted boss/skill rewards resumes at the first
+still-owed stage, consuming normal saved RNG once for newly generated rewards.
+Subsequent version 3 reloads do not reroll them. Saves missing shadow history use
+the former frame-derived rule, then persist future state changes.
 
 `tools/extract_web_assets.py` extracts selected assets from the preserved SWF,
 packages atlases and records registration offsets. It also calls
@@ -99,31 +118,47 @@ pressing Space after cooldown replenished them to five. The production bundle
 also loaded under `/elona/` and reached combat through New Game and Proceed,
 with enemies visibly spawning and no observed console errors.
 
-The latest ordinary regression run passed 33 tests. Independent original-SWF
-fixtures match 72 reload snapshots and three seeded first-day generation
+The integrated suite passes 51 tests covering simulation, items, reward
+transitions, migration, invalid imports and original-reference fixtures;
+typecheck and the candidate release build also pass. Detailed run evidence is
+recorded in `port-verification.json`. Independent original-SWF fixtures match 72 reload
+snapshots and three seeded first-day generation
 snapshots, plus 21 spawn and single-pellet snapshots. The point tests supply
 original body/shadow classification as input and test the production damage and
 critical-region rules. Separate geometry fixtures test the production contour
-implementation, and 139 independent original snapshots cover item generation,
-ordinary loot and starting inventory with exact RNG accounting.
+implementation across 19 cases / 77,824 points, including sheep attack-to-walk
+history. The 157 item snapshots cover item generation, ordinary and boss loot
+and starting inventory with exact RNG accounting; the earlier 139 observations
+are unchanged. Nine progression cases cover three seeds and Capable levels
+0/1/2, all 15 Sheriff previews, candidate order, eligibility and RNG usage.
 Deliberate negative controls demonstrate that missing per-shell
 feedback and an altered random stream are detected. The original comparisons
 already exposed and corrected omitted special-loot and fly-filter random draws.
 
 A separate automatic run exercised 96 first-day scenarios across 32 seeds and
-three input policies, including 951 JSON save/resume checkpoints and 121,588
-simulation frames. Restored state and events matched uninterrupted runs. This
+three input policies, including 1,173 JSON save/resume checkpoints, 222 reward
+transitions and 121,588 simulation frames. Restored state and events matched
+uninterrupted runs through ordinary loot, boss prizes, skill choices and results. This
 checks port stability and replay, not fidelity to unimplemented original rules.
 It uses production ordinary-enemy contours; boss collision retains a documented
 rectangular fallback in this headless runner.
 
-The current browser candidate also reached ordinary loot from a normal-play
+The earlier ordinary-loot browser milestone also reached loot from a normal-play
 checkpoint at tick 1658, 823 gold and 36/40 castle HP. Collecting the rat statue,
 lossless swaps, page reload/Continue, corrupt-import rejection, pickup cancellation
-and advancement to results were observed through ordinary UI. Exported loot and
-result saves retained RNG state 2255067545 and the same collected item metadata.
+and advancement to results were observed through ordinary UI. In that earlier
+milestone, exported loot/result saves retained RNG state 2255067545 and the same
+collected item metadata. The new reward stages consume their own original draws;
+that older result RNG is not an expectation for the expanded reward sequence.
 The checkpoint was generated by a headless aimed player; this is a transition
 test, not a complete browser playthrough or original-game parity proof.
+
+In the expanded reward flow, an actual browser import of a version 2 result
+resumed eight boss offers, then skill choices `[100, 107, 105]`. Selecting
+Reloading (107) reached results with the same inventory and RNG state 91036 as
+the equivalent direct version 3 route. This verifies that observed legacy
+result checkpoint; broader save validation and rejected imports have separate
+automated coverage.
 
 Browser checks also cover manual reload animation restarts, Space resuming pause,
 and original boss health bars at full, half and zero HP. Character-body textures
@@ -145,6 +180,9 @@ Known limits:
   partially verified. Static asset preservation does not prove identical play.
 - The implementation covers one class and one mission. Definitions present in
   an atlas or source table do not imply the corresponding full feature works.
+- Chosen Sheriff traits are saved, but their effects, equipment requirements,
+  weapon changes and modifier mounting are not connected to future combat.
+  Hidden base aiming/teamwork rolls and their level-up growth are not ported.
 - Save migration currently accepts the browser-port format only. Browser storage
   is local to the site and browser profile; exported files provide portability.
 - No comparative performance benchmark establishes an improvement over Flash or
@@ -165,9 +203,11 @@ ordinary simulation; critical kills also play the selected original voice line.
 The initial living sister is assumed until sister damage is ported.
 
 The contour comparison exposed and corrected early-enemy targeting that had been
-too strict with alpha masks. Next combat checks should address animation history,
-full shotgun spread and corpse interactions, followed by native clock
-ordering. A test-only instrumented SWF and
+too strict with alpha masks. The accepted sheep attack-to-walk case then exposed
+76 false-positive hits caused by discarding shadow history; persisted state now
+matches all 19 sampled grids exactly. Other animation histories, full shotgun
+spread and corpse interactions remain unverified. Investigate clock ordering
+when needed to explain a material pacing or behavior difference. A test-only instrumented SWF and
 automatic browser runner live under `.build/oracle/`; builders and runner source
 are in `tools/`. Preserve the production preview while candidates are validated.
 Manually advancing original methods does not establish native timer/frame
@@ -176,12 +216,11 @@ scheduling equivalence. Record each comparison's actual boundary and limitations
 ### Campaign continuation after the reference-test slice
 
 The original victory path is Clear, normal loot, earned boss loot, earned skill
-choices, financial result and town. Item instances and ordinary loot are integrated;
-implement the remaining mandatory rewards before activating Day 2. A direct result-to-Day-2 shortcut
-would discard progression. The next useful campaign milestone is collecting or
-leaving real prizes, making earned Sheriff skill choices, reaching town, using
-Free Repair and saving/reloading that state. Equipment and chosen skills must
-affect combat before the following mission is enabled.
+choices, financial result and town. Item instances and the mandatory first-day
+reward stages are integrated through results. The next useful campaign milestone
+is continuing those results into town, using Free Repair and saving/reloading
+that state. Equipment and chosen skills must affect combat before the following
+mission is enabled; a direct result-to-Day-2 shortcut would omit that preparation.
 
 The following slice should allow two connected days through the ordinary UI,
 with rewards and equipment retained. Town prepares mission level 1 while the
@@ -189,10 +228,12 @@ displayed day is still 1; Rest increments it to 2. Guns refill between battles,
 but consumable grenades do not. Compare the transitions against the preserved
 game and document concrete differences before expanding content.
 
-Pending reference check: the geometry builder now contains a 19th sheep
-attack-to-walk (`32→5`) shadow-state case, but browser attempts stalled before
-any oracle trace. The accepted fixture and exact production comparison remain
-18 cases / 73,728 points. No shadow-history state change was made; the startup
-failure is separate from gameplay geometry and does not invalidate those
-accepted results. Preserve the playable milestone while diagnosing the reference
-harness separately; details and archived evidence are in `docs/oracle-notes.md`.
+The prior reference-startup timeout is diagnosed: an early observer showed the
+intro advancing slowly, reaching the title after 44.1 seconds and exhausting the
+60-second budget during character creation. Diagnostic builds now skip only
+the retired ad/intro flags while executing original game initialization. Two
+identical 19-case runs completed, and the sheep `32→5` shadow-history comparison
+was accepted. The first 18 original snapshots remain unchanged. This resolves
+that test-runner obstacle; it does not establish a general browser scheduling
+fix or reproduce the veteran late-game hitbox complaint. Provenance and before/
+after comparisons are in `docs/oracle-notes.md`.

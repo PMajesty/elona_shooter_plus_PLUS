@@ -2,14 +2,16 @@ const status = document.querySelector('#status');
 const output = document.querySelector('#results');
 const stage = document.querySelector('#stage');
 const PREFIX = 'ELONA_ORACLE:';
+const STARTUP_PREFIX = 'ELONA_STARTUP:';
 const requestedSuite = new URLSearchParams(location.search).get('suite');
-const suite = ['waves', 'combat', 'geometry', 'loot'].includes(requestedSuite) ? requestedSuite : 'reload';
+const suite = ['waves', 'combat', 'geometry', 'loot', 'progression'].includes(requestedSuite) ? requestedSuite : 'reload';
 const suites = {
   reload: {swf:'/reference.swf',build:'/build-report.json',report:'/api/report',clock:'Manual calls to original methods; native frame/timer scheduling is outside this check.'},
   waves: {swf:'/waves-reference.swf',build:'/waves-build-report.json',report:'/api/waves-report',clock:'Synchronous original mission and wave generation under controlled xorshift32; no live enemy AI.'},
   combat: {swf:'/combat-reference.swf',build:'/combat-build-report.json',report:'/api/combat-report',clock:'Synchronous original spawn and single-pellet hit methods under controlled xorshift32; full shotgun spread and native scheduling are outside this check.'},
   geometry: {swf:'/geometry-reference.swf',build:'/geometry-build-report.json',report:'/api/geometry-report',clock:'Original vector body/shadow point grids after explicit frame setup; one synchronous case per diagnostic frame, not native battle scheduling.'},
   loot: {swf:'/loot-reference.swf',build:'/loot-build-report.json',report:'/api/loot-report',clock:'Synchronous original item and loot generation under controlled xorshift32; inventory interaction and campaign transitions are separate checks.'},
+  progression: {swf:'/progression-reference.swf',build:'/progression-build-report.json',report:'/api/progression-report',clock:'Original Sheriff skill choices and descriptions under controlled randomness; later combat effects are separate checks.'},
 };
 const paths = suites[suite];
 document.querySelector('#report-link').href = paths.report;
@@ -31,10 +33,22 @@ async function runOriginal(number) {
   stage.append(player);
   const api = player.ruffle();
   const records = [];
+  const startup = {run:number,observerAttached:false,events:[]};
+  report.startup.push(startup);
   let finish, reject;
   const completed = new Promise((resolve, fail) => { finish = resolve; reject = fail; });
   const timeout = setTimeout(() => reject(new Error(`Original run ${number} did not finish within 60 seconds.`)), 60000);
   const observe = message => {
+    if (message.startsWith(STARTUP_PREFIX)) {
+      try {
+        const event = JSON.parse(message.slice(STARTUP_PREFIX.length));
+        startup.events.push(event);
+        status.dataset.startupFrame = String(event.frame);
+        status.dataset.startupLogoFrame = String(event.logoFrame ?? '');
+        status.dataset.startupTick = String(event.tick);
+      } catch (error) { reject(error); }
+      return;
+    }
     if (!message.startsWith(PREFIX)) return;
     try {
       const record = JSON.parse(message.slice(PREFIX.length));
@@ -49,6 +63,7 @@ async function runOriginal(number) {
     // Ruffle 0.7.1 сохраняет наблюдателя только после создания внутреннего экземпляра load().
     api.volume = 0;
     api.traceObserver = observe;
+    startup.observerAttached = true;
     return await completed;
   } finally {
     clearTimeout(timeout);
@@ -61,7 +76,7 @@ const report = {
   runtime:'@ruffle-rs/ruffle 0.7.1', suite,
   capturedAt:new Date().toISOString(),
   clock:paths.clock,
-  runs:[], status:'running',
+  runs:[], startup:[], status:'running',
 };
 try {
   const response = await fetch(paths.build);

@@ -2,13 +2,16 @@
 
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
 Phaser 4. The current build is a **first playable slice**: choose one of 22
-appearances, play the Sheriff's original opening battle, collect ordinary loot,
-reach results or defeat, and save or restore your progress. Original English artwork, fonts, audio and
+appearances, play the Sheriff's original opening battle, collect ordinary loot
+and earned boss prizes, choose earned Sheriff skills, reach results or defeat,
+and save or restore your progress. Original English artwork, fonts, audio and
 credits are retained.
 
-This is not yet the complete game. Other classes, town management, later days,
-boss prizes, skill choices, the full equipment system, and original Flash save conversion remain to be
-ported. See [port status](docs/port-status.md) for coverage and known differences.
+This is not yet the complete game. Other classes, town management, Day 2 and later
+days, equipment changes and their combat effects, hidden character stats, and
+original Flash save conversion remain to be ported. Earned skills are selected
+and saved; their effects must be connected to future combat before later days
+are enabled. See [port status](docs/port-status.md) for coverage and differences.
 The complete preserved Flash game and its Ruffle startup fix remain available
 as the comparison and recovery baseline.
 
@@ -30,7 +33,7 @@ appearance and press **Proceed**. Sheriff is the implemented class.
 | --- | --- |
 | Mouse | Aim |
 | Left click | Fire; interrupt a reload |
-| Space | Reload |
+| Space | Reload; resume while paused |
 | 2 | Throw a grenade at the cursor |
 | Esc | Pause / resume |
 
@@ -39,11 +42,18 @@ Losing browser focus pauses combat. The game saves locally in this browser;
 browser-port save as a JSON file. These saves use a separate format from Flash
 and do not automatically follow you to another browser or website.
 
-After victory, click an item to pick it up and click a slot to place or swap it.
-Click outside the slots to cancel. Proceed leaves unclaimed items behind.
-The six inventory slots and generated items are saved without rerolling them.
-Version 1 browser saves are accepted; their missing item metadata is reconstructed
-deterministically and explicitly marked in the version 2 save.
+After victory, the reward sequence is **ordinary loot → earned boss prizes →
+earned skill choices → results**. Click an item to pick it up and click a slot to
+place or swap it; click outside the slots to cancel. Proceed leaves unclaimed
+items behind. Skill choices show original descriptions and previews. The six
+inventory slots, offers, pending choices and chosen traits persist without
+rerolling when you reload a version 3 save.
+
+Version 1 and 2 browser saves are accepted. Missing older item or trait metadata
+is reconstructed with explicit provenance; hidden stats remain unknown. Battle
+migration preserves combat RNG. An older result that skipped earned rewards
+resumes at the still-owed stage, generating those rewards once with the saved
+RNG. Original Flash saves use a different format.
 
 ## Build and host on your website
 
@@ -70,8 +80,9 @@ or gameplay server. Node and npm are development tools, not hosting requirements
 `npm.cmd test` runs ordinary regressions, including captured results from the
 original ActionScript game. The accepted fixtures currently cover 72 reload
 snapshots, first-day wave generation under three controlled random seeds and
-21 spawn/single-pellet snapshots, 139 item-generation snapshots, and dense
-ordinary-enemy collision samples from the original display shapes. The pellet
+21 spawn/single-pellet snapshots, 157 item/loot snapshots, nine Sheriff skill
+choice cases, and 19 ordinary-enemy collision grids containing 77,824 sampled
+points from the original display shapes. The pellet
 tests supply original geometry as input; separate contour tests exercise the
 same collision implementation used in the browser. Coverage is documented in
 the feature ledger rather than inferred from the number of passing tests.
@@ -80,7 +91,8 @@ are detected. Expected original results are never regenerated from the port.
 
 `npm.cmd run test:soak` automatically exercises 32 seeds with idle, aimed and
 interrupted-input policies. It checks finite state, battle completion and exact
-JSON save/replay state and event equality. Reports and reproducible failure
+JSON save/replay state and event equality, including every earned reward stage.
+Reports and reproducible failure
 checkpoints are written beneath `.build/soak/`. This is a stability check, not
 evidence that every original feature has been ported.
 
@@ -93,19 +105,25 @@ python tools/build_wave_oracle.py
 python tools/build_combat_oracle.py
 python tools/build_geometry_oracle.py
 python tools/build_loot_oracle.py
+python tools/build_progression_oracle.py
 python tools/serve_oracle.py
 ```
 
 Open `http://127.0.0.1:5176/` for reload or
 `http://127.0.0.1:5176/?suite=waves` for generation, or
 `http://127.0.0.1:5176/?suite=combat` for spawn/hit scenarios, `?suite=geometry`
-for shape-hit grids, and `?suite=loot` for item generation. Each page runs the original
+for shape-hit grids, `?suite=loot` for item generation, or `?suite=progression`
+for Sheriff skill choices and previews. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
-`web/`, run `npm.cmd run test:reference`, `npm.cmd run test:wave-reference` or
-`npm.cmd run test:combat-reference`, `npm.cmd run test:item-reference`, or
-`node --experimental-strip-types scripts/compare-geometry-reference.ts` to
-compare the port. These development tools require the local FFDec/Java and Ruffle
-packages; the distributed game does not. See [oracle notes](docs/oracle-notes.md)
+`web/`, use the matching comparison command: `npm.cmd run test:reference`,
+`npm.cmd run test:wave-reference`, `npm.cmd run test:combat-reference`,
+`npm.cmd run test:item-reference`, or `npm.cmd run test:progression-reference`.
+For geometry, run
+`node --experimental-strip-types scripts/compare-geometry-reference.ts`.
+These development tools require the local FFDec/Java and Ruffle
+packages; the distributed game does not. Diagnostic builds skip the retired ad
+and intro while retaining original game initialization and compared methods.
+See [oracle notes](docs/oracle-notes.md)
 for controlled state, source preservation and limitations, and the
 [feature ledger](docs/feature-ledger.json) for missing and unverified systems.
 

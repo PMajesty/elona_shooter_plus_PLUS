@@ -7,7 +7,7 @@ import sys
 import uuid
 
 from build import ROOT, ORIGINAL_SHA256, FFDEC_VERSION, JAVA_MAJOR, command, digest, find_java, verify
-from build_oracle import AS3 as RELOAD_DRIVER, append_method, method_span
+from build_oracle import AS3 as RELOAD_DRIVER, instrument_startup, method_span
 
 
 WAVE_AS3 = r'''
@@ -105,7 +105,7 @@ WAVE_AS3 = r'''
 
 def shared_driver_methods():
     methods = []
-    for name in ("oracleString", "oracleJson", "oracleEmit", "oracleBootstrap", "oracleAdvance"):
+    for name in ("oracleString", "oracleJson", "oracleEmit", "oracleObserveStartup", "oracleBootstrap", "oracleAdvance"):
         start = re.search(r"\n      private function " + name + r"\(", RELOAD_DRIVER).start()
         _, end = method_span(RELOAD_DRIVER, name)
         methods.append(RELOAD_DRIVER[start:end + len("\n      }")])
@@ -121,8 +121,7 @@ def instrument(source):
     if transformed.replace("oracleWaveRandom()", "Math.random()") != source:
         raise ValueError("Random-call rewrite changed other original source")
     transformed = transformed.replace("   import flash.events.*;", "   import flash.events.*;\n   import flash.external.ExternalInterface;")
-    transformed = append_method(transformed, "elonaInitializeTitle", "oracleBootstrap();")
-    transformed = append_method(transformed, "frame27", "oracleBattleReady();")
+    transformed = instrument_startup(transformed)
     closing = transformed.rfind("\n   }")
     if closing < 0:
         raise ValueError("Cannot find MainTimeline class closing brace")

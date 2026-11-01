@@ -1,10 +1,10 @@
-"""Собирает независимый эталон исходных generateStuff/randomStuff/generateLoot."""
+"""Собирает независимый эталон исходных generateStuff/randomStuff/generateLoot/generateLootBoss."""
 import json
 from pathlib import Path
 import uuid
 
 from build import ROOT, ORIGINAL_SHA256, command, digest, find_java, verify
-from build_oracle import append_method
+from build_oracle import instrument_startup
 from build_wave_oracle import shared_driver_methods
 
 
@@ -44,6 +44,7 @@ LOOT_AS3 = r'''
          }
          for(index=0;index<_maxInv;index++) { inventory.num[index]=0; inventory.value[index]=0; }
          game.day=1; game.looter=0; game.optWeaponLevel=false;
+         game.optionBossDropMod=false; mission.bossKilled=0;
          PARTY.ENGINEER=0; medal[_medalAction4]=false;
          oracleLootState=seed == 0 ? 1 : seed; oracleLootDraws=0;
       }
@@ -86,6 +87,9 @@ LOOT_AS3 = r'''
             var index:int;
             var queue:Array;
             var offers:Array;
+            var previousOffers:Array;
+            var bossCase:Object;
+            var previousIds:Array=[3,11,117,24,13,1,6,8];
             var ids:Array=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,101,102,103,104,105,106,107,108,109,110,112,113,114,115,116,117,120,121];
             for each(seed in [42,3735928559])
             {
@@ -123,8 +127,38 @@ LOOT_AS3 = r'''
                offers=[oracleItemSnapshot(20),oracleItemSnapshot(21),null,null,null,null];
                oracleLootEmit({scenario:"starting",seed:seed,slots:offers});
             }
+            for each(seed in [42,1,3735928559])
+            {
+               for each(bossCase in [
+                  {killed:1,modifiersOnly:false,reuse:false},
+                  {killed:2,modifiersOnly:false,reuse:false},
+                  {killed:16,modifiersOnly:false,reuse:false},
+                  {killed:2,modifiersOnly:true,reuse:false},
+                  {killed:2,modifiersOnly:false,reuse:true},
+                  {killed:2,modifiersOnly:true,reuse:true}
+               ])
+               {
+                  oracleLootReset(42); oracleLootActive=true;
+                  previousOffers=[];
+                  if(bossCase.reuse)
+                  {
+                     for(index=0;index<8;index++)
+                     {
+                        generateStuff(index,previousIds[index]);
+                        if(index % 2 == 1) inventory.num[index]=0;
+                        previousOffers.push(oracleItemSnapshot(index));
+                     }
+                  }
+                  // Подготовка старых полей не входит в поток исследуемой генерации наград.
+                  oracleLootState=uint(seed); oracleLootDraws=0;
+                  mission.bossKilled=bossCase.killed; game.optionBossDropMod=bossCase.modifiersOnly;
+                  generateLootBoss(); offers=[];
+                  for(index=0;index<8;index++) offers.push(inventory.num[index] ? oracleItemSnapshot(index) : null);
+                  oracleLootEmit({scenario:"boss",seed:seed,bossKilled:bossCase.killed,modifiersOnly:bossCase.modifiersOnly,previousOffers:previousOffers,offers:offers});
+               }
+            }
             gamePaused=true;
-            oracleEmit({type:"complete",kind:"loot",ok:true,snapshots:oracleLootSnapshots,baseCases:116,randomCases:15,ordinaryCases:6,startingCases:2});
+            oracleEmit({type:"complete",kind:"loot",ok:true,snapshots:oracleLootSnapshots,baseCases:116,randomCases:15,ordinaryCases:6,startingCases:2,bossCases:18});
             return true;
          }
          catch(error:Error) { oracleLootActive=false; gamePaused=true; oracleEmit({type:"error",kind:"loot",message:error.message}); return false; }
@@ -147,8 +181,7 @@ def main():
         if instrumented.replace('oracleLootRandom()', 'Math.random()') != source:
             raise ValueError('RNG wrapper changed original logic')
         instrumented = instrumented.replace('   import flash.events.*;', '   import flash.events.*;\n   import flash.external.ExternalInterface;')
-        instrumented = append_method(instrumented, 'elonaInitializeTitle', 'oracleBootstrap();')
-        instrumented = append_method(instrumented, 'frame27', 'oracleBattleReady();')
+        instrumented = instrument_startup(instrumented)
         closing = instrumented.rfind('\n   }')
         instrumented = instrumented[:closing] + '\n' + shared_driver_methods() + LOOT_AS3 + instrumented[closing:]
         generated = output_dir / 'LootMainTimeline.as'

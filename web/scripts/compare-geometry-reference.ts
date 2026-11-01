@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { ordinaryEnemyHit, type OrdinaryEnemyKind, type CollisionGeometry } from '../src/collision.ts';
+import { ordinaryEnemyHit, shadowHitAtFrame, type OrdinaryEnemyKind, type CollisionGeometry } from '../src/collision.ts';
 
 const reportPath = resolve(process.argv[2] ?? '../.build/oracle/geometry-browser-report.json');
 const outputPath = resolve(process.argv[3] ?? '../.build/oracle/geometry-comparison-report.json');
@@ -31,7 +31,11 @@ for (const snapshot of report.runs[0].filter((record: { type: string }) => recor
     assert.equal(snapshot[key].length, count); assert.match(snapshot[key], /^[01]+$/);
   }
   // Берём действительную позицию Flash: отдельное округление координат здесь исказило бы опыт.
-  const enemy = { kind, frame: snapshot.frame, x: snapshot.position.x, y: snapshot.position.y };
+  let shadowHit = shadowHitAtFrame(kind, snapshot.spawnFrame);
+  for (const frame of snapshot.poseFrames) shadowHit = shadowHitAtFrame(kind, frame, shadowHit);
+  shadowHit = shadowHitAtFrame(kind, snapshot.frame, shadowHit);
+  assert.equal(shadowHit, snapshot.shadowHit, 'Production frame transitions differ from original shadow state');
+  const enemy = { kind, frame: snapshot.frame, x: snapshot.position.x, y: snapshot.position.y, shadowHit };
   assert.deepEqual(snapshot.rootPosition, { x: 0, y: 0 }, 'Oracle root transform must be identity');
   const mismatches = [];
   let expectedHits = 0, actualHits = 0, extra = 0, missing = 0;
@@ -49,7 +53,7 @@ for (const snapshot of report.runs[0].filter((record: { type: string }) => recor
   }
   total += count; falsePositives += extra; falseNegatives += missing;
   comparisons.push({ enemyId: snapshot.enemyId, kind, requestedFrame: snapshot.requestedFrame, frame: snapshot.frame,
-    requestedPosition: snapshot.requestedPosition, position: snapshot.position, shadowHit: snapshot.shadowHit,
+    requestedPosition: snapshot.requestedPosition, position: snapshot.position, poseFrames: snapshot.poseFrames, shadowHit: snapshot.shadowHit,
     grid, points: count, expectedHits, actualHits, falsePositives: extra, falseNegatives: missing, mismatches });
 }
 assert.ok(comparisons.length > 0, 'No geometry observations');

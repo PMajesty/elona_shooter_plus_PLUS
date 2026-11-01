@@ -7,7 +7,7 @@ import sys
 import uuid
 
 from build import ROOT, ORIGINAL_SHA256, FFDEC_VERSION, JAVA_MAJOR, command, digest, find_java, unpack
-from build_oracle import append_method
+from build_oracle import instrument_startup
 from build_wave_oracle import shared_driver_methods
 
 
@@ -217,8 +217,7 @@ def instrument(main_source, enemy_source):
     if enemy.replace(observer, "").replace("_root.oracleCombatRandom()", "Math.random()") != enemy_source:
         raise ValueError("Damage observer changed original logic")
     main = main.replace("   import flash.events.*;", "   import flash.events.*;\n   import flash.external.ExternalInterface;")
-    main = append_method(main, "elonaInitializeTitle", "oracleBootstrap();")
-    main = append_method(main, "frame27", "oracleBattleReady();")
+    main = instrument_startup(main)
     return append_class(main, shared_driver_methods() + COMBAT_AS3), append_class(enemy, ENEMY_AS3), main_calls, enemy_calls
 
 

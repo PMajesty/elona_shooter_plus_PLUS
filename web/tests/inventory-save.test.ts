@@ -17,7 +17,8 @@ function victory(): Simulation {
 function legacySave(simulation: Simulation): Record<string, any> {
   const value: Record<string, any> = simulation.toSave();
   value.version = 1;
-  for (const field of ['inventory', 'lootOffers', 'postbattle', 'inventoryProvenance', 'legacyReconstructionSeed']) delete value[field];
+  for (const field of ['inventory', 'lootOffers', 'postbattle', 'inventoryProvenance', 'legacyReconstructionSeed', 'bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance']) delete value[field];
+  delete value.player.traits;
   return value;
 }
 
@@ -31,7 +32,7 @@ test('New Game generates original starter items before the opening mission consu
       const simulation = new Simulation(row.seed);
       assert.deepEqual(simulation.state.inventory, row.slots.map(itemFromOriginal));
       assert.equal(boundaries.at(-1), row.rngState);
-      assert.equal(simulation.state.version, 2);
+      assert.equal(simulation.state.version, 3);
       assert.equal(simulation.state.inventoryProvenance, 'original-generation');
       assert.equal(simulation.state.postbattle, 'none');
     }
@@ -130,7 +131,9 @@ test('v1 battle migration is deterministic, preserves combat state and never mut
   const first = Simulation.fromSave(oldSave), second = Simulation.fromSave(oldSave);
   assert.deepEqual(oldSave, untouched);
   assert.deepEqual(first.state, second.state);
-  for (const [field, expected] of Object.entries(oldSave)) if (field !== 'version') assert.deepEqual(first.state[field as keyof typeof first.state], expected, field);
+  for (const [field, expected] of Object.entries(oldSave)) if (!['version', 'player'].includes(field)) assert.deepEqual(first.state[field as keyof typeof first.state], expected, field);
+  const { traits: _traits, ...restoredPlayer } = first.state.player;
+  assert.deepEqual(restoredPlayer, oldSave.player);
   assert.equal(first.state.inventoryProvenance, 'legacy-v1-reconstructed');
   assert.equal(first.state.legacyReconstructionSeed, oldSave.rng);
   assert.equal(first.state.inventory[0]!.ammo, oldSave.player.ammo);

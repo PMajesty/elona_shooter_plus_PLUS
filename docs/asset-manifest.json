@@ -8,7 +8,7 @@
   "frameNames": "Original one-based Flash timeline frame numbers as strings",
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
-    "images": 28,
+    "images": 29,
     "clips": 17,
     "sounds": 89,
     "fonts": 3

@@ -4,14 +4,15 @@ import { SHOTGUN, WORLD, type EnemyKind } from './content.ts';
 import { exportSave, readMute, readSave, storeMute, storeSave } from './storage.ts';
 import { OriginalAlly, type OriginalAllyMetadata } from './original-animation.ts';
 import { createLootView } from './loot-view.ts';
+import { createSkillView } from './skill-view.ts';
 import { alphaMaskHit, ordinaryEnemyHit, type CollisionGeometry } from './collision.ts';
 import './style.css';
 
 interface ImageAsset { file: string; width: number; height: number; originX: number; originY: number }
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string> }
-interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2; appearance: number; simulation: unknown }
-type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'result' | 'defeat';
+interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3; appearance: number; simulation: unknown }
+type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
 const loadStatus = document.querySelector<HTMLDivElement>('#load-status')!;
@@ -93,7 +94,7 @@ class ElonaScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-TWO', () => { if (this.screen === 'battle' && !this.paused) this.grenadeRequested = true; });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'First playable slice: Sheriff, opening battle, ordinary loot, results and save/reload. Other classes, boss prizes, skill choices, town and later days are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'First playable slice: Sheriff, opening battle, loot, boss prizes, skill choices and save/reload. Other classes, town and later days are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
   }
 
@@ -114,6 +115,7 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.bossBars = '0'; container.dataset.bossHealth = '[]';
     container.dataset.playerFrame = ''; container.dataset.reloadTicks = '0'; container.dataset.reloadAnimations = '0';
     delete container.dataset.lootOffers; delete container.dataset.inventory;
+    delete container.dataset.skillChoices; delete container.dataset.selectedTrait; delete container.dataset.traits; delete container.dataset.skillPoints;
   }
 
   private image(key: string, x = 0, y = 0): Phaser.GameObjects.Image | undefined {
@@ -416,7 +418,7 @@ class ElonaScene extends Phaser.Scene {
       const actor = this.enemySprites.get(enemy.uid);
       return actor instanceof OriginalAlly && actor.hitTestWorld(x, y, (key, frame, localX, localY) => this.texturePixelHit(key, frame, localX, localY));
     }
-    return ordinaryEnemyHit({ kind: enemy.kind, x: enemy.x, y: enemy.y, frame: enemy.frame }, x, y, this.cache.json.get('collision-geometry') as CollisionGeometry);
+    return ordinaryEnemyHit({ kind: enemy.kind, x: enemy.x, y: enemy.y, frame: enemy.frame, shadowHit: enemy.shadowHit }, x, y, this.cache.json.get('collision-geometry') as CollisionGeometry);
   }
 
   private texturePixelHit(key: string, frameName: string, x: number, y: number): boolean {
@@ -476,7 +478,10 @@ class ElonaScene extends Phaser.Scene {
 
   private showOutcome(): void {
     if (!this.sim) return;
-    if (this.sim.state.phase === 'victory' && this.sim.state.postbattle === 'loot') { this.showLoot(); return; }
+    if (this.sim.state.phase === 'victory') {
+      if (['loot', 'boss-loot'].includes(this.sim.state.postbattle)) { this.showLoot(); return; }
+      if (this.sim.state.postbattle === 'skill') { this.showSkillChoice(); return; }
+    }
     const state = this.sim.state;
     this.reset(state.phase === 'victory' ? 'result' : 'defeat');
     this.image('battle'); this.drawHud();
@@ -520,8 +525,9 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private showLoot(): void {
-    if (!this.sim || this.sim.state.postbattle !== 'loot') return;
-    this.reset('loot');
+    if (!this.sim || !['loot', 'boss-loot'].includes(this.sim.state.postbattle)) return;
+    const bossReward = this.sim.state.postbattle === 'boss-loot';
+    this.reset(bossReward ? 'boss-loot' : 'loot');
     this.image('battle'); this.drawHud();
     this.updateHud();
     this.root.add(createLootView(this, this.sim.state, manifest, {
@@ -533,11 +539,29 @@ class ElonaScene extends Phaser.Scene {
       proceed: () => {
         if (this.sim!.finishLoot()) { this.playSound('soundClick1'); this.saveGame(false); this.showOutcome(); }
       },
-    }));
+    }, bossReward ? 'boss' : 'ordinary'));
     container.dataset.phase = 'victory';
     container.dataset.lootOffers = JSON.stringify(this.sim.state.lootOffers.map(item => item?.id ?? null));
     container.dataset.inventory = JSON.stringify(this.sim.state.inventory.map(item => item?.id ?? null));
     status.textContent = 'Click an item, then click a destination slot. Items left in the loot row will be wasted when you proceed.';
+  }
+
+  private showSkillChoice(): void {
+    if (!this.sim || this.sim.state.postbattle !== 'skill') return;
+    this.reset('skill');
+    this.image('battle'); this.drawHud(); this.updateHud();
+    this.root.add(createSkillView(this, this.sim.state, manifest, {
+      select: id => { container.dataset.selectedTrait = String(id); },
+      choose: id => {
+        if (!this.sim!.chooseSkill(id)) return false;
+        this.playSound('soundClick1'); this.saveGame(false); this.showOutcome();
+        return true;
+      },
+    }));
+    container.dataset.skillChoices = JSON.stringify(this.sim.state.skillChoices);
+    container.dataset.traits = JSON.stringify(this.sim.state.player.traits);
+    container.dataset.skillPoints = String(this.sim.state.player.skillPoints);
+    status.textContent = 'Choose a skill, review its improvement, then press Proceed to learn it.';
   }
 
   togglePause(): void {
@@ -558,7 +582,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   makeSave(): PortSave | undefined {
-    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 2, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
+    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 3, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
   }
 
   saveGame(notify = true): boolean {
@@ -571,7 +595,7 @@ class ElonaScene extends Phaser.Scene {
 
   private parseSave(raw: unknown): { simulation: Simulation; appearance: number } {
     const save = raw as Partial<PortSave> | null;
-    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
+    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
     return { simulation: Simulation.fromSave(save.simulation, this.simulationOptions()), appearance: save.appearance! };
   }
 

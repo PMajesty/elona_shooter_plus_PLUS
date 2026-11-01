@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
-import { ordinaryEnemyHit, type CollisionGeometry, type OrdinaryEnemyKind } from '../src/collision.ts';
+import { ordinaryEnemyHit, shadowHitAtFrame, type CollisionGeometry, type OrdinaryEnemyKind } from '../src/collision.ts';
 
 test('production ordinary-enemy contours match all original sampled hit points', () => {
   const fixture = JSON.parse(readFileSync(new URL('./fixtures/original-geometry-trace.json', import.meta.url), 'utf8'));
@@ -12,7 +12,11 @@ test('production ordinary-enemy contours match all original sampled hit points',
   let cases = 0, points = 0;
   for (const snapshot of fixture.records.filter((record: { type: string }) => record.type === 'snapshot')) {
     const kind = kinds[snapshot.enemyId]; assert.ok(kind);
-    const enemy = { kind, frame: snapshot.frame, x: snapshot.position.x, y: snapshot.position.y };
+    let shadowHit = shadowHitAtFrame(kind, snapshot.spawnFrame);
+    for (const frame of snapshot.poseFrames) shadowHit = shadowHitAtFrame(kind, frame, shadowHit);
+    shadowHit = shadowHitAtFrame(kind, snapshot.frame, shadowHit);
+    assert.equal(shadowHit, snapshot.shadowHit);
+    const enemy = { kind, frame: snapshot.frame, x: snapshot.position.x, y: snapshot.position.y, shadowHit };
     const grid = snapshot.grid;
     assert.equal(grid.step, 1);
     assert.equal(snapshot.combinedBits.length, grid.width * grid.height);
@@ -25,6 +29,6 @@ test('production ordinary-enemy contours match all original sampled hit points',
     }
     cases++;
   }
-  assert.equal(cases, 18);
-  assert.equal(points, 73728);
+  assert.equal(cases, 19);
+  assert.equal(points, 77824);
 });

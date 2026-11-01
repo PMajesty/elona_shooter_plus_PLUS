@@ -12,6 +12,7 @@
     "test:wave-reference": "node --experimental-strip-types scripts/compare-wave-reference.ts",
     "test:combat-reference": "node --experimental-strip-types scripts/compare-combat-reference.ts",
     "test:item-reference": "node --experimental-strip-types scripts/compare-item-reference.ts",
+    "test:progression-reference": "node --experimental-strip-types scripts/compare-progression-reference.ts",
     "test:soak": "node --experimental-strip-types scripts/soak.ts"
   },
   "dependencies": {

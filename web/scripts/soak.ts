@@ -51,6 +51,7 @@ let scenario: { seed: number; policy: Policy } | undefined;
 let lastCheckpoint: unknown;
 let inputs: Input[] = [];
 let frames = 0;
+let rewardTransitions = 0;
 try {
   for (let index = 0; index < seedCount; index++) {
     // Мультипликативная последовательность охватывает разные 32-битные начальные состояния.
@@ -78,13 +79,40 @@ try {
       }
       assert.notEqual(simulation.state.phase, 'battle', 'Opening battle did not terminate within 6000 frames.');
       if (policy === 'idle') assert.equal(simulation.state.phase, 'defeat');
+      let rewardActions = 0;
+      while (simulation.state.phase === 'victory' && simulation.state.postbattle !== 'result') {
+        assert.ok(rewardActions++ < 30, 'Earned rewards did not reach results.');
+        const state = simulation.state;
+        if (state.postbattle === 'loot' || state.postbattle === 'boss-loot') {
+          const offer = state.lootOffers.findIndex(item => item !== null);
+          const slot = state.inventory.findIndex(item => item === null);
+          if (offer >= 0 && slot >= 0) {
+            assert.equal(simulation.collectLoot(offer, slot), true);
+            assert.equal(restored.collectLoot(offer, slot), true);
+          } else {
+            assert.equal(simulation.finishLoot(), true);
+            assert.equal(restored.finishLoot(), true);
+          }
+        } else {
+          assert.equal(state.postbattle, 'skill');
+          const choice = state.skillChoices[0];
+          assert.equal(simulation.chooseSkill(choice), true);
+          assert.equal(restored.chooseSkill(choice), true);
+        }
+        assert.deepEqual(restored.state, simulation.state, 'Reward replay changed the offered items or skills.');
+        assertFinite(simulation.state);
+        lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
+        restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
+        assert.deepEqual(restored.state, simulation.state, 'Reward save/restore rerolled state.');
+        checkpoints++; rewardTransitions++;
+      }
       assert.deepEqual(Simulation.fromSave(simulation.toSave(), simulationOptions).state, simulation.state);
       results.push({ ...scenario, phase: simulation.state.phase, ticks: simulation.state.tick, kills: simulation.state.kills, checkpoints });
     }
   }
   const report = {
     status: 'passed', seedCount, policies, scenarios: results.length, simulationFrames: frames,
-    checkpoints: results.reduce((sum, result) => sum + result.checkpoints, 0),
+    checkpoints: results.reduce((sum, result) => sum + result.checkpoints, 0), rewardTransitions,
     elapsedMs: Math.round(performance.now() - started),
     collision: 'Production ordinary-enemy contours; boss uses the documented rectangular headless fallback',
     limits: ['Port self-consistency, finite state and JSON replay only; not an original-game parity proof', 'First-day Sheriff only; boss shape geometry not exercised', 'No browser rendering, input latency, audio or wall-clock performance comparison'],

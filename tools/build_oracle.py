@@ -51,6 +51,29 @@ AS3 = r'''
          trace("ELONA_ORACLE:" + oracleJson(value));
       }
 
+      private function oracleObserveStartup() : void
+      {
+         var ticks:int = 0;
+         var lastFrame:int = -1;
+         var observer:Function;
+         observer = function(event:Event):void
+         {
+            ++ticks;
+            if(oraclePhase >= 3)
+            {
+               removeEventListener(Event.ENTER_FRAME,observer);
+               return;
+            }
+            if(currentFrame != lastFrame || ticks % 30 == 1)
+            {
+               // Диагностика загрузчика отделена от сравниваемых игровых наблюдений.
+               trace("ELONA_STARTUP:" + oracleJson({tick:ticks,frame:currentFrame,label:currentLabel,phase:oraclePhase,logoFrame:logo == null ? null : logo.currentFrame,loadedBytes:loaderInfo.bytesLoaded,totalBytes:loaderInfo.bytesTotal,elapsed:getTimer()}));
+               lastFrame = currentFrame;
+            }
+         };
+         addEventListener(Event.ENTER_FRAME,observer);
+      }
+
       private function oracleBootstrap() : void
       {
          if(oraclePhase != -1) return;
@@ -244,6 +267,21 @@ def append_method(source, name, statement):
     return source[:end] + "\n         " + statement + source[end:]
 
 
+def instrument_startup(source):
+    begin, end = method_span(source, "frame1")
+    body = source[begin:end]
+    # Тест обходит только рекламу и заставку: frame3 всё ещё вызывает исходную ветку init.
+    # Методы New Game, создания персонажа и запуска боя остаются исходными.
+    for flag in ("skipLoader", "skipAd"):
+        body, count = re.subn(r"\b" + flag + r" = 0;", flag + " = 1;", body)
+        if count != 1:
+            raise ValueError(f"Expected one frame1 initialization of {flag}, found {count}")
+    source = source[:begin] + body + source[end:]
+    source = append_method(source, "frame1", "oracleObserveStartup();")
+    source = append_method(source, "elonaInitializeTitle", "oracleBootstrap();")
+    return append_method(source, "frame27", "oracleBattleReady();")
+
+
 def instrument(source):
     source = source.replace("   import flash.events.*;", "   import flash.events.*;\n   import flash.external.ExternalInterface;")
     # Меняются только наблюдатели вызовов, исходная арифметика методов сохраняется.
@@ -258,8 +296,7 @@ def instrument(source):
         if re.sub(r"\s+", "", recovered) != re.sub(r"\s+", "", source[begin:end]):
             raise ValueError(f"Observer injection changed original {name} logic")
         source = source[:begin] + body + source[end:]
-    source = append_method(source, "elonaInitializeTitle", "oracleBootstrap();")
-    source = append_method(source, "frame27", "oracleBattleReady();")
+    source = instrument_startup(source)
     closing = source.rfind("\n   }")
     if closing < 0:
         raise ValueError("Cannot find MainTimeline class closing brace")

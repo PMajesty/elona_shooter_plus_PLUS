@@ -1,24 +1,27 @@
 import { ENEMIES, ENEMY_SELECTION_ORDER, FIRST_DAY, GRENADE, SHOTGUN, SIMULATION_HZ, STARTING_CLASS, TIMER_HZ, WORLD, type EnemyKind, type Rect } from './content.ts';
 import { BASE_ITEM_FIELDS, ITEM_TYPE, ItemFactory, collectLoot as collectLootItem, createStartingInventory, swapInventorySlots, type Item } from './items.ts';
+import { TRAIT, SHERIFF_TRAITS, SHERIFF_CHOICE_ORDER, applySheriffChoice, availableSheriffTraits, createSheriffTraits, rollSheriffChoices, type TraitLevels } from './progression.ts';
+import { shadowHitAtFrame } from './collision.ts';
 
 export interface EnemyState {
   uid: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number;
   speed: number; speedOrg: number; attack: number; gold: number; exp: number;
-  knockBack: number; attacking: boolean; attacked: boolean; frame: number;
+  knockBack: number; attacking: boolean; attacked: boolean; frame: number; shadowHit: boolean;
   deathTicks: number; drop: number; removed: boolean;
   bossAction: number; bossCount: number; bossIdle: number; bossFireNum: number; bossWeapon: number;
 }
 export interface GrenadeState { uid: number; x: number; y: number; startX: number; startY: number; targetX: number; targetY: number; speed: number; remaining: number }
 export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCount: number }
 export interface SimulationState {
-  version: 2; phase: 'battle' | 'victory' | 'defeat'; day: 1; tick: number; timerRemainder: number; rng: number; nextUid: number;
+  version: 3; phase: 'battle' | 'victory' | 'defeat'; day: 1; tick: number; timerRemainder: number; rng: number; nextUid: number;
   castleHp: number; castleMaxHp: number; gold: number; kills: number; criticalKills: number;
   aimX: number; aimY: number; fireHeld: boolean; pendingShot: boolean;
-  player: { classId: 'sheriff'; level: number; exp: number; skillPoints: number; weaponExp: number; ammo: number; reloadTicks: number; shootTimer: number; accuracyFix: number; rampageTicks: number; grenades: number; grenadeCooldown: number };
+  player: { classId: 'sheriff'; level: number; exp: number; skillPoints: number; traits: TraitLevels; weaponExp: number; ammo: number; reloadTicks: number; shootTimer: number; accuracyFix: number; rampageTicks: number; grenades: number; grenadeCooldown: number };
   waveIndex: number; waves: WaveState[]; bossWave: number; newWave: boolean; spawnTimer: number; noDamage: boolean;
   enemies: EnemyState[]; grenades: GrenadeState[]; loot: number[];
-  inventory: (Item | null)[]; lootOffers: (Item | null)[]; postbattle: 'none' | 'loot' | 'result';
+  inventory: (Item | null)[]; lootOffers: (Item | null)[]; postbattle: 'none' | 'loot' | 'boss-loot' | 'skill' | 'result';
   inventoryProvenance: 'original-generation' | 'legacy-v1-reconstructed'; legacyReconstructionSeed?: number;
+  bossKilled: number; skillChoices: number[]; traitsProvenance: 'known-starting-traits' | 'legacy-reconstructed'; bossKilledProvenance: 'observed' | 'legacy-inferred';
   result: { reward: number; perfectBonus: number; upkeep: number; netReward: number };
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; reload?: boolean; grenade?: boolean }
@@ -53,13 +56,14 @@ export class Simulation {
   constructor(seed = Date.now(), options: SimulationOptions = {}) {
     this.options = options;
     this.state = {
-      version: 2, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: seed >>> 0 || 1, nextUid: 1,
+      version: 3, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: seed >>> 0 || 1, nextUid: 1,
       castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, gold: STARTING_CLASS.money, kills: 0, criticalKills: 0,
       aimX: 300, aimY: 240, fireHeld: false, pendingShot: false,
-      player: { classId: 'sheriff', level: 1, exp: 0, skillPoints: 0, weaponExp: 0, ammo: SHOTGUN.magazine, reloadTicks: 0, shootTimer: 0, accuracyFix: 0, rampageTicks: 0, grenades: GRENADE.quantity, grenadeCooldown: 0 },
+      player: { classId: 'sheriff', level: 1, exp: 0, skillPoints: 0, traits: createSheriffTraits(), weaponExp: 0, ammo: SHOTGUN.magazine, reloadTicks: 0, shootTimer: 0, accuracyFix: 0, rampageTicks: 0, grenades: GRENADE.quantity, grenadeCooldown: 0 },
       waveIndex: FIRST_DAY.waves, waves: [], bossWave: 2, newWave: true, spawnTimer: 30, noDamage: true,
       enemies: [], grenades: [], loot: [], result: { reward: 0, perfectBonus: 0, upkeep: 0, netReward: 0 },
       inventory: [], lootOffers: Array(8).fill(null), postbattle: 'none', inventoryProvenance: 'original-generation',
+      bossKilled: 0, skillChoices: [], traitsProvenance: 'known-starting-traits', bossKilledProvenance: 'observed',
     };
     this.state.inventory = createStartingInventory(() => this.random());
     this.generateOpeningMission();
@@ -287,7 +291,7 @@ export class Simulation {
     // Даже при нулевых strength/THREAT исходное умножение и деление влияют на последний бит Number.
     const speed = (definition.speedBase + this.random() * definition.speedRandom) * 100 / 100;
     const y = int(this.random() * (kind === 'boss' ? 105 : definition.airborne ? 70 : WORLD.groundWidth) + (kind === 'boss' ? 195 : definition.airborne ? 40 : WORLD.groundLine));
-    this.state.enemies.push({ uid: this.state.nextUid++, kind, x: -20, y, hp: definition.hp, maxHp: definition.hp, speed, speedOrg: speed, attack: definition.attack, gold, exp: 1 + int(definition.power * 0.4), knockBack: 0, attacking: false, attacked: false, frame: kind === 'rat' ? 14 : 1, deathTicks: 0, drop: 0, removed: false, bossAction: kind === 'boss' ? 3 : 0, bossCount, bossIdle: 0, bossFireNum: 0, bossWeapon });
+    this.state.enemies.push({ uid: this.state.nextUid++, kind, x: -20, y, hp: definition.hp, maxHp: definition.hp, speed, speedOrg: speed, attack: definition.attack, gold, exp: 1 + int(definition.power * 0.4), knockBack: 0, attacking: false, attacked: false, frame: kind === 'rat' ? 14 : 1, shadowHit: shadowHitAtFrame(kind, kind === 'rat' ? 14 : 1), deathTicks: 0, drop: 0, removed: false, bossAction: kind === 'boss' ? 3 : 0, bossCount, bossIdle: 0, bossFireNum: 0, bossWeapon });
   }
 
   private damageEnemy(enemy: EnemyState, raw: number, critical: boolean, weapon: boolean, x: number, y: number): void {
@@ -305,7 +309,7 @@ export class Simulation {
     if (definition.level + 3 < player.level) experience *= 100 / (100 + (player.level - definition.level) * 75);
     // В исходнике опыт приводится к int через trainerFix() для текущего героя.
     player.exp += int(experience);
-    if (player.exp >= 1000) { player.exp %= 1000; player.level++; player.skillPoints++; this.events.push({ type: 'level-up', amount: player.level }); }
+    if (player.exp >= 1000) { player.exp %= 1000; player.level++; player.traits[TRAIT.SHERIFF] = player.level; player.skillPoints++; this.events.push({ type: 'level-up', amount: player.level }); }
     const dropThreshold = player.rampageTicks > 0 ? 100 : 150;
     let goodShotIndex: number | undefined;
     if (critical) {
@@ -318,8 +322,9 @@ export class Simulation {
     const groupSize = this.state.waves[Math.max(0, this.state.waveIndex)].initialCount;
     if (int(this.random() * groupSize * 5) === 0) { enemy.drop = 2; this.state.loot.push(definition.loot); }
     else this.random();
-    if (enemy.kind === 'boss') enemy.drop = 1;
+    if (enemy.kind === 'boss') { enemy.drop = 1; this.state.bossKilled++; }
     enemy.frame = enemy.kind === 'sheep' ? 107 : enemy.kind === 'rat' ? 93 : enemy.kind === 'chicken' ? 208 : enemy.kind === 'boss' ? 281 : 1;
+    enemy.shadowHit = shadowHitAtFrame(enemy.kind, enemy.frame, enemy.shadowHit);
     this.events.push({ type: 'kill', x: enemy.x, y: enemy.y, critical, enemyUid: enemy.uid, goodShotIndex });
   }
 
@@ -333,12 +338,16 @@ export class Simulation {
       enemy.deathTicks++;
       const deathEnds: Record<EnemyKind, number> = { sheep: 129, rat: 128, chicken: 239, crow: 87, boss: 403 };
       enemy.frame = Math.min(enemy.frame + 1, deathEnds[enemy.kind]);
+      enemy.shadowHit = shadowHitAtFrame(enemy.kind, enemy.frame, enemy.shadowHit);
       if (enemy.deathTicks === 50 && enemy.drop === 1) { this.state.gold += enemy.gold; this.events.push({ type: 'gold', amount: enemy.gold, x: enemy.x, y: enemy.y }); }
       if (enemy.deathTicks >= 200) enemy.removed = true;
       return;
     }
     if (enemy.knockBack > 0) {
-      if (enemy.attacking) { enemy.attacking = false; enemy.speed = enemy.speedOrg; enemy.frame = enemy.kind === 'rat' ? 14 : 5; }
+      if (enemy.attacking) {
+        enemy.attacking = false; enemy.speed = enemy.speedOrg; enemy.frame = enemy.kind === 'rat' ? 14 : 5;
+        enemy.shadowHit = shadowHitAtFrame(enemy.kind, enemy.frame, enemy.shadowHit);
+      }
       enemy.knockBack--;
       enemy.x -= enemy.knockBack ** 2 / 40 + ENEMIES[enemy.kind].knockResistance / 2 + 0.2;
       enemy.x = Math.max(-60, enemy.x);
@@ -356,6 +365,7 @@ export class Simulation {
       enemy.frame++;
       if (enemy.frame === 27) enemy.frame = 3;
       if (enemy.frame === 46) enemy.frame = 30;
+      enemy.shadowHit = shadowHitAtFrame(enemy.kind, enemy.frame, enemy.shadowHit);
       return;
     }
     if (enemy.kind === 'chicken') {
@@ -370,7 +380,10 @@ export class Simulation {
       }
     } else if (!enemy.attacking) {
       enemy.x += enemy.speed;
-      if (enemy.x >= WORLD.defenseLine) { enemy.speed = 0; enemy.attacking = true; enemy.frame = enemy.kind === 'sheep' ? 32 : 41; }
+      if (enemy.x >= WORLD.defenseLine) {
+        enemy.speed = 0; enemy.attacking = true; enemy.frame = enemy.kind === 'sheep' ? 32 : 41;
+        enemy.shadowHit = shadowHitAtFrame(enemy.kind, enemy.frame, enemy.shadowHit);
+      }
     }
     this.advanceEnemyAnimation(enemy);
   }
@@ -396,6 +409,7 @@ export class Simulation {
       if (enemy.frame === 153) enemy.attacked = true;
       if (enemy.frame === 196) enemy.frame = 105;
     }
+    enemy.shadowHit = shadowHitAtFrame(enemy.kind, enemy.frame, enemy.shadowHit);
   }
 
   private tickBoss(enemy: EnemyState): void {
@@ -438,7 +452,7 @@ export class Simulation {
     player.rampageTicks = 0;
     player.grenadeCooldown = 0;
     player.exp += 250;
-    if (player.exp >= 1000) { player.exp %= 1000; player.level++; player.skillPoints++; this.events.push({ type: 'level-up', amount: player.level }); }
+    if (player.exp >= 1000) { player.exp %= 1000; player.level++; player.traits[TRAIT.SHERIFF] = player.level; player.skillPoints++; this.events.push({ type: 'level-up', amount: player.level }); }
     this.state.pendingShot = false;
     const perfectBonus = this.state.noDamage ? FIRST_DAY.reward * 0.3 : 0;
     this.state.result = { reward: FIRST_DAY.reward, perfectBonus, upkeep: FIRST_DAY.upkeep, netReward: FIRST_DAY.reward + perfectBonus - FIRST_DAY.upkeep };
@@ -467,7 +481,7 @@ export class Simulation {
   }
 
   moveLootItem(fromArea: LootArea, from: number, toArea: LootArea, to: number): boolean {
-    if (this.state.phase !== 'victory' || this.state.postbattle !== 'loot') return false;
+    if (this.state.phase !== 'victory' || !['loot', 'boss-loot'].includes(this.state.postbattle)) return false;
     if (!['offers', 'inventory'].includes(fromArea) || !['offers', 'inventory'].includes(toArea)) return false;
     const source = fromArea === 'offers' ? this.state.lootOffers : this.state.inventory;
     const destination = toArea === 'offers' ? this.state.lootOffers : this.state.inventory;
@@ -483,16 +497,34 @@ export class Simulation {
   }
 
   finishLoot(): boolean {
-    if (this.state.phase !== 'victory' || this.state.postbattle !== 'loot') return false;
+    if (this.state.phase !== 'victory' || !['loot', 'boss-loot'].includes(this.state.postbattle)) return false;
+    if (this.state.postbattle === 'loot' && this.state.bossKilled > 0) {
+      this.state.lootOffers = new ItemFactory(() => this.random(), { day: this.state.day }).bossLoot(this.state.bossKilled, false, this.state.lootOffers);
+      this.state.postbattle = 'boss-loot';
+      return true;
+    }
+    this.prepareSkillChoices();
     this.state.lootOffers.fill(null);
-    this.state.postbattle = 'result';
+    return true;
+  }
+
+  private prepareSkillChoices(): void {
+    this.state.skillChoices = this.state.player.skillPoints > 0 ? rollSheriffChoices(this.state.player.level, this.state.player.traits, () => this.random()) : [];
+    this.state.postbattle = this.state.skillChoices.length > 0 ? 'skill' : 'result';
+  }
+
+  chooseSkill(id: number): boolean {
+    if (this.state.phase !== 'victory' || this.state.postbattle !== 'skill' || this.state.player.skillPoints < 1) return false;
+    if (!applySheriffChoice(this.state.player.traits, this.state.skillChoices, id)) return false;
+    this.state.player.skillPoints--;
+    this.prepareSkillChoices();
     return true;
   }
 
   toSave(): SimulationState { return structuredClone(this.state); }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
-    if (!record(value) || ![1, 2].includes(Number(value.version)) || typeof value.version !== 'number' || value.day !== 1 || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat'].includes(value.phase)) throw new Error('Unsupported or invalid save.');
+    if (!record(value) || ![1, 2, 3].includes(Number(value.version)) || typeof value.version !== 'number' || value.day !== 1 || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat'].includes(value.phase)) throw new Error('Unsupported or invalid save.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || value.bossWave !== 2 || (value.waveIndex === 5 && value.newWave !== true)) throw new Error('Invalid counters.');
@@ -504,7 +536,7 @@ export class Simulation {
     if (player.ammo === SHOTGUN.magazine && Number(player.reloadTicks) > 0) throw new Error('A full magazine cannot be reloading.');
     if (!Array.isArray(value.waves) || value.waves.length !== 5 || value.waves.some(wave => !record(wave) || !Array.isArray(wave.enemies) || wave.enemies.length > 200 || wave.enemies.some(kind => typeof kind !== 'string' || !Object.hasOwn(ENEMIES, kind)) || !Array.isArray(wave.delays) || wave.delays.length !== wave.enemies.length || wave.delays.some(delay => !finite(delay) || delay < 0 || delay > 1000) || !finite(wave.initialCount) || wave.initialCount < wave.enemies.length)) throw new Error('Invalid wave state.');
     const enemyNumbers = ['uid', 'x', 'y', 'hp', 'maxHp', 'speed', 'speedOrg', 'attack', 'gold', 'exp', 'knockBack', 'frame', 'deathTicks', 'drop', 'bossAction', 'bossCount', 'bossIdle', 'bossFireNum', 'bossWeapon'];
-    if (!Array.isArray(value.enemies) || value.enemies.length > 200 || value.enemies.some(enemy => !record(enemy) || typeof enemy.kind !== 'string' || !Object.hasOwn(ENEMIES, enemy.kind) || enemyNumbers.some(key => !finite(enemy[key])) || Number(enemy.maxHp) <= 0 || Number(enemy.hp) > Number(enemy.maxHp) || ['attacking', 'attacked', 'removed'].some(key => typeof enemy[key] !== 'boolean'))) throw new Error('Invalid enemies.');
+    if (!Array.isArray(value.enemies) || value.enemies.length > 200 || value.enemies.some(enemy => !record(enemy) || typeof enemy.kind !== 'string' || !Object.hasOwn(ENEMIES, enemy.kind) || enemyNumbers.some(key => !finite(enemy[key])) || Number(enemy.maxHp) <= 0 || Number(enemy.hp) > Number(enemy.maxHp) || ['attacking', 'attacked', 'removed'].some(key => typeof enemy[key] !== 'boolean') || (enemy.shadowHit !== undefined && typeof enemy.shadowHit !== 'boolean'))) throw new Error('Invalid enemies.');
     const ids = value.enemies.map(enemy => (enemy as Record<string, unknown>).uid);
     if (new Set(ids).size !== ids.length || ids.some(id => !Number.isInteger(id) || Number(id) < 1)) throw new Error('Invalid enemy identifiers.');
     const grenadeNumbers = ['uid', 'x', 'y', 'startX', 'startY', 'targetX', 'targetY', 'speed', 'remaining'];
@@ -514,6 +546,18 @@ export class Simulation {
     if (!Array.isArray(value.loot) || value.loot.length > 200 || value.loot.some(item => !Number.isInteger(item) || !Object.hasOwn(BASE_ITEM_FIELDS, item > 1000 ? item - 1000 : item)) || !record(value.result) || ['reward', 'perfectBonus', 'upkeep', 'netReward'].some(key => !finite((value.result as Record<string, unknown>)[key]))) throw new Error('Invalid results.');
     const simulation = new Simulation(1, options);
     simulation.state = structuredClone(value) as unknown as SimulationState;
+    // Старый формат не сохранял историю тени; восстанавливаем прежнюю геометрию без новых случайных чисел.
+    for (const enemy of simulation.state.enemies) enemy.shadowHit ??= shadowHitAtFrame(enemy.kind, enemy.frame);
+    if (value.version !== 3) {
+      const state = simulation.state;
+      state.player.traits = { ...createSheriffTraits(), [TRAIT.SHERIFF]: state.player.level };
+      state.skillChoices = [];
+      state.traitsProvenance = 'legacy-reconstructed';
+      state.bossKilledProvenance = 'legacy-inferred';
+      const boss = state.enemies.find(enemy => enemy.kind === 'boss');
+      const bossQueued = state.waves[state.bossWave].enemies.includes('boss');
+      state.bossKilled = boss ? Number(boss.hp <= 0) : Number(!bossQueued && state.waveIndex <= state.bossWave);
+    }
     if (value.version === 1) {
       // Старые сохранения не содержат метаданных предметов; отдельный поток не меняет бой.
       let reconstructionRng = Number(value.rng);
@@ -524,7 +568,7 @@ export class Simulation {
         reconstructionRng >>>= 0;
         return reconstructionRng / 4294967296;
       };
-      simulation.state.version = 2;
+      simulation.state.version = 3;
       simulation.state.inventory = createStartingInventory(reconstructionRandom);
       simulation.state.lootOffers = Array(8).fill(null);
       simulation.state.postbattle = 'none';
@@ -535,11 +579,30 @@ export class Simulation {
     }
     const state = simulation.state;
     if (!Array.isArray(state.inventory) || state.inventory.length !== 6 || Array.from(state.inventory).some(item => item !== null && !validItem(item)) || !Array.isArray(state.lootOffers) || state.lootOffers.length !== 8 || Array.from(state.lootOffers).some(item => item !== null && !validItem(item))) throw new Error('Invalid inventory items.');
-    if (!['none', 'loot', 'result'].includes(state.postbattle) || (state.phase === 'victory' ? state.postbattle === 'none' : state.postbattle !== 'none') || (state.postbattle !== 'loot' && state.lootOffers.some(item => item !== null))) throw new Error('Invalid postbattle stage.');
+    if (!['none', 'loot', 'boss-loot', 'skill', 'result'].includes(state.postbattle) || (state.phase === 'victory' ? state.postbattle === 'none' : state.postbattle !== 'none') || (!['loot', 'boss-loot'].includes(state.postbattle) && state.lootOffers.some(item => item !== null))) throw new Error('Invalid postbattle stage.');
+    if (value.version === 2 && !['none', 'loot', 'result'].includes(state.postbattle)) throw new Error('Invalid legacy postbattle stage.');
     if (state.phase !== 'victory' && (state.inventory[0]?.id !== SHOTGUN.id || state.inventory[0].ammo !== state.player.ammo || state.inventory[0].reloadTime !== state.player.reloadTicks || state.inventory[1]?.id !== GRENADE.id || state.inventory[1].ammo !== state.player.grenades)) throw new Error('Inventory does not match active equipment.');
     if (state.inventoryProvenance === 'legacy-v1-reconstructed') {
       if (!Number.isInteger(state.legacyReconstructionSeed) || state.legacyReconstructionSeed! < 1 || state.legacyReconstructionSeed! > 0xffffffff) throw new Error('Invalid legacy inventory provenance.');
     } else if (state.inventoryProvenance !== 'original-generation' || state.legacyReconstructionSeed !== undefined) throw new Error('Invalid inventory provenance.');
+    if (value.version !== 3) {
+      state.version = 3;
+      if (state.phase === 'victory' && state.postbattle === 'result') {
+        // Старый результат пропускал награды босса и навыки; новые награды расходуют основной поток.
+        state.postbattle = 'loot';
+        simulation.finishLoot();
+      }
+    }
+    if (!Number.isInteger(state.bossKilled) || state.bossKilled < 0 || state.bossKilled > 1 || !['observed', 'legacy-inferred'].includes(state.bossKilledProvenance) || !['known-starting-traits', 'legacy-reconstructed'].includes(state.traitsProvenance)) throw new Error('Invalid progression provenance.');
+    if (!record(state.player.traits) || Object.entries(state.player.traits).some(([id, level]) => !Object.hasOwn(SHERIFF_TRAITS, id) || !Number.isInteger(level) || level < 0 || level > SHERIFF_TRAITS[Number(id)].maxLevel) || state.player.traits[TRAIT.SHERIFF] !== state.player.level || (state.player.traits[TRAIT.SHOTGUN] ?? 0) < 2 || (state.player.traits[TRAIT.FURY] ?? 0) < 1) throw new Error('Invalid Sheriff traits.');
+    // Пустой список не даёт исходному listTrait2 ни одного допустимого навыка даже до fallback.
+    if (state.phase === 'victory' && state.player.skillPoints > 0 && availableSheriffTraits(state.player.level, state.player.traits).length === 0) throw new Error('Pending skill points have no available Sheriff skill.');
+    if (!Array.isArray(state.skillChoices) || state.skillChoices.length > 5 || state.skillChoices.some(id => !Number.isInteger(id) || !SHERIFF_CHOICE_ORDER.includes(id)) || new Set(state.skillChoices).size !== state.skillChoices.length) throw new Error('Invalid skill choices.');
+    if (state.postbattle === 'skill') {
+      const available = availableSheriffTraits(state.player.level, state.player.traits);
+      if (state.player.skillPoints < 1 || state.skillChoices.length !== 3 + (state.player.traits[TRAIT.CAPABLE] ?? 0) || state.skillChoices.some(id => !available.includes(id)) || state.lootOffers.some(Boolean)) throw new Error('Invalid pending skill selection.');
+    } else if (state.skillChoices.length !== 0) throw new Error('Unexpected pending skill choices.');
+    if ((state.postbattle === 'boss-loot' && state.bossKilled === 0) || (state.postbattle === 'result' && state.player.skillPoints !== 0)) throw new Error('Invalid completed rewards.');
     return simulation;
   }
 }

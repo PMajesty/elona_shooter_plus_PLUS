@@ -104,15 +104,17 @@
         "guardian_npc": 9
       },
       "status": "partial",
-      "implemented": "Sheriff with starting Shotgun 2 and Fury; selection explicitly limits other classes.",
+      "implemented": "Sheriff with known starting Shotgun 2/Fury traits, all 15 earned Sheriff choice definitions and persistent selected levels; selection explicitly limits other classes.",
       "evidence": [
         "web/src/content.ts:STARTING_CLASS",
-        "web/src/simulation.ts:constructor"
+        "web/src/simulation.ts:constructor",
+        "web/tests/progression-reference.test.ts: nine original Sheriff choice/preview cases"
       ],
       "unverified": [
         "Other seven playable classes",
         "Guardian and starting companions",
-        "Class-specific mechanics beyond Sheriff first-battle use"
+        "Class-specific mechanics beyond Sheriff first-battle use",
+        "Hidden base aiming/teamwork generation and growth; combat effects of earned traits"
       ]
     },
     {
@@ -124,18 +126,22 @@
         "MainTimeline:4617 refreshPlayer"
       ],
       "status": "partial",
-      "implemented": "Initial Sheriff shotgun rules, critical hits, knockback and original ordinary-enemy filled-contour hit testing; bosses retain separate alpha geometry.",
+      "implemented": "Initial Sheriff shotgun rules, critical hits, knockback and original ordinary-enemy filled-contour hit testing with persisted shadow state; bosses retain separate alpha geometry.",
       "evidence": [
         "web/tests/simulation.test.ts:cooldown and queued-input tests",
         "docs/port-verification.json:browser_checks.shooting",
         "web/tests/combat-reference.test.ts:21 original spawn/point snapshots; port critical rules with original geometry supplied",
-        "web/tests/geometry-reference.test.ts: original sampled contours through the production collision helper"
+        "web/tests/geometry-reference.test.ts: 19 original grids / 77,824 points through production contours and shadow-state transitions",
+        "web/tests/enemy-shadow.test.ts: actual attack/knockback/alive/death, save restore and missing-history fallback"
       ],
       "unverified": [
-        "Unsampled frames/positions, animation history, boss and dropping-rat geometry",
+        "Unsampled frames/positions and other animation histories; boss and dropping-rat geometry",
         "Full shotgun spread and corpse interactions against original",
         "All weapon families and trait combinations",
         "Native frame/input timing"
+      ],
+      "notes": [
+        "Original sheep 32-to-5 retained shadowHit=false. Previous port had 76 extra hits; persisted state corrects all sampled points. This is not a reproduced late-game defect."
       ]
     },
     {
@@ -203,7 +209,8 @@
       "evidence": [
         "web/src/content.ts:ENEMIES",
         "web/tests/simulation.test.ts:defeat and first-battle completion",
-        "web/tests/combat-reference.test.ts:exact spawn stats/RNG for five enemy types and two seeds"
+        "web/tests/combat-reference.test.ts:exact spawn stats/RNG for five enemy types and two seeds",
+        "web/tests/enemy-shadow.test.ts: original sheep shadow state persists through attack-to-walk and resets on death"
       ],
       "unverified": [
         "Later species and enemy variants",
@@ -313,7 +320,7 @@
       "status": "partial",
       "implemented": "58 source item IDs with generation/modifier metadata and six persistent inventory slots; no town purchase/equip loop or modifier mounting.",
       "evidence": [
-        "web/tests/item-reference.test.ts:139 original snapshots including fields and RNG",
+        "web/tests/item-reference.test.ts: 157 original snapshots including fields, ordinary/boss offers and RNG; prior 139 unchanged",
         "web/tests/inventory-save.test.ts: item persistence and swaps"
       ],
       "unverified": [
@@ -333,15 +340,20 @@
         "MainTimeline:9380 trait registrations"
       ],
       "status": "partial",
-      "implemented": "First-battle kill/completion XP, levels and pending skill-point state.",
+      "implemented": "First-battle kill/completion XP, levels and earned Sheriff choices; all 15 original candidate definitions, eligibility/order/descriptions/previews, Capable options, duplicate retries and selected-level persistence. Normal postbattle UI spends each earned point once before results.",
       "evidence": [
         "web/tests/simulation.test.ts:first-battle result",
-        "docs/port-verification.json:browser_checks.victory_checkpoint"
+        "docs/port-verification.json:browser_checks.victory_checkpoint",
+        "web/tests/progression-reference.test.ts: 9 captured original cases across 3 seeds and Capable 0/1/2; 15 previews, candidate order/eligibility and exact RNG",
+        "web/tests/progression-save.test.ts:complete opening battle, all reward-stage save/restore, legacy migration and rejected/repeated choices",
+        "web/src/skill-view.ts:original-art skill menu and preview selection",
+        "web/docs/progression-notes.md:source formulas, hidden-stat provenance and deferred effects"
       ],
       "unverified": [
-        "Skill-choice flow",
+        "Chosen-trait effects in future combat, equipment requirements, party and town systems",
+        "Hidden base aiming/teamwork rolls and level-up growth",
         "Weapon skill growth",
-        "All 52 registered trait definitions and interactions"
+        "Other classes, all 52 registered traits and later/exhausted-pool interactions"
       ]
     },
     {
@@ -355,17 +367,17 @@
         "MainTimeline:11166 procLootMenu"
       ],
       "status": "partial",
-      "implemented": "Opening-mission pending loot, source ordinary-offer generation, original loot screen, click pickup/place and swaps; offers generated once and stored with six inventory slots.",
+      "implemented": "Opening-mission pending loot, original ordinary and earned-boss offer generation, normal loot screens, click pickup/place and swaps; offers generated once and stored with six inventory slots. Flow advances ordinary loot to earned boss prizes, earned skills and results.",
       "evidence": [
         "web/src/simulation.ts:damageEnemy",
         "web/tests/wave-reference.test.ts:original raw pending loot queue",
         "web/tests/combat-reference.test.ts:controlled lethal-rat drop and pending loot, exact RNG accounting",
-        "web/tests/item-reference.test.ts: original ordinary loot and starting inventory",
+        "web/tests/item-reference.test.ts: 157 original snapshots including 18 added boss-loot cases; prior 139 unchanged",
         "web/tests/inventory-save.test.ts: completion and one-time loot generation",
-        "docs/port-verification.json:browser_checks.ordinary_loot"
+        "docs/port-verification.json:browser_checks.ordinary_loot",
+        "web/tests/progression-save.test.ts:boss-kill eligibility, complete reward ordering and no-reroll/repeat-claim persistence"
       ],
       "unverified": [
-        "Boss prize generation and selection",
         "Later-day skill-dependent generation contexts",
         "Loot persistence and equipment effects through town and later days",
         "Original tooltip rendering and fading"
@@ -438,12 +450,14 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot with JSON import/export, version 2 item/loot-stage persistence and deterministic migration of version 1 browser saves.",
+      "implemented": "One browser slot with JSON import/export; version 3 preserves items, boss-kill state, reward stage, pending skill choices, known traits and enemy shadow history. Versions 1/2 migrate with explicit reconstruction provenance; newly owed legacy result rewards are generated once.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",
-        "web/scripts/soak.ts:96 seeded scenarios,951 checkpoints, exact state/event replay equality",
-        "web/tests/inventory-save.test.ts: version migration, inventory validation and no-reroll persistence"
+        "web/scripts/soak.ts: 96 seeded scenarios, 1173 checkpoints, 222 reward transitions and 121588 frames; exact state/event replay equality",
+        "web/tests/inventory-save.test.ts: version migration, inventory validation and no-reroll persistence",
+        "web/tests/progression-save.test.ts: v1/v2 battle and result migrations plus reward/choice persistence",
+        "web/tests/enemy-shadow.test.ts:missing-history fallback without RNG draws and invalid shadow-field rejection"
       ],
       "unverified": [
         "Six-slot parity",
@@ -452,7 +466,9 @@
       ],
       "intentionalDifferences": [
         "Current JSON format accepts only browser-port saves; it is not Flash SharedObject-compatible.",
-        "Version 1 browser saves lacked generated item metadata. Reconstructed metadata has explicit provenance; original Flash save conversion remains missing."
+        "Version 1 browser saves lacked generated item metadata. Reconstructed metadata has explicit provenance; original Flash save conversion remains missing.",
+        "Legacy trait and boss-kill information is reconstructed/inferred with explicit provenance; missing hidden stats remain unknown. Battle RNG is preserved, while previously omitted result rewards consume normal RNG once.",
+        "Old enemy saves without shadow history keep their former frame-derived behavior; subsequent transitions persist the flag."
       ]
     },
     {
@@ -485,7 +501,7 @@
         "enemy and enemy_* display timelines in original SWF"
       ],
       "status": "missing",
-      "implemented": "Ordinary-enemy contour comparison corrected overly strict port alpha targeting. The veteran late-game defect is still not reproduced.",
+      "implemented": "Ordinary-enemy contour comparison corrected overly strict port alpha targeting; a separate original sheep 32-to-5 case corrected discarded shadow history. The veteran late-game defect is still not reproduced.",
       "evidence": [
         "docs/oracle-notes.md: ordinary-enemy geometry comparison; this does not establish a late-game fix"
       ],

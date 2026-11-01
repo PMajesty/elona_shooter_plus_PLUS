@@ -51,6 +51,13 @@
       "originX": 0,
       "originY": 0
     },
+    "level": {
+      "file": "screens/level.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
     "background": {
       "file": "images/background.png",
       "width": 640,

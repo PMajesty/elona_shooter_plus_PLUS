@@ -1,0 +1,3555 @@
+{
+  "format": "elona-original-progression-trace",
+  "version": 1,
+  "runtime": "@ruffle-rs/ruffle 0.7.1",
+  "capturedAt": "2026-11-01T20:27:08.130Z",
+  "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "instrumentedSwfSha256": "43871c046326abf03f452e386a52dd94b1c8b15e918a8f794fa6700766d9f240",
+  "traceSha256": "258e2b8b174de014162b651be314f15a46cf0fd64f5066f7a2dc2f5b064071c1",
+  "clock": "Original Sheriff skill choices and descriptions under controlled randomness; later combat effects are separate checks.",
+  "records": [
+    {
+      "capableLevels": [
+        0,
+        1,
+        2
+      ],
+      "classId": 6,
+      "clock": "synchronous-original-trait-methods",
+      "focus": -1,
+      "kind": "progression",
+      "level": 2,
+      "rng": "xorshift32",
+      "seeds": [
+        42,
+        1,
+        3735928559
+      ],
+      "type": "ready",
+      "version": 1
+    },
+    {
+      "capable": 0,
+      "choiceOrder": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "choices": [
+        105,
+        121,
+        100
+      ],
+      "details": [
+        {
+          "current": [
+            "Shotgun 2",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.2 shotguns",
+            "",
+            ""
+          ],
+          "currentCalc": 2,
+          "id": 105,
+          "level": 2,
+          "maxLevel": 999,
+          "next": [
+            "Shotgun 3",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.3 shotguns",
+            "",
+            ""
+          ],
+          "nextCalc": 3,
+          "requiredLevel": 2
+        },
+        {
+          "current": [
+            "Cool",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 100,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Cool(New!)",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "12% faster recovery",
+            "",
+            ""
+          ],
+          "nextCalc": 12,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Accuracy",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 101,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Accuracy(New!)",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "11% less bullet spread",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Reloading",
+            "Reloading! Faster reloading is all you need!",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 107,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Reloading(New!)",
+            "Reloading! Faster reloading is all you need!",
+            "11% faster reloading",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Capable",
+            "You will be able to see more skill options when leveling up.",
+            "None",
+            "2",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 102,
+          "level": 0,
+          "maxLevel": 2,
+          "next": [
+            "Capable(New!)",
+            "You will be able to see more skill options when leveling up.",
+            "+1 option(s) availabe when leveled",
+            "2",
+            ""
+          ],
+          "nextCalc": 1,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Dr Holliday",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "None",
+            "5",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 110,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Dr Holliday(New!)",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "+1 shot(s) fired",
+            "5",
+            ""
+          ],
+          "nextCalc": 10,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Defender",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 113,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Defender(New!)",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "5% nullify chance",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Leadership",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 116,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Leadership(New!)",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "7% faster aiming",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 7,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Insurance",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 118,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Insurance(New!)",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "You get 2 gp",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 2,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Fury",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "13% more rampage duration",
+            "10",
+            ""
+          ],
+          "currentCalc": 13,
+          "id": 121,
+          "level": 1,
+          "maxLevel": 10,
+          "next": [
+            "Fury 2",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "18% more rampage duration",
+            "10",
+            ""
+          ],
+          "nextCalc": 18.970562748477143,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Taunt",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "None",
+            "5",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 125,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Taunt(New!)",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "20% more reward",
+            "5",
+            "Party Skill"
+          ],
+          "nextCalc": 20,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Last Hope",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 134,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Last Hope(New!)",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "When the wall HP is less than19%",
+            "10",
+            ""
+          ],
+          "nextCalc": 19,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Cripple Shot",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 129,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Cripple Shot(New!)",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "5% slow down per hit",
+            "10",
+            ""
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Quick Eyed",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 137,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Quick Eyed(New!)",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "15% more good events",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 15,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Anti Armor",
+            "You know weak spots of armored creatures.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 132,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Anti Armor(New!)",
+            "You know weak spots of armored creatures.",
+            "9% more damage vs Armor",
+            "10",
+            ""
+          ],
+          "nextCalc": 9,
+          "requiredLevel": 1
+        }
+      ],
+      "drawCount": 3,
+      "eligible": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "focus": -1,
+      "inputTraits": {
+        "6": 2,
+        "102": 0,
+        "105": 2,
+        "121": 1,
+        "900": 1,
+        "901": 1
+      },
+      "kind": "progression",
+      "level": 2,
+      "rngState": 476557059,
+      "seed": 42,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "capable": 1,
+      "choiceOrder": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "choices": [
+        105,
+        121,
+        100,
+        129
+      ],
+      "details": [
+        {
+          "current": [
+            "Shotgun 2",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.2 shotguns",
+            "",
+            ""
+          ],
+          "currentCalc": 2,
+          "id": 105,
+          "level": 2,
+          "maxLevel": 999,
+          "next": [
+            "Shotgun 3",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.3 shotguns",
+            "",
+            ""
+          ],
+          "nextCalc": 3,
+          "requiredLevel": 2
+        },
+        {
+          "current": [
+            "Cool",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 100,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Cool(New!)",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "12% faster recovery",
+            "",
+            ""
+          ],
+          "nextCalc": 12,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Accuracy",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 101,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Accuracy(New!)",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "11% less bullet spread",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Reloading",
+            "Reloading! Faster reloading is all you need!",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 107,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Reloading(New!)",
+            "Reloading! Faster reloading is all you need!",
+            "11% faster reloading",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Capable",
+            "You will be able to see more skill options when leveling up.",
+            "+1 option(s) availabe when leveled",
+            "2",
+            ""
+          ],
+          "currentCalc": 1,
+          "id": 102,
+          "level": 1,
+          "maxLevel": 2,
+          "next": [
+            "Capable 2",
+            "You will be able to see more skill options when leveling up.",
+            "+2 option(s) availabe when leveled [Maxed]",
+            "2",
+            ""
+          ],
+          "nextCalc": 2,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Dr Holliday",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "None",
+            "5",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 110,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Dr Holliday(New!)",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "+1 shot(s) fired",
+            "5",
+            ""
+          ],
+          "nextCalc": 10,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Defender",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 113,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Defender(New!)",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "5% nullify chance",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Leadership",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 116,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Leadership(New!)",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "7% faster aiming",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 7,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Insurance",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 118,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Insurance(New!)",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "You get 2 gp",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 2,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Fury",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "13% more rampage duration",
+            "10",
+            ""
+          ],
+          "currentCalc": 13,
+          "id": 121,
+          "level": 1,
+          "maxLevel": 10,
+          "next": [
+            "Fury 2",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "18% more rampage duration",
+            "10",
+            ""
+          ],
+          "nextCalc": 18.970562748477143,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Taunt",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "None",
+            "5",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 125,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Taunt(New!)",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "20% more reward",
+            "5",
+            "Party Skill"
+          ],
+          "nextCalc": 20,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Last Hope",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 134,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Last Hope(New!)",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "When the wall HP is less than19%",
+            "10",
+            ""
+          ],
+          "nextCalc": 19,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Cripple Shot",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 129,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Cripple Shot(New!)",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "5% slow down per hit",
+            "10",
+            ""
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Quick Eyed",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 137,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Quick Eyed(New!)",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "15% more good events",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 15,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Anti Armor",
+            "You know weak spots of armored creatures.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 132,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Anti Armor(New!)",
+            "You know weak spots of armored creatures.",
+            "9% more damage vs Armor",
+            "10",
+            ""
+          ],
+          "nextCalc": 9,
+          "requiredLevel": 1
+        }
+      ],
+      "drawCount": 4,
+      "eligible": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "focus": -1,
+      "inputTraits": {
+        "6": 2,
+        "102": 1,
+        "105": 2,
+        "121": 1,
+        "900": 1,
+        "901": 1
+      },
+      "kind": "progression",
+      "level": 2,
+      "rngState": 3648046016,
+      "seed": 42,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "capable": 2,
+      "choiceOrder": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "choices": [
+        105,
+        125,
+        100,
+        129,
+        137
+      ],
+      "details": [
+        {
+          "current": [
+            "Shotgun 2",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.2 shotguns",
+            "",
+            ""
+          ],
+          "currentCalc": 2,
+          "id": 105,
+          "level": 2,
+          "maxLevel": 999,
+          "next": [
+            "Shotgun 3",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.3 shotguns",
+            "",
+            ""
+          ],
+          "nextCalc": 3,
+          "requiredLevel": 2
+        },
+        {
+          "current": [
+            "Cool",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 100,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Cool(New!)",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "12% faster recovery",
+            "",
+            ""
+          ],
+          "nextCalc": 12,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Accuracy",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 101,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Accuracy(New!)",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "11% less bullet spread",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Reloading",
+            "Reloading! Faster reloading is all you need!",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 107,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Reloading(New!)",
+            "Reloading! Faster reloading is all you need!",
+            "11% faster reloading",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Capable 2",
+            "You will be able to see more skill options when leveling up.",
+            "+2 option(s) availabe when leveled [Maxed]",
+            "2",
+            ""
+          ],
+          "currentCalc": 2,
+          "id": 102,
+          "level": 2,
+          "maxLevel": 2,
+          "next": [
+            "Capable 3",
+            "You will be able to see more skill options when leveling up.",
+            "+3 option(s) availabe when leveled",
+            "2",
+            ""
+          ],
+          "nextCalc": 3,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Dr Holliday",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "None",
+            "5",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 110,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Dr Holliday(New!)",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "+1 shot(s) fired",
+            "5",
+            ""
+          ],
+          "nextCalc": 10,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Defender",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 113,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Defender(New!)",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "5% nullify chance",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Leadership",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 116,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Leadership(New!)",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "7% faster aiming",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 7,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Insurance",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 118,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Insurance(New!)",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "You get 2 gp",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 2,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Fury",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "13% more rampage duration",
+            "10",
+            ""
+          ],
+          "currentCalc": 13,
+          "id": 121,
+          "level": 1,
+          "maxLevel": 10,
+          "next": [
+            "Fury 2",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "18% more rampage duration",
+            "10",
+            ""
+          ],
+          "nextCalc": 18.970562748477143,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Taunt",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "None",
+            "5",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 125,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Taunt(New!)",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "20% more reward",
+            "5",
+            "Party Skill"
+          ],
+          "nextCalc": 20,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Last Hope",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 134,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Last Hope(New!)",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "When the wall HP is less than19%",
+            "10",
+            ""
+          ],
+          "nextCalc": 19,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Cripple Shot",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 129,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Cripple Shot(New!)",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "5% slow down per hit",
+            "10",
+            ""
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Quick Eyed",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 137,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Quick Eyed(New!)",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "15% more good events",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 15,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Anti Armor",
+            "You know weak spots of armored creatures.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 132,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Anti Armor(New!)",
+            "You know weak spots of armored creatures.",
+            "9% more damage vs Armor",
+            "10",
+            ""
+          ],
+          "nextCalc": 9,
+          "requiredLevel": 1
+        }
+      ],
+      "drawCount": 5,
+      "eligible": [
+        105,
+        100,
+        101,
+        107,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "focus": -1,
+      "inputTraits": {
+        "6": 2,
+        "102": 2,
+        "105": 2,
+        "121": 1,
+        "900": 1,
+        "901": 1
+      },
+      "kind": "progression",
+      "level": 2,
+      "rngState": 3759983556,
+      "seed": 42,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "capable": 0,
+      "choiceOrder": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "choices": [
+        105,
+        121,
+        100
+      ],
+      "details": [
+        {
+          "current": [
+            "Shotgun 2",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.2 shotguns",
+            "",
+            ""
+          ],
+          "currentCalc": 2,
+          "id": 105,
+          "level": 2,
+          "maxLevel": 999,
+          "next": [
+            "Shotgun 3",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.3 shotguns",
+            "",
+            ""
+          ],
+          "nextCalc": 3,
+          "requiredLevel": 2
+        },
+        {
+          "current": [
+            "Cool",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 100,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Cool(New!)",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "12% faster recovery",
+            "",
+            ""
+          ],
+          "nextCalc": 12,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Accuracy",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 101,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Accuracy(New!)",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "11% less bullet spread",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Reloading",
+            "Reloading! Faster reloading is all you need!",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 107,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Reloading(New!)",
+            "Reloading! Faster reloading is all you need!",
+            "11% faster reloading",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Capable",
+            "You will be able to see more skill options when leveling up.",
+            "None",
+            "2",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 102,
+          "level": 0,
+          "maxLevel": 2,
+          "next": [
+            "Capable(New!)",
+            "You will be able to see more skill options when leveling up.",
+            "+1 option(s) availabe when leveled",
+            "2",
+            ""
+          ],
+          "nextCalc": 1,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Dr Holliday",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "None",
+            "5",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 110,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Dr Holliday(New!)",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "+1 shot(s) fired",
+            "5",
+            ""
+          ],
+          "nextCalc": 10,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Defender",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 113,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Defender(New!)",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "5% nullify chance",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Leadership",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 116,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Leadership(New!)",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "7% faster aiming",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 7,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Insurance",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 118,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Insurance(New!)",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "You get 2 gp",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 2,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Fury",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "13% more rampage duration",
+            "10",
+            ""
+          ],
+          "currentCalc": 13,
+          "id": 121,
+          "level": 1,
+          "maxLevel": 10,
+          "next": [
+            "Fury 2",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "18% more rampage duration",
+            "10",
+            ""
+          ],
+          "nextCalc": 18.970562748477143,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Taunt",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "None",
+            "5",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 125,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Taunt(New!)",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "20% more reward",
+            "5",
+            "Party Skill"
+          ],
+          "nextCalc": 20,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Last Hope",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 134,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Last Hope(New!)",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "When the wall HP is less than19%",
+            "10",
+            ""
+          ],
+          "nextCalc": 19,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Cripple Shot",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 129,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Cripple Shot(New!)",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "5% slow down per hit",
+            "10",
+            ""
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Quick Eyed",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 137,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Quick Eyed(New!)",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "15% more good events",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 15,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Anti Armor",
+            "You know weak spots of armored creatures.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 132,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Anti Armor(New!)",
+            "You know weak spots of armored creatures.",
+            "9% more damage vs Armor",
+            "10",
+            ""
+          ],
+          "nextCalc": 9,
+          "requiredLevel": 1
+        }
+      ],
+      "drawCount": 4,
+      "eligible": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "focus": -1,
+      "inputTraits": {
+        "6": 2,
+        "102": 0,
+        "105": 2,
+        "121": 1,
+        "900": 1,
+        "901": 1
+      },
+      "kind": "progression",
+      "level": 2,
+      "rngState": 307599695,
+      "seed": 1,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "capable": 1,
+      "choiceOrder": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "choices": [
+        105,
+        121,
+        100,
+        118
+      ],
+      "details": [
+        {
+          "current": [
+            "Shotgun 2",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.2 shotguns",
+            "",
+            ""
+          ],
+          "currentCalc": 2,
+          "id": 105,
+          "level": 2,
+          "maxLevel": 999,
+          "next": [
+            "Shotgun 3",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.3 shotguns",
+            "",
+            ""
+          ],
+          "nextCalc": 3,
+          "requiredLevel": 2
+        },
+        {
+          "current": [
+            "Cool",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 100,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Cool(New!)",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "12% faster recovery",
+            "",
+            ""
+          ],
+          "nextCalc": 12,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Accuracy",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 101,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Accuracy(New!)",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "11% less bullet spread",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Reloading",
+            "Reloading! Faster reloading is all you need!",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 107,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Reloading(New!)",
+            "Reloading! Faster reloading is all you need!",
+            "11% faster reloading",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Capable",
+            "You will be able to see more skill options when leveling up.",
+            "+1 option(s) availabe when leveled",
+            "2",
+            ""
+          ],
+          "currentCalc": 1,
+          "id": 102,
+          "level": 1,
+          "maxLevel": 2,
+          "next": [
+            "Capable 2",
+            "You will be able to see more skill options when leveling up.",
+            "+2 option(s) availabe when leveled [Maxed]",
+            "2",
+            ""
+          ],
+          "nextCalc": 2,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Dr Holliday",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "None",
+            "5",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 110,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Dr Holliday(New!)",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "+1 shot(s) fired",
+            "5",
+            ""
+          ],
+          "nextCalc": 10,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Defender",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 113,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Defender(New!)",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "5% nullify chance",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Leadership",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 116,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Leadership(New!)",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "7% faster aiming",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 7,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Insurance",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 118,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Insurance(New!)",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "You get 2 gp",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 2,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Fury",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "13% more rampage duration",
+            "10",
+            ""
+          ],
+          "currentCalc": 13,
+          "id": 121,
+          "level": 1,
+          "maxLevel": 10,
+          "next": [
+            "Fury 2",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "18% more rampage duration",
+            "10",
+            ""
+          ],
+          "nextCalc": 18.970562748477143,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Taunt",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "None",
+            "5",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 125,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Taunt(New!)",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "20% more reward",
+            "5",
+            "Party Skill"
+          ],
+          "nextCalc": 20,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Last Hope",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 134,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Last Hope(New!)",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "When the wall HP is less than19%",
+            "10",
+            ""
+          ],
+          "nextCalc": 19,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Cripple Shot",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 129,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Cripple Shot(New!)",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "5% slow down per hit",
+            "10",
+            ""
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Quick Eyed",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 137,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Quick Eyed(New!)",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "15% more good events",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 15,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Anti Armor",
+            "You know weak spots of armored creatures.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 132,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Anti Armor(New!)",
+            "You know weak spots of armored creatures.",
+            "9% more damage vs Armor",
+            "10",
+            ""
+          ],
+          "nextCalc": 9,
+          "requiredLevel": 1
+        }
+      ],
+      "drawCount": 5,
+      "eligible": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "focus": -1,
+      "inputTraits": {
+        "6": 2,
+        "102": 1,
+        "105": 2,
+        "121": 1,
+        "900": 1,
+        "901": 1
+      },
+      "kind": "progression",
+      "level": 2,
+      "rngState": 2398689233,
+      "seed": 1,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "capable": 2,
+      "choiceOrder": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "choices": [
+        105,
+        121,
+        100,
+        118,
+        101
+      ],
+      "details": [
+        {
+          "current": [
+            "Shotgun 2",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.2 shotguns",
+            "",
+            ""
+          ],
+          "currentCalc": 2,
+          "id": 105,
+          "level": 2,
+          "maxLevel": 999,
+          "next": [
+            "Shotgun 3",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.3 shotguns",
+            "",
+            ""
+          ],
+          "nextCalc": 3,
+          "requiredLevel": 2
+        },
+        {
+          "current": [
+            "Cool",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 100,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Cool(New!)",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "12% faster recovery",
+            "",
+            ""
+          ],
+          "nextCalc": 12,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Accuracy",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 101,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Accuracy(New!)",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "11% less bullet spread",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Reloading",
+            "Reloading! Faster reloading is all you need!",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 107,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Reloading(New!)",
+            "Reloading! Faster reloading is all you need!",
+            "11% faster reloading",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Capable 2",
+            "You will be able to see more skill options when leveling up.",
+            "+2 option(s) availabe when leveled [Maxed]",
+            "2",
+            ""
+          ],
+          "currentCalc": 2,
+          "id": 102,
+          "level": 2,
+          "maxLevel": 2,
+          "next": [
+            "Capable 3",
+            "You will be able to see more skill options when leveling up.",
+            "+3 option(s) availabe when leveled",
+            "2",
+            ""
+          ],
+          "nextCalc": 3,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Dr Holliday",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "None",
+            "5",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 110,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Dr Holliday(New!)",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "+1 shot(s) fired",
+            "5",
+            ""
+          ],
+          "nextCalc": 10,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Defender",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 113,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Defender(New!)",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "5% nullify chance",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Leadership",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 116,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Leadership(New!)",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "7% faster aiming",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 7,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Insurance",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 118,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Insurance(New!)",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "You get 2 gp",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 2,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Fury",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "13% more rampage duration",
+            "10",
+            ""
+          ],
+          "currentCalc": 13,
+          "id": 121,
+          "level": 1,
+          "maxLevel": 10,
+          "next": [
+            "Fury 2",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "18% more rampage duration",
+            "10",
+            ""
+          ],
+          "nextCalc": 18.970562748477143,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Taunt",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "None",
+            "5",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 125,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Taunt(New!)",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "20% more reward",
+            "5",
+            "Party Skill"
+          ],
+          "nextCalc": 20,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Last Hope",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 134,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Last Hope(New!)",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "When the wall HP is less than19%",
+            "10",
+            ""
+          ],
+          "nextCalc": 19,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Cripple Shot",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 129,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Cripple Shot(New!)",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "5% slow down per hit",
+            "10",
+            ""
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Quick Eyed",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 137,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Quick Eyed(New!)",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "15% more good events",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 15,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Anti Armor",
+            "You know weak spots of armored creatures.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 132,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Anti Armor(New!)",
+            "You know weak spots of armored creatures.",
+            "9% more damage vs Armor",
+            "10",
+            ""
+          ],
+          "nextCalc": 9,
+          "requiredLevel": 1
+        }
+      ],
+      "drawCount": 6,
+      "eligible": [
+        105,
+        100,
+        101,
+        107,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "focus": -1,
+      "inputTraits": {
+        "6": 2,
+        "102": 2,
+        "105": 2,
+        "121": 1,
+        "900": 1,
+        "901": 1
+      },
+      "kind": "progression",
+      "level": 2,
+      "rngState": 745495504,
+      "seed": 1,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "capable": 0,
+      "choiceOrder": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "choices": [
+        102,
+        118,
+        125
+      ],
+      "details": [
+        {
+          "current": [
+            "Shotgun 2",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.2 shotguns",
+            "",
+            ""
+          ],
+          "currentCalc": 2,
+          "id": 105,
+          "level": 2,
+          "maxLevel": 999,
+          "next": [
+            "Shotgun 3",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.3 shotguns",
+            "",
+            ""
+          ],
+          "nextCalc": 3,
+          "requiredLevel": 2
+        },
+        {
+          "current": [
+            "Cool",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 100,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Cool(New!)",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "12% faster recovery",
+            "",
+            ""
+          ],
+          "nextCalc": 12,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Accuracy",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 101,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Accuracy(New!)",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "11% less bullet spread",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Reloading",
+            "Reloading! Faster reloading is all you need!",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 107,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Reloading(New!)",
+            "Reloading! Faster reloading is all you need!",
+            "11% faster reloading",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Capable",
+            "You will be able to see more skill options when leveling up.",
+            "None",
+            "2",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 102,
+          "level": 0,
+          "maxLevel": 2,
+          "next": [
+            "Capable(New!)",
+            "You will be able to see more skill options when leveling up.",
+            "+1 option(s) availabe when leveled",
+            "2",
+            ""
+          ],
+          "nextCalc": 1,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Dr Holliday",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "None",
+            "5",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 110,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Dr Holliday(New!)",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "+1 shot(s) fired",
+            "5",
+            ""
+          ],
+          "nextCalc": 10,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Defender",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 113,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Defender(New!)",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "5% nullify chance",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Leadership",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 116,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Leadership(New!)",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "7% faster aiming",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 7,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Insurance",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 118,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Insurance(New!)",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "You get 2 gp",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 2,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Fury",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "13% more rampage duration",
+            "10",
+            ""
+          ],
+          "currentCalc": 13,
+          "id": 121,
+          "level": 1,
+          "maxLevel": 10,
+          "next": [
+            "Fury 2",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "18% more rampage duration",
+            "10",
+            ""
+          ],
+          "nextCalc": 18.970562748477143,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Taunt",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "None",
+            "5",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 125,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Taunt(New!)",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "20% more reward",
+            "5",
+            "Party Skill"
+          ],
+          "nextCalc": 20,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Last Hope",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 134,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Last Hope(New!)",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "When the wall HP is less than19%",
+            "10",
+            ""
+          ],
+          "nextCalc": 19,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Cripple Shot",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 129,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Cripple Shot(New!)",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "5% slow down per hit",
+            "10",
+            ""
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Quick Eyed",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 137,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Quick Eyed(New!)",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "15% more good events",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 15,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Anti Armor",
+            "You know weak spots of armored creatures.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 132,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Anti Armor(New!)",
+            "You know weak spots of armored creatures.",
+            "9% more damage vs Armor",
+            "10",
+            ""
+          ],
+          "nextCalc": 9,
+          "requiredLevel": 1
+        }
+      ],
+      "drawCount": 3,
+      "eligible": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "focus": -1,
+      "inputTraits": {
+        "6": 2,
+        "102": 0,
+        "105": 2,
+        "121": 1,
+        "900": 1,
+        "901": 1
+      },
+      "kind": "progression",
+      "level": 2,
+      "rngState": 3129746520,
+      "seed": 3735928559,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "capable": 1,
+      "choiceOrder": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "choices": [
+        102,
+        118,
+        125,
+        132
+      ],
+      "details": [
+        {
+          "current": [
+            "Shotgun 2",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.2 shotguns",
+            "",
+            ""
+          ],
+          "currentCalc": 2,
+          "id": 105,
+          "level": 2,
+          "maxLevel": 999,
+          "next": [
+            "Shotgun 3",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.3 shotguns",
+            "",
+            ""
+          ],
+          "nextCalc": 3,
+          "requiredLevel": 2
+        },
+        {
+          "current": [
+            "Cool",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 100,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Cool(New!)",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "12% faster recovery",
+            "",
+            ""
+          ],
+          "nextCalc": 12,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Accuracy",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 101,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Accuracy(New!)",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "11% less bullet spread",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Reloading",
+            "Reloading! Faster reloading is all you need!",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 107,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Reloading(New!)",
+            "Reloading! Faster reloading is all you need!",
+            "11% faster reloading",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Capable",
+            "You will be able to see more skill options when leveling up.",
+            "+1 option(s) availabe when leveled",
+            "2",
+            ""
+          ],
+          "currentCalc": 1,
+          "id": 102,
+          "level": 1,
+          "maxLevel": 2,
+          "next": [
+            "Capable 2",
+            "You will be able to see more skill options when leveling up.",
+            "+2 option(s) availabe when leveled [Maxed]",
+            "2",
+            ""
+          ],
+          "nextCalc": 2,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Dr Holliday",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "None",
+            "5",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 110,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Dr Holliday(New!)",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "+1 shot(s) fired",
+            "5",
+            ""
+          ],
+          "nextCalc": 10,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Defender",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 113,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Defender(New!)",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "5% nullify chance",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Leadership",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 116,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Leadership(New!)",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "7% faster aiming",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 7,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Insurance",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 118,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Insurance(New!)",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "You get 2 gp",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 2,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Fury",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "13% more rampage duration",
+            "10",
+            ""
+          ],
+          "currentCalc": 13,
+          "id": 121,
+          "level": 1,
+          "maxLevel": 10,
+          "next": [
+            "Fury 2",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "18% more rampage duration",
+            "10",
+            ""
+          ],
+          "nextCalc": 18.970562748477143,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Taunt",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "None",
+            "5",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 125,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Taunt(New!)",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "20% more reward",
+            "5",
+            "Party Skill"
+          ],
+          "nextCalc": 20,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Last Hope",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 134,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Last Hope(New!)",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "When the wall HP is less than19%",
+            "10",
+            ""
+          ],
+          "nextCalc": 19,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Cripple Shot",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 129,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Cripple Shot(New!)",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "5% slow down per hit",
+            "10",
+            ""
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Quick Eyed",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 137,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Quick Eyed(New!)",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "15% more good events",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 15,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Anti Armor",
+            "You know weak spots of armored creatures.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 132,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Anti Armor(New!)",
+            "You know weak spots of armored creatures.",
+            "9% more damage vs Armor",
+            "10",
+            ""
+          ],
+          "nextCalc": 9,
+          "requiredLevel": 1
+        }
+      ],
+      "drawCount": 4,
+      "eligible": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "focus": -1,
+      "inputTraits": {
+        "6": 2,
+        "102": 1,
+        "105": 2,
+        "121": 1,
+        "900": 1,
+        "901": 1
+      },
+      "kind": "progression",
+      "level": 2,
+      "rngState": 4276113467,
+      "seed": 3735928559,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "capable": 2,
+      "choiceOrder": [
+        105,
+        100,
+        101,
+        107,
+        102,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "choices": [
+        107,
+        118,
+        134,
+        132,
+        113
+      ],
+      "details": [
+        {
+          "current": [
+            "Shotgun 2",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.2 shotguns",
+            "",
+            ""
+          ],
+          "currentCalc": 2,
+          "id": 105,
+          "level": 2,
+          "maxLevel": 999,
+          "next": [
+            "Shotgun 3",
+            "The skill is required to handle shotguns.",
+            "You can equip Lv.3 shotguns",
+            "",
+            ""
+          ],
+          "nextCalc": 3,
+          "requiredLevel": 2
+        },
+        {
+          "current": [
+            "Cool",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 100,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Cool(New!)",
+            "Makes you calm and recover quicikly from gun recoil. For NPCs, it directly increases accuracy.",
+            "12% faster recovery",
+            "",
+            ""
+          ],
+          "nextCalc": 12,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Accuracy",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 101,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Accuracy(New!)",
+            "Decreases the bullet spread, making it fly to just where you aim at.",
+            "11% less bullet spread",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Reloading",
+            "Reloading! Faster reloading is all you need!",
+            "None",
+            "",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 107,
+          "level": 0,
+          "maxLevel": 999,
+          "next": [
+            "Reloading(New!)",
+            "Reloading! Faster reloading is all you need!",
+            "11% faster reloading",
+            "",
+            ""
+          ],
+          "nextCalc": 11,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Capable 2",
+            "You will be able to see more skill options when leveling up.",
+            "+2 option(s) availabe when leveled [Maxed]",
+            "2",
+            ""
+          ],
+          "currentCalc": 2,
+          "id": 102,
+          "level": 2,
+          "maxLevel": 2,
+          "next": [
+            "Capable 3",
+            "You will be able to see more skill options when leveling up.",
+            "+3 option(s) availabe when leveled",
+            "2",
+            ""
+          ],
+          "nextCalc": 3,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Dr Holliday",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "None",
+            "5",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 110,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Dr Holliday(New!)",
+            "When equipped with a shotgun, each level of the skill increases the number of shells shot but decreases accuracy.",
+            "+1 shot(s) fired",
+            "5",
+            ""
+          ],
+          "nextCalc": 10,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Defender",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 113,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Defender(New!)",
+            "Occasionally, you will be able to completely nullify the damage done to the castle.  Party Skill.",
+            "5% nullify chance",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Leadership",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 116,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Leadership(New!)",
+            "Leadership raises the morale of the team, making your troops aim faster. Party Skill.",
+            "7% faster aiming",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 7,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Insurance",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 118,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Insurance(New!)",
+            "You receive the insurance EVERY TIME an enemy hits the castle! Party Skill.",
+            "You get 2 gp",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 2,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Fury",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "13% more rampage duration",
+            "10",
+            ""
+          ],
+          "currentCalc": 13,
+          "id": 121,
+          "level": 1,
+          "maxLevel": 10,
+          "next": [
+            "Fury 2",
+            "Everyone should just make sure not to piss you off. Your rampage duration lasts longer than normal. Stacks on the ranger's bonus.",
+            "18% more rampage duration",
+            "10",
+            ""
+          ],
+          "nextCalc": 18.970562748477143,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Taunt",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "None",
+            "5",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 125,
+          "level": 0,
+          "maxLevel": 5,
+          "next": [
+            "Taunt(New!)",
+            "Taunting enemies makes them angry and stronger. But it will increase the mission reward money somehow. Party Skill.",
+            "20% more reward",
+            "5",
+            "Party Skill"
+          ],
+          "nextCalc": 20,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Last Hope",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 134,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Last Hope(New!)",
+            "When the castle is attacked while the wall is heavily damaged, you get a fair chance of going rampage.",
+            "When the wall HP is less than19%",
+            "10",
+            ""
+          ],
+          "nextCalc": 19,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Cripple Shot",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 129,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Cripple Shot(New!)",
+            "Slows down the shot enemy so you can dish it anyway you want.",
+            "5% slow down per hit",
+            "10",
+            ""
+          ],
+          "nextCalc": 5,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Quick Eyed",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "None",
+            "10",
+            "Party Skill"
+          ],
+          "currentCalc": 0,
+          "id": 137,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Quick Eyed(New!)",
+            "The feat increases the chance you get good events while searching in the town. Party Skill.",
+            "15% more good events",
+            "10",
+            "Party Skill"
+          ],
+          "nextCalc": 15,
+          "requiredLevel": 1
+        },
+        {
+          "current": [
+            "Anti Armor",
+            "You know weak spots of armored creatures.",
+            "None",
+            "10",
+            ""
+          ],
+          "currentCalc": 0,
+          "id": 132,
+          "level": 0,
+          "maxLevel": 10,
+          "next": [
+            "Anti Armor(New!)",
+            "You know weak spots of armored creatures.",
+            "9% more damage vs Armor",
+            "10",
+            ""
+          ],
+          "nextCalc": 9,
+          "requiredLevel": 1
+        }
+      ],
+      "drawCount": 5,
+      "eligible": [
+        105,
+        100,
+        101,
+        107,
+        110,
+        113,
+        116,
+        118,
+        121,
+        125,
+        134,
+        129,
+        137,
+        132
+      ],
+      "focus": -1,
+      "inputTraits": {
+        "6": 2,
+        "102": 2,
+        "105": 2,
+        "121": 1,
+        "900": 1,
+        "901": 1
+      },
+      "kind": "progression",
+      "level": 2,
+      "rngState": 1745748808,
+      "seed": 3735928559,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "kind": "progression",
+      "ok": true,
+      "snapshots": 9,
+      "type": "complete",
+      "version": 1
+    }
+  ]
+}

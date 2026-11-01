@@ -1,7 +1,7 @@
 import type { EnemyKind } from './content.ts';
 
 export type OrdinaryEnemyKind = Exclude<EnemyKind, 'boss'>;
-export interface OrdinaryEnemyGeometry { kind: OrdinaryEnemyKind; x: number; y: number; frame: number }
+export interface OrdinaryEnemyGeometry { kind: OrdinaryEnemyKind; x: number; y: number; frame: number; shadowHit: boolean }
 export interface RgbaMask { width: number; height: number; data: ArrayLike<number> }
 interface OriginalShape { bounds: [number, number, number, number]; fills: number[][][] }
 interface OriginalPlacement { shape: string; matrix: [number, number, number, number, number, number]; shadow: boolean }
@@ -9,6 +9,22 @@ export interface CollisionGeometry {
   version: 1; units: 'twips'; sourceSha256: string;
   shapes: Record<string, OriginalShape>;
   enemies: Record<OrdinaryEnemyKind, { symbol: number; count: number; frames: Record<string, OriginalPlacement[]> }>;
+}
+
+/** Флаг задают только скрипты определённых кадров; возврат sheep 32→5 его не восстанавливает. */
+export function shadowHitAtFrame(kind: EnemyKind, frame: number, previous?: boolean): boolean {
+  if (kind === 'sheep') {
+    if (frame === 1 || frame === 107) return true;
+    if (frame === 32) return false;
+    // В старом сохранении истории нет: сохраняем прежнее правило текущего кадра.
+    return previous ?? !(frame >= 32 && frame <= 95);
+  }
+  if (kind === 'crow') {
+    if (frame === 1) return false;
+    if (frame === 69) return true;
+    return previous ?? frame >= 69;
+  }
+  return previous ?? true;
 }
 
 /** Одинаковая проверка альфа-канала для браузерного холста и сравнения с исходным SWF. */
@@ -58,7 +74,7 @@ export function ordinaryEnemyHit(
   // Дисплей Flash хранит координаты в двадцатых долях пикселя с усечением к нулю.
   const localX = Math.trunc(x * 20) - Math.trunc(enemy.x * 20);
   const localY = Math.trunc(y * 20) - Math.trunc(enemy.y * 20);
-  const excludeShadow = enemy.kind === 'sheep' && enemy.frame >= 32 && enemy.frame <= 95 || enemy.kind === 'crow' && enemy.frame < 69;
+  const excludeShadow = !enemy.shadowHit;
   let bodyHit = false;
   for (const placement of placements) {
     if (!placedShapeHit(geometry.shapes[placement.shape], placement, localX, localY)) continue;
