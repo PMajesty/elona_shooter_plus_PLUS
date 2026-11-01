@@ -1,0 +1,23 @@
+{
+  "name": "elona-shooter-browser-port",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "test:reference": "node --experimental-strip-types scripts/compare-reference.ts",
+    "test:wave-reference": "node --experimental-strip-types scripts/compare-wave-reference.ts",
+    "test:combat-reference": "node --experimental-strip-types scripts/compare-combat-reference.ts",
+    "test:soak": "node --experimental-strip-types scripts/soak.ts"
+  },
+  "dependencies": {
+    "phaser": "4.2.1"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.0",
+    "vite": "8.3.5"
+  }
+}

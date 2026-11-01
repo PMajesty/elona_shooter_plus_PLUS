@@ -1,0 +1,561 @@
+{
+  "date": "2026-11-01",
+  "milestone": "Opening-battle fidelity fixes and independent original-reference testing",
+  "complete_port": false,
+  "environment": {
+    "os": "Windows",
+    "browser": "Codex in-app browser",
+    "node": "24.15.0",
+    "phaser": "4.2.1",
+    "vite": "8.3.5"
+  },
+  "automated": {
+    "simulation_tests_passed": 19,
+    "simulation_tests_failed": 0,
+    "typescript": "passed",
+    "production_build": "passed",
+    "candidate_build": "passed",
+    "seeded_soak": {
+      "status": "passed",
+      "seedCount": 32,
+      "policies": [
+        "idle",
+        "aimed",
+        "interruptions"
+      ],
+      "scenarios": 96,
+      "simulationFrames": 122812,
+      "checkpoints": 957,
+      "elapsedMs": 3071,
+      "limits": [
+        "Port self-consistency, finite state and JSON replay only; not an original-game parity proof",
+        "First-day Sheriff only, rectangular headless hit testing",
+        "No browser rendering, input latency, audio or wall-clock performance comparison"
+      ]
+    }
+  },
+  "browser_checks": {
+    "new_game": {
+      "character_creation": true,
+      "appearance_choices": 22,
+      "proceed_reaches_combat": true,
+      "initial_ammo": 5,
+      "no_proceed_click_shot": true
+    },
+    "shooting": {
+      "real_mouse_click_consumes_shell": true,
+      "damage_observed": 16
+    },
+    "reload": {
+      "space_after_cooldown": true,
+      "ammo_before": 3,
+      "ammo_after": 5,
+      "exact_wall_clock_reload_duration_measured": false,
+      "per_shell_animation_restarts": 2,
+      "tested_missing_shells": 2,
+      "final_player_frame": 109,
+      "final_reload_ticks": 0,
+      "space_resumes_pause_without_reloading": true
+    },
+    "grenade": {
+      "key": "2",
+      "quantity_before": 5,
+      "quantity_after": 4
+    },
+    "pause": {
+      "tick_frozen_while_paused": true,
+      "resume_works": true
+    },
+    "continue": {
+      "appearance_6_and_battle_restored": true,
+      "regression_after_fix": {
+        "tick": 982,
+        "ammo": 3,
+        "no_continue_click_shot": true
+      }
+    },
+    "victory_checkpoint": {
+      "tick": 1668,
+      "castle_hp": 40,
+      "gold": 989,
+      "kills": 29,
+      "ammo": 5,
+      "level": 2,
+      "exp": 175,
+      "reward": 600,
+      "perfect_bonus": 180,
+      "upkeep": 40,
+      "net_reward": 740
+    },
+    "defeat_checkpoint": {
+      "tick": 542,
+      "castle_hp": -3,
+      "gold": 200,
+      "original_game_over_art": true,
+      "return_to_title": true
+    },
+    "export_and_reload": {
+      "downloaded_json_matches_victory": true,
+      "page_reload_then_continue_restores_victory": true
+    },
+    "invalid_import": {
+      "rejected": true,
+      "prior_paused_state_preserved": {
+        "tick": 880,
+        "ammo": 4,
+        "castle_hp": 32
+      }
+    },
+    "production_subdirectory": {
+      "url": "http://127.0.0.1:5175/elona/",
+      "title_assets_loaded": true,
+      "new_game_and_proceed": true,
+      "initial_ammo": 5,
+      "enemies_visibly_spawned": true,
+      "console_errors_observed": 0,
+      "latest_bundle": "assets/index-DHxwcqge.js",
+      "fidelity_update_new_game": {
+        "tick": 1,
+        "ammo": 5,
+        "castle_hp": 40,
+        "grenades": 5,
+        "paused": true,
+        "console_errors_observed": 0
+      },
+      "reload_recheck": {
+        "ammo_before": 3,
+        "ammo_after": 5,
+        "reload_animations": 2,
+        "reload_ticks": 0,
+        "player_frame": 109
+      }
+    },
+    "boss_health": {
+      "fixture": "Controlled edits of an existing valid browser save, imported through normal file input",
+      "full_hp_fraction": 1,
+      "half_hp_fraction": 0.5,
+      "bar_count_alive": 1,
+      "bar_count_dead": 0,
+      "parent_offset": [
+        -11,
+        22
+      ],
+      "art_source": "SWF sprite2411",
+      "matched_original_screenshot": false
+    },
+    "rendering": {
+      "canvas": [
+        620,
+        380
+      ],
+      "css_size": [
+        620,
+        380
+      ],
+      "device_pixel_ratio": 1,
+      "character_sampling": "nearest",
+      "reason": "All273 original charaPic bitmap fills are non-smoothed0x43; fractional idle placement made linear texture sampling blend source pixels",
+      "ordinary_candidate_view_inspected": true,
+      "all_blur_resolved": false
+    }
+  },
+  "checkpoint_provenance": "Generated using public Simulation API, seed 42 and normal fire/reload inputs with rectangular fallback collision. No state edits. Imported through the normal file picker. These checks are not a complete manual playthrough or parity proof. New boss full/half/dead checks deliberately edit only boss HP/death frame in a copied checkpoint; they are controlled fixtures, not normal-play captures. Older victory/defeat checks predate the source-backed wave RNG correction.",
+  "performance": {
+    "comparison_with_flash_or_ruffle": "not measured",
+    "sample": {
+      "scope": "short local active-battle sample; not a stress benchmark",
+      "mean_frame_ms": 16.73,
+      "max_frame_ms": 18.34,
+      "frames_above_50ms_in_rolling_window": 0
+    },
+    "startup": "Production assets ready in 274 ms on local host; cache/network conditions uncontrolled."
+  },
+  "screenshots": [
+    ".build/browser-qa/character-creation.jpg",
+    ".build/browser-qa/opening-battle.jpg",
+    ".build/browser-qa/boss-health-and-sharp-sprites.jpg",
+    ".build/browser-qa/fidelity-update.jpg"
+  ],
+  "preserved_baselines": {
+    "original/elonashooter1.3.swf": {
+      "sha256_worktree": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "modified_by_port": false
+    },
+    "elonashooter1.3-fixed.swf": {
+      "sha256_worktree": "bf573da9f6dc7dae9538ccc3e458b1eba80dc7947ad16f520fde62388b3c4363",
+      "modified_by_port": false
+    },
+    "src/original/MainTimeline.as": {
+      "sha256_worktree": "1a2a25a718337102f06ab61e9eee007675e7ab1252eea9a631e6ca39fe5cca7f",
+      "modified_by_port": false
+    },
+    "src/shootem_fla/MainTimeline.as": {
+      "sha256_worktree": "77b37efa384e58f0b31f6bd31f553efb8f2001faec91d214fcda09d63e62215f",
+      "modified_by_port": false
+    }
+  },
+  "reference_comparisons": {
+    "reload": {
+      "status": "passed",
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "fcd1c103289f86df0fa242716e309fbd2ef43c1e4973a2f121afdc18d9263cba",
+      "traceSha256": "6839b558ccb0c45a749d93ef0586a262e6afc1b7b58a3d71be8949135fcffba8",
+      "scenarios": 5,
+      "matchedSnapshots": 72,
+      "checks": [
+        "ammo",
+        "reload timer",
+        "rampage counter",
+        "pause gate",
+        "sound intents",
+        "animation intents"
+      ],
+      "limits": [
+        "Manually advanced logical timer methods; native frame/timer ordering untested",
+        "Simulation pause is a test-adapter gate; browser pause/input tested separately",
+        "Sound and animation intents, not audio samples or rendered frames",
+        "Reload scenarios do not establish combat RNG equivalence"
+      ]
+    },
+    "waves": {
+      "status": "passed",
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "b4289a5d1999b1f5d2b72292934b190297239474a0e09c038ced90c6d08c41c9",
+      "traceSha256": "479295a34c068696271273a426bf235f118cc5e05a69be56bc49b4b41b1f038f",
+      "boundary": "Seed before original generateMission(0), followed by preGenerateWave()",
+      "checks": [
+        "mission constants",
+        "boss wave",
+        "pending raw loot queue",
+        "ordered original enemy IDs",
+        "ordered delays",
+        "initial group sizes",
+        "RNG draw count",
+        "final RNG state"
+      ],
+      "matchedSnapshots": 3,
+      "comparisons": [
+        {
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 150,
+          "portDrawCount": 150,
+          "originalRngState": 2052753070,
+          "portRngState": 2052753070,
+          "enemyCount": 28,
+          "differences": []
+        },
+        {
+          "seed": 1,
+          "matched": true,
+          "originalDrawCount": 151,
+          "portDrawCount": 151,
+          "originalRngState": 4149881838,
+          "portRngState": 4149881838,
+          "enemyCount": 29,
+          "differences": []
+        },
+        {
+          "seed": 3735928559,
+          "matched": true,
+          "originalDrawCount": 153,
+          "portDrawCount": 153,
+          "originalRngState": 267543726,
+          "portRngState": 267543726,
+          "enemyCount": 31,
+          "differences": []
+        }
+      ],
+      "limits": [
+        "Three seeds for non-casual first-day Sheriff only",
+        "The same injected xorshift32 stream is used by both runtimes; this does not reproduce native Flash Math.random",
+        "Generation ends before spawning or combat; combat RNG and later days are untested",
+        "Raw loot queue parity does not establish postbattle inventory redemption"
+      ]
+    },
+    "combat": {
+      "status": "passed",
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "3930a9a1e9a4ed9d50a4eb59ad50748e2875a82685041e83ebf6c085eaa84148",
+      "traceSha256": "f146fc2ab6e5c87a291b77d5bbd238f1abb1e2e813cd8768c096ef2726cd0b3c",
+      "boundary": "Original spawnEnemy; original procHit versus the processPellet production path used by fireAt",
+      "checks": [
+        "spawn stats and logical animation frame",
+        "critical classification at tested points, damage/critical multiplier/air reduction/knockback",
+        "death, XP, kills, weapon XP, rampage and pending loot",
+        "RNG draw count and final state"
+      ],
+      "matchedSnapshots": 21,
+      "completePointCoverage": true,
+      "comparisons": [
+        {
+          "scenario": "spawn",
+          "seed": 42,
+          "enemyId": 3,
+          "coverage": "spawn",
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "originalRngState": 476557059,
+          "portRngState": 476557059,
+          "differences": []
+        },
+        {
+          "scenario": "spawn",
+          "seed": 42,
+          "enemyId": 17,
+          "coverage": "spawn",
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "originalRngState": 476557059,
+          "portRngState": 476557059,
+          "differences": []
+        },
+        {
+          "scenario": "spawn",
+          "seed": 42,
+          "enemyId": 19,
+          "coverage": "spawn",
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "originalRngState": 476557059,
+          "portRngState": 476557059,
+          "differences": []
+        },
+        {
+          "scenario": "spawn",
+          "seed": 42,
+          "enemyId": 6,
+          "coverage": "spawn",
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "originalRngState": 476557059,
+          "portRngState": 476557059,
+          "differences": []
+        },
+        {
+          "scenario": "spawn",
+          "seed": 42,
+          "enemyId": 999,
+          "coverage": "spawn",
+          "matched": true,
+          "originalDrawCount": 5,
+          "portDrawCount": 5,
+          "originalRngState": 3759983556,
+          "portRngState": 3759983556,
+          "differences": []
+        },
+        {
+          "scenario": "spawn",
+          "seed": 3735928559,
+          "enemyId": 3,
+          "coverage": "spawn",
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "originalRngState": 3129746520,
+          "portRngState": 3129746520,
+          "differences": []
+        },
+        {
+          "scenario": "spawn",
+          "seed": 3735928559,
+          "enemyId": 17,
+          "coverage": "spawn",
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "originalRngState": 3129746520,
+          "portRngState": 3129746520,
+          "differences": []
+        },
+        {
+          "scenario": "spawn",
+          "seed": 3735928559,
+          "enemyId": 19,
+          "coverage": "spawn",
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "originalRngState": 3129746520,
+          "portRngState": 3129746520,
+          "differences": []
+        },
+        {
+          "scenario": "spawn",
+          "seed": 3735928559,
+          "enemyId": 6,
+          "coverage": "spawn",
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "originalRngState": 3129746520,
+          "portRngState": 3129746520,
+          "differences": []
+        },
+        {
+          "scenario": "spawn",
+          "seed": 3735928559,
+          "enemyId": 999,
+          "coverage": "spawn",
+          "matched": true,
+          "originalDrawCount": 5,
+          "portDrawCount": 5,
+          "originalRngState": 1745748808,
+          "portRngState": 1745748808,
+          "differences": []
+        },
+        {
+          "scenario": "sheep_miss",
+          "seed": 42,
+          "enemyId": 3,
+          "coverage": "single-point-original-geometry-input",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "originalRngState": 42,
+          "portRngState": 42,
+          "differences": []
+        },
+        {
+          "scenario": "sheep_body",
+          "seed": 42,
+          "enemyId": 3,
+          "coverage": "single-point-original-geometry-input",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "originalRngState": 42,
+          "portRngState": 42,
+          "differences": []
+        },
+        {
+          "scenario": "sheep_crit_inside",
+          "seed": 42,
+          "enemyId": 3,
+          "coverage": "single-point-original-geometry-input",
+          "matched": true,
+          "originalDrawCount": 1,
+          "portDrawCount": 1,
+          "originalRngState": 11355432,
+          "portRngState": 11355432,
+          "differences": []
+        },
+        {
+          "scenario": "sheep_crit_left_boundary",
+          "seed": 42,
+          "enemyId": 3,
+          "coverage": "single-point-original-geometry-input",
+          "matched": true,
+          "originalDrawCount": 1,
+          "portDrawCount": 1,
+          "originalRngState": 11355432,
+          "portRngState": 11355432,
+          "differences": []
+        },
+        {
+          "scenario": "sheep_crit_left_inside",
+          "seed": 42,
+          "enemyId": 3,
+          "coverage": "single-point-original-geometry-input",
+          "matched": true,
+          "originalDrawCount": 1,
+          "portDrawCount": 1,
+          "originalRngState": 11355432,
+          "portRngState": 11355432,
+          "differences": []
+        },
+        {
+          "scenario": "sheep_crit_right_boundary",
+          "seed": 42,
+          "enemyId": 3,
+          "coverage": "single-point-original-geometry-input",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "originalRngState": 42,
+          "portRngState": 42,
+          "differences": []
+        },
+        {
+          "scenario": "sheep_crit_top_boundary",
+          "seed": 42,
+          "enemyId": 3,
+          "coverage": "single-point-original-geometry-input",
+          "matched": true,
+          "originalDrawCount": 1,
+          "portDrawCount": 1,
+          "originalRngState": 11355432,
+          "portRngState": 11355432,
+          "differences": []
+        },
+        {
+          "scenario": "sheep_crit_top_inside",
+          "seed": 42,
+          "enemyId": 3,
+          "coverage": "single-point-original-geometry-input",
+          "matched": true,
+          "originalDrawCount": 1,
+          "portDrawCount": 1,
+          "originalRngState": 11355432,
+          "portRngState": 11355432,
+          "differences": []
+        },
+        {
+          "scenario": "sheep_crit_bottom_boundary",
+          "seed": 42,
+          "enemyId": 3,
+          "coverage": "single-point-original-geometry-input",
+          "matched": true,
+          "originalDrawCount": 1,
+          "portDrawCount": 1,
+          "originalRngState": 11355432,
+          "portRngState": 11355432,
+          "differences": []
+        },
+        {
+          "scenario": "crow_body",
+          "seed": 42,
+          "enemyId": 6,
+          "coverage": "single-point-original-geometry-input",
+          "matched": true,
+          "originalDrawCount": 1,
+          "portDrawCount": 1,
+          "originalRngState": 11355432,
+          "portRngState": 11355432,
+          "differences": []
+        },
+        {
+          "scenario": "rat_lethal",
+          "seed": 42,
+          "enemyId": 17,
+          "coverage": "single-point-original-geometry-input",
+          "matched": true,
+          "originalDrawCount": 5,
+          "portDrawCount": 5,
+          "originalRngState": 3759983556,
+          "portRngState": 3759983556,
+          "differences": []
+        }
+      ],
+      "limits": [
+        "Original vector body/shadow classification is supplied to the port as input; exported-alpha-mask collision geometry is NOT compared",
+        "Critical rectangle decisions are tested only where the original vector body/shadow predicate permits a hit",
+        "No six-pellet shooting, spread, cooldown, input, movement, timer/frame scheduling, rendered frames or audio output comparison",
+        "Only first-day unmodified Sheriff/shotgun and listed enemy probes; no corpse hits, other skills or later levels",
+        "Critical-kill sound selection assumes the initial living sister; sister damage is not implemented",
+        "Original display bounds/scales, boss idle/fireNum defaults and earnedGold attribution counter are observed but not compared"
+      ]
+    }
+  },
+  "production_recovery": {
+    "previous_build": ".build/browser-baseline-before-fidelity",
+    "candidate_bundle_matches_production": true
+  }
+}

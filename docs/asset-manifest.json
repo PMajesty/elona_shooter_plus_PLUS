@@ -1,0 +1,31 @@
+{
+  "source": "original/elonashooter1.3.swf",
+  "sourceSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "exporter": "tools/extract_web_assets.py",
+  "ffdecVersion": "26.4.0",
+  "runtimeManifest": "web/public/assets/manifest.json",
+  "frameRate": 30,
+  "frameNames": "Original one-based Flash timeline frame numbers as strings",
+  "origins": "Pixel offset from exported image top-left to Flash registration point",
+  "counts": {
+    "images": 26,
+    "clips": 16,
+    "sounds": 89,
+    "fonts": 3
+  },
+  "runtimeAdjustments": [
+    "Static screens omit runtime text placeholders and separately rendered controls",
+    "Sister is frozen at original stand frame 4 and sisterFire is hidden",
+    "townHud applies the original eventGene bgAlpha.alpha=1",
+    "gene and result retain offset (0,-26); application applies menu slide X offset",
+    "Item quantities and radio labels are rendered by the application",
+    "allyBack and allyFront retain source depths around separately selected charaPic poses",
+    "sheepShadow and crowShadow preserve shadow-only alpha masks for original hit exclusion",
+    "gameOver hides day-one carry-over control and retired external play-more button"
+  ],
+  "limitations": [
+    "FFDec renders timelines without executing ActionScript; application implements frame actions",
+    "Asset extraction alone does not establish complete original gameplay parity",
+    "Only selected runtime visuals are packaged; full source exports remain in ignored .build"
+  ]
+}

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Elona original-game comparison</title>
+<style>
+body { margin:24px auto; max-width:1000px; background:#171a18; color:#e3e6df; font:15px/1.5 system-ui,sans-serif; }
+h1 { font-size:24px; } #stage { width:620px;height:380px; background:#000; }
+ruffle-player { width:620px;height:380px; }
+pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#0d100e;padding:16px; }
+.pass {color:#83db91} .fail {color:#ff8c85} a {color:#bdd0ff}
+</style>
+<h1>Original-game comparison</h1>
+<p><a href="/">Reload scenarios</a> · <a href="/?suite=waves">Controlled-randomness wave scenarios</a> · <a href="/?suite=combat">Spawn and single-pellet scenarios</a></p>
+<p>This development-only page automatically runs the instrumented original twice. It does not alter the playable port or its saves.</p>
+<p id="status" role="status" data-state="loading">Loading the original-game test fixture…</p>
+<div id="stage"></div>
+<h2>Observed original events</h2>
+<pre id="results">Waiting for the reference game.</pre>
+<p><a id="report-link" href="/api/report">Saved machine-readable report</a></p>
+<script>
+window.RufflePlayer = {config:{autoplay:'on',unmuteOverlay:'hidden',splashScreen:false,showSwfDownload:false,contextMenu:'off',logLevel:'info'}};
+</script>
+<script src="/ruffle/ruffle.js"></script>
+<script type="module" src="/harness.js"></script>
+</html>

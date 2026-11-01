@@ -1,9 +1,13 @@
 # Project instructions
 
-The current scope is the game-start fix only. Preserve the original English UI
-and balance; add features or localization only when the user requests them.
+The current scope is a faithful browser port, authorized on 2026-11-01.
+Preserve the original English UI, content and balance, including the separate
+30 Hz animation/frame loop and 20 Hz gameplay timer.
+Build complete playable slices in `web/`; label incomplete coverage honestly.
+Use original extracted assets. Do not replace original behavior with invented
+mechanics merely to make a demo work. Record intentional fixes and differences.
 
-Edit `src/shootem_fla/MainTimeline.as`. Keep `original/elonashooter1.3.swf` and
+For SWF compatibility changes, edit `src/shootem_fla/MainTimeline.as`. Keep `original/elonashooter1.3.swf` and
 `src/original/MainTimeline.as` unchanged as recovery and comparison baselines.
 Use `python tools/build.py` to rebuild and validate non-code resource preservation.
 Do not commit `.tools/`, `.build/`, credentials, runtime caches or unrelated games.
@@ -11,5 +15,10 @@ Do not commit `.tools/`, `.build/`, credentials, runtime caches or unrelated gam
 Read `README.md` and `docs/verification.json` before changing the startup path.
 Validate the actual New Game flow in Ruffle after startup changes. A successful
 compiler return alone does not prove gameplay initialization completed.
+
+For the browser port, validate the actual New Game, combat, results and save/load
+flows in a browser. Keep simulation independent of rendering. Measure behavior
+against the preserved game before claiming parity. Read `docs/port-status.md`
+for current port coverage and known differences when that file exists.
 
 Use English working notes and Russian explanatory code comments.

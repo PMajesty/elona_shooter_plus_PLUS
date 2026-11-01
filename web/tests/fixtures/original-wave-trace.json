@@ -1,0 +1,389 @@
+{
+  "format": "elona-original-wave-trace",
+  "version": 1,
+  "runtime": "@ruffle-rs/ruffle 0.7.1",
+  "capturedAt": "2026-11-01T19:19:48.214Z",
+  "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "instrumentedSwfSha256": "b4289a5d1999b1f5d2b72292934b190297239474a0e09c038ced90c6d08c41c9",
+  "traceSha256": "479295a34c068696271273a426bf235f118cc5e05a69be56bc49b4b41b1f038f",
+  "clock": "Synchronous original mission and wave generation under controlled xorshift32; no live enemy AI.",
+  "records": [
+    {
+      "clock": "synchronous-original-generation",
+      "kind": "waves",
+      "rng": "xorshift32",
+      "seeds": [
+        42,
+        1,
+        3735928559
+      ],
+      "type": "ready",
+      "version": 1
+    },
+    {
+      "bossWave": 2,
+      "day": 1,
+      "drawCount": 150,
+      "kind": "waves",
+      "loot": [
+        1117
+      ],
+      "missionLevel": 0,
+      "powerOrg": 800,
+      "reward": 600,
+      "rngState": 2052753070,
+      "seed": 42,
+      "spawnRate": 15,
+      "type": "snapshot",
+      "version": 1,
+      "waves": [
+        {
+          "delays": [
+            175,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            17,
+            17,
+            3,
+            17,
+            3,
+            3,
+            3
+          ],
+          "index": 0,
+          "initialCount": 7
+        },
+        {
+          "delays": [
+            125,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            17,
+            17,
+            3,
+            19,
+            3
+          ],
+          "index": 1,
+          "initialCount": 5
+        },
+        {
+          "delays": [
+            125,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            3,
+            3,
+            999,
+            17,
+            17,
+            3
+          ],
+          "index": 2,
+          "initialCount": 6
+        },
+        {
+          "delays": [
+            125,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            3,
+            17,
+            3,
+            3,
+            17
+          ],
+          "index": 3,
+          "initialCount": 5
+        },
+        {
+          "delays": [
+            125,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            3,
+            17,
+            3,
+            19,
+            17
+          ],
+          "index": 4,
+          "initialCount": 5
+        }
+      ]
+    },
+    {
+      "bossWave": 2,
+      "day": 1,
+      "drawCount": 151,
+      "kind": "waves",
+      "loot": [
+        1117
+      ],
+      "missionLevel": 0,
+      "powerOrg": 800,
+      "reward": 600,
+      "rngState": 4149881838,
+      "seed": 1,
+      "spawnRate": 15,
+      "type": "snapshot",
+      "version": 1,
+      "waves": [
+        {
+          "delays": [
+            175,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            3,
+            3,
+            17,
+            17,
+            3,
+            17,
+            3
+          ],
+          "index": 0,
+          "initialCount": 7
+        },
+        {
+          "delays": [
+            125,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            3,
+            17,
+            17,
+            3,
+            3,
+            3
+          ],
+          "index": 1,
+          "initialCount": 6
+        },
+        {
+          "delays": [
+            125,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            3,
+            17,
+            17,
+            999,
+            3,
+            3
+          ],
+          "index": 2,
+          "initialCount": 6
+        },
+        {
+          "delays": [
+            125,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            3,
+            3,
+            17,
+            17,
+            3
+          ],
+          "index": 3,
+          "initialCount": 5
+        },
+        {
+          "delays": [
+            125,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            17,
+            17,
+            19,
+            3,
+            3
+          ],
+          "index": 4,
+          "initialCount": 5
+        }
+      ]
+    },
+    {
+      "bossWave": 2,
+      "day": 1,
+      "drawCount": 153,
+      "kind": "waves",
+      "loot": [
+        1117
+      ],
+      "missionLevel": 0,
+      "powerOrg": 800,
+      "reward": 600,
+      "rngState": 267543726,
+      "seed": 3735928559,
+      "spawnRate": 15,
+      "type": "snapshot",
+      "version": 1,
+      "waves": [
+        {
+          "delays": [
+            175,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            3,
+            3,
+            17,
+            17,
+            3,
+            3,
+            17
+          ],
+          "index": 0,
+          "initialCount": 7
+        },
+        {
+          "delays": [
+            125,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            17,
+            17,
+            3,
+            17,
+            3,
+            17,
+            3
+          ],
+          "index": 1,
+          "initialCount": 7
+        },
+        {
+          "delays": [
+            125,
+            15,
+            15,
+            15,
+            15,
+            15,
+            22
+          ],
+          "enemies": [
+            17,
+            17,
+            3,
+            3,
+            17,
+            999,
+            17
+          ],
+          "index": 2,
+          "initialCount": 7
+        },
+        {
+          "delays": [
+            125,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            19,
+            3,
+            17,
+            3,
+            17
+          ],
+          "index": 3,
+          "initialCount": 5
+        },
+        {
+          "delays": [
+            125,
+            15,
+            15,
+            15,
+            15
+          ],
+          "enemies": [
+            3,
+            17,
+            17,
+            3,
+            3
+          ],
+          "index": 4,
+          "initialCount": 5
+        }
+      ]
+    },
+    {
+      "kind": "waves",
+      "ok": true,
+      "seeds": [
+        42,
+        1,
+        3735928559
+      ],
+      "snapshots": 3,
+      "type": "complete",
+      "version": 1
+    }
+  ]
+}

@@ -1,0 +1,466 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-11-01",
+  "purpose": "Track the original game's systems and content against implemented behavior and independent evidence. This is an expandable inventory, not an exhaustive specification or a completion percentage.",
+  "reference": {
+    "originalSwf": "original/elonashooter1.3.swf",
+    "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+    "originalTimeline": "src/original/MainTimeline.as",
+    "runnableBaseline": "elonashooter1.3-fixed.swf",
+    "baselineVerification": "docs/verification.json",
+    "embeddedScriptExport": ".build/export/scripts/",
+    "anchorRule": "Timeline line numbers refer to src/original/MainTimeline.as. Embedded-class anchors identify the original SWF class and its method; export files are ignored, reproducible derivatives."
+  },
+  "identityPolicy": "Keep ledger IDs stable. Preserve original numeric content IDs during migration. Future additional content should use separate namespace-qualified IDs and explicit save migrations, never reuse an original ID or infer identity from display text.",
+  "evidencePolicy": "Source inspection, port unit tests, browser observations and original-versus-port comparisons are different evidence. Passing tests or extracting an asset does not mark its entire feature complete. Update status only from a concrete implementation or observation.",
+  "statusValues": [
+    "partial",
+    "missing",
+    "in_progress"
+  ],
+  "inventoryCounts": {
+    "selectableClasses": {
+      "count": 8,
+      "source": "MainTimeline:9610 classList",
+      "note": "Guardian is a separate NPC class; it is not a ninth selectable class."
+    },
+    "portraits": {
+      "count": 22,
+      "source": "MainTimeline:894 _maxPic"
+    },
+    "saveSlots": {
+      "count": 6,
+      "source": "MainTimeline:9182 idx.saveName"
+    },
+    "traitRegistrations": {
+      "count": 52,
+      "source": "MainTimeline:9380 setTrait calls",
+      "note": "Includes class and base traits; this count is not a gameplay completion metric."
+    },
+    "enemyRegistrations": {
+      "count": 20,
+      "source": "MainTimeline:1527 setEnemy calls",
+      "note": "Includes boss, bomb and dropped rat special entities, not twenty ordinary enemy species."
+    }
+  },
+  "features": [
+    {
+      "id": "original.runtime.clocks",
+      "scope": "30 Hz frame/animation loop and independent 50 ms gameplay timer",
+      "source": [
+        "MainTimeline:22 SWF metadata",
+        "MainTimeline:9174 new Timer(50,0)",
+        "MainTimeline:8238 onTick"
+      ],
+      "status": "partial",
+      "implemented": "Both logical clocks are represented in Simulation.tick with an integer accumulator.",
+      "evidence": [
+        "web/tests/simulation.test.ts: reload timer and firing cooldown tests"
+      ],
+      "unverified": [
+        "Original-versus-port wall-clock/event ordering under load",
+        "Long stalls and browser background behavior"
+      ]
+    },
+    {
+      "id": "original.start.character_creation",
+      "scope": "Title, New Game, 22 portraits, class selection, options and initial loadout",
+      "source": [
+        "MainTimeline:7374 MouseLDownFunc_title",
+        "MainTimeline:894 _maxPic",
+        "MainTimeline:7020 updateGene",
+        "MainTimeline:2075 generatePlayer"
+      ],
+      "status": "partial",
+      "implemented": "Title, portrait choices and Sheriff entry into the opening battle.",
+      "evidence": [
+        "docs/port-verification.json:browser_checks.new_game"
+      ],
+      "unverified": [
+        "Complete scene-by-scene visual comparison",
+        "All creation options and unlock conditions"
+      ]
+    },
+    {
+      "id": "original.content.classes",
+      "scope": "Original selectable classes and NPC Guardian",
+      "source": [
+        "MainTimeline:9610 classList",
+        "MainTimeline:2075 generatePlayer",
+        "MainTimeline:13882 getClass"
+      ],
+      "originalIds": {
+        "hunter": 1,
+        "sniper": 2,
+        "rogue": 3,
+        "militia": 4,
+        "ranger": 5,
+        "sheriff": 6,
+        "duelist": 7,
+        "noble": 8,
+        "guardian_npc": 9
+      },
+      "status": "partial",
+      "implemented": "Sheriff with starting Shotgun 2 and Fury; selection explicitly limits other classes.",
+      "evidence": [
+        "web/src/content.ts:STARTING_CLASS",
+        "web/src/simulation.ts:constructor"
+      ],
+      "unverified": [
+        "Other seven playable classes",
+        "Guardian and starting companions",
+        "Class-specific mechanics beyond Sheriff first-battle use"
+      ]
+    },
+    {
+      "id": "original.combat.shooting",
+      "scope": "Weapon damage, recoil, range, accuracy, critical regions, resistances, target shape and cooldown",
+      "source": [
+        "MainTimeline:7787 shoot",
+        "enemy.damage in original SWF",
+        "MainTimeline:4617 refreshPlayer"
+      ],
+      "status": "partial",
+      "implemented": "Initial Sheriff shotgun rules, critical hits, knockback and browser alpha hit masks.",
+      "evidence": [
+        "web/tests/simulation.test.ts:cooldown and queued-input tests",
+        "docs/port-verification.json:browser_checks.shooting",
+        "web/tests/combat-reference.test.ts:21 original spawn/point snapshots; port critical rules with original geometry supplied"
+      ],
+      "unverified": [
+        "Original vector versus exported alpha-mask geometry, including shadow exclusions",
+        "Full shotgun spread and corpse interactions against original",
+        "All weapon families and trait combinations",
+        "Native frame/input timing"
+      ]
+    },
+    {
+      "id": "original.reload.manual",
+      "scope": "Space input, per-shell timing, repeated shell sound/animation, interrupt, completion and empty trigger",
+      "source": [
+        "MainTimeline:4566 reload",
+        "MainTimeline:7326 reloading",
+        "MainTimeline:2664 cancelReload",
+        "MainTimeline:12056 reload cancellation",
+        "MainTimeline:13222 Space input"
+      ],
+      "status": "partial",
+      "implemented": "Space reload, seven timer ticks per baseline shotgun shell, per-shell feedback restart, interruption and completion; Space resumes pause without starting a reload on that key event.",
+      "evidence": [
+        "web/tests/simulation.test.ts:per-shell feedback sequence",
+        "web/tests/simulation.test.ts:interruption, held trigger and queued reload tests",
+        "web/src/main.ts:renderEvent restarts the original reload animation on each reload event",
+        "docs/port-verification.json:browser_checks.reload",
+        "web/tests/reference.test.ts:72 original SWF snapshots and prior-regression negative control",
+        "docs/port-verification.json:reference_comparisons.reload"
+      ],
+      "unverified": [
+        "Audible playback timing and matched rendered animation frames against original",
+        "Held Space repeat/focus behavior in both runtimes",
+        "Native 30 Hz / 20 Hz event ordering and wall-clock intervals under load"
+      ],
+      "notes": [
+        "manualReload denotes one cartridge at a time; no active-reload timing-window minigame was found in the supplied reload/input code.",
+        "Original reload tooltip uses a different time conversion from the runtime timer; use observed runtime behavior as the timing reference."
+      ]
+    },
+    {
+      "id": "original.reload.variants",
+      "scope": "Full-magazine reload, Reloading skill, reload enchantment, Auto Reload and rampage acceleration",
+      "source": [
+        "MainTimeline:7355 non-manual reload branch",
+        "MainTimeline:9444 RELOADING trait",
+        "MainTimeline:8627 reload enchantment",
+        "MainTimeline:8659 Auto Reload",
+        "MainTimeline:7329 rampage timer"
+      ],
+      "status": "partial",
+      "implemented": "Rampage countdown acceleration exists for the initial shotgun; other reload configurations are not exposed.",
+      "evidence": [
+        "web/src/simulation.ts:timerTick",
+        "web/tests/reference.test.ts:rampage reload scenario matches original method transitions"
+      ],
+      "unverified": [
+        "Every reload variant against original",
+        "Skill/mod-derived timing",
+        "Magazine reload progress bar"
+      ]
+    },
+    {
+      "id": "original.content.enemies",
+      "scope": "Registered enemies, spawn statistics, movement, attacks, death behavior and boss levels",
+      "source": [
+        "MainTimeline:1527 setEnemy roster",
+        "enemy.init and enemy.onEnterFrame in original SWF",
+        "enemy_* frame scripts in original SWF"
+      ],
+      "status": "partial",
+      "implemented": "Opening-battle sheep, rat, chicken and level-zero boss; crow definitions/code also exist but are not opening-mission coverage.",
+      "evidence": [
+        "web/src/content.ts:ENEMIES",
+        "web/tests/simulation.test.ts:defeat and first-battle completion",
+        "web/tests/combat-reference.test.ts:exact spawn stats/RNG for five enemy types and two seeds"
+      ],
+      "unverified": [
+        "Later species and enemy variants",
+        "Higher-level boss actions",
+        "Differential movement/attack timing and corpse behavior"
+      ]
+    },
+    {
+      "id": "original.ui.health",
+      "scope": "Numeric castle HP and boss-only health bar",
+      "source": [
+        "MainTimeline:7126 updateHP",
+        "MainTimeline:10859 damageCastle",
+        "enemy.init:493 hpbar",
+        "enemy.onEnterFrame:979 hp/maxHP bar update",
+        "enemy.kill:537 bar removal"
+      ],
+      "status": "partial",
+      "implemented": "Original boss-only health bar art, offset, centered width scaling and removal on death; numeric castle HP.",
+      "evidence": [
+        "docs/port-verification.json:browser_checks.defeat_checkpoint",
+        "web/src/simulation.ts:EnemyState",
+        "web/src/main.ts:bossBars rendering and removal",
+        "docs/port-verification.json:browser_checks.boss_health"
+      ],
+      "unverified": [
+        "Matched live original-versus-port screenshot measurement",
+        "Later boss variants and display scaling"
+      ],
+      "notes": [
+        "Source creates hpbar for bosses only. Ordinary-enemy bars should not be invented as a fidelity fix."
+      ]
+    },
+    {
+      "id": "original.items.usable",
+      "scope": "Grenades, repairs, protection and other usable items with cooldowns",
+      "source": [
+        "MainTimeline:3645 useItem",
+        "MainTimeline:13357 throwGrenade",
+        "MainTimeline:3042 explode",
+        "itemTimer and bullet_grenade in original SWF"
+      ],
+      "status": "partial",
+      "implemented": "Five starting Soldier's Grenades, ballistic path, damage area and cooldown.",
+      "evidence": [
+        "web/tests/simulation.test.ts:grenade test",
+        "docs/port-verification.json:browser_checks.grenade"
+      ],
+      "unverified": [
+        "Other usable items",
+        "Differential trajectory/explosion timing",
+        "Inventory cooldown presentation"
+      ],
+      "intentionalDifferences": [
+        "A strictly vertical grenade target is shifted 0.01 pixel to avoid the original zero divisor."
+      ]
+    },
+    {
+      "id": "original.party.ai",
+      "scope": "Starting companions, recruitment, equipment, targeting, orders and Fire at Will",
+      "source": [
+        "MainTimeline:13798 gameStart",
+        "MainTimeline:7709 generateRecruit",
+        "MainTimeline:13003 aiNormal",
+        "MainTimeline:12561 aiFireAtWill",
+        "MainTimeline:12996 orderClick"
+      ],
+      "status": "missing",
+      "implemented": "No companion/recruitment loop; Sheriff was chosen because it does not require a starting companion.",
+      "evidence": [],
+      "unverified": [
+        "All party behavior and its effects on progression/economy"
+      ]
+    },
+    {
+      "id": "original.campaign.missions",
+      "scope": "Opening mission, later days, wave families, modifiers and boss days",
+      "source": [
+        "MainTimeline:7435 generateMission(0)",
+        "MainTimeline:12144 generateMission",
+        "MainTimeline:5274 generateWave",
+        "MainTimeline:8323 wave progression"
+      ],
+      "status": "partial",
+      "implemented": "Original mission zero displayed as Day 1, five scheduled waves and result transition.",
+      "evidence": [
+        "web/tests/simulation.test.ts:first mission and completion",
+        "docs/port-verification.json:browser_checks.victory_checkpoint",
+        "web/tests/wave-reference.test.ts:three original generation traces including draw counts and raw loot"
+      ],
+      "unverified": [
+        "Native spawn/combat event sequence",
+        "Town-to-next-day loop",
+        "Later wave patterns and difficulty modifiers"
+      ]
+    },
+    {
+      "id": "original.town.equipment_shop",
+      "scope": "Town menus, shop inventory, purchases, equipment changes, item generation and modification",
+      "source": [
+        "MainTimeline:1963 updateInvSlots",
+        "MainTimeline:4529 updateEquipSlots",
+        "MainTimeline:5246 generateShop",
+        "MainTimeline:6042 randomStuff",
+        "MainTimeline:8577 enchant"
+      ],
+      "status": "missing",
+      "implemented": "Starting weapon/item definitions only; no town purchase/equip loop.",
+      "evidence": [],
+      "unverified": [
+        "All shop/equipment interactions and their save persistence",
+        "Full item catalogue and generation rules"
+      ]
+    },
+    {
+      "id": "original.progression.skills",
+      "scope": "Experience, levels, weapon experience, trait choices and class growth",
+      "source": [
+        "MainTimeline:10480 levelUp",
+        "MainTimeline:6907 wexpUp",
+        "MainTimeline:11432 procLevel",
+        "MainTimeline:11517 gainTrait",
+        "MainTimeline:9380 trait registrations"
+      ],
+      "status": "partial",
+      "implemented": "First-battle kill/completion XP, levels and pending skill-point state.",
+      "evidence": [
+        "web/tests/simulation.test.ts:first-battle result",
+        "docs/port-verification.json:browser_checks.victory_checkpoint"
+      ],
+      "unverified": [
+        "Skill-choice flow",
+        "Weapon skill growth",
+        "All 52 registered trait definitions and interactions"
+      ]
+    },
+    {
+      "id": "original.progression.loot",
+      "scope": "Kill drops, special mission loot, boss loot, loot selection and inventory integration",
+      "source": [
+        "enemy.damage and death animation in original SWF",
+        "MainTimeline:12064 generateSpecialLoot",
+        "MainTimeline:11402 generateLoot",
+        "MainTimeline:12536 generateLootBoss",
+        "MainTimeline:11166 procLootMenu"
+      ],
+      "status": "partial",
+      "implemented": "First-day special-loot queue and enemy generation loot match original for three injected seeds; ordinary gold/drop-ID state exists; no prize selection or inventory redemption.",
+      "evidence": [
+        "web/src/simulation.ts:damageEnemy",
+        "web/tests/wave-reference.test.ts:original raw pending loot queue",
+        "web/tests/combat-reference.test.ts:controlled lethal-rat drop and pending loot, exact RNG accounting"
+      ],
+      "unverified": [
+        "Boss/special drops",
+        "Generation probabilities and rewards against original",
+        "Loot persistence through town"
+      ]
+    },
+    {
+      "id": "original.town.upgrades_economy",
+      "scope": "Castle upgrades, repair, storage, housing, training, wages, taxes and result settlement",
+      "source": [
+        "MainTimeline:9185 upgradeRefStr",
+        "MainTimeline:12274 procCastleMenu",
+        "MainTimeline:3587 calcTax",
+        "MainTimeline:1660 calcUnkeep",
+        "MainTimeline:3610 wage"
+      ],
+      "status": "partial",
+      "implemented": "Opening battle base reward, perfect bonus and initial storage upkeep only.",
+      "evidence": [
+        "web/tests/simulation.test.ts:first-battle result"
+      ],
+      "unverified": [
+        "Upgrade purchases/effects",
+        "Economy beyond initial result",
+        "Party wages and town income"
+      ]
+    },
+    {
+      "id": "original.town.events",
+      "scope": "Town actions, search, cards, event choices and resulting mission modifiers",
+      "source": [
+        "MainTimeline:6417 townEvent",
+        "MainTimeline:10528 showEventDialog",
+        "MainTimeline:11190 search",
+        "MainTimeline:5410 generateCard"
+      ],
+      "status": "missing",
+      "implemented": "None of the town action/event loop.",
+      "evidence": [],
+      "unverified": [
+        "All event triggers, choices, costs and outcomes"
+      ]
+    },
+    {
+      "id": "original.progression.medals_modes",
+      "scope": "Medals, unlocks, inherited bonuses, difficulty options, alternative starts and carry-over",
+      "source": [
+        "MainTimeline:10987 getMedalInfo",
+        "MainTimeline:8807 geneMedalBonus",
+        "MainTimeline:9698 carryOver",
+        "MainTimeline:13798 gameStart",
+        "MainTimeline:11782 difficulty options"
+      ],
+      "status": "missing",
+      "implemented": "Normal initial Sheriff scenario only; other choices explicitly unavailable.",
+      "evidence": [],
+      "unverified": [
+        "All medal rewards and unlock conditions",
+        "Hardcore/casual/alternative-start behavior",
+        "Carry-over"
+      ]
+    },
+    {
+      "id": "original.persistence.saves",
+      "scope": "Six original slots, global medal/index state, version migration, deletion and Continue",
+      "source": [
+        "MainTimeline:9182 six save slots",
+        "MainTimeline:6311 saveGame",
+        "MainTimeline:4986 loadGame",
+        "MainTimeline:7003 loadIndex",
+        "MainTimeline:1378 deleteGame"
+      ],
+      "status": "partial",
+      "implemented": "One versioned browser-port slot with JSON export/import and own-PRNG resume.",
+      "evidence": [
+        "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
+        "docs/port-verification.json:browser_checks.export_and_reload",
+        "web/scripts/soak.ts:96 seeded scenarios,957 checkpoints, exact state/event replay equality"
+      ],
+      "unverified": [
+        "Six-slot parity",
+        "Original Flash/Ruffle save conversion",
+        "Global medals/index and future content migrations"
+      ],
+      "intentionalDifferences": [
+        "Current JSON format accepts only browser-port saves; it is not Flash SharedObject-compatible."
+      ]
+    },
+    {
+      "id": "original.presentation.assets",
+      "scope": "Original artwork, fonts, layered animations, sounds, UI, effects and hit silhouettes",
+      "source": [
+        "original/elonashooter1.3.swf embedded resources and timelines",
+        "ally1 and enemy_* frame scripts in original SWF"
+      ],
+      "status": "partial",
+      "implemented": "Selected original assets and reconstructed character timeline layers in the playable opening slice.",
+      "evidence": [
+        "docs/asset-manifest.json",
+        "docs/ui-reference.md",
+        "docs/port-verification.json:screenshots",
+        "web/src/main.ts:charaPic nearest filtering matches original non-smoothed bitmap fills; ordinary browser inspected"
+      ],
+      "unverified": [
+        "Complete scene/state visual comparison",
+        "All dynamic child actions and audio events",
+        "Effects, masks and layering throughout later content"
+      ]
+    }
+  ]
+}

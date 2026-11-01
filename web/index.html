@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Elona Shooter Plus PLUS — a faithful browser port in progress." />
+    <title>Elona Shooter Plus PLUS</title>
+  </head>
+  <body>
+    <main>
+      <header><h1>Elona Shooter <span>Plus PLUS</span></h1><p>Browser port · Opening battle</p></header>
+      <div id="game" aria-label="Elona Shooter game"></div>
+      <div id="load-status" role="status">Loading original game assets…</div>
+      <footer>
+        <p><b>Mouse</b> aim &amp; shoot <span>·</span> <b>Space</b> reload <span>·</span> <b>2</b> grenade <span>·</span> <b>Esc</b> pause</p>
+        <p id="scope-note">Port in progress. Original game and artwork by Noa; original credits are preserved.</p>
+        <nav><button id="fullscreen">Full screen</button><button id="export-save">Export save</button><button id="import-save">Import save</button><button id="sound">Sound on</button></nav>
+        <input id="save-file" type="file" accept=".json,application/json" hidden />
+        <p id="save-status" role="status"></p>
+      </footer>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

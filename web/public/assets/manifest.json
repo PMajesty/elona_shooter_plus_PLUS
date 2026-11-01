@@ -1,0 +1,546 @@
+{
+  "sourceSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "sourceFrameRate": 30,
+  "images": {
+    "title": {
+      "file": "screens/title.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "battle": {
+      "file": "screens/battle.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "townHud": {
+      "file": "screens/townHud.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "gene": {
+      "file": "screens/gene.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "result": {
+      "file": "screens/result.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "background": {
+      "file": "images/background.png",
+      "width": 640,
+      "height": 400,
+      "originX": 0,
+      "originY": 0
+    },
+    "clouds": {
+      "file": "images/clouds.png",
+      "width": 1920,
+      "height": 120,
+      "originX": 0,
+      "originY": 0
+    },
+    "town": {
+      "file": "images/town.png",
+      "width": 640,
+      "height": 400,
+      "originX": 0,
+      "originY": 0
+    },
+    "parchment": {
+      "file": "images/parchment.png",
+      "width": 580,
+      "height": 330,
+      "originX": 0,
+      "originY": 0
+    },
+    "button_newGame": {
+      "file": "buttons/button_newGame.png",
+      "width": 194,
+      "height": 92,
+      "originX": -23.0,
+      "originY": 45.9,
+      "characterId": 2521
+    },
+    "button_newGame_over": {
+      "file": "buttons/button_newGame_over.png",
+      "width": 194,
+      "height": 92,
+      "originX": -23.0,
+      "originY": 45.9,
+      "characterId": 2521
+    },
+    "button_newGame_down": {
+      "file": "buttons/button_newGame_down.png",
+      "width": 194,
+      "height": 92,
+      "originX": -23.0,
+      "originY": 45.9,
+      "characterId": 2521
+    },
+    "button_continue": {
+      "file": "buttons/button_continue.png",
+      "width": 194,
+      "height": 92,
+      "originX": -23.0,
+      "originY": 45.9,
+      "characterId": 2542
+    },
+    "button_continue_over": {
+      "file": "buttons/button_continue_over.png",
+      "width": 194,
+      "height": 92,
+      "originX": -23.0,
+      "originY": 45.9,
+      "characterId": 2542
+    },
+    "button_continue_down": {
+      "file": "buttons/button_continue_down.png",
+      "width": 194,
+      "height": 92,
+      "originX": -23.0,
+      "originY": 45.9,
+      "characterId": 2542
+    },
+    "button_help": {
+      "file": "buttons/button_help.png",
+      "width": 139,
+      "height": 92,
+      "originX": -23.0,
+      "originY": 45.9,
+      "characterId": 2579
+    },
+    "button_help_over": {
+      "file": "buttons/button_help_over.png",
+      "width": 139,
+      "height": 92,
+      "originX": -23.0,
+      "originY": 45.9,
+      "characterId": 2579
+    },
+    "button_help_down": {
+      "file": "buttons/button_help_down.png",
+      "width": 139,
+      "height": 92,
+      "originX": -23.0,
+      "originY": 45.9,
+      "characterId": 2579
+    },
+    "button_proceed": {
+      "file": "buttons/button_proceed.png",
+      "width": 182,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1547
+    },
+    "button_proceed_over": {
+      "file": "buttons/button_proceed_over.png",
+      "width": 182,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1547
+    },
+    "button_proceed_down": {
+      "file": "buttons/button_proceed_down.png",
+      "width": 182,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1547
+    },
+    "button_gameMods": {
+      "file": "buttons/button_gameMods.png",
+      "width": 182,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1881
+    },
+    "button_gameMods_over": {
+      "file": "buttons/button_gameMods_over.png",
+      "width": 182,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1881
+    },
+    "button_gameMods_down": {
+      "file": "buttons/button_gameMods_down.png",
+      "width": 182,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1881
+    },
+    "gameOver": {
+      "file": "images/gameOver.png",
+      "width": 561,
+      "height": 638,
+      "originX": 268.85,
+      "originY": 318.6
+    },
+    "ammo_fill": {
+      "file": "images/ammo_fill.png",
+      "width": 87,
+      "height": 17,
+      "originX": 1.0,
+      "originY": 0.0
+    }
+  },
+  "clips": {
+    "charaPic": {
+      "image": "sprites/charaPic.png",
+      "json": "sprites/charaPic.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "labels": {},
+      "count": 659,
+      "uniqueFrames": 273,
+      "characterId": 677
+    },
+    "enemy_sheep": {
+      "image": "sprites/enemy_sheep.png",
+      "json": "sprites/enemy_sheep.json",
+      "originX": 14.5,
+      "originY": 8.5,
+      "frameWidth": 36,
+      "frameHeight": 32,
+      "labels": {
+        "init": 1,
+        "alive": 5,
+        "attack": 32,
+        "dead": 107,
+        "null": 216
+      },
+      "count": 216,
+      "uniqueFrames": 25,
+      "characterId": 910
+    },
+    "enemy_chicken": {
+      "image": "sprites/enemy_chicken.png",
+      "json": "sprites/enemy_chicken.json",
+      "originX": 12.0,
+      "originY": 26.5,
+      "frameWidth": 32,
+      "frameHeight": 50,
+      "labels": {
+        "init": 1,
+        "alive": 5,
+        "wait": 37,
+        "attack": 105,
+        "dead": 208,
+        "null": 324
+      },
+      "count": 324,
+      "uniqueFrames": 44,
+      "characterId": 1063
+    },
+    "enemy_rat": {
+      "image": "sprites/enemy_rat.png",
+      "json": "sprites/enemy_rat.json",
+      "originX": 22.9,
+      "originY": 68.9,
+      "frameWidth": 36,
+      "frameHeight": 88,
+      "labels": {
+        "init": 1,
+        "dropping": 2,
+        "alive": 14,
+        "attack": 41,
+        "dead": 93,
+        "null": 261
+      },
+      "count": 275,
+      "uniqueFrames": 33,
+      "characterId": 1295
+    },
+    "enemy_crow": {
+      "image": "sprites/enemy_crow.png",
+      "json": "sprites/enemy_crow.json",
+      "originX": 13.85,
+      "originY": 15.55,
+      "frameWidth": 34,
+      "frameHeight": 172,
+      "labels": {
+        "init": 1,
+        "alive": 3,
+        "attack": 30,
+        "dead": 58,
+        "null": 172
+      },
+      "count": 189,
+      "uniqueFrames": 30,
+      "characterId": 981
+    },
+    "explosion": {
+      "image": "sprites/explosion.png",
+      "json": "sprites/explosion.json",
+      "originX": 48.9,
+      "originY": 52.5,
+      "frameWidth": 100,
+      "frameHeight": 90,
+      "labels": {},
+      "count": 28,
+      "uniqueFrames": 14,
+      "characterId": 2235
+    },
+    "itemPicture": {
+      "image": "sprites/itemPicture.png",
+      "json": "sprites/itemPicture.json",
+      "originX": 8.0,
+      "originY": 27.5,
+      "frameWidth": 98,
+      "frameHeight": 89,
+      "labels": {},
+      "count": 131,
+      "uniqueFrames": 60,
+      "characterId": 2113
+    },
+    "ammoBar": {
+      "image": "sprites/ammoBar.png",
+      "json": "sprites/ammoBar.json",
+      "originX": 1.0,
+      "originY": 0.0,
+      "frameWidth": 87,
+      "frameHeight": 17,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2698
+    },
+    "radioButton": {
+      "image": "sprites/radioButton.png",
+      "json": "sprites/radioButton.json",
+      "originX": 16.5,
+      "originY": 17.7,
+      "frameWidth": 119,
+      "frameHeight": 36,
+      "labels": {},
+      "count": 6,
+      "uniqueFrames": 4,
+      "characterId": 2312
+    },
+    "grenadeBody": {
+      "image": "sprites/grenadeBody.png",
+      "json": "sprites/grenadeBody.json",
+      "originX": 6.0,
+      "originY": 7.5,
+      "frameWidth": 12,
+      "frameHeight": 15,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2275
+    },
+    "grenadeShadow": {
+      "image": "sprites/grenadeShadow.png",
+      "json": "sprites/grenadeShadow.json",
+      "originX": 0.0,
+      "originY": -1.6,
+      "frameWidth": 12,
+      "frameHeight": 6,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2199
+    },
+    "bossHealthFill": {
+      "image": "sprites/bossHealthFill.png",
+      "json": "sprites/bossHealthFill.json",
+      "originX": 11.95,
+      "originY": 1.45,
+      "frameWidth": 24,
+      "frameHeight": 3,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2411
+    },
+    "allyBack": {
+      "image": "sprites/allyBack.png",
+      "json": "sprites/allyBack.json",
+      "originX": 17.75,
+      "originY": 20.0,
+      "frameWidth": 111,
+      "frameHeight": 44,
+      "labels": {
+        "init": 1,
+        "reload": 30,
+        "stand": 45,
+        "walk": 200,
+        "shield": 221,
+        "dead": 281
+      },
+      "count": 426,
+      "uniqueFrames": 82,
+      "characterId": 838
+    },
+    "allyFront": {
+      "image": "sprites/allyFront.png",
+      "json": "sprites/allyFront.json",
+      "originX": 30.45,
+      "originY": 13.0,
+      "frameWidth": 116,
+      "frameHeight": 36,
+      "labels": {
+        "init": 1,
+        "reload": 30,
+        "stand": 45,
+        "walk": 200,
+        "shield": 221,
+        "dead": 281
+      },
+      "count": 426,
+      "uniqueFrames": 142,
+      "characterId": 838
+    },
+    "sheepShadow": {
+      "image": "sprites/sheepShadow.png",
+      "json": "sprites/sheepShadow.json",
+      "originX": 11.0,
+      "originY": -12.0,
+      "frameWidth": 20,
+      "frameHeight": 4,
+      "labels": {
+        "init": 1,
+        "alive": 5,
+        "attack": 32,
+        "dead": 107,
+        "null": 216
+      },
+      "count": 216,
+      "uniqueFrames": 2,
+      "characterId": 910
+    },
+    "crowShadow": {
+      "image": "sprites/crowShadow.png",
+      "json": "sprites/crowShadow.json",
+      "originX": 9.6,
+      "originY": -124.95,
+      "frameWidth": 22,
+      "frameHeight": 26,
+      "labels": {
+        "init": 1,
+        "alive": 3,
+        "attack": 30,
+        "dead": 58,
+        "null": 172
+      },
+      "count": 189,
+      "uniqueFrames": 9,
+      "characterId": 981
+    }
+  },
+  "sounds": {
+    "soundReloaded3": "sounds/soundReloaded3.mp3",
+    "soundReloaded2": "sounds/soundReloaded2.mp3",
+    "soundRampageEnemy": "sounds/soundRampageEnemy.mp3",
+    "soundRampage": "sounds/soundRampage.mp3",
+    "soundPuls": "sounds/soundPuls.mp3",
+    "soundPray1": "sounds/soundPray1.mp3",
+    "soundPay1": "sounds/soundPay1.mp3",
+    "soundParty": "sounds/soundParty.mp3",
+    "soundNight": "sounds/soundNight.mp3",
+    "soundMute": "sounds/soundMute.mp3",
+    "soundThrow1": "sounds/soundThrow1.mp3",
+    "soundMod": "sounds/soundMod.mp3",
+    "soundMedal": "sounds/soundMedal.mp3",
+    "soundLow": "sounds/soundLow.mp3",
+    "soundLightning": "sounds/soundLightning.mp3",
+    "soundLaunch": "sounds/soundLaunch.mp3",
+    "soundKilled": "sounds/soundKilled.mp3",
+    "soundImpact1": "sounds/soundImpact1.mp3",
+    "soundGun9": "sounds/soundGun9.mp3",
+    "soundGun8": "sounds/soundGun8.mp3",
+    "soundGun7": "sounds/soundGun7.mp3",
+    "soundTank2": "sounds/soundTank2.mp3",
+    "soundGun6": "sounds/soundGun6.mp3",
+    "soundGun5": "sounds/soundGun5.mp3",
+    "soundGun4": "sounds/soundGun4.mp3",
+    "soundGun3": "sounds/soundGun3.mp3",
+    "soundGun15": "sounds/soundGun15.mp3",
+    "soundGun14": "sounds/soundGun14.mp3",
+    "soundGun13": "sounds/soundGun13.mp3",
+    "soundGun12": "sounds/soundGun12.mp3",
+    "soundGun11": "sounds/soundGun11.mp3",
+    "soundGun10": "sounds/soundGun10.mp3",
+    "soundTank": "sounds/soundTank.mp3",
+    "soundGun1": "sounds/soundGun1.mp3",
+    "soundGoodshot4": "sounds/soundGoodshot4.mp3",
+    "soundGoodshot3": "sounds/soundGoodshot3.mp3",
+    "soundGoodshot2": "sounds/soundGoodshot2.mp3",
+    "soundGoodshot1": "sounds/soundGoodshot1.mp3",
+    "soundGoodshot0": "sounds/soundGoodshot0.mp3",
+    "soundGood": "sounds/soundGood.mp3",
+    "soundGold1": "sounds/soundGold1.mp3",
+    "soundFirework": "sounds/soundFirework.mp3",
+    "soundFireball": "sounds/soundFireball.mp3",
+    "soundSearch": "sounds/soundSearch.mp3",
+    "soundExp1": "sounds/soundExp1.mp3",
+    "soundEat1": "sounds/soundEat1.mp3",
+    "soundDrop": "sounds/soundDrop.mp3",
+    "soundDefend": "sounds/soundDefend.mp3",
+    "soundDeadChicken": "sounds/soundDeadChicken.mp3",
+    "soundDead9": "sounds/soundDead9.mp3",
+    "soundDead8": "sounds/soundDead8.mp3",
+    "soundDead7": "sounds/soundDead7.mp3",
+    "soundDead6": "sounds/soundDead6.mp3",
+    "soundDead5": "sounds/soundDead5.mp3",
+    "soundScroll1": "sounds/soundScroll1.mp3",
+    "soundDead4": "sounds/soundDead4.mp3",
+    "soundDead3": "sounds/soundDead3.mp3",
+    "soundDead2": "sounds/soundDead2.mp3",
+    "soundDead1": "sounds/soundDead1.mp3",
+    "soundDamage1": "sounds/soundDamage1.mp3",
+    "soundCrow": "sounds/soundCrow.mp3",
+    "soundComplete": "sounds/soundComplete.mp3",
+    "soundClick1": "sounds/soundClick1.mp3",
+    "soundChickenAttack": "sounds/soundChickenAttack.mp3",
+    "soundChicken": "sounds/soundChicken.mp3",
+    "soundRepair1": "sounds/soundRepair1.mp3",
+    "soundChain3": "sounds/soundChain3.mp3",
+    "soundChain2": "sounds/soundChain2.mp3",
+    "soundChain1": "sounds/soundChain1.mp3",
+    "soundCata": "sounds/soundCata.mp3",
+    "soundBow2": "sounds/soundBow2.mp3",
+    "soundBow1": "sounds/soundBow1.mp3",
+    "soundDeadBoss2": "sounds/soundDeadBoss2.mp3",
+    "soundDeadBoss1": "sounds/soundDeadBoss1.mp3",
+    "soundBgTown": "sounds/soundBgTown.mp3",
+    "soundBgForest": "sounds/soundBgForest.mp3",
+    "soundReloading3": "sounds/soundReloading3.mp3",
+    "soundBeep": "sounds/soundBeep.mp3",
+    "soundBattleBegin": "sounds/soundBattleBegin.mp3",
+    "soundBattleEnd": "sounds/soundBattleEnd.mp3",
+    "soundBag1": "sounds/soundBag1.mp3",
+    "soundBad": "sounds/soundBad.mp3",
+    "soundAward": "sounds/soundAward.mp3",
+    "soundCard1": "sounds/soundCard1.mp3",
+    "soundGun2": "sounds/soundGun2.mp3",
+    "soundReloaded1": "sounds/soundReloaded1.mp3",
+    "soundPop1": "sounds/soundPop1.mp3",
+    "soundReloading2": "sounds/soundReloading2.mp3",
+    "soundReloading1": "sounds/soundReloading1.mp3"
+  },
+  "fonts": {
+    "menu": "fonts/menu.ttf",
+    "hud": "fonts/hud.ttf",
+    "small": "fonts/small.ttf"
+  },
+  "allyAnimation": "ally-animation.json"
+}
