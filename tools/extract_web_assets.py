@@ -22,7 +22,12 @@ CLIPS = {"charaPic": 677, "enemy_sheep": 910,
          "enemy_chicken": 1063, "enemy_rat": 1295, "enemy_crow": 981,
          "explosion": 2235, "itemPicture": 2113, "ammoBar": 2698, "radioButton": 2312,
          "grenadeBody": 2275, "grenadeShadow": 2199, "bossHealthFill": 2411, "shopCoin": 1442,
-         "layhand": 2226, "itemTimer": 2370}
+         "layhand": 2226, "itemTimer": 2370, "launcherGrenadeBody": 2238,
+         "rocketBody": 2246, "arrowBody": 2263, "flameBody": 2195, "explosionLarge": 2403}
+PROJECTILES = {"hand-grenade": (2276, "grenadeBody"), "grenade": (2239, "launcherGrenadeBody"),
+               "rocket": (2247, "rocketBody"), "bolt": (2264, "arrowBody"),
+               "arrow": (2265, "arrowBody"), "gravity": (2260, "gravityBody"),
+               "flame": (2196, "flameBody")}
 BUTTONS = {"button_newGame": 2521, "button_continue": 2542, "button_help": 2579,
            "button_proceed": 1547, "button_gameMods": 1881,
            "button_townMission": 2753, "button_townCastle": 2763,
@@ -220,6 +225,83 @@ def ally_effects(xml, sprite, layer):
     return atlas("ally" + layer.capitalize(), 838, sprite, directory, svg_directory)
 
 
+def projectile_assets(xml, sprites, manifest):
+    """Сохраняет регистрацию mc/тени и исходный вложенный импульс гравитационного шара."""
+    directory, svg_directory = WORK / "projectile-gravity", WORK / "projectile-gravity-svg"
+    parent = placed_frame(sprites[2260].find("subTags"), 1)[0]
+    source_body = placed_frame(sprites[2259].find("subTags"), 1)
+    pulse = next(tag for tag in source_body if tag.get("name") == "puls")
+    if FORCE or not list(directory.glob("DefineSprite_2260*")):
+        derived = copy.deepcopy(xml)
+        target = next(tag for tag in derived.find("tags") if tag.get("spriteId") == "2260")
+        timeline = target.find("subTags")
+        timeline.clear()
+        previous_depths = []
+        # explosion_puls останавливается на кадре 13; внешний mc продолжает вращаться.
+        for frame in range(1, 14):
+            for depth in previous_depths:
+                timeline.append(ET.Element("item", type="RemoveObject2Tag", depth=depth,
+                                           forceWriteAsLong="false"))
+            selected = [copy.deepcopy(tag) for tag in source_body if tag is not pulse]
+            for tag in placed_frame(sprites[2258].find("subTags"), frame):
+                tag = copy.deepcopy(tag)
+                tag.set("depth", str(int(tag.get("depth")) + 1))
+                matrix = tag.find("matrix")
+                pulse_matrix = pulse.find("matrix")
+                for axis in ("translateX", "translateY"):
+                    matrix.set(axis, str(int(matrix.get(axis, "0")) + int(pulse_matrix.get(axis, "0"))))
+                selected.append(tag)
+            for tag in selected:
+                # Цвет родительского mc: RGB 33/256 с прибавлением (133,0,44).
+                # В дочерних исходных размещениях собственного CXFORM нет.
+                assert tag.find("colorTransform") is None
+                tag.set("placeFlagHasColorTransform", "true")
+                tag.append(copy.deepcopy(parent.find("colorTransform")))
+                timeline.append(tag)
+            previous_depths = [tag.get("depth") for tag in selected]
+            timeline.append(ET.Element("item", type="ShowFrameTag", forceWriteAsLong="false"))
+        timeline.append(ET.Element("item", type="EndTag", forceWriteAsLong="false"))
+        target.set("frameCount", "13")
+        xml_path, swf_path = WORK / "projectile-gravity.xml", WORK / "projectile-gravity.swf"
+        ET.ElementTree(derived).write(xml_path, encoding="utf-8", xml_declaration=True)
+        ffdec(["-xml2swf", xml_path, swf_path], "projectile-gravity-swf")
+        ffdec(["-ignorebackground", "-selectid", "2260", "-export", "sprite", directory, swf_path], "projectile-gravity-png")
+        ffdec(["-ignorebackground", "-selectid", "2260", "-format", "sprite:svg", "-export",
+               "sprite", svg_directory, swf_path], "projectile-gravity-svg")
+    manifest["clips"]["gravityBody"] = atlas("gravityBody", 2260, sprites[2260], directory, svg_directory)
+    # WebGL не поддерживает Flash hard-light напрямую. Два прохода сохраняют
+    # формулу D*(1-alpha+alpha*A)+alpha*B, где A=2*min(S,1-S), B=max(0,2*S-1).
+    original = manifest["clips"]["gravityBody"]
+    image = Image.open(DEST / original["image"]).convert("RGBA")
+    atlas_data = json.loads((DEST / original["json"]).read_text(encoding="utf-8"))
+    for name, transform in [("gravityMultiply", lambda value: 2 * min(value, 255 - value)),
+                            ("gravityAdd", lambda value: max(0, 2 * value - 255))]:
+        rgb = [image.getchannel(channel).point(transform) for channel in "RGB"]
+        Image.merge("RGBA", (*rgb, image.getchannel("A"))).save(DEST / "sprites" / (name + ".png"), optimize=True)
+        atlas_data["meta"]["image"] = name + ".png"
+        (DEST / "sprites" / (name + ".json")).write_text(json.dumps(atlas_data, separators=(",", ":")), encoding="utf-8")
+        manifest["clips"][name] = {**original, "image": f"sprites/{name}.png", "json": f"sprites/{name}.json"}
+    visuals = {}
+    for kind, (symbol, clip) in PROJECTILES.items():
+        placements = placed_frame(sprites[symbol].find("subTags"), 1)
+        body = next(tag for tag in placements if tag.get("name") == "mc")
+        matrix = body.find("matrix")
+        value = {"characterId": symbol, "clip": clip,
+                 "bodyX": int(matrix.get("translateX", "0")) / 20,
+                 "initialBodyY": int(matrix.get("translateY", "0")) / 20}
+        if body.get("blendMode") == "14":
+            value["hardLight"] = {"multiplyClip": "gravityMultiply", "addClip": "gravityAdd"}
+        shadow = next((tag for tag in placements if tag.get("name") == "shadow"), None)
+        if shadow is not None:
+            matrix = shadow.find("matrix")
+            value["shadow"] = {"clip": "grenadeShadow", "x": int(matrix.get("translateX", "0")) / 20,
+                "initialY": int(matrix.get("translateY", "0")) / 20,
+                "scaleX": float(matrix.get("scaleX", "1")), "scaleY": float(matrix.get("scaleY", "1")),
+                "aboveBody": int(shadow.get("depth")) > int(body.get("depth"))}
+        visuals[kind] = value
+    manifest["projectileVisuals"] = visuals
+
+
 def buttons(manifest):
     png_dir, svg_dir = ROOT / ".build/buttons", ROOT / ".build/buttons-svg"
     for directory, extension, format_args, log in [(png_dir, "png", [], "buttons"),
@@ -366,6 +448,7 @@ def main():
                 "clips": {}, "sounds": {}, "fonts": {}}
     for name, i in CLIPS.items():
         manifest["clips"][name] = atlas(name, i, sprites[i])
+    projectile_assets(xml, sprites, manifest)
     for layer in ["back", "front"]:
         manifest["clips"]["ally" + layer.capitalize()] = ally_effects(xml, sprites[838], layer)
     omit_title = {"newGameButton", "continueButton", "helpButton", "longest", "saveBox", "trash",
@@ -467,6 +550,9 @@ def main():
             "gene and result retain offset (0,-26); application applies menu slide X offset",
             "Item quantities and radio labels are rendered by the application",
             "allyBack and allyFront retain source depths around separately selected charaPic poses",
+            "Projectile metadata preserves original mc/shadow registration and layer order",
+            "gravityBody flattens original nested pulse frames 1-13 with the inherited mc color transform",
+            "Gravity hard-light is decomposed into original-alpha multiply/add textures for the WebGL renderer",
             "sheepShadow and crowShadow preserve shadow-only alpha masks for original hit exclusion",
             "Ordinary enemy collision uses original filled contours and placement matrices, not bitmap alpha",
             "gameOver hides day-one carry-over control and retired external play-more button"

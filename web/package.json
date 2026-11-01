@@ -17,12 +17,14 @@
     "test:rest-reference": "node --experimental-strip-types scripts/compare-rest-reference.ts",
     "test:second-town-reference": "node --experimental-strip-types scripts/compare-second-town-reference.ts",
     "test:castle-reference": "node --experimental-strip-types scripts/compare-castle-reference.ts",
+    "test:projectile-reference": "node --experimental-strip-types scripts/compare-projectile-reference.ts",
     "test:combat-reference": "node --experimental-strip-types scripts/compare-combat-reference.ts",
     "test:item-reference": "node --experimental-strip-types scripts/compare-item-reference.ts",
     "test:progression-reference": "node --experimental-strip-types scripts/compare-progression-reference.ts",
     "test:town-reference": "node --experimental-strip-types scripts/compare-town-reference.ts",
     "test:town-preparation-reference": "node --experimental-strip-types scripts/compare-town-preparation-reference.ts",
-    "test:soak": "node --experimental-strip-types scripts/soak.ts"
+    "test:soak": "node --experimental-strip-types scripts/soak.ts",
+    "test:projectile-soak": "node --experimental-strip-types scripts/projectile-soak.ts"
   },
   "dependencies": {
     "phaser": "4.2.1"

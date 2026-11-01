@@ -43,7 +43,7 @@ export function compareCastleTrace(records: CastleRecord[]) {
     state.castleHp = config.hp; state.castleMaxHp = 40; state.gold = 100; state.totalMoney = 500;
     state.protection = { counter: config.protection ?? 0, blueMultiplierAdd: config.blue ?? 0 };
     state.activeMission.absorbFix = config.absorbFix ?? 0;
-    state.enemies = []; state.grenades = []; state.newWave = false; state.spawnTimer = 100000;
+    state.enemies = []; state.projectiles = []; state.newWave = false; state.spawnTimer = 100000;
     state.waveIndex = 4; state.fireHeld = false; state.pendingShot = false;
     state.rng = config.seed;
     const boundary = simulation as unknown as { random(): number; damageCastle(amount: number): void };

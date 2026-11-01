@@ -136,7 +136,9 @@ test('grenade count, cooldown and vertical trajectory stay finite', () => {
   assert.equal(simulation.throwGrenade(100, 200), false);
   assert.equal(simulation.state.inventory[1]!.ammo, 4);
   simulation.tick();
-  assert.ok(simulation.events.some(event => event.type === 'explosion'));
+  assert.equal(simulation.events.some(event => event.type === 'explosion'), false);
+  for (let frame = 0; frame < 20 && !simulation.events.some(event => event.type === 'explosion'); frame++) simulation.tick();
+  assert.ok(simulation.events.some(event => event.type === 'explosion' && event.x === 510 && event.y === 200));
   assert.ok(simulation.events.every(event => event.x === undefined || Number.isFinite(event.x)));
   assert.ok(simulation.events.every(event => event.y === undefined || Number.isFinite(event.y)));
   advance(simulation, 100);
@@ -180,7 +182,7 @@ test('restored entity identifiers cannot collide when the next enemy or grenade 
   const saved = simulation.toSave();
   assert.deepEqual(Simulation.fromSave(saved).state, saved);
   assert.throws(() => Simulation.fromSave({ ...saved, nextUid: saved.enemies[0].uid }));
-  assert.throws(() => Simulation.fromSave({ ...saved, grenades: [{ ...saved.grenades[0], uid: saved.enemies[0].uid }] }));
+  assert.throws(() => Simulation.fromSave({ ...saved, projectiles: [{ ...saved.projectiles[0], uid: saved.enemies[0].uid }] }));
   assert.throws(() => Simulation.fromSave({ ...saved, enemies: [{ ...saved.enemies[0], maxHp: 0 }] }));
 });
 

@@ -8,7 +8,7 @@ your retained equipment. Victory, defeat and save/restore work across these
 stages. Original English artwork, fonts, audio and credits are retained.
 
 This is not yet the complete game. Day 3 onward, other classes, full town
-management, recruiting and card actions, Ragnarok, projectile weapons and
+management, recruiting and card actions, Ragnarok and
 original Flash save conversion remain to be ported. Ordinary firearms use owned
 item statistics and weapon-skill requirements; the covered Sheriff combat skills
 affect play. Unsupported actions remain unavailable. See
@@ -33,7 +33,7 @@ appearance and press **Proceed**. Sheriff is the implemented class.
 | Control | Action |
 | --- | --- |
 | Mouse | Aim |
-| Left click | Fire; interrupt a manual reload |
+| Left click | Fire; hold/release to draw/fire a bow; interrupt a manual reload |
 | Space | Reload; resume while paused |
 | 1–5 | Select a firearm or use the item in that inventory slot |
 | Esc | Pause / resume |
@@ -48,6 +48,13 @@ use their original charge/cooldown or protection rules. Using a consumable keeps
 the selected weapon. Hammers consume a charge even at full HP; the Grail is
 single-use. Firearms require their indicated weapon skill. Reloading, automatic
 fire and automatic reload follow the selected item's properties.
+
+Long/Wind Bows, both Crossbows, the Grenade Launcher, Rocket Launcher,
+Gravity Gun and Flamethrower now use their original projectile behaviors and
+artwork when owned and usable. Wind Bow releases three arrows. Gravity Gun
+starts reloading immediately while its projectile continues. Exactly vertical
+shots use an explicit corrected path: the original divides by zero there.
+That correction is separate from the still-unreproduced late-game hitbox report.
 
 After victory, the reward sequence is **ordinary loot → earned boss prizes →
 earned skill choices → results**. Click an item to pick it up and click a slot to
@@ -71,7 +78,9 @@ spend AP or cost gold. Guns refill; consumable charges stay spent. Day 2 ends in
 its own rewards and prepared town, where further Rest is disabled. Recruiting,
 card actions, Refresh Stock, Upgrade Weapon and MOD mounting remain unavailable.
 
-Saves now use version 7; versions 1–6 are accepted. Ammo and reload timers live
+Saves now use version 8; versions 1–7 are accepted. In-flight projectiles and
+charged bows resume without relaunching or rerolling. Legacy hand grenades retain
+their stored positions, damage and remaining lifetime. Ammo and reload timers live
 on the owned items, with a selected slot, five item cooldowns and saved
 protection state. Weapon experience is tracked separately for Small Gun, Big
 Gun, Rifle, Shotgun and other items. Legacy scalar experience maps to Shotgun;
@@ -129,7 +138,12 @@ same collision implementation used in the browser. Coverage is documented in
 the feature ledger rather than inferred from the number of passing tests.
 Negative controls verify that missing shell feedback and altered RNG consumption
 are detected. Expected original results are never regenerated from the port.
-The integrated v7 candidate passes **135 tests** and TypeScript checks. Release
+Projectile comparisons add **14 original scenarios with 650 recorded updates**,
+covering every projectile family, hits, penetration, overlapping corpses, weapon
+switching and random draws. A separate native probe checks first-update timing;
+two vertical-shot diagnostics preserve the original failure and verify the
+intentional correction. These are bounded comparisons, not a complete replay of
+an original battle. The integrated v8 candidate passes **151 tests** and TypeScript checks. Release
 and browser acceptance are tracked separately in
 [port verification](docs/port-verification.json).
 
@@ -137,10 +151,16 @@ and browser acceptance are tracked separately in
 interrupted-input policies. It checks finite state, battle completion and exact
 JSON save/replay state and event equality through both days, earned rewards,
 town preparation, repair, shop transactions and Rest. The latest run passed
-**96 scenarios, 193,607 frames and 2,167 checkpoints**, including **56 Rest
+**96 scenarios, 196,363 frames and 2,207 checkpoints**, including **59 Rest
 transitions and 32 Day 2 victories**. Reports and reproducible failure
 checkpoints are written beneath `.build/soak/`. This is a stability check, not
 evidence that every original feature has been ported.
+
+`npm.cmd run test:projectile-soak` separately exercises eight projectile guns
+and hand grenades under three seeds: **27 scenarios, 9,720 frames and 1,080
+save/replay checkpoints**. These configured scenarios grant the required weapon
+skills and exercise switches, bow charge/release, pulses and vertical aiming;
+they do not claim ordinary campaign acquisition of every weapon.
 
 To refresh independent original traces, build the diagnostic SWFs and start the
 local development-only runner from the repository root:
@@ -160,6 +180,7 @@ python tools/build_equipment_oracle.py
 python tools/build_castle_oracle.py
 python tools/build_rest_oracle.py
 python tools/build_second_town_oracle.py
+python tools/build_projectile_oracle.py
 python tools/serve_oracle.py
 ```
 
@@ -172,7 +193,8 @@ and Free Repair. Use `?suite=hero` for character creation/growth,
 `?suite=prepared-waves` for the prepared next-mission waves, and `?suite=shoot`
 for actual firing. Use `?suite=equipment` for selection/fire/reload input,
 `?suite=castle` for castle damage/protection, `?suite=rest` for Rest, and
-`?suite=second-town` for the second preparation. The town fixture excludes full
+`?suite=second-town` for the second preparation, and `?suite=projectiles` for
+projectile launches and lifecycles (`npm.cmd run test:projectile-reference`). The town fixture excludes full
 town preparation. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, use the matching comparison command: `npm.cmd run test:reference`,

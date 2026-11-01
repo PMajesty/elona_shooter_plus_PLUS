@@ -48,11 +48,11 @@ test('grenades retain launch damage and independent slot cooldowns through save 
   assert.equal(simulation.throwGrenade(100, 230, 1), true);
   assert.equal(simulation.throwGrenade(150, 230, 2), true);
   assert.deepEqual(simulation.state.itemCooldowns, [0, 101, 101, 0, 0]);
-  assert.equal(simulation.state.grenades[0].damage, 73);
-  assert.equal(simulation.state.grenades[1].damage, 45);
+  assert.equal(simulation.state.projectiles[0].damage, 73);
+  assert.equal(simulation.state.projectiles[1].damage, 45);
   simulation.state.inventory[1]!.attack = 91;
   const resumed = restore(simulation);
-  assert.equal(resumed.state.grenades[0].damage, 73);
+  assert.equal(resumed.state.projectiles[0].damage, 73);
   let explosions = 0;
   for (let frame = 0; frame < 101; frame++) {
     simulation.tick(); resumed.tick();
@@ -63,7 +63,7 @@ test('grenades retain launch damage and independent slot cooldowns through save 
   assert.equal(explosions, 2);
   assert.deepEqual(simulation.state.itemCooldowns, [0, 0, 0, 0, 0]);
   assert.equal(simulation.throwGrenade(100, 230, 1), true);
-  assert.equal(simulation.state.grenades[0].damage, 91);
+  assert.equal(simulation.state.projectiles[0].damage, 91);
 });
 
 test('Grail blocks actual sheep wall attacks through restore and expires before the next unprotected hit', () => {

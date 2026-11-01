@@ -943,6 +943,102 @@
       "count": 1,
       "uniqueFrames": 1,
       "characterId": 2370
+    },
+    "launcherGrenadeBody": {
+      "image": "sprites/launcherGrenadeBody.png",
+      "json": "sprites/launcherGrenadeBody.json",
+      "originX": 10.0,
+      "originY": 4.0,
+      "frameWidth": 20,
+      "frameHeight": 8,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2238
+    },
+    "rocketBody": {
+      "image": "sprites/rocketBody.png",
+      "json": "sprites/rocketBody.json",
+      "originX": 20.7,
+      "originY": 8.75,
+      "frameWidth": 46,
+      "frameHeight": 19,
+      "labels": {},
+      "count": 2,
+      "uniqueFrames": 2,
+      "characterId": 2246
+    },
+    "arrowBody": {
+      "image": "sprites/arrowBody.png",
+      "json": "sprites/arrowBody.json",
+      "originX": 1.95,
+      "originY": 7.45,
+      "frameWidth": 4,
+      "frameHeight": 15,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2263
+    },
+    "flameBody": {
+      "image": "sprites/flameBody.png",
+      "json": "sprites/flameBody.json",
+      "originX": 11.45,
+      "originY": 12.0,
+      "frameWidth": 23,
+      "frameHeight": 24,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2195
+    },
+    "explosionLarge": {
+      "image": "sprites/explosionLarge.png",
+      "json": "sprites/explosionLarge.json",
+      "originX": 45.25,
+      "originY": 45.75,
+      "frameWidth": 91,
+      "frameHeight": 92,
+      "labels": {},
+      "count": 13,
+      "uniqueFrames": 7,
+      "characterId": 2403
+    },
+    "gravityBody": {
+      "image": "sprites/gravityBody.png",
+      "json": "sprites/gravityBody.json",
+      "originX": 34.45,
+      "originY": 35.95,
+      "frameWidth": 73,
+      "frameHeight": 73,
+      "labels": {},
+      "count": 13,
+      "uniqueFrames": 7,
+      "characterId": 2260
+    },
+    "gravityMultiply": {
+      "image": "sprites/gravityMultiply.png",
+      "json": "sprites/gravityMultiply.json",
+      "originX": 34.45,
+      "originY": 35.95,
+      "frameWidth": 73,
+      "frameHeight": 73,
+      "labels": {},
+      "count": 13,
+      "uniqueFrames": 7,
+      "characterId": 2260
+    },
+    "gravityAdd": {
+      "image": "sprites/gravityAdd.png",
+      "json": "sprites/gravityAdd.json",
+      "originX": 34.45,
+      "originY": 35.95,
+      "frameWidth": 73,
+      "frameHeight": 73,
+      "labels": {},
+      "count": 13,
+      "uniqueFrames": 7,
+      "characterId": 2260
     }
   },
   "sounds": {
@@ -1045,5 +1141,93 @@
   },
   "allyAnimation": "ally-animation.json",
   "collisionGeometry": "collision-geometry.json",
-  "townLayout": "town-layout.json"
+  "townLayout": "town-layout.json",
+  "projectileVisuals": {
+    "hand-grenade": {
+      "characterId": 2276,
+      "clip": "grenadeBody",
+      "bodyX": -0.45,
+      "initialBodyY": -96.75,
+      "shadow": {
+        "clip": "grenadeShadow",
+        "x": -6.45,
+        "initialY": -30.2,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "aboveBody": false
+      }
+    },
+    "grenade": {
+      "characterId": 2239,
+      "clip": "launcherGrenadeBody",
+      "bodyX": -0.6,
+      "initialBodyY": -79.85,
+      "shadow": {
+        "clip": "grenadeShadow",
+        "x": -7.6,
+        "initialY": -21.7,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "aboveBody": true
+      }
+    },
+    "rocket": {
+      "characterId": 2247,
+      "clip": "rocketBody",
+      "bodyX": -0.8,
+      "initialBodyY": -114.25,
+      "shadow": {
+        "clip": "grenadeShadow",
+        "x": -16.6,
+        "initialY": -24.55,
+        "scaleX": 2.5,
+        "scaleY": 1.0,
+        "aboveBody": true
+      }
+    },
+    "bolt": {
+      "characterId": 2264,
+      "clip": "arrowBody",
+      "bodyX": 0.5,
+      "initialBodyY": -45.0,
+      "shadow": {
+        "clip": "grenadeShadow",
+        "x": -6.45,
+        "initialY": -11.9,
+        "scaleX": 1.0,
+        "scaleY": -0.30769348,
+        "aboveBody": false
+      }
+    },
+    "arrow": {
+      "characterId": 2265,
+      "clip": "arrowBody",
+      "bodyX": 0.5,
+      "initialBodyY": -45.0,
+      "shadow": {
+        "clip": "grenadeShadow",
+        "x": -6.45,
+        "initialY": -11.9,
+        "scaleX": 1.0,
+        "scaleY": -0.30769348,
+        "aboveBody": false
+      }
+    },
+    "gravity": {
+      "characterId": 2260,
+      "clip": "gravityBody",
+      "bodyX": 0.0,
+      "initialBodyY": -47.95,
+      "hardLight": {
+        "multiplyClip": "gravityMultiply",
+        "addClip": "gravityAdd"
+      }
+    },
+    "flame": {
+      "characterId": 2196,
+      "clip": "flameBody",
+      "bodyX": 1.8,
+      "initialBodyY": -34.5
+    }
+  }
 }

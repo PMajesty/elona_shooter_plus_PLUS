@@ -9,7 +9,7 @@
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
     "images": 84,
-    "clips": 20,
+    "clips": 28,
     "sounds": 89,
     "fonts": 5
   },
@@ -25,7 +25,10 @@
     "allyBack and allyFront retain source depths around separately selected charaPic poses",
     "sheepShadow and crowShadow preserve shadow-only alpha masks for original hit exclusion",
     "Ordinary enemy collision uses original filled contours and placement matrices, not bitmap alpha",
-    "gameOver hides day-one carry-over control and retired external play-more button"
+    "gameOver hides day-one carry-over control and retired external play-more button",
+    "Projectile metadata preserves original mc/shadow registration and layer order",
+    "gravityBody flattens original nested pulse frames 1-13 with the inherited mc color transform",
+    "Gravity hard-light is decomposed into original-alpha multiply/add textures for the WebGL renderer"
   ],
   "limitations": [
     "FFDec renders timelines without executing ActionScript; application implements frame actions",

@@ -10,12 +10,14 @@ import { createTownView, type TownLayout, type TownTab, type TownDialog } from '
 import { createShopView, type ShopLayout } from './shop-view.ts';
 import { ITEM_TYPE, isOccupiedItem } from './items.ts';
 import { alphaMaskHit, ordinaryEnemyHit, type CollisionGeometry } from './collision.ts';
+import type { ProjectileKind } from './projectiles.ts';
 import './style.css';
 
 interface ImageAsset { file: string; width: number; height: number; originX: number; originY: number }
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number }
-interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string> }
-interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5 | 6 | 7; appearance: number; simulation: unknown }
+interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
+interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual> }
+interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8; appearance: number; simulation: unknown }
 type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
@@ -30,6 +32,7 @@ USED_SOUNDS.add('soundReloaded1');
 for (const key of ['soundBgTown', 'soundRepair1', 'soundBeep', 'soundScroll1', 'soundPay1']) USED_SOUNDS.add(key);
 for (let index = 1; index <= 15; index++) USED_SOUNDS.add(`soundGun${index}`);
 for (const key of ['soundReloading1', 'soundReloading3', 'soundReloaded3', 'soundPray1', 'soundDefend', 'soundNight']) USED_SOUNDS.add(key);
+for (const key of ['soundBow2', 'soundFireball', 'soundRampageEnemy', 'soundPuls']) USED_SOUNDS.add(key);
 let manifest: Manifest;
 let gameScene: ElonaScene;
 
@@ -45,20 +48,23 @@ class ElonaScene extends Phaser.Scene {
   private enemySprites = new Map<number, Phaser.GameObjects.Image | OriginalAlly>();
   private bossFrames = new Map<number, number>();
   private bossBars = new Map<number, { container: Phaser.GameObjects.Container; fill: Phaser.GameObjects.Image }>();
-  private grenadeSprites = new Map<number, { body: Phaser.GameObjects.Image; shadow: Phaser.GameObjects.Image }>();
+  private projectileSprites = new Map<number, { container: Phaser.GameObjects.Container; body: Phaser.GameObjects.Container; images: Phaser.GameObjects.Image[]; shadow?: Phaser.GameObjects.Image }>();
   private playerSprite?: OriginalAlly;
   private ammoFill?: Phaser.GameObjects.Image;
   private selection?: Phaser.GameObjects.Rectangle;
   private cursor?: Phaser.GameObjects.Graphics;
   private pauseLayer?: Phaser.GameObjects.Container;
   private firePressed = false;
+  private fireReleased = false;
   private firingGesture = false;
+  private firingReleaseOwned = false;
   private reloadRequested = false;
   private reloadAnimations = 0;
   private slotRequested?: number;
   private hotbar: { icon: Phaser.GameObjects.Image; count: Phaser.GameObjects.Text; cooldown: Phaser.GameObjects.Image }[] = [];
   private effects: { object: Phaser.GameObjects.GameObject; ticks: number; moveY?: number; clip?: string; frame?: number }[] = [];
   private ambient?: Phaser.Sound.BaseSound;
+  private bowSound?: Phaser.Sound.BaseSound;
   private fpsSamples: number[] = [];
   private maskCache = new Map<string, { width: number; height: number; data: Uint8ClampedArray }>();
 
@@ -89,10 +95,21 @@ class ElonaScene extends Phaser.Scene {
     this.input.mouse?.disableContextMenu();
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       if (this.screen !== 'battle' || this.paused || pointer.y < 30 || pointer.y > 345) return;
-      if (pointer.leftButtonDown()) { this.firePressed = true; this.firingGesture = true; }
+      if (pointer.button === 0 && pointer.leftButtonDown()) { this.firePressed = true; this.firingGesture = this.firingReleaseOwned = true; }
     });
-    this.input.on('pointerup', () => { this.firingGesture = false; });
+    const releaseFire = (pointer: Phaser.Input.Pointer) => {
+      // Отпускание другой кнопки не выпускает стрелу при удерживаемой левой.
+      if (pointer.button !== 0) return;
+      if (this.firingReleaseOwned) this.fireReleased = true;
+      this.firingGesture = this.firingReleaseOwned = false;
+    };
+    this.input.on('pointerup', releaseFire);
+    this.input.on('pointerupoutside', releaseFire);
+    // За пределами поля удерживаемый огонь прекращается, но MouseUp ещё принадлежит этому нажатию.
     this.input.on('gameout', () => { this.firingGesture = false; });
+    this.input.on('gameover', (_time: number, event: MouseEvent | TouchEvent) => {
+      if (this.firingReleaseOwned && 'buttons' in event && (event.buttons & 1) !== 0) this.firingGesture = true;
+    });
     this.input.keyboard?.on('keydown-SPACE', (event: KeyboardEvent) => {
       event.preventDefault();
       if (this.screen !== 'battle') return;
@@ -105,7 +122,7 @@ class ElonaScene extends Phaser.Scene {
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Sheriff Days 1–2, rewards, town shop, Free Repair and Rest are playable. Number keys 1–5 use owned equipment and consumables. Ragnarok, projectile weapons, other town actions, Day 3 onward and other classes are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Sheriff Days 1–2, rewards, town shop, Free Repair and Rest are playable. Number keys 1–5 use owned equipment and consumables; hold and release the mouse to draw and fire a bow. Ragnarok, other town actions, Day 3 onward and other classes are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
   }
 
@@ -114,11 +131,12 @@ class ElonaScene extends Phaser.Scene {
     this.screen = screen;
     this.paused = false;
     this.accumulator = 0;
-    this.firePressed = this.reloadRequested = false; this.slotRequested = undefined;
-    this.firingGesture = false;
+    this.firePressed = this.fireReleased = this.reloadRequested = false; this.slotRequested = undefined;
+    this.firingGesture = this.firingReleaseOwned = false;
     this.input.setDefaultCursor('default');
     this.root.removeAll(true);
-    this.enemySprites.clear(); this.bossFrames.clear(); this.bossBars.clear(); this.grenadeSprites.clear(); this.hud.clear(); this.effects = []; this.hotbar = [];
+    this.enemySprites.clear(); this.bossFrames.clear(); this.bossBars.clear(); this.projectileSprites.clear(); this.hud.clear(); this.effects = []; this.hotbar = [];
+    this.bowSound?.destroy(); this.bowSound = undefined;
     this.reloadAnimations = 0;
     this.pauseLayer = undefined; this.playerSprite = undefined; this.cursor = undefined; this.selection = undefined; this.ammoFill = undefined;
     if (!keepTownAmbience) { this.ambient?.destroy(); this.ambient = undefined; }
@@ -126,6 +144,7 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.paused = 'false';
     container.dataset.bossBars = '0'; container.dataset.bossHealth = '[]';
     container.dataset.playerFrame = ''; container.dataset.reloadTicks = '0'; container.dataset.reloadAnimations = '0';
+    container.dataset.projectiles = '[]'; container.dataset.bowDrawing = 'false';
     delete container.dataset.lootOffers; delete container.dataset.inventory;
     delete container.dataset.skillChoices; delete container.dataset.selectedTrait; delete container.dataset.traits; delete container.dataset.skillPoints;
     delete container.dataset.actionPoints; delete container.dataset.townTab; delete container.dataset.repairDialog; delete container.dataset.townDialog;
@@ -208,7 +227,7 @@ class ElonaScene extends Phaser.Scene {
     this.root.add(this.add.rectangle(0, 0, 620, 380, 0x000000, 0.45).setOrigin(0));
     this.root.add(this.add.rectangle(90, 50, 440, 280, 0xe0d1ae).setOrigin(0).setStrokeStyle(2, 0x9e8c61));
     this.text(123, 73, 'How to Play', 26);
-    this.text(123, 121, 'Aim with the mouse. Click to fire.\n1–5 select or use inventory slots.\nSpace reloads your weapon.\nClick interrupts a manual reload.\nEsc pauses; Space also resumes.\n\nProtect the castle until the day is over.\nIn town, use Mission → Rest for Day 2.\nRest does not repair the castle.', 16).setLineSpacing(4);
+    this.text(123, 121, 'Mouse: aim and fire; bows hold/release.\n1–5 select or use an inventory slot.\nSpace reloads; click cancels manual reload.\nEsc pauses; Space also resumes.\n\nDefend the castle until the day ends.\nMission → Rest starts Day 2 without repairs.', 16).setLineSpacing(3);
     this.labelButton(245, 288, 'Return to Title', () => this.showTitle(), 145);
   }
 
@@ -269,6 +288,7 @@ class ElonaScene extends Phaser.Scene {
     this.playerSprite = new OriginalAlly(this, this.cache.json.get('ally-animation') as OriginalAllyMetadata, manifest.clips, this.appearance, WORLD.playerX, WORLD.playerY);
     this.root.add(this.playerSprite);
     this.playerSprite.setOriginalFrame(weaponPresentation(this.sim?.selectedItem?.id ?? 0).idleFrame);
+    if (this.sim?.state.player.bowDrawing) this.playerSprite.playOriginal(86);
     if (this.sim?.weapon?.reloadTime && !this.sim.weapon.autoReload) this.playerSprite.playOriginal('reload');
     this.drawHud();
     this.cursor = this.add.graphics(); this.root.add(this.cursor);
@@ -314,8 +334,9 @@ class ElonaScene extends Phaser.Scene {
     while (this.accumulator >= 1000 / 30 && this.sim.state.phase === 'battle') {
       // Коллизия босса использует текущую симуляцию даже между кадрами отрисовки.
       for (const enemy of this.sim.state.enemies) if (enemy.kind === 'boss') this.syncBossActor(enemy);
-      this.sim.tick({ aimX: pointer.x, aimY: pointer.y, firePressed: this.firePressed, fireHeld: this.firingGesture && pointer.isDown && pointer.leftButtonDown(), reload: this.reloadRequested, slot: this.slotRequested });
-      this.firePressed = this.reloadRequested = false; this.slotRequested = undefined;
+      this.sim.tick({ aimX: pointer.x, aimY: pointer.y, firePressed: this.firePressed, fireReleased: this.fireReleased, fireHeld: this.firingGesture && pointer.isDown && pointer.leftButtonDown(), reload: this.reloadRequested, slot: this.slotRequested });
+      this.firePressed = this.fireReleased = this.reloadRequested = false; this.slotRequested = undefined;
+      if (!this.sim.state.player.bowDrawing && this.bowSound) { this.bowSound.destroy(); this.bowSound = undefined; }
       this.accumulator -= 1000 / 30;
       this.playerSprite?.stepOriginal();
       for (const actor of this.enemySprites.values()) if (actor instanceof OriginalAlly) actor.stepOriginal();
@@ -384,22 +405,7 @@ class ElonaScene extends Phaser.Scene {
     if (this.playerSprite) {
       this.root.bringToTop(this.playerSprite);
     }
-    const grenadeIds = new Set<number>();
-    for (const grenade of state.grenades) {
-      grenadeIds.add(grenade.uid);
-      let sprite = this.grenadeSprites.get(grenade.uid);
-      if (!sprite) {
-        const shadow = this.clip('grenadeShadow', 1, grenade.x - 6.45, grenade.startY)!;
-        const body = this.add.image(grenade.x - 0.45, grenade.y, 'grenadeBody', '1').setOrigin(0.5);
-        this.root.add(body); sprite = { body, shadow }; this.grenadeSprites.set(grenade.uid, sprite);
-      }
-      sprite.body.setPosition(grenade.x - 0.45, grenade.y).setAngle(-4 * Math.abs((grenade.x - grenade.startX) / grenade.speed));
-      let shadowY = (grenade.targetY - grenade.startY) * (grenade.x - grenade.startX) / (grenade.targetX - grenade.startX);
-      if (grenade.targetY < 135) shadowY /= 3;
-      const shadow = manifest.clips.grenadeShadow;
-      sprite.shadow.setPosition(grenade.x - 6.45 - shadow.originX, shadowY + grenade.startY - shadow.originY);
-    }
-    for (const [uid, sprite] of this.grenadeSprites) if (!grenadeIds.has(uid)) { sprite.body.destroy(); sprite.shadow.destroy(); this.grenadeSprites.delete(uid); }
+    this.paintProjectiles();
     this.updateHud();
     for (const text of this.hud.values()) this.root.bringToTop(text);
     const pointer = this.input.activePointer;
@@ -417,6 +423,50 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.frameMs = (this.fpsSamples.reduce((a, b) => a + b, 0) / Math.max(1, this.fpsSamples.length)).toFixed(2);
     container.dataset.slowFrames = String(this.fpsSamples.filter(ms => ms > 50).length);
     container.dataset.maxFrameMs = Math.max(0, ...this.fpsSamples).toFixed(2);
+  }
+
+  private paintProjectiles(): void {
+    const present = new Set<number>();
+    for (const projectile of this.sim?.state.projectiles ?? []) {
+      present.add(projectile.uid);
+      const visual = manifest.projectileVisuals[projectile.kind];
+      let sprite = this.projectileSprites.get(projectile.uid);
+      if (!sprite) {
+        // Поворот и масштаб применяются к регистрации Flash, а не к центру PNG.
+        const keys = visual.hardLight ? [visual.hardLight.multiplyClip, visual.hardLight.addClip] : [visual.clip];
+        const images = keys.map((key, index) => {
+          const asset = manifest.clips[key];
+          const image = this.add.image(0, 0, key, '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
+          // Flash hard-light разложен на умножение и прибавление с исходной альфой.
+          if (visual.hardLight) image.setBlendMode(index === 0 ? Phaser.BlendModes.MULTIPLY : Phaser.BlendModes.ADD);
+          return image;
+        });
+        const body = this.add.container(0, 0, images);
+        const group = this.add.container(0, 0);
+        let shadow: Phaser.GameObjects.Image | undefined;
+        if (visual.shadow) {
+          const asset = manifest.clips[visual.shadow.clip];
+          shadow = this.add.image(visual.shadow.x, 0, visual.shadow.clip, '1')
+            .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight)
+            .setScale(visual.shadow.scaleX, visual.shadow.scaleY);
+        }
+        if (shadow && !visual.shadow!.aboveBody) group.add(shadow);
+        group.add(body);
+        if (shadow && visual.shadow!.aboveBody) group.add(shadow);
+        this.root.add(group);
+        sprite = { container: group, body, images, shadow };
+        this.projectileSprites.set(projectile.uid, sprite);
+      }
+      sprite.container.setPosition(projectile.x, 0).setAlpha(Math.max(0, projectile.alpha));
+      sprite.body.setPosition(visual.bodyX, projectile.y).setAngle(projectile.rotation).setScale(projectile.scale);
+      const frame = projectile.kind === 'gravity' ? Math.min(13, projectile.pulseFrame) : projectile.kind === 'rocket' ? projectile.frame % 2 + 1 : 1;
+      for (const image of sprite.images) image.setFrame(String(frame));
+      sprite.shadow?.setY(projectile.shadowY).setAlpha(Math.max(0, projectile.shadowAlpha)).setVisible(projectile.shadowVisible);
+      this.root.bringToTop(sprite.container);
+    }
+    for (const [uid, sprite] of this.projectileSprites) if (!present.has(uid)) { sprite.container.destroy(true); this.projectileSprites.delete(uid); }
+    container.dataset.bowDrawing = String(this.sim?.state.player.bowDrawing ?? false);
+    container.dataset.projectiles = JSON.stringify((this.sim?.state.projectiles ?? []).map(({ uid, kind, x, y, frame, pulseFrame, scale, alpha }) => ({ uid, kind, x, y, frame, pulseFrame, scale, alpha })));
   }
 
   private paintBossBars(): void {
@@ -475,7 +525,7 @@ class ElonaScene extends Phaser.Scene {
       // cancelReload после последнего автоматического патрона получает уже нулевой таймер.
       if (event.automaticReload && manual) delete sound.reloaded;
     }
-    Object.assign(sound, { select: 'soundReloaded1', beep: 'soundBeep', repair: 'soundRepair1', protection: 'soundPray1', defend: 'soundDefend' });
+    Object.assign(sound, { select: 'soundReloaded1', beep: 'soundBeep', repair: 'soundRepair1', protection: 'soundPray1', defend: 'soundDefend', pulse: 'soundPuls' });
     if (event.message) status.textContent = event.message;
     if (event.type === 'kill') {
       const enemy = this.sim?.state.enemies.find(candidate => candidate.uid === event.enemyUid);
@@ -487,6 +537,12 @@ class ElonaScene extends Phaser.Scene {
     if (event.type === 'shot') {
       this.playerSprite?.playOriginal(weaponPresentation(event.weaponId ?? 0).shootFrame);
     }
+    if (event.type === 'bow-draw') {
+      this.playerSprite?.playOriginal(86);
+      this.bowSound?.destroy();
+      if (this.cache.audio.exists('soundBow2')) { this.bowSound = this.sound.add('soundBow2', { volume: 0.65 }); this.bowSound.play(); }
+    }
+    if (event.type === 'select' || event.type === 'shot') { this.bowSound?.destroy(); this.bowSound = undefined; }
     if (event.type === 'select' || (event.type === 'reloaded' && (!event.automaticReload || !this.sim?.weapon?.manualReload))) {
       this.playerSprite?.stopOriginal(weaponPresentation(event.weaponId ?? 0).idleFrame);
     }
@@ -499,8 +555,13 @@ class ElonaScene extends Phaser.Scene {
       this.effects.push({ object: damage, ticks: 24, moveY: -0.6 });
     }
     if (event.type === 'explosion') {
-      const explosion = this.clip('explosion', 1, event.x ?? 0, event.y ?? 0);
-      if (explosion) this.effects.push({ object: explosion, ticks: manifest.clips.explosion.count, clip: 'explosion', frame: 1 });
+      const key = event.explosionKind === 'rocket' ? 'explosionLarge' : 'explosion';
+      const asset = manifest.clips[key];
+      const explosion = this.add.image(event.x ?? 0, event.y ?? 0, key, '1')
+        .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setScale(event.scale ?? 1).setAlpha(0.85);
+      this.root.add(explosion);
+      // Кадровые скрипты удаляют исходные эффекты на 23-м и 13-м кадрах.
+      this.effects.push({ object: explosion, ticks: key === 'explosion' ? 22 : 12, clip: key, frame: 1 });
     }
     if (event.type === 'protection') {
       const effect = this.clip('layhand', 1, event.x ?? 550, event.y ?? 270);
@@ -692,10 +753,10 @@ class ElonaScene extends Phaser.Scene {
 
   togglePause(): void {
     if (this.screen !== 'battle') return;
-    this.paused = !this.paused; this.accumulator = 0; this.firePressed = false; this.firingGesture = false;
+    this.paused = !this.paused; this.accumulator = 0; this.firePressed = this.fireReleased = false; this.firingGesture = this.firingReleaseOwned = false;
     container.dataset.paused = String(this.paused);
-    if (!this.paused) { this.pauseLayer?.destroy(true); this.pauseLayer = undefined; this.ambient?.resume(); return; }
-    this.ambient?.pause(); this.saveGame(false);
+    if (!this.paused) { this.pauseLayer?.destroy(true); this.pauseLayer = undefined; this.ambient?.resume(); this.bowSound?.resume(); return; }
+    this.ambient?.pause(); this.bowSound?.pause(); this.saveGame(false);
     const existing = new Set(this.root.list);
     this.root.add(this.add.rectangle(0, 0, 620, 380, 0x000000, 0.45).setOrigin(0));
     this.root.add(this.add.rectangle(199, 105, 222, 180, 0xdfcfac).setOrigin(0).setStrokeStyle(2, 0x8c7b53));
@@ -708,7 +769,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   makeSave(): PortSave | undefined {
-    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 7, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
+    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 8, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
   }
 
   saveGame(notify = true): boolean {
@@ -721,7 +782,7 @@ class ElonaScene extends Phaser.Scene {
 
   private parseSave(raw: unknown): { simulation: Simulation; appearance: number } {
     const save = raw as Partial<PortSave> | null;
-    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5, 6, 7].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
+    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5, 6, 7, 8].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
     return { simulation: Simulation.fromSave(save.simulation, this.simulationOptions()), appearance: save.appearance! };
   }
 

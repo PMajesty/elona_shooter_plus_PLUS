@@ -136,6 +136,113 @@ Battle HUD values come from `updateDay`, `updateHP`, and `updateAmmoBar`:
 day shows `game.day + "/" + mission.wave`, HP shows `current/max`, ammo shows
 `current/max`. The source does not show elapsed seconds as the day counter.
 
+## Projectile presentation
+
+The projectile assets come from the preserved SWF above, using FFDec 26.4.0.
+`tools/extract_web_assets.py` regenerates the selected atlases and
+`web/public/assets/manifest.json`. Its `projectileVisuals` entries retain each
+source movie's named `mc` and `shadow` placements, including their relative
+depths. The source launch methods are `throwGrenade`, `throwRocket`, `shoot`,
+`explode`, and `explode_puls` in `src/original/MainTimeline.as`; the corresponding
+`bullet_*.as`, `fireball.as`, and explosion frame scripts are exported under
+ignored `.build/export/scripts/`.
+
+| Projectile | Parent symbol | Body atlas / source symbol | Body x; initial child y |
+| --- | ---: | --- | --- |
+| Hand grenade | 2276 | `grenadeBody` / 2275 | -0.45; -96.75 |
+| Grenade launcher | 2239 | `launcherGrenadeBody` / 2238 | -0.6; -79.85 |
+| Rocket | 2247 | `rocketBody` / 2246 | -0.8; -114.25 |
+| Bow arrow | 2265 | `arrowBody` / 2263 | 0.5; -45 |
+| Crossbow/bolt | 2264 | `arrowBody` / 2263 | 0.5; -45 |
+| Gravity | 2260 | `gravityBody`, derived from 2259 and pulse 2258 | 0; -47.95 |
+| Flame | 2196 | `flameBody` / 2195 | 1.8; -34.5 |
+
+These initial y values are source child placements, not launch altitude.
+The original parent remains at y = 0; its `mc.y` is updated by the projectile
+frame script. `main.ts` renders the simulation's root x and child y directly,
+with the extracted child x offset. It uses the atlas registration point as
+the rotation/scale pivot, rather than centering the PNG. The common shadow is
+symbol 2199; rocket shadow scaleX is 2.5, and arrow/bolt shadow scaleY is
+-0.3076934814453125. Launcher and rocket shadows are above their body in the
+original child order; the other visible shadows are below it.
+
+Rocket body animation alternates its two source frames. Flame body 2195 is a
+static one-frame graphic. The gravity pulse is a nested 19-frame timeline whose
+script stops at frame 13; projectile updates restart it every 15 updates.
+The extractor flattens the body and active pulse frames 1–13, and the renderer
+uses the saved `pulseFrame`, clamped at 13. Projectile trajectories, alpha,
+scale, shadow visibility and pulse timing belong to the simulation, not to an
+independent browser animation clock.
+
+Normal explosion 2235 removes itself on frame 23; large explosion 2403 removes
+itself on frame 13. The renderer displays preceding frames with source alpha
+0.85 and the event's scale. `explode_puls` creates no separate explosion
+graphic: gravity pulses play `soundPuls`, while flame damage pulses are silent.
+Bow drawing uses ally frame 86 and `soundBow2`; release uses the weapon's
+original shot pose/sound and stops the drawing sound.
+
+### Gravity hard-light experiment
+
+Gravity's source `mc` uses SWF hard-light mode 14 and a color transform with
+RGB multipliers 33/256 and additions (133, 0, 44). The flattened tinted frame 1
+is byte-identical to a native FFDec export of symbol 2260 with only its blend
+mode disabled. Retaining hard-light produces a different result because it
+depends on the background; baking that isolated result into a normal sprite
+would lose this behavior.
+
+Installed Phaser 4.2.1 documents `HARD_LIGHT` as Canvas-only in
+`node_modules/phaser/src/renderer/BlendModes.js`. The WebGL renderer uses
+premultiplied textures and supports the factors needed for two passes:
+`MULTIPLY = (DST_COLOR, ONE_MINUS_SRC_ALPHA)` followed by
+`ADD = (ONE, DST_ALPHA)`. The extractor derives `gravityMultiply` and
+`gravityAdd` from the original tinted atlas, retaining its alpha. For source
+channel S, destination D and source alpha a (all normalized), the result over
+the opaque battlefield is:
+
+```text
+A = 2 * min(S, 1 - S)
+B = max(0, 2 * S - 1)
+output = D * (1 - a + a * A) + a * B
+```
+
+The ignored report `.build/web-assets/gravity-blend-comparison.json` compares
+this CPU formula with FFDec source hard-light composites over three original
+backgrounds. Each comparison samples 2,313 affected RGB channels at projectile
+root placement (300.45, 250.9), chosen to align the exported raster to pixels:
+
+| Background | Maximum channel difference / 255 | Mean channel difference / 255 |
+| --- | ---: | ---: |
+| Battlefield | 3 | 0.7890 |
+| Town | 3 | 0.8132 |
+| Parchment | 4 | 0.7601 |
+
+The retained fractional-placement control at (300, 250) has maximum difference
+71 and mean 7.3087. FFDec's blended intermediate layer changes fractional raster
+sampling; moving the comparison onto pixel boundaries greatly reduces that
+difference. This does **not** justify rounding live projectile positions or
+claiming pixel-perfect rendering. Eight-bit channel rounding, raster edges,
+rotation/scaling and actual Phaser WebGL output remain separate limits. The
+screens used for this experiment are in `.build/web-assets/blend-qa/`; the report
+records the original SWF hash. This is source-asset/compositing evidence, not
+final browser acceptance or a live Ruffle-versus-port visual comparison.
+
+### Bow input and pause boundary
+
+The browser sends explicit `firePressed`, `fireHeld`, and `fireReleased` values.
+A charged bow waits for physical release; losing held input alone does not
+release it in the UI. A valid left-button press retains release ownership when
+the pointer leaves the canvas; left-button `pointerup` or `pointerupoutside`
+ends it. Held fire stops outside the canvas and resumes on reentry while that
+button is still held. Releasing another mouse button does not fire the bow.
+Pausing clears queued input and release ownership, and freezes simulation and
+animation. Thus a release followed immediately by Escape before the next tick
+can leave the bow drawn, but resuming does not invent a shot. A new press while
+already drawn keeps that state; its subsequent release fires. Headless callers
+that omit `fireReleased` retain the simulation's held-to-released inference.
+This uniform pause freeze is a deliberate port policy: the original projectile
+classes are inconsistent about checking pause. The code review establishes the
+input boundary; browser acceptance is recorded separately.
+
 ## Fonts and drawing fidelity
 
 | SWF font ID | Face | Use |

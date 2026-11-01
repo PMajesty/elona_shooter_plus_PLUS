@@ -1019,3 +1019,88 @@ transition and is not invented by the diagnostic.
 Regenerate with `python tools/build_castle_oracle.py`, capture `?suite=castle`,
 then run `npm.cmd run test:castle-reference` from `web/`. The focused regression
 is `node --experimental-strip-types --test tests/castle-reference.test.ts`.
+
+## Projectile launch, flight and impact
+
+`tools/build_projectile_oracle.py` captures original `shoot`/`useItem`, the seven
+`bullet_*` implementations, and their original `procHit`/explosion callbacks.
+The diagnostic preserves the method bodies, with reversible aim, RNG and
+observation seams. It invokes each original first-frame initializer once when
+native initialization has not yet run. All 3491 tags, their order, frame header
+and non-code payloads remain unchanged; only DoABC 2782 changes. No original SWF
+or application ActionScript is rewritten by this tool.
+
+Two Ruffle runs produced identical **17-snapshot traces**: one native birth
+probe, 14 ordinary scenarios, and two exact-vertical diagnostics. The 14 ordinary
+scenarios match production launch, flight and damage over **650 manually
+advanced steps**. They cover hand and launcher grenades, rockets, crossbows,
+bows, Wind Bow's shared-target fan, Repeating Crossbow, shrinking crossbow
+removal, gravity and flame pulses, a sky shot, overlapping living targets and a
+corpse, weapon switching during flight, and repeated penetration hits on one
+enemy. The two vertical diagnostics add two original callback observations but
+are deliberately excluded from parity comparisons.
+
+The adapter invokes actual `Simulation.fireAt`/`useSlot`, `advanceProjectile`,
+and production hit/explosion methods. It compares launch ammo/reload/bow-draw
+state, every actor step and callback, all item fields, enemy/player state, every
+random value, draw count and final RNG state. Original vector membership is
+supplied to the damage comparator; the trajectory and callback coordinates are
+computed independently by the port. Consequently this is a damage/trajectory
+proof at those source hit predicates, not another proof of pixel or vector
+collision contours. Numerical tolerances are 1e-9 for gameplay values and 1e-7
+for visual transforms, with rotation compared modulo 360. Expected data is the
+unchanged browser trace.
+
+The capture corrected several concrete assumptions. Flash truncates x/y to
+twips on **each assignment**, including intermediate shadow assignments; it
+truncates alpha to increments of 1/256 and normalizes rotation. The native
+launcher-grenade probe initializes on logical frame 1 and first advances on
+frame 2. A production input regression now checks that timing and the first
+observed displacement through ordinary `Simulation.tick`. The final comparison
+also exposed a missing Crow death frame: the source begins its dead sequence at
+58. Source-derived runtime corrections resolved these discrepancies; the
+earlier failed comparison remains in
+`.build/oracle/projectiles-comparison-before.json`.
+
+Observed branches include two shake draws for each grenade/rocket explosion,
+four shared launch-spread draws for all three Wind Bow arrows, SENSE draws for
+corpse intersections, and three successive damage hits on the same sheep from
+one penetrating arrow. Switching to the shotgun during a bolt's flight still
+uses the launch slot for damage effects, while the kill increases shotgun
+experience. Gravity and flame both execute a final pulse after removal is
+requested in their callback. These behaviors are guarded by fixture coverage
+assertions. Negative controls demonstrate that the comparator rejects changed
+trajectory coordinates, random values and birth ordering.
+
+Both original exact-vertical launches divide by zero. The captured computed
+trajectory is NaN while the Flash display setter exposes child y=0; the original
+grenade therefore explodes at the wrong location. An epsilon offset initially
+made the port finite but still produced badly displaced impacts after twip
+truncation. The integrated correction uses explicit vertical distance progress
+and preserves the requested x. The two diagnostic regressions require finite
+flight, bounded completion, and one grenade/rocket explosion exactly at the
+requested point. This intentional correction is distinct from the user's
+reported late-game hitbox problem, which this fixture does not reproduce.
+
+The boundary excludes moving enemy AI, native callback interleaving after the
+birth probe, child timeline animation/audio, repeated input scheduling and whole
+battle execution. Original child `currentFrame`/`mcX` are recorded but excluded
+from numerical comparison; the port's `frame` is actor age. Ordinary cases freeze
+enemy motion and use manual callbacks. The native ordering observation applies
+to the separately captured launcher grenade. Initial target placement was
+adjusted using original callback coordinates so the named bow-hit branches were
+actually exercised; the initial capture is retained as
+`.build/oracle/projectiles-browser-report-before-target-adjustment.json`.
+
+- Accepted diagnostic SWF SHA-256: `057c803ceab7ec45e20a66399d7e88864cca9a02dc56add9dc548e6b1f94ea72`.
+- Accepted trace SHA-256: `7b7309ffbf0673df71b51ea8db8dc4876352a960066c43dbebade6bd5338a32b`.
+- Accepted fixture: `web/tests/fixtures/original-projectile-trace.json`.
+- Runtime capture: `.build/oracle/projectiles-browser-report.json`, dated `2026-11-01T22:32:59.038Z`.
+
+Regenerate with `python tools/build_projectile_oracle.py`, capture
+`?suite=projectiles`, then run `npm.cmd run test:projectile-reference` from `web/`.
+The focused regression is
+`node --experimental-strip-types --test tests/projectile-reference.test.ts`;
+all three tests pass. The browser report, build report and accepted fixture have
+separate roles: compilation/resource preservation, actual runtime observation,
+and repeatable offline regression are not treated as interchangeable evidence.

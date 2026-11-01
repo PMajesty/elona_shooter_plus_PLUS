@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation } from '../src/simulation.ts';
-import { asLegacyV6Save } from './legacy-save-support.ts';
+import { asLegacyV6Save, asLegacyV7Save } from './legacy-save-support.ts';
 
 test('v6 migration moves active ammunition and cooldowns to canonical inventory while preserving its input', () => {
   const simulation = new Simulation(42);
@@ -13,14 +13,14 @@ test('v6 migration moves active ammunition and cooldowns to canonical inventory 
   const untouched = structuredClone(legacy);
   const restored = Simulation.fromSave(legacy);
   assert.deepEqual(legacy, untouched);
-  assert.equal(restored.state.version, 7);
+  assert.equal(restored.state.version, 8);
   assert.deepEqual(restored.state.inventory, legacy.inventory);
   assert.equal(restored.state.player.selectedSlot, 0);
   assert.deepEqual(restored.state.player.weaponExp, [0, 0, 0, legacy.player.weaponExp, 0]);
   for (const field of ['ammo', 'reloadTicks', 'grenades', 'grenadeCooldown']) assert.equal(Object.hasOwn(restored.state.player, field), false);
   assert.deepEqual(restored.state.itemCooldowns, [0, legacy.player.grenadeCooldown, 0, 0, 0]);
   assert.deepEqual(restored.state.protection, { counter: 0, blueMultiplierAdd: 0 });
-  assert.deepEqual(restored.state.grenades, legacy.grenades.map((grenade: object) => ({ ...grenade, damage: 45 })));
+  assert.deepEqual(asLegacyV7Save(restored.state).grenades, legacy.grenades.map((grenade: object) => ({ ...grenade, damage: 45 })));
   assert.deepEqual(restored.state.hero, legacy.hero);
   assert.equal(restored.state.rng, legacy.rng);
   const resumed = Simulation.fromSave(JSON.parse(JSON.stringify(restored.toSave())));
@@ -32,7 +32,7 @@ test('v6 migration moves active ammunition and cooldowns to canonical inventory 
   }
 });
 
-test('v6 keeps rejecting duplicate ammunition disagreements while v7 accepts valid independent item ammo', () => {
+test('v6 keeps rejecting duplicate ammunition disagreements while current saves accept independent item ammo', () => {
   const state = new Simulation(42).toSave();
   const legacy = asLegacyV6Save(state);
   const changes = [
@@ -63,6 +63,6 @@ test('depleted legacy grenades migrate to an inactive slot without replacing the
   const restored = Simulation.fromSave(legacy);
   assert.deepEqual(restored.state.inventory[1], { ...originalItem, num: 0 });
   assert.equal(restored.useSlot(1), false);
-  assert.equal(restored.state.grenades.length, 0);
+  assert.equal(restored.state.projectiles.length, 0);
   assert.deepEqual(Simulation.fromSave(restored.toSave()).state, restored.state);
 });

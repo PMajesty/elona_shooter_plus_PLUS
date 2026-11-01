@@ -1,6 +1,6 @@
 {
   "date": "2026-11-02",
-  "milestone": "Connected Sheriff Days 1-2, canonical v7 equipment/consumables, Rest, weapon XP and castle skill fidelity",
+  "milestone": "Connected Sheriff Days 1-2 with eight projectile guns, faithful lifecycles/input, explicit vertical-shot correction and v8 saves",
   "complete_port": false,
   "environment": {
     "os": "Windows",
@@ -10,7 +10,7 @@
     "vite": "8.3.5"
   },
   "automated": {
-    "simulation_tests_passed": 135,
+    "simulation_tests_passed": 151,
     "simulation_tests_failed": 0,
     "typescript": "passed",
     "production_build": "passed",
@@ -24,14 +24,14 @@
         "interruptions"
       ],
       "scenarios": 96,
-      "simulationFrames": 193607,
-      "checkpoints": 2167,
-      "rewardTransitions": 399,
-      "townActions": 352,
-      "restTransitions": 56,
+      "simulationFrames": 196363,
+      "checkpoints": 2207,
+      "rewardTransitions": 405,
+      "townActions": 364,
+      "restTransitions": 59,
       "secondDayVictories": 32,
-      "equipmentSelections": 303,
-      "elapsedMs": 16002,
+      "equipmentSelections": 297,
+      "elapsedMs": 15738,
       "collision": "Production ordinary-enemy contours; boss uses the documented rectangular headless fallback",
       "limits": [
         "Port self-consistency, finite state and JSON replay only; not an original-game parity proof",
@@ -67,7 +67,7 @@
           "daysCompleted": 1,
           "ticks": 2243,
           "kills": 0,
-          "checkpoints": 24
+          "checkpoints": 25
         },
         {
           "seed": 2654435761,
@@ -93,11 +93,11 @@
           "seed": 2654435761,
           "policy": "interruptions",
           "phase": "defeat",
-          "day": 2,
-          "daysCompleted": 1,
-          "ticks": 2268,
-          "kills": 0,
-          "checkpoints": 23
+          "day": 1,
+          "daysCompleted": 0,
+          "ticks": 1629,
+          "kills": 24,
+          "checkpoints": 12
         },
         {
           "seed": 1013904226,
@@ -125,9 +125,9 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2442,
+          "ticks": 2340,
           "kills": 0,
-          "checkpoints": 24
+          "checkpoints": 23
         },
         {
           "seed": 3668339987,
@@ -157,7 +157,7 @@
           "daysCompleted": 1,
           "ticks": 2702,
           "kills": 0,
-          "checkpoints": 28
+          "checkpoints": 27
         },
         {
           "seed": 2027808452,
@@ -183,11 +183,11 @@
           "seed": 2027808452,
           "policy": "interruptions",
           "phase": "defeat",
-          "day": 1,
-          "daysCompleted": 0,
-          "ticks": 1653,
-          "kills": 23,
-          "checkpoints": 13
+          "day": 2,
+          "daysCompleted": 1,
+          "ticks": 2582,
+          "kills": 0,
+          "checkpoints": 26
         },
         {
           "seed": 387276917,
@@ -206,7 +206,7 @@
           "day": 2,
           "daysCompleted": 2,
           "ticks": 3206,
-          "kills": 26,
+          "kills": 27,
           "checkpoints": 40
         },
         {
@@ -215,9 +215,9 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2567,
-          "kills": 0,
-          "checkpoints": 25
+          "ticks": 2832,
+          "kills": 2,
+          "checkpoints": 30
         },
         {
           "seed": 3041712678,
@@ -245,9 +245,9 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2186,
-          "kills": 0,
-          "checkpoints": 22
+          "ticks": 2550,
+          "kills": 6,
+          "checkpoints": 31
         },
         {
           "seed": 1401181143,
@@ -273,11 +273,11 @@
           "seed": 1401181143,
           "policy": "interruptions",
           "phase": "defeat",
-          "day": 1,
-          "daysCompleted": 0,
-          "ticks": 1595,
-          "kills": 22,
-          "checkpoints": 12
+          "day": 2,
+          "daysCompleted": 1,
+          "ticks": 2397,
+          "kills": 0,
+          "checkpoints": 28
         },
         {
           "seed": 4055616904,
@@ -296,7 +296,7 @@
           "day": 2,
           "daysCompleted": 2,
           "ticks": 3392,
-          "kills": 31,
+          "kills": 30,
           "checkpoints": 42
         },
         {
@@ -305,8 +305,8 @@
           "phase": "defeat",
           "day": 1,
           "daysCompleted": 0,
-          "ticks": 1427,
-          "kills": 17,
+          "ticks": 1440,
+          "kills": 18,
           "checkpoints": 11
         },
         {
@@ -325,19 +325,19 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3240,
-          "kills": 27,
-          "checkpoints": 41
+          "ticks": 3342,
+          "kills": 32,
+          "checkpoints": 42
         },
         {
           "seed": 2415085369,
           "policy": "interruptions",
           "phase": "defeat",
-          "day": 1,
-          "daysCompleted": 0,
-          "ticks": 1416,
-          "kills": 18,
-          "checkpoints": 11
+          "day": 2,
+          "daysCompleted": 1,
+          "ticks": 2418,
+          "kills": 0,
+          "checkpoints": 24
         },
         {
           "seed": 774553834,
@@ -356,7 +356,7 @@
           "day": 2,
           "daysCompleted": 2,
           "ticks": 3261,
-          "kills": 27,
+          "kills": 28,
           "checkpoints": 41
         },
         {
@@ -365,7 +365,7 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2405,
+          "ticks": 2640,
           "kills": 0,
           "checkpoints": 26
         },
@@ -386,18 +386,18 @@
           "day": 2,
           "daysCompleted": 2,
           "ticks": 3357,
-          "kills": 26,
+          "kills": 27,
           "checkpoints": 41
         },
         {
           "seed": 3428989595,
           "policy": "interruptions",
           "phase": "defeat",
-          "day": 2,
-          "daysCompleted": 1,
-          "ticks": 2303,
-          "kills": 0,
-          "checkpoints": 25
+          "day": 1,
+          "daysCompleted": 0,
+          "ticks": 1686,
+          "kills": 26,
+          "checkpoints": 13
         },
         {
           "seed": 1788458060,
@@ -415,8 +415,8 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3299,
-          "kills": 29,
+          "ticks": 3276,
+          "kills": 28,
           "checkpoints": 41
         },
         {
@@ -425,9 +425,9 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2183,
+          "ticks": 2306,
           "kills": 0,
-          "checkpoints": 23
+          "checkpoints": 24
         },
         {
           "seed": 147926525,
@@ -445,19 +445,19 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3354,
-          "kills": 33,
-          "checkpoints": 42
+          "ticks": 3309,
+          "kills": 30,
+          "checkpoints": 43
         },
         {
           "seed": 147926525,
           "policy": "interruptions",
           "phase": "defeat",
-          "day": 1,
-          "daysCompleted": 0,
-          "ticks": 1601,
-          "kills": 21,
-          "checkpoints": 12
+          "day": 2,
+          "daysCompleted": 1,
+          "ticks": 2225,
+          "kills": 0,
+          "checkpoints": 23
         },
         {
           "seed": 2802362286,
@@ -485,9 +485,9 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 3084,
-          "kills": 15,
-          "checkpoints": 32
+          "ticks": 2222,
+          "kills": 0,
+          "checkpoints": 26
         },
         {
           "seed": 1161830751,
@@ -515,9 +515,9 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2747,
-          "kills": 11,
-          "checkpoints": 27
+          "ticks": 2387,
+          "kills": 0,
+          "checkpoints": 25
         },
         {
           "seed": 3816266512,
@@ -535,7 +535,7 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3309,
+          "ticks": 3332,
           "kills": 31,
           "checkpoints": 42
         },
@@ -543,11 +543,11 @@
           "seed": 3816266512,
           "policy": "interruptions",
           "phase": "defeat",
-          "day": 2,
-          "daysCompleted": 1,
-          "ticks": 2505,
-          "kills": 0,
-          "checkpoints": 26
+          "day": 1,
+          "daysCompleted": 0,
+          "ticks": 1628,
+          "kills": 20,
+          "checkpoints": 12
         },
         {
           "seed": 2175734977,
@@ -577,7 +577,7 @@
           "daysCompleted": 1,
           "ticks": 2270,
           "kills": 0,
-          "checkpoints": 26
+          "checkpoints": 23
         },
         {
           "seed": 535203442,
@@ -625,8 +625,8 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3264,
-          "kills": 29,
+          "ticks": 3287,
+          "kills": 30,
           "checkpoints": 41
         },
         {
@@ -685,9 +685,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3296,
-          "kills": 30,
-          "checkpoints": 41
+          "ticks": 3183,
+          "kills": 25,
+          "checkpoints": 40
         },
         {
           "seed": 4203543429,
@@ -697,7 +697,7 @@
           "daysCompleted": 1,
           "ticks": 2877,
           "kills": 12,
-          "checkpoints": 30
+          "checkpoints": 27
         },
         {
           "seed": 2563011894,
@@ -715,8 +715,8 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3318,
-          "kills": 32,
+          "ticks": 3341,
+          "kills": 33,
           "checkpoints": 41
         },
         {
@@ -725,7 +725,7 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2204,
+          "ticks": 2394,
           "kills": 0,
           "checkpoints": 23
         },
@@ -753,11 +753,11 @@
           "seed": 922480359,
           "policy": "interruptions",
           "phase": "defeat",
-          "day": 1,
-          "daysCompleted": 0,
-          "ticks": 1553,
-          "kills": 19,
-          "checkpoints": 12
+          "day": 2,
+          "daysCompleted": 1,
+          "ticks": 2183,
+          "kills": 0,
+          "checkpoints": 22
         },
         {
           "seed": 3576916120,
@@ -785,7 +785,7 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2360,
+          "ticks": 2348,
           "kills": 0,
           "checkpoints": 24
         },
@@ -805,9 +805,9 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3321,
-          "kills": 28,
-          "checkpoints": 41
+          "ticks": 3354,
+          "kills": 31,
+          "checkpoints": 42
         },
         {
           "seed": 1936384585,
@@ -815,8 +815,8 @@
           "phase": "defeat",
           "day": 1,
           "daysCompleted": 0,
-          "ticks": 1544,
-          "kills": 20,
+          "ticks": 1548,
+          "kills": 21,
           "checkpoints": 12
         },
         {
@@ -836,7 +836,7 @@
           "day": 2,
           "daysCompleted": 2,
           "ticks": 3230,
-          "kills": 24,
+          "kills": 27,
           "checkpoints": 41
         },
         {
@@ -845,9 +845,9 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2156,
+          "ticks": 2138,
           "kills": 0,
-          "checkpoints": 26
+          "checkpoints": 22
         },
         {
           "seed": 2950288811,
@@ -865,8 +865,8 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3311,
-          "kills": 30,
+          "ticks": 3266,
+          "kills": 27,
           "checkpoints": 41
         },
         {
@@ -875,9 +875,9 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2196,
+          "ticks": 2267,
           "kills": 0,
-          "checkpoints": 22
+          "checkpoints": 23
         },
         {
           "seed": 1309757276,
@@ -895,8 +895,8 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3252,
-          "kills": 28,
+          "ticks": 3219,
+          "kills": 27,
           "checkpoints": 41
         },
         {
@@ -905,9 +905,9 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2292,
-          "kills": 0,
-          "checkpoints": 23
+          "ticks": 2535,
+          "kills": 3,
+          "checkpoints": 26
         },
         {
           "seed": 3964193037,
@@ -935,9 +935,9 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2160,
+          "ticks": 2249,
           "kills": 0,
-          "checkpoints": 23
+          "checkpoints": 24
         },
         {
           "seed": 2323661502,
@@ -955,7 +955,7 @@
           "phase": "town",
           "day": 2,
           "daysCompleted": 2,
-          "ticks": 3252,
+          "ticks": 3242,
           "kills": 28,
           "checkpoints": 41
         },
@@ -965,9 +965,9 @@
           "phase": "defeat",
           "day": 2,
           "daysCompleted": 1,
-          "ticks": 2847,
-          "kills": 13,
-          "checkpoints": 29
+          "ticks": 2274,
+          "kills": 0,
+          "checkpoints": 25
         },
         {
           "seed": 683129967,
@@ -993,12 +993,565 @@
           "seed": 683129967,
           "policy": "interruptions",
           "phase": "defeat",
-          "day": 1,
-          "daysCompleted": 0,
-          "ticks": 1592,
-          "kills": 23,
-          "checkpoints": 12
+          "day": 2,
+          "daysCompleted": 1,
+          "ticks": 2889,
+          "kills": 9,
+          "checkpoints": 27
         }
+      ]
+    },
+    "projectile_soak": {
+      "format": "elona-projectile-replay-soak",
+      "version": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T22:39:20.867Z",
+      "scenarioBoundary": "Configured owned original guns with required weapon traits, seeded production item/enemy generation, fixed enemy placement and disabled ambient wave spawning. This is not ordinary progression to these weapons.",
+      "collision": "Production ordinary-enemy contours; boss uses a rectangular headless fallback, not the browser alpha geometry.",
+      "purpose": "Finite state and exact port save/event replay; not independent original-runtime parity, native scheduling or browser performance.",
+      "pauseScope": "Browser pause input and wall-clock behavior are outside this headless fixture.",
+      "seeds": [
+        42,
+        1,
+        3735928559
+      ],
+      "weaponIds": [
+        11,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        40
+      ],
+      "frameBudget": 360,
+      "cases": 27,
+      "totals": {
+        "frames": 9720,
+        "checkpoints": 1080,
+        "launched": 165,
+        "hits": 149,
+        "kills": 57,
+        "explosions": 42,
+        "pulses": 41,
+        "bowDrawCheckpoints": 54,
+        "inFlightSwitches": 122,
+        "verticalAimFrames": 3240
+      },
+      "elapsedMs": 870.0691,
+      "maximumPairOfTicksMs": 0.9441000000000059,
+      "sourceHashes": {
+        "src/simulation.ts": "25d165dfc96596a6aab96c219253dac8073a4993747cee7fe8d512f0ab16e12c",
+        "src/projectiles.ts": "036783bccf2bd2d46f6adc4ba4a715fc2d9d2f88d7bcfebf4de5626edf7eb3fe",
+        "src/combat-stats.ts": "c3566ee5bd0a7efad407248f62d45cc219d05a5994ba6b360e05c12d35c2455b",
+        "src/consumables.ts": "ecccc8f4839ca5b86f84788cc873a41399877be84e31ab71a3155f3175d5360a",
+        "src/collision.ts": "a8755ac6da84ce167768ba465c635f4d8913373362b99184a5616b7670211834",
+        "public/assets/collision-geometry.json": "c062ab2837aa3e95d670e90ee986ccd1fe8346fca27a9f3b62bef7aec56d69b8"
+      },
+      "results": [
+        {
+          "seed": 42,
+          "weaponId": 11,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 4,
+          "hits": 3,
+          "kills": 2,
+          "explosions": 4,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 2,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 510,
+          "maximumTickMs": 0.9441000000000059
+        },
+        {
+          "seed": 42,
+          "weaponId": 21,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 6,
+          "hits": 4,
+          "kills": 2,
+          "explosions": 6,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 1,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 589.1,
+          "maximumTickMs": 0.49629999999999086
+        },
+        {
+          "seed": 42,
+          "weaponId": 22,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 4,
+          "hits": 3,
+          "kills": 3,
+          "explosions": 4,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 4,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 510,
+          "maximumTickMs": 0.11119999999999663
+        },
+        {
+          "seed": 42,
+          "weaponId": 23,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 8,
+          "hits": 4,
+          "kills": 2,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 3,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 657.6,
+          "maximumTickMs": 0.43840000000000146
+        },
+        {
+          "seed": 42,
+          "weaponId": 24,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 4,
+          "hits": 1,
+          "kills": 1,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 9,
+          "inFlightSwitches": 6,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 510,
+          "maximumTickMs": 0.16059999999998809
+        },
+        {
+          "seed": 42,
+          "weaponId": 25,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 12,
+          "hits": 1,
+          "kills": 1,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 9,
+          "inFlightSwitches": 8,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 3,
+          "maximumAbsoluteCoordinate": 515,
+          "maximumTickMs": 0.10159999999996217
+        },
+        {
+          "seed": 42,
+          "weaponId": 26,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 12,
+          "hits": 6,
+          "kills": 2,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 7,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 2,
+          "maximumAbsoluteCoordinate": 6074.15,
+          "maximumTickMs": 0.2108000000000061
+        },
+        {
+          "seed": 42,
+          "weaponId": 27,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 1,
+          "hits": 5,
+          "kills": 4,
+          "explosions": 0,
+          "pulses": 14,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 6,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 510,
+          "maximumTickMs": 0.11779999999998836
+        },
+        {
+          "seed": 42,
+          "weaponId": 40,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 4,
+          "hits": 23,
+          "kills": 3,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 4,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 2,
+          "maximumAbsoluteCoordinate": 646.8,
+          "maximumTickMs": 0.33320000000003347
+        },
+        {
+          "seed": 1,
+          "weaponId": 11,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 4,
+          "hits": 3,
+          "kills": 2,
+          "explosions": 4,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 2,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 510,
+          "maximumTickMs": 0.10219999999998208
+        },
+        {
+          "seed": 1,
+          "weaponId": 21,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 6,
+          "hits": 3,
+          "kills": 2,
+          "explosions": 6,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 1,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 598.4,
+          "maximumTickMs": 0.25970000000000937
+        },
+        {
+          "seed": 1,
+          "weaponId": 22,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 4,
+          "hits": 4,
+          "kills": 3,
+          "explosions": 4,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 4,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 519.3,
+          "maximumTickMs": 0.0443000000000211
+        },
+        {
+          "seed": 1,
+          "weaponId": 23,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 8,
+          "hits": 4,
+          "kills": 1,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 3,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 654,
+          "maximumTickMs": 0.05259999999998399
+        },
+        {
+          "seed": 1,
+          "weaponId": 24,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 4,
+          "hits": 0,
+          "kills": 0,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 9,
+          "inFlightSwitches": 8,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 510,
+          "maximumTickMs": 0.24479999999994106
+        },
+        {
+          "seed": 1,
+          "weaponId": 25,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 12,
+          "hits": 1,
+          "kills": 1,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 9,
+          "inFlightSwitches": 8,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 3,
+          "maximumAbsoluteCoordinate": 524.6,
+          "maximumTickMs": 0.11800000000005184
+        },
+        {
+          "seed": 1,
+          "weaponId": 26,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 12,
+          "hits": 5,
+          "kills": 1,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 5,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 2,
+          "maximumAbsoluteCoordinate": 652.8,
+          "maximumTickMs": 0.10199999999997544
+        },
+        {
+          "seed": 1,
+          "weaponId": 27,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 1,
+          "hits": 5,
+          "kills": 4,
+          "explosions": 0,
+          "pulses": 13,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 5,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 510,
+          "maximumTickMs": 0.024100000000089494
+        },
+        {
+          "seed": 1,
+          "weaponId": 40,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 4,
+          "hits": 24,
+          "kills": 4,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 4,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 2,
+          "maximumAbsoluteCoordinate": 699.55,
+          "maximumTickMs": 0.04780000000005202
+        },
+        {
+          "seed": 3735928559,
+          "weaponId": 11,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 4,
+          "hits": 3,
+          "kills": 2,
+          "explosions": 4,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 2,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 510,
+          "maximumTickMs": 0.04660000000001219
+        },
+        {
+          "seed": 3735928559,
+          "weaponId": 21,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 6,
+          "hits": 3,
+          "kills": 2,
+          "explosions": 6,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 1,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 584.2,
+          "maximumTickMs": 0.050299999999992906
+        },
+        {
+          "seed": 3735928559,
+          "weaponId": 22,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 4,
+          "hits": 4,
+          "kills": 3,
+          "explosions": 4,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 4,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 547.9,
+          "maximumTickMs": 0.053599999999960346
+        },
+        {
+          "seed": 3735928559,
+          "weaponId": 23,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 8,
+          "hits": 6,
+          "kills": 3,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 3,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 652.8,
+          "maximumTickMs": 0.211400000000026
+        },
+        {
+          "seed": 3735928559,
+          "weaponId": 24,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 4,
+          "hits": 0,
+          "kills": 0,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 9,
+          "inFlightSwitches": 8,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 510,
+          "maximumTickMs": 0.05080000000009477
+        },
+        {
+          "seed": 3735928559,
+          "weaponId": 25,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 12,
+          "hits": 1,
+          "kills": 1,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 9,
+          "inFlightSwitches": 8,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 3,
+          "maximumAbsoluteCoordinate": 879.45,
+          "maximumTickMs": 0.18650000000002365
+        },
+        {
+          "seed": 3735928559,
+          "weaponId": 26,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 12,
+          "hits": 5,
+          "kills": 1,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 5,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 2,
+          "maximumAbsoluteCoordinate": 653.6,
+          "maximumTickMs": 0.04069999999990159
+        },
+        {
+          "seed": 3735928559,
+          "weaponId": 27,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 1,
+          "hits": 5,
+          "kills": 4,
+          "explosions": 0,
+          "pulses": 14,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 6,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 1,
+          "maximumAbsoluteCoordinate": 510,
+          "maximumTickMs": 0.03330000000005384
+        },
+        {
+          "seed": 3735928559,
+          "weaponId": 40,
+          "frames": 360,
+          "phase": "battle",
+          "checkpoints": 40,
+          "launched": 4,
+          "hits": 23,
+          "kills": 3,
+          "explosions": 0,
+          "pulses": 0,
+          "bowDrawCheckpoints": 0,
+          "inFlightSwitches": 4,
+          "verticalAimFrames": 120,
+          "maximumConcurrent": 2,
+          "maximumAbsoluteCoordinate": 641.1,
+          "maximumTickMs": 0.03300000000001546
+        }
+      ]
+    },
+    "vertical_regressions": {
+      "families": 7,
+      "directions": [
+        "up",
+        "down",
+        "same origin"
+      ],
+      "cases": 21,
+      "checks": [
+        "finite bounded lifecycle",
+        "exact grenade/rocket aimed impacts",
+        "JSON state/callback replay to removal",
+        "malformed saved progress rejected"
       ]
     }
   },
@@ -1591,6 +2144,81 @@
         "Exact native timing, audio audibility, full pixel parity and performance improvement over Flash are not established",
         "Source oracle and replay soak establish separate bounded evidence, not complete game parity"
       ]
+    },
+    "projectiles": {
+      "candidate_url": "http://127.0.0.1:5181/elona/",
+      "bundle": "assets/index-BuAQ79IH.js",
+      "provenance": {
+        "file": ".build/browser-qa/projectile-controls-provenance.json",
+        "configured": true,
+        "actual_campaign_acquisition": false,
+        "description": "Normal new Simulation with owned guns and granted required traits, disabled ambient spawns; imports use ordinary UI."
+      },
+      "ordinary_bow": {
+        "hold_ms": 3000,
+        "draw_pose": 86,
+        "release_once": true,
+        "paused_tick": 20,
+        "arrow_frame": 7,
+        "arrow_x": 440.35,
+        "arrow_y": 209.45,
+        "ammo": 1
+      },
+      "charged_bow": {
+        "right_click_keeps_charge": true,
+        "left_drag_release_outside_canvas_fires_once": true,
+        "pause_resume_policy": "Charged state preserved; explicit release ownership clears on pause, so resume does not fire automatically. Model tests and input review cover this policy."
+      },
+      "rocket": {
+        "ammo_before": 3,
+        "ammo_after": 2,
+        "projectile_frame_at_pause": 0,
+        "tick": 1
+      },
+      "gravity": {
+        "ammo_after": 0,
+        "immediate_reload": true,
+        "reload_ticks_at_launch": 181,
+        "launch_frame": 0,
+        "after_one_update": {
+          "x": 507.5,
+          "y": 244.85,
+          "frame": 1,
+          "reload_ticks": 180
+        }
+      },
+      "in_flight_continue": {
+        "original": ".build/browser-qa/projectile-gravity-ui-v8.json",
+        "continued": ".build/browser-qa/projectile-gravity-continue-v8.json",
+        "byte_identical": true,
+        "sha256": "ec86f7f739c3baf3e745f7e8317003fad4346a99ed3ac1e2aa4fa0af7eb1972a",
+        "tick": 2
+      },
+      "production": {
+        "url": "http://127.0.0.1:5175/elona/",
+        "script_src_observed": "./assets/index-BuAQ79IH.js",
+        "new_game_reaches_battle": {
+          "tick": 0,
+          "hp": 40,
+          "ammo": 5,
+          "gold": 200
+        },
+        "legacy_v7_continue_entire_simulation_matches_independent_fromSave": true,
+        "restored_prior_progress": true,
+        "paused_tick": 674,
+        "hp": 40,
+        "ammo": 5,
+        "gold": 209,
+        "boss_bar_fraction": 0.5,
+        "export": ".build/browser-qa/projectile-production-ui-v8.json"
+      },
+      "console_errors_observed": 0,
+      "limits": [
+        "Focused imported UI scenarios, not ordinary acquisition or an uninterrupted campaign playthrough",
+        "CUA hold/snapshot timing in a background tab is not a native performance benchmark",
+        "No complete browser raster/audio comparison; hard-light fractional placement differences documented in ui-reference",
+        "Crossbow key3 selection/bolt was checked in earlier candidate before quantization corrections, not counted as a final-build browser trajectory proof"
+      ]
     }
   },
   "checkpoint_provenance": "Generated using public Simulation API, seed 42 and normal fire/reload inputs with rectangular fallback collision. No state edits. Imported through the normal file picker. These checks are not a complete manual playthrough or parity proof. New boss full/half/dead checks deliberately edit only boss HP/death frame in a copied checkpoint; they are controlled fixtures, not normal-play captures. Older victory/defeat checks predate the source-backed wave RNG correction. Latest loot checkpoint uses post-item-integration New Game with seed42; see .build/browser-qa/loot-expected.json. Older numerical checkpoints above are retained as dated evidence and are not expected outputs for the new initial RNG boundary. Latest Day2 checkpoint provenance is stored in browser_checks.equipment_rest_day2: real two-day inputs, production ordinary contours and documented boss fallback, no phase overrides.",
@@ -1619,7 +2247,10 @@
     ".build/browser-qa/day2-manual-reload.jpg",
     ".build/browser-qa/day2-purchased-selection.jpg",
     ".build/browser-qa/day2-second-town.jpg",
-    ".build/browser-qa/day2-release.jpg"
+    ".build/browser-qa/day2-release.jpg",
+    ".build/browser-qa/projectile-bow-final.jpg",
+    ".build/browser-qa/projectile-gravity-final.jpg",
+    ".build/browser-qa/projectile-production-restored.jpg"
   ],
   "preserved_baselines": {
     "original/elonashooter1.3.swf": {
@@ -2291,30 +2922,193 @@
       ],
       "original_runs_identical": 2,
       "matchedSnapshots": 17
+    },
+    "projectiles": {
+      "status": "passed",
+      "observedSnapshots": 17,
+      "comparedSnapshots": 14,
+      "matchedSnapshots": 14,
+      "nativeFirstAdvanceFrame": 2,
+      "verticalFixChecks": 2,
+      "comparisons": [
+        {
+          "scenario": "hand_grenade",
+          "matched": true,
+          "steps": 27,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": [],
+          "visualDifferences": []
+        },
+        {
+          "scenario": "launcher_grenade",
+          "matched": true,
+          "steps": 27,
+          "originalDrawCount": 6,
+          "portDrawCount": 6,
+          "differences": [],
+          "visualDifferences": []
+        },
+        {
+          "scenario": "rocket",
+          "matched": true,
+          "steps": 43,
+          "originalDrawCount": 6,
+          "portDrawCount": 6,
+          "differences": [],
+          "visualDifferences": []
+        },
+        {
+          "scenario": "crossbow",
+          "matched": true,
+          "steps": 17,
+          "originalDrawCount": 6,
+          "portDrawCount": 6,
+          "differences": [],
+          "visualDifferences": []
+        },
+        {
+          "scenario": "bow",
+          "matched": true,
+          "steps": 32,
+          "originalDrawCount": 5,
+          "portDrawCount": 5,
+          "differences": [],
+          "visualDifferences": []
+        },
+        {
+          "scenario": "wind_bow",
+          "matched": true,
+          "steps": 75,
+          "originalDrawCount": 6,
+          "portDrawCount": 6,
+          "differences": [],
+          "visualDifferences": []
+        },
+        {
+          "scenario": "repeating_crossbow",
+          "matched": true,
+          "steps": 16,
+          "originalDrawCount": 5,
+          "portDrawCount": 5,
+          "differences": [],
+          "visualDifferences": []
+        },
+        {
+          "scenario": "crossbow_fade",
+          "matched": true,
+          "steps": 30,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": [],
+          "visualDifferences": []
+        },
+        {
+          "scenario": "gravity",
+          "matched": true,
+          "steps": 210,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": [],
+          "visualDifferences": []
+        },
+        {
+          "scenario": "flame",
+          "matched": true,
+          "steps": 72,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": [],
+          "visualDifferences": []
+        },
+        {
+          "scenario": "bow_sky",
+          "matched": true,
+          "steps": 25,
+          "originalDrawCount": 5,
+          "portDrawCount": 5,
+          "differences": [],
+          "visualDifferences": []
+        },
+        {
+          "scenario": "crossbow_overlap_corpse",
+          "matched": true,
+          "steps": 17,
+          "originalDrawCount": 10,
+          "portDrawCount": 10,
+          "differences": [],
+          "visualDifferences": []
+        },
+        {
+          "scenario": "switch_in_flight",
+          "matched": true,
+          "steps": 28,
+          "originalDrawCount": 10,
+          "portDrawCount": 10,
+          "differences": [],
+          "visualDifferences": []
+        },
+        {
+          "scenario": "arrow_penetration",
+          "matched": true,
+          "steps": 31,
+          "originalDrawCount": 7,
+          "portDrawCount": 7,
+          "differences": [],
+          "visualDifferences": []
+        }
+      ],
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "057c803ceab7ec45e20a66399d7e88864cca9a02dc56add9dc548e6b1f94ea72",
+      "traceSha256": "7b7309ffbf0673df71b51ea8db8dc4876352a960066c43dbebade6bd5338a32b",
+      "boundary": "Original shoot/useItem and registered projectile frame methods versus production Simulation launch, advanceProjectile and Simulation hit/explosion callbacks",
+      "checks": [
+        "launch inputs/ammo/reload/bow drawing and four-draw spread",
+        "every manual actor step, coordinates, count/penetration/removal and callback ordering",
+        "original vector membership as input to real production damage",
+        "weapon slot retained across switching, current weapon experience category, enemy state and all item fields",
+        "every random value/count/state including explosion shake and corpse SENSE",
+        "intentional vertical correction retains x, stays finite and explodes once at the requested target"
+      ],
+      "tolerances": {
+        "gameplayNumbers": 1e-09,
+        "visualNumbers": 1e-07,
+        "rotation": "modulo 360"
+      },
+      "limits": [
+        "Original vector membership is supplied to the damage comparator; this is not another collision-contour proof",
+        "Original child frame1 bodies are invoked once if native initialization has not run; the separate native probe measures birth ordering",
+        "No enemy AI, native interleaving after birth, child timeline animation/audio, repeated manual shooting, or whole battle scheduling parity",
+        "Two original vertical launches produce NaN trajectory arithmetic and child y=0; corrected port flight to the requested point is intentional and excluded from equality",
+        "Observed child timeline frame indices and local mcX are outside numerical projectile state comparisons; frame in the port is actor age"
+      ],
+      "original_runs_identical": 2,
+      "sourceSteps": 650
     }
   },
   "production_recovery": {
-    "release_directory": ".build/browser-day2-release",
-    "previous_directory": ".build/browser-before-day2",
-    "current_bundle": "assets/index-DD2-eZ9I.js",
-    "copied_release_files_hash_checked": 225,
-    "current_package": ".build/elona-shooter-browser-day2-slice.zip",
-    "current_package_bytes": 7394283,
-    "current_package_sha256": "9dba6c3331736ff10f71c380e5c04cd2d57fdff8003996b1f2414e8d41fb75fd",
+    "release_directory": ".build/browser-projectile-release",
+    "previous_directory": ".build/browser-before-projectiles",
+    "current_bundle": "assets/index-BuAQ79IH.js",
+    "copied_release_files_hash_checked": 241,
+    "current_package": ".build/elona-shooter-browser-projectile-slice.zip",
+    "current_package_bytes": 7470391,
+    "current_package_sha256": "c2f645cc0cdbd772e277d74d0c30ac64002df3bd6972c0780d232078aaf63687",
     "candidate_build_matches_production": true,
-    "previous_package": ".build/elona-shooter-browser-growth-slice.zip",
-    "previous_bundle": "assets/index-CHnStNxq.js",
-    "candidate_bundle": "assets/index-DD2-eZ9I.js",
+    "previous_package": ".build/elona-shooter-browser-day2-slice.zip",
+    "previous_bundle": "assets/index-DD2-eZ9I.js",
+    "candidate_bundle": "assets/index-BuAQ79IH.js",
     "restored_battle": {
-      "source": ".build/browser-qa/growth-production-ui-v6.json",
+      "source": ".build/browser-qa/day2-production-ui-v7.json",
       "source_tick": 674,
-      "export": ".build/browser-qa/day2-production-ui-v7.json",
+      "export": ".build/browser-qa/projectile-production-ui-v8.json",
       "paused": true,
       "tick": 674,
       "ammo": 5,
       "hp": 40,
       "gold": 209,
-      "note": "Actual v6 browser Continue migrated to v7; full exported simulation equals independent fromSave result with no elapsed frame."
+      "note": "Actual v7 browser Continue migrated to v8; full exported simulation equals independent fromSave with no elapsed update. Restored after New Game smoke check."
     }
   }
 }

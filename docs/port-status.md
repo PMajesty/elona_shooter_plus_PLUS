@@ -6,11 +6,12 @@ towns, shop transactions, Free Repair and Rest. This is not a complete remake.
 The client runs independently of Flash and Ruffle; the preserved game remains
 the reference for behavior, content and appearance.
 
-The v7 build is served at `http://127.0.0.1:5175/elona/`. It passed the automated
-checks below and focused browser acceptance for New Game, equipment, Rest,
-Day 2 Continue, second-town loading and legacy migration. The previous release
-is retained in `.build/browser-before-day2`; the deployable archive is
-`.build/elona-shooter-browser-day2-slice.zip`. Release hashes and exact browser
+The v8 build is served at `http://127.0.0.1:5175/elona/`. It passed the automated
+checks below and focused projectile input, rendering, in-flight Continue and
+legacy migration acceptance. Earlier v7 evidence covers equipment, Rest and
+Day 2 town flow. The previous release is retained in
+`.build/browser-before-projectiles`; the deployable archive is
+`.build/elona-shooter-browser-projectile-slice.zip`. Release hashes and exact browser
 boundaries are recorded in [port verification](port-verification.json).
 
 ## Current goal amendments
@@ -39,6 +40,10 @@ earlier ordinary-enemy contour fixes do not establish this late-game diagnosis.
   reload and automatic-fire/reload properties. Covered Sheriff skills and item
   modifiers affect combat; source-derived weapon/castle calculations are shared
   with the reference comparisons.
+- All eight projectile guns: Long/Wind Bows, Crossbow/Repeating Crossbow,
+  Grenade/Rocket Launchers, Gravity Gun and Flamethrower. Bows draw on hold and
+  fire on release; Wind Bow launches three arrows; Gravity Gun reloads while
+  its shot is active. Launch weapon effects persist when selection changes.
 - Grenades with stored launch damage, Repair Hammers and Holy Grail protection.
   Consumables retain the selected weapon. Hammers spend a charge even at full
   HP; the Grail is single-use. Cooldowns belong to inventory slots. Original
@@ -59,7 +64,7 @@ earlier ordinary-enemy contour fixes do not establish this late-game diagnosis.
   rewards and prepared town; further Rest is disabled.
 - Pause, local saves, Continue and validated browser-save import/export.
 
-Other classes, Day 3 onward, Ragnarok, projectile weapons, recruiting, card and
+Other classes, Day 3 onward, Ragnarok, recruiting, card and
 search actions, stock refresh, weapon upgrades and MOD mounting remain
 unavailable. Generated records or atlas entries do not imply these actions work.
 Learned skills whose companion or town systems are absent do not have those
@@ -86,7 +91,7 @@ preserves a sheep's shadow exclusion after attack-to-walk transitions. Bosses
 use a separate rendered alpha path; the headless soak uses a documented boss
 rectangle fallback.
 
-Version **7** makes owned items the source of ammo and reload timers. It stores
+Version **7** made owned items the source of ammo and reload timers. It stores
 the selected slot, five consumable cooldowns, protection state, grenade launch
 damage and five weapon-experience categories: Small Gun, Big Gun, Rifle,
 Shotgun and other. Kills credit the selected slot's original `reqTrait` metadata,
@@ -101,10 +106,17 @@ earned after Day 2 changes the next prepared mission, not the historical mission
 that was just fought. `totalMoney` includes gold pickups, result income and
 confirmed sales; purchases do not reduce that historical counter.
 
-Versions **1–6** remain accepted. Their duplicate player ammo/cooldown fields
+Version **8** adds persisted projectile lifecycles and bow charge state.
+`projectiles.ts` owns source trajectories, collision callback ordering and
+display-coordinate quantization. Legacy hand grenades retain stored position,
+damage and remaining updates; no migration relaunches them. A separate saved
+vertical path fixes division by zero for exactly vertical shots.
+
+Versions **1–7** remain accepted. Their duplicate player ammo/cooldown fields
 migrate to items and slot timers; scalar weapon XP maps to Shotgun's category.
-Old in-flight grenades retain the former fixed damage of 45. Missing campaign
-values are derived only from the covered first-day state. Current v7 saves must
+Versions 1–6 retain the former fixed grenade damage of 45; v7 retains its stored
+launch damage. Missing campaign values are derived only from the covered
+first-day state. Saves from v7 onward must
 provide their shadow history; only legacy saves use the former frame-derived
 fallback, which cannot recover an earlier attack-to-walk transition.
 
@@ -138,7 +150,7 @@ and original credits.
 
 ## Evidence and limits
 
-The integrated release passes **135 tests** and TypeScript checks. The newest
+The integrated release passes **151 tests** and TypeScript checks. The newest
 independent original comparisons cover:
 
 | Boundary | Accepted comparison |
@@ -147,6 +159,7 @@ independent original comparisons cover:
 | Castle damage, solo skills and protection | 17 original states with RNG accounting |
 | Rest | Three final port transitions from 12 original observations; intermediate dialog observations are not twelve port comparisons |
 | Second-town preparation | Six original snapshots, including retained metadata and medal absorption |
+| Projectiles | 14 matching ordinary scenarios / 650 manual source steps, plus a native birth probe and two vertical bug diagnostics |
 
 These originals were captured in two identical runs. Earlier accepted coverage
 remains: 72 reload snapshots; three opening-wave and three prepared-Day-2-wave
@@ -159,9 +172,9 @@ original results are never generated from
 the port. Boundaries, hashes, capture instructions and negative controls are in
 [oracle notes](oracle-notes.md) and the [feature ledger](feature-ledger.json).
 
-The expanded soak passed **96 scenarios across 32 seeds**, with **193,607
-simulation frames, 2,167 JSON checkpoints, 399 reward transitions, 352 town
-actions, 56 Rest transitions, 32 Day 2 victories and 303 equipment selections**.
+The expanded soak passed **96 scenarios across 32 seeds**, with **196,363
+simulation frames, 2,207 JSON checkpoints, 405 reward transitions, 364 town
+actions, 59 Rest transitions, 32 Day 2 victories and 297 equipment selections**.
 Idle, aimed and interrupted-input policies vary skill choices and exercise
 purchased equipment. Restored state and events match uninterrupted runs through
 both days. A source check corrected the soak's former grenade assumption:
@@ -175,7 +188,20 @@ Focused regressions also cover Rest without healing/AP cost, the Day 2 boss's
 175 HP and appearance 52, historical versus newly earned absorption, consumable
 save/resume, category-specific weapon XP and rejection of missing v7 shadow state.
 
-The v7 browser check opened the original Rest dialog without changing the save,
+The v8 projectile sweep separately passed 27 configured cases, 9,720 updates
+and 1,080 exact save/replay checkpoints with production ordinary contours.
+Twenty-one vertical family/direction cases also prove finite bounded completion
+and exact continued callback/state replay. These configured guns and traits
+are not evidence of ordinary two-day acquisition.
+
+The final v8 candidate browser check exercised physical bow hold/release, a
+charged bow retaining charge on right-click and firing on release outside the
+canvas, Rocket Launcher ammo use, and Gravity Gun immediate reload. An in-flight
+gravity export was byte-identical after page reload and Continue. The final
+candidate had no observed console errors. This is focused UI evidence, not a
+whole-battle timing or pixel comparison.
+
+The historical v7 browser check opened the original Rest dialog without changing the save,
 then acknowledged it into Day 2. The full export matched `startNextDay`; page
 reload and Continue produced an identical export. A shop purchase survived Rest
 and key 3 selected it in battle. Grenade use retained the gun selection and
@@ -191,7 +217,7 @@ shooting, manual reload, pause/Space resume, boss health bars, defeat, item and
 skill menus, shop transactions, legacy imports and exact export/Continue state.
 The prior v6 release also verified preserved hero/traits/items/RNG and explicit
 legacy hero reconstruction. Those observations remain historical evidence;
-they are not new v7 browser results. See [port verification](port-verification.json)
+they are not new v8 browser results. See [port verification](port-verification.json)
 for concrete checkpoints and release records, rather than reusing their old
 balances or RNG values as expectations after added source draws.
 
@@ -208,12 +234,22 @@ retaining original initialization and compared methods. This solved the capture
 obstacle; controlled method calls do not establish native event scheduling or
 wall-clock equivalence.
 
+Projectile comparison found source-specific twip truncation, 1/256 alpha
+steps, next-frame movement and a crow death-frame mismatch. Those are corrected.
+Original vertical grenade/rocket trajectories produced NaN and displayed y=0;
+the port now uses explicit vertical travel and explodes at the requested point.
+That intentional correction is separate from the veteran late-game report.
+Projectile pause/postbattle freezing remains a documented difference. Gravity
+hard-light rendering has small aligned pixel errors and larger fractional
+placement differences. See [projectile notes](../web/docs/projectile-source.md)
+and [rendering evidence](ui-reference.md).
+
 Remaining limits:
 
 - Rasterized Flash assets, filtering, fonts, dynamic text and subpixel rendering
   can differ from Flash/Ruffle. Not every animation, VFX or hit-mask edge has a
   matched browser capture. The cooldown bar scales its baked shadow with the image.
-- Coverage is one class and two missions. Day 3+, projectiles, Ragnarok, other
+- Coverage is one class and two missions. Day 3+, Ragnarok, other
   town actions, companions and other classes remain separate integration work.
   Global medal persistence and future-New-Game bonuses are not fully implemented.
 - Original late-game collision complaints remain unverified. Boss alpha geometry
@@ -225,9 +261,9 @@ Remaining limits:
 
 ## Next integrated work
 
-Expand one usable original feature boundary at a time—remaining
-equipment/projectiles or town actions—with
-source comparisons and save continuity before enabling more days. Generated
+The next useful boundary is an ordinary town equipment action, such as weapon
+upgrades or MOD mounting, with original outcome/RNG comparisons and save
+continuity. Then extend campaign/enemy coverage before enabling later days. Generated
 content alone is not a completed gameplay feature.
 
 Continuous goal work and a 30-minute watcher were authorized on 2026-11-01;

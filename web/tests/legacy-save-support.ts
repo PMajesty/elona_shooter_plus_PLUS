@@ -1,8 +1,22 @@
 import assert from 'node:assert/strict';
 import type { SimulationState } from '../src/simulation.ts';
 
-export function asLegacyV6Save(state: SimulationState): Record<string, any> {
+export function asLegacyV7Save(state: SimulationState): Record<string, any> {
   const value: Record<string, any> = structuredClone(state);
+  assert.equal(value.player.bowDrawing, false);
+  assert.ok(value.projectiles.every((actor: { kind: string; weaponSlot: number | null }) => actor.kind === 'hand-grenade' && actor.weaponSlot === null));
+  value.grenades = value.projectiles.map((actor: Record<string, number>) => ({
+    uid: actor.uid, x: actor.x, y: actor.y, startX: actor.startX, startY: actor.startY,
+    targetX: actor.targetX, targetY: actor.targetY, speed: -actor.speed, remaining: actor.count, damage: actor.damage,
+  }));
+  delete value.projectiles;
+  delete value.player.bowDrawing;
+  value.version = 7;
+  return value;
+}
+
+export function asLegacyV6Save(state: SimulationState): Record<string, any> {
+  const value = asLegacyV7Save(state);
   // Старый формат умел стрелять только дробовиком из слота 0 и бросать гранаты из слота 1.
   assert.equal(value.player.selectedSlot, 0);
   assert.equal(value.inventory[0]?.id, 3);

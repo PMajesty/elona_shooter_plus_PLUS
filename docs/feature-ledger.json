@@ -129,7 +129,7 @@
         "MainTimeline:4617 refreshPlayer"
       ],
       "status": "partial",
-      "implemented": "Owned inventory drives selection, ammunition, weapon-skill requirements, manual/automatic firing, damage, range, recoil and reloads across Days 1–2. Number keys 1–5 address five combat slots; the sixth is storage. Critical hits, knockback and original ordinary-enemy filled-contour hit testing preserve shadow history; bosses retain separate alpha geometry. Actual firing preserves both per-hit rolls, shell dilution, leech/slow/knockback, living-weapon evolution before growth and nonlethal boss accumulator RNG. Projectile weapon families are rejected without consuming ammunition.",
+      "implemented": "Owned inventory drives selection, ammunition, weapon-skill requirements, manual/automatic firing, damage, range, recoil and reloads across Days 1–2. Number keys 1–5 address five combat slots; the sixth is storage. Critical hits, knockback and original ordinary-enemy filled-contour hit testing preserve shadow history; bosses retain separate alpha geometry. Actual firing preserves both per-hit rolls, shell dilution, leech/slow/knockback, living-weapon evolution before growth and nonlethal boss accumulator RNG. All eight projectile guns now launch through the ordinary input and owned-item path; see original.combat.projectiles.",
       "evidence": [
         "web/tests/simulation.test.ts:cooldown and queued-input tests",
         "docs/port-verification.json:browser_checks.shooting",
@@ -143,11 +143,44 @@
       "unverified": [
         "Unsampled frames/positions and other animation histories; boss and dropping-rat geometry",
         "Other overlapping-target/corpse/animation combinations and successful random SENSE criticals",
-        "Projectile weapons, including bows and launchers; all weapon/trait combinations",
+        "Unsampled weapon/trait combinations, companion shooting and later targets",
         "Native frame/input timing"
       ],
       "notes": [
         "Original sheep 32-to-5 retained shadowHit=false. Previous port had 76 extra hits; persisted state corrects all sampled points. This is not a reproduced late-game defect."
+      ]
+    },
+    {
+      "id": "original.combat.projectiles",
+      "scope": "Eight projectile guns, hand grenades, bow charge/release, flight, hit/pulse callbacks, effects and save continuity",
+      "source": [
+        "MainTimeline:7787 shoot",
+        "MainTimeline:3141 mouseUpFunc",
+        "MainTimeline:13357 throwGrenade",
+        "MainTimeline:10920 throwRocket",
+        "MainTimeline:1428 procHit",
+        "Original bullet_grenade/grenade2/rocket/arrow2/arrow3/puls/fire classes"
+      ],
+      "status": "partial",
+      "implemented": "Seven actor families with original damage/ammo/reload, shared Wind Bow target roll, source per-assignment twip and alpha quantization, next-frame first motion, penetration/corpse handling, launch-slot effects/current-slot XP, original assets and v8 state. Explicit vertical motion fixes singular aims; crow death begins at frame58.",
+      "evidence": [
+        "web/tests/projectile-reference.test.ts: 14 matching original scenarios, 650 manual source steps, actual native grenade birth timing, two original vertical diagnostics and negative controls",
+        "web/tests/projectile-gameplay.test.ts: ordinary input and selected/launch weapon behavior",
+        "web/tests/projectile-save.test.ts: v1–7 migration, current lifecycle validation, 21 vertical outcomes and JSON replays",
+        "web/scripts/projectile-soak.ts: 27 configured cases, 9720 updates,1080 replay checkpoints",
+        "docs/port-verification.json: browser_checks.projectiles"
+      ],
+      "unverified": [
+        "Later enemy species and chain reactions; all skill/item combinations and party shooting",
+        "Whole native battle/event interleaving, postbattle effects and audible timing",
+        "Original geometry is supplied to damage comparison; this does not prove additional collision contours",
+        "Full raster parity; hard-light fractional placement differs",
+        "Veteran late-game hitbox complaint remains unreproduced"
+      ],
+      "notes": [
+        "Pause/postbattle freeze applies to all port projectiles; original child handlers differ.",
+        "Exactly vertical aims use explicit saved progress, fixed x and bounded travel; this is an intentional bug fix, not ordinary source equality.",
+        "Weapon acquisition beyond available two-day content is not established by configured fixtures."
       ]
     },
     {

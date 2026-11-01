@@ -47,7 +47,7 @@ export function compareEquipmentTrace(records: EquipmentRecord[]) {
       Object.assign(state.player, { selectedSlot: expected.selectedSlot, shootTimer: expected.shootTimer, accuracyFix: expected.accuracyFix, rampageTicks: expected.rampage });
       state.itemCooldowns = [...expected.itemCooldowns]; state.castleHp = expected.castleHp;
       state.fireHeld = expected.held; state.pendingShot = expected.shooting; state.timerRemainder = expected.timerRemainder;
-      state.enemies = []; state.grenades = []; state.waveIndex = 4; state.newWave = false; state.spawnTimer = 100000;
+      state.enemies = []; state.projectiles = []; state.waveIndex = 4; state.newWave = false; state.spawnTimer = 100000;
       state.aimX = 500; state.aimY = 180; state.rng = 42;
       drawCount = 0;
       const boundary = simulation as unknown as { random(): number };
