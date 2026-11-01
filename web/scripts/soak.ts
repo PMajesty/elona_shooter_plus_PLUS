@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
-import { Simulation, type Input } from '../src/simulation.ts';
+import { Simulation, type Input, type SimulationOptions } from '../src/simulation.ts';
+import { ENEMIES } from '../src/content.ts';
+import { ordinaryEnemyHit, type CollisionGeometry } from '../src/collision.ts';
 
 const outputDirectory = resolve('../.build/soak');
 mkdirSync(outputDirectory, { recursive: true });
@@ -10,6 +12,13 @@ const seedCount = Number(process.argv[2] ?? 32);
 assert.ok(Number.isInteger(seedCount) && seedCount >= 1 && seedCount <= 1000, 'Seed count must be between 1 and 1000.');
 const policies = ['idle', 'aimed', 'interruptions'] as const;
 type Policy = typeof policies[number];
+const geometry = JSON.parse(readFileSync(new URL('../public/assets/collision-geometry.json', import.meta.url), 'utf8')) as CollisionGeometry;
+const simulationOptions: SimulationOptions = { hitTest: (enemy, x, y) => {
+  if (enemy.kind !== 'boss') return ordinaryEnemyHit({ ...enemy, kind: enemy.kind }, x, y, geometry);
+  // Геометрия босса пока зависит от Phaser; её прямоугольная замена отмечена в отчёте.
+  const [left, right, top, bottom] = ENEMIES.boss.body;
+  return x - enemy.x > left && x - enemy.x < right && y - enemy.y > top && y - enemy.y < bottom;
+} };
 
 function inputFor(simulation: Simulation, policy: Policy): Input {
   if (policy === 'idle') return {};
@@ -48,8 +57,8 @@ try {
     const seed = index === 0 ? 42 : Math.imul(index, 0x9e3779b1) >>> 0;
     for (const policy of policies) {
       scenario = { seed, policy };
-      const simulation = new Simulation(seed);
-      let restored = Simulation.fromSave(JSON.parse(JSON.stringify(simulation.toSave())));
+      const simulation = new Simulation(seed, simulationOptions);
+      let restored = Simulation.fromSave(JSON.parse(JSON.stringify(simulation.toSave())), simulationOptions);
       lastCheckpoint = simulation.toSave(); inputs = [];
       let checkpoints = 1;
       for (let frame = 0; frame < 6000 && simulation.state.phase === 'battle'; frame++) {
@@ -63,13 +72,13 @@ try {
         assert.ok(simulation.state.player.grenades >= 0 && simulation.state.player.grenades <= 5);
         if (frame % 137 === 136) {
           lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
-          restored = Simulation.fromSave(lastCheckpoint);
+          restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
           inputs = []; checkpoints++;
         }
       }
       assert.notEqual(simulation.state.phase, 'battle', 'Opening battle did not terminate within 6000 frames.');
       if (policy === 'idle') assert.equal(simulation.state.phase, 'defeat');
-      assert.deepEqual(Simulation.fromSave(simulation.toSave()).state, simulation.state);
+      assert.deepEqual(Simulation.fromSave(simulation.toSave(), simulationOptions).state, simulation.state);
       results.push({ ...scenario, phase: simulation.state.phase, ticks: simulation.state.tick, kills: simulation.state.kills, checkpoints });
     }
   }
@@ -77,7 +86,8 @@ try {
     status: 'passed', seedCount, policies, scenarios: results.length, simulationFrames: frames,
     checkpoints: results.reduce((sum, result) => sum + result.checkpoints, 0),
     elapsedMs: Math.round(performance.now() - started),
-    limits: ['Port self-consistency, finite state and JSON replay only; not an original-game parity proof', 'First-day Sheriff only, rectangular headless hit testing', 'No browser rendering, input latency, audio or wall-clock performance comparison'],
+    collision: 'Production ordinary-enemy contours; boss uses the documented rectangular headless fallback',
+    limits: ['Port self-consistency, finite state and JSON replay only; not an original-game parity proof', 'First-day Sheriff only; boss shape geometry not exercised', 'No browser rendering, input latency, audio or wall-clock performance comparison'],
     results,
   };
   writeFileSync(resolve(outputDirectory, 'report.json'), JSON.stringify(report, null, 2) + '\n');

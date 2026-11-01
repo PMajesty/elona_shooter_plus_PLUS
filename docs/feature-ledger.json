@@ -46,7 +46,7 @@
   "features": [
     {
       "id": "original.runtime.clocks",
-      "scope": "30 Hz frame/animation loop and independent 50 ms gameplay timer",
+      "scope": "Observable movement, firing, reload and enemy timing; original30Hz/20Hz are comparison references, not mandatory architecture",
       "source": [
         "MainTimeline:22 SWF metadata",
         "MainTimeline:9174 new Timer(50,0)",
@@ -60,6 +60,9 @@
       "unverified": [
         "Original-versus-port wall-clock/event ordering under load",
         "Long stalls and browser background behavior"
+      ],
+      "notes": [
+        "User amendment2026-11-01 permits changing internal rates unless gameplay is materially affected. Preserve behavior with measured regression scenarios."
       ]
     },
     {
@@ -121,14 +124,15 @@
         "MainTimeline:4617 refreshPlayer"
       ],
       "status": "partial",
-      "implemented": "Initial Sheriff shotgun rules, critical hits, knockback and browser alpha hit masks.",
+      "implemented": "Initial Sheriff shotgun rules, critical hits, knockback and original ordinary-enemy filled-contour hit testing; bosses retain separate alpha geometry.",
       "evidence": [
         "web/tests/simulation.test.ts:cooldown and queued-input tests",
         "docs/port-verification.json:browser_checks.shooting",
-        "web/tests/combat-reference.test.ts:21 original spawn/point snapshots; port critical rules with original geometry supplied"
+        "web/tests/combat-reference.test.ts:21 original spawn/point snapshots; port critical rules with original geometry supplied",
+        "web/tests/geometry-reference.test.ts: original sampled contours through the production collision helper"
       ],
       "unverified": [
-        "Original vector versus exported alpha-mask geometry, including shadow exclusions",
+        "Unsampled frames/positions, animation history, boss and dropping-rat geometry",
         "Full shotgun spread and corpse interactions against original",
         "All weapon families and trait combinations",
         "Native frame/input timing"
@@ -306,12 +310,16 @@
         "MainTimeline:6042 randomStuff",
         "MainTimeline:8577 enchant"
       ],
-      "status": "missing",
-      "implemented": "Starting weapon/item definitions only; no town purchase/equip loop.",
-      "evidence": [],
+      "status": "partial",
+      "implemented": "58 source item IDs with generation/modifier metadata and six persistent inventory slots; no town purchase/equip loop or modifier mounting.",
+      "evidence": [
+        "web/tests/item-reference.test.ts:139 original snapshots including fields and RNG",
+        "web/tests/inventory-save.test.ts: item persistence and swaps"
+      ],
       "unverified": [
-        "All shop/equipment interactions and their save persistence",
-        "Full item catalogue and generation rules"
+        "Town purchases, equipment effects and modifier mounting",
+        "Generation with nondefault skills and later-day contexts",
+        "Combat behavior of weapons beyond the starting shotgun"
       ]
     },
     {
@@ -347,16 +355,20 @@
         "MainTimeline:11166 procLootMenu"
       ],
       "status": "partial",
-      "implemented": "First-day special-loot queue and enemy generation loot match original for three injected seeds; ordinary gold/drop-ID state exists; no prize selection or inventory redemption.",
+      "implemented": "Opening-mission pending loot, source ordinary-offer generation, original loot screen, click pickup/place and swaps; offers generated once and stored with six inventory slots.",
       "evidence": [
         "web/src/simulation.ts:damageEnemy",
         "web/tests/wave-reference.test.ts:original raw pending loot queue",
-        "web/tests/combat-reference.test.ts:controlled lethal-rat drop and pending loot, exact RNG accounting"
+        "web/tests/combat-reference.test.ts:controlled lethal-rat drop and pending loot, exact RNG accounting",
+        "web/tests/item-reference.test.ts: original ordinary loot and starting inventory",
+        "web/tests/inventory-save.test.ts: completion and one-time loot generation",
+        "docs/port-verification.json:browser_checks.ordinary_loot"
       ],
       "unverified": [
-        "Boss/special drops",
-        "Generation probabilities and rewards against original",
-        "Loot persistence through town"
+        "Boss prize generation and selection",
+        "Later-day skill-dependent generation contexts",
+        "Loot persistence and equipment effects through town and later days",
+        "Original tooltip rendering and fading"
       ]
     },
     {
@@ -426,11 +438,12 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One versioned browser-port slot with JSON export/import and own-PRNG resume.",
+      "implemented": "One browser slot with JSON import/export, version 2 item/loot-stage persistence and deterministic migration of version 1 browser saves.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",
-        "web/scripts/soak.ts:96 seeded scenarios,957 checkpoints, exact state/event replay equality"
+        "web/scripts/soak.ts:96 seeded scenarios,951 checkpoints, exact state/event replay equality",
+        "web/tests/inventory-save.test.ts: version migration, inventory validation and no-reroll persistence"
       ],
       "unverified": [
         "Six-slot parity",
@@ -438,7 +451,8 @@
         "Global medals/index and future content migrations"
       ],
       "intentionalDifferences": [
-        "Current JSON format accepts only browser-port saves; it is not Flash SharedObject-compatible."
+        "Current JSON format accepts only browser-port saves; it is not Flash SharedObject-compatible.",
+        "Version 1 browser saves lacked generated item metadata. Reconstructed metadata has explicit provenance; original Flash save conversion remains missing."
       ]
     },
     {
@@ -460,6 +474,29 @@
         "Complete scene/state visual comparison",
         "All dynamic child actions and audio events",
         "Effects, masks and layering throughout later content"
+      ]
+    },
+    {
+      "id": "port.fixes.lategame_hitboxes",
+      "scope": "Reproduce and correct reported late-game hitbox defects while preserving intended targeting and balance",
+      "source": [
+        "User-supplied veteran report2026-11-01: hitboxes that plague ES lategame",
+        "MainTimeline.procHit",
+        "enemy and enemy_* display timelines in original SWF"
+      ],
+      "status": "missing",
+      "implemented": "Ordinary-enemy contour comparison corrected overly strict port alpha targeting. The veteran late-game defect is still not reproduced.",
+      "evidence": [
+        "docs/oracle-notes.md: ordinary-enemy geometry comparison; this does not establish a late-game fix"
+      ],
+      "unverified": [
+        "Specific affected enemy/day/weapon combinations",
+        "Geometry versus animation/overlap/projectile/timing cause",
+        "Controlled original failing scenario",
+        "Intentional port fix and automated regression"
+      ],
+      "notes": [
+        "User asked to investigate in due course without rushing. Do not turn an anecdote into an assumed diagnosis."
       ]
     }
   ]

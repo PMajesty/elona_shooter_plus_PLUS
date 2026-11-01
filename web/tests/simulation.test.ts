@@ -144,7 +144,7 @@ test('JSON save resumes simulation and in-flight grenades without changing the o
 test('corrupt saves are rejected before they can enter the simulation', () => {
   const saved = new Simulation(123).toSave();
   for (const change of [
-    { version: 2 }, { phase: ['battle'] }, { rng: 0 }, { castleHp: Infinity }, { waveIndex: 8 },
+    { version: 99 }, { phase: ['battle'] }, { rng: 0 }, { castleHp: Infinity }, { waveIndex: 8 },
     { enemies: [{ kind: '__proto__' }] }, { waves: [] }, { player: { ...saved.player, ammo: -1 } },
     { player: { ...saved.player, ammo: 5, reloadTicks: 7 } },
     { grenades: [{ uid: 1, startX: 2, targetX: 2 }] },

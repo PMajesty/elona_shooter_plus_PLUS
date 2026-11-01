@@ -2,12 +2,12 @@
 
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
 Phaser 4. The current build is a **first playable slice**: choose one of 22
-appearances, play the Sheriff's original opening battle, reach victory or defeat,
-and save or restore your progress. Original English artwork, fonts, audio and
+appearances, play the Sheriff's original opening battle, collect ordinary loot,
+reach results or defeat, and save or restore your progress. Original English artwork, fonts, audio and
 credits are retained.
 
 This is not yet the complete game. Other classes, town management, later days,
-the full skill and loot systems, and original Flash save conversion remain to be
+boss prizes, skill choices, the full equipment system, and original Flash save conversion remain to be
 ported. See [port status](docs/port-status.md) for coverage and known differences.
 The complete preserved Flash game and its Ruffle startup fix remain available
 as the comparison and recovery baseline.
@@ -39,6 +39,12 @@ Losing browser focus pauses combat. The game saves locally in this browser;
 browser-port save as a JSON file. These saves use a separate format from Flash
 and do not automatically follow you to another browser or website.
 
+After victory, click an item to pick it up and click a slot to place or swap it.
+Click outside the slots to cancel. Proceed leaves unclaimed items behind.
+The six inventory slots and generated items are saved without rerolling them.
+Version 1 browser saves are accepted; their missing item metadata is reconstructed
+deterministically and explicitly marked in the version 2 save.
+
 ## Build and host on your website
 
 From `web/`:
@@ -64,8 +70,11 @@ or gameplay server. Node and npm are development tools, not hosting requirements
 `npm.cmd test` runs ordinary regressions, including captured results from the
 original ActionScript game. The accepted fixtures currently cover 72 reload
 snapshots, first-day wave generation under three controlled random seeds and
-21 spawn/single-pellet snapshots. The latter supply the original shape-hit
-classification as input; alpha-mask geometry itself still needs comparison.
+21 spawn/single-pellet snapshots, 139 item-generation snapshots, and dense
+ordinary-enemy collision samples from the original display shapes. The pellet
+tests supply original geometry as input; separate contour tests exercise the
+same collision implementation used in the browser. Coverage is documented in
+the feature ledger rather than inferred from the number of passing tests.
 Negative controls verify that missing shell feedback and altered RNG consumption
 are detected. Expected original results are never regenerated from the port.
 
@@ -82,15 +91,19 @@ local development-only runner from the repository root:
 python tools/build_oracle.py
 python tools/build_wave_oracle.py
 python tools/build_combat_oracle.py
+python tools/build_geometry_oracle.py
+python tools/build_loot_oracle.py
 python tools/serve_oracle.py
 ```
 
 Open `http://127.0.0.1:5176/` for reload or
 `http://127.0.0.1:5176/?suite=waves` for generation, or
-`http://127.0.0.1:5176/?suite=combat` for spawn/hit scenarios. Each page runs the original
+`http://127.0.0.1:5176/?suite=combat` for spawn/hit scenarios, `?suite=geometry`
+for shape-hit grids, and `?suite=loot` for item generation. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, run `npm.cmd run test:reference`, `npm.cmd run test:wave-reference` or
-`npm.cmd run test:combat-reference` to
+`npm.cmd run test:combat-reference`, `npm.cmd run test:item-reference`, or
+`node --experimental-strip-types scripts/compare-geometry-reference.ts` to
 compare the port. These development tools require the local FFDec/Java and Ruffle
 packages; the distributed game does not. See [oracle notes](docs/oracle-notes.md)
 for controlled state, source preservation and limitations, and the

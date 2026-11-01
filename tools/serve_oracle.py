@@ -12,6 +12,8 @@ REPORTS = {
     "/api/report": REPORT,
     "/api/waves-report": ROOT / ".build/oracle/waves-browser-report.json",
     "/api/combat-report": ROOT / ".build/oracle/combat-browser-report.json",
+    "/api/geometry-report": ROOT / ".build/oracle/geometry-browser-report.json",
+    "/api/loot-report": ROOT / ".build/oracle/loot-browser-report.json",
 }
 ROUTES = {
     "/": ROOT / "tools/oracle/index.html",
@@ -22,6 +24,10 @@ ROUTES = {
     "/waves-build-report.json": ROOT / ".build/oracle/waves-build-report.json",
     "/combat-reference.swf": ROOT / ".build/oracle/combat-reference.swf",
     "/combat-build-report.json": ROOT / ".build/oracle/combat-build-report.json",
+    "/geometry-reference.swf": ROOT / ".build/oracle/geometry-reference.swf",
+    "/geometry-build-report.json": ROOT / ".build/oracle/geometry-build-report.json",
+    "/loot-reference.swf": ROOT / ".build/oracle/loot-reference.swf",
+    "/loot-build-report.json": ROOT / ".build/oracle/loot-build-report.json",
 }
 
 

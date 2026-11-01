@@ -1,4 +1,5 @@
 import { ENEMIES, ENEMY_SELECTION_ORDER, FIRST_DAY, GRENADE, SHOTGUN, SIMULATION_HZ, STARTING_CLASS, TIMER_HZ, WORLD, type EnemyKind, type Rect } from './content.ts';
+import { BASE_ITEM_FIELDS, ITEM_TYPE, ItemFactory, collectLoot as collectLootItem, createStartingInventory, swapInventorySlots, type Item } from './items.ts';
 
 export interface EnemyState {
   uid: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number;
@@ -10,22 +11,39 @@ export interface EnemyState {
 export interface GrenadeState { uid: number; x: number; y: number; startX: number; startY: number; targetX: number; targetY: number; speed: number; remaining: number }
 export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCount: number }
 export interface SimulationState {
-  version: 1; phase: 'battle' | 'victory' | 'defeat'; day: 1; tick: number; timerRemainder: number; rng: number; nextUid: number;
+  version: 2; phase: 'battle' | 'victory' | 'defeat'; day: 1; tick: number; timerRemainder: number; rng: number; nextUid: number;
   castleHp: number; castleMaxHp: number; gold: number; kills: number; criticalKills: number;
   aimX: number; aimY: number; fireHeld: boolean; pendingShot: boolean;
   player: { classId: 'sheriff'; level: number; exp: number; skillPoints: number; weaponExp: number; ammo: number; reloadTicks: number; shootTimer: number; accuracyFix: number; rampageTicks: number; grenades: number; grenadeCooldown: number };
   waveIndex: number; waves: WaveState[]; bossWave: number; newWave: boolean; spawnTimer: number; noDamage: boolean;
   enemies: EnemyState[]; grenades: GrenadeState[]; loot: number[];
+  inventory: (Item | null)[]; lootOffers: (Item | null)[]; postbattle: 'none' | 'loot' | 'result';
+  inventoryProvenance: 'original-generation' | 'legacy-v1-reconstructed'; legacyReconstructionSeed?: number;
   result: { reward: number; perfectBonus: number; upkeep: number; netReward: number };
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; reload?: boolean; grenade?: boolean }
 export interface SimulationEvent { type: 'shot' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold'; x?: number; y?: number; amount?: number; critical?: boolean; enemyUid?: number; goodShotIndex?: number; pellets?: { x: number; y: number }[] }
 export interface SimulationOptions { hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean }
+export type LootArea = 'offers' | 'inventory';
 
 function inside(rect: Rect, x: number, y: number): boolean { return x > rect[0] && x < rect[1] && y > rect[2] && y < rect[3]; }
 function int(value: number): number { return Math.trunc(value); }
 function record(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }
 function finite(value: unknown): value is number { return typeof value === 'number' && Number.isFinite(value) && Math.abs(value) < 1e12; }
+function validItem(value: unknown): value is Item {
+  if (!record(value) || !Number.isInteger(value.id) || !Object.hasOwn(BASE_ITEM_FIELDS, Number(value.id))) return false;
+  const numbers = ['num', 'id', 'graphic', 'type', 'reloadTime', 'reloadTimeMax', 'ammo', 'ammoMax', 'value', 'mod', 'modMax', 'shell', 'lv', 'typeMinor', 'special', 'leech', 'impact', 'shootRate', 'rare', 'autoReload', 'livingWeapon'];
+  const optional = ['baseAccuracy', 'accuracyDec', 'attack', 'dmgAir', 'dmgArmor', 'reqTrait', 'reqLv', 'range'];
+  if (numbers.some(key => !finite(value[key]) || Number(value[key]) < 0) || optional.some(key => value[key] !== undefined && (!finite(value[key]) || Number(value[key]) < 0))) return false;
+  if (numbers.filter(key => key !== 'value').some(key => !Number.isInteger(value[key]))) return false;
+  const id = Number(value.id);
+  const expectedType = [8, 9, 10, 121].includes(id) ? ITEM_TYPE.mod : BASE_ITEM_FIELDS[id].type ?? ITEM_TYPE.gun;
+  if (value.num !== 1 || value.graphic !== id + 10 || value.type !== expectedType || Number(value.lv) < 1 || Number(value.modMax) < 1 || typeof value.manualReload !== 'boolean' || typeof value.automatic !== 'boolean') return false;
+  if (typeof value.name !== 'string' || value.name.length === 0 || value.name.length > 256 || typeof value.modText !== 'string' || value.modText.length > 4096) return false;
+  if (expectedType === ITEM_TYPE.gun && (optional.some(key => !finite(value[key])) || Number(value.ammoMax) < 1 || Number(value.ammo) > Number(value.ammoMax) || Number(value.mod) > Number(value.modMax))) return false;
+  if (Number(value.reloadTime) > Number(value.reloadTimeMax) + 1 || (value.type === ITEM_TYPE.gun && value.ammo === value.ammoMax && Number(value.reloadTime) !== 0)) return false;
+  return true;
+}
 
 export class Simulation {
   state: SimulationState;
@@ -35,13 +53,24 @@ export class Simulation {
   constructor(seed = Date.now(), options: SimulationOptions = {}) {
     this.options = options;
     this.state = {
-      version: 1, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: seed >>> 0 || 1, nextUid: 1,
+      version: 2, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: seed >>> 0 || 1, nextUid: 1,
       castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, gold: STARTING_CLASS.money, kills: 0, criticalKills: 0,
       aimX: 300, aimY: 240, fireHeld: false, pendingShot: false,
       player: { classId: 'sheriff', level: 1, exp: 0, skillPoints: 0, weaponExp: 0, ammo: SHOTGUN.magazine, reloadTicks: 0, shootTimer: 0, accuracyFix: 0, rampageTicks: 0, grenades: GRENADE.quantity, grenadeCooldown: 0 },
       waveIndex: FIRST_DAY.waves, waves: [], bossWave: 2, newWave: true, spawnTimer: 30, noDamage: true,
       enemies: [], grenades: [], loot: [], result: { reward: 0, perfectBonus: 0, upkeep: 0, netReward: 0 },
+      inventory: [], lootOffers: Array(8).fill(null), postbattle: 'none', inventoryProvenance: 'original-generation',
     };
+    this.state.inventory = createStartingInventory(() => this.random());
+    this.generateOpeningMission();
+  }
+
+  private generateOpeningMission(): void {
+    this.state.waves = [];
+    this.state.loot = [];
+    this.state.waveIndex = FIRST_DAY.waves;
+    this.state.newWave = true;
+    this.state.spawnTimer = 30;
     // generateSpecialLoot() наполняет ту же очередь, куда затем попадают трофеи врагов.
     if (this.random() > 0.97) this.state.loot.push(1038);
     this.state.loot.push(ENEMIES.rat.id + 1100);
@@ -132,12 +161,13 @@ export class Simulation {
     if (!finite(x) || !finite(y) || this.state.phase !== 'battle') return false;
     this.state.aimX = x; this.state.aimY = y;
     const player = this.state.player;
-    if (player.reloadTicks > 0) { player.reloadTicks = 0; this.events.push({ type: 'reloaded' }); return false; }
+    if (player.reloadTicks > 0) { player.reloadTicks = 0; this.syncBattleInventory(); this.events.push({ type: 'reloaded' }); return false; }
     if (player.shootTimer > 0) return false;
     if (player.ammo <= 0) { this.state.pendingShot = false; this.requestReload(); return false; }
     const spread = 13 * (100 + player.accuracyFix * player.accuracyFix * 1000) / SHOTGUN.baseAccuracy;
     player.shootTimer = SHOTGUN.shotTimer;
     player.ammo--;
+    this.syncBattleInventory();
     player.accuracyFix += SHOTGUN.accuracyDecay;
     const damage = int(SHOTGUN.damage * (player.rampageTicks > 0 ? 1.5 : 1));
     const pellets: { x: number; y: number }[] = [];
@@ -171,6 +201,7 @@ export class Simulation {
     const player = this.state.player;
     if (this.state.phase !== 'battle' || player.shootTimer > 0 || player.reloadTicks > 0 || player.ammo >= SHOTGUN.magazine) return false;
     player.reloadTicks = SHOTGUN.reloadTimer;
+    this.syncBattleInventory();
     this.events.push({ type: 'reload' });
     return true;
   }
@@ -183,6 +214,7 @@ export class Simulation {
     const speed = GRENADE.speed * Math.atan2(Math.abs(x - WORLD.playerX) * 2, Math.abs(y - WORLD.playerY)) * 2 / Math.PI + 0.1;
     this.state.grenades.push({ uid: this.state.nextUid++, x: WORLD.playerX, y: WORLD.playerY, startX: WORLD.playerX, startY: WORLD.playerY, targetX: x, targetY: y, speed: x > WORLD.playerX ? speed : -speed, remaining: int(Math.abs(x - WORLD.playerX) / speed) + 1 });
     player.grenades--;
+    this.syncBattleInventory();
     player.grenadeCooldown = GRENADE.cooldownFrames + 1;
     this.events.push({ type: 'grenade', x, y });
     return true;
@@ -219,6 +251,7 @@ export class Simulation {
         this.events.push({ type: player.reloadTicks ? 'reload' : 'reloaded' });
       }
     }
+    this.syncBattleInventory();
     if (state.newWave) {
       state.newWave = false;
       if (state.castleHp < state.castleMaxHp) state.noDamage = false;
@@ -398,6 +431,7 @@ export class Simulation {
   }
 
   private finishDay(): void {
+    if (this.state.phase !== 'battle') return;
     const player = this.state.player;
     player.ammo = SHOTGUN.magazine;
     player.reloadTicks = 0;
@@ -410,13 +444,55 @@ export class Simulation {
     this.state.result = { reward: FIRST_DAY.reward, perfectBonus, upkeep: FIRST_DAY.upkeep, netReward: FIRST_DAY.reward + perfectBonus - FIRST_DAY.upkeep };
     this.state.gold += this.state.result.netReward;
     this.state.phase = 'victory';
+    this.syncBattleInventory();
+    this.prepareOrdinaryLoot(() => this.random());
     this.events.push({ type: 'victory' });
+  }
+
+  private syncBattleInventory(): void {
+    const gun = this.state.inventory[0], grenade = this.state.inventory[1];
+    if (gun?.id === SHOTGUN.id) {
+      gun.ammo = this.state.player.ammo;
+      gun.reloadTime = this.state.player.reloadTicks;
+    }
+    if (grenade?.id === GRENADE.id) grenade.ammo = this.state.player.grenades;
+  }
+
+  private prepareOrdinaryLoot(random: () => number): void {
+    if (this.state.phase !== 'victory' || this.state.postbattle !== 'none') return;
+    const generated = new ItemFactory(random, { day: this.state.day }).ordinaryLoot(this.state.loot, this.state.lootOffers);
+    this.state.lootOffers = generated.offers;
+    this.state.loot = generated.queue;
+    this.state.postbattle = 'loot';
+  }
+
+  moveLootItem(fromArea: LootArea, from: number, toArea: LootArea, to: number): boolean {
+    if (this.state.phase !== 'victory' || this.state.postbattle !== 'loot') return false;
+    if (!['offers', 'inventory'].includes(fromArea) || !['offers', 'inventory'].includes(toArea)) return false;
+    const source = fromArea === 'offers' ? this.state.lootOffers : this.state.inventory;
+    const destination = toArea === 'offers' ? this.state.lootOffers : this.state.inventory;
+    return source === destination ? swapInventorySlots(source, from, to) : collectLootItem(source, destination, from, to);
+  }
+
+  collectLoot(offer: number, slot = this.state.inventory.findIndex(item => item === null)): boolean {
+    return this.moveLootItem('offers', offer, 'inventory', slot);
+  }
+
+  dropLootItem(slot: number, offer = this.state.lootOffers.findIndex(item => item === null)): boolean {
+    return this.moveLootItem('inventory', slot, 'offers', offer);
+  }
+
+  finishLoot(): boolean {
+    if (this.state.phase !== 'victory' || this.state.postbattle !== 'loot') return false;
+    this.state.lootOffers.fill(null);
+    this.state.postbattle = 'result';
+    return true;
   }
 
   toSave(): SimulationState { return structuredClone(this.state); }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
-    if (!record(value) || value.version !== 1 || value.day !== 1 || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat'].includes(value.phase)) throw new Error('Unsupported or invalid save.');
+    if (!record(value) || ![1, 2].includes(Number(value.version)) || typeof value.version !== 'number' || value.day !== 1 || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat'].includes(value.phase)) throw new Error('Unsupported or invalid save.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || value.bossWave !== 2 || (value.waveIndex === 5 && value.newWave !== true)) throw new Error('Invalid counters.');
@@ -435,9 +511,35 @@ export class Simulation {
     if (!Array.isArray(value.grenades) || value.grenades.length > 5 || value.grenades.some(grenade => !record(grenade) || grenadeNumbers.some(key => !finite(grenade[key])) || Math.abs(Number(grenade.targetX) - Number(grenade.startX)) < 0.001)) throw new Error('Invalid grenades.');
     const allIds = [...ids, ...value.grenades.map(grenade => (grenade as Record<string, unknown>).uid)];
     if (Number(value.nextUid) < 1 || new Set(allIds).size !== allIds.length || allIds.some(id => !Number.isInteger(id) || Number(id) < 1 || Number(id) >= Number(value.nextUid))) throw new Error('Invalid next entity identifier.');
-    if (!Array.isArray(value.loot) || value.loot.length > 200 || value.loot.some(item => !finite(item)) || !record(value.result) || ['reward', 'perfectBonus', 'upkeep', 'netReward'].some(key => !finite((value.result as Record<string, unknown>)[key]))) throw new Error('Invalid results.');
+    if (!Array.isArray(value.loot) || value.loot.length > 200 || value.loot.some(item => !Number.isInteger(item) || !Object.hasOwn(BASE_ITEM_FIELDS, item > 1000 ? item - 1000 : item)) || !record(value.result) || ['reward', 'perfectBonus', 'upkeep', 'netReward'].some(key => !finite((value.result as Record<string, unknown>)[key]))) throw new Error('Invalid results.');
     const simulation = new Simulation(1, options);
     simulation.state = structuredClone(value) as unknown as SimulationState;
+    if (value.version === 1) {
+      // Старые сохранения не содержат метаданных предметов; отдельный поток не меняет бой.
+      let reconstructionRng = Number(value.rng);
+      const reconstructionRandom = () => {
+        reconstructionRng ^= reconstructionRng << 13;
+        reconstructionRng ^= reconstructionRng >>> 17;
+        reconstructionRng ^= reconstructionRng << 5;
+        reconstructionRng >>>= 0;
+        return reconstructionRng / 4294967296;
+      };
+      simulation.state.version = 2;
+      simulation.state.inventory = createStartingInventory(reconstructionRandom);
+      simulation.state.lootOffers = Array(8).fill(null);
+      simulation.state.postbattle = 'none';
+      simulation.state.inventoryProvenance = 'legacy-v1-reconstructed';
+      simulation.state.legacyReconstructionSeed = Number(value.rng);
+      simulation.syncBattleInventory();
+      simulation.prepareOrdinaryLoot(reconstructionRandom);
+    }
+    const state = simulation.state;
+    if (!Array.isArray(state.inventory) || state.inventory.length !== 6 || Array.from(state.inventory).some(item => item !== null && !validItem(item)) || !Array.isArray(state.lootOffers) || state.lootOffers.length !== 8 || Array.from(state.lootOffers).some(item => item !== null && !validItem(item))) throw new Error('Invalid inventory items.');
+    if (!['none', 'loot', 'result'].includes(state.postbattle) || (state.phase === 'victory' ? state.postbattle === 'none' : state.postbattle !== 'none') || (state.postbattle !== 'loot' && state.lootOffers.some(item => item !== null))) throw new Error('Invalid postbattle stage.');
+    if (state.phase !== 'victory' && (state.inventory[0]?.id !== SHOTGUN.id || state.inventory[0].ammo !== state.player.ammo || state.inventory[0].reloadTime !== state.player.reloadTicks || state.inventory[1]?.id !== GRENADE.id || state.inventory[1].ammo !== state.player.grenades)) throw new Error('Inventory does not match active equipment.');
+    if (state.inventoryProvenance === 'legacy-v1-reconstructed') {
+      if (!Number.isInteger(state.legacyReconstructionSeed) || state.legacyReconstructionSeed! < 1 || state.legacyReconstructionSeed! > 0xffffffff) throw new Error('Invalid legacy inventory provenance.');
+    } else if (state.inventoryProvenance !== 'original-generation' || state.legacyReconstructionSeed !== undefined) throw new Error('Invalid inventory provenance.');
     return simulation;
   }
 }

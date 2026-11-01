@@ -229,6 +229,7 @@ def buttons(manifest):
 def runtime_clips(xml, sprites, manifest):
     directory, svg_directory = WORK / "runtime-clips", WORK / "runtime-clips-svg"
     specs = {"itemPicture": (2113, {"2"}, False), "radioButton": (2312, {"1", "8"}, False),
+             "inventorySlot": (2121, {"2", "3", "4", "6"}, False),
              "sheepShadow": (910, {"1"}, True), "crowShadow": (981, {"1"}, True),
              "gameOver": (2741, {"6", "9"}, False)}
     if FORCE or any(not list(directory.glob(f"DefineSprite_{value[0]}*")) for value in specs.values()):
@@ -301,11 +302,14 @@ def main():
                  "unlockButton", "extraButton", "procButton"}
     omit_result = {"closeButton", "field", "before", "now", "taken", "reward", "wage", "castle", "other",
                    "tax", "mc_playMore", "procButton"}
+    omit_loot = {"closeButton", "popup", "warning", "procButton"}
     for name, timeline, frame, omit, offset in [
         ("title", tags, 22, omit_title, (0, 0)), ("battle", tags, 27, omit_battle, (0, 0)),
         ("townHud", tags, 65, omit_battle | {"missionButton", "shopButton", "castleButton", "charaButton", "equipButton", "medalButton"}, (0, 0)),
         ("gene", sprites[1995].find("subTags"), 125, omit_gene, (0, -26)),
-        ("result", sprites[1995].find("subTags"), 14, omit_result, (0, -26))]:
+        ("result", sprites[1995].find("subTags"), 14, omit_result, (0, -26)),
+        ("loot", sprites[1995].find("subTags"), 89, omit_loot, (0, -26)),
+        ("lootBoss", sprites[1995].find("subTags"), 100, omit_loot | {"lootText"}, (0, -26))]:
         manifest["images"][name] = static_screen(xml, name, placed_frame(timeline, frame), omit, offset)
     for name, image_id in {"background": 2491, "clouds": 2494, "town": 2743, "parchment": 1477}.items():
         source = next((CACHE / "images").glob(f"{image_id}.*"))
@@ -341,6 +345,10 @@ def main():
     animation = extract(xml_path, CACHE / "scripts/ally1.as")
     (DEST / "ally-animation.json").write_text(json.dumps(animation, separators=(",", ":")) + "\n", encoding="utf-8")
     manifest["allyAnimation"] = "ally-animation.json"
+    from extract_collision_geometry import extract as extract_collision
+    collision = extract_collision(xml_path)
+    (DEST / "collision-geometry.json").write_text(json.dumps(collision, separators=(",", ":")) + "\n", encoding="utf-8")
+    manifest["collisionGeometry"] = "collision-geometry.json"
     (DEST / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     summary = {
         "source": "original/elonashooter1.3.swf", "sourceSha256": fingerprint,
@@ -358,6 +366,7 @@ def main():
             "Item quantities and radio labels are rendered by the application",
             "allyBack and allyFront retain source depths around separately selected charaPic poses",
             "sheepShadow and crowShadow preserve shadow-only alpha masks for original hit exclusion",
+            "Ordinary enemy collision uses original filled contours and placement matrices, not bitmap alpha",
             "gameOver hides day-one carry-over control and retired external play-more button"
         ],
         "limitations": [

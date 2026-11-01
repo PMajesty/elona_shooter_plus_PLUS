@@ -8,8 +8,8 @@
   "frameNames": "Original one-based Flash timeline frame numbers as strings",
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
-    "images": 26,
-    "clips": 16,
+    "images": 28,
+    "clips": 17,
     "sounds": 89,
     "fonts": 3
   },
@@ -21,6 +21,7 @@
     "Item quantities and radio labels are rendered by the application",
     "allyBack and allyFront retain source depths around separately selected charaPic poses",
     "sheepShadow and crowShadow preserve shadow-only alpha masks for original hit exclusion",
+    "Ordinary enemy collision uses original filled contours and placement matrices, not bitmap alpha",
     "gameOver hides day-one carry-over control and retired external play-more button"
   ],
   "limitations": [

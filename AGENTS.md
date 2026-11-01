@@ -1,8 +1,14 @@
 # Project instructions
 
 The current scope is a faithful browser port, authorized on 2026-11-01.
-Preserve the original English UI, content and balance, including the separate
-30 Hz animation/frame loop and 20 Hz gameplay timer.
+Preserve the original English UI, content, balance and observable gameplay timing.
+User amendment on 2026-11-01: exact 30 Hz frame and 20 Hz timer rates are not
+requirements. Keep them as reference clocks while useful; modernize scheduling
+when measured movement, firing, reload and enemy behavior remain faithful.
+Investigate the reported late-game hitbox problems in due course. Reproduce them
+in the original, distinguish defects from intended rules, and retain before/after
+regressions for deliberate fixes. Do not preserve a demonstrated bug solely for
+literal parity or rush a speculative hitbox redesign.
 Build complete playable slices in `web/`; label incomplete coverage honestly.
 Use original extracted assets. Do not replace original behavior with invented
 mechanics merely to make a demo work. Record intentional fixes and differences.

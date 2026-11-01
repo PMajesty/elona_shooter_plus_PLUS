@@ -37,6 +37,20 @@
       "originX": 0,
       "originY": 0
     },
+    "loot": {
+      "file": "screens/loot.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "lootBoss": {
+      "file": "screens/lootBoss.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
     "background": {
       "file": "images/background.png",
       "width": 640,
@@ -409,6 +423,18 @@
       "uniqueFrames": 142,
       "characterId": 838
     },
+    "inventorySlot": {
+      "image": "sprites/inventorySlot.png",
+      "json": "sprites/inventorySlot.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 50,
+      "frameHeight": 50,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2121
+    },
     "sheepShadow": {
       "image": "sprites/sheepShadow.png",
       "json": "sprites/sheepShadow.json",
@@ -542,5 +568,6 @@
     "hud": "fonts/hud.ttf",
     "small": "fonts/small.ttf"
   },
-  "allyAnimation": "ally-animation.json"
+  "allyAnimation": "ally-animation.json",
+  "collisionGeometry": "collision-geometry.json"
 }

@@ -3,11 +3,13 @@ const output = document.querySelector('#results');
 const stage = document.querySelector('#stage');
 const PREFIX = 'ELONA_ORACLE:';
 const requestedSuite = new URLSearchParams(location.search).get('suite');
-const suite = ['waves', 'combat'].includes(requestedSuite) ? requestedSuite : 'reload';
+const suite = ['waves', 'combat', 'geometry', 'loot'].includes(requestedSuite) ? requestedSuite : 'reload';
 const suites = {
   reload: {swf:'/reference.swf',build:'/build-report.json',report:'/api/report',clock:'Manual calls to original methods; native frame/timer scheduling is outside this check.'},
   waves: {swf:'/waves-reference.swf',build:'/waves-build-report.json',report:'/api/waves-report',clock:'Synchronous original mission and wave generation under controlled xorshift32; no live enemy AI.'},
   combat: {swf:'/combat-reference.swf',build:'/combat-build-report.json',report:'/api/combat-report',clock:'Synchronous original spawn and single-pellet hit methods under controlled xorshift32; full shotgun spread and native scheduling are outside this check.'},
+  geometry: {swf:'/geometry-reference.swf',build:'/geometry-build-report.json',report:'/api/geometry-report',clock:'Original vector body/shadow point grids after explicit frame setup; one synchronous case per diagnostic frame, not native battle scheduling.'},
+  loot: {swf:'/loot-reference.swf',build:'/loot-build-report.json',report:'/api/loot-report',clock:'Synchronous original item and loot generation under controlled xorshift32; inventory interaction and campaign transitions are separate checks.'},
 };
 const paths = suites[suite];
 document.querySelector('#report-link').href = paths.report;

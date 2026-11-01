@@ -14,6 +14,7 @@ export interface WaveReferenceRecord {
 interface Difference { field: string; expected: unknown; actual: unknown }
 
 function capturePortGeneration(seed: number) {
+  const simulation = new Simulation(seed);
   const prototype = Simulation.prototype as unknown as { random(): number };
   const originalRandom = prototype.random;
   let drawCount = 0;
@@ -23,7 +24,9 @@ function capturePortGeneration(seed: number) {
     return originalRandom.call(this);
   };
   try {
-    const simulation = new Simulation(seed);
+    // Эталон устанавливает seed после generatePlayer, непосредственно перед generateMission(0).
+    simulation.state.rng = seed >>> 0 || 1;
+    (simulation as unknown as { generateOpeningMission(): void }).generateOpeningMission();
     const state = simulation.state;
     return {
       missionLevel: FIRST_DAY.missionLevel, day: state.day, bossWave: state.bossWave,
