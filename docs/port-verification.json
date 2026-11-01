@@ -1,6 +1,6 @@
 {
   "date": "2026-11-01",
-  "milestone": "Opening-battle boss prizes, earned Sheriff skill choices and persistent collision history",
+  "milestone": "Opening-battle rewards, original result settlement and first-town Free Repair",
   "complete_port": false,
   "environment": {
     "os": "Windows",
@@ -10,7 +10,7 @@
     "vite": "8.3.5"
   },
   "automated": {
-    "simulation_tests_passed": 51,
+    "simulation_tests_passed": 58,
     "simulation_tests_failed": 0,
     "typescript": "passed",
     "production_build": "passed",
@@ -25,9 +25,10 @@
       ],
       "scenarios": 96,
       "simulationFrames": 121588,
-      "checkpoints": 1173,
+      "checkpoints": 1255,
       "rewardTransitions": 222,
-      "elapsedMs": 5454,
+      "townActions": 82,
+      "elapsedMs": 5719,
       "collision": "Production ordinary-enemy contours; boss uses the documented rectangular headless fallback",
       "limits": [
         "Port self-consistency, finite state and JSON replay only; not an original-game parity proof",
@@ -115,7 +116,7 @@
       "initial_ammo": 5,
       "enemies_visibly_spawned": true,
       "console_errors_observed": 0,
-      "latest_bundle": "assets/index-BJbtj5OL.js",
+      "latest_bundle": "assets/index-CR09VOvU.js",
       "fidelity_update_new_game": {
         "tick": 1,
         "ammo": 5,
@@ -173,6 +174,26 @@
         "restored_castle_hp": 40,
         "console_errors_observed": 0,
         "screenshot": ".build/browser-qa/earned-skill-release.jpg"
+      },
+      "town_update": {
+        "new_game_proceed_reaches_combat": true,
+        "paused_tick": 0,
+        "ammo": 5,
+        "castle_hp": 40,
+        "result_proceed_enters_town": true,
+        "repair_hp_before": 36,
+        "repair_hp_after": 40,
+        "ap_before": 4,
+        "ap_after": 2,
+        "gold_before_and_after": 823,
+        "original_action_labels_render_above_cards": true,
+        "repair_dialog_rendered": true,
+        "prior_local_save_restored_and_paused": true,
+        "restored_tick": 675,
+        "restored_ammo": 5,
+        "restored_castle_hp": 40,
+        "console_errors_observed": 0,
+        "screenshot": ".build/browser-qa/town-free-repair-release.jpg"
       }
     },
     "boss_health": {
@@ -286,6 +307,49 @@
       ],
       "malformed_exhausted_skill_save_rejected": true,
       "result_preserved_after_invalid_import": true
+    },
+    "town_and_repair": {
+      "migrated_result_gold": 823,
+      "result_proceed_enters_day": 1,
+      "before_repair": {
+        "hp": 36,
+        "maxHp": 40,
+        "ap": 4,
+        "gold": 823
+      },
+      "after_repair": {
+        "hp": 40,
+        "maxHp": 40,
+        "ap": 2,
+        "gold": 823
+      },
+      "original_dialog_title_and_text_rendered": true,
+      "click_outside_modal_dismisses_without_repairing_again": true,
+      "repeat_full_hp_repair_rejected_without_spending_ap": true,
+      "insufficient_ap_fixture": {
+        "hp": 39,
+        "ap": 1,
+        "gold": 823,
+        "unchanged_after_failure": true,
+        "message": "You don't have enough action points!"
+      },
+      "page_reload_continue_exact_export_equality": true,
+      "saved_rng": 2262752108,
+      "inventory": [
+        3,
+        11,
+        117,
+        8,
+        null,
+        null
+      ],
+      "scope": "Result/AP/Free Repair boundary only; frame71 shop/cards/mission/recruit preparation is explicitly pending, Day2 disabled",
+      "rendering_corrections": [
+        "Original town panel offset and action labels layered above card artwork",
+        "Displayed XP uses original exp/10",
+        "Perfect bonus appears in Reward, not Other"
+      ],
+      "console_errors_observed": 0
     }
   },
   "checkpoint_provenance": "Generated using public Simulation API, seed 42 and normal fire/reload inputs with rectangular fallback collision. No state edits. Imported through the normal file picker. These checks are not a complete manual playthrough or parity proof. New boss full/half/dead checks deliberately edit only boss HP/death frame in a copied checkpoint; they are controlled fixtures, not normal-play captures. Older victory/defeat checks predate the source-backed wave RNG correction. Latest loot checkpoint uses post-item-integration New Game with seed42; see .build/browser-qa/loot-expected.json. Older numerical checkpoints above are retained as dated evidence and are not expected outputs for the new initial RNG boundary.",
@@ -306,7 +370,8 @@
     ".build/browser-qa/fidelity-update.jpg",
     ".build/browser-qa/ordinary-loot-inventory.jpg",
     ".build/browser-qa/skill-choice-candidate.jpg",
-    ".build/browser-qa/earned-skill-release.jpg"
+    ".build/browser-qa/earned-skill-release.jpg",
+    ".build/browser-qa/town-free-repair-release.jpg"
   ],
   "preserved_baselines": {
     "original/elonashooter1.3.swf": {
@@ -769,17 +834,45 @@
         "Original current REF labels and category/max-label metadata are captured but are not compared by the current screen adapter",
         "This comparison does not operate original radio buttons or apply a choice"
       ]
+    },
+    "town": {
+      "status": "passed",
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "a3067ee0145054d8d834af0731085a6ba8e218261b7b18abbeef1e4280c261ad",
+      "traceSha256": "443099a3eaaf83a2b101b8aefa32737fbff835d7a85a189baa304d10176be702",
+      "checks": [
+        "First-day normal and perfect result settlement at three seeds",
+        "Result gold/reward/upkeep and source townEvent AP",
+        "Free Repair cost/full healing, repeat and insufficient-AP guards, including guard priority",
+        "HP/AP/gold/day/RNG unchanged by original repair acknowledgment",
+        "RNG draw count and final state"
+      ],
+      "matchedSnapshots": 11,
+      "observedOriginalDialog": {
+        "cardFrame": 2,
+        "text": "Citizens acknowledge your hard work and decided to rebuild the castle walls for free!",
+        "title": "Free Repair!"
+      },
+      "limits": [
+        "Full frame71 shop/card/mission/recruit preparation is explicitly excluded; this is not whole-town parity",
+        "First-day default income/upgrades with no companions or medals, ACTIVE0 and normal mode only",
+        "Original dialog text/card art and rejection messages are captured; DOM presentation and acknowledgment interaction require browser validation",
+        "Simulation has no modal state: acknowledgment comparison checks unchanged game values, not dialog dismissal",
+        "Source total-money statistics and separate wage/income fields are captured but absent from the current production result model",
+        "Rest and day2 are outside this boundary"
+      ]
     }
   },
   "production_recovery": {
-    "previous_package": ".build/elona-shooter-browser-loot-slice.zip",
-    "previous_bundle": "assets/index-CIURmbSX.js",
-    "release_directory": ".build/browser-rewards-release",
-    "current_bundle": "assets/index-BJbtj5OL.js",
-    "candidate_bundle": "assets/index-BJbtj5OL.js",
+    "previous_package": ".build/elona-shooter-browser-rewards-slice.zip",
+    "previous_bundle": "assets/index-BJbtj5OL.js",
+    "release_directory": ".build/browser-town-release",
+    "current_bundle": "assets/index-CR09VOvU.js",
+    "candidate_bundle": "assets/index-CR09VOvU.js",
     "candidate_build_matches_production": true,
-    "copied_release_files_hash_checked": 161,
-    "current_package": ".build/elona-shooter-browser-rewards-slice.zip",
-    "current_package_bytes": 5609710
+    "copied_release_files_hash_checked": 202,
+    "current_package": ".build/elona-shooter-browser-town-slice.zip",
+    "current_package_bytes": 6835440
   }
 }

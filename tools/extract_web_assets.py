@@ -23,7 +23,12 @@ CLIPS = {"charaPic": 677, "enemy_sheep": 910,
          "explosion": 2235, "itemPicture": 2113, "ammoBar": 2698, "radioButton": 2312,
          "grenadeBody": 2275, "grenadeShadow": 2199, "bossHealthFill": 2411}
 BUTTONS = {"button_newGame": 2521, "button_continue": 2542, "button_help": 2579,
-           "button_proceed": 1547, "button_gameMods": 1881}
+           "button_proceed": 1547, "button_gameMods": 1881,
+           "button_townMission": 2753, "button_townCastle": 2763,
+           "button_townChara": 2768, "button_townEquip": 2773,
+           "button_townShop": 2758, "button_townMedal": 2777,
+           "button_townRest": 1601, "button_townHire": 1605,
+           "button_freeRepair": 1642, "button_eventOk": 2434, "button_windowClose": 1497}
 FORCE = False
 
 
@@ -83,7 +88,7 @@ def clip_labels(sprite):
     return labels
 
 
-def static_screen(xml, name, tags, omit=(), offset=(0, 0)):
+def static_screen(xml, name, tags, omit=(), offset=(0, 0), sprite_frames=None):
     out = DEST / "screens" / (name + ".png")
     if out.exists() and not FORCE:
         image = Image.open(out)
@@ -91,6 +96,16 @@ def static_screen(xml, name, tags, omit=(), offset=(0, 0)):
                 "height": image.height, "originX": 0, "originY": 0}
     output = copy.deepcopy(xml)
     target = output.find("tags")
+    # Диалог ремонта выбирает исходную карточку кадра 2 до появления окна.
+    for symbol, frame in (sprite_frames or {}).items():
+        sprite = next(t for t in target if t.get("spriteId") == str(symbol))
+        subtags = sprite.find("subTags")
+        selected = placed_frame(subtags, frame)
+        subtags.clear()
+        subtags.extend(selected)
+        subtags.append(ET.Element("item", type="ShowFrameTag", forceWriteAsLong="false"))
+        subtags.append(ET.Element("item", type="EndTag", forceWriteAsLong="false"))
+        sprite.set("frameCount", "1")
     # Код исходной игры останавливает сестру на кадре stand и прячет реплику.
     sister = next((t for t in target if t.get("spriteId") == "2622"), None)
     if sister is not None:
@@ -203,12 +218,15 @@ def ally_effects(xml, sprite, layer):
 
 
 def buttons(manifest):
-    ids = ",".join(map(str, BUTTONS.values()))
     png_dir, svg_dir = ROOT / ".build/buttons", ROOT / ".build/buttons-svg"
-    if FORCE or not png_dir.exists():
-        ffdec(["-ignorebackground", "-selectid", ids, "-export", "button", png_dir, SOURCE], "buttons")
-        ffdec(["-ignorebackground", "-selectid", ids, "-format", "button:svg", "-export",
-               "button", svg_dir, SOURCE], "buttons-svg")
+    for directory, extension, format_args, log in [(png_dir, "png", [], "buttons"),
+            (svg_dir, "svg", ["-format", "button:svg"], "buttons-svg")]:
+        needed = [value for value in BUTTONS.values()
+                  if FORCE or any(not (directory / f"DefineButton2_{value}" / (state + "." + extension)).exists()
+                                  for state in ("1_up", "2_over", "3_down"))]
+        if needed:
+            ffdec(["-ignorebackground", "-selectid", ",".join(map(str, needed)), *format_args,
+                   "-export", "button", directory, SOURCE], log)
     for name, button_id in BUTTONS.items():
         for state in ["1_up", "2_over", "3_down"]:
             source = png_dir / f"DefineButton2_{button_id}" / (state + ".png")
@@ -260,6 +278,52 @@ def runtime_clips(xml, sprites, manifest):
     (DEST / "sprites/gameOver.json").unlink()
 
 
+def town_layout(xml, sprites):
+    tags = xml.find("tags")
+    definitions = {tag.get("characterID"): tag for tag in tags if tag.get("characterID")}
+
+    def placements(timeline, frame):
+        output = {}
+        for tag in placed_frame(timeline, frame):
+            if not tag.get("name"):
+                continue
+            matrix = tag.find("matrix")
+            a, d = (float(matrix.get(key, "1")) for key in ("scaleX", "scaleY"))
+            b, c = (float(matrix.get(key, "0")) for key in ("rotateSkew0", "rotateSkew1"))
+            x, y = (int(matrix.get(key, "0")) / 20 for key in ("translateX", "translateY"))
+            entry = {"characterId": int(tag.get("characterId")), "x": x, "y": y,
+                     "matrix": [a, b, c, d, x, y], "scaleX": math.hypot(a, b),
+                     "scaleY": math.hypot(c, d), "rotationDegrees": math.degrees(math.atan2(b, a))}
+            definition = definitions.get(tag.get("characterId"))
+            if definition is not None and definition.get("type") == "DefineEditTextTag":
+                bounds = definition.find("bounds")
+                color = definition.find("textColor")
+                entry["text"] = {"fontId": int(definition.get("fontId")),
+                    "fontSize": int(definition.get("fontHeight")) / 20,
+                    "bounds": [int(bounds.get(key)) / 20 for key in ("Xmin", "Ymin", "Xmax", "Ymax")],
+                    "align": int(definition.get("align", "0")),
+                    "color": "#" + "".join(f"{int(color.get(key)):02x}" for key in ("red", "green", "blue")),
+                    "initialHtml": definition.get("initialText", "")}
+            output[tag.get("name")] = entry
+        return output
+
+    root = placements(tags, 71)
+    navigation = {}
+    for name, key in {"mission": "Mission", "castle": "Castle", "chara": "Chara",
+                      "equip": "Equip", "shop": "Shop", "medal": "Medal"}.items():
+        navigation[name] = {**root[name + "Button"], "image": "button_town" + key}
+    # В городе окно стартует с 630; после боя та же анимация стартовала с 590.
+    return {"version": 1, "sourceSha256": ORIGINAL_SHA256, "rootFrame": 71,
+            "menuPosition": {"x": 630 - sum(i ** 1.7 for i in range(16)), "y": -22},
+            "panelImageOffset": {"x": 0, "y": -22}, "navigation": navigation, "rootChildren": root,
+            "mission": {"characterId": 1995, "frame": 40, "image": "townMission", "labelsImage": "townMissionLabels",
+                        "children": placements(sprites[1995].find("subTags"), 40)},
+            "castle": {"characterId": 1995, "frame": 54, "image": "townCastle", "labelsImage": "townCastleLabels",
+                       "children": placements(sprites[1995].find("subTags"), 54)},
+            "repairDialog": {"characterId": 2437, "frame": 1, "image": "eventRepair",
+                             "cardFrame": 2, "children": placements(sprites[2437].find("subTags"), 1)}}
+
+
 def main():
     global FORCE
     parser = argparse.ArgumentParser(description=__doc__)
@@ -304,15 +368,29 @@ def main():
                    "tax", "mc_playMore", "procButton"}
     omit_loot = {"closeButton", "popup", "warning", "procButton"}
     omit_level = {"closeButton", "procButton", "itemDesc", "itemDesc2", "now"}
+    omit_town_nav = {"missionButton", "shopButton", "castleButton", "charaButton", "equipButton", "medalButton"}
     for name, timeline, frame, omit, offset in [
         ("title", tags, 22, omit_title, (0, 0)), ("battle", tags, 27, omit_battle, (0, 0)),
-        ("townHud", tags, 65, omit_battle | {"missionButton", "shopButton", "castleButton", "charaButton", "equipButton", "medalButton"}, (0, 0)),
+        ("townHud", tags, 65, omit_battle | omit_town_nav, (0, 0)),
+        ("townScene", tags, 71, omit_battle | omit_town_nav | {"textCarryOver"}, (0, 0)),
+        ("townMission", sprites[1995].find("subTags"), 40,
+         {"closeButton", "hint2", "act1", "act2", "actRef1", "actRef2"}, (0, -22)),
+        ("townCastle", sprites[1995].find("subTags"), 54,
+         {"closeButton", "hint2", "hint", "unkeep", "locker", "act1", "actRef1"}, (0, -22)),
         ("gene", sprites[1995].find("subTags"), 125, omit_gene, (0, -26)),
         ("result", sprites[1995].find("subTags"), 14, omit_result, (0, -26)),
         ("loot", sprites[1995].find("subTags"), 89, omit_loot, (0, -26)),
         ("lootBoss", sprites[1995].find("subTags"), 100, omit_loot | {"lootText"}, (0, -26)),
         ("level", sprites[1995].find("subTags"), 148, omit_level, (0, -26))]:
         manifest["images"][name] = static_screen(xml, name, placed_frame(timeline, frame), omit, offset)
+    # Подписи лежат выше карточек-действий в исходной временной шкале.
+    for name, frame, labels in [("townMissionLabels", 40, {"actRef1", "actRef2"}),
+                                ("townCastleLabels", 54, {"actRef1"})]:
+        selected = [tag for tag in placed_frame(sprites[1995].find("subTags"), frame)
+                    if tag.get("name") in labels]
+        manifest["images"][name] = static_screen(xml, name, selected, offset=(0, -22))
+    manifest["images"]["eventRepair"] = static_screen(xml, "eventRepair",
+        placed_frame(sprites[2437].find("subTags"), 1), {"title", "text", "okButton"}, sprite_frames={2336: 2})
     for name, image_id in {"background": 2491, "clouds": 2494, "town": 2743, "parchment": 1477}.items():
         source = next((CACHE / "images").glob(f"{image_id}.*"))
         dest = DEST / "images" / (name + ".png")
@@ -321,7 +399,7 @@ def main():
         im = Image.open(dest)
         manifest["images"][name] = {"file": f"images/{name}.png", "width": im.width,
                                     "height": im.height, "originX": 0, "originY": 0}
-    for name, font_id in {"menu": 682, "hud": 2681, "small": 1392}.items():
+    for name, font_id in {"menu": 682, "menuBold": 1608, "hud": 2681, "small": 1392}.items():
         source = next((CACHE / "fonts").glob(f"{font_id}_*"))
         dest = DEST / "fonts" / (name + ".ttf")
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -351,6 +429,8 @@ def main():
     collision = extract_collision(xml_path)
     (DEST / "collision-geometry.json").write_text(json.dumps(collision, separators=(",", ":")) + "\n", encoding="utf-8")
     manifest["collisionGeometry"] = "collision-geometry.json"
+    (DEST / "town-layout.json").write_text(json.dumps(town_layout(xml, sprites), indent=2) + "\n", encoding="utf-8")
+    manifest["townLayout"] = "town-layout.json"
     (DEST / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     summary = {
         "source": "original/elonashooter1.3.swf", "sourceSha256": fingerprint,
@@ -364,6 +444,9 @@ def main():
             "Static screens omit runtime text placeholders and separately rendered controls",
             "Sister is frozen at original stand frame 4 and sisterFire is hidden",
             "townHud applies the original eventGene bgAlpha.alpha=1",
+            "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",
+            "Town action labels are separate original foreground layers above their card buttons",
+            "Town scene and panels omit runtime HUD fields; Free Repair uses original event card frame 2",
             "gene and result retain offset (0,-26); application applies menu slide X offset",
             "Item quantities and radio labels are rendered by the application",
             "allyBack and allyFront retain source depths around separately selected charaPic poses",

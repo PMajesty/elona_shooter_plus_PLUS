@@ -17,7 +17,8 @@ function completeOpeningBattle(): Simulation {
 function asVersion2(state: SimulationState): Record<string, any> {
   const value: Record<string, any> = structuredClone(state);
   value.version = 2;
-  for (const field of ['bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance']) delete value[field];
+  if (value.phase === 'victory' && value.town === null) value.gold += value.result.netReward;
+  for (const field of ['bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance', 'town']) delete value[field];
   delete value.player.traits;
   return value;
 }
@@ -59,7 +60,9 @@ test('a completed opening battle delivers ordinary loot, one boss prize, one ear
   assert.equal(simulation.state.postbattle, 'result');
   assert.deepEqual(simulation.state.skillChoices, []);
   assert.deepEqual(simulation.state.inventory[2], prize);
-  assert.equal(simulation.state.rng, pending.rng);
+  assert.notEqual(simulation.state.rng, pending.rng);
+  assert.equal(simulation.state.gold, pending.gold + pending.result.netReward);
+  assert.deepEqual(simulation.state.town, { ap: 4, preparation: 'pending' });
   simulation = roundTrip(simulation);
   const finished = simulation.toSave();
   assert.equal(simulation.chooseSkill(chosen), false);
@@ -90,7 +93,7 @@ test('v2 battle migration preserves existing item metadata and its combat random
   const untouched = structuredClone(oldSave);
   const migrated = Simulation.fromSave(oldSave);
   assert.deepEqual(oldSave, untouched);
-  assert.equal(migrated.state.version, 3);
+  assert.equal(migrated.state.version, 4);
   assert.equal(migrated.state.rng, oldSave.rng);
   assert.deepEqual(migrated.state.inventory, oldSave.inventory);
   assert.deepEqual(migrated.state.waves, oldSave.waves);

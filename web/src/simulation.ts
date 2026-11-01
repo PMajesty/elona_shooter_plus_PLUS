@@ -13,7 +13,7 @@ export interface EnemyState {
 export interface GrenadeState { uid: number; x: number; y: number; startX: number; startY: number; targetX: number; targetY: number; speed: number; remaining: number }
 export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCount: number }
 export interface SimulationState {
-  version: 3; phase: 'battle' | 'victory' | 'defeat'; day: 1; tick: number; timerRemainder: number; rng: number; nextUid: number;
+  version: 4; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1; tick: number; timerRemainder: number; rng: number; nextUid: number;
   castleHp: number; castleMaxHp: number; gold: number; kills: number; criticalKills: number;
   aimX: number; aimY: number; fireHeld: boolean; pendingShot: boolean;
   player: { classId: 'sheriff'; level: number; exp: number; skillPoints: number; traits: TraitLevels; weaponExp: number; ammo: number; reloadTicks: number; shootTimer: number; accuracyFix: number; rampageTicks: number; grenades: number; grenadeCooldown: number };
@@ -23,11 +23,13 @@ export interface SimulationState {
   inventoryProvenance: 'original-generation' | 'legacy-v1-reconstructed'; legacyReconstructionSeed?: number;
   bossKilled: number; skillChoices: number[]; traitsProvenance: 'known-starting-traits' | 'legacy-reconstructed'; bossKilledProvenance: 'observed' | 'legacy-inferred';
   result: { reward: number; perfectBonus: number; upkeep: number; netReward: number };
+  town: null | { ap: number; preparation: 'pending' };
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; reload?: boolean; grenade?: boolean }
 export interface SimulationEvent { type: 'shot' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold'; x?: number; y?: number; amount?: number; critical?: boolean; enemyUid?: number; goodShotIndex?: number; pellets?: { x: number; y: number }[] }
 export interface SimulationOptions { hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean }
 export type LootArea = 'offers' | 'inventory';
+export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
 
 function inside(rect: Rect, x: number, y: number): boolean { return x > rect[0] && x < rect[1] && y > rect[2] && y < rect[3]; }
 function int(value: number): number { return Math.trunc(value); }
@@ -56,7 +58,7 @@ export class Simulation {
   constructor(seed = Date.now(), options: SimulationOptions = {}) {
     this.options = options;
     this.state = {
-      version: 3, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: seed >>> 0 || 1, nextUid: 1,
+      version: 4, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: seed >>> 0 || 1, nextUid: 1,
       castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, gold: STARTING_CLASS.money, kills: 0, criticalKills: 0,
       aimX: 300, aimY: 240, fireHeld: false, pendingShot: false,
       player: { classId: 'sheriff', level: 1, exp: 0, skillPoints: 0, traits: createSheriffTraits(), weaponExp: 0, ammo: SHOTGUN.magazine, reloadTicks: 0, shootTimer: 0, accuracyFix: 0, rampageTicks: 0, grenades: GRENADE.quantity, grenadeCooldown: 0 },
@@ -64,6 +66,7 @@ export class Simulation {
       enemies: [], grenades: [], loot: [], result: { reward: 0, perfectBonus: 0, upkeep: 0, netReward: 0 },
       inventory: [], lootOffers: Array(8).fill(null), postbattle: 'none', inventoryProvenance: 'original-generation',
       bossKilled: 0, skillChoices: [], traitsProvenance: 'known-starting-traits', bossKilledProvenance: 'observed',
+      town: null,
     };
     this.state.inventory = createStartingInventory(() => this.random());
     this.generateOpeningMission();
@@ -456,7 +459,6 @@ export class Simulation {
     this.state.pendingShot = false;
     const perfectBonus = this.state.noDamage ? FIRST_DAY.reward * 0.3 : 0;
     this.state.result = { reward: FIRST_DAY.reward, perfectBonus, upkeep: FIRST_DAY.upkeep, netReward: FIRST_DAY.reward + perfectBonus - FIRST_DAY.upkeep };
-    this.state.gold += this.state.result.netReward;
     this.state.phase = 'victory';
     this.syncBattleInventory();
     this.prepareOrdinaryLoot(() => this.random());
@@ -511,6 +513,31 @@ export class Simulation {
   private prepareSkillChoices(): void {
     this.state.skillChoices = this.state.player.skillPoints > 0 ? rollSheriffChoices(this.state.player.level, this.state.player.traits, () => this.random()) : [];
     this.state.postbattle = this.state.skillChoices.length > 0 ? 'skill' : 'result';
+    if (this.state.postbattle === 'result') this.prepareResult();
+  }
+
+  private prepareResult(): void {
+    if (this.state.phase !== 'victory' || this.state.postbattle !== 'result' || this.state.town !== null) return;
+    // renewResult тратит бросок fame даже при fame=0; затем townEvent делает два броска ACTIVE=0.
+    this.random();
+    const extraAp = int(this.random() * this.random());
+    this.state.gold += this.state.result.netReward;
+    this.state.town = { ap: 4 + extraAp, preparation: 'pending' };
+  }
+
+  enterTown(): boolean {
+    if (this.state.phase !== 'victory' || this.state.postbattle !== 'result' || this.state.town === null) return false;
+    this.state.phase = 'town';
+    return true;
+  }
+
+  freeRepair(): RepairOutcome {
+    if (this.state.phase !== 'town' || this.state.town === null) return 'unavailable';
+    if (this.state.castleHp === this.state.castleMaxHp) return 'not-damaged';
+    if (this.state.town.ap < 2) return 'not-enough-ap';
+    this.state.town.ap -= 2;
+    this.state.castleHp = this.state.castleMaxHp;
+    return 'repaired';
   }
 
   chooseSkill(id: number): boolean {
@@ -524,7 +551,7 @@ export class Simulation {
   toSave(): SimulationState { return structuredClone(this.state); }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
-    if (!record(value) || ![1, 2, 3].includes(Number(value.version)) || typeof value.version !== 'number' || value.day !== 1 || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat'].includes(value.phase)) throw new Error('Unsupported or invalid save.');
+    if (!record(value) || ![1, 2, 3, 4].includes(Number(value.version)) || typeof value.version !== 'number' || value.day !== 1 || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version !== 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || value.bossWave !== 2 || (value.waveIndex === 5 && value.newWave !== true)) throw new Error('Invalid counters.');
@@ -546,9 +573,14 @@ export class Simulation {
     if (!Array.isArray(value.loot) || value.loot.length > 200 || value.loot.some(item => !Number.isInteger(item) || !Object.hasOwn(BASE_ITEM_FIELDS, item > 1000 ? item - 1000 : item)) || !record(value.result) || ['reward', 'perfectBonus', 'upkeep', 'netReward'].some(key => !finite((value.result as Record<string, unknown>)[key]))) throw new Error('Invalid results.');
     const simulation = new Simulation(1, options);
     simulation.state = structuredClone(value) as unknown as SimulationState;
+    if (value.version !== 4) {
+      simulation.state.town = null;
+      // v1–v3 начисляли итог сразу после боя. Отменяем аванс до единственного нового расчёта.
+      if (simulation.state.phase === 'victory') simulation.state.gold -= simulation.state.result.netReward;
+    }
     // Старый формат не сохранял историю тени; восстанавливаем прежнюю геометрию без новых случайных чисел.
     for (const enemy of simulation.state.enemies) enemy.shadowHit ??= shadowHitAtFrame(enemy.kind, enemy.frame);
-    if (value.version !== 3) {
+    if (Number(value.version) < 3) {
       const state = simulation.state;
       state.player.traits = { ...createSheriffTraits(), [TRAIT.SHERIFF]: state.player.level };
       state.skillChoices = [];
@@ -568,7 +600,7 @@ export class Simulation {
         reconstructionRng >>>= 0;
         return reconstructionRng / 4294967296;
       };
-      simulation.state.version = 3;
+      simulation.state.version = 4;
       simulation.state.inventory = createStartingInventory(reconstructionRandom);
       simulation.state.lootOffers = Array(8).fill(null);
       simulation.state.postbattle = 'none';
@@ -579,14 +611,14 @@ export class Simulation {
     }
     const state = simulation.state;
     if (!Array.isArray(state.inventory) || state.inventory.length !== 6 || Array.from(state.inventory).some(item => item !== null && !validItem(item)) || !Array.isArray(state.lootOffers) || state.lootOffers.length !== 8 || Array.from(state.lootOffers).some(item => item !== null && !validItem(item))) throw new Error('Invalid inventory items.');
-    if (!['none', 'loot', 'boss-loot', 'skill', 'result'].includes(state.postbattle) || (state.phase === 'victory' ? state.postbattle === 'none' : state.postbattle !== 'none') || (!['loot', 'boss-loot'].includes(state.postbattle) && state.lootOffers.some(item => item !== null))) throw new Error('Invalid postbattle stage.');
+    if (!['none', 'loot', 'boss-loot', 'skill', 'result'].includes(state.postbattle) || (state.phase === 'victory' ? state.postbattle === 'none' : state.phase === 'town' ? state.postbattle !== 'result' : state.postbattle !== 'none') || (!['loot', 'boss-loot'].includes(state.postbattle) && state.lootOffers.some(item => item !== null))) throw new Error('Invalid postbattle stage.');
     if (value.version === 2 && !['none', 'loot', 'result'].includes(state.postbattle)) throw new Error('Invalid legacy postbattle stage.');
-    if (state.phase !== 'victory' && (state.inventory[0]?.id !== SHOTGUN.id || state.inventory[0].ammo !== state.player.ammo || state.inventory[0].reloadTime !== state.player.reloadTicks || state.inventory[1]?.id !== GRENADE.id || state.inventory[1].ammo !== state.player.grenades)) throw new Error('Inventory does not match active equipment.');
+    if (['battle', 'defeat'].includes(state.phase) && (state.inventory[0]?.id !== SHOTGUN.id || state.inventory[0].ammo !== state.player.ammo || state.inventory[0].reloadTime !== state.player.reloadTicks || state.inventory[1]?.id !== GRENADE.id || state.inventory[1].ammo !== state.player.grenades)) throw new Error('Inventory does not match active equipment.');
     if (state.inventoryProvenance === 'legacy-v1-reconstructed') {
       if (!Number.isInteger(state.legacyReconstructionSeed) || state.legacyReconstructionSeed! < 1 || state.legacyReconstructionSeed! > 0xffffffff) throw new Error('Invalid legacy inventory provenance.');
     } else if (state.inventoryProvenance !== 'original-generation' || state.legacyReconstructionSeed !== undefined) throw new Error('Invalid inventory provenance.');
-    if (value.version !== 3) {
-      state.version = 3;
+    if (Number(value.version) < 3) {
+      state.version = 4;
       if (state.phase === 'victory' && state.postbattle === 'result') {
         // Старый результат пропускал награды босса и навыки; новые награды расходуют основной поток.
         state.postbattle = 'loot';
@@ -603,6 +635,13 @@ export class Simulation {
       if (state.player.skillPoints < 1 || state.skillChoices.length !== 3 + (state.player.traits[TRAIT.CAPABLE] ?? 0) || state.skillChoices.some(id => !available.includes(id)) || state.lootOffers.some(Boolean)) throw new Error('Invalid pending skill selection.');
     } else if (state.skillChoices.length !== 0) throw new Error('Unexpected pending skill choices.');
     if ((state.postbattle === 'boss-loot' && state.bossKilled === 0) || (state.postbattle === 'result' && state.player.skillPoints !== 0)) throw new Error('Invalid completed rewards.');
+    if (value.version !== 4) {
+      state.version = 4;
+      if (state.phase === 'victory' && state.postbattle === 'result') simulation.prepareResult();
+    }
+    if (state.phase === 'town' || (state.phase === 'victory' && state.postbattle === 'result')) {
+      if (!record(state.town) || !Number.isInteger(state.town.ap) || state.town.ap < 0 || state.town.ap > 4 || state.town.preparation !== 'pending' || (state.phase === 'victory' && state.town.ap !== 4) || state.castleHp <= 0) throw new Error('Invalid first-town state.');
+    } else if (state.town !== null) throw new Error('Town preparation precedes completed rewards.');
     return simulation;
   }
 }

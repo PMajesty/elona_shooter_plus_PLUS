@@ -5,14 +5,15 @@ import { exportSave, readMute, readSave, storeMute, storeSave } from './storage.
 import { OriginalAlly, type OriginalAllyMetadata } from './original-animation.ts';
 import { createLootView } from './loot-view.ts';
 import { createSkillView } from './skill-view.ts';
+import { createTownView, type TownLayout, type TownTab } from './town-view.ts';
 import { alphaMaskHit, ordinaryEnemyHit, type CollisionGeometry } from './collision.ts';
 import './style.css';
 
 interface ImageAsset { file: string; width: number; height: number; originX: number; originY: number }
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string> }
-interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3; appearance: number; simulation: unknown }
-type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat';
+interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4; appearance: number; simulation: unknown }
+type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
 const loadStatus = document.querySelector<HTMLDivElement>('#load-status')!;
@@ -23,6 +24,7 @@ const bootStarted = performance.now();
 const USED_SOUNDS = new Set(['soundClick1', 'soundGun3', 'soundReloading2', 'soundReloaded2', 'soundThrow1', 'soundExp1', 'soundDead3', 'soundDead5', 'soundDead7', 'soundDeadChicken', 'soundDeadBoss1', 'soundDamage1', 'soundPop1', 'soundBattleBegin', 'soundBattleEnd', 'soundKilled', 'soundRampage', 'soundComplete', 'soundGold1', 'soundBgForest']);
 for (let index = 0; index < 5; index++) USED_SOUNDS.add(`soundGoodshot${index}`);
 USED_SOUNDS.add('soundReloaded1');
+for (const key of ['soundBgTown', 'soundRepair1', 'soundBeep', 'soundScroll1']) USED_SOUNDS.add(key);
 let manifest: Manifest;
 let gameScene: ElonaScene;
 
@@ -59,6 +61,7 @@ class ElonaScene extends Phaser.Scene {
   preload(): void {
     this.load.json('ally-animation', assetUrl('ally-animation.json'));
     this.load.json('collision-geometry', assetUrl('collision-geometry.json'));
+    this.load.json('town-layout', assetUrl('town-layout.json'));
     for (const [key, asset] of Object.entries(manifest.images)) this.load.image(key, assetUrl(asset.file));
     for (const [key, asset] of Object.entries(manifest.clips)) this.load.atlas(key, assetUrl(asset.image), assetUrl(asset.json));
     for (const [key, file] of Object.entries(manifest.sounds)) if (USED_SOUNDS.has(key)) this.load.audio(key, assetUrl(file));
@@ -94,11 +97,12 @@ class ElonaScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-TWO', () => { if (this.screen === 'battle' && !this.paused) this.grenadeRequested = true; });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'First playable slice: Sheriff, opening battle, loot, boss prizes, skill choices and save/reload. Other classes, town and later days are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Sheriff opening battle, rewards and town Free Repair are playable. Other town actions, equipment effects, later days and other classes are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
   }
 
   private reset(screen: Screen): void {
+    const keepTownAmbience = this.screen === 'town' && screen === 'town';
     this.screen = screen;
     this.paused = false;
     this.accumulator = 0;
@@ -108,14 +112,15 @@ class ElonaScene extends Phaser.Scene {
     this.root.removeAll(true);
     this.enemySprites.clear(); this.bossFrames.clear(); this.bossBars.clear(); this.grenadeSprites.clear(); this.hud.clear(); this.effects = [];
     this.reloadAnimations = 0;
-    this.pauseLayer = undefined; this.playerSprite = undefined; this.cursor = undefined; this.selection = undefined;
-    this.ambient?.destroy(); this.ambient = undefined;
+    this.pauseLayer = undefined; this.playerSprite = undefined; this.cursor = undefined; this.selection = undefined; this.ammoFill = undefined;
+    if (!keepTownAmbience) { this.ambient?.destroy(); this.ambient = undefined; }
     container.dataset.screen = screen;
     container.dataset.paused = 'false';
     container.dataset.bossBars = '0'; container.dataset.bossHealth = '[]';
     container.dataset.playerFrame = ''; container.dataset.reloadTicks = '0'; container.dataset.reloadAnimations = '0';
     delete container.dataset.lootOffers; delete container.dataset.inventory;
     delete container.dataset.skillChoices; delete container.dataset.selectedTrait; delete container.dataset.traits; delete container.dataset.skillPoints;
+    delete container.dataset.actionPoints; delete container.dataset.townTab; delete container.dataset.repairDialog;
   }
 
   private image(key: string, x = 0, y = 0): Phaser.GameObjects.Image | undefined {
@@ -478,6 +483,7 @@ class ElonaScene extends Phaser.Scene {
 
   private showOutcome(): void {
     if (!this.sim) return;
+    if (this.sim.state.phase === 'town') { this.showTown(); return; }
     if (this.sim.state.phase === 'victory') {
       if (['loot', 'boss-loot'].includes(this.sim.state.postbattle)) { this.showLoot(); return; }
       if (this.sim.state.postbattle === 'skill') { this.showSkillChoice(); return; }
@@ -491,13 +497,15 @@ class ElonaScene extends Phaser.Scene {
     if (state.phase === 'victory') {
       const background = new Set(this.root.list);
       this.image('result');
-      const values = [200, state.gold - 200 - state.result.netReward, state.result.reward, 0, state.result.perfectBonus, 0, -state.result.upkeep, state.gold];
+      const values = [200, state.gold - 200 - state.result.netReward, state.result.reward + state.result.perfectBonus, 0, 0, 0, -state.result.upkeep, state.gold];
       values.forEach((value, index) => this.text(252, 128 + index * 20 + (index === 7 ? 10 : 0), String(value), 12, value < 0 ? '#b02020' : '#14248d', 'Arial'));
       this.text(335, 145, `Day 1 completed.\n\nEnemies defeated: ${state.kills}\nCritical kills: ${state.criticalKills}\nCastle: ${state.castleHp}/${state.castleMaxHp}`, 13).setWordWrapWidth(185);
-      this.originalButton('button_proceed', 160, 301, () => { this.saveGame(); this.showTitle(); });
+      this.originalButton('button_proceed', 160, 301, () => {
+        if (this.sim!.enterTown()) { this.saveGame(false); this.showTown(); }
+      });
       const menu = this.root.list.filter(object => !background.has(object));
       this.root.add(this.add.container(MENU_X, 0, menu));
-      status.textContent = 'Opening battle complete and saved. Town management and later days are the next part of the port.';
+      status.textContent = 'Opening battle complete and saved. Proceed to town.';
     } else {
       this.image('gameOver', 300, 205);
       this.zone(120, 175, 400, 70, () => this.showTitle());
@@ -514,7 +522,7 @@ class ElonaScene extends Phaser.Scene {
     this.hud.get('ammo')?.setText(`${state.player.ammo}/${SHOTGUN.magazine}`);
     this.hud.get('gold')?.setText(String(state.gold));
     this.hud.get('hp')?.setText(`${state.castleHp}/${state.castleMaxHp}`);
-    this.hud.get('level')?.setText(String(state.player.level)); this.hud.get('exp')?.setText(String(state.player.exp));
+    this.hud.get('level')?.setText(String(state.player.level)); this.hud.get('exp')?.setText(String(state.player.exp / 10));
     this.hud.get('grenades')?.setText(`x${state.player.grenades}`);
     this.ammoFill?.setScale(state.player.ammo / SHOTGUN.magazine, 1);
     container.dataset.gold = String(state.gold); container.dataset.hp = String(state.castleHp);
@@ -564,6 +572,34 @@ class ElonaScene extends Phaser.Scene {
     status.textContent = 'Choose a skill, review its improvement, then press Proceed to learn it.';
   }
 
+  private showTown(tab: TownTab = 'mission', repairDialog = false): void {
+    if (!this.sim || this.sim.state.phase !== 'town' || !this.sim.state.town) return;
+    this.reset('town');
+    this.root.add(createTownView(this, this.sim.state, manifest, this.cache.json.get('town-layout') as TownLayout, {
+      select: next => { this.playSound('soundScroll1'); this.showTown(next); },
+      message: value => { status.textContent = value; },
+      repair: () => {
+        const outcome = this.sim!.freeRepair();
+        if (outcome === 'repaired') {
+          this.playSound('soundRepair1'); this.saveGame(false); this.showTown('castle', true);
+        } else {
+          this.playSound('soundBeep');
+          status.textContent = outcome === 'not-damaged' ? 'The castle is not damaged!' : outcome === 'not-enough-ap' ? "You don't have enough action points!" : 'Free Repair is available in town.';
+        }
+      },
+      dismiss: () => { this.playSound('soundClick1'); this.showTown('castle'); },
+    }, tab, repairDialog));
+    this.updateHud();
+    container.dataset.actionPoints = String(this.sim.state.town.ap);
+    container.dataset.townTab = tab ?? 'none';
+    container.dataset.repairDialog = String(repairDialog);
+    container.dataset.inventory = JSON.stringify(this.sim.state.inventory.map(item => item?.id ?? null));
+    if (!this.ambient && this.cache.audio.exists('soundBgTown')) {
+      this.ambient = this.sound.add('soundBgTown', { volume: 0.3, loop: true }); this.ambient.play();
+    }
+    status.textContent = repairDialog ? 'The castle walls are repaired. Click to continue.' : 'Castle → Free Repair restores the walls for 2 AP. Other town actions and the next day are not available yet.';
+  }
+
   togglePause(): void {
     if (this.screen !== 'battle') return;
     this.paused = !this.paused; this.accumulator = 0; this.firePressed = false; this.firingGesture = false;
@@ -582,7 +618,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   makeSave(): PortSave | undefined {
-    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 3, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
+    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 4, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
   }
 
   saveGame(notify = true): boolean {
@@ -595,7 +631,7 @@ class ElonaScene extends Phaser.Scene {
 
   private parseSave(raw: unknown): { simulation: Simulation; appearance: number } {
     const save = raw as Partial<PortSave> | null;
-    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
+    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
     return { simulation: Simulation.fromSave(save.simulation, this.simulationOptions()), appearance: save.appearance! };
   }
 
@@ -623,7 +659,7 @@ async function boot(): Promise<void> {
   const response = await fetch(assetUrl('manifest.json'));
   if (!response.ok) throw new Error('Original assets are missing. Run python tools/extract_web_assets.py from the project folder.');
   manifest = await response.json() as Manifest;
-  const families: Record<string, string> = { menu: 'ElonaMenu', hud: 'ElonaHud', small: 'ElonaSmall' };
+  const families: Record<string, string> = { menu: 'ElonaMenu', menuBold: 'ElonaMenuBold', hud: 'ElonaHud', small: 'ElonaSmall' };
   await Promise.all(Object.entries(manifest.fonts).map(async ([key, file]) => {
     const font = new FontFace(families[key] ?? key, `url("${assetUrl(file)}")`);
     await font.load(); document.fonts.add(font);

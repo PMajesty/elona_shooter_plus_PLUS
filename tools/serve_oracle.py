@@ -15,6 +15,7 @@ REPORTS = {
     "/api/geometry-report": ROOT / ".build/oracle/geometry-browser-report.json",
     "/api/loot-report": ROOT / ".build/oracle/loot-browser-report.json",
     "/api/progression-report": ROOT / ".build/oracle/progression-browser-report.json",
+    "/api/town-report": ROOT / ".build/oracle/town-browser-report.json",
 }
 ROUTES = {
     "/": ROOT / "tools/oracle/index.html",
@@ -31,6 +32,8 @@ ROUTES = {
     "/loot-build-report.json": ROOT / ".build/oracle/loot-build-report.json",
     "/progression-reference.swf": ROOT / ".build/oracle/progression-reference.swf",
     "/progression-build-report.json": ROOT / ".build/oracle/progression-build-report.json",
+    "/town-reference.swf": ROOT / ".build/oracle/town-reference.swf",
+    "/town-build-report.json": ROOT / ".build/oracle/town-build-report.json",
 }
 
 

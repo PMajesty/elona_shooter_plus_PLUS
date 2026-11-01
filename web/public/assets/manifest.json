@@ -23,6 +23,27 @@
       "originX": 0,
       "originY": 0
     },
+    "townScene": {
+      "file": "screens/townScene.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "townMission": {
+      "file": "screens/townMission.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "townCastle": {
+      "file": "screens/townCastle.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
     "gene": {
       "file": "screens/gene.png",
       "width": 620,
@@ -53,6 +74,27 @@
     },
     "level": {
       "file": "screens/level.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "townMissionLabels": {
+      "file": "screens/townMissionLabels.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "townCastleLabels": {
+      "file": "screens/townCastleLabels.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "eventRepair": {
+      "file": "screens/eventRepair.png",
       "width": 620,
       "height": 380,
       "originX": 0,
@@ -205,6 +247,270 @@
       "originX": 24.0,
       "originY": 24.0,
       "characterId": 1881
+    },
+    "button_townMission": {
+      "file": "buttons/button_townMission.png",
+      "width": 139,
+      "height": 61,
+      "originX": 35.25,
+      "originY": 36.2,
+      "characterId": 2753
+    },
+    "button_townMission_over": {
+      "file": "buttons/button_townMission_over.png",
+      "width": 139,
+      "height": 61,
+      "originX": 35.25,
+      "originY": 36.2,
+      "characterId": 2753
+    },
+    "button_townMission_down": {
+      "file": "buttons/button_townMission_down.png",
+      "width": 139,
+      "height": 61,
+      "originX": 35.25,
+      "originY": 36.2,
+      "characterId": 2753
+    },
+    "button_townCastle": {
+      "file": "buttons/button_townCastle.png",
+      "width": 157,
+      "height": 76,
+      "originX": 35.5,
+      "originY": 42.0,
+      "characterId": 2763
+    },
+    "button_townCastle_over": {
+      "file": "buttons/button_townCastle_over.png",
+      "width": 157,
+      "height": 76,
+      "originX": 35.5,
+      "originY": 42.0,
+      "characterId": 2763
+    },
+    "button_townCastle_down": {
+      "file": "buttons/button_townCastle_down.png",
+      "width": 157,
+      "height": 76,
+      "originX": 35.5,
+      "originY": 42.0,
+      "characterId": 2763
+    },
+    "button_townChara": {
+      "file": "buttons/button_townChara.png",
+      "width": 165,
+      "height": 62,
+      "originX": 35.45,
+      "originY": 36.95,
+      "characterId": 2768
+    },
+    "button_townChara_over": {
+      "file": "buttons/button_townChara_over.png",
+      "width": 165,
+      "height": 62,
+      "originX": 35.45,
+      "originY": 36.95,
+      "characterId": 2768
+    },
+    "button_townChara_down": {
+      "file": "buttons/button_townChara_down.png",
+      "width": 165,
+      "height": 62,
+      "originX": 35.45,
+      "originY": 36.95,
+      "characterId": 2768
+    },
+    "button_townEquip": {
+      "file": "buttons/button_townEquip.png",
+      "width": 116,
+      "height": 48,
+      "originX": 35.45,
+      "originY": 36.95,
+      "characterId": 2773
+    },
+    "button_townEquip_over": {
+      "file": "buttons/button_townEquip_over.png",
+      "width": 116,
+      "height": 48,
+      "originX": 35.45,
+      "originY": 36.95,
+      "characterId": 2773
+    },
+    "button_townEquip_down": {
+      "file": "buttons/button_townEquip_down.png",
+      "width": 116,
+      "height": 48,
+      "originX": 35.45,
+      "originY": 36.95,
+      "characterId": 2773
+    },
+    "button_townShop": {
+      "file": "buttons/button_townShop.png",
+      "width": 175,
+      "height": 55,
+      "originX": 35.45,
+      "originY": 37.95,
+      "characterId": 2758
+    },
+    "button_townShop_over": {
+      "file": "buttons/button_townShop_over.png",
+      "width": 175,
+      "height": 55,
+      "originX": 35.45,
+      "originY": 37.95,
+      "characterId": 2758
+    },
+    "button_townShop_down": {
+      "file": "buttons/button_townShop_down.png",
+      "width": 175,
+      "height": 55,
+      "originX": 35.45,
+      "originY": 37.95,
+      "characterId": 2758
+    },
+    "button_townMedal": {
+      "file": "buttons/button_townMedal.png",
+      "width": 172,
+      "height": 68,
+      "originX": 34.45,
+      "originY": 36.95,
+      "characterId": 2777
+    },
+    "button_townMedal_over": {
+      "file": "buttons/button_townMedal_over.png",
+      "width": 172,
+      "height": 68,
+      "originX": 34.45,
+      "originY": 36.95,
+      "characterId": 2777
+    },
+    "button_townMedal_down": {
+      "file": "buttons/button_townMedal_down.png",
+      "width": 172,
+      "height": 68,
+      "originX": 34.45,
+      "originY": 36.95,
+      "characterId": 2777
+    },
+    "button_townRest": {
+      "file": "buttons/button_townRest.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1601
+    },
+    "button_townRest_over": {
+      "file": "buttons/button_townRest_over.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1601
+    },
+    "button_townRest_down": {
+      "file": "buttons/button_townRest_down.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1601
+    },
+    "button_townHire": {
+      "file": "buttons/button_townHire.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1605
+    },
+    "button_townHire_over": {
+      "file": "buttons/button_townHire_over.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1605
+    },
+    "button_townHire_down": {
+      "file": "buttons/button_townHire_down.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1605
+    },
+    "button_freeRepair": {
+      "file": "buttons/button_freeRepair.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1642
+    },
+    "button_freeRepair_over": {
+      "file": "buttons/button_freeRepair_over.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1642
+    },
+    "button_freeRepair_down": {
+      "file": "buttons/button_freeRepair_down.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1642
+    },
+    "button_eventOk": {
+      "file": "buttons/button_eventOk.png",
+      "width": 182,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 2434
+    },
+    "button_eventOk_over": {
+      "file": "buttons/button_eventOk_over.png",
+      "width": 182,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 2434
+    },
+    "button_eventOk_down": {
+      "file": "buttons/button_eventOk_down.png",
+      "width": 182,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 2434
+    },
+    "button_windowClose": {
+      "file": "buttons/button_windowClose.png",
+      "width": 27,
+      "height": 27,
+      "originX": 13.45,
+      "originY": 13.45,
+      "characterId": 1497
+    },
+    "button_windowClose_over": {
+      "file": "buttons/button_windowClose_over.png",
+      "width": 27,
+      "height": 27,
+      "originX": 13.45,
+      "originY": 13.45,
+      "characterId": 1497
+    },
+    "button_windowClose_down": {
+      "file": "buttons/button_windowClose_down.png",
+      "width": 27,
+      "height": 27,
+      "originX": 13.45,
+      "originY": 13.45,
+      "characterId": 1497
     },
     "gameOver": {
       "file": "images/gameOver.png",
@@ -572,9 +878,11 @@
   },
   "fonts": {
     "menu": "fonts/menu.ttf",
+    "menuBold": "fonts/menuBold.ttf",
     "hud": "fonts/hud.ttf",
     "small": "fonts/small.ttf"
   },
   "allyAnimation": "ally-animation.json",
-  "collisionGeometry": "collision-geometry.json"
+  "collisionGeometry": "collision-geometry.json",
+  "townLayout": "town-layout.json"
 }

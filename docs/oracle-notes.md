@@ -639,3 +639,56 @@ combat effects and live visual matching remain separate work. Current REF labels
 and category/max-label metadata are captured but not compared by this screen
 adapter. Browser checks independently cover selecting, previewing, committing,
 reload/Continue and migration from the earlier result screen.
+
+## Original result settlement and Free Repair oracle
+
+`tools/build_town_oracle.py` exercises the original `renewResult` (line 3411),
+`townEvent` (6417), `showEventDialog` Free Repair branch (10561) and
+`procEventDialog` (6624) after actual Sheriff initialization. It prepares the
+original Castle clip for the action, but explicitly does not enter `frame71`.
+Shop stock, cards, next-mission generation, recruits and town-entry medal effects
+are outside this boundary. The shared diagnostic intro/ad skip remains in use.
+
+The capture at 2026-11-01 20:43:14 UTC used `@ruffle-rs/ruffle 0.7.1`. Two
+identical runs each contain ready, 11 snapshots and successful completion;
+all 11 snapshots match the production Simulation methods:
+
+- Six first-day settlements: seeds 42, 1 and 3735928559, with and without a
+  perfect battle. Default upgrades, zero income, no companions/medals and
+  Active 0 yield 40 upkeep, 4 AP and net rewards of 560 or 740. Each settlement
+  consumes all three original fame/AP draws even when their bonuses are zero.
+- Five Free Repair observations: success from 17/40 HP and 2 AP, acknowledgment,
+  repeated use after full repair, damaged walls with 1 AP, and full walls with
+  zero AP. The full-wall check takes priority over the AP check. Success spends
+  2 AP, restores 40 HP and leaves gold/day/RNG unchanged; acknowledgment removes
+  the original dialog without further game-state changes.
+
+The captured original dialog uses card frame 2, title `Free Repair!`, and text
+`Citizens acknowledge your hard work and decided to rebuild the castle walls for free!`
+The original wording is preserved, including its tense. Rejection messages are
+`The castle is not damaged!` and `You don't have enough action points!`.
+
+- Original SWF SHA-256: `4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663`.
+- Instrumented SWF SHA-256: `a3067ee0145054d8d834af0731085a6ba8e218261b7b18abbeef1e4280c261ad`.
+- Captured trace SHA-256: `443099a3eaaf83a2b101b8aefa32737fbff835d7a85a189baa304d10176be702`.
+
+Build verification preserves all 3491 root tags, non-code payloads, ordering and
+frame header; only DoABC tag 2782 changes. Evidence is under
+`.build/oracle/town-*-report.json`. The accepted fixture is
+`web/tests/fixtures/original-town-trace.json`.
+
+Regenerate with `python tools/build_town_oracle.py`, start
+`python tools/serve_oracle.py --port 5176`, then open
+`http://127.0.0.1:5176/?suite=town`. After two identical successful captures,
+run `node --experimental-strip-types scripts/compare-town-reference.ts` from
+`web/`. The focused `node --experimental-strip-types --test tests/town-reference.test.ts`
+uses the accepted fixture without a browser or ignored build cache.
+
+The comparison calculates the production result plan through `finishDay`, then
+reseeds at `prepareResult`; it does not inject the expected reward total.
+Free Repair comparisons use production `enterTown`/`freeRepair`. The Simulation
+has no modal state, so acknowledgment checks unchanged HP/AP/gold/day/RNG only.
+Actual DOM dismissal, card rendering and text layout require separate browser
+validation. Source total-money statistics and separate wage/income fields are
+recorded but absent from the current result model. This is a bounded result and
+repair check, not whole-town or Day 2 parity.

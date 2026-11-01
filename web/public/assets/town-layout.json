@@ -1,0 +1,1023 @@
+{
+  "version": 1,
+  "sourceSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "rootFrame": 71,
+  "menuPosition": {
+    "x": 24.41238023502831,
+    "y": -22
+  },
+  "panelImageOffset": {
+    "x": 0,
+    "y": -22
+  },
+  "navigation": {
+    "mission": {
+      "characterId": 2753,
+      "x": 46.0,
+      "y": 75.0,
+      "matrix": [
+        0.99923706,
+        0.0,
+        0.0,
+        1.0009308,
+        46.0,
+        75.0
+      ],
+      "scaleX": 0.99923706,
+      "scaleY": 1.0009308,
+      "rotationDegrees": 0.0,
+      "image": "button_townMission"
+    },
+    "castle": {
+      "characterId": 2763,
+      "x": 52.4,
+      "y": 126.0,
+      "matrix": [
+        0.9991913,
+        0.0,
+        0.0,
+        1.0,
+        52.4,
+        126.0
+      ],
+      "scaleX": 0.9991913,
+      "scaleY": 1.0,
+      "rotationDegrees": 0.0,
+      "image": "button_townCastle"
+    },
+    "chara": {
+      "characterId": 2768,
+      "x": 45.0,
+      "y": 191.0,
+      "matrix": [
+        0.9992676,
+        0.0,
+        0.0,
+        1.0009003,
+        45.0,
+        191.0
+      ],
+      "scaleX": 0.9992676,
+      "scaleY": 1.0009003,
+      "rotationDegrees": 0.0,
+      "image": "button_townChara"
+    },
+    "equip": {
+      "characterId": 2773,
+      "x": 86.9,
+      "y": 237.0,
+      "matrix": [
+        1.0001373,
+        0.0,
+        0.0,
+        1.0015106,
+        86.9,
+        237.0
+      ],
+      "scaleX": 1.0001373,
+      "scaleY": 1.0015106,
+      "rotationDegrees": 0.0,
+      "image": "button_townEquip"
+    },
+    "shop": {
+      "characterId": 2758,
+      "x": 46.0,
+      "y": 268.0,
+      "matrix": [
+        1.000412,
+        0.0,
+        0.0,
+        1.0010681,
+        46.0,
+        268.0
+      ],
+      "scaleX": 1.000412,
+      "scaleY": 1.0010681,
+      "rotationDegrees": 0.0,
+      "image": "button_townShop"
+    },
+    "medal": {
+      "characterId": 2777,
+      "x": 46.0,
+      "y": 318.0,
+      "matrix": [
+        0.9988556,
+        0.0,
+        0.0,
+        1.000824,
+        46.0,
+        318.0
+      ],
+      "scaleX": 0.9988556,
+      "scaleY": 1.000824,
+      "rotationDegrees": 0.0,
+      "image": "button_townMedal"
+    }
+  },
+  "rootChildren": {
+    "textCarryOver": {
+      "characterId": 2778,
+      "x": 51.8,
+      "y": 30.65,
+      "matrix": [
+        1.0004883,
+        0.0,
+        0.0,
+        0.97636414,
+        51.8,
+        30.65
+      ],
+      "scaleX": 1.0004883,
+      "scaleY": 0.97636414,
+      "rotationDegrees": 0.0,
+      "text": {
+        "fontId": 1535,
+        "fontSize": 8.0,
+        "bounds": [
+          -2.0,
+          -2.0,
+          92.25,
+          11.15
+        ],
+        "align": 0,
+        "color": "#ffffff",
+        "initialHtml": "<p align=\"left\"><font face=\"Arial\" size=\"8\" color=\"#ffffff\" letterSpacing=\"1.000000\" kerning=\"0\">CARRIED OVER</font></p>"
+      }
+    },
+    "moneyText": {
+      "characterId": 2682,
+      "x": 427.0,
+      "y": 8.95,
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.9759064,
+        427.0,
+        8.95
+      ],
+      "scaleX": 1.0,
+      "scaleY": 0.9759064,
+      "rotationDegrees": 0.0,
+      "text": {
+        "fontId": 2681,
+        "fontSize": 16.0,
+        "bounds": [
+          -2.0,
+          -2.0,
+          83.95,
+          21.1
+        ],
+        "align": 0,
+        "color": "#ffffff",
+        "initialHtml": "<p align=\"left\"><font face=\"Leelawadee Bold\" size=\"16\" color=\"#ffffff\" letterSpacing=\"1.000000\" kerning=\"0\"><b>99999999</b></font></p>"
+      }
+    },
+    "customCursor": {
+      "characterId": 2689,
+      "x": 333.0,
+      "y": 152.15,
+      "matrix": [
+        0.17539978,
+        0.0,
+        0.0,
+        0.17381287,
+        333.0,
+        152.15
+      ],
+      "scaleX": 0.17539978,
+      "scaleY": 0.17381287,
+      "rotationDegrees": 0.0
+    },
+    "dayText": {
+      "characterId": 2694,
+      "x": 47.0,
+      "y": 8.95,
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.9759064,
+        47.0,
+        8.95
+      ],
+      "scaleX": 1.0,
+      "scaleY": 0.9759064,
+      "rotationDegrees": 0.0,
+      "text": {
+        "fontId": 2681,
+        "fontSize": 16.0,
+        "bounds": [
+          -2.0,
+          -2.0,
+          53.5,
+          21.1
+        ],
+        "align": 0,
+        "color": "#ffffff",
+        "initialHtml": "<p align=\"left\"><font face=\"Leelawadee Bold\" size=\"16\" color=\"#ffffff\" letterSpacing=\"1.000000\" kerning=\"0\"><b>999</b></font></p>"
+      }
+    },
+    "castleHPText": {
+      "characterId": 2695,
+      "x": 531.0,
+      "y": 8.95,
+      "matrix": [
+        1.0004883,
+        0.0,
+        0.0,
+        0.9759064,
+        531.0,
+        8.95
+      ],
+      "scaleX": 1.0004883,
+      "scaleY": 0.9759064,
+      "rotationDegrees": 0.0,
+      "text": {
+        "fontId": 2681,
+        "fontSize": 16.0,
+        "bounds": [
+          -2.0,
+          -2.0,
+          100.45,
+          21.1
+        ],
+        "align": 0,
+        "color": "#ffffff",
+        "initialHtml": "<p align=\"left\"><font face=\"Leelawadee Bold\" size=\"16\" color=\"#ffffff\" letterSpacing=\"1.000000\" kerning=\"0\"><b>9999/9999</b></font></p>"
+      }
+    },
+    "ammobar": {
+      "characterId": 2698,
+      "x": 290.9,
+      "y": 11.0,
+      "matrix": [
+        1.0005798,
+        0.0,
+        0.0,
+        0.99705505,
+        290.9,
+        11.0
+      ],
+      "scaleX": 1.0005798,
+      "scaleY": 0.99705505,
+      "rotationDegrees": 0.0
+    },
+    "ammoText": {
+      "characterId": 2699,
+      "x": 292.0,
+      "y": 9.95,
+      "matrix": [
+        1.0004578,
+        0.0,
+        0.0,
+        0.9759064,
+        292.0,
+        9.95
+      ],
+      "scaleX": 1.0004578,
+      "scaleY": 0.9759064,
+      "rotationDegrees": 0.0,
+      "text": {
+        "fontId": 2681,
+        "fontSize": 16.0,
+        "bounds": [
+          -2.0,
+          -2.0,
+          107.25,
+          21.1
+        ],
+        "align": 0,
+        "color": "#ffffff",
+        "initialHtml": "<p align=\"left\"><font face=\"Leelawadee Bold\" size=\"16\" color=\"#ffffff\" letterSpacing=\"1.000000\" kerning=\"0\"><b>999/999</b></font></p>"
+      }
+    },
+    "menuButton": {
+      "characterId": 2703,
+      "x": 597.0,
+      "y": 361.35,
+      "matrix": [
+        1.0013123,
+        0.0,
+        0.0,
+        1.0012817,
+        597.0,
+        361.35
+      ],
+      "scaleX": 1.0013123,
+      "scaleY": 1.0012817,
+      "rotationDegrees": 0.0
+    },
+    "lvText": {
+      "characterId": 2710,
+      "x": 518.05,
+      "y": 356.15,
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        518.05,
+        356.15
+      ],
+      "scaleX": 1.0,
+      "scaleY": 1.0,
+      "rotationDegrees": 0.0,
+      "text": {
+        "fontId": 1392,
+        "fontSize": 10.0,
+        "bounds": [
+          -2.0,
+          -2.0,
+          30.9,
+          15.6
+        ],
+        "align": 0,
+        "color": "#ffffff",
+        "initialHtml": "<p align=\"left\"><font face=\"Levenim MT Bold\" size=\"10\" color=\"#ffffff\" letterSpacing=\"1.000000\" kerning=\"0\"><b>99</b></font></p>"
+      }
+    },
+    "expText": {
+      "characterId": 2712,
+      "x": 518.05,
+      "y": 367.3,
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        518.05,
+        367.3
+      ],
+      "scaleX": 1.0,
+      "scaleY": 1.0,
+      "rotationDegrees": 0.0,
+      "text": {
+        "fontId": 1392,
+        "fontSize": 10.0,
+        "bounds": [
+          -2.0,
+          -2.0,
+          30.9,
+          15.6
+        ],
+        "align": 0,
+        "color": "#ffffff",
+        "initialHtml": "<p align=\"left\"><font face=\"Levenim MT Bold\" size=\"10\" color=\"#ffffff\" letterSpacing=\"1.000000\" kerning=\"0\"><b>99</b></font></p>"
+      }
+    },
+    "frenzyBar2": {
+      "characterId": 2715,
+      "x": 207.25,
+      "y": 19.45,
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        1.000473,
+        207.25,
+        19.45
+      ],
+      "scaleX": 1.0,
+      "scaleY": 1.000473,
+      "rotationDegrees": 0.0
+    },
+    "frenzyBar": {
+      "characterId": 2717,
+      "x": 148.0,
+      "y": 9.9,
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        1.000473,
+        148.0,
+        9.9
+      ],
+      "scaleX": 1.0,
+      "scaleY": 1.000473,
+      "rotationDegrees": 0.0
+    },
+    "frenzyText": {
+      "characterId": 2718,
+      "x": 154.0,
+      "y": 11.85,
+      "matrix": [
+        1.0004883,
+        0.0,
+        0.0,
+        0.97636414,
+        154.0,
+        11.85
+      ],
+      "scaleX": 1.0004883,
+      "scaleY": 0.97636414,
+      "rotationDegrees": 0.0,
+      "text": {
+        "fontId": 2681,
+        "fontSize": 12.0,
+        "bounds": [
+          -2.0,
+          -2.0,
+          100.45,
+          16.35
+        ],
+        "align": 0,
+        "color": "#ffffff",
+        "initialHtml": "<p align=\"left\"><font face=\"Leelawadee Bold\" size=\"12\" color=\"#ffffff\" letterSpacing=\"1.000000\" kerning=\"0\"><b>Adrenaline</b></font></p>"
+      }
+    },
+    "apText": {
+      "characterId": 2719,
+      "x": 86.0,
+      "y": 8.95,
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.9759064,
+        86.0,
+        8.95
+      ],
+      "scaleX": 1.0,
+      "scaleY": 0.9759064,
+      "rotationDegrees": 0.0,
+      "text": {
+        "fontId": 2681,
+        "fontSize": 16.0,
+        "bounds": [
+          -2.0,
+          -2.0,
+          53.5,
+          21.1
+        ],
+        "align": 0,
+        "color": "#ffffff",
+        "initialHtml": "<p align=\"left\"><font face=\"Leelawadee Bold\" size=\"16\" color=\"#ffffff\" letterSpacing=\"1.000000\" kerning=\"0\"><b>999</b></font></p>"
+      }
+    },
+    "missionButton": {
+      "characterId": 2753,
+      "x": 46.0,
+      "y": 75.0,
+      "matrix": [
+        0.99923706,
+        0.0,
+        0.0,
+        1.0009308,
+        46.0,
+        75.0
+      ],
+      "scaleX": 0.99923706,
+      "scaleY": 1.0009308,
+      "rotationDegrees": 0.0
+    },
+    "shopButton": {
+      "characterId": 2758,
+      "x": 46.0,
+      "y": 268.0,
+      "matrix": [
+        1.000412,
+        0.0,
+        0.0,
+        1.0010681,
+        46.0,
+        268.0
+      ],
+      "scaleX": 1.000412,
+      "scaleY": 1.0010681,
+      "rotationDegrees": 0.0
+    },
+    "castleButton": {
+      "characterId": 2763,
+      "x": 52.4,
+      "y": 126.0,
+      "matrix": [
+        0.9991913,
+        0.0,
+        0.0,
+        1.0,
+        52.4,
+        126.0
+      ],
+      "scaleX": 0.9991913,
+      "scaleY": 1.0,
+      "rotationDegrees": 0.0
+    },
+    "charaButton": {
+      "characterId": 2768,
+      "x": 45.0,
+      "y": 191.0,
+      "matrix": [
+        0.9992676,
+        0.0,
+        0.0,
+        1.0009003,
+        45.0,
+        191.0
+      ],
+      "scaleX": 0.9992676,
+      "scaleY": 1.0009003,
+      "rotationDegrees": 0.0
+    },
+    "equipButton": {
+      "characterId": 2773,
+      "x": 86.9,
+      "y": 237.0,
+      "matrix": [
+        1.0001373,
+        0.0,
+        0.0,
+        1.0015106,
+        86.9,
+        237.0
+      ],
+      "scaleX": 1.0001373,
+      "scaleY": 1.0015106,
+      "rotationDegrees": 0.0
+    },
+    "medalButton": {
+      "characterId": 2777,
+      "x": 46.0,
+      "y": 318.0,
+      "matrix": [
+        0.9988556,
+        0.0,
+        0.0,
+        1.000824,
+        46.0,
+        318.0
+      ],
+      "scaleX": 0.9988556,
+      "scaleY": 1.000824,
+      "rotationDegrees": 0.0
+    },
+    "vol": {
+      "characterId": 2671,
+      "x": 559.95,
+      "y": 367.35,
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        559.95,
+        367.35
+      ],
+      "scaleX": 1.0,
+      "scaleY": 1.0,
+      "rotationDegrees": 0.0
+    }
+  },
+  "mission": {
+    "characterId": 1995,
+    "frame": 40,
+    "image": "townMission",
+    "labelsImage": "townMissionLabels",
+    "children": {
+      "lootText": {
+        "characterId": 1597,
+        "x": 172.55,
+        "y": 84.0,
+        "matrix": [
+          1.0006104,
+          0.0,
+          0.0,
+          1.0024109,
+          172.55,
+          84.0
+        ],
+        "scaleX": 1.0006104,
+        "scaleY": 1.0024109,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 12.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            180.8,
+            31.9
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">The innkeeper greets you,</font></p><p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">&quot;Rest well, for you will need it!&quot;</font></p>"
+        }
+      },
+      "act1": {
+        "characterId": 1601,
+        "x": 463.95,
+        "y": 97.35,
+        "matrix": [
+          0.17912292,
+          -0.97262573,
+          0.97262573,
+          0.17912292,
+          463.95,
+          97.35
+        ],
+        "scaleX": 0.9889822198236726,
+        "scaleY": 0.9889822198236726,
+        "rotationDegrees": -79.56508727013835
+      },
+      "act2": {
+        "characterId": 1605,
+        "x": 379.0,
+        "y": 96.85,
+        "matrix": [
+          0.98916626,
+          -0.12207031,
+          0.12207031,
+          0.98916626,
+          379.0,
+          96.85
+        ],
+        "scaleX": 0.9966699807388019,
+        "scaleY": 0.9966699807388019,
+        "rotationDegrees": -7.035146177829403
+      },
+      "actRef1": {
+        "characterId": 1610,
+        "x": 408.8,
+        "y": 112.05,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          408.8,
+          112.05
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "actRef2": {
+        "characterId": 1613,
+        "x": 327.5,
+        "y": 79.05,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          327.5,
+          79.05
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "closeButton": {
+        "characterId": 1497,
+        "x": 528.0,
+        "y": 90.95,
+        "matrix": [
+          0.99790955,
+          0.0,
+          0.0,
+          0.99790955,
+          528.0,
+          90.95
+        ],
+        "scaleX": 0.99790955,
+        "scaleY": 0.99790955,
+        "rotationDegrees": 0.0
+      },
+      "hint2": {
+        "characterId": 1614,
+        "x": 166.0,
+        "y": 348.0,
+        "matrix": [
+          1.000412,
+          0.0,
+          0.0,
+          1.0,
+          166.0,
+          348.0
+        ],
+        "scaleX": 1.000412,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 1535,
+          "fontSize": 11.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            340.85,
+            26.1
+          ],
+          "align": 0,
+          "color": "#330000",
+          "initialHtml": "Click a skill to set as a focused skill.\\rThis is multiline test"
+        }
+      }
+    }
+  },
+  "castle": {
+    "characterId": 1995,
+    "frame": 54,
+    "image": "townCastle",
+    "labelsImage": "townCastleLabels",
+    "children": {
+      "page1": {
+        "characterId": 1625,
+        "x": 516.0,
+        "y": 113.0,
+        "matrix": [
+          1.0007935,
+          0.0,
+          0.0,
+          0.99838257,
+          516.0,
+          113.0
+        ],
+        "scaleX": 1.0007935,
+        "scaleY": 0.99838257,
+        "rotationDegrees": 0.0
+      },
+      "page2": {
+        "characterId": 1630,
+        "x": 516.0,
+        "y": 148.0,
+        "matrix": [
+          1.0007935,
+          0.0,
+          0.0,
+          0.99838257,
+          516.0,
+          148.0
+        ],
+        "scaleX": 1.0007935,
+        "scaleY": 0.99838257,
+        "rotationDegrees": 0.0
+      },
+      "lootText": {
+        "characterId": 1638,
+        "x": 185.0,
+        "y": 87.0,
+        "matrix": [
+          1.0006104,
+          0.0,
+          0.0,
+          1.0024109,
+          185.0,
+          87.0
+        ],
+        "scaleX": 1.0006104,
+        "scaleY": 1.0024109,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 12.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            190.85,
+            32.9
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">The chef yells,</font></p><p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">&quot;Upgrades! I love upgrades!</font></p>"
+        }
+      },
+      "act1": {
+        "characterId": 1642,
+        "x": 469.95,
+        "y": 91.4,
+        "matrix": [
+          0.9887085,
+          0.12606812,
+          -0.12606812,
+          0.9887085,
+          469.95,
+          91.4
+        ],
+        "scaleX": 0.9967134336671621,
+        "scaleY": 0.9967134336671621,
+        "rotationDegrees": 7.266452442988114
+      },
+      "actRef1": {
+        "characterId": 1645,
+        "x": 471.0,
+        "y": 73.0,
+        "matrix": [
+          1.0005035,
+          0.0,
+          0.0,
+          1.0,
+          471.0,
+          73.0
+        ],
+        "scaleX": 1.0005035,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "unkeep": {
+        "characterId": 1647,
+        "x": 373.95,
+        "y": 105.9,
+        "matrix": [
+          1.000412,
+          0.0,
+          0.0,
+          1.0,
+          373.95,
+          105.9
+        ],
+        "scaleX": 1.000412,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            57.0,
+            16.0
+          ],
+          "align": 0,
+          "color": "#cc0000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#cc0000\" letterSpacing=\"0.000000\" kerning=\"1\">0 </font></p>"
+        }
+      },
+      "locker": {
+        "characterId": 1650,
+        "x": 462.65,
+        "y": 259.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          462.65,
+          259.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "closeButton": {
+        "characterId": 1497,
+        "x": 528.0,
+        "y": 90.95,
+        "matrix": [
+          0.99790955,
+          0.0,
+          0.0,
+          0.99790955,
+          528.0,
+          90.95
+        ],
+        "scaleX": 0.99790955,
+        "scaleY": 0.99790955,
+        "rotationDegrees": 0.0
+      },
+      "hint2": {
+        "characterId": 1614,
+        "x": 166.0,
+        "y": 348.0,
+        "matrix": [
+          1.000412,
+          0.0,
+          0.0,
+          1.0,
+          166.0,
+          348.0
+        ],
+        "scaleX": 1.000412,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 1535,
+          "fontSize": 11.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            340.85,
+            26.1
+          ],
+          "align": 0,
+          "color": "#330000",
+          "initialHtml": "Click a skill to set as a focused skill.\\rThis is multiline test"
+        }
+      },
+      "hint": {
+        "characterId": 1657,
+        "x": 231.0,
+        "y": 36.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          231.0,
+          36.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      }
+    }
+  },
+  "repairDialog": {
+    "characterId": 2437,
+    "frame": 1,
+    "image": "eventRepair",
+    "cardFrame": 2,
+    "children": {
+      "okButton": {
+        "characterId": 2434,
+        "x": 294.35,
+        "y": 266.1,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          294.35,
+          266.1
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "card": {
+        "characterId": 2336,
+        "x": 255.0,
+        "y": 198.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          255.0,
+          198.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "text": {
+        "characterId": 2435,
+        "x": 300.05,
+        "y": 145.6,
+        "matrix": [
+          1.0006104,
+          0.0,
+          0.0,
+          1.0035248,
+          300.05,
+          145.6
+        ],
+        "scaleX": 1.0006104,
+        "scaleY": 1.0035248,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 12.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            201.85,
+            111.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">Victory! Town falks are overjoyed by the deed you have brought today.</font></p>"
+        }
+      },
+      "title": {
+        "characterId": 2436,
+        "x": 225.7,
+        "y": 115.7,
+        "matrix": [
+          1.0009918,
+          0.0,
+          0.0,
+          1.0018616,
+          225.7,
+          115.7
+        ],
+        "scaleX": 1.0009918,
+        "scaleY": 1.0018616,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 1608,
+          "fontSize": 20.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            254.35,
+            22.0
+          ],
+          "align": 2,
+          "color": "#330000",
+          "initialHtml": "<p align=\"center\"><font face=\"HGPGyoshotai\" size=\"20\" color=\"#330000\" letterSpacing=\"0.000000\" kerning=\"1\"><b>Result</b></font></p>"
+        }
+      }
+    }
+  }
+}

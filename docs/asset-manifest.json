@@ -8,15 +8,18 @@
   "frameNames": "Original one-based Flash timeline frame numbers as strings",
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
-    "images": 29,
+    "images": 68,
     "clips": 17,
     "sounds": 89,
-    "fonts": 3
+    "fonts": 4
   },
   "runtimeAdjustments": [
     "Static screens omit runtime text placeholders and separately rendered controls",
     "Sister is frozen at original stand frame 4 and sisterFire is hidden",
     "townHud applies the original eventGene bgAlpha.alpha=1",
+    "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",
+    "Town action labels are separate original foreground layers above their card buttons",
+    "Town scene and panels omit runtime HUD fields; Free Repair uses original event card frame 2",
     "gene and result retain offset (0,-26); application applies menu slide X offset",
     "Item quantities and radio labels are rendered by the application",
     "allyBack and allyFront retain source depths around separately selected charaPic poses",

@@ -52,6 +52,7 @@ let lastCheckpoint: unknown;
 let inputs: Input[] = [];
 let frames = 0;
 let rewardTransitions = 0;
+let townActions = 0;
 try {
   for (let index = 0; index < seedCount; index++) {
     // Мультипликативная последовательность охватывает разные 32-битные начальные состояния.
@@ -106,13 +107,27 @@ try {
         assert.deepEqual(restored.state, simulation.state, 'Reward save/restore rerolled state.');
         checkpoints++; rewardTransitions++;
       }
+      if (simulation.state.phase === 'victory') {
+        assert.equal(simulation.enterTown(), true);
+        assert.equal(restored.enterTown(), true);
+        assert.deepEqual(restored.state, simulation.state, 'Town entry changed restored state.');
+        lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
+        restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
+        checkpoints++; townActions++;
+        assert.equal(restored.freeRepair(), simulation.freeRepair());
+        assert.deepEqual(restored.state, simulation.state, 'Town repair changed restored state.');
+        lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
+        restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
+        assert.deepEqual(restored.state, simulation.state, 'Town save/restore changed AP, HP or rewards.');
+        checkpoints++; townActions++;
+      }
       assert.deepEqual(Simulation.fromSave(simulation.toSave(), simulationOptions).state, simulation.state);
       results.push({ ...scenario, phase: simulation.state.phase, ticks: simulation.state.tick, kills: simulation.state.kills, checkpoints });
     }
   }
   const report = {
     status: 'passed', seedCount, policies, scenarios: results.length, simulationFrames: frames,
-    checkpoints: results.reduce((sum, result) => sum + result.checkpoints, 0), rewardTransitions,
+    checkpoints: results.reduce((sum, result) => sum + result.checkpoints, 0), rewardTransitions, townActions,
     elapsedMs: Math.round(performance.now() - started),
     collision: 'Production ordinary-enemy contours; boss uses the documented rectangular headless fallback',
     limits: ['Port self-consistency, finite state and JSON replay only; not an original-game parity proof', 'First-day Sheriff only; boss shape geometry not exercised', 'No browser rendering, input latency, audio or wall-clock performance comparison'],

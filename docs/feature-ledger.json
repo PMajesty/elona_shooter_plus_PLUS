@@ -295,7 +295,7 @@
         "MainTimeline:8323 wave progression"
       ],
       "status": "partial",
-      "implemented": "Original mission zero displayed as Day 1, five scheduled waves and result transition.",
+      "implemented": "Original mission zero displayed as Day 1, five scheduled waves, ordered rewards/results and first-town entry. Day 2 remains disabled.",
       "evidence": [
         "web/tests/simulation.test.ts:first mission and completion",
         "docs/port-verification.json:browser_checks.victory_checkpoint",
@@ -303,8 +303,35 @@
       ],
       "unverified": [
         "Native spawn/combat event sequence",
-        "Town-to-next-day loop",
+        "Ordered first-town next-mission preparation and town-to-next-day loop",
         "Later wave patterns and difficulty modifiers"
+      ]
+    },
+    {
+      "id": "original.town.entry",
+      "scope": "Result Proceed, first-town entry, ordered generation, AP and save/resume",
+      "source": [
+        "MainTimeline:1904 result Proceed",
+        "MainTimeline:5073 transition to town",
+        "MainTimeline:3157 frame71",
+        "MainTimeline:6417 townEvent",
+        "MainTimeline:6646 day increment when leaving town"
+      ],
+      "status": "partial",
+      "implemented": "Completed results enter Day 1 town with four AP, retaining gold, HP, items and chosen traits. Entry is idempotent and save/restore preserves town state. town.preparation remains pending; no placeholder generation draws or Day 2 access.",
+      "evidence": [
+        "web/tests/town.test.ts: result settlement, town entry and state persistence",
+        "web/tests/town-reference.test.ts: original result/AP boundary",
+        "docs/port-verification.json: browser version 3 result migration and Day 1 town entry",
+        "web/public/assets/town-layout.json: original root/menu/dialog placement"
+      ],
+      "unverified": [
+        "Original frame71 ordered shop, card, next-mission and recruit generation",
+        "Town-entry medal effects and full generation RNG sequence",
+        "Later days and complete town management"
+      ],
+      "notes": [
+        "Next integration slice must execute and persist the real ordered preparation before enabling Day 2. Equipment and learned skills must affect subsequent combat first."
       ]
     },
     {
@@ -347,6 +374,7 @@
         "web/tests/progression-reference.test.ts: 9 captured original cases across 3 seeds and Capable 0/1/2; 15 previews, candidate order/eligibility and exact RNG",
         "web/tests/progression-save.test.ts:complete opening battle, all reward-stage save/restore, legacy migration and rejected/repeated choices",
         "web/src/skill-view.ts:original-art skill menu and preview selection",
+        "web/src/main.ts:updateHud uses original exp/10 display conversion (MainTimeline8157–8158)",
         "web/docs/progression-notes.md:source formulas, hidden-stat provenance and deferred effects"
       ],
       "unverified": [
@@ -379,7 +407,7 @@
       ],
       "unverified": [
         "Later-day skill-dependent generation contexts",
-        "Loot persistence and equipment effects through town and later days",
+        "Equipment effects and loot persistence through later days",
         "Original tooltip rendering and fading"
       ]
     },
@@ -391,16 +419,21 @@
         "MainTimeline:12274 procCastleMenu",
         "MainTimeline:3587 calcTax",
         "MainTimeline:1660 calcUnkeep",
-        "MainTimeline:3610 wage"
+        "MainTimeline:3610 wage",
+        "MainTimeline:3411 renewResult",
+        "MainTimeline:10561 Free Repair"
       ],
       "status": "partial",
-      "implemented": "Opening battle base reward, perfect bonus and initial storage upkeep only.",
+      "implemented": "Opening reward/perfect bonus/upkeep settled once after reward choices, with the original fame/AP/AP draws; result-table Reward includes the perfect bonus. First-town Free Repair costs two AP, fully heals and spends no gold or RNG. Legacy early-paid results retain their final balance without a second payment.",
       "evidence": [
-        "web/tests/simulation.test.ts:first-battle result"
+        "web/tests/simulation.test.ts:first-battle reward plan",
+        "web/tests/town.test.ts: delayed once-only settlement, legacy balances and repair guards/persistence",
+        "web/tests/town-reference.test.ts: 11 original snapshots covering six settlements and five repair/acknowledgment/repeat/guard cases",
+        "docs/port-verification.json: browser gold823 retained across old-result migration; town HP36/AP4 to HP40/AP2 after repair"
       ],
       "unverified": [
         "Upgrade purchases/effects",
-        "Economy beyond initial result",
+        "Economy beyond initial result and Free Repair",
         "Party wages and town income"
       ]
     },
@@ -413,11 +446,17 @@
         "MainTimeline:11190 search",
         "MainTimeline:5410 generateCard"
       ],
-      "status": "missing",
-      "implemented": "None of the town action/event loop.",
-      "evidence": [],
+      "status": "partial",
+      "implemented": "Original first-town AP initialization and Free Repair action with original dialog/any-click acknowledgment. Full HP is checked before insufficient AP; repeated repair at full HP spends nothing. Other actions are not implemented.",
+      "evidence": [
+        "web/tests/town-reference.test.ts: original action state/RNG comparisons",
+        "web/tests/town.test.ts: action preconditions, AP costs and save/resume",
+        "docs/port-verification.json: browser repair acknowledgment and no-cost full-HP repeat",
+        "docs/port-verification.json: AP1/HP39 repair refusal preserves AP, HP and gold823"
+      ],
       "unverified": [
-        "All event triggers, choices, costs and outcomes"
+        "Search, cards and other town action triggers, choices, costs and outcomes",
+        "Full frame71 preparation and effects on subsequent missions"
       ]
     },
     {
@@ -450,14 +489,16 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot with JSON import/export; version 3 preserves items, boss-kill state, reward stage, pending skill choices, known traits and enemy shadow history. Versions 1/2 migrate with explicit reconstruction provenance; newly owed legacy result rewards are generated once.",
+      "implemented": "One browser slot with JSON import/export; version 4 preserves items, boss-kill state, reward stage, pending skill choices, known traits, enemy shadow history and town AP/preparation. Versions 1–3 migrate with explicit reconstruction provenance; omitted rewards and result/AP preparation run once, preserving final gold without double-payment.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",
-        "web/scripts/soak.ts: 96 seeded scenarios, 1173 checkpoints, 222 reward transitions and 121588 frames; exact state/event replay equality",
+        "web/scripts/soak.ts: 96 seeded scenarios, 1255 checkpoints, 222 reward transitions, 82 town actions and 121588 frames; exact state/event replay equality",
         "web/tests/inventory-save.test.ts: version migration, inventory validation and no-reroll persistence",
         "web/tests/progression-save.test.ts: v1/v2 battle and result migrations plus reward/choice persistence",
-        "web/tests/enemy-shadow.test.ts:missing-history fallback without RNG draws and invalid shadow-field rejection"
+        "web/tests/enemy-shadow.test.ts:missing-history fallback without RNG draws and invalid shadow-field rejection",
+        "web/tests/town.test.ts: v1–v3 paid-balance migration, completed result/AP initialization, town persistence and invalid AP/stage rejection",
+        "docs/port-verification.json: exact export equality before/after town reload and Continue, including RNG2262752108"
       ],
       "unverified": [
         "Six-slot parity",
@@ -468,6 +509,7 @@
         "Current JSON format accepts only browser-port saves; it is not Flash SharedObject-compatible.",
         "Version 1 browser saves lacked generated item metadata. Reconstructed metadata has explicit provenance; original Flash save conversion remains missing.",
         "Legacy trait and boss-kill information is reconstructed/inferred with explicit provenance; missing hidden stats remain unknown. Battle RNG is preserved, while previously omitted result rewards consume normal RNG once.",
+        "Versions 1–3 paid settlement before reward selection. Version 4 reverses that advance for pending rewards, pays once at results and preserves the final balance; completed old results receive missing result/AP draws once.",
         "Old enemy saves without shadow history keep their former frame-derived behavior; subsequent transitions persist the flag."
       ]
     },
@@ -479,12 +521,13 @@
         "ally1 and enemy_* frame scripts in original SWF"
       ],
       "status": "partial",
-      "implemented": "Selected original assets and reconstructed character timeline layers in the playable opening slice.",
+      "implemented": "Selected original assets and reconstructed character timeline layers in the playable opening slice, including the first-town mission/castle menus and Free Repair dialog.",
       "evidence": [
         "docs/asset-manifest.json",
         "docs/ui-reference.md",
         "docs/port-verification.json:screenshots",
-        "web/src/main.ts:charaPic nearest filtering matches original non-smoothed bitmap fills; ordinary browser inspected"
+        "web/src/main.ts:charaPic nearest filtering matches original non-smoothed bitmap fills; ordinary browser inspected",
+        "web/src/town-view.ts: original town foreground labels remain above card artwork"
       ],
       "unverified": [
         "Complete scene/state visual comparison",

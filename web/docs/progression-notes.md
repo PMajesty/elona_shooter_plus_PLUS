@@ -5,7 +5,7 @@ earned skill choices, then results. `Simulation.finishLoot()` advances either
 loot stage. `chooseSkill(id)` accepts only a displayed, improvable choice,
 spends one pending point, and creates the next choice list only if another point
 remains. Generated offers and choice IDs live in the save; viewing or restoring
-a version 3 stage does not reroll them. A boss that survives mission completion
+a current-version stage does not reroll them. A boss that survives mission completion
 does not earn a prize.
 
 `progression.ts` preserves the original numeric IDs and Sheriff candidate order.
@@ -37,9 +37,10 @@ low-HP description; this discrepancy is recorded, not silently corrected here.
 
 ## Save migration
 
-Version 3 adds `bossKilled`, `skillChoices`, `player.traits`,
+Version 3 added `bossKilled`, `skillChoices`, `player.traits`,
 `traitsProvenance` and `bossKilledProvenance`, and the `boss-loot` / `skill`
-postbattle stages. Version 1 and 2 inputs are cloned before migration.
+postbattle stages. Version 4 adds first-town AP and moves the once-only gold
+settlement to the result stage. All older inputs are cloned before migration.
 
 Battle migration preserves the saved combat RNG, player counters, enemies,
 waves and existing item instances. Known starting traits are reconstructed,
@@ -51,15 +52,56 @@ values.
 
 A legacy result screen omitted boss and skill rewards. Migration resumes at
 the first still-owed stage. Newly generated boss offers and skill choices consume
-the normal saved RNG once; the resulting version 3 save persists them. This can
+the normal saved RNG once; the resulting current save persists them. This can
 advance the RNG of a migrated completed result, as new rewards are being delivered.
-Reopening that version 3 save leaves it unchanged.
+Reopening that migrated save leaves it unchanged.
 
 Version 1 still lacks item metadata. Its previously established separate
 reconstruction stream restores starter items and ordinary offers from only the
 recorded loot queue, without advancing combat RNG. It does not invent a missing
 guaranteed loot item. Later, newly delivered boss/skill rewards use the normal
 simulation RNG. Version 2 inventory and collected item modifications are retained.
+
+Versions 1–3 paid the result balance immediately at battle completion. Migration
+subtracts that recorded net payment from pending rewards, then the result stage
+restores it once. The final gold balance is preserved. A version 3 completed
+result retains its final balance while receiving the missing result RNG draws
+and AP initialization once. Battle saves keep their combat RNG unchanged.
+
+## First-town and Free Repair boundary
+
+The reward plan is recorded at battle completion, but gold is credited only
+after all reward choices finish. `prepareResult()` consumes the original fame
+draw even with fame zero, followed by the two normal `townEvent()` draws even
+with Active zero. The first-day Sheriff receives four AP. The persistent
+`town: {ap, preparation: 'pending'}` is also the once-only settlement marker;
+pending rewards, battle and defeat have `town: null`.
+
+`enterTown()` accepts only completed victory/results and changes the phase to
+`town`, keeping Day 1 and `postbattle: 'result'`. It spends no RNG and cannot
+reset AP on repeat. `freeRepair()` is available only in town. It checks full HP
+before insufficient AP; on success it spends two AP, restores maximum HP and
+changes neither gold nor RNG. A repeated repair at full HP costs nothing.
+There is no daily-used flag. Modal acknowledgment is UI state, while repaired
+HP, AP, inventory and the town phase persist through saves.
+
+This is the first-town **actions boundary**, not complete original town entry.
+Original `frame71` generates shop stock, cards, the next mission, a recruit and
+medal adjustments before saving. Those generators are still pending; no dummy
+random draws are inserted for them. `town.preparation` remains `pending`, and
+Day 2 cannot start. Its saved RNG is the exact port boundary for adding the real
+preparation sequence later. Equipment selection and learned skills must affect
+combat before another day is enabled.
+
+Town saves accept rearranged inventory. Validation requires completed rewards,
+positive castle HP, integer AP in 0–4 and the explicit pending preparation marker.
+Results before town entry must still have all four AP. It rejects town state on
+unfinished rewards or battle saves and rejects unsupported Day 2 data.
+
+Source anchors: `renewResult`, 3411; `townEvent`, 6417; `frame71`, 3157;
+`showEventDialog` Free Repair branch, 10561; `noAp`, 4743; castle action,
+13530; `procEventDialog`, 6620. The day increments only when the sleep dialog
+starts the next battle, at 6646.
 
 ## Source anchors and validation boundary
 
