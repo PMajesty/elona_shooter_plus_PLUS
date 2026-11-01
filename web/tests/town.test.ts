@@ -29,7 +29,7 @@ function restore(simulation: Simulation): Simulation {
 function legacyVictory(simulation: Simulation, version: 1 | 2 | 3): Record<string, any> {
   const value: Record<string, any> = simulation.toSave();
   if (value.town === null) value.gold += value.result.netReward;
-  value.version = version; delete value.town;
+  value.version = version; delete value.town; delete value.totalMoney;
   if (version < 3) {
     for (const field of ['bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance']) delete value[field];
     delete value.player.traits;
@@ -55,6 +55,7 @@ test('settlement waits for the final reward, consumes the three original result 
     simulation.chooseSkill(simulation.state.skillChoices[0]);
     assert.equal(draws, 3);
     assert.equal(simulation.state.gold, perfect ? 940 : 760);
+    assert.equal(simulation.state.totalMoney, perfect ? 780 : 600);
     assert.deepEqual(simulation.state.town, { ap: 4, preparation: 'pending' });
     const result = simulation.toSave();
     boundary.prepareResult();
@@ -65,7 +66,11 @@ test('settlement waits for the final reward, consumes the three original result 
     assert.equal(simulation.state.phase, 'town');
     assert.equal(simulation.state.day, 1);
     assert.equal(simulation.state.postbattle, 'result');
-    assert.equal(simulation.state.rng, result.rng);
+    assert.notEqual(simulation.state.rng, result.rng);
+    assert.equal(simulation.state.town?.preparation, 'ready');
+    assert.equal(simulation.state.town?.ap, 4);
+    assert.equal(simulation.state.gold, result.gold);
+    assert.equal(simulation.state.totalMoney, result.totalMoney);
     const entered = simulation.toSave();
     assert.equal(simulation.enterTown(), false);
     simulation.tick({ firePressed: true, grenade: true, reload: true });
@@ -121,13 +126,14 @@ test('version 1–3 pending reward migration reverses early payment and restores
     const untouched = structuredClone(oldSave);
     let migrated = Simulation.fromSave(oldSave);
     assert.deepEqual(oldSave, untouched);
-    assert.equal(migrated.state.version, 4);
+    assert.equal(migrated.state.version, 5);
     assert.equal(migrated.state.gold, oldSave.gold - oldSave.result.netReward);
     assert.equal(migrated.state.rng, oldSave.rng);
     assert.equal(migrated.state.town, null);
     migrated = restore(migrated);
     completeRewards(migrated);
     assert.equal(migrated.state.gold, oldSave.gold);
+    assert.equal(migrated.state.totalMoney, oldSave.result.reward + oldSave.result.perfectBonus);
     assert.equal(migrated.state.town!.ap, 4);
     migrated = restore(migrated);
     migrated.enterTown();
@@ -153,12 +159,40 @@ test('an old version 3 completed result receives AP without receiving its settle
   restore(migrated);
 });
 
+test('version 4 town migration prepares its missing stock once without repeating settlement or repair', () => {
+  const simulation = afterBattle();
+  completeRewards(simulation);
+  const oldSave: Record<string, any> = simulation.toSave();
+  oldSave.version = 4; delete oldSave.totalMoney;
+  oldSave.phase = 'town'; oldSave.town = { ap: 2, preparation: 'pending' };
+  oldSave.castleHp = 40; oldSave.lootOffers.fill(null);
+  const untouched = structuredClone(oldSave);
+  const migrated = Simulation.fromSave(oldSave);
+  assert.deepEqual(oldSave, untouched);
+  assert.equal(migrated.state.version, 5);
+  assert.equal(migrated.state.phase, 'town');
+  assert.equal(migrated.state.town?.preparation, 'ready');
+  assert.equal(migrated.state.town?.ap, 2);
+  assert.equal(migrated.state.castleHp, 40);
+  assert.equal(migrated.state.gold, oldSave.gold);
+  assert.equal(migrated.state.totalMoney, oldSave.result.reward + oldSave.result.perfectBonus);
+  assert.deepEqual(migrated.state.inventory, oldSave.inventory);
+  assert.deepEqual(migrated.state.player, oldSave.player);
+  assert.notEqual(migrated.state.rng, oldSave.rng);
+  assert.deepEqual(Simulation.fromSave(oldSave).state, migrated.state);
+  const prepared = migrated.toSave();
+  assert.equal(migrated.enterTown(), false);
+  assert.deepEqual(migrated.toSave(), prepared);
+  restore(migrated);
+});
+
 test('town save validation rejects impossible phases, missing preparation and invalid AP', () => {
   const simulation = afterBattle(); completeRewards(simulation); simulation.enterTown();
   const saved = simulation.toSave();
   for (const change of [
-    { town: null }, { town: undefined }, { town: { ap: -1, preparation: 'pending' } },
-    { town: { ap: 5, preparation: 'pending' } }, { town: { ap: 1.5, preparation: 'pending' } },
+    { town: null }, { town: undefined }, { town: { ...saved.town, ap: -1 } },
+    { town: { ...saved.town, ap: 5 } }, { town: { ...saved.town, ap: 1.5 } },
+    { town: { ap: 4, preparation: 'pending' } },
     { town: { ap: 4, preparation: 'complete' } }, { postbattle: 'loot' },
     { castleHp: 0 }, { day: 2 }, { version: 3 }, { phase: 'battle' },
     { phase: 'victory', town: { ap: 2, preparation: 'pending' } },

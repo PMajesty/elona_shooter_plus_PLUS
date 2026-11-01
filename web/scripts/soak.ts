@@ -3,6 +3,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { Simulation, type Input, type SimulationOptions } from '../src/simulation.ts';
+import { isOccupiedItem } from '../src/items.ts';
 import { ENEMIES } from '../src/content.ts';
 import { ordinaryEnemyHit, type CollisionGeometry } from '../src/collision.ts';
 
@@ -85,8 +86,8 @@ try {
         assert.ok(rewardActions++ < 30, 'Earned rewards did not reach results.');
         const state = simulation.state;
         if (state.postbattle === 'loot' || state.postbattle === 'boss-loot') {
-          const offer = state.lootOffers.findIndex(item => item !== null);
-          const slot = state.inventory.findIndex(item => item === null);
+          const offer = state.lootOffers.findIndex(isOccupiedItem);
+          const slot = state.inventory.findIndex(item => !isOccupiedItem(item));
           if (offer >= 0 && slot >= 0) {
             assert.equal(simulation.collectLoot(offer, slot), true);
             assert.equal(restored.collectLoot(offer, slot), true);
@@ -120,6 +121,15 @@ try {
         restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
         assert.deepEqual(restored.state, simulation.state, 'Town save/restore changed AP, HP or rewards.');
         checkpoints++; townActions++;
+        // Продажа освобождает слот с сохранением метаданных; покупка переносит весь предмет.
+        assert.notEqual(simulation.sellTownItem(0), null);
+        assert.notEqual(restored.sellTownItem(0), null);
+        assert.deepEqual(restored.state, simulation.state, 'Town sale changed restored state.');
+        assert.equal(simulation.buyStock(0, 0), restored.buyStock(0, 0));
+        assert.deepEqual(restored.state, simulation.state, 'Town purchase changed restored state.');
+        lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
+        restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
+        checkpoints++; townActions += 2;
       }
       assert.deepEqual(Simulation.fromSave(simulation.toSave(), simulationOptions).state, simulation.state);
       results.push({ ...scenario, phase: simulation.state.phase, ticks: simulation.state.tick, kills: simulation.state.kills, checkpoints });

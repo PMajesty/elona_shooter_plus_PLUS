@@ -686,9 +686,66 @@ uses the accepted fixture without a browser or ignored build cache.
 
 The comparison calculates the production result plan through `finishDay`, then
 reseeds at `prepareResult`; it does not inject the expected reward total.
-Free Repair comparisons use production `enterTown`/`freeRepair`. The Simulation
-has no modal state, so acknowledgment checks unchanged HP/AP/gold/day/RNG only.
+Free Repair comparisons call production `freeRepair` from controlled town state.
+They exclude `enterTown`, which now also prepares the shop and other town state;
+that preparation has its own reference below. The Simulation has no modal state,
+so acknowledgment checks unchanged HP/AP/gold/day/RNG only.
 Actual DOM dismissal, card rendering and text layout require separate browser
-validation. Source total-money statistics and separate wage/income fields are
-recorded but absent from the current result model. This is a bounded result and
-repair check, not whole-town or Day 2 parity.
+validation. Source earned-money totals are now compared directly. Separate
+wage/income fields are recorded but absent from the current result model. This
+is a bounded result and repair check, not whole-town or Day 2 parity.
+
+## Original ordered first-town preparation oracle
+
+`tools/build_town_preparation_oracle.py` extracts the original fresh-entry
+preparation block from `frame71` (lines 3186–3211) and the subsequent search-state
+initialization (3224–3227). After actual Sheriff initialization, it executes the
+original `generateShop`, `generateCard`, `generateMission(game.day)`,
+`generateRecruit`, medal checks and flag resets in their source order. Only
+`saveGame()` I/O is replaced by an observation of the RNG boundary; the actual
+source generator methods remain unchanged. The diagnostic intro/ad skip remains
+in use. This is preparation logic, not the whole town timeline or its UI.
+
+The capture at 2026-11-01 21:04:34 UTC used `@ruffle-rs/ruffle 0.7.1` in the
+supported in-app browser. Two identical runs each contain ready, 16 snapshots
+and successful completion. All 16 snapshots matched on the first comparison:
+
+- Nine fresh-slot seeds exercise all nine recruit classes through original
+  random class selection, including Militia's extra equipment and Guard.
+- Three cases retain prior offer instances, including inactive `num = 0` slots.
+- Three cases collect prior offers through original `swapStuff` before preparing
+  the shop; the resulting empty cells retain exactly their source fields.
+- One case starts with an existing search-state value and skips its final draw.
+
+Comparison covers all 33 fields of every shop slot, including inactive item
+metadata; five unrevealed cards; the complete generated mission configuration;
+recruit identity, stats, nonzero traits and generated equipment; town flags;
+search state; exact RNG draw count/state at the source save boundary and after
+search initialization. Completely uninitialized slots are checked as raw
+`num = 0`, `value = 0` and undefined remaining fields, not confused with formerly
+occupied slots. An extra-draw negative control fails the independent comparison.
+
+The scope is first-town day 1, normal mode, default upgrades and no medals.
+The next mission is prepared at level 1 while the calendar remains day 1; no
+waves are generated yet. The port persists the complete prepared state after
+initializing search state, avoiding the original save-before-search ordering.
+Shop transactions, card actions, recruiting/hiring, upgrades, Rest and Day 2
+combat require their own integration checks. Older port saves cannot reconstruct
+item metadata they previously discarded.
+
+- Original SWF SHA-256: `4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663`.
+- Instrumented SWF SHA-256: `184d3088ccf22a5e66aa27ca80c7f2f12153855517e1face72d5b8fed600e9c6`.
+- Captured trace SHA-256: `980102e9439db74de3ce83d9e9db9b24febeb03b5da23b4bd5534e17bf52f652`.
+
+Build verification preserves all 3491 root tags, non-code payloads, ordering and
+frame header; only DoABC tag 2782 changes. Reports are under
+`.build/oracle/town-preparation-*-report.json`; the accepted source fixture is
+`web/tests/fixtures/original-town-preparation-trace.json`.
+
+Regenerate with `python tools/build_town_preparation_oracle.py`, start
+`python tools/serve_oracle.py --port 5176`, then open
+`http://127.0.0.1:5176/?suite=town-preparation` in a supported visible browser.
+After two successful identical captures, run `npm.cmd run test:town-preparation-reference`
+from `web/`. The ordinary test suite uses the accepted fixture without requiring
+a browser or ignored build cache. Expected state comes from the captured
+ActionScript, never from TypeScript generation.

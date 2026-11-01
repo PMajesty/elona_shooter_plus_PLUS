@@ -21,13 +21,15 @@ DEST = ROOT / "web/public/assets"
 CLIPS = {"charaPic": 677, "enemy_sheep": 910,
          "enemy_chicken": 1063, "enemy_rat": 1295, "enemy_crow": 981,
          "explosion": 2235, "itemPicture": 2113, "ammoBar": 2698, "radioButton": 2312,
-         "grenadeBody": 2275, "grenadeShadow": 2199, "bossHealthFill": 2411}
+         "grenadeBody": 2275, "grenadeShadow": 2199, "bossHealthFill": 2411, "shopCoin": 1442}
 BUTTONS = {"button_newGame": 2521, "button_continue": 2542, "button_help": 2579,
            "button_proceed": 1547, "button_gameMods": 1881,
            "button_townMission": 2753, "button_townCastle": 2763,
            "button_townChara": 2768, "button_townEquip": 2773,
            "button_townShop": 2758, "button_townMedal": 2777,
            "button_townRest": 1601, "button_townHire": 1605,
+           "button_shopRefresh": 1807, "button_shopUpgrade": 1815,
+           "button_dialogYes": 2128, "button_dialogNo": 2126,
            "button_freeRepair": 1642, "button_eventOk": 2434, "button_windowClose": 1497}
 FORCE = False
 
@@ -320,6 +322,13 @@ def town_layout(xml, sprites):
                         "children": placements(sprites[1995].find("subTags"), 40)},
             "castle": {"characterId": 1995, "frame": 54, "image": "townCastle", "labelsImage": "townCastleLabels",
                        "children": placements(sprites[1995].find("subTags"), 54)},
+            "shop": {"characterId": 1995, "frame": 80, "image": "townShop", "labelsImage": "townShopLabels",
+                     "children": placements(sprites[1995].find("subTags"), 80),
+                     "slots": {"stock": {"count": 8, "sourceStart": 0, "x": 140, "y": 160, "columns": 8, "stepX": 50, "op": 0},
+                               "inventory": {"initialCount": 6, "sourceStart": 20, "x": 140, "y": 250, "columns": 8, "stepX": 50, "stepY": 48, "op": 1}}},
+            "inventorySlot": {"characterId": 2121, "children": placements(sprites[2121].find("subTags"), 1)},
+            "saleDialog": {"characterId": 2131, "frame": 1, "image": "shopSaleDialog",
+                           "children": placements(sprites[2131].find("subTags"), 1)},
             "repairDialog": {"characterId": 2437, "frame": 1, "image": "eventRepair",
                              "cardFrame": 2, "children": placements(sprites[2437].find("subTags"), 1)}}
 
@@ -377,6 +386,8 @@ def main():
          {"closeButton", "hint2", "act1", "act2", "actRef1", "actRef2"}, (0, -22)),
         ("townCastle", sprites[1995].find("subTags"), 54,
          {"closeButton", "hint2", "hint", "unkeep", "locker", "act1", "actRef1"}, (0, -22)),
+        ("townShop", sprites[1995].find("subTags"), 80,
+         {"closeButton", "hint2", "warning", "popup", "actHelp", "act1", "act2", "actRef1", "actRef2"}, (0, -22)),
         ("gene", sprites[1995].find("subTags"), 125, omit_gene, (0, -26)),
         ("result", sprites[1995].find("subTags"), 14, omit_result, (0, -26)),
         ("loot", sprites[1995].find("subTags"), 89, omit_loot, (0, -26)),
@@ -385,12 +396,15 @@ def main():
         manifest["images"][name] = static_screen(xml, name, placed_frame(timeline, frame), omit, offset)
     # Подписи лежат выше карточек-действий в исходной временной шкале.
     for name, frame, labels in [("townMissionLabels", 40, {"actRef1", "actRef2"}),
-                                ("townCastleLabels", 54, {"actRef1"})]:
+                                ("townCastleLabels", 54, {"actRef1"}),
+                                ("townShopLabels", 80, {"actRef1", "actRef2"})]:
         selected = [tag for tag in placed_frame(sprites[1995].find("subTags"), frame)
                     if tag.get("name") in labels]
         manifest["images"][name] = static_screen(xml, name, selected, offset=(0, -22))
     manifest["images"]["eventRepair"] = static_screen(xml, "eventRepair",
         placed_frame(sprites[2437].find("subTags"), 1), {"title", "text", "okButton"}, sprite_frames={2336: 2})
+    manifest["images"]["shopSaleDialog"] = static_screen(xml, "shopSaleDialog",
+        placed_frame(sprites[2131].find("subTags"), 1), {"question", "yes", "no", "pop1", "pop2", "poparrow"})
     for name, image_id in {"background": 2491, "clouds": 2494, "town": 2743, "parchment": 1477}.items():
         source = next((CACHE / "images").glob(f"{image_id}.*"))
         dest = DEST / "images" / (name + ".png")
@@ -399,7 +413,7 @@ def main():
         im = Image.open(dest)
         manifest["images"][name] = {"file": f"images/{name}.png", "width": im.width,
                                     "height": im.height, "originX": 0, "originY": 0}
-    for name, font_id in {"menu": 682, "menuBold": 1608, "hud": 2681, "small": 1392}.items():
+    for name, font_id in {"menu": 682, "menuBold": 1608, "hud": 2681, "small": 1392, "ui": 1535}.items():
         source = next((CACHE / "fonts").glob(f"{font_id}_*"))
         dest = DEST / "fonts" / (name + ".ttf")
         dest.parent.mkdir(parents=True, exist_ok=True)

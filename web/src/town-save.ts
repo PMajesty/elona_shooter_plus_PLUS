@@ -1,0 +1,38 @@
+import { RECRUIT_NAMES } from './recruits.ts';
+import type { Item } from './items.ts';
+import type { FirstTownPreparation } from './town-preparation.ts';
+
+const record = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
+const integer = (value: unknown, low: number, high: number): value is number => Number.isInteger(value) && Number(value) >= low && Number(value) <= high;
+const fieldsEqual = (value: Record<string, unknown>, fields: Record<string, unknown>) => Object.entries(fields).every(([key, expected]) => value[key] === expected);
+
+/** Проверяем сохранённые результаты генерации, не повторяя случайные броски при загрузке. */
+export function validTownPreparation(value: unknown, validItem: (item: unknown) => item is Item): value is FirstTownPreparation {
+  if (!record(value) || !Array.isArray(value.shop) || value.shop.length !== 8 || Array.from(value.shop).some(item => item !== null && !validItem(item))) return false;
+  if (!Array.isArray(value.cards) || value.cards.length !== 5 || value.cards.some(id => !integer(id, -7, -1))) return false;
+  for (let id = -7; id <= -1; id++) if (value.cards.filter(card => card === id).length > (id === -1 ? 3 : 1)) return false;
+  if (!integer(value.searched, 0, 999) || !record(value.flags) || !fieldsEqual(value.flags, { specialSale: 0, egg: true, partyHeld: false, prayed: false, robbed: 0, taunted: 0 })) return false;
+  const mission = value.mission;
+  if (!record(mission) || !fieldsEqual(mission, {
+    level: 1, fixedLv: 1, strength: 0, power: 920, powerOrg: 920, reward: 620,
+    hire: false, ragnarok: false, wave: 5, spawnRate: 14.8, waveType: 0,
+    newWave: true, time: 30, bossDay: false, note: '', hpFix: 1, dmgFix: 1,
+    expFix: 1, absorbFix: 0, bossKilled: 0, noDamage: true, criticalCount: 0, resultOther: 0,
+  }) || !Array.isArray(mission.group) || mission.group.length !== 0 || !integer(mission.bossWave, 2, 3)) return false;
+  if (!Array.isArray(mission.loot) || !([1117].join() === mission.loot.join() || [1038, 1117].join() === mission.loot.join()) || mission.loot.some(id => typeof id !== 'number')) return false;
+  const recruit = value.recruit;
+  if (!record(recruit) || !fieldsEqual(recruit, {
+    exist: true, lv: 1, sp: 0, trained: 0, optBoss: true, optWall: true,
+    kill: 0, earn: 0, money: 200, ai: 0, forcus: -1, cost: 400, exp: 0,
+  }) || !integer(recruit.sex, 0, 1) || !integer(recruit.devType, 1, 9) || !integer(recruit.pic, 0, 21) || !integer(recruit.nextTrait, 0, 99) || typeof recruit.name !== 'string' || !RECRUIT_NAMES.includes(recruit.name)) return false;
+  for (const key of ['potentialAim', 'potentialTeam']) if (typeof recruit[key] !== 'number' || !Number.isFinite(recruit[key]) || Number(recruit[key]) < 0.1 || Number(recruit[key]) >= 0.9) return false;
+  if (!Array.isArray(recruit.wexp) || recruit.wexp.length !== 5 || recruit.wexp.some(value => value !== 0)) return false;
+  if (!record(recruit.trait) || recruit.trait[recruit.devType] !== 1 || !integer(recruit.trait[900], 1, 10) || !integer(recruit.trait[901], 1, 10)) return false;
+  const allowedTraits = new Set([recruit.devType, 900, 901, 103, 104, 105, 106, 108, 109, 113, 119, 121]);
+  if (Object.entries(recruit.trait).some(([id, level]) => !allowedTraits.has(Number(id)) || !integer(level, 1, Number(id) >= 900 ? 10 : 3))) return false;
+  const items = recruit.items;
+  if (!record(items)) return false;
+  const slots = recruit.devType === 4 ? ['45', '47', '48'] : ['45'];
+  if (Object.keys(items).length !== slots.length || slots.some(slot => !validItem(items[slot]) || (items[slot] as Item).num !== 1)) return false;
+  return true;
+}

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation, type SimulationState } from '../src/simulation.ts';
+import { isOccupiedItem } from '../src/items.ts';
 import { TRAIT, SHERIFF_TRAITS, SHERIFF_CHOICE_ORDER } from '../src/progression.ts';
 
 function completeOpeningBattle(): Simulation {
@@ -18,7 +19,7 @@ function asVersion2(state: SimulationState): Record<string, any> {
   const value: Record<string, any> = structuredClone(state);
   value.version = 2;
   if (value.phase === 'victory' && value.town === null) value.gold += value.result.netReward;
-  for (const field of ['bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance', 'town']) delete value[field];
+  for (const field of ['bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance', 'town', 'totalMoney']) delete value[field];
   delete value.player.traits;
   return value;
 }
@@ -40,7 +41,7 @@ test('a completed opening battle delivers ordinary loot, one boss prize, one ear
   simulation = roundTrip(simulation);
   assert.equal(simulation.finishLoot(), true);
   assert.equal(simulation.state.postbattle, 'boss-loot');
-  assert.equal(simulation.state.lootOffers.filter(Boolean).length, 1);
+  assert.equal(simulation.state.lootOffers.filter(isOccupiedItem).length, 1);
   assert.equal(simulation.collectLoot(0, 2), true);
   const prize = structuredClone(simulation.state.inventory[2]);
   simulation = roundTrip(simulation);
@@ -93,7 +94,7 @@ test('v2 battle migration preserves existing item metadata and its combat random
   const untouched = structuredClone(oldSave);
   const migrated = Simulation.fromSave(oldSave);
   assert.deepEqual(oldSave, untouched);
-  assert.equal(migrated.state.version, 4);
+  assert.equal(migrated.state.version, 5);
   assert.equal(migrated.state.rng, oldSave.rng);
   assert.deepEqual(migrated.state.inventory, oldSave.inventory);
   assert.deepEqual(migrated.state.waves, oldSave.waves);
@@ -142,7 +143,7 @@ test('legacy boss inference distinguishes a removed dead boss from a surviving o
   assert.equal(migrated.state.postbattle, 'skill');
 });
 
-test('v3 corruption cannot enter reward stages with invalid traits, duplicate choices or missing entitlement', () => {
+test('v5 corruption cannot enter reward stages with invalid traits, duplicate choices or missing entitlement', () => {
   const simulation = completeOpeningBattle();
   simulation.finishLoot(); simulation.finishLoot();
   const saved = simulation.toSave();
@@ -169,7 +170,7 @@ test('an imported pending reward with no eligible skill is rejected before its l
   const saved = simulation.toSave();
   const untouched = structuredClone(saved);
   assert.equal(saved.player.skillPoints, 1);
-  assert.ok(saved.lootOffers.some(Boolean));
+  assert.ok(saved.lootOffers.some(isOccupiedItem));
   assert.throws(() => Simulation.fromSave(saved), /no available Sheriff skill/);
   assert.deepEqual(saved, untouched);
   assert.throws(() => simulation.finishLoot(), /No Sheriff skills are available/);

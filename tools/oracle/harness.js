@@ -4,7 +4,7 @@ const stage = document.querySelector('#stage');
 const PREFIX = 'ELONA_ORACLE:';
 const STARTUP_PREFIX = 'ELONA_STARTUP:';
 const requestedSuite = new URLSearchParams(location.search).get('suite');
-const suite = ['waves', 'combat', 'geometry', 'loot', 'progression', 'town'].includes(requestedSuite) ? requestedSuite : 'reload';
+const suite = ['waves', 'combat', 'geometry', 'loot', 'progression', 'town', 'town-preparation'].includes(requestedSuite) ? requestedSuite : 'reload';
 const suites = {
   reload: {swf:'/reference.swf',build:'/build-report.json',report:'/api/report',clock:'Manual calls to original methods; native frame/timer scheduling is outside this check.'},
   waves: {swf:'/waves-reference.swf',build:'/waves-build-report.json',report:'/api/waves-report',clock:'Synchronous original mission and wave generation under controlled xorshift32; no live enemy AI.'},
@@ -13,6 +13,7 @@ const suites = {
   loot: {swf:'/loot-reference.swf',build:'/loot-build-report.json',report:'/api/loot-report',clock:'Synchronous original item and loot generation under controlled xorshift32; inventory interaction and campaign transitions are separate checks.'},
   progression: {swf:'/progression-reference.swf',build:'/progression-build-report.json',report:'/api/progression-report',clock:'Original Sheriff skill choices and descriptions under controlled randomness; later combat effects are separate checks.'},
   town: {swf:'/town-reference.swf',build:'/town-build-report.json',report:'/api/town-report',clock:'Controlled original result settlement, action points and Free Repair methods; full town stock and next-day preparation are outside this boundary.'},
+  'town-preparation': {swf:'/town-preparation-reference.swf',build:'/town-preparation-build-report.json',report:'/api/town-preparation-report',clock:'Original first-town shop, cards, mission configuration and recruit generation in source order; save I/O, town interactions, Rest and day2 combat are outside this boundary.'},
 };
 const paths = suites[suite];
 document.querySelector('#report-link').href = paths.report;

@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
-import { ITEM_TYPE, type Item } from './items.ts';
+import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
 
-export type TownTab = 'mission' | 'castle' | null;
+export type TownTab = 'mission' | 'castle' | 'shop' | null;
 interface Placement {
   x: number; y: number; scaleX: number; scaleY: number; rotationDegrees: number;
   text?: { fontId: number; fontSize: number; bounds: number[]; align: number; color: string };
@@ -53,21 +53,23 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     return object;
   };
   image('townScene');
-  image('ammo_fill', 290.9, 11).setScale(state.player.ammo / 5, 1);
+  const selected = state.inventory[0];
+  const occupied = isOccupiedItem(selected);
+  image('ammo_fill', 290.9, 11).setScale(occupied && selected.ammoMax > 0 ? selected.ammo / selected.ammoMax : 0, 1);
   const hud = { dayText: String(state.day), moneyText: String(state.gold), castleHPText: `${state.castleHp}/${state.castleMaxHp}`,
-    ammoText: `${state.player.ammo}/5`, lvText: String(state.player.level), expText: String(state.player.exp / 10), apText: `AP: ${state.town?.ap ?? 0}` };
+    ammoText: occupied ? `${selected.ammo}/${selected.ammoMax}` : '', lvText: String(state.player.level), expText: String(state.player.exp / 10), apText: `AP: ${state.town?.ap ?? 0}` };
   for (const [name, value] of Object.entries(hud)) text(layout.rootChildren[name], value);
   const icon = manifest.clips.itemPicture;
   state.inventory.slice(0, 5).forEach((item, index) => {
-    if (!item) return;
+    if (!isOccupiedItem(item)) return;
     root.add(scene.add.image(25 + index * 90 - icon.originX, 343 - icon.originY, 'itemPicture', String(item.graphic)).setOrigin(0));
     if (item.type === ITEM_TYPE.use) root.add(scene.add.text(50 + index * 90, 366, `x${item.ammo}`, { fontFamily: 'Arial', fontSize: '11px', color: '#ffffff' }));
   });
   for (const [name, placement] of Object.entries(layout.navigation)) {
-    const enabled = name === 'mission' || name === 'castle';
+    const enabled = name === 'mission' || name === 'castle' || name === 'shop';
     button(placement.image, placement, () => enabled ? callbacks.select(name as TownTab) : callbacks.message('This town menu is not available in the current port yet.'), 0, 0, enabled);
   }
-  if (tab) {
+  if (tab && tab !== 'shop') {
     const panel = layout[tab], { x, y } = layout.menuPosition;
     // Вертикальный сдвиг уже запечён в статическую панель; её кнопкам он нужен отдельно.
     image(panel.image, x, 0);
@@ -76,7 +78,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
       text(panel.children.unkeep, '40', x, y);
       button('button_freeRepair', panel.children.act1, callbacks.repair, x, y);
     } else {
-      button('button_townRest', panel.children.act1, () => callbacks.message('The next day is not available yet. Town preparation, equipment and learned skills are still being integrated.'), x, y, false);
+      button('button_townRest', panel.children.act1, () => callbacks.message('The next day is not available yet. Equipment and learned skills are still being integrated into combat.'), x, y, false);
       button('button_townHire', panel.children.act2, () => callbacks.message('Hiring companions is not available yet.'), x, y, false);
     }
     image(panel.labelsImage, x, 0).setAlpha(tab === 'mission' ? 0.35 : 1);

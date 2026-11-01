@@ -4,14 +4,13 @@ A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
 Phaser 4. The current build is a **first playable slice**: choose one of 22
 appearances, play the Sheriff's original opening battle, collect ordinary loot
 and earned boss prizes, choose earned Sheriff skills, reach results, enter the
-first town and use Free Repair, or reach defeat. Save and restore your progress
-through these stages. Original English artwork, fonts, audio and
-credits are retained.
+first town, use Free Repair and buy or sell at the shop, or reach defeat. Save and
+restore your progress through these stages. Original English artwork, fonts,
+audio and credits are retained.
 
-This is not yet the complete game. Other classes, full town preparation and
-management, Day 2 and later
-days, equipment changes and their combat effects, hidden character stats, and
-original Flash save conversion remain to be ported. Earned skills are selected
+This is not yet the complete game. Other classes, full town management, recruiting
+and card actions, Day 2 and later days, equipment combat effects, hidden player
+stats, and original Flash save conversion remain to be ported. Earned skills are selected
 and saved; their effects must be connected to future combat before later days
 are enabled. See [port status](docs/port-status.md) for coverage and differences.
 The complete preserved Flash game and its Ruffle startup fix remain available
@@ -55,15 +54,23 @@ choices finish, when results appear.
 Proceed from results to the first town, still on **Day 1**, with **4 AP**. Open
 the Castle tab to use **Free Repair**: it costs **2 AP**, restores all wall HP
 and costs no gold. Click to acknowledge its message. A full wall costs no AP to
-repair again. Town HP, AP and inventory survive save/restore. Shop stock, cards,
-the next mission and recruits are not yet prepared; Day 2 remains unavailable.
+repair again. Town preparation generates stock, cards, next-mission data and a
+recruit once. Open the Shop tab, click stock to pick it up, then click an empty
+owned slot to buy it. Owned items can be moved or swapped; dropping one outside
+the slots asks to sell it. Only Yes confirms, and any other dialog click cancels.
+Shop Tokens discount stock. Town HP, AP, prepared data and full inventory records
+survive save/restore. Recruiting, card actions, Refresh Stock, Upgrade Weapon,
+MOD mounting and Day 2 remain unavailable.
 
-Saves now use version 4; versions 1–3 are accepted. Missing older item or trait metadata
-is reconstructed with explicit provenance; hidden stats remain unknown. Battle
+Saves now use version 5; versions 1–4 are accepted. Missing older item or trait
+metadata is reconstructed with explicit provenance; hidden player stats remain unknown. Battle
 migration preserves combat RNG. An older result that skipped earned rewards
 resumes at the still-owed stage, generating those rewards once with the saved
 RNG. Earlier versions paid gold before reward selection; migration preserves
 the final balance while moving payment to results and initializing AP once.
+Version 4 town saves retain their settled gold, AP and HP while missing town
+preparation runs once. Current saves retain inactive item metadata and completed
+search initialization; metadata discarded by older versions is unrecoverable.
 Original Flash saves use a different format.
 
 ## Build and host on your website
@@ -92,7 +99,8 @@ or gameplay server. Node and npm are development tools, not hosting requirements
 original ActionScript game. The accepted fixtures currently cover 72 reload
 snapshots, first-day wave generation under three controlled random seeds and
 21 spawn/single-pellet snapshots, 157 item/loot snapshots, nine Sheriff skill
-choice cases, 11 result-settlement/Free Repair snapshots, and 19 ordinary-enemy
+choice cases, 11 result-settlement/Free Repair snapshots, 16 first-town preparation
+snapshots including all nine recruit classes, and 19 ordinary-enemy
 collision grids containing 77,824 sampled points from the original display shapes. The pellet
 tests supply original geometry as input; separate contour tests exercise the
 same collision implementation used in the browser. Coverage is documented in
@@ -103,7 +111,7 @@ are detected. Expected original results are never regenerated from the port.
 `npm.cmd run test:soak` automatically exercises 32 seeds with idle, aimed and
 interrupted-input policies. It checks finite state, battle completion and exact
 JSON save/replay state and event equality, including every earned reward stage,
-first-town entry and repair.
+first-town preparation, repair and shop transactions.
 Reports and reproducible failure
 checkpoints are written beneath `.build/soak/`. This is a stability check, not
 evidence that every original feature has been ported.

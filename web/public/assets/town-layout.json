@@ -922,6 +922,471 @@
       }
     }
   },
+  "shop": {
+    "characterId": 1995,
+    "frame": 80,
+    "image": "townShop",
+    "labelsImage": "townShopLabels",
+    "children": {
+      "warning": {
+        "characterId": 1803,
+        "x": 232.0,
+        "y": 234.0,
+        "matrix": [
+          1.0004425,
+          0.0,
+          0.0,
+          0.99713135,
+          232.0,
+          234.0
+        ],
+        "scaleX": 1.0004425,
+        "scaleY": 0.99713135,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 1535,
+          "fontSize": 11.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            322.75,
+            14.55
+          ],
+          "align": 0,
+          "color": "#cc0000",
+          "initialHtml": "<p align=\"left\"><font face=\"Arial\" size=\"11\" color=\"#cc0000\" letterSpacing=\"0.000000\" kerning=\"1\">*You don&apos;t have the required skill to use the weapon.</font></p>"
+        }
+      },
+      "act1": {
+        "characterId": 1807,
+        "x": 472.15,
+        "y": 98.75,
+        "matrix": [
+          0.9577637,
+          0.2844391,
+          -0.2844391,
+          0.9577637,
+          472.15,
+          98.75
+        ],
+        "scaleX": 0.9991080555407909,
+        "scaleY": 0.9991080555407909,
+        "rotationDegrees": 16.540500415070444
+      },
+      "talkText": {
+        "characterId": 1808,
+        "x": 224.0,
+        "y": 87.0,
+        "matrix": [
+          1.0006104,
+          0.0,
+          0.0,
+          1.0024109,
+          224.0,
+          87.0
+        ],
+        "scaleX": 1.0006104,
+        "scaleY": 1.0024109,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 12.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            180.8,
+            31.9
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">The blacksmith hails you,</font></p><p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">&quot;What can I do for you today?&quot;</font></p>"
+        }
+      },
+      "actRef1": {
+        "characterId": 1811,
+        "x": 489.0,
+        "y": 68.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          489.0,
+          68.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "act2": {
+        "characterId": 1815,
+        "x": 416.95,
+        "y": 98.3,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          416.95,
+          98.3
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "actRef2": {
+        "characterId": 1818,
+        "x": 399.0,
+        "y": 79.35,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          399.0,
+          79.35
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "actHelp": {
+        "characterId": 1819,
+        "x": 232.0,
+        "y": 234.25,
+        "matrix": [
+          1.000412,
+          0.0,
+          0.0,
+          0.99713135,
+          232.0,
+          234.25
+        ],
+        "scaleX": 1.000412,
+        "scaleY": 0.99713135,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 1535,
+          "fontSize": 11.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            316.8,
+            14.55
+          ],
+          "align": 0,
+          "color": "#330000",
+          "initialHtml": "<p align=\"left\"><font face=\"Arial\" size=\"11\" color=\"#330000\" letterSpacing=\"0.000000\" kerning=\"1\">Choose a weapon to upgrade. Click nowhere to cancel.</font></p>"
+        }
+      },
+      "closeButton": {
+        "characterId": 1497,
+        "x": 528.0,
+        "y": 90.95,
+        "matrix": [
+          0.99790955,
+          0.0,
+          0.0,
+          0.99790955,
+          528.0,
+          90.95
+        ],
+        "scaleX": 0.99790955,
+        "scaleY": 0.99790955,
+        "rotationDegrees": 0.0
+      },
+      "hint2": {
+        "characterId": 1614,
+        "x": 166.0,
+        "y": 348.0,
+        "matrix": [
+          1.000412,
+          0.0,
+          0.0,
+          1.0,
+          166.0,
+          348.0
+        ],
+        "scaleX": 1.000412,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 1535,
+          "fontSize": 11.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            340.85,
+            26.1
+          ],
+          "align": 0,
+          "color": "#330000",
+          "initialHtml": "Click a skill to set as a focused skill.\\rThis is multiline test"
+        }
+      },
+      "popup": {
+        "characterId": 1791,
+        "x": 231.0,
+        "y": 36.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          231.0,
+          36.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      }
+    },
+    "slots": {
+      "stock": {
+        "count": 8,
+        "sourceStart": 0,
+        "x": 140,
+        "y": 160,
+        "columns": 8,
+        "stepX": 50,
+        "op": 0
+      },
+      "inventory": {
+        "initialCount": 6,
+        "sourceStart": 20,
+        "x": 140,
+        "y": 250,
+        "columns": 8,
+        "stepX": 50,
+        "stepY": 48,
+        "op": 1
+      }
+    }
+  },
+  "inventorySlot": {
+    "characterId": 2121,
+    "children": {
+      "shortNum": {
+        "characterId": 2117,
+        "x": 6.0,
+        "y": 29.4,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          6.0,
+          29.4
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 2116,
+          "fontSize": 11.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            17.0,
+            19.55
+          ],
+          "align": 0,
+          "color": "#ffffff",
+          "initialHtml": ""
+        }
+      },
+      "cost": {
+        "characterId": 2118,
+        "x": 14.0,
+        "y": 53.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          14.0,
+          53.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 11.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            74.0,
+            14.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"11\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">1560 gp</font></p>"
+        }
+      },
+      "coin": {
+        "characterId": 1442,
+        "x": 3.95,
+        "y": 56.9,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          3.95,
+          56.9
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "peke": {
+        "characterId": 2120,
+        "x": 45.9,
+        "y": -2.0,
+        "matrix": [
+          -1.8470306,
+          0.0,
+          0.0,
+          1.0,
+          45.9,
+          -2.0
+        ],
+        "scaleX": 1.8470306,
+        "scaleY": 1.0,
+        "rotationDegrees": 180.0,
+        "text": {
+          "fontId": 2119,
+          "fontSize": 50.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            27.25,
+            52.0
+          ],
+          "align": 0,
+          "color": "#725231",
+          "initialHtml": "<p align=\"left\"><font face=\"KaiTi\" size=\"50\" color=\"#725231\" letterSpacing=\"0.000000\" kerning=\"1\">/</font></p>"
+        }
+      }
+    }
+  },
+  "saleDialog": {
+    "characterId": 2131,
+    "frame": 1,
+    "image": "shopSaleDialog",
+    "children": {
+      "question": {
+        "characterId": 2123,
+        "x": 224.0,
+        "y": 175.7,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          224.0,
+          175.7
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 15.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            186.95,
+            49.3
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"15\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">Really?</font></p>"
+        }
+      },
+      "no": {
+        "characterId": 2126,
+        "x": 319.9,
+        "y": 226.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          319.9,
+          226.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "yes": {
+        "characterId": 2128,
+        "x": 213.8,
+        "y": 226.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          213.8,
+          226.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "pop1": {
+        "characterId": 1791,
+        "x": -12.55,
+        "y": 4.6,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          -12.55,
+          4.6
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "pop2": {
+        "characterId": 1791,
+        "x": 298.4,
+        "y": 10.6,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          298.4,
+          10.6
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "poparrow": {
+        "characterId": 2129,
+        "x": 316.0,
+        "y": 117.15,
+        "matrix": [
+          0.0,
+          -0.9980774,
+          1.0012512,
+          0.0,
+          316.0,
+          117.15
+        ],
+        "scaleX": 0.9980774,
+        "scaleY": 1.0012512,
+        "rotationDegrees": -90.0
+      }
+    }
+  },
   "repairDialog": {
     "characterId": 2437,
     "frame": 1,

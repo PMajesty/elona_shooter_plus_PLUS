@@ -44,6 +44,13 @@
       "originX": 0,
       "originY": 0
     },
+    "townShop": {
+      "file": "screens/townShop.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
     "gene": {
       "file": "screens/gene.png",
       "width": 620,
@@ -93,8 +100,22 @@
       "originX": 0,
       "originY": 0
     },
+    "townShopLabels": {
+      "file": "screens/townShopLabels.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
     "eventRepair": {
       "file": "screens/eventRepair.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "shopSaleDialog": {
+      "file": "screens/shopSaleDialog.png",
       "width": 620,
       "height": 380,
       "originX": 0,
@@ -440,6 +461,102 @@
       "originY": 41.45,
       "characterId": 1605
     },
+    "button_shopRefresh": {
+      "file": "buttons/button_shopRefresh.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1807
+    },
+    "button_shopRefresh_over": {
+      "file": "buttons/button_shopRefresh_over.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1807
+    },
+    "button_shopRefresh_down": {
+      "file": "buttons/button_shopRefresh_down.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1807
+    },
+    "button_shopUpgrade": {
+      "file": "buttons/button_shopUpgrade.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1815
+    },
+    "button_shopUpgrade_over": {
+      "file": "buttons/button_shopUpgrade_over.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1815
+    },
+    "button_shopUpgrade_down": {
+      "file": "buttons/button_shopUpgrade_down.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1815
+    },
+    "button_dialogYes": {
+      "file": "buttons/button_dialogYes.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 2128
+    },
+    "button_dialogYes_over": {
+      "file": "buttons/button_dialogYes_over.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 2128
+    },
+    "button_dialogYes_down": {
+      "file": "buttons/button_dialogYes_down.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 2128
+    },
+    "button_dialogNo": {
+      "file": "buttons/button_dialogNo.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 2126
+    },
+    "button_dialogNo_over": {
+      "file": "buttons/button_dialogNo_over.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 2126
+    },
+    "button_dialogNo_down": {
+      "file": "buttons/button_dialogNo_down.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 2126
+    },
     "button_freeRepair": {
       "file": "buttons/button_freeRepair.png",
       "width": 63,
@@ -698,6 +815,18 @@
       "uniqueFrames": 1,
       "characterId": 2411
     },
+    "shopCoin": {
+      "image": "sprites/shopCoin.png",
+      "json": "sprites/shopCoin.json",
+      "originX": 7.95,
+      "originY": 6.95,
+      "frameWidth": 16,
+      "frameHeight": 14,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 1442
+    },
     "allyBack": {
       "image": "sprites/allyBack.png",
       "json": "sprites/allyBack.json",
@@ -880,7 +1009,8 @@
     "menu": "fonts/menu.ttf",
     "menuBold": "fonts/menuBold.ttf",
     "hud": "fonts/hud.ttf",
-    "small": "fonts/small.ttf"
+    "small": "fonts/small.ttf",
+    "ui": "fonts/ui.ttf"
   },
   "allyAnimation": "ally-animation.json",
   "collisionGeometry": "collision-geometry.json",

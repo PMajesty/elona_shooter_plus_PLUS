@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { ITEM_TYPE, itemPrice, type Item } from './items.ts';
+import { ITEM_TYPE, isOccupiedItem, itemPrice, type Item } from './items.ts';
 
 export type LootArea = 'offers' | 'inventory';
 export interface LootViewState { inventory: (Item | null)[]; lootOffers: (Item | null)[]; bossKilled?: number }
@@ -102,6 +102,7 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
   });
 
   const addSlot = (area: LootArea, index: number, item: Item | null, x: number, y: number) => {
+    if (!isOccupiedItem(item)) item = null;
     const slotAsset = manifest.clips.inventorySlot;
     const slot = scene.add.image(x - slotAsset.originX, y - slotAsset.originY, 'inventorySlot', '1').setOrigin(0);
     root.add(slot);

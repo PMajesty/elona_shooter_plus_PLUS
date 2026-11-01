@@ -8,10 +8,10 @@
   "frameNames": "Original one-based Flash timeline frame numbers as strings",
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
-    "images": 68,
-    "clips": 17,
+    "images": 83,
+    "clips": 18,
     "sounds": 89,
-    "fonts": 4
+    "fonts": 5
   },
   "runtimeAdjustments": [
     "Static screens omit runtime text placeholders and separately rendered controls",

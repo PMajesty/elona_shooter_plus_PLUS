@@ -1,7 +1,8 @@
 # Browser port status
 
 Current milestone: **opening battle, ordinary and boss loot, earned Sheriff
-skill choices, results and first-town Free Repair with persistence**, not a complete remake.
+skill choices, results and a prepared first town with Free Repair and shop
+buying/selling**, not a complete remake.
 The browser game runs independently of Flash and Ruffle. The preserved game
 remains the reference for behavior, content and appearance.
 
@@ -42,16 +43,21 @@ sequence rather than rushing speculative changes.
 - Once-only result settlement after all reward choices, then first-town entry
   on Day 1 with four AP. Castle Free Repair spends two AP, restores all HP,
   preserves gold and RNG, and saves the resulting town state.
+- Ordered first-town stock, cards, next-mission data, recruit, entry flags and
+  search initialization, generated once and retained in saves.
+- Original shop UI with prices, purchase into empty slots, owned-item swaps,
+  sale confirmation and Shop Token discounts. Transactions preserve complete
+  item metadata; unsupported MOD mounting leaves both items unchanged.
 
-Other starting classes are visible but unavailable. Full town preparation and
-management, Day 2 and
-later days, recruitment, equipment/shop interactions and importing original Flash
-saves are not implemented. Chosen skills persist, but their effects on later
-combat and town systems remain to be connected. Hidden base aiming/teamwork
-rolls and growth remain unknown. Finishing the opening battle advances through
+Other starting classes are visible but unavailable. Full town management, Day 2
+and later days, recruiting, card actions, equipment combat effects and importing
+original Flash saves are not implemented. Chosen skills persist, but their effects on later
+combat and town systems remain to be connected. The player's hidden base
+aiming/teamwork rolls and growth remain unknown. Finishing the opening battle advances through
 ordinary loot, earned boss loot, earned skill choices and results, then enters
-the first town. This is a bounded town-action path, not complete town gameplay:
-shop stock, cards, the next mission and recruits are still pending.
+the first town. Prepared cards, a recruit and next-mission data do not yet expose
+their actions or enable the next day. Refresh Stock, Upgrade Weapon and MOD
+mounting are visibly unavailable.
 
 ## Architecture
 
@@ -71,8 +77,10 @@ returning from attack to walking retains the original shadow exclusion.
 
 `items.ts` owns generated item instances and loot; `progression.ts` owns the
 implemented Sheriff choices and previews. `loot-view.ts` and `skill-view.ts`
-render these stages through the normal postbattle flow. The town view uses
-original town, mission/castle menu and repair-dialog assets. Combat effects of new
+render these stages through the normal postbattle flow. `town-preparation.ts`
+executes first-town generation in source order, with recruit generation in
+`recruits.ts`. The town and shop views use original menus, item artwork and
+repair/sale dialogs. Combat effects of new
 equipment and earned traits are a separate, unfinished integration boundary.
 
 `storage.ts` stores a versioned browser-port save in local storage. The simulation
@@ -80,8 +88,9 @@ includes its random-generator state so a restored port save can continue its own
 sequence. That generator is not Flash's `Math.random()` and does not reproduce
 the original game's random sequence.
 
-Version 4 stores full generated items, boss-kill tracking, postbattle stage,
-pending skill choices, known trait levels, town AP and reconstruction provenance. New
+Version 5 stores full generated items, boss-kill tracking, postbattle stage,
+pending skill choices, known trait levels, prepared town state, cumulative
+earned money and reconstruction provenance. New
 Game generates starter equipment with the ordinary gameplay RNG before mission
 generation. Version 1 saves lacked item metadata; their migration uses a separate
 deterministic reconstruction stream while preserving saved combat state and RNG.
@@ -96,11 +105,23 @@ version 3 result keeps its gold and receives the missing result/AP preparation
 once. Battle migration preserves combat RNG. Saves missing shadow history use
 the former frame-derived rule, then persist future state changes.
 
+Version 4 town migration retains its settled gold, AP and HP and performs only
+the newly implemented preparation, once. Version 5 preserves inactive item
+records (`num: 0`) because later original generation can reuse their metadata;
+empty stock slots stay hidden and inactive owned slots remain usable. Metadata
+discarded by older port versions cannot be recovered. Cumulative earned money
+(`totalMoney`) increases once for settlement and confirmed sales; buying does
+not reduce this historical counter.
+
 Result preparation consumes the original fame draw and two Active-zero AP
 draws, even though the first Sheriff gets no extra income or AP from them.
-`town.preparation` remains `pending`: original `frame71` shop/card/mission/recruit
-generation has not run. Entry and Free Repair add no placeholder RNG draws. Day 2
-is blocked until real town preparation and equipment/skill combat effects exist.
+At results, `town.preparation` is `pending`; entering town executes the original
+shop/card/mission/recruit sequence and marks it `ready`. Reopening menus and
+restoring ready saves do not reroll preparation. The original `searched` draw
+occurs after its `frame71` autosave; the port deliberately saves the complete
+prepared state, including this value and the resulting RNG, to avoid a partial
+initialization on restore. Free Repair and shop transactions add no random draws.
+Day 2 remains blocked while equipment and learned-skill combat effects are missing.
 
 `tools/extract_web_assets.py` extracts selected assets from the preserved SWF,
 packages atlases and records registration offsets. It also calls
@@ -134,9 +155,10 @@ pressing Space after cooldown replenished them to five. The production bundle
 also loaded under `/elona/` and reached combat through New Game and Proceed,
 with enemies visibly spawning and no observed console errors.
 
-The integrated suite passes 58 tests covering simulation, items, reward
-transitions, migration, invalid imports and original-reference fixtures;
-typecheck and the candidate release build also pass. Detailed run evidence is
+The integrated regression suite passes **78 tests**, covering simulation, items,
+reward transitions, town preparation, shop transactions, migration, invalid
+imports and original-reference fixtures. Typecheck and the release build also
+pass. Detailed run evidence and release checks are
 recorded in `port-verification.json`. Independent original-SWF fixtures match 72 reload
 snapshots and three seeded first-day generation
 snapshots, plus 21 spawn and single-pellet snapshots. The point tests supply
@@ -149,17 +171,20 @@ are unchanged. Nine progression cases cover three seeds and Capable levels
 0/1/2, all 15 Sheriff previews, candidate order, eligibility and RNG usage.
 Eleven accepted town snapshots cover six settlements (three seeds with and
 without a perfect bonus) and five Free Repair/acknowledgment/repeat/guard cases.
-They verify the result/AP RNG boundary and deterministic repair action, not
-original full-town initialization.
+They verify the result/AP RNG boundary and deterministic repair action. A separate
+accepted preparation fixture has 16 snapshots from two identical original runs:
+stock, cards, mission data, recruits across all nine classes, flags, search
+initialization and exact RNG usage match the port under the controlled first-town
+conditions. These cases do not cover later towns or nondefault medal effects.
 Deliberate negative controls demonstrate that missing per-shell
 feedback and an altered random stream are detected. The original comparisons
 already exposed and corrected omitted special-loot and fly-filter random draws.
 
 A separate automatic run exercised 96 first-day scenarios across 32 seeds and
-three input policies, including 1,255 JSON save/resume checkpoints, 222 reward
-transitions, 82 town actions and 121,588 simulation frames. Restored state and
+three input policies, including 1,296 JSON save/resume checkpoints, 222 reward
+transitions, 164 town actions and 121,588 simulation frames. Restored state and
 events matched uninterrupted runs through ordinary loot, boss prizes, skill
-choices, results and first-town repair. This
+choices, results, first-town preparation, repair and shop transactions. This
 checks port stability and replay, not fidelity to unimplemented original rules.
 It uses production ordinary-enemy contours; boss collision retains a documented
 rectangular fallback in this headless runner.
@@ -189,8 +214,29 @@ Any click acknowledged the original dialog; repeating repair at full HP spent
 no extra AP. Exported state before and after town reload/Continue matched
 exactly, including RNG state **2262752108**. An insufficient-AP checkpoint
 (1 AP, 39/40 HP) displayed the original refusal and preserved AP, HP and 823 gold.
-These observations cover town entry and its first action, not the
-unimplemented stock, cards, recruit generation or next-day loop.
+These earlier observations cover town entry and Free Repair before the version 5
+preparation sequence was added; their RNG value is not a final version 5 expectation.
+
+The version 5 shop candidate was also exercised through ordinary browser input.
+Importing that version 4 town retained **823 gold, 2 AP and 40/40 HP**. Buying a
+Pistol for **348** left **475 gold**. Dropping the owned statue outside the slots
+opened the original confirmation; cancellation preserved the statue and gold.
+Confirming its **150** sale with Yes removed the statue and produced **625 gold**.
+Reload, Continue and a new export reproduced the complete saved JSON exactly,
+including **625 gold, 750 cumulative earned money and RNG state 734171070**.
+A controlled zero-gold purchase of stock priced at 319 was rejected without
+mutation. Applying a Shop Token reduced that price to zero, consumed the token
+and preserved gold; the resulting zero-price purchase succeeded. An import
+whose token lacked its discount amount was rejected before changing the active
+game. Moving the gun from slot 0 to slot 5 visibly cleared the selected-slot ammo
+text and bar.
+
+The released build was checked through New Game and Proceed, reaching combat at
+tick 0 with five shells and 40 HP, and through a version 4 town import into the
+shop. No console errors were observed. The static release is packaged as
+`.build/elona-shooter-browser-shop-slice.zip` (220 files, 7,255,843 bytes); the
+previous town release remains available for recovery. These checks validate
+this bounded shop slice, not the unavailable next-day campaign.
 
 The shared HUD now applies the original XP display conversion (`exp / 10`):
 175 internal XP displays as 17.5. The result table includes the perfect-game
@@ -219,11 +265,14 @@ Known limits:
   an atlas or source table do not imply the corresponding full feature works.
 - Chosen Sheriff traits are saved, but their effects, equipment requirements,
   weapon changes and modifier mounting are not connected to future combat.
-  Hidden base aiming/teamwork rolls and their level-up growth are not ported.
-- Town supports entry, the mission/castle presentation and Free Repair only.
-  The source's ordered shop, card, mission and recruit preparation, other town
-  actions and upgrades remain pending. A rendered town menu is not a prepared
-  next mission.
+  The player's hidden base aiming/teamwork rolls and their level-up growth are
+  not ported; the generated recruit's fields are a separate implemented path.
+- Town supports ordered first-town preparation, Free Repair and shop transactions.
+  Recruiting, card/search actions, stock refresh, weapon upgrades and MOD mounting
+  remain unavailable. Prepared mission data does not establish a playable Day 2.
+- Older saves cannot recover item metadata that previous versions discarded.
+  Nondefault medal effects, later towns and subsequent mission transitions remain
+  outside the accepted preparation fixture.
 - Save migration currently accepts the browser-port format only. Browser storage
   is local to the site and browser profile; exported files provide portability.
 - No comparative performance benchmark establishes an improvement over Flash or
@@ -258,14 +307,13 @@ scheduling equivalence. Record each comparison's actual boundary and limitations
 
 The original victory path is Clear, normal loot, earned boss loot, earned skill
 choices, financial result and town. Item instances and the mandatory first-day
-reward stages now lead through results into Day 1 town, Free Repair and a saved
-town state. The next useful slice is the real, ordered first-town preparation:
-shop stock, cards, mission level 1, recruits and applicable entry effects, stored
-once and restored without rerolling. Compare that sequence with original
-`frame71`, including RNG order. The current `preparation: pending` marker keeps
-this gap explicit. Equipment and chosen skills must affect combat before the
-following mission is enabled; a direct result-to-Day-2 shortcut would omit that
-preparation.
+reward stages now lead through results into prepared Day 1 town, Free Repair,
+shop transactions and a saved town state. Ordered first-town preparation is now
+compared with original `frame71`, including RNG order. The next useful boundary
+is connecting owned equipment and chosen skills to actual combat, then making
+Rest enter the prepared mission through ordinary UI. Recruiting, cards and other
+town actions require their own source behavior and integration; their generated
+records alone do not implement them.
 
 After those prerequisites, enable two connected days through the ordinary UI,
 with rewards and equipment retained. Town prepares mission level 1 while the

@@ -17,6 +17,10 @@ export interface ItemContext {
   weaponLevelMode: boolean; weaponSkillLevels: Readonly<Record<number, number>>;
 }
 
+export function isOccupiedItem(item: Item | null | undefined): item is Item {
+  return item !== null && item !== undefined && item.num > 0;
+}
+
 // Статические присваивания generateStuff; исходные числовые ID и названия сохранены.
 export const BASE_ITEM_FIELDS: Readonly<Record<number, Readonly<Partial<Item>>>> = {
   1: {"name": "Pistol", "reloadTimeMax": 20, "ammoMax": 10, "shootRate": 100, "automatic": false, "baseAccuracy": 150, "accuracyDec": 0.1, "attack": 20, "dmgAir": 75, "dmgArmor": 35, "reqTrait": 103, "reqLv": 1, "range": 1, "value": 300},
@@ -157,7 +161,7 @@ export class ItemFactory {
     item.ammo = item.ammoMax; item.lv = level;
   }
 
-  private enchant(item: Item, modId = -1, level = -1): void {
+  enchant(item: Item, modId = -1, level = -1): void {
     if (level === -1) level = 1 + int(this.random() * 3);
     if (modId === -1) modId = MOD_POOL[int(this.random() * MOD_POOL.length)];
     let efficiency = 1.1 + this.context.engineer / 100;
@@ -220,27 +224,28 @@ export class ItemFactory {
 
   ordinaryLoot(rawQueue: readonly number[], previousOffers: readonly (Item | null)[] = []): { offers: (Item | null)[]; queue: number[] } {
     const queue = [...rawQueue];
-    const offers: (Item | null)[] = Array(8).fill(null);
+    // clearGameInv очищает только num; неиспользованные поля остаются у самого слота.
+    const offers = Array.from({ length: 8 }, (_, index) => previousOffers[index] ? { ...previousOffers[index], num: 0 } : null);
     for (let index = 0; index < Math.min(queue.length, 8); index++) {
       if (this.random() > 0.2 || queue[index] > 1000) {
         if (queue[index] > 1000) queue[index] -= 1000;
-        offers[index] = this.generate(queue[index], previousOffers[index] ?? undefined);
+        offers[index] = this.generate(queue[index], offers[index] ?? undefined);
       } else {
         const looterFix = this.context.looter === 0 ? 1 : 1.05 + this.context.looter * 0.08;
-        offers[index] = this.randomItem(int((this.context.day * 40 + 250) * looterFix), 1, previousOffers[index] ?? undefined);
+        offers[index] = this.randomItem(int((this.context.day * 40 + 250) * looterFix), 1, offers[index] ?? undefined);
       }
     }
     return { offers, queue };
   }
 
   bossLoot(bossKilled: number, modifiersOnly = false, previousOffers: readonly (Item | null)[] = []): (Item | null)[] {
-    const offers: (Item | null)[] = Array(8).fill(null);
+    const offers = Array.from({ length: 8 }, (_, index) => previousOffers[index] ? { ...previousOffers[index], num: 0 } : null);
     const looterFix = this.context.looter === 0 ? 1 : 1.05 + this.context.looter * 0.08;
     const targetValue = int((this.context.day * 60 + 500) * looterFix);
     for (let index = 0; index < Math.min(int(bossKilled / 2) + 1, 8); index++) {
       // clearGameInv обнуляет num, но не остальные поля; опция модов пропускает случайный выбор режима.
       const mode = modifiersOnly || this.random() > 0.8 ? 3 : 2;
-      offers[index] = this.randomItem(targetValue, mode, previousOffers[index] ?? undefined);
+      offers[index] = this.randomItem(targetValue, mode, offers[index] ?? undefined);
     }
     return offers;
   }
@@ -264,23 +269,23 @@ export function createStartingInventory(random: () => number): (Item | null)[] {
 }
 
 export function swapInventorySlots(slots: (Item | null)[], from: number, to: number): boolean {
-  if (!Number.isInteger(from) || !Number.isInteger(to) || from < 0 || to < 0 || from >= slots.length || to >= slots.length || from === to || !slots[from]) return false;
+  if (!Number.isInteger(from) || !Number.isInteger(to) || from < 0 || to < 0 || from >= slots.length || to >= slots.length || from === to || !isOccupiedItem(slots[from])) return false;
   // Установка модификации на оружие требует отдельного подтверждения и сюда не входит.
-  if (slots[from]!.type === ITEM_TYPE.mod && slots[to]?.type === ITEM_TYPE.gun) return false;
+  if (slots[from]!.type === ITEM_TYPE.mod && isOccupiedItem(slots[to]) && slots[to]!.type === ITEM_TYPE.gun) return false;
   [slots[from], slots[to]] = [slots[to], slots[from]];
   return true;
 }
 
-export function collectLoot(offers: (Item | null)[], slots: (Item | null)[], offerIndex: number, slotIndex = slots.findIndex(item => item === null)): boolean {
-  if (!Number.isInteger(offerIndex) || !Number.isInteger(slotIndex) || offerIndex < 0 || offerIndex >= offers.length || slotIndex < 0 || slotIndex >= slots.length || !offers[offerIndex]) return false;
-  if (offers[offerIndex]!.type === ITEM_TYPE.mod && slots[slotIndex]?.type === ITEM_TYPE.gun) return false;
+export function collectLoot(offers: (Item | null)[], slots: (Item | null)[], offerIndex: number, slotIndex = slots.findIndex(item => !isOccupiedItem(item))): boolean {
+  if (!Number.isInteger(offerIndex) || !Number.isInteger(slotIndex) || offerIndex < 0 || offerIndex >= offers.length || slotIndex < 0 || slotIndex >= slots.length || !isOccupiedItem(offers[offerIndex])) return false;
+  if (offers[offerIndex]!.type === ITEM_TYPE.mod && isOccupiedItem(slots[slotIndex]) && slots[slotIndex]!.type === ITEM_TYPE.gun) return false;
   [offers[offerIndex], slots[slotIndex]] = [slots[slotIndex], offers[offerIndex]];
   return true;
 }
 
 export function sellInventoryItem(slots: (Item | null)[], index: number): number | null {
-  if (!Number.isInteger(index) || index < 0 || index >= slots.length || !slots[index]) return null;
+  if (!Number.isInteger(index) || index < 0 || index >= slots.length || !isOccupiedItem(slots[index])) return null;
   const price = itemPrice(slots[index]!);
-  slots[index] = null;
+  slots[index]!.num = 0;
   return price;
 }

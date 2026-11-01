@@ -53,21 +53,21 @@ export function compareTownTrace(records: TownReferenceRecord[]) {
       const draws = observeRandom(simulation);
       methods.prepareResult();
       actual = {
-        gold: simulation.state.gold, ap: simulation.state.town?.ap,
+        gold: simulation.state.gold, totalMoney: simulation.state.totalMoney, ap: simulation.state.town?.ap,
         result: { reward: simulation.state.result.reward + simulation.state.result.perfectBonus, upkeep: simulation.state.result.upkeep, netReward: simulation.state.result.netReward },
         drawCount: draws(), rngState: simulation.state.rng,
       };
-      expected = { gold: record.gold, ap: record.ap, result: { reward: record.result!.reward, upkeep: record.result!.upkeep, netReward: record.result!.netReward }, drawCount: record.drawCount, rngState: record.rngState };
+      expected = { gold: record.gold, totalMoney: record.totalMoney, ap: record.ap, result: { reward: record.result!.reward, upkeep: record.result!.upkeep, netReward: record.result!.netReward }, drawCount: record.drawCount, rngState: record.rngState };
     } else {
       assert.equal(record.seed, 42);
       if (record.step === 0) {
         actionSimulation = new Simulation(1);
-        actionSimulation.state.phase = 'victory'; actionSimulation.state.postbattle = 'result';
+        // Эта исходная запись исключает frame71: enterTown добавил бы генерацию лавки и другие броски.
+        actionSimulation.state.phase = 'town'; actionSimulation.state.postbattle = 'result';
         actionSimulation.state.town = { ap: record.scenario === 'repair_sequence' ? 2 : record.scenario === 'low_ap' ? 1 : 0, preparation: 'pending' };
         actionSimulation.state.castleHp = record.scenario === 'full_low_ap' ? 40 : 17;
         actionSimulation.state.gold = 200; actionSimulation.state.rng = 42;
         actionDraws = observeRandom(actionSimulation);
-        assert.equal(actionSimulation.enterTown(), true);
       }
       assert.ok(actionSimulation && actionDraws);
       const outcome = record.op === 'freeRepair' ? actionSimulation.freeRepair() : undefined;

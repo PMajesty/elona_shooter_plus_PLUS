@@ -6,13 +6,15 @@ import { OriginalAlly, type OriginalAllyMetadata } from './original-animation.ts
 import { createLootView } from './loot-view.ts';
 import { createSkillView } from './skill-view.ts';
 import { createTownView, type TownLayout, type TownTab } from './town-view.ts';
+import { createShopView, type ShopLayout } from './shop-view.ts';
+import { isOccupiedItem } from './items.ts';
 import { alphaMaskHit, ordinaryEnemyHit, type CollisionGeometry } from './collision.ts';
 import './style.css';
 
 interface ImageAsset { file: string; width: number; height: number; originX: number; originY: number }
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string> }
-interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4; appearance: number; simulation: unknown }
+interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5; appearance: number; simulation: unknown }
 type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
@@ -24,7 +26,7 @@ const bootStarted = performance.now();
 const USED_SOUNDS = new Set(['soundClick1', 'soundGun3', 'soundReloading2', 'soundReloaded2', 'soundThrow1', 'soundExp1', 'soundDead3', 'soundDead5', 'soundDead7', 'soundDeadChicken', 'soundDeadBoss1', 'soundDamage1', 'soundPop1', 'soundBattleBegin', 'soundBattleEnd', 'soundKilled', 'soundRampage', 'soundComplete', 'soundGold1', 'soundBgForest']);
 for (let index = 0; index < 5; index++) USED_SOUNDS.add(`soundGoodshot${index}`);
 USED_SOUNDS.add('soundReloaded1');
-for (const key of ['soundBgTown', 'soundRepair1', 'soundBeep', 'soundScroll1']) USED_SOUNDS.add(key);
+for (const key of ['soundBgTown', 'soundRepair1', 'soundBeep', 'soundScroll1', 'soundPay1']) USED_SOUNDS.add(key);
 let manifest: Manifest;
 let gameScene: ElonaScene;
 
@@ -97,7 +99,7 @@ class ElonaScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-TWO', () => { if (this.screen === 'battle' && !this.paused) this.grenadeRequested = true; });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Sheriff opening battle, rewards and town Free Repair are playable. Other town actions, equipment effects, later days and other classes are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Sheriff opening battle, rewards, first-town shop and Free Repair are playable. Other town actions, equipment effects, later days and other classes are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
   }
 
@@ -121,6 +123,7 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.lootOffers; delete container.dataset.inventory;
     delete container.dataset.skillChoices; delete container.dataset.selectedTrait; delete container.dataset.traits; delete container.dataset.skillPoints;
     delete container.dataset.actionPoints; delete container.dataset.townTab; delete container.dataset.repairDialog;
+    delete container.dataset.shopStock; delete container.dataset.saleSlot;
   }
 
   private image(key: string, x = 0, y = 0): Phaser.GameObjects.Image | undefined {
@@ -549,8 +552,8 @@ class ElonaScene extends Phaser.Scene {
       },
     }, bossReward ? 'boss' : 'ordinary'));
     container.dataset.phase = 'victory';
-    container.dataset.lootOffers = JSON.stringify(this.sim.state.lootOffers.map(item => item?.id ?? null));
-    container.dataset.inventory = JSON.stringify(this.sim.state.inventory.map(item => item?.id ?? null));
+    container.dataset.lootOffers = JSON.stringify(this.sim.state.lootOffers.map(item => isOccupiedItem(item) ? item.id : null));
+    container.dataset.inventory = JSON.stringify(this.sim.state.inventory.map(item => isOccupiedItem(item) ? item.id : null));
     status.textContent = 'Click an item, then click a destination slot. Items left in the loot row will be wasted when you proceed.';
   }
 
@@ -572,7 +575,7 @@ class ElonaScene extends Phaser.Scene {
     status.textContent = 'Choose a skill, review its improvement, then press Proceed to learn it.';
   }
 
-  private showTown(tab: TownTab = 'mission', repairDialog = false): void {
+  private showTown(tab: TownTab = 'mission', repairDialog = false, saleSlot: number | null = null): void {
     if (!this.sim || this.sim.state.phase !== 'town' || !this.sim.state.town) return;
     this.reset('town');
     this.root.add(createTownView(this, this.sim.state, manifest, this.cache.json.get('town-layout') as TownLayout, {
@@ -589,15 +592,36 @@ class ElonaScene extends Phaser.Scene {
       },
       dismiss: () => { this.playSound('soundClick1'); this.showTown('castle'); },
     }, tab, repairDialog));
+    if (tab === 'shop' && this.sim.state.town.preparation === 'ready') {
+      const changed = (sound = 'soundPay1') => { this.playSound(sound); this.saveGame(false); this.showTown('shop'); };
+      this.root.add(createShopView(this, { inventory: this.sim.state.inventory, shop: this.sim.state.town.shop, gold: this.sim.state.gold, traits: this.sim.state.player.traits }, manifest, this.cache.json.get('town-layout') as ShopLayout, {
+        buy: (stock, slot) => {
+          const outcome = this.sim!.buyStock(stock, slot);
+          if (outcome === 'purchased') { changed(); return true; }
+          this.playSound('soundBeep');
+          status.textContent = outcome === 'not-enough-gold' ? "You don't have enough money!" : outcome === 'occupied' ? 'Choose an empty inventory slot.' : 'This item is no longer available.';
+          return false;
+        },
+        swap: (from, to) => { if (!this.sim!.moveTownItem(from, to)) return false; changed('soundClick1'); return true; },
+        requestSell: slot => this.showTown('shop', false, slot),
+        confirmSell: slot => { if (this.sim!.sellTownItem(slot) === null) return false; changed(); return true; },
+        cancelSale: () => this.showTown('shop'),
+        applyToken: (slot, stock) => { if (!this.sim!.applyShopToken(slot, stock)) return false; changed(); return true; },
+        message: value => { status.textContent = value; },
+        close: () => this.showTown(null),
+      }, saleSlot));
+      container.dataset.shopStock = JSON.stringify(this.sim.state.town.shop.map(item => isOccupiedItem(item) ? { id: item.id, value: Math.trunc(item.value) } : null));
+      container.dataset.saleSlot = saleSlot === null ? '' : String(saleSlot);
+    }
     this.updateHud();
     container.dataset.actionPoints = String(this.sim.state.town.ap);
     container.dataset.townTab = tab ?? 'none';
     container.dataset.repairDialog = String(repairDialog);
-    container.dataset.inventory = JSON.stringify(this.sim.state.inventory.map(item => item?.id ?? null));
+    container.dataset.inventory = JSON.stringify(this.sim.state.inventory.map(item => isOccupiedItem(item) ? item.id : null));
     if (!this.ambient && this.cache.audio.exists('soundBgTown')) {
       this.ambient = this.sound.add('soundBgTown', { volume: 0.3, loop: true }); this.ambient.play();
     }
-    status.textContent = repairDialog ? 'The castle walls are repaired. Click to continue.' : 'Castle → Free Repair restores the walls for 2 AP. Other town actions and the next day are not available yet.';
+    status.textContent = repairDialog ? 'The castle walls are repaired. Click to continue.' : tab === 'shop' ? (saleSlot === null ? 'Click stock, then an empty owned slot to buy. Drop an owned item outside its slots to sell; confirmation is required.' : 'Confirm the sale with Yes, or click elsewhere to keep the item.') : 'Shop buys and sells items. Castle → Free Repair restores the walls for 2 AP. The next day is not available yet.';
   }
 
   togglePause(): void {
@@ -618,7 +642,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   makeSave(): PortSave | undefined {
-    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 4, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
+    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 5, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
   }
 
   saveGame(notify = true): boolean {
@@ -631,7 +655,7 @@ class ElonaScene extends Phaser.Scene {
 
   private parseSave(raw: unknown): { simulation: Simulation; appearance: number } {
     const save = raw as Partial<PortSave> | null;
-    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
+    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
     return { simulation: Simulation.fromSave(save.simulation, this.simulationOptions()), appearance: save.appearance! };
   }
 

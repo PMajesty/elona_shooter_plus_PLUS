@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { isDeepStrictEqual } from 'node:util';
-import { BASE_ITEM_FIELDS, ItemFactory, type Item } from '../src/items.ts';
+import { BASE_ITEM_FIELDS, ItemFactory, isOccupiedItem, type Item } from '../src/items.ts';
 
 export interface ItemReferenceRecord {
   type: string; version: number; kind?: string; rng?: string; clock?: string; day?: number;
@@ -16,7 +16,8 @@ export interface ItemReferenceRecord {
 const FIELDS: (keyof Item)[] = ['num', 'id', 'graphic', 'type', 'reloadTime', 'reloadTimeMax', 'ammo', 'ammoMax', 'value', 'mod', 'modMax', 'shell', 'manualReload', 'automatic', 'modText', 'lv', 'typeMinor', 'special', 'leech', 'impact', 'shootRate', 'rare', 'autoReload', 'livingWeapon', 'name', 'baseAccuracy', 'accuracyDec', 'attack', 'dmgAir', 'dmgArmor', 'reqTrait', 'reqLv', 'range'];
 
 function project(item: Item | null) {
-  if (!item) return null;
+  // Наблюдатель generateLoot/generateLootBoss выдаёт null для num=0, скрывая сохранённые поля.
+  if (!isOccupiedItem(item)) return null;
   // В исходном наблюдателе undefined сериализуется как null; остальные значения не преобразуются.
   return Object.fromEntries(FIELDS.map(field => [field, item[field] ?? null]));
 }

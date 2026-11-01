@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { ItemFactory, type Item } from '../src/items.ts';
+import { ItemFactory, isOccupiedItem, type Item } from '../src/items.ts';
 import { Simulation } from '../src/simulation.ts';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/original-item-trace.json', import.meta.url), 'utf8'));
@@ -18,7 +18,7 @@ function legacySave(simulation: Simulation): Record<string, any> {
   const value: Record<string, any> = simulation.toSave();
   value.version = 1;
   if (value.phase === 'victory' && value.town === null) value.gold += value.result.netReward;
-  for (const field of ['inventory', 'lootOffers', 'postbattle', 'inventoryProvenance', 'legacyReconstructionSeed', 'bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance', 'town']) delete value[field];
+  for (const field of ['inventory', 'lootOffers', 'postbattle', 'inventoryProvenance', 'legacyReconstructionSeed', 'bossKilled', 'skillChoices', 'traitsProvenance', 'bossKilledProvenance', 'town', 'totalMoney']) delete value[field];
   delete value.player.traits;
   return value;
 }
@@ -33,7 +33,7 @@ test('New Game generates original starter items before the opening mission consu
       const simulation = new Simulation(row.seed);
       assert.deepEqual(simulation.state.inventory, row.slots.map(itemFromOriginal));
       assert.equal(boundaries.at(-1), row.rngState);
-      assert.equal(simulation.state.version, 4);
+      assert.equal(simulation.state.version, 5);
       assert.equal(simulation.state.inventoryProvenance, 'original-generation');
       assert.equal(simulation.state.postbattle, 'none');
     }
@@ -114,7 +114,8 @@ test('loot save resumes exact modified items without rerolls, and Done discards 
   assert.equal(resumed.finishLoot(), true);
   assert.equal(resumed.state.postbattle, 'result');
   assert.deepEqual(resumed.state.inventory, saved.inventory);
-  assert.deepEqual(resumed.state.lootOffers, Array(8).fill(null));
+  assert.deepEqual(resumed.state.lootOffers, saved.lootOffers.map(item => item ? { ...item, num: 0 } : null));
+  assert.equal(resumed.state.lootOffers.some(isOccupiedItem), false);
   assert.notEqual(resumed.state.rng, saved.rng);
   assert.equal(resumed.state.gold, saved.gold + saved.result.netReward);
   assert.deepEqual(resumed.state.town, { ap: 4, preparation: 'pending' });
@@ -162,12 +163,12 @@ test('v1 victory reconstructs only its recorded loot queue once, preserving the 
   assert.deepEqual(oldSave, originalInput);
   assert.deepEqual(migrated.state.loot, [117]);
   assert.equal(migrated.state.lootOffers[0]!.id, 117);
-  assert.equal(migrated.state.lootOffers.filter(Boolean).length, 1);
+  assert.equal(migrated.state.lootOffers.filter(isOccupiedItem).length, 1);
   assert.equal(migrated.state.rng, oldSave.rng);
   assert.deepEqual(Simulation.fromSave(migrated.toSave()).state, migrated.state);
 });
 
-test('v2 save rejects invalid item fields and inconsistent loot stages without editing the input', () => {
+test('v5 save rejects invalid item fields and inconsistent loot stages without editing the input', () => {
   const saved = new Simulation(42).toSave();
   const changes = [
     { inventory: [] }, { inventory: Array(6) }, { lootOffers: Array(7).fill(null) }, { lootOffers: Array(8) }, { postbattle: 'loot' },
