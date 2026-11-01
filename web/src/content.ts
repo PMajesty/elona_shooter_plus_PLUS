@@ -17,7 +17,7 @@ export const SHOTGUN = {
 
 export const GRENADE = { id: 11, name: "Soldier's Grenade", damage: 45, quantity: 5, cooldownFrames: 100, radiusX: 60, radiusY: 50, speed: 12 } as const;
 
-export type EnemyKind = 'sheep' | 'rat' | 'chicken' | 'crow' | 'boss';
+export type EnemyKind = 'sheep' | 'rat' | 'chicken' | 'crow' | 'archer' | 'boss';
 export type Rect = readonly [left: number, right: number, top: number, bottom: number];
 export interface EnemyDefinition {
   kind: EnemyKind; id: number; name: string; level: number; power: number;
@@ -30,12 +30,13 @@ export interface EnemyDefinition {
 export const ENEMIES: Readonly<Record<EnemyKind, EnemyDefinition>> = {
   sheep: { kind: 'sheep', id: 3, name: 'Sheep', level: 0, power: 70, hp: 42, attack: 1, speedBase: 0.7, speedRandom: 0.4, critical: [4, 19, -1, 9], body: [-20, 20, -17, 12], knockResistance: 0.9, flags: ['BATCH'], loot: 6 },
   rat: { kind: 'rat', id: 17, name: 'Rat', level: 1, power: 50, hp: 16, attack: 2, speedBase: 2.7, speedRandom: 1.3, critical: [-6, 9, -11, 1], body: [-19, 17, -14, 8], knockResistance: 1.1, flags: ['BATCH', 'MASS'], loot: 28 },
+  archer: { kind: 'archer', id: 2, name: 'Archer', level: 4, power: 100, hp: 38, attack: 3, speedBase: 0.8, speedRandom: 0.7, critical: [-7, 9, -20, -8], body: [-18, 18, -27, 12], knockResistance: 0.8, flags: ['RANGED'], loot: 29 },
   chicken: { kind: 'chicken', id: 19, name: 'Chicken', level: 2, power: 90, hp: 54, attack: 1, speedBase: 1.3, speedRandom: 1.3, critical: [-4, 4, -12, -4], body: [-15, 14, -18, 10], knockResistance: 1, flags: ['BATCH', 'MASS'], loot: 6 },
   crow: { kind: 'crow', id: 6, name: 'Crow', level: 3, power: 110, hp: 34, attack: 5, speedBase: 1.6, speedRandom: 1.5, critical: [5, 18, -1, 16], body: [-23, 21, -14, 20], knockResistance: 1, flags: ['AIR', 'MASS'], airborne: true, loot: 30 },
   boss: { kind: 'boss', id: 999, name: 'Boss', level: 9999, power: 500, hp: 150, attack: 1, speedBase: 1.1, speedRandom: 0.8, critical: [-100, -100, -100, -100], body: [-13, 13, -22, 17], knockResistance: 0, flags: [], loot: 6 },
 };
 
 // Порядок важен: исходный selectEnemy перебирает записи именно так.
-export const ENEMY_SELECTION_ORDER: readonly EnemyKind[] = ['boss', 'sheep', 'rat', 'crow', 'chicken'];
+export const ENEMY_SELECTION_ORDER: readonly EnemyKind[] = ['boss', 'sheep', 'rat', 'archer', 'crow', 'chicken'];
 // New Game вызывает generateMission(0), хотя на экране уже указан первый день.
 export const FIRST_DAY = { day: 1, missionLevel: 0, waves: 5, power: 800, reward: 600, upkeep: 40, castleHp: 40, spawnRate: 15 } as const;

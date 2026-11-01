@@ -1,0 +1,3075 @@
+{
+  "format": "elona-original-third-day-wave-trace",
+  "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "instrumentedSwfSha256": "15cecb3af39db52b6ae5da0784c6e3ef4cd71c5bb111411a9bc43da355f9f80c",
+  "traceSha256": "753c428914dd20c5fdfb1f1931943886ffe228c64ea0a71707461238a656589a",
+  "runtime": "@ruffle-rs/ruffle 0.7.1",
+  "boundary": "Original generateMission(2) on calendar day2 then preGenerateWave on calendar day3 versus the production mission and wave generators",
+  "records": [
+    {
+      "clock": "synchronous-original-third-day-waves",
+      "constantCases": [
+        0,
+        0.99
+      ],
+      "kind": "third-day-waves",
+      "rng": "xorshift32",
+      "seeds": [
+        42,
+        1,
+        3735928559
+      ],
+      "type": "ready",
+      "version": 1
+    },
+    {
+      "bossWave": 3,
+      "constantValue": null,
+      "day": 3,
+      "drawCount": 246,
+      "kind": "third-day-waves",
+      "loot": [
+        1103
+      ],
+      "missionAfter": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 3,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 2,
+        "group": [
+          13,
+          11,
+          10,
+          10,
+          8
+        ],
+        "hire": false,
+        "hpFix": 1,
+        "level": 2,
+        "loot": [
+          1103
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 707,
+        "powerOrg": 1040,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 640,
+        "spawnRate": 14.6,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionBefore": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 3,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 2,
+        "group": [],
+        "hire": false,
+        "hpFix": 1,
+        "level": 2,
+        "loot": [
+          1103
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 1040,
+        "powerOrg": 1040,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 640,
+        "spawnRate": 14.6,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionLevel": 2,
+      "mode": "xorshift32",
+      "powerOrg": 1040,
+      "preparationDay": 2,
+      "preparationDrawCount": 2,
+      "preparationRngState": 2836018348,
+      "reward": 640,
+      "rngState": 2660944570,
+      "seed": 42,
+      "selections": [
+        {
+          "budget": 15,
+          "drawAfter": 11,
+          "drawBefore": 8,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 16,
+          "drawBefore": 13,
+          "flags": [],
+          "ids": [
+            17,
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 20,
+          "drawAfter": 23,
+          "drawBefore": 18,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 20,
+          "drawAfter": 26,
+          "drawBefore": 23,
+          "flags": [],
+          "ids": [
+            19,
+            19
+          ],
+          "requestedLevel": 4,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 33,
+          "drawBefore": 28,
+          "flags": [],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 40,
+          "drawBefore": 35,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            17,
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 62,
+          "drawBefore": 59,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 67,
+          "drawBefore": 64,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 20,
+          "drawAfter": 74,
+          "drawBefore": 69,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 20,
+          "drawAfter": 77,
+          "drawBefore": 74,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 84,
+          "drawBefore": 79,
+          "flags": [],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 91,
+          "drawBefore": 86,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 111,
+          "drawBefore": 108,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 116,
+          "drawBefore": 113,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 20,
+          "drawAfter": 123,
+          "drawBefore": 118,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            17,
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 20,
+          "drawAfter": 126,
+          "drawBefore": 123,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 133,
+          "drawBefore": 128,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 140,
+          "drawBefore": 135,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 159,
+          "drawBefore": 156,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 166,
+          "drawBefore": 161,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 0,
+          "wave": 3
+        },
+        {
+          "budget": 20,
+          "drawAfter": 173,
+          "drawBefore": 168,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 3
+        },
+        {
+          "budget": 20,
+          "drawAfter": 176,
+          "drawBefore": 173,
+          "flags": [],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 4,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 183,
+          "drawBefore": 178,
+          "flags": [],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 0,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 190,
+          "drawBefore": 185,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 209,
+          "drawBefore": 206,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 214,
+          "drawBefore": 211,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        },
+        {
+          "budget": 20,
+          "drawAfter": 221,
+          "drawBefore": 216,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        },
+        {
+          "budget": 20,
+          "drawAfter": 224,
+          "drawBefore": 221,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 231,
+          "drawBefore": 226,
+          "flags": [],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 0,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 238,
+          "drawBefore": 233,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        }
+      ],
+      "spawnRate": 14.6,
+      "type": "snapshot",
+      "version": 1,
+      "waves": [
+        {
+          "delays": [
+            171.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            17,
+            17,
+            19,
+            19,
+            17,
+            17,
+            19,
+            3,
+            3,
+            17,
+            3,
+            17,
+            3
+          ],
+          "index": 0,
+          "initialCount": 13
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            3,
+            3,
+            17,
+            3,
+            3,
+            3,
+            3,
+            3,
+            17,
+            3,
+            6
+          ],
+          "index": 1,
+          "initialCount": 11
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            17,
+            17,
+            6,
+            17,
+            19,
+            17,
+            17,
+            3,
+            17,
+            17
+          ],
+          "index": 2,
+          "initialCount": 10
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            17,
+            3,
+            19,
+            3,
+            19,
+            3,
+            17,
+            17,
+            17,
+            999
+          ],
+          "index": 3,
+          "initialCount": 10
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            6,
+            3,
+            19,
+            3,
+            17,
+            3,
+            3,
+            17
+          ],
+          "index": 4,
+          "initialCount": 8
+        }
+      ]
+    },
+    {
+      "bossWave": 2,
+      "constantValue": null,
+      "day": 3,
+      "drawCount": 243,
+      "kind": "third-day-waves",
+      "loot": [
+        1103
+      ],
+      "missionAfter": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 2,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 2,
+        "group": [
+          15,
+          10,
+          10,
+          8,
+          8
+        ],
+        "hire": false,
+        "hpFix": 1,
+        "level": 2,
+        "loot": [
+          1103
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 707,
+        "powerOrg": 1040,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 640,
+        "spawnRate": 14.6,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionBefore": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 2,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 2,
+        "group": [],
+        "hire": false,
+        "hpFix": 1,
+        "level": 2,
+        "loot": [
+          1103
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 1040,
+        "powerOrg": 1040,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 640,
+        "spawnRate": 14.6,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionLevel": 2,
+      "mode": "xorshift32",
+      "powerOrg": 1040,
+      "preparationDay": 2,
+      "preparationDrawCount": 2,
+      "preparationRngState": 67634689,
+      "reward": 640,
+      "rngState": 17288999,
+      "seed": 1,
+      "selections": [
+        {
+          "budget": 15,
+          "drawAfter": 11,
+          "drawBefore": 8,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 16,
+          "drawBefore": 13,
+          "flags": [],
+          "ids": [
+            17,
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 20,
+          "drawAfter": 23,
+          "drawBefore": 18,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            17,
+            17,
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 20,
+          "drawAfter": 26,
+          "drawBefore": 23,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 33,
+          "drawBefore": 28,
+          "flags": [],
+          "ids": [
+            17,
+            17,
+            17
+          ],
+          "requestedLevel": 0,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 40,
+          "drawBefore": 35,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 64,
+          "drawBefore": 61,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 69,
+          "drawBefore": 66,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 20,
+          "drawAfter": 76,
+          "drawBefore": 71,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 20,
+          "drawAfter": 79,
+          "drawBefore": 76,
+          "flags": [],
+          "ids": [
+            19,
+            19
+          ],
+          "requestedLevel": 4,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 86,
+          "drawBefore": 81,
+          "flags": [],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 93,
+          "drawBefore": 88,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 112,
+          "drawBefore": 109,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 117,
+          "drawBefore": 114,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 20,
+          "drawAfter": 124,
+          "drawBefore": 119,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 2
+        },
+        {
+          "budget": 20,
+          "drawAfter": 127,
+          "drawBefore": 124,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 134,
+          "drawBefore": 129,
+          "flags": [],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 141,
+          "drawBefore": 136,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 0,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 160,
+          "drawBefore": 157,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 165,
+          "drawBefore": 162,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 3
+        },
+        {
+          "budget": 20,
+          "drawAfter": 172,
+          "drawBefore": 167,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 3
+        },
+        {
+          "budget": 20,
+          "drawAfter": 175,
+          "drawBefore": 172,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 182,
+          "drawBefore": 177,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 189,
+          "drawBefore": 184,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 206,
+          "drawBefore": 203,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 211,
+          "drawBefore": 208,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        },
+        {
+          "budget": 20,
+          "drawAfter": 218,
+          "drawBefore": 213,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 0,
+          "wave": 4
+        },
+        {
+          "budget": 20,
+          "drawAfter": 221,
+          "drawBefore": 218,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 228,
+          "drawBefore": 223,
+          "flags": [],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 235,
+          "drawBefore": 230,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        }
+      ],
+      "spawnRate": 14.6,
+      "type": "snapshot",
+      "version": 1,
+      "waves": [
+        {
+          "delays": [
+            171.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            17,
+            17,
+            17,
+            17,
+            3,
+            3,
+            17,
+            17,
+            17,
+            6,
+            17,
+            3,
+            17,
+            17,
+            3
+          ],
+          "index": 0,
+          "initialCount": 15
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            19,
+            3,
+            17,
+            3,
+            17,
+            19,
+            19,
+            3,
+            3,
+            19
+          ],
+          "index": 1,
+          "initialCount": 10
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6
+          ],
+          "enemies": [
+            17,
+            3,
+            17,
+            3,
+            17,
+            3,
+            17,
+            3,
+            999,
+            6
+          ],
+          "index": 2,
+          "initialCount": 10
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            17,
+            17,
+            17,
+            3,
+            19,
+            6,
+            17,
+            3
+          ],
+          "index": 3,
+          "initialCount": 8
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            17,
+            3,
+            17,
+            6,
+            17,
+            17,
+            3,
+            19
+          ],
+          "index": 4,
+          "initialCount": 8
+        }
+      ]
+    },
+    {
+      "bossWave": 2,
+      "constantValue": null,
+      "day": 3,
+      "drawCount": 244,
+      "kind": "third-day-waves",
+      "loot": [
+        1103
+      ],
+      "missionAfter": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 2,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 2,
+        "group": [
+          14,
+          11,
+          9,
+          9,
+          9
+        ],
+        "hire": false,
+        "hpFix": 1,
+        "level": 2,
+        "loot": [
+          1103
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 707,
+        "powerOrg": 1040,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 640,
+        "spawnRate": 14.6,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionBefore": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 2,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 2,
+        "group": [],
+        "hire": false,
+        "hpFix": 1,
+        "level": 2,
+        "loot": [
+          1103
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 1040,
+        "powerOrg": 1040,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 640,
+        "spawnRate": 14.6,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionLevel": 2,
+      "mode": "xorshift32",
+      "powerOrg": 1040,
+      "preparationDay": 2,
+      "preparationDrawCount": 2,
+      "preparationRngState": 2384302402,
+      "reward": 640,
+      "rngState": 2036547264,
+      "seed": 3735928559,
+      "selections": [
+        {
+          "budget": 15,
+          "drawAfter": 11,
+          "drawBefore": 8,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 18,
+          "drawBefore": 13,
+          "flags": [],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 0
+        },
+        {
+          "budget": 20,
+          "drawAfter": 23,
+          "drawBefore": 20,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            17,
+            17,
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 20,
+          "drawAfter": 26,
+          "drawBefore": 23,
+          "flags": [],
+          "ids": [
+            19,
+            19
+          ],
+          "requestedLevel": 4,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 33,
+          "drawBefore": 28,
+          "flags": [],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 40,
+          "drawBefore": 35,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 63,
+          "drawBefore": 60,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 68,
+          "drawBefore": 65,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 20,
+          "drawAfter": 75,
+          "drawBefore": 70,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 20,
+          "drawAfter": 78,
+          "drawBefore": 75,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 85,
+          "drawBefore": 80,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 92,
+          "drawBefore": 87,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 112,
+          "drawBefore": 109,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 117,
+          "drawBefore": 114,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 20,
+          "drawAfter": 124,
+          "drawBefore": 119,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 0,
+          "wave": 2
+        },
+        {
+          "budget": 20,
+          "drawAfter": 127,
+          "drawBefore": 124,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 134,
+          "drawBefore": 129,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 141,
+          "drawBefore": 136,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 159,
+          "drawBefore": 156,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 164,
+          "drawBefore": 161,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 3
+        },
+        {
+          "budget": 20,
+          "drawAfter": 171,
+          "drawBefore": 166,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 3
+        },
+        {
+          "budget": 20,
+          "drawAfter": 174,
+          "drawBefore": 171,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 181,
+          "drawBefore": 176,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 0,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 188,
+          "drawBefore": 183,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 206,
+          "drawBefore": 203,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 211,
+          "drawBefore": 208,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        },
+        {
+          "budget": 20,
+          "drawAfter": 218,
+          "drawBefore": 213,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        },
+        {
+          "budget": 20,
+          "drawAfter": 221,
+          "drawBefore": 218,
+          "flags": [],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 4,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 228,
+          "drawBefore": 223,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 235,
+          "drawBefore": 230,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 4
+        }
+      ],
+      "spawnRate": 14.6,
+      "type": "snapshot",
+      "version": 1,
+      "waves": [
+        {
+          "delays": [
+            171.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            17,
+            3,
+            3,
+            17,
+            3,
+            3,
+            3,
+            3,
+            19,
+            3,
+            17,
+            19,
+            3,
+            17
+          ],
+          "index": 0,
+          "initialCount": 14
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            3,
+            17,
+            3,
+            17,
+            3,
+            17,
+            17,
+            3,
+            6,
+            3,
+            3
+          ],
+          "index": 1,
+          "initialCount": 11
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6
+          ],
+          "enemies": [
+            19,
+            17,
+            6,
+            3,
+            999,
+            17,
+            17,
+            17,
+            3
+          ],
+          "index": 2,
+          "initialCount": 9
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            17,
+            6,
+            17,
+            3,
+            17,
+            3,
+            3,
+            3,
+            17
+          ],
+          "index": 3,
+          "initialCount": 9
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            17,
+            3,
+            3,
+            17,
+            3,
+            19,
+            17,
+            3,
+            17
+          ],
+          "index": 4,
+          "initialCount": 9
+        }
+      ]
+    },
+    {
+      "bossWave": 2,
+      "constantValue": 0,
+      "day": 3,
+      "drawCount": 229,
+      "kind": "third-day-waves",
+      "loot": [
+        1103
+      ],
+      "missionAfter": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 2,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 2,
+        "group": [
+          12,
+          10,
+          9,
+          8,
+          8
+        ],
+        "hire": false,
+        "hpFix": 1,
+        "level": 2,
+        "loot": [
+          1103
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 707,
+        "powerOrg": 1040,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 640,
+        "spawnRate": 14.6,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionBefore": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 2,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 2,
+        "group": [],
+        "hire": false,
+        "hpFix": 1,
+        "level": 2,
+        "loot": [
+          1103
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 1040,
+        "powerOrg": 1040,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 640,
+        "spawnRate": 14.6,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionLevel": 2,
+      "mode": "constant-zero",
+      "powerOrg": 1040,
+      "preparationDay": 2,
+      "preparationDrawCount": 2,
+      "preparationRngState": 42,
+      "reward": 640,
+      "rngState": 42,
+      "seed": 42,
+      "selections": [
+        {
+          "budget": 15,
+          "drawAfter": 11,
+          "drawBefore": 8,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 2,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 16,
+          "drawBefore": 13,
+          "flags": [],
+          "ids": [
+            17,
+            17,
+            17
+          ],
+          "requestedLevel": 2,
+          "wave": 0
+        },
+        {
+          "budget": 20,
+          "drawAfter": 21,
+          "drawBefore": 18,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 0
+        },
+        {
+          "budget": 20,
+          "drawAfter": 24,
+          "drawBefore": 21,
+          "flags": [],
+          "ids": [
+            2,
+            2
+          ],
+          "requestedLevel": 4,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 31,
+          "drawBefore": 26,
+          "flags": [],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 38,
+          "drawBefore": 33,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 59,
+          "drawBefore": 56,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 2,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 64,
+          "drawBefore": 61,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 2,
+          "wave": 1
+        },
+        {
+          "budget": 20,
+          "drawAfter": 69,
+          "drawBefore": 66,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 1
+        },
+        {
+          "budget": 20,
+          "drawAfter": 72,
+          "drawBefore": 69,
+          "flags": [],
+          "ids": [
+            2
+          ],
+          "requestedLevel": 4,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 79,
+          "drawBefore": 74,
+          "flags": [],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 86,
+          "drawBefore": 81,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 105,
+          "drawBefore": 102,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 2,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 110,
+          "drawBefore": 107,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 2,
+          "wave": 2
+        },
+        {
+          "budget": 20,
+          "drawAfter": 115,
+          "drawBefore": 112,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 2
+        },
+        {
+          "budget": 20,
+          "drawAfter": 118,
+          "drawBefore": 115,
+          "flags": [],
+          "ids": [
+            2
+          ],
+          "requestedLevel": 4,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 125,
+          "drawBefore": 120,
+          "flags": [],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 132,
+          "drawBefore": 127,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 150,
+          "drawBefore": 147,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 2,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 155,
+          "drawBefore": 152,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 2,
+          "wave": 3
+        },
+        {
+          "budget": 20,
+          "drawAfter": 160,
+          "drawBefore": 157,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 3
+        },
+        {
+          "budget": 20,
+          "drawAfter": 163,
+          "drawBefore": 160,
+          "flags": [],
+          "ids": [
+            2
+          ],
+          "requestedLevel": 4,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 170,
+          "drawBefore": 165,
+          "flags": [],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 177,
+          "drawBefore": 172,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 194,
+          "drawBefore": 191,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 2,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 199,
+          "drawBefore": 196,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 2,
+          "wave": 4
+        },
+        {
+          "budget": 20,
+          "drawAfter": 204,
+          "drawBefore": 201,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 4
+        },
+        {
+          "budget": 20,
+          "drawAfter": 207,
+          "drawBefore": 204,
+          "flags": [],
+          "ids": [
+            2
+          ],
+          "requestedLevel": 4,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 214,
+          "drawBefore": 209,
+          "flags": [],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 221,
+          "drawBefore": 216,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 2,
+          "wave": 4
+        }
+      ],
+      "spawnRate": 14.6,
+      "type": "snapshot",
+      "version": 1,
+      "waves": [
+        {
+          "delays": [
+            171.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            15.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            3,
+            19,
+            17,
+            17,
+            17,
+            3,
+            3,
+            2,
+            2,
+            3,
+            3,
+            3
+          ],
+          "index": 0,
+          "initialCount": 12
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            3,
+            19,
+            17,
+            17,
+            3,
+            3,
+            2,
+            3,
+            3,
+            3
+          ],
+          "index": 1,
+          "initialCount": 10
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6,
+            21.6
+          ],
+          "enemies": [
+            999,
+            19,
+            17,
+            17,
+            3,
+            3,
+            2,
+            3,
+            3
+          ],
+          "index": 2,
+          "initialCount": 9
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            3,
+            19,
+            17,
+            17,
+            3,
+            3,
+            2,
+            3
+          ],
+          "index": 3,
+          "initialCount": 8
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            3,
+            19,
+            17,
+            17,
+            3,
+            3,
+            2,
+            3
+          ],
+          "index": 4,
+          "initialCount": 8
+        }
+      ]
+    },
+    {
+      "bossWave": 3,
+      "constantValue": 0.99,
+      "day": 3,
+      "drawCount": 233,
+      "kind": "third-day-waves",
+      "loot": [
+        1038,
+        1103
+      ],
+      "missionAfter": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 3,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 2,
+        "group": [
+          10,
+          9,
+          7,
+          8,
+          7
+        ],
+        "hire": false,
+        "hpFix": 1,
+        "level": 2,
+        "loot": [
+          1038,
+          1103
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 707,
+        "powerOrg": 1040,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 640,
+        "spawnRate": 14.6,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionBefore": {
+        "absorbFix": 0,
+        "bossDay": false,
+        "bossKilled": 0,
+        "bossWave": 3,
+        "criticalCount": 0,
+        "dmgFix": 1,
+        "expFix": 1,
+        "fixedLv": 2,
+        "group": [],
+        "hire": false,
+        "hpFix": 1,
+        "level": 2,
+        "loot": [
+          1038,
+          1103
+        ],
+        "newWave": true,
+        "noDamage": true,
+        "note": "",
+        "power": 1040,
+        "powerOrg": 1040,
+        "ragnarok": false,
+        "resultOther": 0,
+        "reward": 640,
+        "spawnRate": 14.6,
+        "strength": 0,
+        "time": 30,
+        "wave": 5,
+        "waveType": 0
+      },
+      "missionLevel": 2,
+      "mode": "constant-high",
+      "powerOrg": 1040,
+      "preparationDay": 2,
+      "preparationDrawCount": 2,
+      "preparationRngState": 42,
+      "reward": 640,
+      "rngState": 42,
+      "seed": 42,
+      "selections": [
+        {
+          "budget": 15,
+          "drawAfter": 11,
+          "drawBefore": 8,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 16,
+          "drawBefore": 13,
+          "flags": [],
+          "ids": [
+            17,
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 20,
+          "drawAfter": 23,
+          "drawBefore": 18,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19,
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 20,
+          "drawAfter": 26,
+          "drawBefore": 23,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 33,
+          "drawBefore": 28,
+          "flags": [],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 40,
+          "drawBefore": 35,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 0,
+          "wave": 0
+        },
+        {
+          "budget": 15,
+          "drawAfter": 59,
+          "drawBefore": 56,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3,
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 64,
+          "drawBefore": 61,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 20,
+          "drawAfter": 71,
+          "drawBefore": 66,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19,
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 20,
+          "drawAfter": 74,
+          "drawBefore": 71,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 81,
+          "drawBefore": 76,
+          "flags": [],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 88,
+          "drawBefore": 83,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 0,
+          "wave": 1
+        },
+        {
+          "budget": 15,
+          "drawAfter": 106,
+          "drawBefore": 103,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 111,
+          "drawBefore": 108,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 20,
+          "drawAfter": 118,
+          "drawBefore": 113,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 20,
+          "drawAfter": 121,
+          "drawBefore": 118,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 128,
+          "drawBefore": 123,
+          "flags": [],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 135,
+          "drawBefore": 130,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 0,
+          "wave": 2
+        },
+        {
+          "budget": 15,
+          "drawAfter": 151,
+          "drawBefore": 148,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 156,
+          "drawBefore": 153,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 3
+        },
+        {
+          "budget": 20,
+          "drawAfter": 163,
+          "drawBefore": 158,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 3
+        },
+        {
+          "budget": 20,
+          "drawAfter": 166,
+          "drawBefore": 163,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 173,
+          "drawBefore": 168,
+          "flags": [],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 180,
+          "drawBefore": 175,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 0,
+          "wave": 3
+        },
+        {
+          "budget": 15,
+          "drawAfter": 197,
+          "drawBefore": 194,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            3
+          ],
+          "requestedLevel": 0,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 202,
+          "drawBefore": 199,
+          "flags": [],
+          "ids": [
+            17,
+            17
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        },
+        {
+          "budget": 20,
+          "drawAfter": 209,
+          "drawBefore": 204,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        },
+        {
+          "budget": 20,
+          "drawAfter": 212,
+          "drawBefore": 209,
+          "flags": [],
+          "ids": [
+            6
+          ],
+          "requestedLevel": 4,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 219,
+          "drawBefore": 214,
+          "flags": [],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 1,
+          "wave": 4
+        },
+        {
+          "budget": 15,
+          "drawAfter": 226,
+          "drawBefore": 221,
+          "flags": [
+            "BATCH"
+          ],
+          "ids": [
+            19
+          ],
+          "requestedLevel": 0,
+          "wave": 4
+        }
+      ],
+      "spawnRate": 14.6,
+      "type": "snapshot",
+      "version": 1,
+      "waves": [
+        {
+          "delays": [
+            171.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            19,
+            3,
+            3,
+            17,
+            17,
+            17,
+            19,
+            19,
+            6,
+            19
+          ],
+          "index": 0,
+          "initialCount": 10
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            19,
+            3,
+            3,
+            17,
+            17,
+            19,
+            19,
+            6,
+            19
+          ],
+          "index": 1,
+          "initialCount": 9
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            19,
+            3,
+            17,
+            17,
+            19,
+            6,
+            19
+          ],
+          "index": 2,
+          "initialCount": 7
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            999,
+            3,
+            17,
+            17,
+            19,
+            6,
+            19,
+            19
+          ],
+          "index": 3,
+          "initialCount": 8
+        },
+        {
+          "delays": [
+            121.6,
+            14.6,
+            14.6,
+            14.6,
+            15.6,
+            14.6,
+            14.6
+          ],
+          "enemies": [
+            19,
+            3,
+            17,
+            17,
+            19,
+            6,
+            19
+          ],
+          "index": 4,
+          "initialCount": 7
+        }
+      ]
+    },
+    {
+      "kind": "third-day-waves",
+      "ok": true,
+      "seeds": [
+        42,
+        1,
+        3735928559
+      ],
+      "snapshots": 5,
+      "type": "complete",
+      "version": 1
+    }
+  ]
+}

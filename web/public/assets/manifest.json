@@ -745,6 +745,24 @@
       "uniqueFrames": 30,
       "characterId": 981
     },
+    "enemy_archer": {
+      "image": "sprites/enemy_archer.png",
+      "json": "sprites/enemy_archer.json",
+      "originX": 14.65,
+      "originY": 21.1,
+      "frameWidth": 41,
+      "frameHeight": 46,
+      "labels": {
+        "init": 1,
+        "alive": 5,
+        "attack": 28,
+        "dead": 94,
+        "null": 210
+      },
+      "count": 210,
+      "uniqueFrames": 26,
+      "characterId": 1092
+    },
     "explosion": {
       "image": "sprites/explosion.png",
       "json": "sprites/explosion.json",
@@ -936,6 +954,18 @@
       "count": 1,
       "uniqueFrames": 1,
       "characterId": 2129
+    },
+    "enemyArrowBody": {
+      "image": "sprites/enemyArrowBody.png",
+      "json": "sprites/enemyArrowBody.json",
+      "originX": 2.0,
+      "originY": 7.5,
+      "frameWidth": 4,
+      "frameHeight": 15,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2281
     },
     "itemPopup": {
       "image": "sprites/itemPopup.png",
@@ -1169,6 +1199,20 @@
     "hud": "fonts/hud.ttf",
     "small": "fonts/small.ttf",
     "ui": "fonts/ui.ttf"
+  },
+  "enemyArrowVisual": {
+    "characterId": 2282,
+    "clip": "enemyArrowBody",
+    "bodyX": 0.0,
+    "initialBodyY": -38.0,
+    "shadow": {
+      "clip": "grenadeShadow",
+      "x": -6.95,
+      "initialY": -18.1,
+      "scaleX": 1.0,
+      "scaleY": 0.25,
+      "aboveBody": true
+    }
   },
   "projectileVisuals": {
     "hand-grenade": {

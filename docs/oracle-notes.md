@@ -1188,3 +1188,122 @@ Regenerate with `python tools/build_modification_oracle.py`, capture
 `?suite=modifications`, then run `npm.cmd run test:modification-reference` from
 `web/`. The focused regression is
 `node --experimental-strip-types --test tests/modification-reference.test.ts`.
+
+## Third-day mission and wave generation
+
+`tools/build_third_day_wave_oracle.py` calls original `generateMission(2)` on
+calendar day 2, then original `preGenerateWave()` on calendar day 3. The prepared
+mission retains its Sheep statue guarantee; it is not regenerated after Rest.
+Two identical Ruffle runs captured five cases: seeds 42, 1 and 3735928559, plus
+explicit constant-zero and constant-0.99 random inputs. All five match the
+production generators on the first comparison, including every mission field,
+enemy ID, fractional delay, group count, RNG draw count and final RNG state.
+All 3491 tags and non-code payloads remain preserved, with only DoABC 2782 changed.
+
+Source selection observations prove six groups per wave with budget percentages
+`15, 15, 20, 20, 15, 15` and flags `BATCH, any, BATCH, any, any, BATCH`. The two
+additional groups begin at mission level 2. The first three seeded cases spend
+246/243/244 draws and generate 52/51/52 enemies. Constant-zero spends 229 draws
+and generates 47; constant-0.99 spends 233 and generates 41. These counts include
+the two mission-preparation draws.
+
+The boundary inputs matter: zero-valued source randomness selects **Archer ID 2**
+in the fourth group, despite its absence from the three ordinary seeded cases.
+The high-input case selects **Chicken ID 19 at requested level 0** through the
+fallback, which deliberately does not repeat the usual level/flag exclusions.
+Both observations are now regression assertions. The port uses the complete
+20-entry original selection catalog in original order, including the Fly filter
+draw before its level check. It does not substitute an implemented enemy when
+an unsupported original ID is selected.
+
+Mission preparation now includes level 3/calendar day 3: power 1160, reward 660,
+spawn rate 14.4, and the Shop Token guarantee after the optional Ragnarok roll.
+That next mission is prepared but its fourth-day battle remains unsupported.
+Mission level 3 enables BATCH1 waves and the boss's first shield behavior;
+mission level 4 additionally enables AIR waves, another fallback roll and Fly
+selection. These are concrete next dependencies, not permission to reuse the
+third-day behavior indefinitely. The first Boss Day is mission level 9.
+
+The fixture is a synchronous generation comparison. Constant streams are legal
+input-boundary probes, not claims that the seeded production RNG naturally
+produces those sequences. Rest, town preparation, Archer behavior, rendering and
+whole-battle scheduling have separate checks. Existing first/second-day fixtures
+remain unchanged. Two new regressions check the accepted trace and reject changed
+delays, omitted rare enemies and altered random consumption.
+
+- Accepted diagnostic SWF SHA-256: `15cecb3af39db52b6ae5da0784c6e3ef4cd71c5bb111411a9bc43da355f9f80c`.
+- Accepted trace SHA-256: `753c428914dd20c5fdfb1f1931943886ffe228c64ea0a71707461238a656589a`.
+- Accepted fixture: `web/tests/fixtures/original-third-day-wave-trace.json`.
+
+Regenerate with `python tools/build_third_day_wave_oracle.py`, capture
+`?suite=third-day-waves`, then run `npm.cmd run test:third-day-wave-reference`
+from `web/`. The focused regression is
+`node --experimental-strip-types --test tests/third-day-wave-reference.test.ts`.
+
+## Third-town preparation
+
+`tools/build_third_town_oracle.py` extracts the same original frame71 preparation
+block as the first/second-town fixtures and executes it on calendar day 3. Two
+identical Ruffle runs captured six cases: seeds 42, 1 and 3735928559, each with
+medal60 absent/present, retained ordinary offer metadata, prior Militia slots
+45/47/48 and an existing search value. All six match production shop, cards,
+mission, recruit, flags, search state, save-boundary RNG and final RNG exactly.
+The prepared mission contains Shop Token 1035 instead of a statue, after the
+optional Ragnarok roll. The recruiter still produces level1 candidates.
+
+The source preparation statements are preserved, except actual save I/O is
+replaced by an RNG observation. All 3491 resource tags and non-code payloads are
+preserved; only DoABC2782 changes. Existing first/second-town fixtures are unchanged.
+The accepted reference test verifies the trace hash. Three additional focused
+checks cover wrong-calendar/statue rejection, retained metadata without input
+mutation, and the largest Day3 recruit level roll.
+
+This boundary uses default castle upgrades, the solo Sheriff party and only the
+reachable absorption medal. It does not cover town interactions or Day4 combat.
+Town4 requires the source MOD-sale overwrite and potentially level2 recruits;
+these branches are deliberately outside the three-town helper's accepted range.
+
+- Accepted diagnostic SWF SHA-256: `e9ea5b163839b742a4de75e44f57dc2612ee65f88a97f84f511cb2b00f727052`.
+- Accepted trace SHA-256: `d0ee4e7c2c90099e16c70554a579014241658ab717ad32da34774e3686b37155`.
+- Accepted fixture: `web/tests/fixtures/original-third-town-trace.json`.
+- Runtime capture: `.build/oracle/third-town-browser-report.json`, dated `2026-11-01T23:13:31.127Z`.
+
+Regenerate with `python tools/build_third_town_oracle.py`, capture
+`?suite=third-town`, then run `npm.cmd run test:third-town-reference` from `web/`.
+Focused checks: `node --experimental-strip-types --test tests/third-town.test.ts tests/third-town-reference.test.ts`.
+
+## Archer AI, arrows and collision samples
+
+`tools/build_archer_oracle.py` calls the actual original Archer spawn and AI,
+then explicitly advances its child frame and previously existing arrows. Two
+identical Ruffle runs captured five scenarios: opening counter, repeated ranged
+attacks, knockback interruption, left-edge knockback and death. All **517 state
+observations** (five initial states plus 512 steps) match production, including
+display widths, frames/flags/counter, motion, rewards, castle HP, every arrow,
+RNG draw count and final RNG state. Six original 64×64 filled-contour grids match
+all **24,576 points**. All 3491 tags and non-code payloads remain preserved;
+only DoABC2782 changes.
+
+The first strict comparison matched239/517 and is retained in
+`.build/oracle/archer-comparison-before.json`. It identified frame1 fallback for
+the missing `stand` label, per-assignment twip rounding and changing display-width
+knockback clamps, and unnecessary arrow-rotation modulo rounding. The actual
+source emitted no exceptions; the corrected comparison contains no exemptions
+or intentional behavior changes. Widths are independently derived from original
+shape bounds/placement matrices and checked against every captured width.
+
+The accepted three-test regression checks trace provenance and full comparison,
+the observed release/fallback/clamp/death edges, and a deliberately wrong arrow
+step. This is a controlled manual scheduling boundary, **not native timeline
+scheduling** or whole-battle/pause/rendering parity. Finite contour grids do not
+establish late-game hitbox correctness. See
+`web/docs/archer-source.md` for source mapping and scope.
+
+- Accepted diagnostic SWF SHA-256: `5b7907f3529e19970a9a12e7e80998089c248dda93ee4d57d3d0656450b3054a`.
+- Accepted trace SHA-256: `6ed7077e2b8afdc618ea48091905c64c0f9fa44b27d2cb712104fa0276d6fb58`.
+- Accepted fixture: `web/tests/fixtures/original-archer-trace.json`.
+- Runtime capture: `.build/oracle/archer-browser-report.json`, dated `2026-11-01T23:13:29.594Z`.
+
+Regenerate with `python tools/build_archer_oracle.py`, capture `?suite=archer`,
+then run `npm.cmd run test:archer-reference` from `web/`. Focused tests:
+`node --experimental-strip-types --test tests/archer-reference.test.ts`.

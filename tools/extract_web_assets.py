@@ -19,12 +19,12 @@ CACHE = ROOT / ".build/export"
 WORK = ROOT / ".build/web-assets"
 DEST = ROOT / "web/public/assets"
 CLIPS = {"charaPic": 677, "enemy_sheep": 910,
-         "enemy_chicken": 1063, "enemy_rat": 1295, "enemy_crow": 981,
+         "enemy_chicken": 1063, "enemy_rat": 1295, "enemy_crow": 981, "enemy_archer": 1092,
          "explosion": 2235, "itemPicture": 2113, "ammoBar": 2698, "radioButton": 2312,
          "grenadeBody": 2275, "grenadeShadow": 2199, "bossHealthFill": 2411, "shopCoin": 1442,
          "layhand": 2226, "itemTimer": 2370, "launcherGrenadeBody": 2238,
          "rocketBody": 2246, "arrowBody": 2263, "flameBody": 2195, "explosionLarge": 2403,
-         "shopUpgradeArrow": 2129}
+         "shopUpgradeArrow": 2129, "enemyArrowBody": 2281}
 PROJECTILES = {"hand-grenade": (2276, "grenadeBody"), "grenade": (2239, "launcherGrenadeBody"),
                "rocket": (2247, "rocketBody"), "bolt": (2264, "arrowBody"),
                "arrow": (2265, "arrowBody"), "gravity": (2260, "gravityBody"),
@@ -283,7 +283,7 @@ def projectile_assets(xml, sprites, manifest):
         (DEST / "sprites" / (name + ".json")).write_text(json.dumps(atlas_data, separators=(",", ":")), encoding="utf-8")
         manifest["clips"][name] = {**original, "image": f"sprites/{name}.png", "json": f"sprites/{name}.json"}
     visuals = {}
-    for kind, (symbol, clip) in PROJECTILES.items():
+    for kind, (symbol, clip) in [*PROJECTILES.items(), ("enemy-arrow", (2282, "enemyArrowBody"))]:
         placements = placed_frame(sprites[symbol].find("subTags"), 1)
         body = next(tag for tag in placements if tag.get("name") == "mc")
         matrix = body.find("matrix")
@@ -300,6 +300,8 @@ def projectile_assets(xml, sprites, manifest):
                 "scaleX": float(matrix.get("scaleX", "1")), "scaleY": float(matrix.get("scaleY", "1")),
                 "aboveBody": int(shadow.get("depth")) > int(body.get("depth"))}
         visuals[kind] = value
+    # Вражеская стрела добавляется в stage над корнем игры, а не в его слой снарядов.
+    manifest["enemyArrowVisual"] = visuals.pop("enemy-arrow")
     manifest["projectileVisuals"] = visuals
 
 
@@ -549,9 +551,10 @@ def main():
     animation = extract(xml_path, CACHE / "scripts/ally1.as")
     (DEST / "ally-animation.json").write_text(json.dumps(animation, separators=(",", ":")) + "\n", encoding="utf-8")
     manifest["allyAnimation"] = "ally-animation.json"
-    from extract_collision_geometry import extract as extract_collision
+    from extract_collision_geometry import extract as extract_collision, write_display_widths
     collision = extract_collision(xml_path)
     (DEST / "collision-geometry.json").write_text(json.dumps(collision, separators=(",", ":")) + "\n", encoding="utf-8")
+    write_display_widths(collision)
     manifest["collisionGeometry"] = "collision-geometry.json"
     (DEST / "town-layout.json").write_text(json.dumps(town_layout(xml, sprites), indent=2) + "\n", encoding="utf-8")
     manifest["townLayout"] = "town-layout.json"
@@ -577,6 +580,7 @@ def main():
             "Item quantities and radio labels are rendered by the application",
             "allyBack and allyFront retain source depths around separately selected charaPic poses",
             "Projectile metadata preserves original mc/shadow registration and layer order",
+            "Archer retains all 210 original frames and filled collision contours; its separate enemy arrow retains stage-overlay registration",
             "gravityBody flattens original nested pulse frames 1-13 with the inherited mc color transform",
             "Gravity hard-light is decomposed into original-alpha multiply/add textures for the WebGL renderer",
             "sheepShadow and crowShadow preserve shadow-only alpha masks for original hit exclusion",

@@ -136,6 +136,92 @@ Battle HUD values come from `updateDay`, `updateHP`, and `updateAmmoBar`:
 day shows `game.day + "/" + mission.wave`, HP shows `current/max`, ammo shows
 `current/max`. The source does not show elapsed seconds as the day counter.
 
+## Archer and the third day
+
+The integrated v10 flow permits Mission → Rest from the first and second towns,
+ending at the third town. The same original Resting card and text are reused;
+the acknowledgment names the next day dynamically. Opening the dialog does not
+advance the simulation. Acknowledging it starts the prepared battle without
+healing the castle or spending AP/gold; firearm ammunition refills and consumed
+item charges remain spent. In the third town, Rest is visibly disabled with
+“Day 4 is not available yet.” The next wave branch and boss shield behavior,
+then recruit growth and the fourth-town MOD-sale stock overwrite, are outside
+this slice. The battle and town HUDs display the current day.
+
+Archer ID 2 is reachable in mission level 2 through a group selecting up to
+`level + 2`. Its `enemy_archer` atlas comes from symbol **1092** and retains all
+**210 timeline frames**, with **26 unique images** in 41 × 46 frame rectangles.
+The registration offset is **(14.65, 21.1)** from the exported top-left.
+
+| Timeline action | Original frame |
+| --- | ---: |
+| `init`, shadow hit enabled | 1 |
+| `alive` | 5 |
+| Return to `alive` | 25 |
+| `attack`, alert | 28 |
+| Release arrow and damage castle | 59 |
+| Repeat `attack` | 82 |
+| `dead`, death sound | 94 |
+| Stop death animation | 125 |
+| `null` | 210 |
+
+There is no `stand` label. When the original retreat-after-attack branch calls
+`gotoAndPlay('stand')`, the captured Ruffle runtime falls back to frame 1 without
+an exception; the next explicit child-frame step reaches frame 2. The port
+matches this observed fallback. This is source-runtime parity, not a new
+intentional fix.
+
+Frame 59 creates `arrow` symbol **2282**, plays `soundBow1`, sets `attacked`, and
+damages the castle immediately when not paused. The arrow's subsequent flight
+is cosmetic. Its body is **2281** (`enemyArrowBody`), distinct from the player's
+arrow symbol 2263: a 4 × 15 atlas with registration **(2, 7.5)**. Its initial
+child placement is **(0, -38)** with rotation 0. Shadow **2199** starts at
+**(-6.95, -18.1)**, scale **(1, 0.25)** and alpha 1, above the body in child order.
+`manifest.json.enemyArrowVisual` records these placements.
+
+Source flight increments parent x by 15, increments `dx`, sets child y to
+`dy + dx² / 3` and rotation to `dx * 2.5 + 90`, moves the shadow to `sy`, then
+removes the arrow when x exceeds 650. The original adds this object directly to
+the stage. Accordingly, the browser renders its container above the root game
+and HUD, using the saved child positions and original rotation pivot. It clears
+these containers on view reset and reconstructs them from saved state. Version
+10 persists the Archer counter and cosmetic arrows; versions 1–9 migrate with
+an empty arrow list. Pause follows the existing uniform freeze policy.
+
+Collision comes from the original filled contours and placement matrices for
+all Archer frames, including shadow and transparent bitmap-fill bounds.
+`tools/extract_collision_geometry.py` also generates
+`web/src/enemy-display-bounds.ts` for the original left-edge knockback clamp.
+Its one-based `ARCHER_DISPLAY_WIDTHS` array matches captured display widths:
+frames 5–9 are 20.7 pixels, 10–14 are 21.95, and 15–24 are 22.95. These bounds
+are independent of PNG alpha and the renderer. Narrow regeneration is:
+
+```powershell
+python tools/extract_collision_geometry.py --display-output web/src/enemy-display-bounds.ts
+```
+
+The accepted original comparison covers **517 state snapshots** and six grids
+at frames **1, 5, 28, 59, 94 and 125**, totaling **24,576 sampled points**.
+It exercises production behavior and geometry, including arrow removal and
+knockback bounds. AI, child frames and prior arrows are explicitly stepped in
+the diagnostic; native timeline scheduling is not asserted. Five original
+third-day wave cases and six third-town preparation cases cover the surrounding
+generation boundary. The v10 build passes 180 tests and the three-day
+save/replay soak. Browser acceptance exercised ordinary Rest into Day3 and exact
+export/Continue equality. A controlled archer fired its original arrow and damaged
+the castle at release; its in-flight export was byte-identical after Continue.
+The final production build passed New Game and exact v9 migration, restored the
+previous save and displayed the corrected Day3 title badge. No console errors
+were observed. The controlled archer scene is not a full browser campaign.
+These checks do not establish
+whole-browser pixel parity or reproduce the veteran late-game hitbox report.
+See [oracle notes](oracle-notes.md) and [port verification](port-verification.json)
+for capture provenance and separate acceptance evidence.
+
+The selected asset package now contains **85 images, 32 clips, 89 sounds and
+five fonts**. All come from the preserved source or documented transformations
+of those assets; the original SWF remains unchanged.
+
 ## Projectile presentation
 
 The projectile assets come from the preserved SWF above, using FFDec 26.4.0.
@@ -270,7 +356,7 @@ Upgrade labels are now separate `townShopRefreshLabel` and
 already include the shop's -22 y offset. The obsolete combined label image was
 removed. Regeneration remains `python tools/extract_web_assets.py`.
 
-The v9 UI reads `pendingTownAction` and the already generated
+The shop UI reads `pendingTownAction` and the already generated
 `upgradeReference` from simulation state. Opening or restoring the view does
 not roll another preview. A pending action forces the Shop screen and places
 an interactive modal over town navigation. Upgrade confirmation displays the

@@ -21,7 +21,7 @@ test('v7 in-flight grenade migration preserves its stored trajectory, damage, RN
   const untouched = structuredClone(legacy);
   const migrated = Simulation.fromSave(legacy);
   assert.deepEqual(legacy, untouched);
-  assert.equal(migrated.state.version, 9);
+  assert.equal(migrated.state.version, 10);
   assert.equal(Object.hasOwn(migrated.state, 'grenades'), false);
   assert.equal(migrated.state.player.bowDrawing, false);
   assert.equal(migrated.state.rng, legacy.rng);

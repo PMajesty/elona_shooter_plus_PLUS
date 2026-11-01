@@ -1,4 +1,4 @@
-"""Извлекает исходные заполненные контуры четырёх обычных врагов, не меняя графику."""
+"""Извлекает исходные заполненные контуры выбранных обычных врагов, не меняя графику."""
 import argparse
 import hashlib
 import json
@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from extract_web_assets import placed_frame
 
 ROOT = Path(__file__).resolve().parents[1]
-SYMBOLS = {"sheep": 910, "rat": 1295, "chicken": 1063, "crow": 981}
+SYMBOLS = {"sheep": 910, "rat": 1295, "chicken": 1063, "crow": 981, "archer": 1092}
 
 
 def matrix(tag):
@@ -88,11 +88,42 @@ def extract(xml_path=ROOT / ".build/reference/original.xml"):
             "shapes": shapes, "enemies": enemies}
 
 
+def write_display_widths(geometry, target=ROOT / "web/src/enemy-display-bounds.ts"):
+    """Сохраняет ширину display bounds лучника для исходного ограничения отбрасывания."""
+    enemy = geometry["enemies"]["archer"]
+    widths = [0]
+    for frame in range(1, enemy["count"] + 1):
+        edges = []
+        for placement in enemy["frames"][str(frame)]:
+            left, top, right, bottom = geometry["shapes"][placement["shape"]]["bounds"]
+            a, _, c, _, x, _ = placement["matrix"]
+            # Учитываем всю геометрию, включая прозрачные bitmap-fill и тень.
+            # У лучника вложенная тень имеет единичную матрицу: сохранённые
+            # матрицы точно представляют каждый прямоугольник в его родителе.
+            edges.extend(int(a * px + c * py + x) for px, py in
+                         [(left, top), (right, top), (left, bottom), (right, bottom)])
+        widths.append((max(edges) - min(edges)) / 20 if edges else 0)
+    # Индекс массива совпадает с исходным номером кадра; ноль не используется.
+    rows = [", ".join(json.dumps(value) for value in widths[start:start + 15])
+            for start in range(0, len(widths), 15)]
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text("// Создано tools/extract_collision_geometry.py из исходных shapeBounds и матриц.\n"
+                      f"// SWF SHA-256: {geometry['sourceSha256']}\n"
+                      "// Номера кадров начинаются с 1; нулевой элемент — заполнитель.\n"
+                      "export const ARCHER_DISPLAY_WIDTHS: readonly number[] = [\n  "
+                      + ",\n  ".join(rows) + ",\n];\n", encoding="utf-8")
+    return widths
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "web/public/assets/collision-geometry.json")
-    target = parser.parse_args().output
+    parser.add_argument("--display-output", type=Path)
+    args = parser.parse_args()
+    target = args.output
     result = extract()
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(result, separators=(",", ":")) + "\n", encoding="utf-8")
+    if args.display_output is not None:
+        write_display_widths(result, args.display_output)
     print(json.dumps({"shapes": len(result["shapes"]), "enemies": len(result["enemies"]), "bytes": target.stat().st_size}))

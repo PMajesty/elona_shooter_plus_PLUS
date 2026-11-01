@@ -1,8 +1,18 @@
 import assert from 'node:assert/strict';
 import type { SimulationState } from '../src/simulation.ts';
 
-export function asLegacyV8Save(state: SimulationState): Record<string, any> {
+export function asLegacyV9Save(state: SimulationState): Record<string, any> {
   const value: Record<string, any> = structuredClone(state);
+  assert.ok(value.day <= 2);
+  assert.equal(value.enemyArrows.length, 0);
+  assert.ok(value.enemies.every((enemy: {kind: string}) => enemy.kind !== 'archer'));
+  delete value.enemyArrows;
+  value.version = 9;
+  return value;
+}
+
+export function asLegacyV8Save(state: SimulationState): Record<string, any> {
+  const value = asLegacyV9Save(state);
   assert.equal(value.pendingTownAction, null);
   delete value.upgradeReference;
   delete value.pendingTownAction;

@@ -1,14 +1,14 @@
 # Elona Shooter Plus PLUS
 
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
-Phaser 4. The current implementation covers **two connected Sheriff days**:
+Phaser 4. The current implementation covers **three connected Sheriff days**:
 choose one of 22 appearances, fight, collect ordinary and boss loot, choose earned
 skills, enter town, buy/sell and upgrade weapons, mount MODs, use Free Repair,
-then Rest to begin Day 2 with your retained equipment. Victory, defeat and
-save/restore work across these
-stages. Original English artwork, fonts, audio and credits are retained.
+then Rest into Days 2 and 3 with your retained equipment. Victory, defeat,
+rewards, town entry and save/restore work across these stages. Original English
+artwork, fonts, audio and credits are retained.
 
-This is not yet the complete game. Day 3 onward, other classes, full town
+This is not yet the complete game. Day 4 onward, other classes, full town
 management, recruiting and card actions, Ragnarok and
 original Flash save conversion remain to be ported. Ordinary firearms use owned
 item statistics and weapon-skill requirements; the covered Sheriff combat skills
@@ -57,6 +57,13 @@ starts reloading immediately while its projectile continues. Exactly vertical
 shots use an explicit corrected path: the original divides by zero there.
 That correction is separate from the still-unreproduced late-game hitbox report.
 
+Day 3 can introduce the original Archer. Its bow damages the castle when the
+arrow is released; the separate flying arrow is visual and does not apply a
+second hit on arrival. Original attack, movement, knockback and death frames
+are retained. The source's missing `stand` label resolves to frame 1 in the
+captured Ruffle runtime; the port matches that observed behavior rather than
+introducing another gameplay correction.
+
 After victory, the reward sequence is **ordinary loot → earned boss prizes →
 earned skill choices → results**. Click an item to pick it up and click a slot to
 place or swap it; click outside the slots to cancel. Proceed leaves unclaimed
@@ -74,10 +81,13 @@ owned slot to buy it. Owned items can be moved or swapped; dropping one outside
 the slots asks to sell it. Only Yes confirms, and any other dialog click cancels.
 Shop Tokens discount stock. Town HP, AP, prepared data and full inventory records
 survive save/restore. **Mission → Rest** opens the original Resting dialog;
-acknowledging it begins the prepared Day 2 battle. Rest does not heal the castle,
-spend AP or cost gold. Guns refill; consumable charges stay spent. Day 2 ends in
-its own rewards and prepared town, where further Rest is disabled. Recruiting,
-card actions and Refresh Stock remain unavailable.
+acknowledging it begins the prepared next battle, up to Day 3. Rest does not heal
+the castle, spend AP or cost gold. Guns refill; consumable charges stay spent.
+Days 2 and 3 each end in their own rewards and prepared town. Further Rest is
+disabled in the third town: Day 4 needs the next wave branch and boss shield
+behavior, followed by level-2 recruit growth and the source's fourth-town
+MOD-sale stock overwrite. Recruiting, card actions and Refresh Stock remain
+unavailable.
 
 In the shop, **Upgrade Weapon** requires **4 AP** to enter selection mode.
 Choose an owned gun to see its before/after comparison and gold cost;
@@ -96,7 +106,9 @@ Rejected mounting keeps both items. **No or clicking outside this confirmation
 swaps the MOD and gun**, matching the original owned-inventory behavior; it does
 not cancel like a sale. Stock MODs must first be bought into an empty owned slot.
 
-Saves now use version 9; versions 1–8 are accepted. Pending Upgrade and MOD
+Saves now use version 10; versions 1–9 are accepted. Archer attack counters and
+cosmetic arrow positions/flight state persist; older saves migrate with no
+in-flight enemy arrows. Pending Upgrade and MOD
 confirmations survive reload, preserving the chosen items and the exact stored
 upgrade preview without another random draw. In-flight projectiles and
 charged bows resume without relaunching or rerolling. Legacy hand grenades retain
@@ -104,7 +116,7 @@ their stored positions, damage and remaining lifetime. Ammo and reload timers li
 on the owned items, with a selected slot, five item cooldowns and saved
 protection state. Weapon experience is tracked separately for Small Gun, Big
 Gun, Rifle, Shotgun and other items. Legacy scalar experience maps to Shotgun;
-the old ammo/cooldown fields migrate without rerolling inventory. Day 2 saves
+the old ammo/cooldown fields migrate without rerolling inventory. Days 2–3 saves
 retain the prepared mission and prior town, including the historical absorption
 bonus that applied when battle began. New characters retain the
 original hidden growth potentials and base aiming/teamwork rolls. Portrait and
@@ -174,18 +186,26 @@ the original `enchant` method reapplied to the omitted modifier, with retained
 Living Weapon progress; expected corrected values do not come from the port.
 See [oracle notes](docs/oracle-notes.md) for this explicit comparison boundary.
 
-The integrated v9 candidate passes **167 tests** and TypeScript checks. Release
-and browser acceptance are tracked separately in
+Day 3 adds **five original wave-generation cases** and **six third-town
+preparation cases**. Archer comparisons cover **517 original state snapshots**
+and **six collision grids containing 24,576 points**, including release-time
+castle damage, arrow flight/removal, the missing-label fallback and changing
+display widths at the left knockback boundary. This fixture explicitly steps
+enemy AI and child frames; native timeline scheduling and browser rendering
+remain separate checks. It introduces no intentional behavior correction.
+
+The integrated v10 candidate passes **180 tests**. Browser acceptance for this
+slice is pending; release and browser evidence are tracked separately in
 [port verification](docs/port-verification.json).
 
 `npm.cmd run test:soak` automatically exercises 32 seeds with idle, aimed and
 interrupted-input policies. It checks finite state, battle completion and exact
-JSON save/replay state and event equality through both days, earned rewards,
+JSON save/replay state and event equality through all three days, earned rewards,
 town preparation, repair, shop transactions, weapon modifications and Rest.
-The latest run passed **96 scenarios, 196,379 frames and 2,287 checkpoints**,
-including **417 reward transitions, 433 town actions, 59 Rest transitions,
-32 Day 2 victories and 297 equipment selections**. It exercised **53 upgrade
-previews, 18 confirmed upgrades, 35 cancellations and 16 mounted MODs**.
+The latest run passed **96 scenarios, 261,877 frames and 3,037 checkpoints**,
+including **542 reward transitions, 593 town actions, 91 Rest transitions,
+32 Day 2 victories and 32 Day 3 victories**. It exercised **85 upgrade
+previews, 24 confirmed upgrades, 61 cancellations and 16 mounted MODs**.
 Reports and reproducible failure checkpoints are written beneath `.build/soak/`.
 This is a stability check, not
 evidence that every original feature has been ported.
@@ -216,6 +236,9 @@ python tools/build_rest_oracle.py
 python tools/build_second_town_oracle.py
 python tools/build_projectile_oracle.py
 python tools/build_modification_oracle.py
+python tools/build_third_day_wave_oracle.py
+python tools/build_archer_oracle.py
+python tools/build_third_town_oracle.py
 python tools/serve_oracle.py
 ```
 
@@ -232,7 +255,10 @@ for actual firing. Use `?suite=equipment` for selection/fire/reload input,
 projectile launches and lifecycles (`npm.cmd run test:projectile-reference`).
 Use `?suite=modifications` for weapon Upgrade and MOD mounting, then run
 `npm.cmd run test:modification-reference` from `web/`. The town fixture excludes full
-town preparation. Each page runs the original
+town preparation. Day 3 uses `?suite=third-day-waves`, `?suite=archer` and
+`?suite=third-town`, compared from `web/` with
+`npm.cmd run test:third-day-wave-reference`, `npm.cmd run test:archer-reference`
+and `npm.cmd run test:third-town-reference`. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, use the matching comparison command: `npm.cmd run test:reference`,
 `npm.cmd run test:wave-reference`, `npm.cmd run test:combat-reference`,
@@ -252,6 +278,10 @@ for controlled state, source preservation and limitations, and the
 The runtime assets are included under `web/public/assets/`, so ordinary browser
 development does not require Java or Flash tooling. Their manifest records
 original symbol IDs, frame numbers and registration offsets.
+The selected package contains **85 images, 32 clips, 89 sounds and five fonts**,
+including the full Archer timeline, its separate arrow and original collision
+contours. Generated display-width data keeps the Archer's knockback clamp
+independent of raster transparency or Phaser.
 
 To regenerate assets from the preserved SWF, use Python 3 with Pillow, Java 21
 and **JPEXS FFDec 26.4.0**. Run from the repository root:

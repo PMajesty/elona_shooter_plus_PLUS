@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { compareThirdDayWaveTrace } from '../tests/third-day-wave-reference-support.ts';
+
+const report = JSON.parse(readFileSync(resolve(process.argv[2] ?? '../.build/oracle/third-day-waves-browser-report.json'), 'utf8'));
+assert.equal(report.format, 'elona-original-oracle'); assert.equal(report.status, 'passed'); assert.equal(report.repeatable, true);
+assert.equal(report.build.status, 'passed'); assert.equal(report.build.all_non_doabc_tag_payloads_identical, true);
+assert.equal(report.build.source_generation_methods_unmodified, true);
+assert.equal(report.runs.length, 2); assert.deepEqual(report.runs[0], report.runs[1]);
+const result = compareThirdDayWaveTrace(report.runs[0]);
+const output = {
+  ...result, referenceRuntime: report.runtime, originalSha256: report.build.original_sha256,
+  instrumentedSwfSha256: report.build.output_sha256,
+  traceSha256: createHash('sha256').update(JSON.stringify(report.runs[0])).digest('hex'),
+  boundary: 'Original generateMission(2) on calendar day2 then preGenerateWave on calendar day3 versus the production mission and wave generators',
+  limits: ['Synchronous original methods; Rest interaction, enemy behavior and whole battle scheduling are separate checks', 'Constant0/0.99 are explicit legal RNG boundary inputs, not claims that the seeded production stream reaches those sequences', 'Original selection observations establish branch coverage; final waves, delays, mission state and RNG accounting are compared independently'],
+};
+writeFileSync(resolve('../.build/oracle/third-day-waves-comparison-report.json'), JSON.stringify(output, null, 2) + '\n');
+const before = resolve('../.build/oracle/third-day-waves-comparison-before.json');
+if (result.status === 'failed' && !existsSync(before)) writeFileSync(before, JSON.stringify(output, null, 2) + '\n');
+console.log(JSON.stringify(result, null, 2));
+assert.equal(result.status, 'passed', 'Day3 wave comparison differs; inspect third-day-waves-comparison-report.json.');

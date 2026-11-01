@@ -9,6 +9,8 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / ".build/oracle/browser-report.json"
 REPORTS = {
+    "/api/archer-report": ROOT / ".build/oracle/archer-browser-report.json",
+    "/api/third-day-waves-report": ROOT / ".build/oracle/third-day-waves-browser-report.json",
     "/api/report": REPORT,
     "/api/waves-report": ROOT / ".build/oracle/waves-browser-report.json",
     "/api/prepared-waves-report": ROOT / ".build/oracle/prepared-waves-browser-report.json",
@@ -17,6 +19,7 @@ REPORTS = {
     "/api/equipment-report": ROOT / ".build/oracle/equipment-browser-report.json",
     "/api/rest-report": ROOT / ".build/oracle/rest-browser-report.json",
     "/api/second-town-report": ROOT / ".build/oracle/second-town-browser-report.json",
+    "/api/third-town-report": ROOT / ".build/oracle/third-town-browser-report.json",
     "/api/castle-report": ROOT / ".build/oracle/castle-browser-report.json",
     "/api/projectiles-report": ROOT / ".build/oracle/projectiles-browser-report.json",
     "/api/modifications-report": ROOT / ".build/oracle/modifications-browser-report.json",
@@ -28,6 +31,10 @@ REPORTS = {
     "/api/town-preparation-report": ROOT / ".build/oracle/town-preparation-browser-report.json",
 }
 ROUTES = {
+    "/archer-reference.swf": ROOT / ".build/oracle/archer-reference.swf",
+    "/archer-build-report.json": ROOT / ".build/oracle/archer-build-report.json",
+    "/third-day-waves-reference.swf": ROOT / ".build/oracle/third-day-waves-reference.swf",
+    "/third-day-waves-build-report.json": ROOT / ".build/oracle/third-day-waves-build-report.json",
     "/": ROOT / "tools/oracle/index.html",
     "/harness.js": ROOT / "tools/oracle/harness.js",
     "/reference.swf": ROOT / ".build/oracle/reference.swf",
@@ -46,6 +53,8 @@ ROUTES = {
     "/rest-build-report.json": ROOT / ".build/oracle/rest-build-report.json",
     "/second-town-reference.swf": ROOT / ".build/oracle/second-town-reference.swf",
     "/second-town-build-report.json": ROOT / ".build/oracle/second-town-build-report.json",
+    "/third-town-reference.swf": ROOT / ".build/oracle/third-town-reference.swf",
+    "/third-town-build-report.json": ROOT / ".build/oracle/third-town-build-report.json",
     "/castle-reference.swf": ROOT / ".build/oracle/castle-reference.swf",
     "/castle-build-report.json": ROOT / ".build/oracle/castle-build-report.json",
     "/projectiles-reference.swf": ROOT / ".build/oracle/projectiles-reference.swf",

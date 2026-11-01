@@ -67,6 +67,7 @@ let rewardTransitions = 0;
 let townActions = 0;
 let restTransitions = 0;
 let secondDayVictories = 0;
+let thirdDayVictories = 0;
 let equipmentSelections = 0;
 let modificationPreviews = 0, modsMounted = 0, weaponsUpgraded = 0, upgradeCancellations = 0;
 try {
@@ -80,7 +81,7 @@ try {
       lastCheckpoint = simulation.toSave(); inputs = [];
       let checkpoints = 1;
       let daysCompleted = 0;
-      for (let day = 1; day <= 2; day++) {
+      for (let day = 1; day <= 3; day++) {
         assert.equal(simulation.state.day, day);
         for (let frame = 0; frame < 6000 && simulation.state.phase === 'battle'; frame++) {
           const input = inputFor(simulation, policy);
@@ -108,7 +109,7 @@ try {
         }
         assert.notEqual(simulation.state.phase, 'battle', `Day ${day} did not terminate within 6000 frames.`);
         if (policy === 'idle') assert.equal(simulation.state.phase, 'defeat');
-        if (simulation.state.phase === 'victory') { daysCompleted++; if (day === 2) secondDayVictories++; }
+        if (simulation.state.phase === 'victory') { daysCompleted++; if (day === 2) secondDayVictories++; if (day === 3) thirdDayVictories++; }
         let rewardActions = 0;
         while (simulation.state.phase === 'victory' && simulation.state.postbattle !== 'result') {
           assert.ok(rewardActions++ < 30, 'Earned rewards did not reach results.');
@@ -158,7 +159,7 @@ try {
             modsMounted++; townActions++;
           }
           if (simulation.state.town?.preparation === 'ready' && simulation.state.town.ap >= 4) {
-            const upgradeSlot = simulation.state.inventory.findIndex((item, index) => isOccupiedItem(item) && item.type === ITEM_TYPE.gun && (day === 2 || index > 1));
+            const upgradeSlot = simulation.state.inventory.findIndex((item, index) => isOccupiedItem(item) && item.type === ITEM_TYPE.gun && (day === 3 || index > 1));
             if (upgradeSlot >= 0) {
               assert.equal(simulation.beginWeaponUpgrade(upgradeSlot), 'previewed');
               assert.equal(restored.beginWeaponUpgrade(upgradeSlot), 'previewed');
@@ -197,7 +198,7 @@ try {
           lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
           restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
           checkpoints++;
-          if (day === 1) {
+          if (day < 3) {
             const previous = simulation.toSave();
             assert.equal(simulation.startNextDay(), true);
             assert.equal(restored.startNextDay(), true);
@@ -207,7 +208,7 @@ try {
             assert.deepEqual(restored.state, simulation.state, 'Rest changed restored mission or equipment.');
             lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
             restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
-            assert.deepEqual(restored.state, simulation.state, 'Day 2 checkpoint changed prepared waves.');
+            assert.deepEqual(restored.state, simulation.state, 'Next-day checkpoint changed prepared waves.');
             checkpoints++; restTransitions++; inputs = [];
           } else {
             const completed = simulation.toSave();
@@ -223,13 +224,14 @@ try {
   }
   assert.ok(restTransitions > 0, 'No scenario reached Day 2.');
   assert.ok(secondDayVictories > 0, 'No scenario completed Day 2.');
+  assert.ok(thirdDayVictories > 0, 'No scenario completed Day 3.');
   const report = {
     status: 'passed', seedCount, policies, scenarios: results.length, simulationFrames: frames,
-    checkpoints: results.reduce((sum, result) => sum + result.checkpoints, 0), rewardTransitions, townActions, restTransitions, secondDayVictories, equipmentSelections,
+    checkpoints: results.reduce((sum, result) => sum + result.checkpoints, 0), rewardTransitions, townActions, restTransitions, secondDayVictories, thirdDayVictories, equipmentSelections,
     modificationPreviews, modsMounted, weaponsUpgraded, upgradeCancellations,
     elapsedMs: Math.round(performance.now() - started),
     collision: 'Production ordinary-enemy contours; boss uses the documented rectangular headless fallback',
-    limits: ['Port self-consistency, finite state and JSON replay only; not an original-game parity proof', 'Sheriff Days 1–2 only; boss shape geometry not exercised', 'No browser rendering, input latency, audio or wall-clock performance comparison'],
+    limits: ['Port self-consistency, finite state and JSON replay only; not an original-game parity proof', 'Sheriff Days 1–3 only; boss shape geometry not exercised', 'No browser rendering, input latency, audio or wall-clock performance comparison'],
     results,
   };
   writeFileSync(resolve(outputDirectory, 'report.json'), JSON.stringify(report, null, 2) + '\n');

@@ -4,8 +4,10 @@ const stage = document.querySelector('#stage');
 const PREFIX = 'ELONA_ORACLE:';
 const STARTUP_PREFIX = 'ELONA_STARTUP:';
 const requestedSuite = new URLSearchParams(location.search).get('suite');
-const suite = ['waves', 'prepared-waves', 'hero', 'shoot', 'equipment', 'rest', 'second-town', 'castle', 'projectiles', 'modifications', 'combat', 'geometry', 'loot', 'progression', 'town', 'town-preparation'].includes(requestedSuite) ? requestedSuite : 'reload';
+const suite = ['waves', 'prepared-waves', 'third-day-waves', 'archer', 'hero', 'shoot', 'equipment', 'rest', 'second-town', 'third-town', 'castle', 'projectiles', 'modifications', 'combat', 'geometry', 'loot', 'progression', 'town', 'town-preparation'].includes(requestedSuite) ? requestedSuite : 'reload';
 const suites = {
+  archer: {swf:'/archer-reference.swf',build:'/archer-build-report.json',report:'/api/archer-report',clock:'Original Archer AI, explicit child-frame stepping, arrow effects and filled shape grids; native scheduling remains separate.'},
+  'third-day-waves': {swf:'/third-day-waves-reference.swf',build:'/third-day-waves-build-report.json',report:'/api/third-day-waves-report',clock:'Original mission2 prepared on day2, then waves on day3, including controlled zero and high random boundaries.'},
   reload: {swf:'/reference.swf',build:'/build-report.json',report:'/api/report',clock:'Manual calls to original methods; native frame/timer scheduling is outside this check.'},
   waves: {swf:'/waves-reference.swf',build:'/waves-build-report.json',report:'/api/waves-report',clock:'Synchronous original mission and wave generation under controlled xorshift32; no live enemy AI.'},
   'prepared-waves': {swf:'/prepared-waves-reference.swf',build:'/prepared-waves-build-report.json',report:'/api/prepared-waves-report',clock:'Original level1 mission preparation on day1 followed by wave generation on day2; Rest interaction and live combat are separate checks.'},
@@ -14,6 +16,7 @@ const suites = {
   equipment: {swf:'/equipment-reference.swf',build:'/equipment-build-report.json',report:'/api/equipment-report',clock:'Controlled original equipment input and player steps; native event scheduling is outside this comparison.'},
   rest: {swf:'/rest-reference.swf',build:'/rest-build-report.json',report:'/api/rest-report',clock:'Original Rest dialog and acknowledgment through battle entry; the decorative Begin wait is skipped with the original frame handler, and town preparation is a separate check.'},
   'second-town': {swf:'/second-town-reference.swf',build:'/second-town-build-report.json',report:'/api/second-town-report',clock:'Original day2 town preparation with retained recruit and item metadata; medal60 absorption is compared, and day3 combat is outside this boundary.'},
+  'third-town': {swf:'/third-town-reference.swf',build:'/third-town-build-report.json',report:'/api/third-town-report',clock:'Original day3 town preparation with retained recruit and item metadata, Shop Token calendar loot and medal60 absorption; day4 combat is outside this boundary.'},
   castle: {swf:'/castle-reference.swf',build:'/castle-build-report.json',report:'/api/castle-report',clock:'Controlled original castle damage, protection and solo trait effects; native enemy attack scheduling is outside this comparison.'},
   projectiles: {swf:'/projectiles-reference.swf',build:'/projectiles-build-report.json',report:'/api/projectiles-report',clock:'Original projectile launch and manually stepped lifecycle/hit cases, plus a bounded native birth-order observation and vertical-trajectory diagnostics; this is not a full native battle replay.'},
   modifications: {swf:'/modifications-reference.swf',build:'/modifications-build-report.json',report:'/api/modifications-report',clock:'Original Upgrade and MOD dialog methods with controlled items, eligibility and randomness; raw and explicitly corrected upgrade cases remain separate, and ordinary mouse interaction needs separate checks.'},

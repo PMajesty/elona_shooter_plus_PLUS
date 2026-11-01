@@ -7,8 +7,8 @@ const integer = (value: unknown, low: number, high: number): value is number => 
 const fieldsEqual = (value: Record<string, unknown>, fields: Record<string, unknown>) => Object.entries(fields).every(([key, expected]) => value[key] === expected);
 
 /** Проверяем сохранённые результаты генерации, не повторяя случайные броски при загрузке. */
-export function validTownPreparation(value: unknown, validItem: (item: unknown) => item is Item, day: 1 | 2 = 1, expectedAbsorbFix?: number): value is FirstTownPreparation {
-  if (day !== 1 && day !== 2) return false;
+export function validTownPreparation(value: unknown, validItem: (item: unknown) => item is Item, day: 1 | 2 | 3 = 1, expectedAbsorbFix?: number): value is FirstTownPreparation {
+  if (day !== 1 && day !== 2 && day !== 3) return false;
   if (!record(value) || !Array.isArray(value.shop) || value.shop.length !== 8 || Array.from(value.shop).some(item => item !== null && !validItem(item))) return false;
   if (!Array.isArray(value.cards) || value.cards.length !== 5 || value.cards.some(id => !integer(id, -7, -1))) return false;
   for (let id = -7; id <= -1; id++) if (value.cards.filter(card => card === id).length > (id === -1 ? 3 : 1)) return false;
@@ -22,8 +22,8 @@ export function validTownPreparation(value: unknown, validItem: (item: unknown) 
     expFix: 1, bossKilled: 0, noDamage: true, criticalCount: 0, resultOther: 0,
   }) || !Array.isArray(mission.group) || mission.group.length !== 0 || !integer(mission.bossWave, 2, 3)) return false;
   if (![0, 0.01, 0.02, 0.03, 0.04].includes(Number(mission.absorbFix)) || typeof mission.absorbFix !== 'number' || (expectedAbsorbFix !== undefined && mission.absorbFix !== expectedAbsorbFix)) return false;
-  const statue = day === 1 ? 1117 : 1103;
-  if (!Array.isArray(mission.loot) || !([statue].join() === mission.loot.join() || [1038, statue].join() === mission.loot.join()) || mission.loot.some(id => typeof id !== 'number')) return false;
+  const calendarLoot = day === 1 ? 1117 : day === 2 ? 1103 : 1035;
+  if (!Array.isArray(mission.loot) || !([calendarLoot].join() === mission.loot.join() || [1038, calendarLoot].join() === mission.loot.join()) || mission.loot.some(id => typeof id !== 'number')) return false;
   const recruit = value.recruit;
   if (!record(recruit) || !fieldsEqual(recruit, {
     exist: true, lv: 1, sp: 0, trained: 0, optBoss: true, optWall: true,

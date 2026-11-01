@@ -246,18 +246,22 @@
         "enemy_* frame scripts in original SWF"
       ],
       "status": "partial",
-      "implemented": "Sheep, rat, chicken, crow and boss runtime for the enabled low-level missions. Day 1 uses mission level 0 and Day 2 the previously prepared level 1; boss HP rises from 150 to 175 and appearance follows cumulative boss spawns. Daily boss-kill counts reset independently. The spawn fixture covers five types at the original opening boundary; this is not differential coverage of every Day 2 attack.",
+      "implemented": "Sheep, rat, chicken, crow, Archer and boss runtime for missions0–2 across displayedDays1–3. Boss HP150/175/200 and appearances51/52/53 follow cumulative spawns. Archer has source counter/range decisions, attack/recovery/death timelines, immediate release-time castle damage, persistent cosmetic arrow flight, twip knockback and per-frame geometric left-edge clamp. Missing stand label follows observed Ruffle frame1 fallback.",
       "evidence": [
         "web/src/content.ts:ENEMIES",
         "web/tests/simulation.test.ts:defeat and first-battle completion",
         "web/tests/combat-reference.test.ts:exact spawn stats/RNG for five enemy types and two seeds",
         "web/tests/enemy-shadow.test.ts: original sheep shadow state persists through attack-to-walk and resets on death",
-        "web/tests/day-two.test.ts: complete second battle, boss HP175 and second appearance, rewards and save/resume"
+        "web/tests/day-two.test.ts: complete second battle, boss HP175 and second appearance, rewards and save/resume",
+        "web/tests/archer-reference.test.ts:517 original state comparisons and6grids/24576points, source widths and exact RNG",
+        "web/tests/day-two.test.ts:connected third battle, boss200HP/appearance53, rewards and third town",
+        "web/tests/day-three-save.test.ts:v9 migration, actual arrow birth/replay and malformed import rejection",
+        "web/docs/archer-source.md:source anchors, capture boundary and limits"
       ],
       "unverified": [
-        "Later species and enemy variants",
-        "Boss actions beyond the enabled mission levels 0 and 1",
-        "Differential movement/attack timing and corpse behavior"
+        "Later species and variants",
+        "Boss actions beyond enabled missionlevels0–2 (Shield beginslevel3)",
+        "Native parent/child scheduling and whole battle timing beyond controlled comparisons"
       ]
     },
     {
@@ -365,7 +369,7 @@
         "MainTimeline:8323 wave progression"
       ],
       "status": "partial",
-      "implemented": "The ordinary loop plays Sheriff Days 1–2 with five scheduled waves per battle, ordered ordinary/boss loot, earned skills, settled results and prepared towns. Day 1 town creates mission level 1; confirmed Rest advances the calendar and generates its Day 2 waves without rerolling the mission. Day 2 town prepares mission level 2, but Day 3 combat is unavailable. Active battle parameters and previous-town metadata remain distinct from the next prepared mission.",
+      "implemented": "Opening mission0 and prepared missions1/2 lead through three connected Sheriff days, rewards and town. Mission2 generation preserves all six ordinary groups, full original selection order, extra fallback rolls and calendar preparation semantics. Rest consumes the saved mission once. Third town prepares mission3 but Day4 remains disabled pending its distinct boss/wave/recruit/shop branches.",
       "evidence": [
         "web/tests/simulation.test.ts:first mission and completion",
         "docs/port-verification.json:browser_checks.victory_checkpoint",
@@ -374,12 +378,15 @@
         "web/tests/prepared-wave-reference.test.ts: 3 actual source snapshots including fractional timing and prepared loot",
         "web/tests/rest-reference.test.ts: 3 final transitions compared against 12 actual original observations, exact state/RNG at battle entry",
         "web/tests/day-two.test.ts: complete two-day state loop, second-day boss/reward/absorption history and replay",
-        "web/tests/second-town-reference.test.ts: 6 actual original second-town preparation snapshots"
+        "web/tests/second-town-reference.test.ts: 6 actual original second-town preparation snapshots",
+        "web/tests/third-day-wave-reference.test.ts:5 original cases including zero/high boundary streams,30 observed groups each, exactwaves/delays/RNG",
+        "web/tests/third-town-reference.test.ts:6 original third-town preparations",
+        "docs/port-verification.json:third-day Rest/Continue and96scenario soak with32Day3wins"
       ],
       "unverified": [
         "Native spawn/combat event sequence",
-        "Complete original-versus-port two-day input replay and native event timing",
-        "Day 3 onward, later wave patterns and difficulty modifiers"
+        "Complete original-versus-port three-day input replay",
+        "Day4 onward, laterwave patterns and difficulty modifiers"
       ]
     },
     {
@@ -393,7 +400,7 @@
         "MainTimeline:6646 day increment when leaving town"
       ],
       "status": "partial",
-      "implemented": "Completed Day 1 and Day 2 results enter town with four AP, retaining gold, HP, inventory and traits. Each town generates stock, cards, the next mission, a recruit and entry flags once in source order. First town initializes searched; second town retains it and prior recruit/shared item-slot metadata. Prepared state persists without rerolling. Version 4 town migration retains settled balances and performs only missing preparation.",
+      "implemented": "Completed Day 1 and Day 2 results enter town with four AP, retaining gold, HP, inventory and traits. Each town generates stock, cards, the next mission, a recruit and entry flags once in source order. First town initializes searched; second town retains it and prior recruit/shared item-slot metadata. Prepared state persists without rerolling. Version 4 town migration retains settled balances and performs only missing preparation. Third town is integrated after Day3 rewards; its prepared mission grants Shop Token1035 without a calendar statue, and recruits remainlevel1.",
       "evidence": [
         "web/tests/town.test.ts: result settlement, town entry and state persistence",
         "web/tests/town-reference.test.ts: original result/AP boundary",
@@ -607,7 +614,7 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot with JSON import/export and Continue. Version 7 stores canonical inventory equipment/ammunition/reload state, selected slot, five consumable cooldowns, in-flight grenade damage, protection, five weapon-XP buckets, hero potentials/traits, enemy shadow/boss-damage/disarmed state, rewards and cumulative earnings. Day 1/2 saves retain active mission parameters, previous-town metadata, the current prepared town, AP, earned medals, perfect-day and boss-spawn counters. Versions 1–6 migrate without rerunning settled rewards or prepared towns; explicit provenance marks reconstructed data. Current saves require shadow history instead of silently deriving a replacement from the frame. Version8 adds full projectile/bow lifecycles. Current version9 persists the upgrade reference and pending Upgrade/MOD confirmation; versions1–8 migrate, initializing these fields without RNG. Town reload metadata retained by enchant is accepted; active-battle timer validation remains strict.",
+      "implemented": "One browser slot with JSON import/export and Continue. Version 7 stores canonical inventory equipment/ammunition/reload state, selected slot, five consumable cooldowns, in-flight grenade damage, protection, five weapon-XP buckets, hero potentials/traits, enemy shadow/boss-damage/disarmed state, rewards and cumulative earnings. Day 1/2 saves retain active mission parameters, previous-town metadata, the current prepared town, AP, earned medals, perfect-day and boss-spawn counters. Versions 1–6 migrate without rerunning settled rewards or prepared towns; explicit provenance marks reconstructed data. Current saves require shadow history instead of silently deriving a replacement from the frame. Version8 adds full projectile/bow lifecycles. Version9 persists the upgrade reference and pending Upgrade/MOD confirmation; versions1–8 migrate, initializing these fields without RNG. Town reload metadata retained by enchant is accepted; active-battle timer validation remains strict. Current version10 adds Archer counters and cosmetic arrow state, permits Day3 and validates previousTown against day−1. Versions1–9 migrate without creating arrows or consuming RNG.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",
@@ -625,7 +632,9 @@
         "web/tests/town-save.test.ts: mission calendar/absorption validation and retained recruit slots",
         "web/tests/modification-save.test.ts:pending Upgrade/MOD persistence and v1–8 migration",
         "web/scripts/soak.ts:latest96 scenarios/196379frames/2287checkpoints through both days, including53 previews16 mounts18 upgrades35 cancellations",
-        "docs/port-verification.json:exact pending-preview Continue and final production v8→v9 import/export equality"
+        "docs/port-verification.json:exact pending-preview Continue and final production v8→v9 import/export equality",
+        "web/tests/day-three-save.test.ts:exact v9 migration, arrow replay and invalidcounter/frame/identity guards",
+        "docs/port-verification.json:third_day exact Rest/Continue and in-flight arrow Continue exports"
       ],
       "unverified": [
         "Six-slot parity",
@@ -653,7 +662,7 @@
         "ally1 and enemy_* frame scripts in original SWF"
       ],
       "status": "partial",
-      "implemented": "Selected original assets and reconstructed character timeline layers support the two-day Sheriff slice, town mission/castle/shop menus, original item/coin art and Free Repair/sale/Rest dialogs. The battle hotbar renders owned equipment, ammo and per-slot cooldowns; selected weapon presentation, repair/prayer/defend effects and sounds use original assets. Original item popup, upgrade arrow and separate shop labels support before/after upgrade and MOD confirmations.",
+      "implemented": "Selected original assets and reconstructed character timeline layers support the two-day Sheriff slice, town mission/castle/shop menus, original item/coin art and Free Repair/sale/Rest dialogs. The battle hotbar renders owned equipment, ammo and per-slot cooldowns; selected weapon presentation, repair/prayer/defend effects and sounds use original assets. Original item popup, upgrade arrow and separate shop labels support before/after upgrade and MOD confirmations. Original Archer1092 and enemyarrow2282 body/shadow are rendered, including stage overlay order and source registration; generated bounds drive the Archer clamp.",
       "evidence": [
         "docs/asset-manifest.json",
         "docs/ui-reference.md",

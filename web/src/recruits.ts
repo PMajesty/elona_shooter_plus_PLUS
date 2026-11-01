@@ -39,14 +39,14 @@ export interface RecruitGenerationOptions {
   itemContext?: Omit<Partial<ItemContext>, 'day'>;
 }
 
-/** Совместимая граница первого города; общий алгоритм также покрывает вечер второго дня. */
+/** Совместимая граница первого города; общий алгоритм также покрывает дни 2 и 3. */
 export function generateFirstTownRecruit(random: () => number, options: RecruitGenerationOptions = {}): FirstTownRecruit {
   return generateEarlyTownRecruit(random, 1, options);
 }
 
-/** В дни 1 и 2 уровень всегда 1, но исходный бросок всё равно расходуется. */
-export function generateEarlyTownRecruit(random: () => number, day: 1 | 2, options: RecruitGenerationOptions = {}): FirstTownRecruit {
-  if (day !== 1 && day !== 2) throw new RangeError('Recruit generation is limited to the first two towns.');
+/** В дни 1–3 уровень всегда 1, но исходный бросок всё равно расходуется. */
+export function generateEarlyTownRecruit(random: () => number, day: 1 | 2 | 3, options: RecruitGenerationOptions = {}): FirstTownRecruit {
+  if (day !== 1 && day !== 2 && day !== 3) throw new RangeError('Recruit generation is limited to the first three towns.');
   const level = (Math.trunc(random() * day * 0.3) + Math.trunc(day / 5) + 1) as 1;
   const sex = Math.trunc(random() * 2);
   const name = RECRUIT_NAMES[Math.trunc(random() * RECRUIT_NAMES.length)];
