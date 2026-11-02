@@ -73,6 +73,247 @@
     },
     "rageOffsetY": 16
   },
+  "pause": {
+    "image": "pauseMenu",
+    "children": {
+      "returnTitleButton": {
+        "characterId": 1487,
+        "x": 393.15,
+        "y": 236.15,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0003204,
+          393.15,
+          236.15
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0003204,
+        "rotationDegrees": 0.0
+      },
+      "saveGameButton": {
+        "characterId": 1490,
+        "x": 393.15,
+        "y": 273.6,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0003204,
+          393.15,
+          273.6
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0003204,
+        "rotationDegrees": 0.0
+      },
+      "helpButton": {
+        "characterId": 1493,
+        "x": 393.15,
+        "y": 312.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0003204,
+          393.15,
+          312.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0003204,
+        "rotationDegrees": 0.0
+      },
+      "closeButton": {
+        "characterId": 1497,
+        "x": 1040.15,
+        "y": -149.25,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1040.15,
+          -149.25
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "options": {
+        "characterId": 1531,
+        "x": 80.0,
+        "y": 219.1,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          0.9998169,
+          80.0,
+          219.1
+        ],
+        "scaleX": 1.0,
+        "scaleY": 0.9998169,
+        "rotationDegrees": 0.0
+      }
+    },
+    "options": {
+      "optShowDamage": {
+        "characterId": 1475,
+        "x": -59.0,
+        "y": 70.0,
+        "matrix": [
+          2.399994,
+          0.0,
+          0.0,
+          1.0,
+          -59.0,
+          70.0
+        ],
+        "scaleX": 2.399994,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "stats": {
+        "characterId": 1530,
+        "x": -60.0,
+        "y": -98.55,
+        "matrix": [
+          2.5000305,
+          0.0,
+          0.0,
+          2.856186,
+          -60.0,
+          -98.55
+        ],
+        "scaleX": 2.5000305,
+        "scaleY": 2.856186,
+        "rotationDegrees": 0.0
+      },
+      "optLowQuality": {
+        "characterId": 1475,
+        "x": -59.0,
+        "y": 31.0,
+        "matrix": [
+          2.399994,
+          0.0,
+          0.0,
+          1.0,
+          -59.0,
+          31.0
+        ],
+        "scaleX": 2.399994,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "optShowAllyDamage": {
+        "characterId": 1475,
+        "x": -59.0,
+        "y": 89.0,
+        "matrix": [
+          2.399994,
+          0.0,
+          0.0,
+          1.0,
+          -59.0,
+          89.0
+        ],
+        "scaleX": 2.399994,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "optFirework": {
+        "characterId": 1475,
+        "x": -59.0,
+        "y": 51.0,
+        "matrix": [
+          2.399994,
+          0.0,
+          0.0,
+          1.0,
+          -59.0,
+          51.0
+        ],
+        "scaleX": 2.399994,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "optColor": {
+        "characterId": 1475,
+        "x": -59.0,
+        "y": 108.0,
+        "matrix": [
+          2.399994,
+          0.0,
+          0.0,
+          1.0,
+          -59.0,
+          108.0
+        ],
+        "scaleX": 2.399994,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "optFlashShot": {
+        "characterId": 1475,
+        "x": -59.0,
+        "y": 127.0,
+        "matrix": [
+          2.399994,
+          0.0,
+          0.0,
+          1.0,
+          -59.0,
+          127.0
+        ],
+        "scaleX": 2.399994,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      }
+    },
+    "labels": {
+      "optLowQuality": "Enable low quality mode (Faster)",
+      "optShowAllyDamage": "Show NPCs' damage output",
+      "optFirework": "Disable firework effect",
+      "optShowDamage": "Show player's damage output",
+      "optColor": "Crosshair for color blindness",
+      "optFlashShot": "Disable screen flash effect"
+    },
+    "controls": {
+      "menuButton": {
+        "characterId": 2703,
+        "x": 597.0,
+        "y": 361.35,
+        "matrix": [
+          1.0013123,
+          0.0,
+          0.0,
+          1.0012817,
+          597.0,
+          361.35
+        ],
+        "scaleX": 1.0013123,
+        "scaleY": 1.0012817,
+        "rotationDegrees": 0.0
+      },
+      "vol": {
+        "characterId": 2671,
+        "x": 559.95,
+        "y": 367.35,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          559.95,
+          367.35
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      }
+    }
+  },
   "help": {
     "position": {
       "x": -5.587619764971691,

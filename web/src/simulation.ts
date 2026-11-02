@@ -450,6 +450,11 @@ export class Simulation {
     if (!this.state.earnedMedals.includes(id)) this.state.earnedMedals.push(id);
   }
 
+  watchFireworks(): boolean {
+    if (this.state.phase !== 'victory' || this.state.postbattle !== 'result' || this.state.earnedMedals.includes(93)) return false;
+    this.awardMedal(93); return this.state.earnedMedals.includes(93);
+  }
+
   readCarryCheckpoint(value: unknown): SimulationState {
     const saved = Simulation.fromSave(value, this.options).state;
     const day = this.state.day - (this.state.phase === 'town' ? 0 : 1);

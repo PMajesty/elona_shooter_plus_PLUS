@@ -13,6 +13,10 @@ import { SAVE_SLOTS, readSelectedSlot, selectSaveSlot, deleteSaveSlot, exportSav
 import { saveSlotLabel } from './save-slots.ts';
 import { createTitleSavesView, type TitleSavesLayout } from './title-saves-view.ts';
 import { createHelpView, type HelpLayout } from './help-view.ts';
+import { createPauseView, type PauseLayout } from './pause-view.ts';
+import { DEFAULT_GAME_OPTIONS, validGameOptions, savedGameOptions, showDamageNumber, pauseStatistics, type GameOptions } from './game-options.ts';
+import { createFireworks } from './fireworks-view.ts';
+import { FIREWORK_MEDAL_FRAMES } from './fireworks.ts';
 import { createModConfirmation, type ModConfirmationLayout } from './mod-confirmation-view.ts';
 import { OriginalAlly, type OriginalAllyMetadata } from './original-animation.ts';
 import { createLootView } from './loot-view.ts';
@@ -33,7 +37,7 @@ interface ImageAsset { file: string; width: number; height: number; originX: num
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number; frameAlpha?: number[] }
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual }
-interface PortSave { format: 'elona-shooter-browser'; version: number; appearance: number; simulation: unknown; profile?: GlobalProfile; carryCheckpoint?: unknown }
+interface PortSave { format: 'elona-shooter-browser'; version: number; appearance: number; simulation: unknown; profile?: GlobalProfile; carryCheckpoint?: unknown; options?: GameOptions }
 type Screen = 'title' | 'gene' | 'mods' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
@@ -57,6 +61,7 @@ for (let index = 1; index <= 15; index++) USED_SOUNDS.add(`soundGun${index}`);
 for (const key of ['soundReloading1', 'soundReloading3', 'soundReloaded3', 'soundPray1', 'soundDefend', 'soundNight', 'soundAward', 'soundCard1']) USED_SOUNDS.add(key);
 for (const key of ['soundDead4', 'soundDead8', 'soundDead9']) USED_SOUNDS.add(key);
 for (const key of ['soundBow1', 'soundBow2', 'soundDead1', 'soundDead2', 'soundDead6', 'soundFireball', 'soundRampageEnemy', 'soundPuls', 'soundLow']) USED_SOUNDS.add(key);
+USED_SOUNDS.add('soundFirework');
 let manifest: Manifest;
 let gameScene: ElonaScene;
 
@@ -68,6 +73,7 @@ class ElonaScene extends Phaser.Scene {
   appearance = 0;
   paused = false;
   muted = readMute();
+  private options: GameOptions = { ...DEFAULT_GAME_OPTIONS };
   private accumulator = 0;
   private root!: Phaser.GameObjects.Container;
   private hud = new Map<string, Phaser.GameObjects.Text>();
@@ -91,10 +97,17 @@ class ElonaScene extends Phaser.Scene {
   private ammoFill?: Phaser.GameObjects.Image;
   private adrenalineFill?: Phaser.GameObjects.Image;
   private selection?: Phaser.GameObjects.Rectangle;
-  private cursor?: Phaser.GameObjects.Graphics;
+  private cursor?: Phaser.GameObjects.Image;
   private pauseLayer?: Phaser.GameObjects.Container;
   private helpLayer?: Phaser.GameObjects.Container;
   private fireAtWillSprites?: { fire: Phaser.GameObjects.Image; rage: Phaser.GameObjects.Image };
+  private volumeIcon?: Phaser.GameObjects.Image;
+  private pauseDialog?: Phaser.GameObjects.Container;
+  private celebration?: ReturnType<typeof createFireworks>;
+  private fireworkMedalChecked = false;
+  private flash?: Phaser.GameObjects.Rectangle;
+  private flashFrames = 0;
+  private flashClock = 0;
   private firePressed = false;
   private fireReleased = false;
   private firingGesture = false;
@@ -157,16 +170,17 @@ class ElonaScene extends Phaser.Scene {
     const combatKey = (event: KeyboardEvent) => {
       if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
       if (event.code === 'Escape') {
-        if (this.helpLayer) this.closeHelp();
-        else if (this.screen === 'battle') this.togglePause();
+        if (this.pauseDialog) { this.pauseDialog.destroy(true); this.pauseDialog = undefined; }
+        else if (this.helpLayer) this.closeHelp();
+        else if (['battle', 'town', 'result'].includes(this.screen)) this.togglePause();
         else if (this.screen === 'gene') this.showTitle();
         else if (this.screen === 'mods') this.leaveGameMods();
       } else if (event.code === 'Space') {
         event.preventDefault();
-        if (this.screen !== 'battle' || this.helpLayer) return;
-        if (this.paused) this.togglePause(); else this.reloadRequested = true;
+        if (this.helpLayer || this.pauseDialog) return;
+        if (this.paused) this.togglePause(); else if (this.screen === 'battle') this.reloadRequested = true;
       } else if (this.screen === 'battle' && !this.paused && !this.helpLayer) {
-        if (event.code === 'KeyF' && this.sim?.toggleFireAtWill()) { this.playSound('soundReloaded2'); this.paintBattle(); }
+        if (event.code === 'KeyF' && this.sim?.toggleFireAtWill()) { this.playSound('soundReloaded2'); this.flashFrames = 8; this.paintBattle(); }
         else if (/^Digit[1-5]$/.test(event.code)) this.slotRequested = Number(event.code.slice(-1)) - 1;
       }
     };
@@ -185,6 +199,9 @@ class ElonaScene extends Phaser.Scene {
     this.firingGesture = this.firingReleaseOwned = false;
     this.input.setDefaultCursor('default');
     this.root.removeAll(true);
+    if (!['loot', 'boss-loot', 'skill', 'result'].includes(screen)) { this.celebration?.destroy(); this.celebration = undefined; this.fireworkMedalChecked = false; }
+    this.volumeIcon = undefined; this.pauseDialog = undefined; this.flash = undefined; this.flashFrames = 0; this.flashClock = 0;
+    if (!this.celebration) delete container.dataset.fireworkFrames;
     this.helpLayer = undefined; delete container.dataset.helpPage; delete container.dataset.helpScroll;
     this.fireAtWillSprites = undefined; delete container.dataset.fireAtWill;
     for (const arrow of this.enemyArrowSprites.values()) arrow.container.destroy(true);
@@ -329,6 +346,7 @@ class ElonaScene extends Phaser.Scene {
       container.dataset.helpPage = String(page); container.dataset.helpScroll = String(Math.round(scroll));
     }, () => this.playSound('soundClick1'));
     this.root.add(this.helpLayer);
+    if (this.volumeIcon) this.root.bringToTop(this.volumeIcon);
   }
 
   private closeHelp(): void {
@@ -338,6 +356,7 @@ class ElonaScene extends Phaser.Scene {
 
   showGene(page: 0 | 1 = 0, keepHero = false): void {
     this.reset('gene');
+    if (!keepHero) { this.options = { ...DEFAULT_GAME_OPTIONS }; this.applyRenderingOptions(); }
     if (!keepHero || !this.sim) this.sim = new Simulation(Date.now(), { ...this.simulationOptions(), medals: this.profile.medals, deferOpeningWaves: true });
     this.image(manifest.images.townHud ? 'townHud' : 'town');
     this.drawHud();
@@ -460,7 +479,8 @@ class ElonaScene extends Phaser.Scene {
     if (this.sim?.weapon?.reloadTime && !this.sim.weapon.autoReload) this.playerSprite.playOriginal('reload');
     this.syncCompanionActors();
     this.drawHud();
-    this.cursor = this.add.graphics(); this.root.add(this.cursor);
+    const crosshair = manifest.clips.originalCrosshair;
+    this.cursor = this.add.image(0, 0, 'originalCrosshair', '1').setOrigin(crosshair.originX / crosshair.frameWidth, crosshair.originY / crosshair.frameHeight); this.root.add(this.cursor);
     this.input.setDefaultCursor('crosshair');
     if (this.cache.audio.exists('soundBgForest')) this.ambient = this.sound.add('soundBgForest', { volume: 0.3, loop: true });
     this.ambient?.play();
@@ -497,6 +517,52 @@ class ElonaScene extends Phaser.Scene {
       this.hotbar.push({ icon, count, cooldown });
     }
     this.updateHud();
+    this.drawGameControls();
+  }
+
+  private drawGameControls(): void {
+    if (!['battle', 'town', 'result'].includes(this.screen)) return;
+    const { menuButton, vol } = (this.cache.json.get('town-layout') as { pause: PauseLayout }).pause.controls;
+    this.originalButton('button_gameMenu', menuButton.x, menuButton.y, () => { if (!this.paused) this.togglePause(); });
+    const a = manifest.clips.gameVolume;
+    this.volumeIcon = this.add.image(vol.x, vol.y, 'gameVolume', this.muted ? '2' : '1').setOrigin(a.originX / a.frameWidth, a.originY / a.frameHeight).setInteractive({ useHandCursor: true }); this.root.add(this.volumeIcon);
+    this.volumeIcon.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); this.toggleMute(); });
+  }
+
+  private applyRenderingOptions(): void {
+    for (const key of [...Object.keys(manifest.images), ...Object.keys(manifest.clips)]) {
+      if (this.textures.exists(key)) this.textures.get(key).setFilter(this.options.lowQuality || key === 'charaPic' ? Phaser.Textures.FilterMode.NEAREST : Phaser.Textures.FilterMode.LINEAR);
+    }
+    this.cameras.main.roundPixels = this.options.lowQuality;
+    container.dataset.options = JSON.stringify(this.options);
+    if (this.options.disableFireworks) { this.celebration?.destroy(); this.celebration = undefined; delete container.dataset.fireworkFrames; }
+    if (this.options.disableFlash) { this.flashFrames = 0; this.flash?.setVisible(false); }
+  }
+
+  private updatePresentation(delta: number): void {
+    if (this.paused) return;
+    this.celebration?.advance(delta);
+    if (this.celebration) {
+      container.dataset.fireworkFrames = String(this.celebration.frame);
+      if (!this.fireworkMedalChecked && this.celebration.frame >= FIREWORK_MEDAL_FRAMES) {
+        this.fireworkMedalChecked = true;
+        if (this.sim?.watchFireworks()) this.saveGame(false);
+      }
+      if (this.celebration.finished) { this.celebration.destroy(); this.celebration = undefined; }
+    }
+    if (this.screen === 'battle' && this.flashFrames > 0 && !this.options.disableFlash) {
+      this.flashClock += Math.min(delta, 250);
+      while (this.flashClock >= 1000 / 30 && this.flashFrames > 0) { this.flashClock -= 1000 / 30; this.flashFrames--; }
+      if (!this.flash) { this.flash = this.add.rectangle(0, 0, 620, 345, 0xffffff).setOrigin(0); this.root.add(this.flash); }
+      this.flash.setAlpha(Math.min(0.5, this.flashFrames * 8 / 255)).setVisible(this.flashFrames > 0); this.root.bringToTop(this.flash);
+    }
+  }
+
+  private startCelebration(): void {
+    if (this.options.disableFireworks || this.celebration || this.screen !== 'result' || !this.sim) return;
+    const state = this.sim.state;
+    this.celebration = createFireworks(this, manifest, state.rng ^ state.day, state.earnedMedals.includes(65));
+    this.fireworkMedalChecked = false; this.playSound('soundFirework', 0.25);
   }
 
   private paintFireAtWill(): void {
@@ -520,6 +586,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
+    this.updatePresentation(delta);
     if (this.screen !== 'battle' || !this.sim || this.paused) return;
     const pointer = this.input.activePointer;
     this.accumulator += Math.min(delta, 250);
@@ -675,14 +742,14 @@ class ElonaScene extends Phaser.Scene {
     this.updateHud();
     for (const text of this.hud.values()) this.root.bringToTop(text);
     const pointer = this.input.activePointer;
-    this.cursor?.clear();
+    this.cursor?.setVisible(false);
     if (pointer.x >= 0 && pointer.x < 620 && pointer.y > 30 && pointer.y < 345) {
-      const radius = 5 + state.player.accuracyFix * 20;
-      this.cursor?.lineStyle(1, 0xffffff, 0.8).strokeCircle(pointer.x, pointer.y, radius);
-      this.cursor?.lineBetween(pointer.x - radius - 4, pointer.y, pointer.x - radius + 1, pointer.y);
-      this.cursor?.lineBetween(pointer.x + radius - 1, pointer.y, pointer.x + radius + 4, pointer.y);
+      this.cursor?.setVisible(true).setPosition(pointer.x, pointer.y)
+        .setFrame(this.options.colorBlind ? '3' : state.waveIndex <= 3 ? '2' : '1')
+        .setScale(0.3 + Math.min(0.6, state.player.accuracyFix)).setAlpha(state.player.shootTimer > 0 && !this.sim.weapon?.automatic ? 0.7 : 1);
       if (this.cursor) this.root.bringToTop(this.cursor);
     }
+    container.dataset.crosshairFrame = this.cursor?.frame.name ?? '';
     container.dataset.playerFrame = String(this.playerSprite?.currentOriginalFrame ?? '');
     container.dataset.reloadTicks = String(this.sim.weapon?.reloadTime ?? 0);
     container.dataset.reloadAnimations = String(this.reloadAnimations);
@@ -890,8 +957,10 @@ class ElonaScene extends Phaser.Scene {
         const pan = Phaser.Math.Clamp(Math.trunc(Math.trunc(enemy?.x ?? event.x ?? 0) / 25), 0, 19) * 0.08 - 0.8;
         this.playSound('soundLow', 0.9, pan);
       }
-      const damage = this.text(event.x ?? 0, (event.y ?? 0) - 25, `${event.amount}${event.critical ? '!' : ''}`, 13, event.critical ? '#ffef62' : '#ffffff', 'ElonaHud').setShadow(1, 1, '#000000', 2);
-      this.effects.push({ object: damage, ticks: 24, moveY: -0.6 });
+      if (showDamageNumber(this.options, actorSlot, event.criticalType)) {
+        const damage = this.text(event.x ?? 0, (event.y ?? 0) - 25, `${event.amount}${event.critical ? '!' : ''}`, 13, event.critical ? '#ffef62' : '#ffffff', 'ElonaHud').setShadow(1, 1, '#000000', 2);
+        this.effects.push({ object: damage, ticks: 24, moveY: -0.6 });
+      }
     }
     if (event.type === 'explosion') {
       const key = event.explosionKind === 'rocket' ? 'explosionLarge' : 'explosion';
@@ -907,6 +976,7 @@ class ElonaScene extends Phaser.Scene {
       if (effect) this.effects.push({ object: effect, ticks: manifest.clips.layhand.count, clip: 'layhand', frame: 1 });
     }
     if (event.type === 'wave' || event.type === 'rampage' || event.type === 'level-up' || event.type === 'ragnarok') {
+      if ((event.type === 'rampage' && actorSlot === 0) || event.type === 'ragnarok') this.flashFrames = 15;
       const position = actorSlot === 0 ? { x: 310, y: 90 } : partyActorPosition(actorSlot);
       const message = this.text(position.x, position.y - (actorSlot ? 35 : 0), event.type === 'wave' ? `Wave ${event.amount}` : event.type === 'rampage' ? 'RAMPAGE!' : event.type === 'ragnarok' ? event.message! : 'Level Up!', actorSlot ? 14 : 27, '#ffefb0').setOrigin(0.5).setShadow(2, 2, '#000000', 3);
       this.effects.push({ object: message, ticks: 45 });
@@ -953,6 +1023,7 @@ class ElonaScene extends Phaser.Scene {
       const menu = this.root.list.filter(object => !background.has(object));
       this.root.add(this.add.container(MENU_X, 0, menu));
       status.textContent = `Day ${state.day} complete and saved. Proceed to town.`;
+      this.startCelebration();
     } else {
       this.image('gameOver', 300, 205);
       this.zone(120, 175, 400, 70, () => this.showTitle());
@@ -1230,7 +1301,7 @@ class ElonaScene extends Phaser.Scene {
       container.dataset.pendingTownAction = JSON.stringify(pending);
       container.dataset.upgradePreview = JSON.stringify(pending?.kind === 'upgrade' ? this.sim.state.upgradeReference : null);
     }
-    this.updateHud();
+    this.updateHud(); this.drawGameControls();
     container.dataset.actionPoints = String(this.sim.state.town.ap);
     container.dataset.castleUpgrades = JSON.stringify({ house: this.sim.state.party.capacity, wall: this.sim.state.wallLevel,
       maxHp: this.sim.state.castleMaxHp, upkeep: castleUpkeep(this.sim.state),
@@ -1360,22 +1431,31 @@ class ElonaScene extends Phaser.Scene {
   }
 
   togglePause(): void {
-    if (this.screen !== 'battle') return;
+    if (!['battle', 'town', 'result'].includes(this.screen)) return;
     this.paused = !this.paused; this.accumulator = 0; this.firePressed = this.fireReleased = false; this.firingGesture = this.firingReleaseOwned = false;
     container.dataset.paused = String(this.paused);
-    if (!this.paused) { status.hide(); this.pauseLayer?.destroy(true); this.pauseLayer = undefined; this.ambient?.resume(); this.bowSound?.resume(); for (const sound of this.companionBowSounds.values()) sound.resume(); return; }
+    this.celebration?.root.setVisible(!this.paused);
+    if (!this.paused) { status.hide(); this.pauseLayer?.destroy(true); this.pauseLayer = undefined; this.saveGame(false); this.ambient?.resume(); this.bowSound?.resume(); for (const sound of this.companionBowSounds.values()) sound.resume(); return; }
     for (const sound of this.companionBowSounds.values()) sound.pause();
     this.ambient?.pause(); this.bowSound?.pause(); this.saveGame(false);
-    const existing = new Set(this.root.list);
-    this.root.add(this.add.rectangle(0, 0, 620, 380, 0x000000, 0.45).setOrigin(0));
-    this.root.add(this.add.rectangle(199, 85, 222, 230, 0xdfcfac).setOrigin(0).setStrokeStyle(2, 0x8c7b53));
-    this.text(310, 123, 'Paused', 26).setOrigin(0.5, 0);
-    this.labelButton(245, 163, 'Resume', () => this.togglePause());
-    this.labelButton(245, 199, 'Save Game', () => this.saveGame());
-    this.labelButton(233, 235, 'Return to Title', () => { this.saveGame(false); this.showTitle(); }, 154);
-    this.originalButton('button_pauseHelp', 233, 273, () => this.showHelp());
-    const members = this.root.list.filter(object => !existing.has(object));
-    this.pauseLayer = this.add.container(0, 0, members); this.root.add(this.pauseLayer);
+    this.cursor?.setVisible(false);
+    const data = this.cache.json.get('town-layout') as { pause: PauseLayout };
+    this.pauseLayer = createPauseView(this, manifest, data.pause, this.options, pauseStatistics(this.sim!.state), {
+      close: () => this.togglePause(), save: () => this.saveGame(), help: () => this.showHelp(),
+      title: () => {
+        if (this.screen === 'town') { this.saveGame(false); this.showTitle(); return; }
+        this.pauseDialog = createModConfirmation(this, manifest, (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog, confirm => {
+          this.pauseDialog?.destroy(true); this.pauseDialog = undefined;
+          if (confirm) this.showTitle();
+        }, 'quit', 'Current game will not be saved. Really quit?');
+        this.root.add(this.pauseDialog);
+      },
+      option: key => {
+        this.options[key] = !this.options[key]; this.applyRenderingOptions();
+        if (key === 'disableFireworks' && !this.options.disableFireworks) { this.startCelebration(); this.celebration?.root.setVisible(false); }
+      }, click: () => this.playSound('soundClick1'),
+    }); this.root.add(this.pauseLayer);
+    if (this.volumeIcon) this.root.bringToTop(this.volumeIcon);
   }
 
   makeSave(): PortSave | undefined {
@@ -1384,8 +1464,9 @@ class ElonaScene extends Phaser.Scene {
     if (!canSaveAdventure(this.sim.state)) return undefined;
     // Город хранится рядом с приключением, поэтому повторные переносы не вкладывают снимки друг в друга.
     const checkpoint = this.sim.state.phase === 'town' ? undefined : this.carryCheckpoint;
+    const options = savedGameOptions(this.options);
     return { format: 'elona-shooter-browser', version: SAVE_VERSION, appearance: this.appearance, simulation: this.sim.toSave(), profile: structuredClone(this.profile),
-      ...(checkpoint && this.sim.state.mode !== 'hardcore' ? { carryCheckpoint: structuredClone(checkpoint) } : {}) };
+      ...(checkpoint && this.sim.state.mode !== 'hardcore' ? { carryCheckpoint: structuredClone(checkpoint) } : {}), ...(options ? { options } : {}) };
   }
 
   saveGame(notify = true): boolean {
@@ -1404,16 +1485,17 @@ class ElonaScene extends Phaser.Scene {
     return stored;
   }
 
-  private parseSave(raw: unknown, ignoreProfileError = false): { simulation: Simulation; appearance: number; profile?: GlobalProfile; carryCheckpoint?: SimulationState } {
+  private parseSave(raw: unknown, ignoreProfileError = false): { simulation: Simulation; appearance: number; profile?: GlobalProfile; carryCheckpoint?: SimulationState; options: GameOptions } {
     const save = raw as Partial<PortSave> | null;
     if (!save || save.format !== 'elona-shooter-browser' || !supportedSaveVersion(save.version) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
+    if (save.options !== undefined && !validGameOptions(save.options)) throw new Error('This save contains invalid game options.');
     const validCollection = validProfile(save.profile);
     if (save.profile !== undefined && !validCollection && !ignoreProfileError) throw new Error('This save contains an invalid medal collection.');
     const simulation = Simulation.fromSave(save.simulation, this.simulationOptions());
     if (!canSaveAdventure(simulation.state)) throw new Error('Hardcore games can only be restored in town.');
     const carryCheckpoint = save.carryCheckpoint === undefined ? undefined : simulation.readCarryCheckpoint(save.carryCheckpoint);
     if (carryCheckpoint && save.version! < 36) throw new Error('Invalid Carry Over save version.');
-    return { simulation, appearance: save.appearance!, ...(validCollection ? { profile: structuredClone(save.profile) } : {}), ...(carryCheckpoint ? { carryCheckpoint } : {}) };
+    return { simulation, appearance: save.appearance!, options: { ...(save.options ?? DEFAULT_GAME_OPTIONS) }, ...(validCollection ? { profile: structuredClone(save.profile) } : {}), ...(carryCheckpoint ? { carryCheckpoint } : {}) };
   }
 
   continueGame(): void {
@@ -1424,10 +1506,12 @@ class ElonaScene extends Phaser.Scene {
 
   loadGame(raw: unknown, restoreCollection = false): void {
     const validated = this.parseSave(raw, !restoreCollection);
+    this.celebration?.destroy(); this.celebration = undefined; this.fireworkMedalChecked = false;
     if (restoreCollection && validated.profile) this.profile = createProfile();
     if (validated.profile) this.profile = mergeProfiles(this.profile, validated.profile);
     this.profile = mergeProfile(this.profile, validated.simulation.state); if (storeProfile(this.profile)) delete this.profileRead.warning;
     this.sim = validated.simulation; this.appearance = validated.appearance;
+    this.options = validated.options; this.applyRenderingOptions();
     this.carryCheckpoint = validated.carryCheckpoint;
     if (this.sim.state.phase === 'battle') { this.enterBattle(); this.togglePause(); }
     else this.showOutcome();
@@ -1437,7 +1521,7 @@ class ElonaScene extends Phaser.Scene {
   importSave(raw: unknown): void { this.loadGame(raw, true); this.saveGame(false); status.textContent = 'Save imported and restored.'; }
 
   playSound(key: string, volume = 0.7, pan = 0): void { if (this.cache.audio.exists(key)) this.sound.play(key, { volume, pan }); }
-  toggleMute(): void { this.muted = !this.muted; this.sound.mute = this.muted; container.dataset.muted = String(this.muted); storeMute(this.muted); }
+  toggleMute(): void { this.muted = !this.muted; this.sound.mute = this.muted; this.volumeIcon?.setFrame(this.muted ? '2' : '1'); container.dataset.muted = String(this.muted); storeMute(this.muted); }
 }
 
 async function boot(): Promise<void> {

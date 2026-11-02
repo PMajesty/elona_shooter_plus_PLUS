@@ -1107,6 +1107,85 @@
       "height": 380,
       "originX": 0,
       "originY": 0
+    },
+    "button_pauseTitle": {
+      "file": "buttons/button_pauseTitle.png",
+      "width": 208,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1487
+    },
+    "button_pauseTitle_over": {
+      "file": "buttons/button_pauseTitle_over.png",
+      "width": 208,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1487
+    },
+    "button_pauseTitle_down": {
+      "file": "buttons/button_pauseTitle_down.png",
+      "width": 208,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1487
+    },
+    "button_pauseSave": {
+      "file": "buttons/button_pauseSave.png",
+      "width": 208,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1490
+    },
+    "button_pauseSave_over": {
+      "file": "buttons/button_pauseSave_over.png",
+      "width": 208,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1490
+    },
+    "button_pauseSave_down": {
+      "file": "buttons/button_pauseSave_down.png",
+      "width": 208,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1490
+    },
+    "button_gameMenu": {
+      "file": "buttons/button_gameMenu.png",
+      "width": 78,
+      "height": 79,
+      "originX": 38.95,
+      "originY": 39.45,
+      "characterId": 2703
+    },
+    "button_gameMenu_over": {
+      "file": "buttons/button_gameMenu_over.png",
+      "width": 78,
+      "height": 79,
+      "originX": 38.95,
+      "originY": 39.45,
+      "characterId": 2703
+    },
+    "button_gameMenu_down": {
+      "file": "buttons/button_gameMenu_down.png",
+      "width": 78,
+      "height": 79,
+      "originX": 38.95,
+      "originY": 39.45,
+      "characterId": 2703
+    },
+    "pauseMenu": {
+      "file": "screens/pauseMenu.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
     }
   },
   "clips": {
@@ -2128,6 +2207,66 @@
       "count": 14,
       "uniqueFrames": 7,
       "characterId": 2386
+    },
+    "gameVolume": {
+      "image": "sprites/gameVolume.png",
+      "json": "sprites/gameVolume.json",
+      "originX": 12.0,
+      "originY": 8.0,
+      "frameWidth": 24,
+      "frameHeight": 16,
+      "labels": {},
+      "count": 2,
+      "uniqueFrames": 2,
+      "characterId": 2671
+    },
+    "originalCrosshair": {
+      "image": "sprites/originalCrosshair.png",
+      "json": "sprites/originalCrosshair.json",
+      "originX": 25.95,
+      "originY": 23.95,
+      "frameWidth": 53,
+      "frameHeight": 52,
+      "labels": {},
+      "count": 3,
+      "uniqueFrames": 3,
+      "characterId": 2689
+    },
+    "fireworkLaunch": {
+      "image": "sprites/fireworkLaunch.png",
+      "json": "sprites/fireworkLaunch.json",
+      "originX": 24.95,
+      "originY": 22.95,
+      "frameWidth": 56,
+      "frameHeight": 177,
+      "labels": {},
+      "count": 161,
+      "uniqueFrames": 24,
+      "characterId": 96
+    },
+    "fireworkBit1": {
+      "image": "sprites/fireworkBit1.png",
+      "json": "sprites/fireworkBit1.json",
+      "originX": 19.1,
+      "originY": 146.5,
+      "frameWidth": 37,
+      "frameHeight": 150,
+      "labels": {},
+      "count": 40,
+      "uniqueFrames": 40,
+      "characterId": 101
+    },
+    "fireworkBit2": {
+      "image": "sprites/fireworkBit2.png",
+      "json": "sprites/fireworkBit2.json",
+      "originX": 14.5,
+      "originY": 8.5,
+      "frameWidth": 36,
+      "frameHeight": 32,
+      "labels": {},
+      "count": 216,
+      "uniqueFrames": 25,
+      "characterId": 91
     }
   },
   "sounds": {

@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v38, Fire at will control**.
+Updated 2026-11-02. Current local build: **v38, original pause/options and fireworks**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -104,13 +104,24 @@ All four original pages (Basic, Battle, Town, Credits),13 English tips and9 cred
 links are extracted from the source. Tips support wheel/keyboard scrolling,
 arrow buttons, track clicks and thumb dragging with the original component skins.
 Esc/outside click returns to the underlying screen; Space cannot resume combat
-under help. The remaining pause panel is still a browser approximation.
+under help.
 Source: window frames162–165; insertHelp (4598), procHelp (7482), procLink (8698).
+
+The original Statistics & Options menu replaces the temporary pause panel in
+combat, town and results. Original Menu/Mute icons, Help, Save Game, statistics,
+quit confirmation and all six English option controls are connected. Settings
+control player/NPC damage numbers, nearest-pixel rendering, fireworks, original
+color-blind crosshair and screen flashes. Non-default options are saved beside
+the simulation; old/default envelopes remain unchanged. Mute remains independent.
+Original firework launch/particle clips run on results with a separate decorative
+random stream;651 unpaused presentation frames award Ha-na-bi. Source startFire
+uses48 bursts or60 with medal65; Ha-na-bi's advertised +25 has no check there.
+Source: pauseMenu/endPauseMenu, optionwindow_222, enemy.damage, startFire/fireWork1.
 
 ## Validation and limits
 
-- **509 tests passed**, with typechecking and production build passing. Latest
-  bundle: assets/index-s1thXP-l.js. Slot checks cover unchanged legacy storage,
+- **514 tests passed**, with typechecking and production build passing. Latest
+  bundle: assets/index-B26_cPpi.js. Slot checks cover unchanged legacy storage,
   eight independent adventures, selection persistence, shared medals/mute,
   deletion/tombstones, Hardcore isolation, corrupt data and failed writes.
   Existing deterministic checks cover classes, campaign, equipment services,
@@ -124,6 +135,9 @@ Source: window frames162–165; insertHelp (4598), procHelp (7482), procLink (86
   Seven Fire at will checks cover autonomous shots/reload/kills, AI/manual JSON
   replay, bows, class meters, selected-slot projectile ownership, reload cancellation,
   new-mission reset, v37 migration and invalid/missing AI targets.
+  Five presentation checks cover defaults/JSON validation, independent damage
+  channels, original statistics, deterministic48/60-burst plans and Ha-na-bi
+  eligibility/persistence, including Carry Over. Presentation does not draw combat RNG.
 - The controlled full40-day campaign completed in96494 simulation frames, with
   all19 enemy kinds, rewards, towns and save boundaries. Its changed frame count
   follows the repeating MOD-sale correction and resulting generation RNG. Strong
@@ -182,6 +196,15 @@ Source: window frames162–165; insertHelp (4598), procHelp (7482), procLink (86
   is refused and Continue has no battle save; its town checkpoint loads and Rest
   works. These records remain useful for unchanged paths, without repeating all
   UI flows at every checkpoint.
+- The muted pause/options browser check used slot8: all six toggles changed only
+  the optional settings field, the color-blind cursor reached frame3, and Continue
+  retained the complete envelope. Quit Cancel and invalid-options import retained
+  their complete envelopes. Controlled town/results saves verified original Menu,
+  Save, Help, quit handling, fireworks disable/re-enable and Ha-na-bi without RNG
+  changes. The test slot was deleted and the user's complete adventure/profile
+  restored exactly, including removal of the test medal. No console errors or
+  fullscreen activation. Evidence: .build/browser-qa/pause-options-verification.json,
+  original-pause-options.png and original-fireworks.png.
 - The user's original Sheriff adventure and collection were restored with full
   exported-envelope equality after migration: day1, tick674, RNG1744019180, HP40,
   gold209, paused/muted. No test MODs, unlocks or records remain.
@@ -196,13 +219,19 @@ that the app's crash cause was fixed.
 
 1. Long-session stability/performance and difficulty evidence beyond the first
    cycle; the current Day1000 save safety boundary remains an intentional limit.
-2. Remaining medal effects/triggers and decorative fireworks.
+2. Remaining medal effects/triggers beyond those documented above.
 3. Flash save conversion. The browser dropdown displays all eight choices at once,
    rather than the original ComboBox's five-row scrolling list.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
    camera shake, decorative boss reticle, some ranged spell effects/frame sounds,
    rage art, Chain Gun interruption timing and raster/filter/subpixel differences.
-   Original pause/settings controls also need completion.
+   Firework timing/tint/audio and screen flashes approximate the Flash presentation;
+   low quality uses nearest filtering/pixel rounding rather than rerasterizing
+   original vectors. The right pause panel shifts50px left and statistics panel15px
+   up to fit620×380. Statistics
+   uses wheel scrolling instead of a native Flash TextArea scrollbar. Normal-mode
+   browser checkpoints remain available during combat/results; Flash's Save Game
+   button was town-only. The medal93 bonus text/source-count discrepancy is preserved.
    Help's dynamic TextArea uses canvas cropping/scrolling in place of Flash's native
    component; external credits retain their original URLs, whose availability is unverified.
 5. Separate static castle Sister damage/death interactions. Bird-rat falling

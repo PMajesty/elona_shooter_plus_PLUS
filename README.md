@@ -56,6 +56,11 @@ unless you previously enabled it; the mute preference persists between visits.
 - Original Basic, Battle, Town and Credits help pages, with all13 English tips,
   original navigation and credits links. Open Help from the title or pause menu;
   scroll tips with the wheel, scrollbar or keyboard. Esc/outside click closes help.
+- Original Statistics & Options menu in combat, town and results, with working
+  menu/mute icons, six presentation settings and quit confirmation. Options travel
+  with the adventure; default options preserve existing save envelopes.
+  Original crosshair variants, separate player/NPC damage numbers and victory
+  fireworks are connected. Watching results long enough awards Ha-na-bi.
 
 Remaining work and validation limits are in [port status](docs/port-status.md).
 The [process review](docs/development-process-review.md) records the correction

@@ -59,6 +59,9 @@ BUTTONS.update({"button_helpBattle": 1936, "button_helpTown": 1938,
 CLIPS.update({"helpTextAreaSkin": 1504, "helpScrollUp": 1519,
               "helpScrollDown": 1522, "helpScrollThumb": 1521})
 CLIPS.update({"sisterFireAtWill": 2593, "fireAtWillRage": 2386})
+CLIPS.update({"gameVolume": 2671, "originalCrosshair": 2689, "fireworkLaunch": 96,
+              "fireworkBit1": 101, "fireworkBit2": 91})
+BUTTONS.update({"button_pauseTitle": 1487, "button_pauseSave": 1490, "button_gameMenu": 2703})
 FORCE = False
 
 
@@ -121,7 +124,7 @@ def clip_labels(sprite):
     return labels
 
 
-def static_screen(xml, name, tags, omit=(), offset=(0, 0), sprite_frames=None):
+def static_screen(xml, name, tags, omit=(), offset=(0, 0), sprite_frames=None, sprite_omit=None):
     out = DEST / "screens" / (name + ".png")
     if out.exists() and not FORCE:
         image = Image.open(out)
@@ -129,6 +132,12 @@ def static_screen(xml, name, tags, omit=(), offset=(0, 0), sprite_frames=None):
                 "height": image.height, "originX": 0, "originY": 0}
     output = copy.deepcopy(xml)
     target = output.find("tags")
+    for symbol, names in (sprite_omit or {}).items():
+        sprite = next(t for t in target if t.get("spriteId") == str(symbol))
+        subtags = sprite.find("subTags")
+        for tag in list(subtags):
+            if tag.get("name") in names:
+                subtags.remove(tag)
     # Диалоги выбирают исходную карточку до появления окна.
     for symbol, frame in (sprite_frames or {}).items():
         sprite = next(t for t in target if t.get("spriteId") == str(symbol))
@@ -591,10 +600,23 @@ def town_layout(xml, sprites):
             for line in re.findall(r'window4_mc\.help\.text \+= "(.*?)";', tips_body)]
     links_body = source.split("public function procLink(", 1)[1].split("internal function frame7", 1)[0]
     links = {index: url for index, url in re.findall(r'url\[(\d+)\] = "(.*?)";', links_body) if url}
+    option_source = (CACHE / "scripts/shootem_fla/optionwindow_222.as").read_text(encoding="utf-8")
+    option_labels = {name: json.loads('"' + label.replace("\\'", "'") + '"')
+                     for name, label in re.findall(r'(opt\w+)\.label = "(.*?)";', option_source)}
+    pause_children = placements(sprites[1995].find("subTags"), 10)
+    # Исходная панель обрезает заголовок справа и последний флажок снизу в области620×380.
+    for name in ("returnTitleButton", "saveGameButton", "helpButton"):
+        pause_children[name]["x"] -= 50
+        pause_children[name]["matrix"][4] -= 50
+    pause_children["options"]["y"] -= 15
+    pause_children["options"]["matrix"][5] -= 15
     return {"version": 1, "sourceSha256": ORIGINAL_SHA256, "rootFrame": 71,
             "titleSaves": {"children": {name: value for name, value in placements(tags, 22).items() if name in {"saveBox", "trash"}}},
             "fireAtWill": {"sister": placements(tags, 33)["sister"],
                            "fire": placements(sprites[2622].find("subTags"), 4)["sisterFire"], "rageOffsetY": 16},
+            "pause": {"image": "pauseMenu", "children": pause_children,
+                      "options": placements(sprites[1531].find("subTags"), 1), "labels": option_labels,
+                      "controls": {name: value for name, value in placements(tags, 33).items() if name in {"menuButton", "vol"}}},
             "help": {"position": {"x": 600 - sum(i ** 1.7 for i in range(16)), "y": -20},
                      "pages": [{"image": f"help{page}", "children": placements(sprites[1995].find("subTags"), 161 + page)}
                                for page in range(1, 5)], "tips": tips, "links": links,
@@ -652,6 +674,19 @@ def town_layout(xml, sprites):
                                  "children": placements(sprites[2431].find("subTags"), 1)},
             "newTitleDialog": {"characterId": 2437, "frame": 1, "image": "eventNewTitle",
                                "cardFrame": 3, "children": placements(sprites[2437].find("subTags"), 1)}}
+
+
+def pause_screen(xml, sprites):
+    tags = placed_frame(sprites[1995].find("subTags"), 10)
+    for tag in tags:
+        matrix = tag.find("matrix")
+        if tag.get("characterId") in {"1479", "1481"}:
+            matrix.set("translateX", str(int(matrix.get("translateX")) - 1000))
+        elif tag.get("name") == "options":
+            matrix.set("translateY", str(int(matrix.get("translateY")) - 300))
+    return static_screen(xml, "pauseMenu", tags,
+        {"returnTitleButton", "saveGameButton", "helpButton", "closeButton"},
+        sprite_omit={1531: {"stats", "optShowDamage", "optShowAllyDamage", "optLowQuality", "optFirework", "optColor", "optFlashShot"}})
 
 
 def write_medal_definitions():
@@ -794,6 +829,7 @@ def main():
         shutil.copyfile(source, dest)
         manifest["sounds"][name] = f"sounds/{dest.name}"
     buttons(manifest)
+    manifest["images"]["pauseMenu"] = pause_screen(xml, sprites)
     for page in range(1, 5):
         manifest["images"][f"help{page}"] = static_screen(xml, f"help{page}",
             placed_frame(sprites[1995].find("subTags"), 161 + page),
