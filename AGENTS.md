@@ -14,6 +14,10 @@ cosmetic/audio/RNG fidelity, and use proportionate validation. Read
 browser tab and keep testing muted. The user explicitly reauthorized recurring
 work on 2026-11-02: a 30-minute continuation watcher and a three-hour workflow
 meta-review watchdog. Read `docs/long-term-goal.md` for the current objective.
+User amendment on 2026-11-02: never activate native fullscreen during automated
+testing; it takes over the user's desktop. Keep the requested in-game fullscreen
+icon for the user to operate. Do not add browser toolbars below the hotbar or
+floating explanatory labels over the game. Preserve original in-game tooltips.
 Use original extracted assets. Do not replace original behavior with invented
 mechanics merely to make a demo work. Record intentional fixes and differences.
 

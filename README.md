@@ -68,9 +68,11 @@ export a backup to transfer it between browsers or websites. Current-format impo
 restore the saved medal collection as well as the adventure. Legacy imports merge
 their medals into the existing collection; Continue preserves the collection.
 Keep a recent export before restoring an older backup.
-The page contains only the centered game. Full screen, sound and JSON backup
-controls appear inside the pause menu or title Help screen; Esc also toggles them
-on town/result/title screens. Action feedback appears briefly inside the game.
+The page contains only the centered game and its requested top-right fullscreen
+icon. There is no added bottom toolbar or floating explanatory message overlay.
+Browser shortcuts: Ctrl+S saves, Ctrl+Shift+S exports a JSON backup,
+Ctrl+Shift+O imports one and Ctrl+Shift+M toggles mute. Testing stays muted and
+never activates native fullscreen, which would take over the user's desktop.
 
 ```powershell
 npm.cmd test

@@ -35,15 +35,12 @@ type Screen = 'title' | 'gene' | 'mods' | 'battle' | 'loot' | 'boss-loot' | 'ski
 const container = document.querySelector<HTMLDivElement>('#game')!;
 const loadStatus = document.querySelector<HTMLDivElement>('#load-status')!;
 const statusElement = document.querySelector<HTMLParagraphElement>('#save-status')!;
-let messageTimer: ReturnType<typeof setTimeout> | undefined;
 const status = {
   get textContent(): string | null { return statusElement.textContent; },
   set textContent(message: string | null) {
-    statusElement.textContent = message; statusElement.hidden = !message;
-    clearTimeout(messageTimer);
-    messageTimer = setTimeout(() => { statusElement.hidden = true; }, 6000);
+    statusElement.textContent = message;
   },
-  hide() { clearTimeout(messageTimer); statusElement.hidden = true; },
+  hide() { statusElement.textContent = ''; },
 };
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}assets/${path}`;
 const MENU_X = -15.587619764971691;
@@ -157,15 +154,12 @@ class ElonaScene extends Phaser.Scene {
       if (this.screen === 'battle') this.togglePause();
       else if (this.screen === 'gene') this.showTitle();
       else if (this.screen === 'mods') this.leaveGameMods();
-      else container.dataset.toolsOpen = String(container.dataset.toolsOpen !== 'true');
     });
     ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE'].forEach((key, slot) => {
       this.input.keyboard?.on(`keydown-${key}`, () => { if (this.screen === 'battle' && !this.paused) this.slotRequested = slot; });
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    this.updateSoundButton();
-    document.querySelector<HTMLButtonElement>('#import-save')!.disabled = false;
   }
 
   private reset(screen: Screen): void {
@@ -187,7 +181,6 @@ class ElonaScene extends Phaser.Scene {
     this.pauseLayer = undefined; this.playerSprite = undefined; this.cursor = undefined; this.selection = undefined; this.ammoFill = undefined;
     if (!keepTownAmbience) { this.ambient?.destroy(); this.ambient = undefined; }
     container.dataset.screen = screen;
-    delete container.dataset.toolsOpen;
     status.hide();
     container.dataset.paused = 'false';
     container.dataset.bossBars = '0'; container.dataset.bossHealth = '[]';
@@ -305,7 +298,6 @@ class ElonaScene extends Phaser.Scene {
     this.text(123, 73, 'How to Play', 26);
     this.text(123, 121, 'Mouse: aim and fire; bows hold/release.\n1–5 select or use an inventory slot.\nSpace reloads; click cancels manual reload.\nEsc pauses; Space also resumes.\n\nDefend the castle until the day ends.\nMission → Rest starts the next day\nwithout repairing the castle.', 16).setLineSpacing(3);
     this.labelButton(245, 288, 'Return to Title', () => this.showTitle(), 145);
-    container.dataset.toolsOpen = 'true';
   }
 
   showGene(page: 0 | 1 = 0, keepHero = false): void {
@@ -1380,12 +1372,7 @@ class ElonaScene extends Phaser.Scene {
   importSave(raw: unknown): void { this.loadGame(raw, true); this.saveGame(false); status.textContent = 'Save imported and restored.'; }
 
   playSound(key: string, volume = 0.7, pan = 0): void { if (this.cache.audio.exists(key)) this.sound.play(key, { volume, pan }); }
-  toggleMute(): void { this.muted = !this.muted; this.sound.mute = this.muted; storeMute(this.muted); this.updateSoundButton(); }
-  private updateSoundButton(): void {
-    const button = document.querySelector('#sound')!;
-    button.textContent = this.muted ? 'Sound: muted' : 'Sound: on';
-    button.setAttribute('aria-pressed', String(this.muted));
-  }
+  toggleMute(): void { this.muted = !this.muted; this.sound.mute = this.muted; storeMute(this.muted); }
 }
 
 async function boot(): Promise<void> {
@@ -1403,18 +1390,34 @@ async function boot(): Promise<void> {
   });
 }
 
-document.querySelector('#fullscreen')!.addEventListener('click', () => { void container.requestFullscreen().catch(() => { status.textContent = 'Full screen is unavailable in this browser view.'; }); });
-document.querySelector('#sound')!.addEventListener('click', () => gameScene?.toggleMute());
-document.querySelector('#export-save')!.addEventListener('click', () => {
+const fullscreenButton = document.querySelector<HTMLButtonElement>('#fullscreen')!;
+fullscreenButton.addEventListener('click', () => {
+  const change = document.fullscreenElement === container ? document.exitFullscreen() : container.requestFullscreen();
+  void change.catch(() => { status.textContent = 'Full screen is unavailable in this browser view.'; });
+});
+document.addEventListener('fullscreenchange', () => {
+  const active = document.fullscreenElement === container;
+  fullscreenButton.setAttribute('aria-pressed', String(active));
+  fullscreenButton.setAttribute('aria-label', active ? 'Exit fullscreen' : 'Enter fullscreen');
+});
+function exportAdventure(): void {
   if (gameScene?.sim && !['title', 'gene', 'mods'].includes(gameScene.screen) && !canSaveAdventure(gameScene.sim.state)) {
     status.textContent = 'Hardcore Mode: you can only save or export the game in town.'; return;
   }
   const current = gameScene?.makeSave(), saved = readSave();
   const data = current ?? (saved.kind === 'saved' ? saved.data : undefined);
   if (data) { exportSave(data); status.textContent = 'Save exported.'; } else status.textContent = 'Start a game before exporting a save.';
-});
+}
 const fileInput = document.querySelector<HTMLInputElement>('#save-file')!;
-document.querySelector('#import-save')!.addEventListener('click', () => fileInput.click());
+// Служебные функции сохранения доступны без дополнительных кнопок поверх игры.
+window.addEventListener('keydown', event => {
+  if (!(event.ctrlKey || event.metaKey) || !gameScene || event.altKey) return;
+  if (event.code === 'KeyS') {
+    event.preventDefault();
+    if (event.shiftKey) exportAdventure(); else gameScene.saveGame();
+  } else if (event.code === 'KeyO' && event.shiftKey) { event.preventDefault(); fileInput.click(); }
+  else if (event.code === 'KeyM' && event.shiftKey) { event.preventDefault(); gameScene.toggleMute(); }
+});
 fileInput.addEventListener('change', async () => {
   const file = fileInput.files?.[0]; if (!file) return;
   try { if (file.size > 1_000_000) throw new Error('The save file is too large.'); gameScene.importSave(JSON.parse(await file.text())); }

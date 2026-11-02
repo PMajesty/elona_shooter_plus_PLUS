@@ -20,6 +20,9 @@ Use automated deterministic/seeded scenarios, affected original comparisons,
 save/restore checks and representative muted browser checks so the user need
 not manually playtest builds. Keep testing proportionate; reuse unchanged
 evidence. Preserve the user's save and the original SWF/ActionScript baselines.
+Never activate native fullscreen during automated testing: it takes over the
+user's desktop. Keep the requested fullscreen icon for manual use, and do not
+add browser toolbars below the hotbar or floating explanatory labels.
 Keep current-state documentation concise and push useful integrated checkpoints.
 
 Completion requires original feature/content coverage with a finite documented

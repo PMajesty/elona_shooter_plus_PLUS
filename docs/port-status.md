@@ -70,16 +70,18 @@ Original assets, English UI and credits remain. Sound starts muted unless the us
 enabled it. Browser testing reuses a tab when available and keeps it muted. One browser save,
 Continue and JSON backups work; imported/continued battles open paused.
 The browser page now contains only the centered game on black. The surrounding
-heading, instructions, feature list and footer are removed. Full screen, sound
-and JSON backups appear inside pause/Help; Esc toggles them in town/results/title.
-Action feedback appears briefly within the game. Desktop keeps the native620×380
-size; smaller windows shrink proportionally.
+heading, instructions, feature list and footer are removed. The requested fullscreen
+icon stays in the top-right corner for manual use. The added bottom toolbar and
+floating explanation overlays were removed after user feedback. Original item/skill
+tooltips remain. Ctrl+S saves; Ctrl+Shift+S/O exports/imports JSON; Ctrl+Shift+M
+toggles mute. Desktop keeps native620×380 size; smaller windows shrink proportionally.
+Never activate native fullscreen in testing: it takes over the user's desktop.
 
 ## Validation and limits
 
 - **489 tests passed** at the latest gameplay checkpoint; the page cleanup leaves
   simulation/saves unchanged. Current typechecking and production build pass. Latest
-  bundle: assets/index-BAy6GJ7Y.js. Title checks cover every unlock day, sequential
+  bundle: assets/index-BNk-Q6Gy.js. Title checks cover every unlock day, sequential
   late claims, AP refusal, settlement credits, rank limits and save/Carry Over
   restoration. Carry Over checks cover full-town restoration,
   minimum/earned money, AP, medal restrictions, repeated JSON replay and refusal
@@ -112,10 +114,10 @@ size; smaller windows shrink proportionally.
   verified the original dialog,3000 GP salary and character title. Export changed
   only rank/AP; Continue retained the entire envelope. Evidence:
   .build/browser-qa/titles-verification.json and title-king.png. No console errors.
-- The game-only page was checked muted in the existing tab: no exterior content
-  or scroll overflow, centered native-size game, working pause/Help backup controls,
-  and exact full-envelope preservation of the user's save. No console errors.
-  Screenshot: .build/browser-qa/game-only-page.png.
+- The revised game-only page was checked muted in the existing tab: bottom toolbar
+  absent, explanation overlay removed, fullscreen icon visible without activation,
+  working keyboard backup and exact full-envelope preservation of the user's save.
+  No console errors. Screenshot: .build/browser-qa/no-extra-toolbar.png.
 - Earlier browser evidence covers reload/combat/results/town, activities, hires,
   Museum, class unlocks, Ragnarok and both difficulty modes. Hardcore battle export
   is refused and Continue has no battle save; its town checkpoint loads and Rest
