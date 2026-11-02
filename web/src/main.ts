@@ -5,6 +5,7 @@ import Phaser from 'phaser';
 import { HERO_CLASSES, heroClassUnlocked, type HeroClass } from './hero-classes.ts';
 import { createProfile, mergeProfile, mergeProfiles, validProfile, type GlobalProfile } from './profile.ts';
 import { MEDALS } from './medals.ts';
+import { readFlashCollection } from './flash-profile.ts';
 import { TITLES, nextTitle } from './titles.ts';
 import { Simulation, type SimulationState, type EnemyState, type SimulationEvent } from './simulation.ts';
 import { WORLD } from './content.ts';
@@ -105,6 +106,7 @@ class ElonaScene extends Phaser.Scene {
   private fireAtWillSprites?: { fire: Phaser.GameObjects.Image; rage: Phaser.GameObjects.Image };
   private volumeIcon?: Phaser.GameObjects.Image;
   private pauseDialog?: Phaser.GameObjects.Container;
+  private collectionDialog?: Phaser.GameObjects.Container;
   private celebration?: ReturnType<typeof createFireworks>;
   private fireworkMedalChecked = false;
   private flash?: Phaser.GameObjects.Rectangle;
@@ -171,6 +173,11 @@ class ElonaScene extends Phaser.Scene {
     // Прямое событие DOM выполняет переключение один раз и не зависит от частоты рендеринга.
     const combatKey = (event: KeyboardEvent) => {
       if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (this.collectionDialog) {
+        if (event.code === 'Escape') this.closeCollectionImport();
+        if (event.code === 'Space') event.preventDefault();
+        return;
+      }
       if (event.code === 'Escape') {
         if (this.pauseDialog) { this.pauseDialog.destroy(true); this.pauseDialog = undefined; }
         else if (this.helpLayer) this.closeHelp();
@@ -203,6 +210,7 @@ class ElonaScene extends Phaser.Scene {
     this.root.removeAll(true);
     if (!['loot', 'boss-loot', 'skill', 'result'].includes(screen)) { this.celebration?.destroy(); this.celebration = undefined; this.fireworkMedalChecked = false; }
     this.volumeIcon = undefined; this.pauseDialog = undefined; this.flash = undefined; this.flashFrames = 0; this.flashClock = 0;
+    this.collectionDialog = undefined; delete container.dataset.flashCollection;
     if (!this.celebration) delete container.dataset.fireworkFrames;
     this.helpLayer = undefined; delete container.dataset.helpPage; delete container.dataset.helpScroll;
     this.fireAtWillSprites = undefined; this.castleSisterSprite = undefined; delete container.dataset.fireAtWill; delete container.dataset.castleSister;
@@ -1547,6 +1555,46 @@ class ElonaScene extends Phaser.Scene {
 
   importSave(raw: unknown): void { this.loadGame(raw, true); this.saveGame(false); status.textContent = 'Save imported and restored.'; }
 
+  prepareImport(): boolean {
+    if (this.collectionDialog || this.pauseDialog || this.helpLayer) return false;
+    if (['battle', 'result'].includes(this.screen) && !this.paused) this.togglePause();
+    return true;
+  }
+
+  private closeCollectionImport(): void {
+    this.collectionDialog?.destroy(true); this.collectionDialog = undefined;
+    delete container.dataset.flashCollection; delete container.dataset.importError;
+  }
+
+  importFlashCollection(bytes: Uint8Array): void {
+    const imported = readFlashCollection(bytes);
+    this.closeCollectionImport();
+    const layout = (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog;
+    this.collectionDialog = createModConfirmation(this, manifest, layout, confirm => {
+      if (!confirm) { this.closeCollectionImport(); return; }
+      const merged = mergeProfiles(this.profile, imported.profile);
+      if (!storeProfile(merged)) {
+        (this.collectionDialog!.getByName('flash-collection-question') as Phaser.GameObjects.Text).setText('The collection could not be stored. Please try again.');
+        return;
+      }
+      this.profile = merged; delete this.profileRead.warning;
+      this.closeCollectionImport(); this.showTitle();
+      status.textContent = `Imported ${imported.profile.medals.length} Flash medals and survival records for future games.${imported.ignoredMedals.length ? ` ${imported.ignoredMedals.length} unsupported medal flags were ignored.` : ''}`;
+    }, 'flash-collection', `Import ${imported.profile.medals.length} medals and records?\nAdventures will be kept.`);
+    this.root.add(this.collectionDialog);
+    container.dataset.flashCollection = JSON.stringify(imported);
+  }
+
+  importFailure(error: unknown): void {
+    this.closeCollectionImport();
+    const message = error instanceof SyntaxError ? 'This is not a valid browser save file.'
+      : error instanceof Error ? error.message : 'The save file could not be imported.';
+    status.textContent = message; container.dataset.importError = message;
+    const layout = (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog;
+    this.collectionDialog = createModConfirmation(this, manifest, layout, () => this.closeCollectionImport(), 'import-error', message, true);
+    this.root.add(this.collectionDialog);
+  }
+
   playSound(key: string, volume = 0.7, pan = 0): void { if (this.cache.audio.exists(key)) this.sound.play(key, { volume, pan }); }
   toggleMute(): void { this.muted = !this.muted; this.sound.mute = this.muted; this.volumeIcon?.setFrame(this.muted ? '2' : '1'); container.dataset.muted = String(this.muted); storeMute(this.muted); }
 }
@@ -1591,13 +1639,18 @@ window.addEventListener('keydown', event => {
   if (event.code === 'KeyS') {
     event.preventDefault();
     if (event.shiftKey) exportAdventure(); else gameScene.saveGame();
-  } else if (event.code === 'KeyO' && event.shiftKey) { event.preventDefault(); fileInput.click(); }
+  } else if (event.code === 'KeyO' && event.shiftKey) { event.preventDefault(); if (gameScene.prepareImport()) fileInput.click(); }
   else if (event.code === 'KeyM' && event.shiftKey) { event.preventDefault(); gameScene.toggleMute(); }
 });
 fileInput.addEventListener('change', async () => {
   const file = fileInput.files?.[0]; if (!file) return;
-  try { if (file.size > 1_000_000) throw new Error('The save file is too large.'); gameScene.importSave(JSON.parse(await file.text())); }
-  catch (error) { status.textContent = error instanceof Error ? error.message : 'The save file could not be imported.'; }
+  try {
+    if (file.size > 1_000_000) throw new Error('The save file is too large.');
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    if (bytes[0] === 0 && bytes[1] === 0xbf || file.name.toLowerCase().endsWith('.sol')) gameScene.importFlashCollection(bytes);
+    else gameScene.importSave(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)));
+  }
+  catch (error) { gameScene.importFailure(error); }
   finally { fileInput.value = ''; }
 });
 window.addEventListener('pagehide', () => { if (gameScene?.screen === 'battle') gameScene.saveGame(false); });

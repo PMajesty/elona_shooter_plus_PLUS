@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v38, original castle Sister combat interactions**.
+Updated 2026-11-02. Current local build: **v38, Flash medal-collection import**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -137,10 +137,20 @@ random stream;651 unpaused presentation frames award Ha-na-bi. Source startFire
 uses48 bursts or60 with medal65; Ha-na-bi's advertised +25 has no check there.
 Source: pauseMenu/endPauseMenu, optionwindow_222, enemy.damage, startFire/fireWork1.
 
+Ctrl+Shift+O also accepts the original elonas_idx.sol SharedObject. A native-art
+preview confirms merging known medals and maximum Normal/Hardcore/Casual records;
+it preserves adventures, slot selection, mute and options. New Games receive
+imported class unlocks and bonuses; existing adventures retain their saved medal
+set. Unknown flags (including the undefined Beta90) are reported/ignored. Adventure
+files elonas0–7.sol remain unsupported and are refused visibly. No save format
+change was needed. The bounded reader supports the AMF3 primitive/object/array
+types used by the index, including sparse arrays and string/object/trait references.
+Other encodings/types fail before storage changes. Source: saveIndex10961/loadIndex7052.
+
 ## Validation and limits
 
-- **526 tests passed**, with typechecking and production build passing. Latest
-  bundle: assets/index-BzH28bd5.js. Slot checks cover unchanged legacy storage,
+- **532 tests passed**, with typechecking and production build passing. Latest
+  bundle: assets/index-Bg6pomzN.js. Slot checks cover unchanged legacy storage,
   eight independent adventures, selection persistence, shared medals/mute,
   deletion/tombstones, Hardcore isolation, corrupt data and failed writes.
   Existing deterministic checks cover classes, campaign, equipment services,
@@ -163,6 +173,11 @@ Source: pauseMenu/endPauseMenu, optionwindow_222, enemy.damage, startFire/fireWo
   Six Sister checks cover source contours, hero/companion hitscan, projectile
   exclusion, damage/cheer interruption, protection/Defender, death RNG, JSON replay,
   old/corrupt saves and revival at Rest.
+  Six Flash import checks cover two independent Ruffle SOL samples, source-schema
+  collection conversion, references, Unicode, dense/sparse flags, signed/double
+  values, non-destructive/idempotent merging, bonuses/JSON replay, and invalid or
+  oversized files/records/references. The Elona index test is controlled data;
+  no actual player's Flash collection has yet been supplied/verified.
 - The controlled full40-day campaign completed in96494 simulation frames, with
   all19 enemy kinds, rewards, towns and save boundaries. Its changed frame count
   follows the repeating MOD-sale correction and resulting generation RNG. Strong
@@ -249,6 +264,16 @@ Source: pauseMenu/endPauseMenu, optionwindow_222, enemy.damage, startFire/fireWo
   browser inspection caught it and the corrected export was rebuilt/verified.
   Evidence: .build/browser-qa/castle-sister-verification.json and castle-sister-dead.png.
 
+- The muted Flash import check used a controlled source-schema index. Cancel and
+  an unsupported adventure retained the user's complete envelope; Space left the
+  preview paused. Confirm changed only the shared profile, and an actual New Game
+  selected unlocked Sniper with500 GP/20 Fame. Continue retained its whole envelope.
+  The disposable slot8 was deleted and the user's complete adventure/collection
+  restored exactly. No console errors/fullscreen. A browser-tool deadline occurred
+  after the import action; inspection confirmed success without repeating it.
+  Evidence: .build/browser-qa/flash-collection-verification.json, flash-collection-preview.png
+  and flash-import-unlocks.png.
+
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. Historical details are
 in Git and [historical verification](port-verification.json). The Codex app crash
@@ -263,7 +288,7 @@ that the app's crash cause was fixed.
    remains partial. Preserve source bonus discrepancies: Kongregate advertises a
    wage discount, but wage3610 checks Ragnarok92; medal91 does not add another
    discount. Ha-na-bi's advertised firework bonus likewise differs from startFire.
-3. Flash save conversion. The browser dropdown displays all eight choices at once,
+3. Flash adventure conversion; medal/index import is implemented. The browser dropdown displays all eight choices at once,
    rather than the original ComboBox's five-row scrolling list.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
    camera shake, decorative boss reticle, some ranged spell effects/frame sounds,

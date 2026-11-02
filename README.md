@@ -3,7 +3,7 @@
 A TypeScript/Phaser browser remake of Elona Shooter Plus 1.3.0.4.
 The current local build supports **all eight original hero classes** and
 **repeating campaign cycles**, including Casual and Hardcore modes. This is an
-incomplete remake; Flash-save conversion, remaining interactions and presentation details are still being ported.
+incomplete remake; Flash adventure conversion, remaining interactions and presentation details are still being ported.
 
 Open [the local game](http://127.0.0.1:5175/elona/).
 Original artwork, English text, audio and credits are retained. Sound starts muted
@@ -53,7 +53,8 @@ unless you previously enabled it; the mute preference persists between visits.
 - A persistent browser medal collection with class unlocks and original New Game
   starting bonuses. Eight browser save slots with the original title dropdown,
   trash icon and deletion confirmation, plus Continue and JSON import/export.
-  Version38 accepts prior browser saves; original Flash saves require a future converter.
+  Version38 accepts prior browser saves; the original Flash medal/index file can
+  be imported. Flash adventure conversion remains unfinished.
 - Casual lowers encounter power/taxes and grants35% more kill XP. Hardcore uses
   normal combat, deletes the resumable save when a battle starts and permits
   saving/export only in town. Each mode has a separate best-day record.
@@ -99,8 +100,21 @@ the shared collection; exporting one does not export all eight adventures.
 The page contains only the centered game and its requested top-right fullscreen
 icon. There is no added bottom toolbar or floating explanatory message overlay.
 Browser shortcuts: Ctrl+S saves, Ctrl+Shift+S exports a JSON backup,
-Ctrl+Shift+O imports one and Ctrl+Shift+M toggles mute. Testing stays muted and
+Ctrl+Shift+O imports JSON or the Flash medal collection; Ctrl+Shift+M toggles mute. Testing stays muted and
 never activates native fullscreen, which would take over the user's desktop.
+
+To keep original Flash unlocks, select **elonas_idx.sol** with Ctrl+Shift+O and
+confirm the in-game preview. Known medals merge with the browser collection;
+Normal/Hardcore/Casual survival records retain the higher value. Existing adventures,
+slot selection, sound and game options are preserved. Imported bonuses apply to
+future New Games; existing adventures keep their saved medal set. Unsupported
+flags such as the undefined Beta medal are ignored without granting bonuses.
+Files named elonas0.sol through elonas7.sol contain adventures, whose conversion
+is still pending. Invalid/unsupported imports now show an in-game message.
+Opening the file picker pauses active combat/results; Space cannot dismiss the
+import preview or resume the game underneath it. Escape cancels the preview.
+The reader follows [Adobe's AMF3 specification](https://veovera.org/docs/legacy/amf3-file-format-spec.pdf)
+and the [Ruffle SharedObject envelope](https://github.com/ruffle-rs/rust-flash-lso/blob/master/flash-lso/src/read.rs).
 
 ```powershell
 npm.cmd test
@@ -131,7 +145,7 @@ projectile replay, half rewards, wages, departure and old-save migration.
 Museum checks cover payouts, medal thresholds, daily resets, action AP bonuses,
 correct hero-class awards and migration. Unlock checks cover the global collection,
 starting bonuses and actual class combat effects. Medal notification presentation
-and Flash-save conversion remain incomplete. Slot tests cover eight independent
+and Flash adventure conversion remain incomplete. Slot tests cover eight independent
 adventures, selection persistence, deletion, Hardcore isolation and storage failures.
 Additional controlled combat crosses Day40/80 through ordinary rewards, towns,
 Rest and JSON restores. Source-formula checks cover later cycles and Day1000 save

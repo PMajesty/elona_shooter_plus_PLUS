@@ -9,7 +9,7 @@ export interface ModConfirmationLayout { image: string; children: Record<string,
 
 /** Общий исходный dialogMod живёт на stage, а не в смещённом окне добычи. */
 export function createModConfirmation(scene: Phaser.Scene, manifest: LootViewManifest, layout: ModConfirmationLayout,
-  resolve: (confirm: boolean) => void, name: string, question = 'Do you really want to mount the mod on this gun?'): Phaser.GameObjects.Container {
+  resolve: (confirm: boolean) => void, name: string, question = 'Do you really want to mount the mod on this gun?', acknowledge = false): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName(`${name}-dialog`);
   const image = (key: string, placement?: Placement) => {
     const asset = manifest.images[key];
@@ -32,9 +32,11 @@ export function createModConfirmation(scene: Phaser.Scene, manifest: LootViewMan
   dismiss.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
     event.stopPropagation(); resolve(false);
   });
-  for (const [part, confirm] of [['no', false], ['yes', true]] as const) {
-    const key = confirm ? 'button_dialogYes' : 'button_dialogNo';
-    const button = image(key, layout.children[part]).setName(`${name}-${part}`)
+  const choices = acknowledge ? [['yes', true]] as const : [['no', false], ['yes', true]] as const;
+  for (const [part, confirm] of choices) {
+    const key = acknowledge ? 'button_eventOk' : confirm ? 'button_dialogYes' : 'button_dialogNo';
+    const placement = acknowledge ? { ...layout.children.yes, x: (layout.children.yes.x + layout.children.no.x) / 2 } : layout.children[part];
+    const button = image(key, placement).setName(`${name}-${part}`)
       .setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 });
     button.on('pointerover', () => { if (manifest.images[`${key}_over`]) button.setTexture(`${key}_over`); });
     button.on('pointerout', () => button.setTexture(key));
