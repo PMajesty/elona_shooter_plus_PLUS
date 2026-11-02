@@ -1,6 +1,7 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v38, Flash town adventure import**.
+Updated 2026-11-02. Current local build: **v38, Flash town adventure import**;
+original-game save compatibility regression added without changing the bundle.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -186,11 +187,14 @@ Future RNG starts a deterministic browser stream because Flash did not serialize
 Math.random. Unused past-combat bookkeeping is reconstructed; the saved town and
 next mission are retained. The common save validator refuses unsupported values.
 Source: saveGame6311, loadGame4986, generateMission12144 and source player/inventory
-arrays. Controlled schema files pass; real-player SOL compatibility is unverified.
+arrays. Controlled schema files and a fresh original-game/Ruffle save pass;
+historical player SOL compatibility remains unverified.
 
 ## Validation and limits
 
-- **556 tests pass**; typechecking and production build pass. Bundle:
+- Last full suite: **556 tests pass**; typechecking and production build pass.
+  Added two native-save regressions; all13 affected import checks pass. The unchanged
+  production code/build and unrelated checks were reused. Bundle:
   assets/index-fS9OoWkY.js. Existing deterministic/source comparisons cover hero
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
@@ -201,8 +205,8 @@ arrays. Controlled schema files pass; real-player SOL compatibility is unverifie
 - Muted browser evidence covers New Game, combat/reload/F/results/town, original
   controls/help/options, equipment/services/hires, all eight slots, JSON saves,
   Carry Over, medal unlocks/Museum, Sister reactions and Flash collection import.
-  The source-schema Elona SOL sample is controlled; an actual player's original
-  Flash collection/adventure has not been verified. Five new adventure checks cover
+  Historical player Flash collection/adventure files remain unverified.
+  Five controlled adventure checks cover
   all eight heroes, modes, exact owned/town contents, changed activities/options,
   inactive recruit cells, later-cycle Hardcore/Rest, deterministic replay and
   invalid/deleted/unsupported files. The existing AMF encoder fixture is shared.
@@ -221,6 +225,15 @@ arrays. Controlled schema files pass; real-player SOL compatibility is unverifie
   save, Continue stayed equal, and Rest started Day4 with an exact town Carry Over
   checkpoint. Evidence: .build/browser-qa/flash-adventure-verification.json,
   flash-adventure-preview.png and flash-adventure-town.png.
+- Independent original-save check: ordinary Casual Hunter New Game/battle/results
+  under muted Ruffle0.7.1 produced a native Day1/level2 town SOL:806 GP,5/40 HP,
+  29 kills. Original search produced Rejoice!, AP4→5 and cursor446→455. Importing
+  that SOL reproduced the complete English event and saved changes; browser import,
+  search and actual Return to Title/Continue matched full expected envelopes.
+  The before/after SOLs are committed [regression fixtures](../web/tests/fixtures/flash-native/README.md),
+  independent of the test encoder. Evidence: .build/browser-qa/native-flash-verification.json,
+  ruffle-original-search.png and native-import-search.png. This covers one source
+  save under Ruffle, not historical player files, native Adobe Flash or the index.
 - Disposable slot8 was removed after each check. The user's whole Sheriff
   adventure/collection was restored exactly: Day1, tick674, RNG1744019180, HP40,
   gold209, paused/muted. No test medals/records, console errors or fullscreen.
@@ -242,8 +255,9 @@ that the app's crash cause was fixed.
    source bonus discrepancies: Kongregate advertises a
    wage discount, but wage3610 checks Ragnarok92; medal91 does not add another
    discount. Ha-na-bi's advertised firework bonus likewise differs from startFire.
-3. Real-player Flash save compatibility remains unverified; the collection and
-   town-adventure converters use controlled source-schema evidence. The browser dropdown displays all eight choices at once,
+3. Historical player Flash save compatibility remains unverified. The collection
+   converter has controlled source-schema evidence; adventure import additionally
+   has an independent original-game/Ruffle save and search comparison. The browser dropdown displays all eight choices at once,
    rather than the original ComboBox's five-row scrolling list.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
    camera shake, decorative boss reticle, some ranged spell effects/frame sounds,

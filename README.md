@@ -141,8 +141,12 @@ which is not resumable from a Flash town save, is reconstructed for browser save
 validation. Import resumes in town, and the next Rest starts a normal battle.
 Deleted, malformed or unsupported checkpoints are refused visibly. Controlled
 source-schema files cover all eight classes, modes, town changes, customized gear,
-later-cycle towns and save replay; no actual player's Flash adventure has yet been
-verified. Preserve a backup and treat original-file compatibility as provisional.
+later-cycle towns and save replay. A town save written by the preserved game under
+Ruffle also imports correctly; its next search reproduces the original event,
+AP and search cursor. The [native fixtures](web/tests/fixtures/flash-native/README.md)
+record that independent comparison. Historical player files and the native Adobe
+Flash runtime remain unverified. Preserve a backup and treat original-file
+compatibility as provisional.
 Opening the file picker pauses active combat/results; Space cannot dismiss the
 import preview or resume the game underneath it. Escape cancels the preview.
 The reader follows [Adobe's AMF3 specification](https://veovera.org/docs/legacy/amf3-file-format-spec.pdf)
@@ -176,8 +180,8 @@ Temporary-hire checks cover confirmation, a full permanent party, actual AI fire
 projectile replay, half rewards, wages, departure and old-save migration.
 Museum checks cover payouts, medal thresholds, daily resets, action AP bonuses,
 correct hero-class awards and migration. Unlock checks cover the global collection,
-starting bonuses and actual class combat effects. Medal notification presentation
-and Flash adventure conversion remain incomplete. Slot tests cover eight independent
+starting bonuses and actual class combat effects. Medal notification filters remain
+approximate; historical player Flash files remain unverified. Slot tests cover eight independent
 adventures, selection persistence, deletion, Hardcore isolation and storage failures.
 Additional controlled combat crosses Day40/80 through ordinary rewards, towns,
 Rest and JSON restores. Source-formula checks cover later cycles and Day1000 save

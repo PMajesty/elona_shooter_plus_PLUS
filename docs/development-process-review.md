@@ -101,9 +101,10 @@ work is solo. Recurring work was subsequently reauthorized in the current goal.
 ## Current development order
 
 The former class/campaign/town priorities are implemented; use current status for
-their evidence and limits. Verify original Flash save compatibility beyond controlled
-schema files, then address remaining original interactions and
-browser/hosting/stability/performance gaps.
+their evidence and limits. Original-game/Ruffle adventure import now has independent
+save/search evidence beyond controlled schema files. Address remaining original
+interactions and browser/hosting/stability/performance gaps; historical player
+files remain an explicit compatibility limit.
 Defer costly cosmetic/audio matching and the late-game hitbox complaint as directed.
 
 Completion remains the original game's feature coverage with documented intentional
@@ -159,3 +160,17 @@ slice. Reused the existing AMF reader/encoder and save validator. The browser ch
 exposed clipped preview text, warranting a focused text/build recheck; metadata
 alone did not establish that the rendered prompt was usable. Actual player SOL
 files remain missing evidence, so controlled round trips are not called full parity.
+
+Independent save check: captured two actual original-game SOLs through Ruffle's
+Save Manager, then reused the existing converter/tests and ordinary browser import.
+No production changes or extra harness were needed. Two native regressions and13
+affected checks pass; reuse the unchanged full-suite/build results. This establishes
+one source-save path and an independent fixed-search comparison, not general parity.
+
+A rushed canvas action batch reached a town Resting notice instead of the intended
+title. Equal exports alone had not proved navigation. With rendered pause/title/town
+observations, Return to Title/Continue succeeded and the full save remained equal.
+Confirm actual UI phases before dependent canvas actions; town Return to Title is
+direct and must not be followed by a guessed confirmation click. No product defect
+was established. The transient disposable notice was cleared and the user's whole
+adventure/collection restored exactly.
