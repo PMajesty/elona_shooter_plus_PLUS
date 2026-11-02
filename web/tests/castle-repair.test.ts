@@ -1,3 +1,4 @@
+import { SAVE_VERSION } from '../src/save-version.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation } from '../src/simulation.ts';
@@ -143,7 +144,7 @@ test('v16 migration preserves upgraded walls and party state while new repair fi
   assert.equal(simulation.buyCastleUpgrade('house'), 'purchased'); assert.equal(simulation.buyCastleUpgrade('wall'), 'purchased');
   assert.equal(simulation.requestRecruit(), 'previewed'); assert.equal(simulation.resolvePartyAction(true), 'hired');
   const legacy = asLegacyV16Save(simulation.toSave()), before = structuredClone(legacy);
-  const expected = { ...legacy, version: 25, trainerLevel: 0, looterLevel: 0, pendingLootAction: null, wallFixCount: 0, repairmanLevel: 0, sandbagLevel: 0 };
+  const expected = { ...legacy, version: SAVE_VERSION, trainerLevel: 0, looterLevel: 0, pendingLootAction: null, wallFixCount: 0, repairmanLevel: 0, sandbagLevel: 0 };
   assert.deepEqual(Simulation.fromSave(legacy).toSave(), expected); assert.deepEqual(legacy, before);
   assert.deepEqual(Simulation.fromSave({ ...legacy, wallFixCount: 40, repairmanLevel: 999 }).toSave(), expected);
   const current = saved(simulation);

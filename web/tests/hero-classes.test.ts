@@ -1,3 +1,4 @@
+import { SAVE_VERSION } from '../src/save-version.ts';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { Simulation } from '../src/simulation.ts';
@@ -103,7 +104,7 @@ test('v24 Sheriff saves migrate while impossible class identities and skill sele
   const legacy = new Simulation(13).toSave() as unknown as Record<string, any>;
   legacy.version = 24; delete legacy.player.grenadeCount;
   const migrated = Simulation.fromSave(legacy).toSave();
-  assert.equal(migrated.version, 25); assert.equal(migrated.player.grenadeCount, 325);
+  assert.equal(migrated.version, SAVE_VERSION); assert.equal(migrated.player.grenadeCount, 325);
   assert.equal(migrated.rng, legacy.rng); assert.deepEqual(migrated.inventory, legacy.inventory);
   const invalid = new Simulation(13, { heroClass: 'rogue' }).toSave();
   invalid.player.traits[6] = 1;

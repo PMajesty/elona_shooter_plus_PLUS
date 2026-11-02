@@ -1,3 +1,4 @@
+import { MAX_CAMPAIGN_DAY, validCampaignDay } from './missions.ts';
 import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
 import Phaser from 'phaser';
 import { HERO_CLASSES, isHeroClass, type HeroClass } from './hero-classes.ts';
@@ -39,6 +40,7 @@ USED_SOUNDS.add('soundReloaded1');
 for (const key of ['soundBgTown', 'soundRepair1', 'soundBeep', 'soundScroll1', 'soundPay1', 'soundMod']) USED_SOUNDS.add(key);
 for (let index = 1; index <= 15; index++) USED_SOUNDS.add(`soundGun${index}`);
 for (const key of ['soundReloading1', 'soundReloading3', 'soundReloaded3', 'soundPray1', 'soundDefend', 'soundNight', 'soundAward', 'soundCard1']) USED_SOUNDS.add(key);
+for (const key of ['soundDead4', 'soundDead8', 'soundDead9']) USED_SOUNDS.add(key);
 for (const key of ['soundBow1', 'soundBow2', 'soundDead1', 'soundDead2', 'soundDead6', 'soundFireball', 'soundRampageEnemy', 'soundPuls', 'soundLow']) USED_SOUNDS.add(key);
 let manifest: Manifest;
 let gameScene: ElonaScene;
@@ -136,7 +138,7 @@ class ElonaScene extends Phaser.Scene {
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Rogue, Hunter, Sheriff and Militia Days 1–9, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Ragnarok, Castle page 2, remaining town actions, Day 10 onward and unlockable hero classes are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Rogue, Hunter, Sheriff and Militia Days 1–40, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Ragnarok, Castle page 2, remaining town actions, Day 41 onward and unlockable hero classes are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
     document.querySelector<HTMLButtonElement>('#import-save')!.disabled = false;
   }
@@ -251,7 +253,7 @@ class ElonaScene extends Phaser.Scene {
     const savedDay = saved.kind === 'saved' ? (saved.data as { simulation?: { day?: unknown } } | null)?.simulation?.day : undefined;
     const savedClass = saved.kind === 'saved' ? (saved.data as { simulation?: { player?: { classId?: unknown } } } | null)?.simulation?.player?.classId : undefined;
     const className = isHeroClass(savedClass) ? HERO_CLASSES[savedClass].name : 'Hero';
-    this.text(469, 32, saved.kind === 'saved' ? (typeof savedDay === 'number' && [1, 2, 3, 4, 5, 6, 7, 8, 9].includes(savedDay) ? `${className} · Day ${savedDay}` : `Saved ${className}`) : 'Empty Save', 12, '#151515', 'Arial').setBackgroundColor('#ede9de').setFixedSize(137, 20);
+    this.text(469, 32, saved.kind === 'saved' ? (validCampaignDay(savedDay) ? `${className} · Day ${savedDay}` : `Saved ${className}`) : 'Empty Save', 12, '#151515', 'Arial').setBackgroundColor('#ede9de').setFixedSize(137, 20);
     this.text(334, 11, 'Most Days Survived: 0 / 0 (HC) / 0 (Casual)', 12, '#ffffff').setShadow(1, 1, '#000000', 2);
     if (saved.kind === 'error') status.textContent = saved.message;
   }
@@ -263,7 +265,7 @@ class ElonaScene extends Phaser.Scene {
     this.root.add(this.add.rectangle(0, 0, 620, 380, 0x000000, 0.45).setOrigin(0));
     this.root.add(this.add.rectangle(90, 50, 440, 280, 0xe0d1ae).setOrigin(0).setStrokeStyle(2, 0x9e8c61));
     this.text(123, 73, 'How to Play', 26);
-    this.text(123, 121, 'Mouse: aim and fire; bows hold/release.\n1–5 select or use an inventory slot.\nSpace reloads; click cancels manual reload.\nEsc pauses; Space also resumes.\n\nDefend the castle until the day ends.\nMission → Rest starts the next day (up to\nDay 9) without repairing the castle.', 16).setLineSpacing(3);
+    this.text(123, 121, 'Mouse: aim and fire; bows hold/release.\n1–5 select or use an inventory slot.\nSpace reloads; click cancels manual reload.\nEsc pauses; Space also resumes.\n\nDefend the castle until the day ends.\nMission → Rest starts the next day (up to\nDay 40) without repairing the castle.', 16).setLineSpacing(3);
     this.labelButton(245, 288, 'Return to Title', () => this.showTitle(), 145);
   }
 
@@ -405,7 +407,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private enemyClip(enemy: Readonly<EnemyState>): string {
-    return enemy.kind === 'boss' ? 'charaPic' : `enemy_${enemy.kind}`;
+    return enemy.kind === 'boss' ? 'charaPic' : enemy.kind === 'dropped-rat' ? 'enemy_rat' : `enemy_${enemy.kind}`;
   }
 
   private enemyFrame(enemy: Readonly<EnemyState>, key: string): string {
@@ -645,6 +647,11 @@ class ElonaScene extends Phaser.Scene {
       const actor = this.syncBossActor(enemy);
       return actor.hitTestWorld(x, y, (key, frame, localX, localY) => this.texturePixelHit(key, frame, localX, localY));
     }
+    const geometry = this.cache.json.get('collision-geometry') as CollisionGeometry;
+    if (!geometry.enemies[enemy.kind]) {
+      const key = this.enemyClip(enemy), asset = manifest.clips[key];
+      return this.texturePixelHit(key, this.enemyFrame(enemy, key), x - enemy.x + asset.originX, y - enemy.y + asset.originY);
+    }
     return ordinaryEnemyHit({ kind: enemy.kind, x: enemy.x, y: enemy.y, frame: enemy.frame, shadowHit: enemy.shadowHit }, x, y, this.cache.json.get('collision-geometry') as CollisionGeometry);
   }
 
@@ -666,7 +673,7 @@ class ElonaScene extends Phaser.Scene {
     if (event.type === 'boss-shot' || event.type === 'boss-special') {
       // getWeaponInfo использует gun6/gun2, а soundPos делит поле на 20 звуковых позиций.
       const pan = Phaser.Math.Clamp(Math.trunc(Math.trunc(event.x ?? 0) / 25), 0, 19) * 0.08 - 0.8;
-      this.playSound(event.type === 'boss-special' ? 'soundGun11' : event.weaponId === 1 ? 'soundGun6' : 'soundGun2', 0.9, pan);
+      this.playSound(event.type === 'boss-special' ? (event.weaponId === 36 ? 'soundGun13' : 'soundGun11') : event.weaponId === 1 ? 'soundGun6' : 'soundGun2', 0.9, pan);
       return;
     }
     const actorSlot = event.actorSlot ?? 0;
@@ -691,7 +698,7 @@ class ElonaScene extends Phaser.Scene {
     if (event.message) status.textContent = event.message;
     if (event.type === 'kill') {
       const enemy = this.sim?.state.enemies.find(candidate => candidate.uid === event.enemyUid);
-      if (enemy) sound.kill = { sheep: 'soundDead3', rat: 'soundDead7', chicken: 'soundDeadChicken', crow: 'soundDead5', archer: 'soundDead2', fly: 'soundDead6', barbarian: 'soundDead2', lava: 'soundDead1', boss: 'soundDeadBoss1' }[enemy.kind];
+      if (enemy) sound.kill = { sheep: 'soundDead3', rat: 'soundDead7', chicken: 'soundDeadChicken', crow: 'soundDead5', archer: 'soundDead2', fly: 'soundDead6', barbarian: 'soundDead2', lava: 'soundDead1', boss: 'soundDeadBoss1', cata: 'soundDead4', spider: 'soundDead2', ghost: 'soundDead2', ogre: 'soundDead1', knight: 'soundDead2', bird: 'soundDead8', tank: 'soundDead4', dino: 'soundDead9', dragon: 'soundDead9', 'dropped-rat': 'soundDead7' }[enemy.kind];
       // Выбор реплики уже сделан симуляцией в исходном порядке случайных вызовов.
       if (event.goodShotIndex !== undefined) this.playSound(`soundGoodshot${event.goodShotIndex}`, 0.65);
     }
@@ -1042,7 +1049,7 @@ class ElonaScene extends Phaser.Scene {
       : tab === 'characters' ? 'Select a portrait to inspect skills, wages and orders. Select the available candidate, then Recruit, to hire a companion.'
       : tab === 'equipment' ? 'Click an item, then a destination slot. Companions need the weapon’s required skill. Dropping outside cancels the move.'
       : tab === 'shop' ? (saleSlot === null ? 'Click stock, then an empty owned slot to buy. Drop an owned item outside its slots to sell; confirmation is required.' : 'Confirm the sale with Yes, or click elsewhere to keep the item.')
-      : `Shop buys and sells items. Castle offers paid Fix Wall or Free Repair for 2 AP, plus House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades. ${this.sim.state.day < 9 ? `Mission → Rest begins Day ${this.sim.state.day + 1}.` : 'Day 10 is not available yet.'}`;
+      : `Shop buys and sells items. Castle offers paid Fix Wall or Free Repair for 2 AP, plus House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades. ${this.sim.state.day < MAX_CAMPAIGN_DAY ? `Mission → Rest begins Day ${this.sim.state.day + 1}.` : 'The next campaign cycle is not available yet.'}`;
   }
 
   private showPartyPanel(tab: 'characters' | 'equipment'): void {

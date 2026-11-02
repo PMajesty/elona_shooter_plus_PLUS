@@ -1,3 +1,4 @@
+import { SAVE_VERSION } from '../src/save-version.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation, type EnemyState } from '../src/simulation.ts';
@@ -127,7 +128,7 @@ test('Sandbag upkeep begins next settlement and preserves prior Wall, Repairman 
   assert.equal(simulation.buyCastleUpgrade('fix-wall'), 'purchased');
   assert.equal(simulation.requestRecruit(), 'previewed'); assert.equal(simulation.resolvePartyAction(true), 'hired');
   const legacy = asLegacyV17Save(simulation.toSave()), before = structuredClone(legacy);
-  const expected = { ...legacy, version: 25, trainerLevel: 0, looterLevel: 0, pendingLootAction: null, sandbagLevel: 0 };
+  const expected = { ...legacy, version: SAVE_VERSION, trainerLevel: 0, looterLevel: 0, pendingLootAction: null, sandbagLevel: 0 };
   assert.deepEqual(Simulation.fromSave(legacy).toSave(), expected); assert.deepEqual(legacy, before);
   assert.deepEqual(Simulation.fromSave({ ...legacy, sandbagLevel: 10 }).toSave(), expected);
   const paidResult = structuredClone(simulation.state.result);

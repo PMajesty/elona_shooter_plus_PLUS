@@ -57,7 +57,7 @@ export function validatePartySave(state: SimulationState, validItem: (value: unk
   const targets = state.retainedAITargets;
   if (!Array.isArray(targets) || targets.length > 20 || targets.some(target => !record(target)
     || ['x', 'y', 'speed', 'hp'].some(key => !finite(target[key])) || target.hp !== -1 || target.removed !== true
-    || !integer(target.uid, 1, state.nextUid - 1) || !integer(target.type, 0, 1) || !integer(target.tag, 0, 60) || typeof target.onMark !== 'boolean')) throw new Error('Invalid retained party targets.');
+    || !integer(target.uid, 1, state.nextUid - 1) || !integer(target.type, 0, 2) || !integer(target.tag, 0, 60) || typeof target.onMark !== 'boolean')) throw new Error('Invalid retained party targets.');
   const ids = new Set([...state.enemies, ...targets].map(enemy => enemy.uid));
   if (ids.size !== state.enemies.length + targets.length || targets.some(target => state.projectiles.some(p => p.uid === target.uid) || state.enemyArrows.some(p => p.uid === target.uid))) throw new Error('Duplicate retained target identifier.');
   const reference = (uid: unknown) => uid === null || integer(uid, 1, state.nextUid - 1) && ids.has(Number(uid));
@@ -68,7 +68,7 @@ export function validatePartySave(state: SimulationState, validItem: (value: unk
   }
   for (const slot of state.party.slots.slice(0, 4)) if (slot.exists && slot.member?.aiState && !reference(slot.member.aiState.targetUid)) throw new Error('Missing companion target.');
   for (const enemy of state.enemies) if (!integer(enemy.tag, 0, 60) || typeof enemy.onMark !== 'boolean'
-    || enemy.type !== (ENEMIES[enemy.kind].airborne ? 1 : 0)) throw new Error('Invalid enemy targeting state.');
+    || enemy.type !== (ENEMIES[enemy.kind].airborne ? 1 : ENEMIES[enemy.kind].armor ? 2 : 0)) throw new Error('Invalid enemy targeting state.');
   for (const projectile of state.projectiles) {
     const owner = projectile.actorSlot ?? 0;
     if (!integer(owner, 0, 4) || projectile.damage === -1 && owner !== 0) throw new Error('Invalid projectile owner.');

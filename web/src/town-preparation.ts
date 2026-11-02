@@ -1,14 +1,8 @@
 import { ItemFactory, type Item } from './items.ts';
-import { generateLowLevelMission } from './missions.ts';
+import { generateLowLevelMission, validCampaignDay, type LowLevelMission } from './missions.ts';
 import { generateEarlyTownRecruit, type FirstTownRecruit } from './recruits.ts';
 
-export interface FirstTownMission {
-  level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9; fixedLv: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9; strength: 0; power: 920 | 1040 | 1160 | 1280 | 1400 | 1520 | 1640 | 1760 | 1880; powerOrg: 920 | 1040 | 1160 | 1280 | 1400 | 1520 | 1640 | 1760 | 1880; reward: number;
-  hire: false; ragnarok: false; wave: 5 | 6; spawnRate: number; group: number[];
-  waveType: 0; loot: number[]; newWave: true; time: 30; bossDay: boolean; bossWave: number;
-  note: ''; hpFix: 1; dmgFix: 1; expFix: 1; absorbFix: number; bossKilled: 0;
-  noDamage: true; criticalCount: 0; resultOther: 0;
-}
+export interface FirstTownMission extends LowLevelMission {}
 
 export interface FirstTownPreparationInput {
   priorOffers?: readonly (Readonly<Item> | null)[];
@@ -46,8 +40,8 @@ export function prepareFirstTown(random: () => number, input: FirstTownPreparati
   return prepareEarlyTown(random, 1, input);
 }
 
-export function prepareEarlyTown(random: () => number, day: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9, input: FirstTownPreparationInput = {}): FirstTownPreparation {
-  if (![1, 2, 3, 4, 5, 6, 7, 8, 9].includes(day)) throw new RangeError('Town preparation is limited to days 1 through 9.');
+export function prepareEarlyTown(random: () => number, day: number, input: FirstTownPreparationInput = {}): FirstTownPreparation {
+  if (!validCampaignDay(day)) throw new RangeError('Unsupported campaign town day.');
   const effects: TownPreparationEffects = { shopEngineer: input.shopEngineer ?? 0,
     missionNegotiator: input.missionNegotiator ?? 0, recruitEngineer: input.recruitEngineer ?? 0 };
   if (!validTownPreparationEffects(effects)) throw new RangeError('Invalid original town preparation effects.');

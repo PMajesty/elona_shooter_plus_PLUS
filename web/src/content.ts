@@ -17,13 +17,14 @@ export const SHOTGUN = {
 
 export const GRENADE = { id: 11, name: "Soldier's Grenade", damage: 45, quantity: 5, cooldownFrames: 100, radiusX: 60, radiusY: 50, speed: 12 } as const;
 
-export type EnemyKind = 'sheep' | 'rat' | 'chicken' | 'crow' | 'archer' | 'fly' | 'barbarian' | 'lava' | 'boss';
+export type EnemyKind = 'sheep' | 'rat' | 'chicken' | 'crow' | 'archer' | 'fly' | 'barbarian' | 'lava' | 'boss'
+  | 'cata' | 'spider' | 'ghost' | 'ogre' | 'knight' | 'bird' | 'tank' | 'dino' | 'dragon' | 'dropped-rat';
 export type Rect = readonly [left: number, right: number, top: number, bottom: number];
 export interface EnemyDefinition {
   kind: EnemyKind; id: number; name: string; level: number; power: number;
   hp: number; attack: number; speedBase: number; speedRandom: number;
   critical: Rect; body: Rect; knockResistance: number; flags: readonly string[];
-  airborne?: boolean; loot: number;
+  airborne?: boolean; armor?: boolean; loot: number;
 }
 
 // Числа перенесены из enemy.init и MainTimeline.setEnemy. Границы body — временная замена силуэтов Flash.
@@ -37,6 +38,16 @@ export const ENEMIES: Readonly<Record<EnemyKind, EnemyDefinition>> = {
   barbarian: { kind: 'barbarian', id: 7, name: 'Barbarian', level: 7, power: 95, hp: 85, attack: 5, speedBase: 1.2, speedRandom: 0.8, critical: [-9, 7, -19, -8], body: [-9.25, 11.7, -16, 14.95], knockResistance: 0.8, flags: ['BATCH', 'MASS'], loot: 7 },
   lava: { kind: 'lava', id: 4, name: 'Lava', level: 9, power: 300, hp: 72, attack: 12, speedBase: 4.5, speedRandom: 2, critical: [-9, 9, -19, -7], body: [-15.5, 15.45, -17.5, 17.15], knockResistance: 1, flags: ['KAMIKAZE', 'MASS'], loot: 31 },
   boss: { kind: 'boss', id: 999, name: 'Boss', level: 9999, power: 500, hp: 150, attack: 1, speedBase: 1.1, speedRandom: 0.8, critical: [-100, -100, -100, -100], body: [-13, 13, -22, 17], knockResistance: 0, flags: [], loot: 6 },
+  "cata": {"kind": "cata", "id": 5, "name": "Cata", "level": 11, "power": 300, "hp": 240, "attack": 11, "speedBase": 1.1, "speedRandom": 0.4, "critical": [-20, -6, -22, -7], "body": [-40, 45, -45, 25], "knockResistance": 0, "loot": 32, "flags": ["BOSS"], "armor": true, "airborne": false},
+  "spider": {"kind": "spider", "id": 9, "name": "Spider", "level": 13, "power": 160, "hp": 135, "attack": 5, "speedBase": 6, "speedRandom": 2, "critical": [-21, -8, -16, 5], "body": [-40, 45, -45, 25], "knockResistance": 1, "loot": 33, "flags": ["BATCH", "MASS"], "armor": false, "airborne": false},
+  "ghost": {"kind": "ghost", "id": 14, "name": "Ghost", "level": 15, "power": 260, "hp": 120, "attack": 6, "speedBase": 1, "speedRandom": 1.5, "critical": [-6, 12, -38, -25], "body": [-40, 45, -45, 25], "knockResistance": 1, "loot": 6, "flags": ["BATCH", "MASS"], "armor": false, "airborne": false},
+  "ogre": {"kind": "ogre", "id": 1, "name": "Ogre", "level": 17, "power": 350, "hp": 500, "attack": 10, "speedBase": 0.9, "speedRandom": 0.6, "critical": [-14, 17, 7, 19], "body": [-40, 45, -45, 25], "knockResistance": 0.2, "loot": 31, "flags": ["BATCH", "MASS"], "armor": false, "airborne": false},
+  "knight": {"kind": "knight", "id": 8, "name": "Knight", "level": 19, "power": 280, "hp": 180, "attack": 6, "speedBase": 0.8, "speedRandom": 0.7, "critical": [-4, 8, -2, 9], "body": [-40, 45, -45, 25], "knockResistance": 0.3, "loot": 7, "flags": ["BATCH", "MASS"], "armor": true, "airborne": false},
+  "bird": {"kind": "bird", "id": 16, "name": "Bird", "level": 22, "power": 420, "hp": 150, "attack": 3, "speedBase": 1.2, "speedRandom": 0.5, "critical": [6, 19, -9, -1], "body": [-40, 45, -45, 25], "knockResistance": 0.3, "loot": 30, "flags": ["AIR"], "armor": false, "airborne": true},
+  "tank": {"kind": "tank", "id": 12, "name": "Tank", "level": 25, "power": 400, "hp": 520, "attack": 14, "speedBase": 1.4, "speedRandom": 0.7, "critical": [-9, 6, -26, -15], "body": [-40, 45, -45, 25], "knockResistance": 0, "loot": 32, "flags": ["BOSS"], "armor": true, "airborne": false},
+  "dino": {"kind": "dino", "id": 13, "name": "Dino", "level": 28, "power": 550, "hp": 700, "attack": 25, "speedBase": 1.7, "speedRandom": 1.3, "critical": [-100, -100, -100, -100], "body": [-40, 45, -45, 25], "knockResistance": 0.2, "loot": 34, "flags": ["BOSS", "MASS"], "armor": false, "airborne": false},
+  "dragon": {"kind": "dragon", "id": 15, "name": "Dragon", "level": 32, "power": 550, "hp": 600, "attack": 6, "speedBase": 1, "speedRandom": 0.8, "critical": [-100, -100, -100, -100], "body": [-40, 45, -45, 25], "knockResistance": 0.4, "loot": 34, "flags": ["BOSS"], "armor": false, "airborne": true},
+  "dropped-rat": {"kind": "dropped-rat", "id": 18, "name": "Dropped-Rat", "level": 9999, "power": 80, "hp": 66, "attack": 3, "speedBase": 2.7, "speedRandom": 1.3, "critical": [-6, 9, -11, 1], "body": [-40, 45, -45, 25], "knockResistance": 1.1, "loot": 28, "flags": [], "armor": false, "airborne": false},
 };
 
 // Порядок важен: исходный selectEnemy перебирает записи именно так.

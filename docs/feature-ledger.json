@@ -2,30 +2,30 @@
   "schemaVersion": 1,
   "updated": "2026-11-02",
   "currentRelease": {
-    "saveVersion": 25,
+    "saveVersion": 26,
     "verificationStatus": "passed",
-    "implementedCampaign": "Rogue, Hunter, Sheriff and Militia; connected Days1-9. Starting Little Girl for Rogue/Hunter and Militia gear/class grenade. Day10+ still unavailable.",
+    "implementedCampaign": "Four starting classes, connected Days1-40, nineteen enemy kinds including nine later families and bird-dropped rats. Multi-boss days and later shields/rage/rockets. Later cycles and remaining town systems are incomplete.",
     "publication": {
       "status": "local-build",
       "url": "http://127.0.0.1:5175/elona/",
-      "bundle": "assets/index-Cc-hTEJ3.js",
-      "priorCheckpoint": "2075094"
+      "bundle": "assets/index-DSoK-_2o.js",
+      "priorCheckpoint": "9588b35"
     },
     "automatedVerification": {
-      "uniqueTestsPassed": 416,
-      "runs": "412-test full suite, followed by ten targeted class tests including four additional cases",
-      "releaseBuildPassed": true,
-      "comparisonScope": "Existing original comparisons retained; new classes checked from source, deterministic restoration and natural two-battle smoke."
+      "testsPassed": 423,
+      "fullSuite": true,
+      "controlledCampaignFrames": 97293,
+      "controlledCampaignDays": 40,
+      "enemyKindsEncountered": 19,
+      "seededWaveCampaigns": 12,
+      "releaseBuildPassed": true
     },
     "browserVerification": [
-      "Hunter selection/gear/Little Girl/combat/pause/Continue",
-      "Mute preference retained after reload",
-      "Export wrapper version25",
-      "Preserved v24 user save restored paused; all simulation fields equal headless migration"
+      "Controlled Day26 later-enemy rendering, no console errors",
+      "Muted, original save restored paused with full state equal to migration"
     ],
-    "browserEvidence": ".build/browser-qa/solo-class-restoration.json",
-    "knownGaps": "docs/port-status.md",
-    "priorReleaseEvidence": "Git 2075094 and docs/port-verification.json"
+    "browserEvidence": ".build/browser-qa/campaign-restoration.json",
+    "knownGaps": "docs/port-status.md"
   },
   "purpose": "Track the original game's systems and content against implemented behavior and independent evidence. This is an expandable inventory, not an exhaustive specification or a completion percentage.",
   "reference": {
@@ -282,7 +282,7 @@
         "enemy_* frame scripts in original SWF"
       ],
       "status": "partial",
-      "implemented": "Sheep, rat, chicken, crow, Archer, Fly, Barbarian, Lava and boss runtime for missions0–8 across displayedDays1–9 in the published v24 release. Boss HP150/175/200/225/250/275/300/325/350 and appearances51/52/53/54/55/56/57/58/59 follow cumulative spawns. Archer has source counter/range decisions, attack/recovery/death timelines, immediate release-time castle damage, persistent cosmetic arrow flight, twip knockback and per-frame geometric left-edge clamp. Missing stand label follows observed Ruffle frame1 fallback. Boss action6 shields from Day4, retained entry facing then turn/stop, source firing/walk/hold frames, exact twip movement and source weapon audio are integrated. Projectile collision synchronizes the current boss actor pose before testing. Fly has source spawn statistics, hover/restart RNG, knockback bounds, castle-exit damage, death/shadow timeline and filled-contour collision; each new actor explicitly resets its hover counter and knockback resistance. Barbarian retains original rage activation and unequal current/stored speed formulas, faster attack loop, knockback recovery and death. Rage geometry under mc participates in targeting; parent hit particles affect the left knockback clamp and expire independently. Persisted effect frames preserve these observed source semantics without a new balance or hitbox correction. Day7 boss special selection, wind-up, interruption, immediate castle hit and separate cosmetic grenade flight preserve the observed original branch order and RNG; a surviving wind-up hit affects the boss accumulator without doubling actual HP damage. Lava preserves one-time wall-defending companion alert, continued movement during attack, knockback cancellation while attacking, frame35 self-explosion without kill rewards, and distinct killed/self-exploded corpse lifecycles. Alert, shadow and hit-effect history survive saves. All659 original states and12 sampled geometry grids match; full global f32 inverse placement corrects six port-only frame50 corpse-edge false positives without changing the source fixture.",
+      "implemented": "First-cycle ordinary encounter roster, nine later families and Bird-dropped rats; source stats, movement/attack rules and original atlases/frame commands. Later boss reactive shield, rage and rocket actions are integrated. Early filled contours retained; later sprites currently use rendered alpha.",
       "evidence": [
         "web/src/content.ts:ENEMIES",
         "web/tests/simulation.test.ts:defeat and first-battle completion",
@@ -312,13 +312,14 @@
         ".build/browser-qa/day-eight-lava-exposure-audit.json:earned ordinary-input attack branch, seven fixtures;HP43→32/no credited kill/removal"
       ],
       "unverified": [
-        "Later species and variants",
-        "Later boss actions, including level10 reactive shield, level15 rage and level20 rocket special",
-        "Native parent/child scheduling and whole battle timing beyond controlled comparisons"
+        "Strength/large-enemy variants in later campaign cycles",
+        "Native parent/child scheduling and pixel collision equivalence",
+        "Decorative ranged projectiles, some source sound/visual effects"
       ],
       "intentionalDifferences": [
         "Original Fly initialization retains pooled dirCounter and resKnock. New port Fly actors reset the counter to0 and resistance to1. The accepted original fixture records fresh/explicit-reset behavior separately from73 raw reuse observations; this fixes a demonstrated state leak, not the reported late-game hitbox defect."
-      ]
+      ],
+      "campaignUpdate": "v26 extends ordinary progression through Day40, full first-cycle enemy selection, nine later families/bird drops, source frame-command attacks and multi-boss days. New collision uses rendered alpha; later cycles remain guarded. See web/tests/campaign.test.ts and docs/port-status.md."
     },
     {
       "id": "original.ui.health",
@@ -451,7 +452,7 @@
         "MainTimeline:8323 wave progression"
       ],
       "status": "partial",
-      "implemented": "Opening mission0 and prepared missions1–8 lead through nine connected Sheriff days, rewards and towns in the published v24 release. Source selection order, ordinary/BATCH1/AIR/RANGED branches and all short-circuit/fallback draws are retained. Mission6 enables RANGED with its original90% total group allocation; requested levels through8 add no new ordinary species. Rest consumes each saved mission once. Seventh town prepares mission7 with only the optional1038 loot roll. Day8 uses it unchanged, allows Lava from unrestricted level+2 groups and applies the original shrinking-queue Sheep batching/break-draw rules. Town8 prepares mission8 without a guaranteed calendar item; the candidate uses it for Day9. Mission8 adds the fourth fallback draw, with strict>0.5 Barbarian replacement, and Rat can continue batching at the0.875 first threshold. Town9 prepares mission9 as the first boss day (wave6,bossWave5,true) without the normal boss-wave draw; ordered guarantees1035/1110 follow optional1038. Day10 combat remains disabled.",
+      "implemented": "Connected first 40-day encounter cycle: general wave counts, boss-day groups, AIR/BATCH/RANGED/MASS selection, repeated calendar loot, town/recruit generation and Rest/save flow. Verified with twelve seeded generation runs and one controlled forty-day progression run.",
       "evidence": [
         "web/tests/simulation.test.ts:first mission and completion",
         "docs/port-verification.json:browser_checks.victory_checkpoint",
@@ -482,10 +483,11 @@
         "web/docs/ninth-day-wave-source.md:12 wave and12 timer-spawn original observations"
       ],
       "unverified": [
-        "Native spawn/combat event sequence",
-        "Complete original-versus-port nine-day input replay",
-        "Day10 onward, later enemy/mission branches and difficulty modifiers"
-      ]
+        "Day41+ strengthened cycles and large variants",
+        "Difficulty modifiers, mission hiring and Ragnarok",
+        "Full native Flash input/timing comparison and unassisted full-cycle balance"
+      ],
+      "campaignUpdate": "v26 extends ordinary progression through Day40, full first-cycle enemy selection, nine later families/bird drops, source frame-command attacks and multi-boss days. New collision uses rendered alpha; later cycles remain guarded. See web/tests/campaign.test.ts and docs/port-status.md."
     },
     {
       "id": "original.town.entry",
@@ -804,7 +806,7 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot, Continue and JSON import/export. Version25 supports four hero classes and Militia cooldown; accepts older browser versions without rerolling battles. Loaded battles pause before advancing; original Flash saves and six-slot/global-index behavior are incomplete.",
+      "implemented": "One browser slot, Continue, JSON import/export, v26 supports Day1-40 waves/towns, later enemy AI/armor and boss projectiles. Older saves migrate without rerolling; loaded battles pause. Flash conversion and original multiple/global slots remain incomplete.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",

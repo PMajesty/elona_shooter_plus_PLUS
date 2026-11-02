@@ -1,3 +1,4 @@
+import { calendarLoot, validCampaignDay, generateLowLevelMission } from './missions.ts';
 import { RECRUIT_NAMES } from './recruits.ts';
 import type { Item } from './items.ts';
 import { validTownPreparationEffects, type FirstTownPreparation } from './town-preparation.ts';
@@ -7,8 +8,8 @@ const integer = (value: unknown, low: number, high: number): value is number => 
 const fieldsEqual = (value: Record<string, unknown>, fields: Record<string, unknown>) => Object.entries(fields).every(([key, expected]) => value[key] === expected);
 
 /** Проверяем сохранённые результаты генерации, не повторяя случайные броски при загрузке. */
-export function validTownPreparation(value: unknown, validItem: (item: unknown) => item is Item, day: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 = 1, expectedAbsorbFix?: number): value is FirstTownPreparation {
-  if (![1, 2, 3, 4, 5, 6, 7, 8, 9].includes(day)) return false;
+export function validTownPreparation(value: unknown, validItem: (item: unknown) => item is Item, day: number = 1, expectedAbsorbFix?: number): value is FirstTownPreparation {
+  if (!validCampaignDay(day)) return false;
   if (!record(value) || !Array.isArray(value.shop) || value.shop.length !== 8 || Array.from(value.shop).some(item => item !== null && !validItem(item))) return false;
   if (!Array.isArray(value.cards) || value.cards.length !== 5 || value.cards.some(id => !integer(id, -7, -1))) return false;
   for (let id = -7; id <= -1; id++) if (value.cards.filter(card => card === id).length > (id === -1 ? 3 : 1)) return false;
@@ -17,20 +18,16 @@ export function validTownPreparation(value: unknown, validItem: (item: unknown) 
   if (value.preparationEffects !== undefined && !validTownPreparationEffects(value.preparationEffects)) return false;
   const negotiator = value.preparationEffects?.missionNegotiator ?? 0;
   const mission = value.mission;
-  const power = 800 + day * 50 + day * 70;
-  if (!record(mission) || !fieldsEqual(mission, {
-    level: day, fixedLv: day, strength: 0, power, powerOrg: power, reward: Math.trunc((600 + day * 20) * (100 + negotiator) / 100),
-    hire: false, ragnarok: false, wave: day === 9 ? 6 : 5, spawnRate: 15 - day / 5, waveType: 0,
-    newWave: true, time: 30, bossDay: day === 9, note: '', hpFix: 1, dmgFix: 1,
-    expFix: 1, bossKilled: 0, noDamage: true, criticalCount: 0, resultOther: 0,
-  }) || !Array.isArray(mission.group) || mission.group.length !== 0
-    || (day === 9 ? mission.bossWave !== 5 : !integer(mission.bossWave, 2, 3))) return false;
+  const expected = generateLowLevelMission(day, day, () => 0, { negotiator });
+  const { loot: _loot, group: _group, bossWave: _bossWave, absorbFix: _absorb, ...fixed } = expected;
+  if (!record(mission) || !fieldsEqual(mission, fixed) || !Array.isArray(mission.group) || mission.group.length !== 0
+    || (expected.bossDay ? mission.bossWave !== expected.wave - 1 : !integer(mission.bossWave, 2, 2 + Math.ceil(expected.wave / 3) - 1))) return false;
   if (![0, 0.01, 0.02, 0.03, 0.04].includes(Number(mission.absorbFix)) || typeof mission.absorbFix !== 'number' || (expectedAbsorbFix !== undefined && mission.absorbFix !== expectedAbsorbFix)) return false;
   // В городе9 две гарантии идут после необязательного Ragnarok; порядок важен для выдачи слотов.
-  const calendarLoot = day === 9 ? [1035, 1110] : day >= 7 ? [] : [day === 1 ? 1117 : day === 2 ? 1103 : day === 3 ? 1035 : day === 4 ? 1102 : day === 5 ? 1037 : 1106];
-  if (!Array.isArray(mission.loot) || !(calendarLoot.join() === mission.loot.join() || [1038, ...calendarLoot].join() === mission.loot.join()) || mission.loot.some(id => typeof id !== 'number')) return false;
+  const guaranteed = calendarLoot(day);
+  if (!Array.isArray(mission.loot) || !(guaranteed.join() === mission.loot.join() || [1038, ...guaranteed].join() === mission.loot.join()) || mission.loot.some(id => typeof id !== 'number')) return false;
   const recruit = value.recruit;
-  if (!record(recruit) || !integer(recruit.lv, day >= 5 ? 2 : 1, day >= 7 ? 4 : day >= 5 ? 3 : day === 4 ? 2 : 1)) return false;
+  if (!record(recruit) || !integer(recruit.lv, Math.trunc(day / 5) + 1, Math.ceil(day * 0.3) + Math.trunc(day / 5))) return false;
   const recruitLevel = recruit.lv;
   if (!fieldsEqual(recruit, {
     exist: true, sp: recruitLevel - 1, trained: 0, optBoss: true, optWall: true,

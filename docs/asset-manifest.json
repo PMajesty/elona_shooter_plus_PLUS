@@ -9,7 +9,7 @@
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
     "images": 108,
-    "clips": 50,
+    "clips": 59,
     "sounds": 89,
     "fonts": 6
   },
@@ -38,12 +38,27 @@
     "gravityBody flattens original nested pulse frames 1-13 with the inherited mc color transform",
     "Gravity hard-light is decomposed into original-alpha multiply/add textures for the WebGL renderer",
     "sheepShadow and crowShadow preserve shadow-only alpha masks for original hit exclusion",
-    "Ordinary enemy collision uses original filled contours and placement matrices, not bitmap alpha",
+    "Early enemies use source filled contours; later enemy atlases currently use raster alpha collision",
     "gameOver hides day-one carry-over control and retired external play-more button"
   ],
   "limitations": [
     "FFDec renders timelines without executing ActionScript; application implements frame actions",
     "Asset extraction alone does not establish complete original gameplay parity",
     "Only selected runtime visuals are packaged; full source exports remain in ignored .build"
-  ]
+  ],
+  "campaignEnemies": {
+    "symbols": {
+      "cata": 1020,
+      "spider": 1164,
+      "ghost": 1118,
+      "ogre": 1363,
+      "knight": 1211,
+      "bird": 964,
+      "tank": 993,
+      "dino": 1247,
+      "dragon": 945
+    },
+    "timelines": "web/src/enemy-timelines.ts",
+    "collision": "raster alpha for later enemies; filled contours retained for early enemies"
+  }
 }

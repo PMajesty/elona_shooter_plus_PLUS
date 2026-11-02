@@ -19,6 +19,9 @@ CACHE = ROOT / ".build/export"
 WORK = ROOT / ".build/web-assets"
 DEST = ROOT / "web/public/assets"
 CLIPS = {"charaPic": 677, "enemy_sheep": 910,
+         "enemy_cata": 1020, "enemy_spider": 1164, "enemy_ghost": 1118,
+         "enemy_ogre": 1363, "enemy_knight": 1211, "enemy_bird": 964,
+         "enemy_tank": 993, "enemy_dino": 1247, "enemy_dragon": 945,
          "enemy_chicken": 1063, "enemy_rat": 1295, "enemy_crow": 981, "enemy_archer": 1092, "enemy_fly": 952,
          "enemy_barbarian": 1340, "enemy_lava": 883, "enemyRage": 2385,
          "explosion": 2235, "itemPicture": 2113, "ammoBar": 2698, "radioButton": 2312,
@@ -801,6 +804,8 @@ def main():
     }
     (ROOT / "docs/asset-manifest.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == fingerprint
+    from extract_campaign_enemies import main as extract_campaign_enemies
+    extract_campaign_enemies()
     print(json.dumps({"images": len(manifest["images"]), "clips": len(manifest["clips"]),
                       "sounds": len(manifest["sounds"]), "originalUnchanged": True}))
 

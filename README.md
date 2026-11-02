@@ -2,7 +2,7 @@
 
 A TypeScript/Phaser browser remake of Elona Shooter Plus 1.3.0.4.
 The current local build supports **Rogue, Hunter, Sheriff and Militia** through
-**Days 1–9**. This is an incomplete remake; Day10+ and remaining town systems
+**Days 1–40**. This is an incomplete remake; later campaign cycles and remaining town systems
 are the next substantial work.
 
 Open [the local game](http://127.0.0.1:5175/elona/).
@@ -14,13 +14,15 @@ unless you previously enabled it; its button explicitly displays the current sta
 - All four starting classes: class-specific gear, growth and earned skill choices.
   Rogue and Hunter start with Little Girl; Militia has its class grenade,
   starting rifle, Simple Flame Thrower and Simple Chain Gun.
+- The first 40-day encounter cycle: Catapult, Spider, Ghost, Ogre, Knight, Bird,
+  Tank, Dino and Dragon, bird-dropped rats, multi-boss days and later boss attacks.
 - Manual/automatic reload, owned firearms, bows, projectile weapons and consumables;
   enemies, bosses and health bars; ordinary/boss loot, skills and settlements.
 - Prepared towns, shop buy/sell, weapon upgrades and MOD mounting; permanent
   companions, equipment, orders, autonomous combat, growth and wages.
 - Castle House, Wall, Sandbag, Storage, Looter, Fix Wall, Repairman and Trainer;
   Free Repair, first title/salary and Rest across the supported days.
-- One browser save with Continue and JSON import/export. Version25 accepts prior
+- One browser save with Continue and JSON import/export. Version26 accepts prior
   browser saves; original Flash saves require a future converter.
 
 Remaining work and validation limits are in [port status](docs/port-status.md).
@@ -57,6 +59,9 @@ The simulation is independent of rendering. Existing original-game comparisons
 remain available through `web/package.json`; rerun those affected by a change.
 New class checks cover gear, growth, skill selection, JSON restore/replay, Militia
 cooldown, and natural battles through the first two towns for each starting class.
+Campaign checks cover all 40 days with controlled powerful equipment, natural wave
+generation, rewards, town/Rest transitions and saves. This verifies progression;
+full difficulty balance is not established by the controlled run. All423 tests pass.
 Test counts do not establish whole-game completeness or full pixel parity.
 
 ## Original assets and recovery
@@ -74,6 +79,9 @@ Use `--refresh` to regenerate intermediate FFDec exports. They stay in ignored
 `.build/`; extraction verifies the original SWF hash. See
 [asset provenance](docs/asset-manifest.json) and [UI reference](docs/ui-reference.md).
 Original game/artwork credits belong to **Noa** and the supplied release's contributors.
+The extractor also generates the later enemy atlases and source frame-command
+table through `tools/extract_campaign_enemies.py`. Later enemy collision currently
+uses rendered alpha; early enemies retain source filled contours.
 
 The preserved Flash version is `elonashooter1.3-fixed.swf`, playable through
 Ruffle's Select File → New Game → appearance → Proceed flow. Its startup fix

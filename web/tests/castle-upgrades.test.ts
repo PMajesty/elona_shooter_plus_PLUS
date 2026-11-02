@@ -1,3 +1,4 @@
+import { SAVE_VERSION } from '../src/save-version.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation } from '../src/simulation.ts';
@@ -142,7 +143,7 @@ test('v15 migration adds Wall1 without recomputing party, money, paid results or
   const simulation = town();
   assert.equal(simulation.requestRecruit(), 'previewed'); assert.equal(simulation.resolvePartyAction(true), 'hired');
   const legacy = asLegacyV15Save(simulation.toSave()), untouched = structuredClone(legacy);
-  const expected = { ...legacy, version: 25, trainerLevel: 0, looterLevel: 0, pendingLootAction: null, wallLevel: 1, wallFixCount: 0, repairmanLevel: 0, sandbagLevel: 0 };
+  const expected = { ...legacy, version: SAVE_VERSION, trainerLevel: 0, looterLevel: 0, pendingLootAction: null, wallLevel: 1, wallFixCount: 0, repairmanLevel: 0, sandbagLevel: 0 };
   assert.deepEqual(Simulation.fromSave(legacy).toSave(), expected);
   assert.deepEqual(legacy, untouched);
   const stray = { ...legacy, wallLevel: 1234 };

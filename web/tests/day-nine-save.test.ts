@@ -57,7 +57,7 @@ test('Day9 boss initializes HP350 and appearance59, then restores its ordinary l
   }
 });
 
-test('Day9 settles once, preserves the earned medal and prepares the first boss-day town without enabling Day10', () => {
+test('Day9 settles once, preserves the earned medal and prepares the first boss-day town and enables the first boss-day battle', () => {
   const simulation = eighthTown(); assert.equal(simulation.claimTitle(), 'claimed');
   assert.equal(simulation.startNextDay(), true); const beforeGold = simulation.state.gold;
   settle(simulation);
@@ -73,9 +73,13 @@ test('Day9 settles once, preserves the earned medal and prepares the first boss-
   const mission = simulation.state.town.mission;
   assert.equal(mission.level, 9); assert.equal(mission.wave, 6); assert.equal(mission.bossDay, true); assert.equal(mission.bossWave, 5);
   assert.equal(mission.powerOrg, 1880); assert.deepEqual(mission.loot.slice(-2), [1035, 1110]);
-  resumed = restore(simulation); const town = resumed.toSave();
-  assert.equal(resumed.startNextDay(), false); assert.deepEqual(resumed.toSave(), town);
-  assert.equal(resumed.claimTitle(), 'unavailable'); assert.deepEqual(resumed.toSave(), town);
+  resumed = restore(simulation);
+  assert.equal(resumed.startNextDay(), true);
+  assert.equal(resumed.state.day, 10); assert.equal(resumed.state.activeMission.bossDay, true);
+  assert.equal(resumed.state.waves.length, 6);
+  assert.deepEqual(Simulation.fromSave(resumed.toSave()).toSave(), resumed.toSave());
+  const battle = resumed.toSave();
+  assert.equal(resumed.claimTitle(), 'unavailable'); assert.deepEqual(resumed.toSave(), battle);
 });
 
 test('Day9 rejects older-version claims and malformed prepared boss-day state without changing the input', () => {

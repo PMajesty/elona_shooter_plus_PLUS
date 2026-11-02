@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v25, four starting classes, Days1–9**.
+Updated 2026-11-02. Current local build: **v26, four starting classes, Days1–40**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -12,7 +12,12 @@ periodic free class grenade. Imported/continued battles start paused so they can
 advance while the player is navigating load controls. Skill choices, descriptions, growth, combat, towns,
 equipment and saves use shared systems.
 
-Existing coverage remains: nine connected days; firearms/projectiles, manual and
+The first encounter cycle is connected through Day40. Catapult, Spider, Ghost,
+Ogre, Knight, Bird, Tank, Dino and Dragon use original atlases and extracted frame
+commands for attack timing, loops, stops and alerts. Birds drop falling rats.
+Multi-boss days and later boss shields, rage and rockets are implemented.
+
+Existing coverage remains: firearms/projectiles, manual and
 automatic reload, consumables, boss health bars, enemy animation, ordinary/boss
 loot, skills, results, town generation, shop and equipment transactions,
 permanent companions with AI/growth/wages, Castle page-one purchases, repairs,
@@ -24,32 +29,36 @@ interruption closed the earlier temporary tab; the replacement is retained for r
 
 ## Validation
 
-- Existing suite plus six class tests: **412 passing tests**. Four subsequent
-  targeted cases also pass: each class completes two natural battles, earned
-  rewards/choices, town entry, save restoration and Rest. **416 unique tests**
-  across those runs; not a single 416-test run.
+- The complete suite passes **423 tests**. The controlled full-cycle run completed
+  all40 days, rewards, towns and Rest/save boundaries over97293 simulation frames,
+  encountering all19 implemented enemy kinds. Powerful test equipment/HP removes
+  difficulty as a test obstacle; this is not a full-campaign balance claim.
+- Twelve seeded generation runs cover all first-cycle encounter families and
+  boss formations. Focused cases check later attacks, armor targeting, bird drops,
+  JSON restore/replay, rockets, frozen Spider/Ghost poses and malformed saves.
 - Class combat restores identical full state/events after JSON restoration,
   including Little Girl's AI and the Militia cooldown. Invalid identities/counters
-  are rejected. V24 Sheriff migration preserves inventory and combat RNG.
+  are rejected. Prior Sheriff migration preserves inventory and combat RNG.
 - Typechecking and production build pass. Browser checks cover Hunter selection,
-  creation, Little Girl in battle, pause and Continue. Final exports use version25.
-  The preserved v24 user save restores paused with every simulation field equal
+  creation, Little Girl, combat, pause/Continue and a controlled Day26 scene with
+  later enemy art. No console errors observed. Final exports use version26.
+  The preserved user save restores paused with every simulation field equal
   to its expected migration: tick674, RNG1744019180, HP40 and gold209. Evidence:
-  `.build/browser-qa/solo-class-restoration.json`.
+  `.build/browser-qa/campaign-restoration.json`.
 - Natural class smoke tests use rectangle hit regions, like the older opening
   battle tests. They do not prove browser contour/pixel parity, balance across the
   full campaign or a performance advantage over Flash.
 
-No new original-SWF diagnostic family, multi-campaign fixture collection, ZIP or
-full rollback copy was created for individual classes. Existing reference tests
-continue to pass. The prior baseline is committed at `2075094`; old evidence is
+No day-specific SWF diagnostic family, large fixture collection or per-day ZIP
+was created. Existing reference tests continue to pass. The prior baseline is
+committed at `9588b35`; old evidence is
 in [historical verification](port-verification.json) and Git history.
 
 ## Remaining features and differences
 
-1. General campaign progression beyond Day9, first boss-day combat, missing enemy
-   families and later variants. Mission selection still rejects enemy kinds with
-   missing behavior; do not bypass that guard to claim broader coverage.
+1. Later campaign cycles beyond Day40, strength/large-enemy variants and the
+   systems below. Day40 town prepares the next mission, but Rest is guarded until
+   those cycles are implemented. This is not an endless-campaign claim.
 2. Castle page two, remaining town/card/search actions, recruit refresh, temporary
    Mission Hire, Ragnarok and remaining economy/medal systems.
 3. Unlockable hero classes (Sniper, Ranger, Duelist, Noble), original multiple save
@@ -59,6 +68,13 @@ in [historical verification](port-verification.json) and Git history.
    boss reticle and some raster/filter/subpixel differences.
 5. The veteran late-game hitbox complaint is still **unreproduced**. Earlier
    contour/vertical-projectile corrections do not establish its diagnosis.
+
+The later enemy hit regions use rendered alpha; extending the contour extractor
+encountered unsupported strokes. Existing early contours remain unchanged.
+Bird-rat falling motion is approximate. Decorative ranged bolt/fireball/lightning
+effects, some frame-triggered sounds and boss rage art are incomplete; castle
+damage follows the extracted source attack frames. These are explicit fidelity
+gaps retained while completing gameplay coverage.
 
 ## Working direction
 
