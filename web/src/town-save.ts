@@ -1,6 +1,7 @@
 import { calendarLoot, validCampaignDay, generateLowLevelMission } from './missions.ts';
 import { RECRUIT_NAMES } from './recruits.ts';
 import type { Item } from './items.ts';
+import type { GameMods } from './game-mods.ts';
 import { validTownPreparationEffects, type FirstTownPreparation } from './town-preparation.ts';
 
 const record = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -8,17 +9,17 @@ const integer = (value: unknown, low: number, high: number): value is number => 
 const fieldsEqual = (value: Record<string, unknown>, fields: Record<string, unknown>) => Object.entries(fields).every(([key, expected]) => value[key] === expected);
 
 /** Проверяем сохранённые результаты генерации, не повторяя случайные броски при загрузке. */
-export function validTownPreparation(value: unknown, validItem: (item: unknown) => item is Item, day: number = 1, expectedAbsorbFix?: number, absorbMode: 'base' | 'active' = 'active', casual = false): value is FirstTownPreparation {
+export function validTownPreparation(value: unknown, validItem: (item: unknown) => item is Item, day: number = 1, expectedAbsorbFix?: number, absorbMode: 'base' | 'active' = 'active', casual = false, mods: GameMods = {}): value is FirstTownPreparation {
   if (!validCampaignDay(day)) return false;
   if (!record(value) || !Array.isArray(value.shop) || value.shop.length !== 8 || Array.from(value.shop).some(item => item !== null && !validItem(item))) return false;
   if (!Array.isArray(value.cards) || value.cards.length !== 5 || value.cards.some(id => !integer(id, -7, -1))) return false;
   for (let id = -7; id <= -1; id++) if (value.cards.filter(card => card === id).length > (id === -1 ? 3 : 1)) return false;
-  if (!integer(value.searched, 0, Number.MAX_SAFE_INTEGER - 1) || !record(value.flags) || value.flags.specialSale !== 0 || !integer(value.flags.robbed, 0, 1000000) || ['egg', 'partyHeld', 'prayed'].some(key => typeof (value.flags as Record<string, unknown>)[key] !== 'boolean') || !integer(value.flags.taunted, 0, 100)) return false;
+  if (!integer(value.searched, 0, Number.MAX_SAFE_INTEGER - 1) || !record(value.flags) || value.flags.specialSale !== (mods.community && day % 10 === 4 ? 1 : 0) || !integer(value.flags.robbed, 0, 1000000) || ['egg', 'partyHeld', 'prayed'].some(key => typeof (value.flags as Record<string, unknown>)[key] !== 'boolean') || !integer(value.flags.taunted, 0, 100)) return false;
   // Снимок принадлежит моменту подготовки: найм/увольнение позднее не меняют готовую награду.
   if (value.preparationEffects !== undefined && !validTownPreparationEffects(value.preparationEffects)) return false;
   const negotiator = value.preparationEffects?.missionNegotiator ?? 0;
   const mission = value.mission;
-  const expected = generateLowLevelMission(day, day, () => 0, { negotiator, casual });
+  const expected = generateLowLevelMission(day, day, () => 0, { negotiator, casual, intense: mods.intense });
   const { loot: _loot, group: _group, bossWave: _bossWave, hire: _hire, absorbFix: _absorb, hpFix: _hp, dmgFix: _dmg, expFix: _exp, reward: _reward, ...fixed } = expected;
   if (!record(mission) || typeof mission.hire !== 'boolean' || !fieldsEqual(mission, fixed) || !Array.isArray(mission.group) || mission.group.length !== 0
     || (expected.bossDay ? mission.bossWave !== expected.wave - 1 : !integer(mission.bossWave, 2, 2 + Math.ceil(expected.wave / 3) - 1))) return false;

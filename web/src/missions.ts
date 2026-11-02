@@ -1,4 +1,5 @@
 import { ENEMIES, type EnemyKind } from './content.ts';
+import type { GameMods } from './game-mods.ts';
 export type GameMode = 'normal' | 'casual' | 'hardcore';
 
 export interface LowLevelMission {
@@ -13,7 +14,7 @@ export interface GeneratedWave { enemies: EnemyKind[]; delays: number[]; initial
 export interface GeneratedWaves { waves: GeneratedWave[]; power: number; group: number[] }
 
 // Миссия готовится до Rest; календарный день определяет гарантированный предмет.
-export function generateLowLevelMission(level: number, calendarDay: number, random: () => number, options: { absorbFix?: number; negotiator?: number; casual?: boolean } = {}): LowLevelMission {
+export function generateLowLevelMission(level: number, calendarDay: number, random: () => number, options: { absorbFix?: number; negotiator?: number; casual?: boolean; intense?: boolean } = {}): LowLevelMission {
   if (!Number.isInteger(level) || level < 0 || level > MAX_CAMPAIGN_DAY || !validCampaignDay(calendarDay)) throw new RangeError('Unsupported campaign mission preparation.');
   const absorbFix = options.absorbFix ?? 0;
   if (![0, 0.01, 0.02, 0.03, 0.04].includes(absorbFix)) throw new RangeError('Unsupported medal absorption.');
@@ -26,7 +27,8 @@ export function generateLowLevelMission(level: number, calendarDay: number, rand
   const bossDay = fixedLv % 10 === 9;
   const wave = bossDay ? 6 + Math.trunc(fixedLv / 10) : 5 + Number(fixedLv > 10) + Number(fixedLv > 20) + Number(fixedLv > 30) + Number(fixedLv > 35);
   const rolledBossWave = bossDay ? wave - 1 : 2 + Math.trunc(random() * wave / 3);
-  const power = options.casual ? 500 + fixedLv * 30 + level * 60 : 800 + fixedLv * 50 + level * 70;
+  const power = (options.casual ? 500 + fixedLv * 30 + level * 60 : 800 + fixedLv * 50 + level * 70)
+    + (options.intense && calendarDay < 10 ? 400 - calendarDay * 25 : 0);
   return {
     // generateMission обновляет PARTY перед расчётом; округление происходит после деления.
     level, fixedLv, strength, power, powerOrg: power, reward: Math.trunc((600 + level * 20) * (100 + negotiator) / 100),
@@ -64,7 +66,7 @@ const SELECTION_ENEMIES: readonly SelectionEnemy[] = [
 
 // Источник: generateWave/selectEnemy/randLv/preGenerateWave. Миссия готовится до Rest,
 // а календарный день меняется до генерации волн; переданную миссию не создаём заново.
-export function generateLowLevelWaves(mission: Readonly<LowLevelMission>, calendarDay: number, random: () => number): GeneratedWaves {
+export function generateLowLevelWaves(mission: Readonly<LowLevelMission>, calendarDay: number, random: () => number, mods: GameMods = {}): GeneratedWaves {
   if (!Number.isInteger(mission.level) || mission.level < 0 || mission.level >= MAX_CAMPAIGN_DAY || !validCampaignDay(calendarDay)) throw new RangeError('Unsupported campaign mission.');
   const expected = generateLowLevelMission(mission.level, calendarDay, () => 0);
   if (mission.wave !== expected.wave || mission.fixedLv !== expected.fixedLv || mission.bossDay !== expected.bossDay
@@ -118,7 +120,7 @@ export function generateLowLevelWaves(mission: Readonly<LowLevelMission>, calend
       select(level, 20, ['AIR']);
       select(level + 2, 20, ['AIR']);
       select(randLv(level, 0.2), 20, ['AIR']);
-    } else if (random() < 0.1 && level > 2) {
+    } else if (random() < 0.1 && level > 2 && !mods.skipHard) {
       // BATCH1 прерывает цепочку: броски RANGED и BATCH2 здесь не выполняются.
       select(randLv(level, 0.7), 40, ['BATCH']);
       select(level + 2, 20, []);
@@ -131,7 +133,7 @@ export function generateLowLevelWaves(mission: Readonly<LowLevelMission>, calend
       select(randLv(level, 1), 15, []);
       select(randLv(level, 1), 15, ['RANGED']);
     } else {
-      const batch = random() < 0.15 && level > 10;
+      const batch = random() < 0.15 && level > 10 && !mods.skipHard;
       if (batch) select(randLv(level - 2, 0.8), 100, ['MASS']);
       else {
         select(randLv(level, 0.25), 15, ['BATCH']);
@@ -151,7 +153,7 @@ export function generateLowLevelWaves(mission: Readonly<LowLevelMission>, calend
       [enemies[n], enemies[swap]] = [enemies[swap], enemies[n]];
     }
     delays[0] += 90 - Math.trunc(mission.fixedLv * 1.5);
-    if (calendarDay < 10) delays[0] += 20;
+    if (calendarDay < 10 && !mods.intense) delays[0] += 20;
     if (index === 0) delays[0] += 50;
     waves.push({ enemies, delays, initialCount: enemies.length });
   }

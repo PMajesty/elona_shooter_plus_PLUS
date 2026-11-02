@@ -1,10 +1,12 @@
-import { ItemFactory, type Item } from './items.ts';
+import { ItemFactory, type Item, type ItemContext } from './items.ts';
 import { generateLowLevelMission, validCampaignDay, type LowLevelMission } from './missions.ts';
 import { generateEarlyTownRecruit, type FirstTownRecruit } from './recruits.ts';
 
 export interface FirstTownMission extends LowLevelMission {}
 
 export interface FirstTownPreparationInput {
+  intense?: boolean; community?: boolean;
+  weaponLevelMode?: boolean; weaponSkillLevels?: ItemContext['weaponSkillLevels'];
   casual?: boolean;
   actionMedals?: readonly number[];
   smith?: number; chickens?: number; specialSale?: boolean;
@@ -62,16 +64,16 @@ export function prepareEarlyTown(random: () => number, day: number, input: First
   }
 
   // Уровень следующей миссии равен текущему дню; календарная добыча определяется до Rest.
-  const mission = generateLowLevelMission(day, day, random, { absorbFix: input.absorbFix, negotiator: effects.missionNegotiator, casual: input.casual }) as FirstTownMission;
+  const mission = generateLowLevelMission(day, day, random, { absorbFix: input.absorbFix, negotiator: effects.missionNegotiator, casual: input.casual, intense: input.intense }) as FirstTownMission;
   // generatePlayer вызывает initPartySkill до выдачи оружия; кандидат5 не входит в активные0–4.
-  const recruit = generateEarlyTownRecruit(random, day, { previousSlots: input.recruitSlots, itemContext: { engineer: effects.recruitEngineer } });
+  const recruit = generateEarlyTownRecruit(random, day, { previousSlots: input.recruitSlots, itemContext: { engineer: effects.recruitEngineer, weaponLevelMode: input.weaponLevelMode, weaponSkillLevels: input.weaponSkillLevels ?? {} } });
   // Смена кандидата не стирает неиспользованные слоты прежнего ополченца.
   const retainedRecruitItems: Record<number, Item> = {};
   for (const [slot, item] of Object.entries(input.recruitSlots ?? {})) if (item) retainedRecruitItems[Number(slot)] = { ...item };
   recruit.items = { ...retainedRecruitItems, ...recruit.items };
   const bonusAp = [80, 81, 82].reduce((sum, medal) => sum + Number(Boolean(input.actionMedals?.includes(medal)) && random() > 0.6), 0);
   // Флаги нового дня сбрасываются после выплаты бонусных AP за медали.
-  const flags = { specialSale: 0, egg: !(input.chickens && input.chickens > 0), partyHeld: false, prayed: false, robbed: 0, taunted: 0 } as const;
+  const flags = { specialSale: input.community && day % 10 === 4 ? 1 : 0, egg: !(input.chickens && input.chickens > 0), partyHeld: false, prayed: false, robbed: 0, taunted: 0 } as const;
   // В оригинале этот бросок идёт после автоматического сохранения frame71; вызывающий код сохраняет весь готовый результат.
   const searched = input.searched ?? Math.trunc(random() * 1000);
   const explicitEffects = input.shopEngineer !== undefined || input.missionNegotiator !== undefined || input.recruitEngineer !== undefined;
@@ -81,7 +83,7 @@ export function prepareEarlyTown(random: () => number, day: number, input: First
 
 export function generateTownShop(random: () => number, day: number, input: FirstTownPreparationInput = {}): (Item | null)[] {
   // frame71 генерирует лавку до generateMission/initPartySkill: здесь действует прежний кэш.
-  const factory = new ItemFactory(random, { day, engineer: input.shopEngineer ?? 0 });
+  const factory = new ItemFactory(random, { day, engineer: input.shopEngineer ?? 0, weaponLevelMode: input.weaponLevelMode, weaponSkillLevels: input.weaponSkillLevels ?? {} });
   // clearGameInv сохраняет поля даже у пустых слотов; первая лавка использует только 0 и 1.
   const shop = Array.from({ length: 8 }, (_, index) => input.priorOffers?.[index] ? { ...input.priorOffers[index], num: 0 } as Item : null);
   for (let index = 0; index < 2 + (input.smith ?? 0); index++) {
@@ -89,7 +91,7 @@ export function generateTownShop(random: () => number, day: number, input: First
   }
   // Исходный generateShop сначала тратит броски слота 0, затем заменяет его гарантированным оружием.
   shop[0] = factory.randomItem(Math.trunc(random() * day * 200) + 200, 4, shop[0]!);
-  if (input.specialSale ?? day === 4) {
+  if (input.specialSale ?? day % 10 === 4) {
     // Распродажа заменяет уже созданный товар: исходные броски и поля слотов остаются значимыми.
     for (let index = 0; index < 2 + (input.smith ?? 0); index++) {
       shop[index] = factory.randomItem(Math.trunc(random() * day * 75) + 500, 3, shop[index]!);

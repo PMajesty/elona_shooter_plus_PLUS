@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v34, eight hero classes, repeating cycles**.
+Updated 2026-11-02. Current local build: **v35, eight hero classes, repeating cycles**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -38,6 +38,11 @@ source encounter power,35% more kill XP and lower taxes. Hardcore uses normal
 combat, removes the browser adventure save at battle start and permits saving,
 export and Continue only in town. Medal collection and separate mode day records
 persist independently; Hardcore medals are awarded at original day20/40/80 boundaries.
+All seven original Game MODs are selectable in the original options panel: boss
+MOD drops, Intense Start, weapon-level limits, Skip hard waves, Tighter crosshair,
+Laptop difficulty and Community Compilation. Their combat, loot, town and saved
+state effects are connected. MOD sale days now repeat every10 days as in source;
+Community Compilation retains the sale for refreshes on that day.
 
 Town coverage includes shop buy/sell, upgrades/MOD mounting, permanent companions
 with equipment/orders/AI/growth/wages, temporary Mission Hire, both Castle pages,
@@ -48,75 +53,52 @@ Both original Museum medal pages show all38 English descriptions and earned stat
 visitor robbery, action-medal AP bonuses and class/day/perfect-day medals work.
 
 Original assets, English UI and credits remain. Sound starts muted unless the user
-enabled it. Browser testing reuses one tab and keeps it muted. One browser save,
+enabled it. Browser testing reuses a tab when available and keeps it muted. One browser save,
 Continue and JSON backups work; imported/continued battles open paused.
 
 ## Validation and limits
 
-- **474 tests passed**, with typechecking and production build passing.
-  Latest bundle: `assets/index-Dee9n8Oq.js`.
-- New checks cover unlock requirements, global profile validation/storage, carried
-  medals, starting bonuses applied once, actual Sniper/Duelist damage, Ranger
-  rampage, Noble XP, reload/decay, save replay and older-save migration. All eight
-  classes finish the first two natural battles using ordinary Free Repair between
-  damaged towns. This is not proof of full-campaign difficulty balance.
-- Existing controlled campaign evidence covers all40 days, rewards, towns and
-  Rest/save boundaries over97293 frames and all19 enemy kinds. Powerful test gear
-  removes difficulty as an obstacle. Existing economy, search, hire, Museum,
-  projectile, corruption and original-comparison checks remain relevant evidence
-  for their unchanged behavior; seeded repeatability does not prove Flash parity.
-- V31 browser checks refused locked Sniper selection, accepted the required class
-  medals, selected Sniper through the second class page and started an actual
-  battle with the original adrenaline HUD and saved class state. A malformed
-  collection import preserved the full game/profile envelope. No console errors.
-  Evidence: `.build/browser-qa/class-unlocks-verification.json` and
-  `unlocked-classes.png`.
-- V32 controlled combat crosses Days39–44 and77–82 through rewards, towns, Rest
-  and JSON saves. Formula cases cover levels40/46/80/120/999, later-cycle selection,
-  boss counts, calendar loot, strength, large-variant exclusions, actual size hit
-  coverage and malformed imports. Day1000 and its level1009 henchman restore.
-  The existing40-day full replay remains fixed at40 rather than expanding with
-  the save boundary. This is progression evidence, not later-cycle balance proof.
-- V32 browser Rest opens Day41 with fixedLv3/strength200. Its full exported
-  simulation matches expected progression using the observed browser pointer
-  coordinates as input. Controlled normal/large sheep display original artwork;
-  import and Continue retain variant state. No console errors. Evidence:
-  `.build/browser-qa/cycle-transition-verification.json` and `cycle-large-enemies.png`.
-- V33 tests cover Ragnarok consumption,30 spawn attempts, the shared200-enemy
-  capacity, actual dinosaur attacks and saved replay, controlled battle survival,
-  defeat, medal timing, discounted wages, future New Game Luck and reset at Rest.
-  The number3 key activated the artifact in the muted browser; all30 dinosaurs,
-  consumed item and mission flag were exported and retained by Continue (pointer
-  coordinates treated as observed input). No console errors. Evidence:
-  `.build/browser-qa/ragnarok-verification.json` and `ragnarok.png`.
-  This controlled survival run does not establish unassisted Ragnarok balance.
-  An actual crash from killing an enemy before the first wave's timer boundary
-  is fixed: missing group size follows the source's int(NaN)→0 drop calculation.
-- V34 checks cover actual Casual XP/tax/mission power, two controlled battles and
-  Rest/save replay, creation-mode changes without hero/RNG rerolls, Hardcore medal
-  boundaries and bonuses, town-only save policy, preserved medals/mute settings,
-  independent profile records and corrupt/old-mode rejection. Muted browser New
-  Game exercised exclusive Casual/Hardcore toggles; Casual exports show500 opening
-  power. Hardcore battle export was refused and Continue reported no save. Its
-  town19 checkpoint restored and Rest opened a paused Hardcore Day20 battle.
-  Original user adventure/profile restoration is exact after migration. Evidence:
-  `.build/browser-qa/game-modes-verification.json` and `game-modes.png`.
-  The app crash stopped the preview and invalidated the retained tab; Vite preview
-  was restored at the same address and one muted replacement tab retained. No
-  cause or fix for the Codex app crash itself is established by this recovery.
-- The user's original Sheriff adventure **and collection** were restored with full
-  exported-envelope equality: day1, tick674, RNG1744019180, HP40, gold209, paused
-  and muted. No test unlocks remain in the collection.
+- **480 tests passed**, with typechecking and production build passing. Latest
+  bundle: assets/index-CvdXBdyD.js. New MOD checks cover selection/reset without
+  hero/RNG rerolls, combined Casual/Intense power, both skipped batch branches,
+  actual movement, spread/recoil, range penalty, manual XP, boss rewards, party
+  weapon-skill limits, explicit upgrade behavior, fixed Active AP, sale refreshes,
+  malformed imports and JSON replay across Rest. Earlier normal saves migrate
+  without adding MOD fields or changing their simulation RNG/state.
+- The controlled full40-day campaign completed in96494 simulation frames, with
+  all19 enemy kinds, rewards, towns and save boundaries. Its changed frame count
+  follows the repeating MOD-sale correction and resulting generation RNG. Strong
+  test gear removes difficulty as an obstacle; this is not a balance claim.
+- Existing checks cover all eight heroes through two natural opening battles;
+  controlled Day40/80 cycle crossings; later formulas/Day1000 henchman; economy,
+  search, hire, Museum, projectiles, Ragnarok and Casual/Hardcore. Ragnarok and
+  later-cycle survival tests use controlled gear/HP. Original comparison cases
+  still pass for unchanged defaults. Seeded repeatability is distinct from parity.
+- The muted V35 browser check opened the extracted original MOD panel, toggled an
+  option, verified Back/reset, enabled all seven and started an actual battle with
+  1175 opening power. Continue retained its entire envelope using observed pointer
+  coordinates as input. No console errors. Evidence:
+  .build/browser-qa/game-mods-verification.json and game-mods.png.
+- Earlier browser evidence covers reload/combat/results/town, activities, hires,
+  Museum, class unlocks, Ragnarok and both difficulty modes. Hardcore battle export
+  is refused and Continue has no battle save; its town checkpoint loads and Rest
+  works. These records remain useful for unchanged paths, without repeating all
+  UI flows at every checkpoint.
+- The user's original Sheriff adventure and collection were restored with full
+  exported-envelope equality after migration: day1, tick674, RNG1744019180, HP40,
+  gold209, paused/muted. No test MODs, unlocks or records remain.
 
-Current evidence supports these features, not whole-game parity, native Flash
-timing equivalence, full pixel/contour parity or a measured performance advantage.
-Historical details are in Git and [historical verification](port-verification.json).
+Current evidence does not establish whole-game parity, native Flash timing, full
+pixel/contour parity or a measured performance advantage. Historical details are
+in Git and [historical verification](port-verification.json). The Codex app crash
+stopped the preview; it was recovered at the same URL. Recovery does not establish
+that the app's crash cause was fixed.
 
 ## Remaining features and differences
 
 1. Long-session stability/performance and difficulty evidence beyond the first
    cycle; the current Day1000 save safety boundary remains an intentional limit.
-2. Game MODs, alternative starts, carry-over and remaining medal
+2. Alternative starts, carry-over and remaining medal
    effects/triggers, including recycling/modding bonuses and decorative fireworks.
 3. Original six save slots/global slot UI, deletion and Flash save conversion.
 4. Measured performance, rendering sharpness and remaining visual/audio details:

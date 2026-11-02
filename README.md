@@ -3,7 +3,7 @@
 A TypeScript/Phaser browser remake of Elona Shooter Plus 1.3.0.4.
 The current local build supports **all eight original hero classes** and
 **repeating campaign cycles**, including Casual and Hardcore modes. This is an
-incomplete remake; Game MODs, alternative starts and remaining systems are still being ported.
+incomplete remake; alternative starts, carry-over and remaining systems are still being ported.
 
 Open [the local game](http://127.0.0.1:5175/elona/).
 Original artwork, English text, audio and credits are retained. Sound starts muted
@@ -38,10 +38,13 @@ unless you previously enabled it; its button explicitly displays the current sta
   saved counters and action medals with their next-town AP chances.
 - A persistent browser medal collection with class unlocks and original New Game
   starting bonuses. One browser save with Continue and JSON import/export.
-  Version34 accepts prior browser saves; original Flash saves require a future converter.
+  Version35 accepts prior browser saves; original Flash saves require a future converter.
 - Casual lowers encounter power/taxes and grants35% more kill XP. Hardcore uses
   normal combat, deletes the resumable save when a battle starts and permits
   saving/export only in town. Each mode has a separate best-day record.
+- All seven original Game MODs: boss MOD drops, Intense Start, weapon-level limits,
+  Skip hard waves, Tighter crosshair, Laptop difficulty and Community Compilation.
+  New Game opens the original options panel; selected MODs persist per adventure.
 
 Remaining work and validation limits are in [port status](docs/port-status.md).
 The [process review](docs/development-process-review.md) records the correction
@@ -94,7 +97,7 @@ Temporary-hire checks cover confirmation, a full permanent party, actual AI fire
 projectile replay, half rewards, wages, departure and old-save migration.
 Museum checks cover payouts, medal thresholds, daily resets, action AP bonuses,
 correct hero-class awards and migration. Unlock checks cover the global collection,
-starting bonuses and actual class combat effects. Game MODs, some medal effects and
+starting bonuses and actual class combat effects. Alternative starts, some medal effects and
 the original six save slots remain incomplete.
 Additional controlled combat crosses Day40/80 through ordinary rewards, towns,
 Rest and JSON restores. Source-formula checks cover later cycles and Day1000 save
@@ -103,6 +106,8 @@ Ragnarok checks cover actual attacks, capacity, one-use consumption, save replay
 victory/defeat medal boundaries, wage reduction and the future New Game bonus.
 Mode checks cover Casual combat/settlement and replay, Hardcore save policy,
 day20/40/80 medals, independent records and unchanged normal-save migration.
+Game MOD checks measure actual movement, spread/recoil, XP, waves, rewards and
+party-based weapon generation limits, plus AP, repeating sales and save replay.
 Test counts do not establish whole-game completeness or full pixel parity.
 
 ## Original assets and recovery

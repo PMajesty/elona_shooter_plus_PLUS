@@ -1,3 +1,4 @@
+import { validGameMods, type GameMods } from './game-mods.ts';
 import { generateEarlyTownRecruit } from './recruits.ts';
 import { generateHenchman } from './party.ts';
 import { MEDALS } from './medals.ts';
@@ -48,6 +49,7 @@ export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCoun
 export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'> & { hire?: true; ragnarok?: true };
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
 export interface SimulationState {
+  mods?: GameMods;
   mode?: Exclude<GameMode, 'normal'>;
   version: typeof SAVE_VERSION; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: number; tick: number; timerRemainder: number; rng: number; nextUid: number;
   activeMission: ActiveMission; resultBefore: number; earnedMedals: number[]; perfectDays: number; bossesSpawned: number;
@@ -74,7 +76,7 @@ export interface SimulationState {
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
 export interface SimulationEvent { actorSlot?: number; type: 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
-export interface SimulationOptions { mode?: GameMode; hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
+export interface SimulationOptions { mods?: GameMods; mode?: GameMode; hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
 export type PurchaseOutcome = 'purchased' | 'occupied' | 'not-enough-gold' | 'unavailable';
@@ -123,11 +125,11 @@ export class Simulation {
       return initialRng / 4294967296;
     };
     // New Game готовит миссию до первого updateGene; волны появляются после Proceed.
-    this.pendingOpeningMission = generateLowLevelMission(0, 1, random, { casual: options.mode === 'casual', absorbFix: [60, 61, 62, 63].filter(id => options.medals?.includes(id)).length / 100 });
+    this.pendingOpeningMission = generateLowLevelMission(0, 1, random, { casual: options.mode === 'casual', intense: options.mods?.intense, absorbFix: [60, 61, 62, 63].filter(id => options.medals?.includes(id)).length / 100 });
     const classId = options.heroClass ?? 'sheriff';
     const generated = generateHero(random, classId);
     this.state = {
-      ...(options.mode && options.mode !== 'normal' ? { mode: options.mode } : {}), version: SAVE_VERSION, economy: createTownEconomy(), phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
+      ...(options.mode && options.mode !== 'normal' ? { mode: options.mode } : {}), ...(options.mods && Object.keys(options.mods).length ? { mods: structuredClone(options.mods) } : {}), version: SAVE_VERSION, economy: createTownEconomy(), phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
       activeMission: this.missionParameters(this.pendingOpeningMission), resultBefore: STARTING_CLASS.money, earnedMedals: [...new Set([40, ...(options.medals ?? [])])], perfectDays: 0, bossesSpawned: 0,
       castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, wallLevel: 1, wallFixCount: 0, repairmanLevel: 0, sandbagLevel: 0, looterLevel: 0, trainerLevel: 0, gold: STARTING_CLASS.money, totalMoney: 0, kills: 0, criticalKills: 0,
       aimX: 300, aimY: 240, fireHeld: false, pendingShot: false,
@@ -354,14 +356,26 @@ export class Simulation {
   setOpeningMode(mode: GameMode): boolean {
     if (!this.pendingOpeningMission || !['normal', 'casual', 'hardcore'].includes(mode)) return false;
     if (mode === 'normal') delete this.state.mode; else this.state.mode = mode;
-    const power = mode === 'casual' ? 500 : 800;
+    const power = (mode === 'casual' ? 500 : 800) + (this.state.mods?.intense ? 375 : 0);
     this.pendingOpeningMission.power = this.pendingOpeningMission.powerOrg = power;
     this.state.activeMission.powerOrg = power;
     return true;
   }
 
+  setOpeningMods(mods: GameMods): boolean {
+    if (!this.pendingOpeningMission || !validGameMods(mods)) return false;
+    if (Object.keys(mods).length) this.state.mods = structuredClone(mods); else delete this.state.mods;
+    return this.setOpeningMode(this.state.mode ?? 'normal');
+  }
+
+  private weaponLevelContext() {
+    const troops = [this.state.player, ...this.state.party.slots.slice(0, 4).flatMap(slot => slot.exists && slot.member ? [slot.member] : [])];
+    return { weaponLevelMode: Boolean(this.state.mods?.weaponLevel),
+      weaponSkillLevels: Object.fromEntries([103, 104, 105, 106].map(id => [id, Math.max(...troops.map(troop => troop.traits[id] ?? 0))])) };
+  }
+
   private generateOpeningMission(): void {
-    this.applyOpeningMission(generateLowLevelMission(0, 1, () => this.random(), { casual: this.state.mode === 'casual' }));
+    this.applyOpeningMission(generateLowLevelMission(0, 1, () => this.random(), { casual: this.state.mode === 'casual', intense: this.state.mods?.intense }));
   }
 
   private applyStartingMedals(): void {
@@ -383,7 +397,7 @@ export class Simulation {
     this.state.newWave = mission.newWave;
     this.state.spawnTimer = mission.time;
     this.state.bossWave = mission.bossWave;
-    this.state.waves = generateLowLevelWaves(mission, 1, () => this.random()).waves;
+    this.state.waves = generateLowLevelWaves(mission, 1, () => this.random(), this.state.mods).waves;
   }
 
   private missionParameters(mission: Readonly<LowLevelMission>): ActiveMission {
@@ -408,7 +422,7 @@ export class Simulation {
     state.previousTown = town;
     state.town = null;
     state.activeMission = this.missionParameters(town.mission);
-    const generated = generateLowLevelWaves(town.mission, state.day, () => this.random());
+    const generated = generateLowLevelWaves(town.mission, state.day, () => this.random(), state.mods);
     state.waves = generated.waves;
     state.waveIndex = town.mission.wave; state.bossWave = town.mission.bossWave;
     state.newWave = true; state.spawnTimer = town.mission.time; state.loot = [...town.mission.loot];
@@ -511,7 +525,7 @@ export class Simulation {
       if (manual) this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'beep', message: 'You need a gun to shoot!' });
       return false;
     }
-    const stats = weaponStats(item, player.traits, { manualControl: manual, partyLeadership: this.state.partySkills.effects[116] });
+    const stats = weaponStats(item, player.traits, { tight: this.state.mods?.tight, manualControl: manual, partyLeadership: this.state.partySkills.effects[116] });
     if (!stats.canFire) {
       if (manual) this.state.pendingShot = false;
       if (manual) this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'beep', message: "You don't have the required weapon skill!" });
@@ -526,7 +540,7 @@ export class Simulation {
       else if (ai) { ai.shooting = false; ai.burst = 0; }
       this.requestActorReload(actorSlot); return false;
     }
-    const spread = shotSpread(item, player.traits, player.accuracyFix, { manualControl: manual, fireAtWill: member?.ai === 6 });
+    const spread = shotSpread(item, player.traits, player.accuracyFix, { tight: this.state.mods?.tight, manualControl: manual, fireAtWill: member?.ai === 6 });
     player.shootTimer = stats.shootTimer;
     if (!manual && !item.automatic) player.shootTimer += int(this.random() * (item.shootRate / 1.5 / ai!.workRate));
     const behavior = weaponBehavior(item);
@@ -747,7 +761,7 @@ export class Simulation {
       }
     }
     const selected = state.inventory[player.selectedSlot];
-    if (selected?.baseAccuracy !== undefined && selected.range !== undefined) player.accuracyFix = recoverAccuracy(selected, player.traits, player.accuracyFix, state.aimX);
+    if (selected?.baseAccuracy !== undefined && selected.range !== undefined) player.accuracyFix = recoverAccuracy(selected, player.traits, player.accuracyFix, state.aimX, state.mods?.tight);
   }
 
   private spawnEnemy(kind: EnemyKind): void {
@@ -773,7 +787,7 @@ export class Simulation {
     const bossCount = kind === 'boss' ? 100 + int(this.random() * 60) : 0;
     // Даже при нулевых strength/THREAT исходное умножение и деление влияют на последний бит Number.
     const strength = this.state.activeMission.strength;
-    const speed = (definition.speedBase + this.random() * definition.speedRandom) * (100 + strength / 8) / (100 + this.state.partySkills.effects[112]);
+    const speed = (definition.speedBase + this.random() * definition.speedRandom) * (100 + strength / 8) / (100 + this.state.partySkills.effects[112]) * (this.state.mods?.laptop ? 0.7 : 1);
     const yRoll = this.random();
     const y = int(kind === 'fly' ? yRoll * 70 / 1.5 + 80 : yRoll * (kind === 'boss' ? 105 : definition.airborne ? 70 : WORLD.groundWidth) + (kind === 'boss' ? 195 : definition.airborne ? 40 : WORLD.groundLine));
     const hp = kind === 'boss' ? 150 + this.state.activeMission.level * 25 : int(definition.hp * this.state.activeMission.hpFix * (100 + strength * 1.2) / 100);
@@ -881,7 +895,7 @@ export class Simulation {
     if (actorSlot) {
       if (this.state.day / 1.5 > player.level) { player.weaponExp[skillIndex < 0 ? 4 : skillIndex]++; experience = int(experience * 2); }
       experience = int(experience * 1.5);
-    }
+    } else if (this.state.mods?.tight) experience = int(experience * 0.7);
     const enemyLevel = enemy.kind === 'boss' ? this.state.activeMission.level : definition.level;
     if (enemyLevel + 3 < player.level) experience = int(experience * 100 / (100 + (player.level - enemyLevel) * 75));
     if (player.traits[COMBAT_TRAIT.NOBLE]) experience = int(experience * 1.4);
@@ -1371,7 +1385,7 @@ export class Simulation {
 
   private prepareOrdinaryLoot(random: () => number): void {
     if (this.state.phase !== 'victory' || this.state.postbattle !== 'none') return;
-    const generated = new ItemFactory(random, { day: this.state.day, engineer: this.state.partySkills.effects[120], looter: this.state.looterLevel }).ordinaryLoot(this.state.loot, this.state.previousTown?.shop ?? this.state.lootOffers);
+    const generated = this.equipmentFactory(random).ordinaryLoot(this.state.loot, this.state.previousTown?.shop ?? this.state.lootOffers);
     this.state.lootOffers = generated.offers;
     this.state.loot = generated.queue;
     this.state.postbattle = 'loot';
@@ -1432,7 +1446,7 @@ export class Simulation {
   finishLoot(): boolean {
     if (this.state.phase !== 'victory' || !['loot', 'boss-loot'].includes(this.state.postbattle) || this.state.pendingLootAction) return false;
     if (this.state.postbattle === 'loot' && this.state.bossKilled > 0) {
-      this.state.lootOffers = this.equipmentFactory().bossLoot(this.state.bossKilled, false, this.state.lootOffers);
+      this.state.lootOffers = this.equipmentFactory().bossLoot(this.state.bossKilled, Boolean(this.state.mods?.bossMods), this.state.lootOffers);
       this.state.postbattle = 'boss-loot';
       return true;
     }
@@ -1453,7 +1467,7 @@ export class Simulation {
     // renewResult тратит бросок fame даже при fame=0; townEvent использует прежний кэш ACTIVE.
     const fame = int(this.state.economy.fame * this.random() * 15);
     if (fame) { this.state.result.fame = fame; this.state.result.netReward += fame; }
-    const extraAp = int(this.random() * this.random() * (this.state.partySkills.effects[123] + 1));
+    const extraAp = this.state.mods?.community ? int((this.state.partySkills.effects[123] + 1) / 2) : int(this.random() * this.random() * (this.state.partySkills.effects[123] + 1));
     this.state.gold += this.state.result.netReward;
     this.state.totalMoney += this.state.result.reward + this.state.result.perfectBonus + this.state.result.salary + (this.state.result.museum ?? 0) + fame;
     this.state.town = { ap: 4 + extraAp, preparation: 'pending' };
@@ -1473,7 +1487,7 @@ export class Simulation {
     const shopEngineer = this.state.partySkills.effects[120];
     this.refreshPartySkills();
     // До generateMission лавка использует старого Engineer; миссия и кандидат — новый кэш.
-    const { bonusAp = 0, ...prepared } = prepareEarlyTown(() => this.random(), this.state.day, { casual: this.state.mode === 'casual', actionMedals: this.state.earnedMedals, priorOffers: this.state.lootOffers, recruitSlots, searched: previous?.searched, absorbFix: this.medalAbsorption(),
+    const { bonusAp = 0, ...prepared } = prepareEarlyTown(() => this.random(), this.state.day, { ...this.weaponLevelContext(), intense: this.state.mods?.intense, community: this.state.mods?.community, casual: this.state.mode === 'casual', actionMedals: this.state.earnedMedals, priorOffers: this.state.lootOffers, recruitSlots, searched: previous?.searched, absorbFix: this.medalAbsorption(),
       smith: this.state.economy.smith, chickens: this.state.economy.chickens, shopEngineer, missionNegotiator: this.state.partySkills.effects[117], recruitEngineer: this.state.partySkills.effects[120] });
     this.state.town = { ap: this.state.town.ap + bonusAp, preparation: 'ready', ...prepared };
     if (this.state.day >= 40) { this.awardMedal(94); if (this.state.mode === 'hardcore') this.awardMedal(96); }
@@ -1550,8 +1564,8 @@ export class Simulation {
   private regenerateShop(): void {
     const town = this.state.town;
     if (town?.preparation !== 'ready') return;
-    town.shop = generateTownShop(() => this.random(), this.state.day, { priorOffers: town.shop,
-      smith: this.state.economy.smith, shopEngineer: this.state.partySkills.effects[120], specialSale: false });
+    town.shop = generateTownShop(() => this.random(), this.state.day, { ...this.weaponLevelContext(), priorOffers: town.shop,
+      smith: this.state.economy.smith, shopEngineer: this.state.partySkills.effects[120], specialSale: Boolean(town.flags.specialSale) });
   }
 
   refreshTownStock(): 'refreshed' | 'not-enough-ap' | 'unavailable' {
@@ -1566,7 +1580,7 @@ export class Simulation {
     const town = this.state.town! as ReadyTown;
     town.ap -= 2;
     town.recruit = generateEarlyTownRecruit(() => this.random(), this.state.day, {
-      previousSlots: { ...town.recruit.items, 45: this.state.party.slots[4].weapon }, itemContext: { engineer: this.state.partySkills.effects[120] } });
+      previousSlots: { ...town.recruit.items, 45: this.state.party.slots[4].weapon }, itemContext: { ...this.weaponLevelContext(), engineer: this.state.partySkills.effects[120] } });
     installCandidate(this.state.party, town.recruit); return 'refreshed';
   }
 
@@ -1754,8 +1768,8 @@ export class Simulation {
     return 'claimed';
   }
 
-  private equipmentFactory(): ItemFactory {
-    return new ItemFactory(() => this.random(), { day: this.state.day, engineer: this.state.partySkills.effects[120], looter: this.state.looterLevel });
+  private equipmentFactory(random = () => this.random()): ItemFactory {
+    return new ItemFactory(random, { ...this.weaponLevelContext(), day: this.state.day, engineer: this.state.partySkills.effects[120], looter: this.state.looterLevel });
   }
 
   beginWeaponUpgrade(slot: number): TownEquipmentOutcome {
@@ -1820,6 +1834,7 @@ export class Simulation {
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
     if (!record(value) || !supportedSaveVersion(value.version) || (!validCampaignDay(value.day) || (value.version < 32 && Number(value.day) > 40) || (value.version < 26 && Number(value.day) > 9) || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7) || (value.version < 23 && value.day === 8) || (value.version < 24 && value.day === 9)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
     if (value.mode !== undefined && (Number(value.version) < 34 || !['casual', 'hardcore'].includes(String(value.mode)))) throw new Error('Invalid game mode.');
+    if (value.mods !== undefined && (Number(value.version) < 35 || !validGameMods(value.mods))) throw new Error('Invalid Game MODs.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || !Number.isInteger(value.bossWave) || Number(value.bossWave) < 2 || Number(value.bossWave) >= (Array.isArray(value.waves) ? value.waves.length : 0) || (Array.isArray(value.waves) && value.waveIndex === value.waves.length && value.newWave !== true)) throw new Error('Invalid counters.');
@@ -1850,7 +1865,7 @@ export class Simulation {
       if (!Array.isArray(value.itemCooldowns) || value.itemCooldowns.length !== 5 || value.itemCooldowns.some(time => !Number.isInteger(time) || time < 0 || time > 2001)) throw new Error('Invalid item cooldowns.');
       if (!record(value.protection) || !Number.isInteger(value.protection.counter) || Number(value.protection.counter) < -99 || Number(value.protection.counter) > 250 || !finite(value.protection.blueMultiplierAdd) || value.protection.blueMultiplierAdd < -0.2 || value.protection.blueMultiplierAdd > 1.4) throw new Error('Invalid protection effect.');
       const mission = value.activeMission, level = Number(value.day) - 1;
-      const expected = generateLowLevelMission(level, Number(value.day), () => 0, { casual: value.mode === 'casual' });
+      const expected = generateLowLevelMission(level, Math.max(1, level), () => 0, { casual: value.mode === 'casual', intense: (value.mods as GameMods | undefined)?.intense });
       if (record(mission) && mission.ragnarok !== undefined && (Number(value.version) < 33 || mission.ragnarok !== true)) throw new Error('Invalid Ragnarok state.');
       if (!record(mission) || Object.entries({ level, fixedLv: expected.fixedLv, strength: expected.strength, powerOrg: expected.powerOrg, ...(value.version < 15 || value.day === 1 ? { reward: 600 + level * 20 } : {}), spawnRate: expected.spawnRate, ...(Number(value.version) < 27 || value.day === 1 ? { hpFix: 1, dmgFix: 1, expFix: 1 } : {}), bossDay: expected.bossDay }).some(([key, expected]) => mission[key] !== expected) || !Number.isInteger(mission.reward) || (Number(value.version) < 27 ? ![0, 0.01, ...(Number(value.day) >= 5 ? [0.02] : []), ...(Number(value.day) >= 8 ? [0.03] : []), ...(Number(value.day) >= 11 ? [0.04] : [])].includes(Number(mission.absorbFix)) : !finite(mission.absorbFix) || mission.absorbFix < 0 || mission.absorbFix > 0.24) || (value.day === 1 && (value.version < 31 ? mission.absorbFix !== 0 : ![0, 0.01, 0.02, 0.03, 0.04].includes(Number(mission.absorbFix))))) throw new Error('Invalid active mission.');
       if (Number(value.version) >= 27 && ['hpFix', 'dmgFix', 'expFix'].some(key => !finite(mission[key]) || Number(mission[key]) < 1 || Number(mission[key]) > 100)) throw new Error('Invalid mission bonuses.');
@@ -2074,7 +2089,7 @@ export class Simulation {
       if (!Number.isInteger(state.legacyReconstructionSeed) || state.legacyReconstructionSeed! < 1 || state.legacyReconstructionSeed! > 0xffffffff) throw new Error('Invalid legacy inventory provenance.');
     } else if (state.inventoryProvenance !== 'original-generation' || state.legacyReconstructionSeed !== undefined) throw new Error('Invalid inventory provenance.');
     if (state.day > 1) {
-      if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > (value.version < 15 ? 4 : value.version < 28 ? 14 : 1000000) || !validTownPreparation(state.previousTown, validItem, state.day - 1, state.activeMission.absorbFix, 'active', state.mode === 'casual') || ['reward', 'hpFix', 'dmgFix', 'expFix', 'absorbFix'].some(key => state.activeMission[key as keyof ActiveMission] !== state.previousTown!.mission[key as keyof LowLevelMission]) || (Boolean(state.activeMission.hire) !== state.previousTown.mission.hire)) throw new Error('Invalid previous town.');
+      if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > (value.version < 15 ? 4 : value.version < 28 ? 14 : 1000000) || !validTownPreparation(state.previousTown, validItem, state.day - 1, state.activeMission.absorbFix, 'active', state.mode === 'casual', state.mods) || ['reward', 'hpFix', 'dmgFix', 'expFix', 'absorbFix'].some(key => state.activeMission[key as keyof ActiveMission] !== state.previousTown!.mission[key as keyof LowLevelMission]) || (Boolean(state.activeMission.hire) !== state.previousTown.mission.hire)) throw new Error('Invalid previous town.');
     } else if (state.previousTown !== null) throw new Error('Unexpected previous town.');
     if (Number(value.version) < 3) {
       state.version = SAVE_VERSION;
@@ -2109,7 +2124,7 @@ export class Simulation {
       const town = state.town as unknown;
       if (!record(town) || !Number.isInteger(town.ap) || Number(town.ap) < 0 || Number(town.ap) > (value.version < 15 ? 4 : value.version < 28 ? 14 : 1000000) || (state.phase === 'victory' && (Number(town.ap) < 4 || town.preparation !== 'pending')) || state.castleHp <= 0) throw new Error('Invalid first-town state.');
       if (town.preparation === 'ready') {
-        if (value.version < 5 || state.phase !== 'town' || !validTownPreparation(town, validItem, state.day, simulation.medalAbsorption(), 'base', state.mode === 'casual') || state.lootOffers.some(item => item !== null)) throw new Error('Invalid prepared town.');
+        if (value.version < 5 || state.phase !== 'town' || !validTownPreparation(town, validItem, state.day, simulation.medalAbsorption(), 'base', state.mode === 'casual', state.mods) || state.lootOffers.some(item => item !== null)) throw new Error('Invalid prepared town.');
       } else if (town.preparation !== 'pending' || (value.version >= 5 && state.phase === 'town')) throw new Error('Missing town preparation.');
     } else if (state.town !== null) throw new Error('Town preparation precedes completed rewards.');
     // После боя исходные слоты могут быть переставлены; замороженные снаряды не возобновляются.

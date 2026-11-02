@@ -1,4 +1,5 @@
 import { MAX_CAMPAIGN_DAY, validCampaignDay } from './missions.ts';
+import { GAME_MODS, type GameMod } from './game-mods.ts';
 import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
 import Phaser from 'phaser';
 import { HERO_CLASSES, heroClassUnlocked, isHeroClass, type HeroClass } from './hero-classes.ts';
@@ -28,7 +29,7 @@ interface ClipAsset { image: string; json: string; originX: number; originY: num
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual }
 interface PortSave { format: 'elona-shooter-browser'; version: number; appearance: number; simulation: unknown; profile?: GlobalProfile }
-type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
+type Screen = 'title' | 'gene' | 'mods' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
 const loadStatus = document.querySelector<HTMLDivElement>('#load-status')!;
@@ -68,6 +69,7 @@ class ElonaScene extends Phaser.Scene {
   private companionCursors = new Map<number, Phaser.GameObjects.Image>();
   private companionBowSounds = new Map<number, Phaser.Sound.BaseSound>();
   private selectedCharacter = 0;
+  private modsClassPage: 0 | 1 = 0;
   private castlePage: 0 | 1 = 0;
   private medalPage: 0 | 1 = 0;
   private profileRead = readProfile();
@@ -139,13 +141,13 @@ class ElonaScene extends Phaser.Scene {
       if (this.paused) this.togglePause();
       else this.reloadRequested = true;
     });
-    this.input.keyboard?.on('keydown-ESC', () => { if (this.screen === 'battle') this.togglePause(); else if (this.screen === 'gene') this.showTitle(); });
+    this.input.keyboard?.on('keydown-ESC', () => { if (this.screen === 'battle') this.togglePause(); else if (this.screen === 'gene') this.showTitle(); else if (this.screen === 'mods') this.leaveGameMods(); });
     ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE'].forEach((key, slot) => {
       this.input.keyboard?.on(`keydown-${key}`, () => { if (this.screen === 'battle' && !this.paused) this.slotRequested = slot; });
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Eight hero classes and repeating campaign cycles, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Sniper, Ranger, Duelist and Noble unlock through class medals; the browser medal collection carries into new games and is included in exports. Importing a current-format backup also restores that collection. Casual and Hardcore modes are playable. Remaining Game MODs, alternative starts and original multiple save slots are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Eight hero classes and repeating campaign cycles, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Sniper, Ranger, Duelist and Noble unlock through class medals; the browser medal collection carries into new games and is included in exports. Importing a current-format backup also restores that collection. Casual and Hardcore modes are playable. All seven original Game MODs are selectable at creation. Alternative starts and original multiple save slots are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
     document.querySelector<HTMLButtonElement>('#import-save')!.disabled = false;
   }
@@ -336,7 +338,7 @@ class ElonaScene extends Phaser.Scene {
     });
     refreshClass();
     this.originalButton('button_proceed', 267, 301, () => this.startGame());
-    this.originalButton('button_gameMods', 408, 301, () => { status.textContent = 'Game MODs will return as their underlying systems are ported.'; });
+    this.originalButton('button_gameMods', 408, 301, () => this.showGameMods(page));
     this.text(159, 302, 'Next Page', 13, '#2d315b');
     const modeNames = [['casual', 'Casual Mode'], ['hardcore', 'Hardcore Mode']] as const;
     const modeMarkers = modeNames.map(([mode, name], index) => this.text(413, 252 + index * 22, '', 12, '#2d315b', 'Arial'));
@@ -355,6 +357,36 @@ class ElonaScene extends Phaser.Scene {
 
   private moveSelection(): void {
     this.selection?.setPosition(162 + this.appearance % 11 * 32, 114 + Math.floor(this.appearance / 11) * 30);
+  }
+
+  private leaveGameMods(): void {
+    this.sim?.setOpeningMods({}); this.showGene(this.modsClassPage, true);
+    status.textContent = 'Game MODs have been reset.';
+  }
+
+  private showGameMods(page: 0 | 1): void {
+    this.modsClassPage = page;
+    this.reset('mods'); this.image('townHud'); this.drawHud();
+    const background = new Set(this.root.list);
+    this.image('gameMods');
+    const rows: [GameMod, number][] = [['bossMods', 104], ['intense', 123], ['tight', 142], ['laptop', 161], ['community', 181], ['skipHard', 220], ['weaponLevel', 239]];
+    const labels = rows.map(([key, y]) => this.text(150, y, '', 12, '#24221a', 'ElonaSmall').setWordWrapWidth(390));
+    const refresh = () => {
+      rows.forEach(([key], index) => labels[index].setText(`${this.sim!.state.mods?.[key] ? '[x]' : '[ ]'} ${GAME_MODS[key].label}`));
+      container.dataset.gameMods = JSON.stringify(this.sim!.state.mods ?? {});
+    };
+    rows.forEach(([key, y]) => this.zone(145, y - 2, 405, 19, () => {
+      const mods = { ...this.sim!.state.mods };
+      if (mods[key]) delete mods[key]; else mods[key] = true;
+      this.sim!.setOpeningMods(mods); this.playSound('soundClick1'); refresh();
+      status.textContent = key === 'community' ? 'Community Compilation: Active grants fixed bonus AP; MOD sales remain active for shop refreshes on sale days.' : GAME_MODS[key].label;
+    }));
+    this.originalButton('button_modBack', 132.35, 310, () => this.leaveGameMods());
+    this.originalButton('button_proceed', 269.05, 310, () => this.startGame());
+    refresh();
+    const menu = this.root.list.filter(object => !background.has(object));
+    this.root.add(this.add.container(MENU_X, 0, menu));
+    status.textContent = 'Choose optional Game MODs. Proceed starts this adventure; Back resets MODs. Alternative starts are still being ported.';
   }
 
   private simulationOptions() { return { hitTest: (enemy: Readonly<EnemyState>, x: number, y: number) => this.hitTest(enemy, x, y) }; }
@@ -886,6 +918,7 @@ class ElonaScene extends Phaser.Scene {
       this.adrenalineFill.setScale(Math.max(0, Math.min(1, ratio)), 1.000473);
     }
     container.dataset.gameMode = state.mode ?? 'normal';
+    container.dataset.gameMods = JSON.stringify(state.mods ?? {});
     container.dataset.heroClass = state.player.classId;
     container.dataset.classState = JSON.stringify(meter ?? null);
     container.dataset.gold = String(state.gold); container.dataset.hp = String(state.castleHp);
@@ -1234,7 +1267,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   makeSave(): PortSave | undefined {
-    if (!this.sim || this.screen === 'title' || this.screen === 'gene') return undefined;
+    if (!this.sim || ['title', 'gene', 'mods'].includes(this.screen)) return undefined;
     this.profile = mergeProfile(this.profile, this.sim.state);
     if (!canSaveAdventure(this.sim.state)) return undefined;
     return { format: 'elona-shooter-browser', version: SAVE_VERSION, appearance: this.appearance, simulation: this.sim.toSave(), profile: structuredClone(this.profile) };
@@ -1243,7 +1276,7 @@ class ElonaScene extends Phaser.Scene {
   saveGame(notify = true): boolean {
     const save = this.makeSave();
     if (!save) {
-      if (this.sim && !canSaveAdventure(this.sim.state)) {
+      if (this.sim && !['title', 'gene', 'mods'].includes(this.screen) && !canSaveAdventure(this.sim.state)) {
         const cleared = clearSave(); storeProfile(this.profile);
         if (notify || !cleared) status.textContent = cleared ? 'Hardcore Mode: you can only save or export the game in town.' : 'The Hardcore save could not be cleared from browser storage.';
       } else if (notify) status.textContent = 'Start a game before saving.';
@@ -1312,7 +1345,7 @@ async function boot(): Promise<void> {
 document.querySelector('#fullscreen')!.addEventListener('click', () => { void container.requestFullscreen().catch(() => { status.textContent = 'Full screen is unavailable in this browser view.'; }); });
 document.querySelector('#sound')!.addEventListener('click', () => gameScene?.toggleMute());
 document.querySelector('#export-save')!.addEventListener('click', () => {
-  if (gameScene?.sim && !['title', 'gene'].includes(gameScene.screen) && !canSaveAdventure(gameScene.sim.state)) {
+  if (gameScene?.sim && !['title', 'gene', 'mods'].includes(gameScene.screen) && !canSaveAdventure(gameScene.sim.state)) {
     status.textContent = 'Hardcore Mode: you can only save or export the game in town.'; return;
   }
   const current = gameScene?.makeSave(), saved = readSave();

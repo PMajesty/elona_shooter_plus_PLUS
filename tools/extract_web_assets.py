@@ -51,6 +51,7 @@ BUTTONS = {"button_newGame": 2521, "button_continue": 2542, "button_help": 2579,
            "button_partyRecycle": 1758, "button_partyRestock": 1762,
            "button_castlePage1": 1625, "button_castlePage2": 1630}
 BUTTONS["button_robVisitors"] = 1831
+BUTTONS["button_modBack"] = 1893
 FORCE = False
 
 
@@ -719,6 +720,9 @@ def main():
          {"closeButton", "hint2", "hint", "lootText", "act1", "actRef1", "page1", "page2", "kongMc", "armorbt"}, (0, -22)),
         ("medalRow", sprites[2151].find("subTags"), 1, {"medalName"}, (0, 0)),
         ("gene", sprites[1995].find("subTags"), 125, omit_gene, (0, -26)),
+        ("gameMods", sprites[1995].find("subTags"), 136,
+         {"classPic", "button1", "procButton", "warning", "backButton", "closeButton", "detailButton", "detailWin",
+          "optDropMod", "optMore", "optWeaponLevel", "optSkipHard", "optTight", "optLaptop", "optComp"}, (0, -26)),
         ("result", sprites[1995].find("subTags"), 14, omit_result, (0, -26)),
         ("loot", sprites[1995].find("subTags"), 89, omit_loot, (0, -26)),
         ("lootBoss", sprites[1995].find("subTags"), 100, omit_loot | {"lootText"}, (0, -26)),
