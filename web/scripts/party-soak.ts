@@ -10,13 +10,16 @@ import { ENEMIES } from '../src/content.ts';
 import { isOccupiedItem } from '../src/items.ts';
 import { generateEarlyTownRecruit } from '../src/recruits.ts';
 import { installCandidate } from '../src/party.ts';
+import { castleUpgradeCost, castleUpkeep } from '../src/castle-upgrades.ts';
 
-const output = fileURLToPath(new URL('../../.build/party-soak', import.meta.url));
+const castleMode = process.argv[3] === 'castle';
+const output = fileURLToPath(new URL(castleMode ? '../../.build/castle-party-soak' : '../../.build/party-soak', import.meta.url));
+const fixturePrefix = castleMode ? 'castle-party' : 'party';
 const browserOutput = fileURLToPath(new URL('../../.build/browser-qa', import.meta.url));
 mkdirSync(output, { recursive: true }); mkdirSync(browserOutput, { recursive: true });
 const seedCount = Number(process.argv[2] ?? 32);
 assert.ok(Number.isInteger(seedCount) && seedCount >= 1 && seedCount <= 32, 'Use 1–32 natural seeds.');
-const sourceHashes = Object.fromEntries(['simulation.ts', 'party.ts', 'party-ai.ts', 'party-progression.ts', 'party-save.ts', 'projectiles.ts', 'collision.ts', 'town-preparation.ts', 'town-save.ts']
+const sourceHashes = Object.fromEntries(['simulation.ts', 'party.ts', 'party-ai.ts', 'party-progression.ts', 'party-save.ts', 'projectiles.ts', 'collision.ts', 'town-preparation.ts', 'town-save.ts', 'castle-upgrades.ts']
   .map(file => [file, createHash('sha256').update(readFileSync(new URL(`../src/${file}`, import.meta.url))).digest('hex')]));
 const geometrySha256 = createHash('sha256').update(readFileSync(new URL('../public/assets/collision-geometry.json', import.meta.url))).digest('hex');
 const geometry = JSON.parse(readFileSync(new URL('../public/assets/collision-geometry.json', import.meta.url), 'utf8')) as CollisionGeometry;
@@ -28,7 +31,7 @@ const options: SimulationOptions = { hitTest: (enemy, x, y) => {
 } };
 type Save = ReturnType<Simulation['toSave']>;
 type Operation = { action: string; args: unknown[] };
-type Scenario = { id: string; seed: number; kind: 'natural' | 'controlled-start'; classId?: number; origin?: string };
+type Scenario = { id: string; seed: number; kind: 'natural' | 'controlled-start' | 'capital-start'; classId?: number; origin?: string };
 type Activity = { shots: number; hits: number; damage: number; kills: number; reloads: number; reloadCompletions: number; bowDraws: number; projectiles: number; projectileKinds: Record<string, number>; levelUps: number; wages: number; wageSettlements: number; battles: number; victories: number; castleDefeats: number };
 const emptyActivity = (): Activity => ({ shots: 0, hits: 0, damage: 0, kills: 0, reloads: 0, reloadCompletions: 0, bowDraws: 0, projectiles: 0, projectileKinds: {}, levelUps: 0, wages: 0, wageSettlements: 0, battles: 0, victories: 0, castleDefeats: 0 });
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
@@ -42,6 +45,10 @@ let scenario: Scenario | undefined, checkpoint: Save | undefined, sinceCheckpoin
 let firstTown: { save: Save; scenario: string; seed: number; operations: number } | undefined;
 let totalFrames = 0, totalCheckpoints = 0, totalRest = 0, totalRewards = 0;
 const reachedDays: Record<number, number> = {}, wonDays: Record<number, number> = {};
+const actorActivity: Record<number, Activity> = { 1: emptyActivity(), 2: emptyActivity(), 3: emptyActivity() };
+const partyBattleCounts: Record<number, number> = {};
+const expandedNaturalScenarios = new Set<string>();
+let housePurchases = 0, wallPurchases = 0, maximumCompanions = 0;
 
 function finite(value: unknown, path = 'state'): void {
   if (typeof value === 'number') assert.ok(Number.isFinite(value), `${path} is not finite`);
@@ -87,30 +94,36 @@ function run(current: Scenario, initial?: Save): void {
       simulation.events === before ? simulation.events.slice(beforeLength) : simulation.events); return result;
   };
   const activeClass = () => simulation.state.party.slots.find(slot => slot.slot <= 3 && slot.exists)?.member?.devType;
+  const activeCount = () => simulation.state.party.slots.filter(slot => slot.slot <= 3 && slot.exists).length;
   const recordFixture = (reason: string) => {
     const classId = activeClass();
     if (!classId || recorded.has(reason)) return;
     recorded.add(reason);
-    const file = `party-${current.id}-${reason}-v15.json`, value = { format: 'elona-shooter-browser', version: 15, appearance: 0, simulation: simulation.toSave() };
+    const version = simulation.state.version;
+    const file = `${fixturePrefix}-${current.id}-${reason}-v${version}.json`, value = { format: 'elona-shooter-browser', version, appearance: 0, simulation: simulation.toSave() };
     const encoded = JSON.stringify(value, null, 2) + '\n';
     writeFileSync(resolve(browserOutput, file), encoded);
     snapshots.push({ scenario: current.id, classId, reason, file, sha256: hash(encoded), operation: operations.length, day: simulation.state.day, tick: simulation.state.tick });
   };
   const countEvent = (event: SimulationEvent) => {
     if (!event.actorSlot) return;
-    if (event.type === 'shot') activity.shots++;
-    if (event.type === 'hit') { activity.hits++; activity.damage += event.amount ?? 0; }
-    if (event.type === 'kill') activity.kills++;
-    if (event.type === 'reload') activity.reloads++;
-    if (event.type === 'reloaded') activity.reloadCompletions++;
-    if (event.type === 'bow-draw') activity.bowDraws++;
-    if (event.type === 'level-up') activity.levelUps++;
+    for (const counter of [activity, ...(castleMode ? [actorActivity[event.actorSlot]] : [])]) {
+      assert.ok(counter, 'Unexpected companion actor slot');
+      if (event.type === 'shot') counter.shots++;
+      if (event.type === 'hit') { counter.hits++; counter.damage += event.amount ?? 0; }
+      if (event.type === 'kill') counter.kills++;
+      if (event.type === 'reload') counter.reloads++;
+      if (event.type === 'reloaded') counter.reloadCompletions++;
+      if (event.type === 'bow-draw') counter.bowDraws++;
+      if (event.type === 'level-up') counter.levelUps++;
+    }
   };
   save();
   while (simulation.state.day <= 7) {
     const day = simulation.state.day;
     if (simulation.state.phase === 'battle') {
       reachedDays[day] = (reachedDays[day] ?? 0) + 1;
+      partyBattleCounts[activeCount()] = (partyBattleCounts[activeCount()] ?? 0) + 1;
       if (activeClass()) activity.battles++;
       for (let frame = 0; frame < 6000 && simulation.state.phase === 'battle'; frame++) {
         const input = inputFor(simulation);
@@ -146,7 +159,8 @@ function run(current: Scenario, initial?: Save): void {
         }
         totalRewards++; save();
       }
-      if (activeClass()) { activity.wages += simulation.state.result.wages; activity.wageSettlements++; recordFixture('result'); }
+      if (castleMode) assert.equal(simulation.state.result.upkeep, castleUpkeep(simulation.state));
+      if (activeClass()) { activity.wages += simulation.state.result.wages; activity.wageSettlements++; recordFixture('result'); if (castleMode) recordFixture(`result-party${activeCount()}`); }
       assert.equal(act('enterTown', [], sim => sim.enterTown()), true); save();
     }
     assert.equal(simulation.state.phase, 'town');
@@ -154,7 +168,28 @@ function run(current: Scenario, initial?: Save): void {
       firstTown = { save: clone(simulation.toSave()), scenario: current.id, seed: current.seed, operations: operations.length };
       writeFileSync(resolve(output, 'earned-first-town.json'), JSON.stringify(firstTown, null, 2) + '\n');
     }
-    if (!activeClass()) {
+    if (castleMode) {
+      const state = simulation.state;
+      const candidateCost = state.party.slots[4].member?.cost ?? 0;
+      if (activeCount() === state.party.capacity && state.party.capacity < 3 && state.party.slots[4].exists
+        && state.gold >= castleUpgradeCost('house', state) + candidateCost) {
+        recordFixture(`before-house${state.party.capacity + 1}`);
+        const previousResult = clone(state.result);
+        assert.equal(act('buyCastleUpgrade', ['house'], sim => sim.buyCastleUpgrade('house')), 'purchased');
+        housePurchases++;
+        assert.deepEqual(state.result, previousResult, 'House purchase repriced an already paid result');
+        recordFixture(`house${state.party.capacity}`); save();
+      }
+      if (day >= 2 && state.wallLevel === 1 && state.gold >= castleUpgradeCost('wall', state) + candidateCost) {
+        recordFixture('before-wall');
+        const previousResult = clone(state.result);
+        assert.equal(act('buyCastleUpgrade', ['wall'], sim => sim.buyCastleUpgrade('wall')), 'purchased');
+        wallPurchases++;
+        assert.deepEqual(state.result, previousResult, 'Wall purchase repriced an already paid result');
+        recordFixture('wall'); save();
+      }
+    }
+    if (castleMode ? activeCount() < simulation.state.party.capacity : !activeClass()) {
       const candidate = simulation.state.party.slots[4].member;
       const outcome = act('requestRecruit', [], sim => sim.requestRecruit());
       if (outcome === 'previewed') {
@@ -162,18 +197,20 @@ function run(current: Scenario, initial?: Save): void {
         assert.equal(act('resolvePartyAction', [true], sim => sim.resolvePartyAction(true)), 'hired');
         hired.push({ day, classId: candidate.devType, cost: candidate.cost, name: candidate.name });
         if (current.kind === 'natural') naturalHired.add(candidate.devType);
-        recordFixture('hired-town'); save();
+        maximumCompanions = Math.max(maximumCompanions, activeCount());
+        if (castleMode && current.kind === 'natural' && activeCount() >= 2) expandedNaturalScenarios.add(current.id);
+        recordFixture('hired-town'); if (castleMode) recordFixture(`hired${activeCount()}`); save();
       } else assert.ok(['not-enough-gold', 'no-candidate', 'house-full', 'party-full'].includes(String(outcome)));
     }
     if (day === 6) act('claimTitle', [], sim => sim.claimTitle());
     act('freeRepair', [], sim => sim.freeRepair()); save();
     if (day === 7) break;
     assert.equal(act('startNextDay', [], sim => sim.startNextDay()), true); totalRest++; rests++;
-    recordFixture('battle-entry'); save();
+    recordFixture('battle-entry'); if (castleMode) recordFixture(`battle-party${activeCount()}`); save();
   }
   save();
   const classId = hired[0]?.classId ?? activeClass();
-  if (classId) {
+  if (classId && !castleMode) {
     const aggregate = classes[classId][current.kind === 'natural' ? 'natural' : 'controlled'];
     for (const key of Object.keys(activity) as (keyof Activity)[]) {
       if (key === 'projectileKinds') for (const [kind, count] of Object.entries(activity.projectileKinds)) aggregate.projectileKinds[kind] = (aggregate.projectileKinds[kind] ?? 0) + count;
@@ -193,7 +230,7 @@ try {
     run({ id: `natural-${index}`, seed, kind: 'natural' });
   }
   assert.ok(firstTown, 'No natural scenario earned a first town');
-  for (let classId = 1; classId <= 9; classId++) if (!naturalHired.has(classId)) {
+  for (let classId = 1; !castleMode && classId <= 9; classId++) if (!naturalHired.has(classId)) {
     const value = clone(firstTown.save), prefix = [0.5, 0.5, 0.5, (classId - 0.5) / 9];
     // Только пропущенный класс кандидата подменяется исходным генератором; деньги, HP, RNG и предметы героя не меняются.
     const recruit = generateEarlyTownRecruit(() => prefix.shift() ?? 0.5, 1);
@@ -203,15 +240,31 @@ try {
     run({ id: `controlled-class-${classId}`, seed: firstTown.seed, kind: 'controlled-start', classId,
       origin: `${firstTown.scenario} at operation${firstTown.operations}; candidate generation prefix [0.5,0.5,0.5,${(classId - 0.5) / 9}], remaining draws0.5; campaign RNG unchanged` }, value);
   }
-  assert.ok(Object.values(classes).every(row => row.natural.battles + row.controlled.battles > 0), 'One or more classes never entered battle');
+  if (castleMode) {
+    const value = clone(firstTown.save);
+    // Явный капитал — единственный контролируемый вход; кандидаты и бои затем идут обычным путём.
+    value.gold += 12000;
+    run({ id: 'capital-three-companions', seed: firstTown.seed, kind: 'capital-start',
+      origin: `${firstTown.scenario} earned first town at operation${firstTown.operations}; add12000gold only; no grants to HP, traits, equipment, candidates or campaign RNG` }, value);
+    assert.ok((partyBattleCounts[2] ?? 0) > 0 && (partyBattleCounts[3] ?? 0) > 0, 'Expanded parties never entered battle');
+    assert.ok(actorActivity[2].shots > 0 && actorActivity[3].shots > 0, 'Additional companion slots never fired');
+    assert.ok(expandedNaturalScenarios.size > 0, 'No natural campaign earned an expanded party');
+  } else assert.ok(Object.values(classes).every(row => row.natural.battles + row.controlled.battles > 0), 'One or more classes never entered battle');
   const report = { status: 'passed', seedCount, sourceHashes, geometrySha256, scenarios: results.length, frames: totalFrames, checkpoints: totalCheckpoints, restTransitions: totalRest,
-    rewardActions: totalRewards, reachedDays, wonDays, naturallyHiredClasses: [...naturalHired].sort(), classes,
+    rewardActions: totalRewards, reachedDays, wonDays, naturallyHiredClasses: [...naturalHired].sort(), classes: castleMode ? undefined : classes,
+    ...(castleMode ? { housePurchases, wallPurchases, maximumCompanions, partyBattleCounts, expandedNaturalScenarios: [...expandedNaturalScenarios],
+      actorActivity: Object.fromEntries(Object.entries(actorActivity).map(([slot, value]) => [slot, Object.fromEntries(
+        ['shots', 'hits', 'damage', 'kills', 'reloads', 'reloadCompletions', 'bowDraws', 'levelUps'].map(key => [key, value[key as keyof Activity]]))])) } : {}),
     elapsedMs: Math.round(performance.now() - started),
     collision: 'Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts',
-    policy: 'Aimed Sheriff plus autonomous companion; generated equipment and skills retained; collect available loot; source skill choice indexed by seed/day; hire when affordable; Free Repair and Day6 title before Rest; no grants, invincibility, private battle completion or forced kills',
-    limits: ['Port full-state/event replay and finite-state checks, not independent original parity or browser validation', 'Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred', 'Controlled starts replace only the candidate generated at an actually earned first town, with provenance recorded separately', 'Deaths count castle defeats; companions have no separate HP/death model in the source combat actor'], snapshots, results };
+    policy: castleMode ? 'Aimed Sheriff plus autonomous permanent companions; buy House with enough gold for the next generated candidate, buy one Wall from town2 onward when affordable, then hire through ordinary confirmation; Free Repair and Day6 title before Rest; natural runs have no grants. Separate capital-start adds12000gold at an earned first town to exercise the three-slot party before the current Day7 boundary.'
+      : 'Aimed Sheriff plus autonomous companion; generated equipment and skills retained; collect available loot; source skill choice indexed by seed/day; hire when affordable; Free Repair and Day6 title before Rest; no grants, invincibility, private battle completion or forced kills',
+    limits: ['Port full-state/event replay and finite-state checks, not independent original parity or browser validation', 'Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred',
+      castleMode ? 'Natural scenarios and the one capital-start are separate: the latter grants12000gold only at an earned first town; it does not establish natural three-companion affordability within seven days'
+        : 'Controlled starts replace only the candidate generated at an actually earned first town, with provenance recorded separately',
+      'Deaths count castle defeats; companions have no separate HP/death model in the source combat actor'], snapshots, results };
   writeFileSync(resolve(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
-  writeFileSync(resolve(browserOutput, 'party-soak-fixtures.json'), JSON.stringify({ status: 'passed', report: '../party-soak/report.json', snapshots }, null, 2) + '\n');
+  writeFileSync(resolve(browserOutput, `${fixturePrefix}-soak-fixtures.json`), JSON.stringify({ status: 'passed', report: castleMode ? '../castle-party-soak/report.json' : '../party-soak/report.json', snapshots }, null, 2) + '\n');
   console.log(JSON.stringify({ ...report, classes: undefined, snapshots: undefined, results: undefined }, null, 2));
 } catch (error) {
   writeFileSync(resolve(output, 'failure.json'), JSON.stringify({ scenario, sourceHashes, geometrySha256, checkpoint, operationsSinceCheckpoint: sinceCheckpoint,

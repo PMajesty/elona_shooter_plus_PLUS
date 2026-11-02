@@ -774,6 +774,54 @@
       "originY": 41.45,
       "characterId": 1762
     },
+    "button_castlePage1": {
+      "file": "buttons/button_castlePage1.png",
+      "width": 130,
+      "height": 95,
+      "originX": 32.45,
+      "originY": 31.45,
+      "characterId": 1625
+    },
+    "button_castlePage1_over": {
+      "file": "buttons/button_castlePage1_over.png",
+      "width": 130,
+      "height": 95,
+      "originX": 32.45,
+      "originY": 31.45,
+      "characterId": 1625
+    },
+    "button_castlePage1_down": {
+      "file": "buttons/button_castlePage1_down.png",
+      "width": 130,
+      "height": 95,
+      "originX": 32.45,
+      "originY": 31.45,
+      "characterId": 1625
+    },
+    "button_castlePage2": {
+      "file": "buttons/button_castlePage2.png",
+      "width": 130,
+      "height": 95,
+      "originX": 32.45,
+      "originY": 31.45,
+      "characterId": 1630
+    },
+    "button_castlePage2_over": {
+      "file": "buttons/button_castlePage2_over.png",
+      "width": 130,
+      "height": 95,
+      "originX": 32.45,
+      "originY": 31.45,
+      "characterId": 1630
+    },
+    "button_castlePage2_down": {
+      "file": "buttons/button_castlePage2_down.png",
+      "width": 130,
+      "height": 95,
+      "originX": 32.45,
+      "originY": 31.45,
+      "characterId": 1630
+    },
     "gameOver": {
       "file": "images/gameOver.png",
       "width": 561,
@@ -1287,6 +1335,36 @@
         "y": 11,
         "passes": 1
       }
+    },
+    "castleUpgradeTiles": {
+      "image": "sprites/castleUpgradeTiles.png",
+      "json": "sprites/castleUpgradeTiles.json",
+      "originX": 37.95,
+      "originY": 28.1,
+      "frameWidth": 148,
+      "frameHeight": 152,
+      "labels": {},
+      "count": 16,
+      "uniqueFrames": 16,
+      "characterId": 2192,
+      "coordinateSpace": "upgrades-parent",
+      "placementBaked": true,
+      "sourcePictureId": 2191,
+      "sourcePictureFrames": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "framesPerTile": 2,
+      "states": [
+        "up",
+        "over"
+      ]
     },
     "shieldHit": {
       "image": "sprites/shieldHit.png",

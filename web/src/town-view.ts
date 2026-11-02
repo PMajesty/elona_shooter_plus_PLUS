@@ -1,12 +1,13 @@
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
+import { castleUpgradeCost, castleUpkeep, type CastleUpgradeKind } from './castle-upgrades.ts';
 
 export type TownTab = 'mission' | 'castle' | 'shop' | 'characters' | 'equipment' | null;
 export type TownDialog = 'repair' | 'rest' | 'title' | null;
 interface Placement {
   x: number; y: number; scaleX: number; scaleY: number; rotationDegrees: number;
-  text?: { fontId: number; fontSize: number; bounds: number[]; align: number; color: string };
+  text?: { fontId: number; fontSize: number; bounds: number[]; align: number; color: string; indent?: number };
 }
 export interface TownLayout {
   menuPosition: { x: number; y: number };
@@ -14,15 +15,18 @@ export interface TownLayout {
   navigation: Record<string, Placement & { image: string }>;
   mission: { image: string; labelsImage: string; children: Record<string, Placement> };
   castle: { image: string; labelsImage: string; children: Record<string, Placement> };
+  castleUpgrades: { clip: string; children: Record<string, Placement>; x: number; y: number; columns: number; stepX: number; stepY: number;
+    names: string[]; disabledAlpha: number; affordableColor: string; unavailableColor: string; pageButtons: string[]; hitRect: number[] };
   repairDialog: { image: string; children: Record<string, Placement> };
   claimTitleAction: { x: number; y: number; cardClip: string; cardFrame: number; cardRotation: number; hoverScale: number; pinClip: string; text: string; children: Record<string, Placement> };
 }
 interface TownViewState {
   day: number; gold: number; castleHp: number; castleMaxHp: number; title: 0 | 1;
+  wallLevel: number; party: { capacity: 1 | 2 | 3 };
   player: { level: number; exp: number; selectedSlot: number };
   town: { ap: number; preparation: string } | null; inventory: (Item | null)[];
 }
-interface Callbacks { select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; actionHover(): void; dismiss(): void; message(value: string): void }
+interface Callbacks { select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; dismiss(): void; message(value: string): void }
 
 /** Городские координаты и повороты берутся из исходного кадра 71 и его окон. */
 export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, dialog: TownDialog): Phaser.GameObjects.Container {
@@ -35,9 +39,10 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
   };
   const text = (placement: Placement, value: string, x = 0, y = 0) => {
     const field = placement.text!;
-    const fonts: Record<number, string> = { 682: 'ElonaMenu', 1608: 'ElonaMenuBold', 2681: 'ElonaHud', 1392: 'ElonaSmall' };
-    const width = field.bounds[2] - field.bounds[0];
-    const object = scene.add.text(x + placement.x, y + placement.y, value, {
+    const fonts: Record<number, string> = { 682: 'ElonaMenu', 1608: 'ElonaMenuBold', 2681: 'ElonaHud', 1392: 'ElonaSmall', 1535: 'ui' };
+    const indent = field.indent ?? 0;
+    const width = field.bounds[2] - field.bounds[0] - indent;
+    const object = scene.add.text(x + placement.x + indent, y + placement.y, value, {
       fontFamily: fonts[field.fontId] ?? 'Arial', fontSize: `${field.fontSize}px`, color: field.color,
       wordWrap: { width }, align: field.align === 2 ? 'center' : 'left', padding: { x: 1, y: 1 },
     }).setFixedSize(width, 0).setScale(placement.scaleX, placement.scaleY);
@@ -79,8 +84,50 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     image(panel.image, x, 0);
     button('button_windowClose', panel.children.closeButton, () => callbacks.select(null), x, y);
     if (tab === 'castle') {
-      text(panel.children.unkeep, '40', x, y);
+      text(panel.children.unkeep, String(castleUpkeep(state)), x, y);
       button('button_freeRepair', panel.children.act1, callbacks.repair, x, y);
+      const tile = layout.castleUpgrades, asset = manifest.clips[tile.clip];
+      const notice = 'Only House and Wall purchases are available.';
+      const hint = text(panel.children.hint2, notice, x, y);
+      button(tile.pageButtons[0], panel.children.page1, () => {}, x, y);
+      button(tile.pageButtons[1], panel.children.page2, () => callbacks.message('These Castle upgrades are not available yet.'), x, y, false).setAlpha(tile.disabledAlpha);
+      // Остальные цены/уровни исходные, но их плитки явно отключены до реализации покупки.
+      const levels = [0, state.wallLevel, 0, 1, state.party.capacity, 0, 0, 0];
+      const costs = [8 * (state.castleMaxHp - state.castleHp), castleUpgradeCost('wall', state), 1000,
+        (state.inventory.length - 4) ** 2 * 30 + 250, castleUpgradeCost('house', state), 300, 700, 250];
+      tile.names.forEach((name, index) => {
+        const kind: CastleUpgradeKind | undefined = index === 1 ? 'wall' : index === 4 ? 'house' : undefined;
+        const possible = Boolean(kind && costs[index] > 0 && state.gold >= costs[index]);
+        const tileX = x + tile.x + index % tile.columns * tile.stepX;
+        const tileY = y + tile.y + Math.floor(index / tile.columns) * tile.stepY;
+        const group = scene.add.container(tileX, tileY).setName(`castle-upgrade-${index}`).setAlpha(possible ? 1 : tile.disabledAlpha);
+        root.add(group);
+        const upFrame = index * 2 + 1;
+        const art = scene.add.image(0, 0, tile.clip, String(upFrame))
+          .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
+        const label = text(tile.children.upgradeName, name + (levels[index] > 0 ? ` Lv ${levels[index]}` : ''));
+        const cost = text(tile.children.upgradeCost, String(costs[index])).setColor(possible ? tile.affordableColor : tile.unavailableColor);
+        group.add([art, label, cost]);
+        const description = kind === 'house'
+          ? `For each house built, you can hire +1 more troop. (Currently, you can hire ${state.party.capacity} people)`
+          : kind === 'wall' ? `Each level of the wall upgrade gives you +5 more max hit points. (Currently, ${state.castleMaxHp} MHP)`
+          : `${name} is not available in the current port yet.`;
+        // HitTest-кадр содержит заполненный прямоугольник: alpha3 после фильтра теряется в PNG.
+        // Геометрия исходной кнопки сохраняет кликабельность, не включая размытую тень.
+        const [hitX, hitY, hitWidth, hitHeight] = tile.hitRect;
+        art.setInteractive({ useHandCursor: possible,
+          hitArea: new Phaser.Geom.Rectangle(hitX + asset.originX, hitY + asset.originY, hitWidth, hitHeight),
+          hitAreaCallback: Phaser.Geom.Rectangle.Contains });
+        label.setInteractive({ useHandCursor: possible }); cost.setInteractive({ useHandCursor: possible });
+        for (const object of [art, label, cost]) {
+          object.on('pointerover', () => { if (possible) art.setFrame(String(upFrame + 1)); hint.setText(description); });
+          object.on('pointerout', () => { art.setFrame(String(upFrame)); hint.setText(notice); });
+          object.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+            event.stopPropagation();
+            if (kind) callbacks.castleUpgrade(kind); else callbacks.message(description);
+          });
+        }
+      });
     } else {
       button('button_townRest', panel.children.act1, () => canRest ? callbacks.rest() : callbacks.message('Day 8 is not available yet.'), x, y, canRest);
       button('button_townHire', panel.children.act2, () => callbacks.message('Temporary henchmen are not available yet. Recruit permanent companions in Characters.'), x, y, false);

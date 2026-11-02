@@ -1,9 +1,10 @@
 # Castle House and Wall upgrades: source audit
 
-Status: **not implemented** in the current browser port. This document records
-original source behavior and proposed validation boundaries. It makes no
-runtime-parity claim for Castle purchases, upgraded walls or an expanded
-permanent party.
+Status: **implemented transaction API; original transaction comparison accepted**.
+The source-derived House/Wall quotes and production `Simulation.buyCastleUpgrade`
+match 23 observations from two identical original-game runs. This document does
+not establish browser interaction, publication or expanded-party battle parity;
+those have separate integration checks.
 
 Source anchors below refer to preserved `src/original/MainTimeline.as`.
 The original/default state is House1, Wall1, currentHP40/maxHP40 and Storage1
@@ -121,50 +122,75 @@ Relevant persistent fields are `game.house`, `game.wallUpgrade`,
 `totalMoney` persist unchanged through the purchase. The Fix Wall counter is
 also stored if that action is later implemented.
 
-At audit time, the browser port already has canonical `party.capacity:1|2|3`,
-but no ordinary House purchase. Reuse that field instead of adding a second
-mutable house capacity. Wall level needs its own value alongside existing
-current/maxHP. Legacy saves can initialize Wall1 without consuming RNG.
-Current `Simulation.fromSave` rejects maxHP other than40, and settlement uses
-fixed `FIRST_DAY.upkeep`; both must change with this feature. Existing healing,
-HUD and Last Hope calculations already accept the state's maxHP, but their
-upgraded-wall callers and save round trips need focused verification.
+The browser implementation reuses canonical `party.capacity:1|2|3` and adds
+independent `wallLevel` to save version16 alongside current/maxHP. Older saves
+initialize Wall1 without transaction RNG. `castle-upgrades.ts` exposes original
+prices and upkeep for the supported default non-House/Wall upgrades: Storage1,
+no Hard Badge, no Repair/Sandbag/Looter/Museum upgrades. Its upkeep formula must
+expand when those features become available. Save validation and settlement
+have separate focused tests in `web/tests/castle-upgrades.test.ts`.
 
-## Smallest useful implementation and original reference
+## Implemented boundary and accepted original reference
 
-The proposed player outcome is: buy House/Wall from Castle, see the price,
+The intended integrated player outcome is: buy House/Wall from Castle, see the price,
 capacity/HP and upkeep update immediately, save/Continue, hire an additional
 eligible companion, then enter the next supported battle and pay the correct
 later upkeep and wages. Day/campaign expansion is not required.
 
-A minimal state API can expose a computed quote and immediate
-`buyCastleUpgrade('house'|'wall')`, returning purchased, insufficient-gold,
-capped or unavailable. It should not create a confirmation-state framework
-for an original immediate transaction. Keep upgraded maxHP, Wall level and
-party capacity authoritative and persist them once.
+The production API exposes `castleUpgradeCost`, `castleUpkeep`, and immediate
+`Simulation.buyCastleUpgrade('house'|'wall')`, returning `purchased`,
+`not-enough-gold`, `capped` or `unavailable`. Purchases require a prepared town
+without an outstanding equipment/party dialog. No confirmation state is added.
 
-For independent evidence, reuse the proven **continued-town frame71** setup
-from `tools/build_party_hiring_oracle.py`, then open the actual Castle menu.
-Drive original `MouseLDownFunc_town` using the reversible coordinate-input
-seam and real tile hit testing; calling `upgradeDone` alone would bypass
-affordability/cap guards. Observe before/after money, AP, totalMoney, House and
-Wall levels, current/maxHP, `calcUnkeep`, tile cost/availability, RNG count and
-state. Do not execute unrelated fresh-town generation inside this boundary.
+`tools/build_castle_upgrades_oracle.py` uses the proven **continued-town frame71**
+setup from the hiring fixture and opens the actual Castle menu. It finds
+hittable integer coordinates in the original tile shapes, excluding earlier
+tiles and Free Repair, then calls original `MouseLDownFunc_town`. The only input
+seam replaces mouse coordinates; original affordability/cap guards, payment,
+`upgradeDone`, upkeep and menu rebuild methods execute unchanged. Random calls
+use the shared controlled stream, with the normal random function retained
+outside the fixture. The builder verifies reversibility of those seams and
+preserves every non-code SWF resource tag. Fresh-town generation is excluded.
 
-Keep the fixture bounded to informative cases:
+Ten scenarios produce 23 snapshots: ten initial quote/state observations and
+thirteen actual click outcomes:
 
 - House:1999GP rejected, exact2000GP purchase, exact5000GP second purchase,
-  and House3 cap rejection.
+  House3 cap rejection, and both purchases from one7000GP starting balance.
 - Wall:239GP rejected, exact240GP purchase at fullHP, damaged30/40→35/45,
-  and a repeated purchase using the newly computed410GP price.
+  and three purchases using240/410/600GP prices from one1250GP balance.
 - A declared configured41maxHP input, representing the source Search outcome,
   to establish272GP integer pricing and independent level/HP fields. This
   does not imply Search itself is implemented.
-- AP0 successful purchases with zero transaction RNG, unchanged totalMoney,
-  and increased upkeep. Test disabled/full or capped buttons through the
-  original handler rather than assuming a zero price means free purchase.
+- All inputs use AP0; every original outcome retains AP, totalMoney and RNG
+  state42/draw count0. Upkeep and rebuilt tile prices, names, availability and
+  button enablement are recorded. Disabled/capped shape clicks exercise the
+  real guard rather than treating a zero price as a free purchase.
 
-Production checks should cover save/Continue after each purchase without a
+Accepted capture: `@ruffle-rs/ruffle 0.7.1`,
+`2026-11-02T02:11:54.847Z`, two identical runs. The production adapter compares
+all23 states exactly, invokes the real `Simulation.buyCastleUpgrade` for all13
+click outcomes, and checks that prepared town data, party records, cached
+bonuses and the already-settled result remain unchanged. Original fixture:
+`web/tests/fixtures/original-castle-upgrades-trace.json`. Local reports:
+`.build/oracle/castle-upgrades-browser-report.json` and
+`.build/oracle/castle-upgrades-comparison-report.json`.
+
+- Preserved original SWF SHA256:
+  `4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663`
+- Diagnostic SWF SHA256:
+  `3566209d7273bb4486dad99e8a886e963477bc2a9e0a9c2cf462a047b5b1cc90`
+- Accepted trace SHA256:
+  `6ee6e1ba7fba046fc069b36a8516da1450b5a72465c8a2bc64491fe41edda4fc`
+
+Run `python tools/build_castle_upgrades_oracle.py`, capture
+`http://127.0.0.1:5176/?suite=castle-upgrades`, then run
+`npm run test:castle-upgrades-reference` from `web`.
+`web/tests/castle-upgrades-reference.test.ts` has three passing tests, including
+negative controls that deliberately fully heal a damaged Wall or derive its
+price from Wall level. Both are rejected by the unchanged original trace.
+
+Separate integration checks cover save/Continue after each purchase without a
 second payment, corrupted wall/capacity state rejection, unchanged already-paid
 result totals, and the next settlement's updated upkeep. One ordinary expanded
 party flow should exercise two/three companions, their equipment and slot

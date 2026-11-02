@@ -3,19 +3,24 @@
 Current implementation: **seven connected Sheriff days**, with owned firearms and
 consumables, ordinary/boss loot, earned skills, prepared towns, shop transactions,
 weapon Upgrade, MOD mounting, Free Repair, Rest, the first title claim and its salary,
-plus permanent recruitment, companion equipment, autonomous AI, growth and wages.
+plus permanent recruitment, companion equipment, autonomous AI, growth and wages,
+and Castle House capacity two/three and Wall purchases.
 This is not a complete remake.
 The TypeScript/Phaser client runs independently of Flash and Ruffle; the preserved
 game remains the reference for behavior, content and appearance.
 
-The **v15 party release** is served at `http://127.0.0.1:5175/elona/` after
-automated checks, browser acceptance and production New Game/save migration checks.
-All 300 tested files from `.build/browser-party-final` match the published build
-and archive. The bundle is `assets/index-Do-bjyfx.js`; the deployable archive is
-`.build/elona-shooter-browser-party-slice.zip` (8,432,781 bytes), SHA-256
-`1a49d3530e19f2a8c31fcd3f167f128f5b33139735189489cdae34b38b1c99a7`.
-The verified v14 release remains in `.build/browser-before-party` and
-`.build/elona-shooter-browser-day7-slice.zip` for rollback.
+The **v16 Castle release** is served at `http://127.0.0.1:5175/elona/` after
+automated/source checks and eleven complete-save browser checks. All 308 files
+from `.build/browser-castle-final` match publication and the archive. The bundle
+is `assets/index-s1hKilh5.js`; the deployable archive is
+`.build/elona-shooter-browser-castle-slice.zip` (8,573,679 bytes), SHA-256
+`510b912aa4da55f270d4b1b9afa28b86f3ddde7e351f6fcf7ea101ac303988b4`.
+Final production New Game and exact actual v15-save migration/restore checks pass.
+The verified v15 release is retained in `.build/browser-before-castle` (all 300
+files match that release) and `.build/elona-shooter-browser-party-slice.zip`
+(8,432,781 bytes, SHA-256
+`1a49d3530e19f2a8c31fcd3f167f128f5b33139735189489cdae34b38b1c99a7`).
+Historical v14 recovery remains `.build/browser-before-party` and the Day7 archive.
 Browser boundaries and historical milestones are in
 [port verification](port-verification.json).
 
@@ -76,6 +81,13 @@ establish this late-game diagnosis.
   rejects before the insufficient-AP check. Mission → Rest starts the next prepared battle
   after dialog acknowledgment into Days2–7, without healing or spending gold/AP. Guns refill;
   consumable charges stay spent.
+- Castle House/Wall clicks purchase immediately without AP, RNG or confirmation.
+  House costs 2,000 then 5,000 GP, caps at 3 and enables the corresponding permanent
+  companion slots without automatic hiring. Wall adds 5 current/maxHP, preserving
+  the damage deficit; its price is derived from maxHP (first 240 GP). House adds 50
+  upkeep per level and Wall adds 10 per purchase. Existing settled results remain
+  historical. The original tiles, prices, levels and affordability are displayed;
+  other Castle purchases and page2 remain disabled.
 - Day6 settlement deducts the first 10 GP tax separately from default upkeep 40.
   Mission → Claim title costs 4 AP and grants Honorary Citizen, once eligible.
   It consumes no RNG and pays no immediate gold. Its 100 GP salary begins at the
@@ -85,7 +97,8 @@ establish this late-game diagnosis.
   add medal62's absorption to future preparation, preserving active mission history.
 - Pause, browser-local save, Continue and validated JSON import/export.
 - Characters supports permanent hiring/cancel/dismissal of all nine generated classes,
-  orders, Boss/Defend preferences and skill focus. Initial house capacity is one.
+  orders, Boss/Defend preferences and skill focus. Initial house capacity is one;
+  House purchases expand it to two/three.
   Equipment preserves whole records and checks both directions of companion swaps;
   companion MOD No returns the MOD, unlike the owned-inventory swap behavior.
   Rest connects autonomous targeting, reloads, class effects, owner-attributed
@@ -95,7 +108,7 @@ establish this late-game diagnosis.
   See [party integration](../web/docs/party-integration-status.md).
 
 Other playable hero classes, Day 8+, Ragnarok, temporary Mission Hire, recruit
-refresh, house upgrades, other card/search actions, stock refresh, most castle/economy
+refresh, other card/search actions, stock refresh, the remaining Castle/economy
 actions, complete global medals and original Flash
 save conversion remain unfinished. Companion/town skills cannot exercise systems
 that are still absent. No completion percentage is inferred from extracted assets
@@ -117,8 +130,11 @@ Ordinary-enemy collision uses original filled contours and placement matrices,
 including persisted sheep shadow history. Bosses use rendered alpha geometry;
 the headless soak uses an explicitly documented boss rectangle fallback.
 
-Current saves use **version 15**, accepting port versions **1–14** through their
-existing migrations. Canonical party/candidate and inactive records, equipment,
+Current saves use **version 16**, accepting port versions **1–15** through
+their existing migrations. House capacity, Wall level and maxHP persist separately;
+older saves initialize Wall level 1 without changing HP, RNG, owned party state
+or settled results. Unsupported legacy expanded capacity is not retroactively
+invented. Version 15 introduced the party state below. Canonical party/candidate and inactive records, equipment,
 pending confirmations, cached party effects, AI/retained targets and projectile
 owners persist. Older saves install retained candidate history without RNG or
 a hiring charge, and do not invent an owned companion. Town generation records
@@ -185,7 +201,32 @@ no Flash plugin, Ruffle, external CDN or gameplay server.
 
 ## Evidence and intentional corrections
 
-The published v15 release passes **288 tests**, TypeScript checking, the release
+The v16 Castle release passes **298 tests**, TypeScript checking and its build.
+Two identical original runs match **23 House/Wall observations**: ten controlled
+starting states plus thirteen transactions covering payment, denied actions,
+House3 cap, damaged walls, nonstandard maxHP and upkeep. These controlled source
+methods do not establish natural affordability or full browser/campaign parity.
+See [source audit](../web/docs/castle-upgrades-source.md) and
+[UI extraction](../web/docs/castle-upgrades-ui-source.md). The original SWF/AS and
+unrelated prior assets remain byte-identical; the Castle panel split and new
+tiles/page controls are explicit extraction changes. Eleven browser checks match
+complete expected save envelopes: denied House leaves state unchanged; Wall costs 240
+and changes HP 40→45 and upkeep 40→50 while retaining the previously paid result; Continue
+is exact; natural House2 costs 2,000 and its second hire 400; controlled House3
+costs 5,000 and rejects further expansion; third hire costs 400; Rest preserves all
+three companions; ten actual combat updates match production replay; results
+show 150 upkeep and 188 wages, then town entry matches. Evidence:
+`.build/browser-qa/castle-ui-verification.json`; screenshots include
+`castle-house3.jpg`, `castle-three-companions.jpg` and `castle-party-result.jpg`.
+The controlled capital provenance remains explicit. Publication matches the
+accepted candidate. Production loaded `s1hKilh5`; New Game exported v16 at tick 0,
+HP 40, gold 200, ammo 5, Wall 1/capacity 1. The actual v15 backup migrated and restored
+with exact full-envelope equality at tick 674, HP 40, gold 209 and unchanged RNG;
+paused and no console errors. Evidence:
+`.build/browser-qa/castle-production-verification.json` and
+`.build/castle-publication.json`; screenshot `castle-production-restored.jpg`.
+
+The historical published v15 release passed **288 tests**, TypeScript checking, the release
 build, focused party browser checks and production New Game/migration verification.
 Party references match **61 transaction observations from 79 captured snapshots**,
 **45 progression**, **75 AI** and **37 combat snapshots**, including source RNG and
@@ -447,12 +488,28 @@ Import Save was also observed disabled during asset loading and enabled only aft
 scene creation. The final published bundle passed a fresh New Game and actual v14
 backup restoration, with no console errors.
 
+The separate v16 Castle/expanded-party run passes **nine campaigns, 135,297
+frames and 1,450 checkpoints**, with **54 Rest transitions, 223 reward actions,
+10 House and nine Wall purchases**. All eight natural campaigns earn a second
+companion. The ninth starts from an earned first town with a clearly recorded
+12,000-gold grant, then buys House3 and hires naturally generated candidates;
+no HP, skill, equipment, candidate or RNG grant is made. There are 23 two-companion
+and 4 three-companion battle entries, and all nine finish Day7. This demonstrates
+integration and save/event replay, not natural three-companion affordability,
+original balance or browser performance. Ordinary collision uses source contours;
+boss collision retains the documented rectangular fallback. Evidence:
+`.build/castle-party-soak/report.json`; command from `web`:
+`node --experimental-strip-types scripts/party-soak.ts 8 castle`.
+
 ## Next integrated work and continuation
 
-The next integration priority is **house upgrades for companion capacity two/three
-and Castle wall upgrades**, before further campaign expansion. Audit original
-costs, eligibility, effects and timing before implementing those ordinary town actions;
-the [source audit](../web/docs/castle-upgrades-source.md) records the current findings.
+The next useful slice is **remaining Castle page0 actions**, starting with paid
+Fix Wall and Repairman after a fresh source audit of costs, repair timing and
+upkeep. This connects early-town spending and repeated battles before extending
+the campaign again. Storage, Looter, Trainer and Sandbag should follow in bounded
+integrated slices, rather than be treated as one large prerequisite. The
+[House/Wall source audit](../web/docs/castle-upgrades-source.md) and
+[UI notes](../web/docs/castle-upgrades-ui-source.md) preserve this milestone's boundary.
 Later campaign work still includes Lava and further town thresholds; Day8 onward
 remains unavailable. The veteran late-game hitbox report is still unproven and
 requires its own failing original encounter before a correction is claimed.

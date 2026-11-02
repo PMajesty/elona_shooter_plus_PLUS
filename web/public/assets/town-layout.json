@@ -922,6 +922,132 @@
       }
     }
   },
+  "castleUpgrades": {
+    "characterId": 2192,
+    "clip": "castleUpgradeTiles",
+    "children": {
+      "upgradeName": {
+        "characterId": 2152,
+        "x": -11.6,
+        "y": 64.0,
+        "matrix": [
+          1.0003815,
+          0.0,
+          0.0,
+          1.0,
+          -11.6,
+          64.0
+        ],
+        "scaleX": 1.0003815,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 12.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            97.55,
+            16.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">Upgrade Lv1</font></p>",
+          "indent": 17.0
+        }
+      },
+      "upgradeCost": {
+        "characterId": 2153,
+        "x": -11.6,
+        "y": 82.0,
+        "matrix": [
+          1.0003815,
+          0.0,
+          0.0,
+          1.0,
+          -11.6,
+          82.0
+        ],
+        "scaleX": 1.0003815,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 12.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            97.05,
+            14.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">1480</font></p>",
+          "indent": 31.0
+        }
+      },
+      "upgradeButton": {
+        "characterId": 2159,
+        "x": 12.65,
+        "y": 10.65,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          12.65,
+          10.65
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "upgradePic": {
+        "characterId": 2191,
+        "x": 37.05,
+        "y": 22.55,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          37.05,
+          22.55
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      }
+    },
+    "x": 150,
+    "y": 140,
+    "columns": 4,
+    "stepX": 100,
+    "stepY": 110,
+    "names": [
+      "Fix Wall",
+      "Wall",
+      "Sandbag",
+      "Storage",
+      "House",
+      "Looter",
+      "Repairman",
+      "Trainer"
+    ],
+    "disabledAlpha": 0.3,
+    "affordableColor": "#0000cc",
+    "unavailableColor": "#cc0000",
+    "pageButtons": [
+      "button_castlePage1",
+      "button_castlePage2"
+    ],
+    "hitRect": [
+      -15.999999999999998,
+      -7.999999999999998,
+      104.0,
+      111.0
+    ]
+  },
   "characters": {
     "characterId": 1995,
     "frame": 63,

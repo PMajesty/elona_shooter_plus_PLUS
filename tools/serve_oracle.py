@@ -9,6 +9,7 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / ".build/oracle/browser-report.json"
 REPORTS = {
+    "/api/castle-upgrades-report": ROOT / ".build/oracle/castle-upgrades-browser-report.json",
     "/api/party-progression-report": ROOT / ".build/oracle/party-progression-browser-report.json",
     "/api/party-hiring-report": ROOT / ".build/oracle/party-hiring-browser-report.json",
     "/api/party-ai-report": ROOT / ".build/oracle/party-ai-browser-report.json",
@@ -48,6 +49,8 @@ REPORTS = {
     "/api/town-preparation-report": ROOT / ".build/oracle/town-preparation-browser-report.json",
 }
 ROUTES = {
+    "/castle-upgrades-reference.swf": ROOT / ".build/oracle/castle-upgrades-reference.swf",
+    "/castle-upgrades-build-report.json": ROOT / ".build/oracle/castle-upgrades-build-report.json",
     "/party-progression-reference.swf": ROOT / ".build/oracle/party-progression-reference.swf",
     "/party-progression-build-report.json": ROOT / ".build/oracle/party-progression-build-report.json",
     "/party-hiring-reference.swf": ROOT / ".build/oracle/party-hiring-reference.swf",

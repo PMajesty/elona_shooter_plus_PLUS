@@ -8,8 +8,8 @@
   "frameNames": "Original one-based Flash timeline frame numbers as strings",
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
-    "images": 102,
-    "clips": 48,
+    "images": 108,
+    "clips": 49,
     "sounds": 89,
     "fonts": 6
   },
@@ -19,6 +19,7 @@
     "townHud applies the original eventGene bgAlpha.alpha=1",
     "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",
     "Town action labels are separate original foreground layers above their card buttons",
+    "Castle upgrade tiles retain original icon, button-state, coin and filter placements; runtime draws levels/prices and uses the source button hit-state rectangle",
     "Characters/Equipment panels retain original labels, portraits, slot placements and separately rendered controls; permanent recruitment is separate from the Mission henchman action",
     "partyPortraitBackground bakes ally3 bg placement, alpha41/256 and blur11 in parent portrait coordinates; selection opacity applies to the whole portrait",
     "Shop Upgrade and Refresh labels are separate so each retains its own enabled state",

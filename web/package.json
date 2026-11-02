@@ -13,6 +13,8 @@
     "test:party-ai-reference": "node --experimental-strip-types scripts/compare-party-ai-reference.ts",
     "test:party-combat-reference": "node --experimental-strip-types scripts/compare-party-combat-reference.ts",
     "test:party-soak": "node --experimental-strip-types scripts/party-soak.ts",
+    "test:castle-upgrades-reference": "node --experimental-strip-types scripts/compare-castle-upgrades-reference.ts",
+    "test:castle-party-soak": "node --experimental-strip-types scripts/party-soak.ts 8 castle",
     "test:reference": "node --experimental-strip-types scripts/compare-reference.ts",
     "test:wave-reference": "node --experimental-strip-types scripts/compare-wave-reference.ts",
     "test:prepared-wave-reference": "node --experimental-strip-types scripts/compare-prepared-wave-reference.ts",

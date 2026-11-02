@@ -44,7 +44,8 @@ BUTTONS = {"button_newGame": 2521, "button_continue": 2542, "button_help": 2579,
            "button_dialogYes": 2128, "button_dialogNo": 2126,
            "button_freeRepair": 1642, "button_eventOk": 2434, "button_windowClose": 1497,
            "button_partyPortrait": 130, "button_partyDismiss": 1696,
-           "button_partyRecycle": 1758, "button_partyRestock": 1762}
+           "button_partyRecycle": 1758, "button_partyRestock": 1762,
+           "button_castlePage1": 1625, "button_castlePage2": 1630}
 FORCE = False
 
 
@@ -389,6 +390,70 @@ def effect_segment_asset(xml, sprite, name, cache_name, start, end, alpha):
             "sourceFrameStart": start, "frameAlpha": alpha}
 
 
+def castle_upgrade_tiles(xml, sprites):
+    """Запекает исходные фильтры/размещения плитки; название и цена остаются динамическими."""
+    directory, svg_directory = WORK / "castle-tiles", WORK / "castle-tiles-svg"
+    derived = copy.deepcopy(xml)
+    tags = derived.find("tags")
+    target = next(tag for tag in tags if tag.get("spriteId") == "2192")
+    target_index = list(tags).index(target)
+    existing = {tag.get(key) for tag in tags for key in ("spriteId", "buttonId", "characterID") if tag.get(key)}
+    assert not existing.intersection(str(value) for value in range(30000, 30009))
+    # Кадр upgradePic выбирается кодом. Отдельные однокадровые копии не запускают его временную шкалу.
+    for index in range(8):
+        picture = copy.deepcopy(sprites[2191])
+        picture.set("spriteId", str(30000 + index))
+        picture.set("frameCount", "1")
+        timeline = picture.find("subTags")
+        timeline.clear()
+        timeline.extend(placed_frame(sprites[2191].find("subTags"), index + 2))
+        timeline.append(ET.Element("item", type="ShowFrameTag", forceWriteAsLong="false"))
+        timeline.append(ET.Element("item", type="EndTag", forceWriteAsLong="false"))
+        tags.insert(target_index, picture)
+        target_index += 1
+    # Состояние over содержит собственные исходные alpha/blur, а не прибавленную браузером заливку.
+    hover_button = copy.deepcopy(next(tag for tag in tags if tag.get("buttonId") == "2159"))
+    hover_button.set("buttonId", "30008")
+    records = hover_button.find("characters")
+    for record in list(records):
+        if record.get("buttonStateOver") != "true":
+            records.remove(record)
+        else:
+            for state in ("Up", "Over", "Down", "HitTest"):
+                record.set("buttonState" + state, "true")
+    tags.insert(target_index, hover_button)
+    timeline = target.find("subTags")
+    timeline.clear()
+    source = [tag for tag in placed_frame(sprites[2192].find("subTags"), 1)
+              if tag.get("name") not in {"upgradeName", "upgradeCost"}]
+    depths = []
+    for index in range(8):
+        for hover in (False, True):
+            for depth in depths:
+                timeline.append(ET.Element("item", type="RemoveObject2Tag", depth=depth, forceWriteAsLong="false"))
+            selected = copy.deepcopy(source)
+            for tag in selected:
+                if tag.get("name") == "upgradePic":
+                    tag.set("characterId", str(30000 + index))
+                elif tag.get("name") == "upgradeButton" and hover:
+                    tag.set("characterId", "30008")
+            timeline.extend(selected)
+            depths = [tag.get("depth") for tag in selected]
+            timeline.append(ET.Element("item", type="ShowFrameTag", forceWriteAsLong="false"))
+    timeline.append(ET.Element("item", type="EndTag", forceWriteAsLong="false"))
+    target.set("frameCount", "16")
+    if FORCE or not list(directory.glob("DefineSprite_2192*")):
+        path, swf_path = WORK / "castle-tiles.xml", WORK / "castle-tiles.swf"
+        ET.ElementTree(derived).write(path, encoding="utf-8", xml_declaration=True)
+        ffdec(["-xml2swf", path, swf_path], "castle-tiles-swf")
+        ffdec(["-ignorebackground", "-selectid", "2192", "-export", "sprite", directory, swf_path], "castle-tiles-png")
+        ffdec(["-ignorebackground", "-selectid", "2192", "-format", "sprite:svg", "-export", "sprite", svg_directory, swf_path], "castle-tiles-svg")
+    return {**atlas("castleUpgradeTiles", 2192, target, directory, svg_directory),
+            "coordinateSpace": "upgrades-parent", "placementBaked": True,
+            "sourcePictureId": 2191, "sourcePictureFrames": list(range(2, 10)),
+            "framesPerTile": 2, "states": ["up", "over"]}
+
+
 def buttons(manifest):
     png_dir, svg_dir = ROOT / ".build/buttons", ROOT / ".build/buttons-svg"
     for directory, extension, format_args, log in [(png_dir, "png", [], "buttons"),
@@ -489,6 +554,20 @@ def town_layout(xml, sprites):
     for name, key in {"mission": "Mission", "castle": "Castle", "chara": "Chara",
                       "equip": "Equip", "shop": "Shop", "medal": "Medal"}.items():
         navigation[name] = {**root[name + "Button"], "image": "button_town" + key}
+    upgrade_children = placements(sprites[2192].find("subTags"), 1)
+    for name in ("upgradeName", "upgradeCost"):
+        definition = definitions[str(upgrade_children[name]["characterId"])]
+        upgrade_children[name]["text"]["indent"] = int(definition.get("indent", "0")) / 20
+    # HitTest-состояние SimpleButton содержит заполненный прямоугольник, почти прозрачный после alpha.
+    # Берём исходные границы и переносы, а не расширенные фильтром границы растра.
+    upgrade_button = next(tag for tag in tags if tag.get("buttonId") == str(upgrade_children["upgradeButton"]["characterId"]))
+    hit_record = next(record for record in upgrade_button.iter("item") if record.get("buttonStateHitTest") == "true")
+    hit_shape = next(tag for tag in tags if tag.get("shapeId") == hit_record.get("characterId"))
+    hit_bounds, hit_matrix = hit_shape.find("shapeBounds"), hit_record.find("placeMatrix")
+    hit_rect = [upgrade_children["upgradeButton"]["x"] + (int(hit_matrix.get("translateX")) + int(hit_bounds.get("Xmin"))) / 20,
+                upgrade_children["upgradeButton"]["y"] + (int(hit_matrix.get("translateY")) + int(hit_bounds.get("Ymin"))) / 20,
+                (int(hit_bounds.get("Xmax")) - int(hit_bounds.get("Xmin"))) / 20,
+                (int(hit_bounds.get("Ymax")) - int(hit_bounds.get("Ymin"))) / 20]
     # В городе окно стартует с 630; после боя та же анимация стартовала с 590.
     return {"version": 1, "sourceSha256": ORIGINAL_SHA256, "rootFrame": 71,
             "menuPosition": {"x": 630 - sum(i ** 1.7 for i in range(16)), "y": -22},
@@ -497,6 +576,11 @@ def town_layout(xml, sprites):
                         "children": placements(sprites[1995].find("subTags"), 40)},
             "castle": {"characterId": 1995, "frame": 54, "image": "townCastle", "labelsImage": "townCastleLabels",
                        "children": placements(sprites[1995].find("subTags"), 54)},
+            "castleUpgrades": {"characterId": 2192, "clip": "castleUpgradeTiles", "children": upgrade_children,
+                               "x": 150, "y": 140, "columns": 4, "stepX": 100, "stepY": 110,
+                               "names": ["Fix Wall", "Wall", "Sandbag", "Storage", "House", "Looter", "Repairman", "Trainer"],
+                               "disabledAlpha": 0.3, "affordableColor": "#0000cc", "unavailableColor": "#cc0000",
+                               "pageButtons": ["button_castlePage1", "button_castlePage2"], "hitRect": hit_rect},
             "characters": {"characterId": 1995, "frame": 63, "image": "townCharacters", "labelsImage": "townCharactersLabels",
                            "children": placements(sprites[1995].find("subTags"), 63),
                            "portraits": {"x": 160, "y": 146, "stepX": 62, "candidateIndex": 5, "candidateExtraX": 10}},
@@ -572,6 +656,7 @@ def main():
         manifest["clips"][name] = atlas(name, i, sprites[i])
     manifest["clips"]["itemPopup"] = item_popup_asset(xml, sprites[1791])
     manifest["clips"]["partyPortraitBackground"] = party_portrait_background(xml, sprites[685])
+    manifest["clips"]["castleUpgradeTiles"] = castle_upgrade_tiles(xml, sprites)
     manifest["clips"]["shieldHit"] = effect_segment_asset(xml, sprites[1459], "shieldHit", "shield-hit", 140, 146, [0.7, 0.7, 0.5, 0.5, 0.2, 0.2])
     # Наблюдаемые значения alpha хранятся Flash с точностью 1/256.
     manifest["clips"]["bloodHit"] = effect_segment_asset(xml, sprites[1459], "bloodHit", "enemy-hit-blood", 50, 63, [1, 1, 1, 1, 204/256, 204/256, 153/256, 153/256, 102/256, 102/256, 25/256, 25/256, 25/256])
@@ -597,7 +682,7 @@ def main():
         ("townMission", sprites[1995].find("subTags"), 40,
          {"closeButton", "hint2", "act1", "act2", "actRef1", "actRef2"}, (0, -22)),
         ("townCastle", sprites[1995].find("subTags"), 54,
-         {"closeButton", "hint2", "hint", "unkeep", "locker", "act1", "actRef1"}, (0, -22)),
+         {"closeButton", "hint2", "hint", "unkeep", "locker", "act1", "actRef1", "page1", "page2"}, (0, -22)),
         ("townShop", sprites[1995].find("subTags"), 80,
          {"closeButton", "hint2", "warning", "popup", "actHelp", "act1", "act2", "actRef1", "actRef2"}, (0, -22)),
         ("townCharacters", sprites[1995].find("subTags"), 63,
@@ -686,6 +771,7 @@ def main():
             "townHud applies the original eventGene bgAlpha.alpha=1",
             "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",
             "Town action labels are separate original foreground layers above their card buttons",
+            "Castle upgrade tiles retain original icon, button-state, coin and filter placements; runtime draws levels/prices and uses the source button hit-state rectangle",
             "Characters/Equipment panels retain original labels, portraits, slot placements and separately rendered controls; permanent recruitment is separate from the Mission henchman action",
             "partyPortraitBackground bakes ally3 bg placement, alpha41/256 and blur11 in parent portrait coordinates; selection opacity applies to the whole portrait",
             "Shop Upgrade and Refresh labels are separate so each retains its own enabled state",

@@ -304,7 +304,7 @@ test('v14 town migration installs the retained candidate without RNG, preparatio
   const untouched = structuredClone(legacy);
   const migrated = Simulation.fromSave(legacy);
   assert.deepEqual(legacy, untouched);
-  assert.equal(migrated.state.version, 15);
+  assert.equal(migrated.state.version, 16);
   assert.equal(migrated.state.rng, legacy.rng); assert.equal(migrated.state.gold, legacy.gold);
   assert.equal(migrated.state.totalMoney, legacy.totalMoney);
   assert.deepEqual(migrated.state.inventory, legacy.inventory);
@@ -401,6 +401,7 @@ test('early v15 air classification repair moves complete cache cells and preserv
   Object.assign(simulation.state.party.slots[0].member!.aiState!, { targetUid: fly.uid, onMark: true, aimCount: 7, idleCount: 0.231 });
   const correct = saved(simulation), current = restore(simulation);
   const early = structuredClone(correct);
+  early.version = 15; delete early.wallLevel;
   early.enemies.find((enemy: EnemyState) => enemy.kind === 'crow').type = 2;
   early.retainedAITargets[0].type = 2;
   early.partyAI.targets[2] = early.partyAI.targets[1];

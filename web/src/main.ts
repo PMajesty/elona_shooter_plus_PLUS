@@ -11,6 +11,7 @@ import { createShopView, type ShopLayout } from './shop-view.ts';
 import { createPartyView, type PartyLayout, type PartyViewMember, type PartyViewTrait, type PartyEquipmentSlot } from './party-view.ts';
 import { ALL_TRAITS, companionWage } from './party-progression.ts';
 import { partyActorPosition } from './party-ai.ts';
+import { castleUpgradeCost, castleUpkeep } from './castle-upgrades.ts';
 import { ITEM_TYPE, isOccupiedItem } from './items.ts';
 import { alphaMaskHit, ordinaryEnemyHit, type CollisionGeometry } from './collision.ts';
 import type { ProjectileKind } from './projectiles.ts';
@@ -20,7 +21,7 @@ interface ImageAsset { file: string; width: number; height: number; originX: num
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number; frameAlpha?: number[] }
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual }
-interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15; appearance: number; simulation: unknown }
+interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16; appearance: number; simulation: unknown }
 type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
@@ -132,7 +133,7 @@ class ElonaScene extends Phaser.Scene {
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Sheriff Days 1–7, companion recruitment, party equipment and orders, rewards, the shop, weapon upgrades, MOD mounting, Free Repair, Claim Title and Rest are playable. Number keys 1–5 use owned equipment and consumables; hold and release the mouse to draw and fire a bow. Ragnarok, remaining town actions, Day 8 onward and other playable classes are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Sheriff Days 1–7, companion recruitment, party equipment and orders, House and Wall upgrades, rewards, the shop, weapon upgrades, MOD mounting, Free Repair, Claim Title and Rest are playable. Number keys 1–5 use owned equipment and consumables; hold and release the mouse to draw and fire a bow. Ragnarok, remaining town actions, Day 8 onward and other playable classes are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
     document.querySelector<HTMLButtonElement>('#import-save')!.disabled = false;
   }
@@ -167,6 +168,7 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.shopStock; delete container.dataset.saleSlot; delete container.dataset.upgradeSelecting;
     delete container.dataset.pendingTownAction; delete container.dataset.upgradePreview;
     delete container.dataset.party; delete container.dataset.partySelection; delete container.dataset.pendingPartyAction; delete container.dataset.companionVisuals;
+    delete container.dataset.castleUpgrades;
   }
 
   private image(key: string, x = 0, y = 0): Phaser.GameObjects.Image | undefined {
@@ -858,6 +860,18 @@ class ElonaScene extends Phaser.Scene {
       select: next => { this.playSound('soundScroll1'); this.showTown(next); },
       actionHover: () => this.playSound('soundCard1'),
       message: value => { status.textContent = value; },
+      castleUpgrade: kind => {
+        const outcome = this.sim!.buyCastleUpgrade(kind);
+        if (outcome === 'purchased') {
+          this.playSound('soundPay1'); this.saveGame(false); this.showTown('castle');
+          status.textContent = `${kind === 'house' ? 'House' : 'Wall'} upgraded.`;
+        } else {
+          this.playSound('soundBeep');
+          // Исходный Castle только пищит; пояснение использует обычную строку статуса порта.
+          status.textContent = outcome === 'not-enough-gold' ? 'Not enough gold.'
+            : outcome === 'capped' ? 'The House is already at its maximum level.' : 'This Castle upgrade is unavailable.';
+        }
+      },
       repair: () => {
         const outcome = this.sim!.freeRepair();
         if (outcome === 'repaired') {
@@ -942,6 +956,9 @@ class ElonaScene extends Phaser.Scene {
     }
     this.updateHud();
     container.dataset.actionPoints = String(this.sim.state.town.ap);
+    container.dataset.castleUpgrades = JSON.stringify({ house: this.sim.state.party.capacity, wall: this.sim.state.wallLevel,
+      maxHp: this.sim.state.castleMaxHp, upkeep: castleUpkeep(this.sim.state),
+      houseCost: castleUpgradeCost('house', this.sim.state), wallCost: castleUpgradeCost('wall', this.sim.state) });
     container.dataset.title = String(this.sim.state.title);
     container.dataset.townTab = tab ?? 'none';
     container.dataset.repairDialog = String(dialog === 'repair');
@@ -1056,7 +1073,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   makeSave(): PortSave | undefined {
-    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 15, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
+    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 16, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
   }
 
   saveGame(notify = true): boolean {
@@ -1069,7 +1086,7 @@ class ElonaScene extends Phaser.Scene {
 
   private parseSave(raw: unknown): { simulation: Simulation; appearance: number } {
     const save = raw as Partial<PortSave> | null;
-    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
+    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
     return { simulation: Simulation.fromSave(save.simulation, this.simulationOptions()), appearance: save.appearance! };
   }
 

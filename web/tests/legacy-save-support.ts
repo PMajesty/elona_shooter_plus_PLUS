@@ -10,7 +10,8 @@ import { ENEMIES } from '../src/content.ts';
 export function withLegacyPartyDefaults(value: Record<string, any>): Record<string, any> {
   const expected = structuredClone(value);
   const town = expected.town?.preparation === 'ready' ? expected.town : expected.previousTown;
-  expected.version = 15;
+  expected.version = 16;
+  expected.wallLevel = 1;
   expected.party = createPartyState(town?.recruit);
   expected.partySkills = partySkills([{ traits: expected.player.traits ?? createSheriffTraits() }]);
   expected.partyAI = createPartyAIShared();
@@ -25,8 +26,17 @@ export function withLegacyPartyDefaults(value: Record<string, any>): Record<stri
   return expected;
 }
 
-export function asLegacyV14Save(state: SimulationState): Record<string, any> {
+export function asLegacyV15Save(state: SimulationState): Record<string, any> {
   const value: Record<string, any> = structuredClone(state);
+  assert.equal(value.wallLevel, 1);
+  assert.equal(value.castleMaxHp, 40);
+  delete value.wallLevel;
+  value.version = 15;
+  return value;
+}
+
+export function asLegacyV14Save(state: SimulationState): Record<string, any> {
+  const value = asLegacyV15Save(state);
   assert.ok(value.party.slots.slice(0, 4).every((slot: {exists: boolean}) => !slot.exists));
   assert.equal(value.pendingPartyAction, null);
   for (const field of ['party', 'partySkills', 'partyAI', 'retainedAITargets', 'pendingPartyAction']) delete value[field];
