@@ -169,11 +169,16 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.muted = String(this.muted);
     this.root = this.add.container(0, 0);
     this.input.mouse?.disableContextMenu();
+    // Phaser слушает mousedown родительского окна iframe с координатами чужого документа.
+    // Новое нажатие принадлежит только canvas; глобальный mouseup сохраняет отпускание за его пределами.
+    const mouse = this.input.mouse;
+    const mouseWindow = mouse?.isTop ? window.top : window;
+    if (mouse) mouseWindow?.removeEventListener('mousedown', mouse.onMouseDownWindow as EventListener);
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       if (this.screen !== 'battle' || this.paused || pointer.y < 30 || pointer.y > 345) return;
       if (pointer.button === 0 && pointer.leftButtonDown()) { this.firePressed = true; this.firingGesture = this.firingReleaseOwned = true; }
     });
-    const releaseFire = (pointer: Phaser.Input.Pointer) => {
+    const releaseFire = (pointer: { button: number }) => {
       // Отпускание другой кнопки не выпускает стрелу при удерживаемой левой.
       if (pointer.button !== 0) return;
       if (this.firingReleaseOwned) this.fireReleased = true;
@@ -181,6 +186,13 @@ class ElonaScene extends Phaser.Scene {
     };
     this.input.on('pointerup', releaseFire);
     this.input.on('pointerupoutside', releaseFire);
+    // Отпускание приходит из окна игры или родителя; завершаем только собственный жест.
+    const outsideRelease = (event: MouseEvent) => releaseFire(event);
+    const releaseWindows = new Set([window, ...(mouseWindow ? [mouseWindow] : [])]);
+    for (const releaseWindow of releaseWindows) releaseWindow.addEventListener('mouseup', outsideRelease, true);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      for (const releaseWindow of releaseWindows) releaseWindow.removeEventListener('mouseup', outsideRelease, true);
+    });
     // За пределами поля удерживаемый огонь прекращается, но MouseUp ещё принадлежит этому нажатию.
     this.input.on('gameout', () => { this.firingGesture = false; });
     this.input.on('gameover', (_time: number, event: MouseEvent | TouchEvent) => {

@@ -167,6 +167,24 @@ preview at `http://127.0.0.1:5175/elona/` serves `web/dist/`.
 To restore that preview after an app restart, run
 `npm.cmd --prefix web run preview -- --port 5175 --strictPort --base /elona/`.
 
+For a responsive embed on the same website:
+
+```html
+<div style="width:100%;max-width:620px;aspect-ratio:31/19">
+  <iframe src="/elona/" title="Elona Shooter Plus"
+    width="620" height="380" allow="fullscreen"
+    style="display:block;width:100%;height:100%;border:0"></iframe>
+</div>
+```
+
+The game pauses when focus leaves it. Surrounding website controls do not start
+shots or resume combat; a shot begun inside the game can finish outside the frame.
+Same-origin iframe save/Continue across a host-page reload and shared slots with
+the direct game URL have been checked. Keep the direct URL available for backups:
+JSON export downloads work there, while iframe download delivery remains unverified
+in the in-app browser. Cross-origin storage/download policies and sandboxed embeds
+have not been verified. The fullscreen icon is for the player to operate.
+
 A controlled five-minute Day41 browser stress check began with150 enemies,
 including six bosses, and three companions. Sampled rendering stayed near60 FPS
 while simulation kept pace with elapsed time; its full save reloaded exactly.

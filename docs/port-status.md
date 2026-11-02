@@ -1,9 +1,16 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v40, audio preload correction and crowded-battle baseline**.
+Updated 2026-11-02. Current local build: **v40, website iframe input correction**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
+
+Website embedding now isolates new mouse presses to the game canvas. Phaser's
+parent-window mousedown listener had interpreted surrounding website controls as
+game clicks, including resuming paused combat. Owned bow releases work in both
+the iframe and accessible parent window. Focus loss pauses play. Same-origin
+host-page reload/Continue and direct-route access to the same save slots work;
+the README includes an embed example. Iframe download delivery remains unverified.
 
 All eight original hero classes are connected to ordinary New Game, equipment,
 skill choices, growth, combat and saves. Rogue/Hunter start with Little Girl;
@@ -216,8 +223,8 @@ historical player SOL compatibility remains unverified.
 
 - Last full suite: **565 tests pass**; the three fall checks also passed after a
   test-only knockback assertion. Simulation/save code is unchanged by the audio
-  loader correction, so those results were reused. Current typecheck/build pass.
-  Bundle: assets/index-9vmVDnBg.js. Existing deterministic/source comparisons cover hero
+  loader and iframe input corrections, so those results were reused. Current
+  typecheck/build pass. Bundle: assets/index-Bi81nsvB.js. Existing comparisons cover hero
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
 - The current controlled40-day campaign reached18 enemy kinds in96827 frames using
@@ -280,6 +287,19 @@ historical player SOL compatibility remains unverified.
   .build/browser-qa records and historical verification. Reuse it for unchanged
   behavior. The source's inactive card/debug-start functions were audited below.
 
+- Website iframe check: surrounding text input/keys and native-to-small resize
+  retained identical paused battle metadata after the fix. At360px display width,
+  the620×380 buffer retained working weapon selection/fire (rifle10→9 rounds).
+  Releasing a bow drag outside the frame created a real arrow and cleared drawing.
+  Host-page reload/Continue retained tick170, ammo/selection/pause; a direct-route
+  export retained that tick and arrow. Disposable slot8 was removed and the user's
+  complete adventure/collection restored exactly, paused/muted, without errors or
+  fullscreen. Typecheck/build passed;565 unchanged simulation tests were reused.
+  Evidence: .build/browser-qa/embedding-verification.json and embedding-browser.png.
+  The temporary host page was removed. Two iframe export attempts reported success
+  without producing a download in IAB; direct-route export succeeded. Cross-origin,
+  sandboxed and ordinary-browser iframe downloads remain unverified.
+
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. Historical details are
 in Git and [historical verification](port-verification.json). The Codex app crash
@@ -290,7 +310,8 @@ that the app's crash cause was fixed.
 
 1. Hours-long stability, broader browser/hosting performance and later difficulty
    evidence. The five-minute crowded baseline above passes; the Day1000 save safety
-   boundary remains an intentional limit.
+   boundary remains an intentional limit. Same-origin embedding has the input/save
+   evidence above; cross-origin storage and iframe download delivery remain open.
 2. All38 defined medal award paths and award notifications are connected. Preserve
    source bonus discrepancies: Kongregate advertises a
    wage discount, but wage3610 checks Ragnarok92; medal91 does not add another

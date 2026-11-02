@@ -191,3 +191,19 @@ metadata and normal save import, with no new harness. Local TimeStep source show
 the existing delta is smoothed; distinguish it from raw frame gaps as well as
 whole-run stall/memory evidence. No optimization was justified
 by the observed60 FPS and simulation progress matching wall time.
+
+Website embedding exposed a real integration defect: host-page clicks reached
+Phaser's parent-window mousedown listener using the wrong document coordinates.
+After reproducing native-to-small resize resuming paused combat, inspecting that
+vendor boundary identified the shared cause. Removing only outside presses kept
+canvas controls; an outside bow-release check then required capture in both own
+and accessible parent windows. These failures justified focused rebuilds, not a
+new simulation harness or unchanged campaign replay. Browser metadata plus an
+actual exported arrow established completion, rather than the release event alone.
+
+Two iframe export attempts showed a success status but delivered no file in IAB.
+Stop retrying that unchanged route: record the compatibility limit and use the
+working direct URL to inspect the saved checkpoint and restore the user's whole
+backup. Do not infer ordinary-browser download behavior or change export code
+without evidence. Same-origin host reload/Continue passed; no broader hosting
+claim follows. Temporary host controls were removed from the served build.
