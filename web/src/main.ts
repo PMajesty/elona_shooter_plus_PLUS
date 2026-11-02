@@ -1797,8 +1797,8 @@ class ElonaScene extends Phaser.Scene {
 
   continueGame(): void {
     const saved = readSave(this.saveSlot);
-    if (saved.kind !== 'saved') { this.playSound('soundBeep'); status.textContent = saved.kind === 'error' ? saved.message : 'Save Game not found.'; return; }
-    try { this.loadGame(saved.data); } catch (error) { this.playSound('soundBeep'); status.textContent = error instanceof Error ? error.message : 'Unable to read save.'; }
+    if (saved.kind !== 'saved') { this.playSound('soundBeep'); this.importFailure(new Error(saved.kind === 'error' ? saved.message : 'Save Game not found.')); return; }
+    try { this.loadGame(saved.data); } catch (error) { this.playSound('soundBeep'); this.importFailure(error); }
   }
 
   loadGame(raw: unknown, restoreCollection = false): void {
@@ -1816,7 +1816,11 @@ class ElonaScene extends Phaser.Scene {
     status.textContent = 'Saved game restored.';
   }
 
-  importSave(raw: unknown): void { this.loadGame(raw, true); this.saveGame(false); status.textContent = 'Save imported and restored.'; }
+  importSave(raw: unknown): void {
+    this.loadGame(raw, true);
+    // Импорт тоже сообщает об ошибке записи и предлагает резервную копию текущего приключения.
+    if (this.saveGame() && !this.pauseDialog) status.textContent = 'Save imported and restored.';
+  }
 
   prepareImport(): boolean {
     if (this.collectionDialog || this.pauseDialog || this.helpLayer) return false;

@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-03. Current local build: **v41, original item and skill information**.
+Updated 2026-11-03. Current local build: **v41, visible Continue/import failure recovery**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -32,6 +32,11 @@ failures have separate messages. Cancel/Escape leave combat paused; Space cannot
 resume under the prompt. Successful saves add no dialog. Hardcore combat keeps
 its town-only save/export rule and explains it with an acknowledgement.
 Automatic saves retain their existing non-interrupting behavior.
+Continue now shows an in-game acknowledgement for unreadable/unsupported saves,
+using the existing import-error dialog; dismissing it preserves the raw adventure
+and collection. JSON/Flash-adventure imports now report failed browser writes and
+offer the imported run as a backup instead of silently claiming success. Medal-only
+write failures remain distinct, and healthy imports add no dialog.
 Loss of WebGL now freezes updates and pauses active combat. Resume controls remain
 blocked while the context is lost; after Phaser restores rendering, the original
 pause menu stays open for the player to resume. This prevents invisible combat
@@ -286,10 +291,13 @@ historical player SOL compatibility remains unverified.
 
 ## Validation and limits
 
-- Last full suite: **578 tests pass** in11.236s. Three new skill-hint checks cover
+- Last full suite: **578 tests pass** in11.236s at the skill-information checkpoint.
+  Three new skill-hint checks cover
   source Sniper/Duelist bonus strings, owned/maxed names and effects, finite caps
   and normal/Base/Party categories. Current typecheck/build pass; bundle:
-  assets/index-BfIjAP1Y.js. Original comparisons, deterministic gameplay and save
+  assets/index-Cn5tm2du.js. The subsequent Continue/import UI routing has focused
+  browser coverage below; the unchanged full suite was not repeated. Original
+  comparisons, deterministic gameplay and save
   tests pass; combat formulas, RNG and save format remain unchanged.
   Existing source/deterministic checks cover
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
@@ -341,6 +349,7 @@ Reuse it for unchanged behavior rather than repeating whole browser/campaign run
 | New Game information | `gene-info-verification.json`, `gene-{class-hint,locked,noble}-browser.png`: class skill/starting skills and original English hover text render; locked names/requirement match source. A controlled medal collection unlocks all four advanced labels; Noble proceeds into combat and its full save survives Continue exactly. Source medal bonuses apply only on Proceed; the check confirms Luck is absent before and present afterward. No script errors; user profile untouched. |
 | Item information | `item-popup-verification.json`, `item-popup-{equipment,shop,upgrade,loot}-browser.png`: original panel fields/artwork render across equipment, shop, loot and upgrade comparison. Red requirements, modified living-weapon progress and non-gun descriptions are readable. Hover/carry preserve the full save; equipment moves, purchase cost, loot collection and upgrade Cancel work. Final full-envelope Continue matches. Controlled fixture variants, muted isolated Chrome, no script errors or user-profile changes. |
 | Skill information | `trait-hint-verification.json`, `trait-hint-{barracks,sniper,party}-browser.png`: all five source fields render; weapon focus preserves gold/AP/RNG, hovering preserves the entire save and Continue restores it exactly. Noble skill order matches source; controlled advanced-class unlocks permit an ordinary Sniper start and shot10→9. Muted isolated Chrome, no script errors or changes to the user profile. |
+| Continue/import recovery | `save-recovery-verification.json`, `save-recovery-{corrupt,import}-browser.png`: unreadable JSON and unsupported-version Continue show original-artwork acknowledgements; raw adventure/collection remain exact. Another slot loads normally. Blocked imported-adventure writes preserve the prior stored run and export the complete imported envelope; Space cannot resume under the prompt. Medal-only failure is distinct; healthy import/Continue remain exact. Isolated muted Chrome, no script errors or user-profile changes. |
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. The Codex app crash
