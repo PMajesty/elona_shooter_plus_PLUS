@@ -7,6 +7,8 @@ main { width: 100%; height: 100%; display: grid; place-items: center; }
 #game:fullscreen { width: 100vw; height: 100dvh; aspect-ratio: auto; }
 #load-status { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; color: #d4c58e; font-size: 13px; text-align: center; }
 #load-status[hidden] { display: none; }
+.startup-error { max-width: 470px; padding: 24px; }
+.startup-error p { margin: 0 0 16px; line-height: 1.5; }
 button { border: 1px solid #796a4f; border-radius: 2px; background: #302b20; color: #e6dac0; padding: 5px; cursor: pointer; font: 12px system-ui, sans-serif; }
 button:hover { background: #4c4230; }
 button:focus-visible { outline: 2px solid #e6d5a6; outline-offset: 1px; }

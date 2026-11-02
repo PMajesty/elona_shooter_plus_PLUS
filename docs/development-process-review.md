@@ -1,232 +1,105 @@
-# Development process review — 2026-11-02
+# Development process review
 
-## Finding
+Current review: 2026-11-02, scheduled19:37 UTC; checkpoint completed after the
+user's reboot. Earlier reviews remain in Git. Follow the [current goal](long-term-goal.md)
+and [coverage/evidence/limits](port-status.md).
 
-The overnight process optimized confidence in narrow increments at the expense of
-feature coverage. The result is useful but substantially incomplete. The user
-reports more than $1,000 spent. Repository records cannot verify billing or assign
-an exact cost/time percentage to each activity; the workflow problems below are
-observable without inventing those numbers.
+## Findings from actual work
 
-## Evidence and root causes
+Since the16:02 review, nine integrated checkpoints delivered original Flash
+adventure import with independent source-save fixtures, manual Chain Gun spin,
+falling-rat behavior, missing combat audio, iframe input isolation, late-enemy
+attacks, original combat announcements/auras and font-failure recovery. Import
+reused the AMF reader, validator and ordinary UI; attacks reused saved flights.
+Work remained solo, muted and save-preserving. Keep those practices.
 
-| Problem | Evidence | Consequence | Doctrine |
-| --- | --- | --- | --- |
-| Calendar days became delivery units | Separate wave/town builders and comparison commands for Days 3–9; UI and save validators enumerate supported days | Repeated editing, fixtures and validation to extend an algorithm that should support progression | 1, 6, 10 |
-| Small purchases became releases | Castle, repair, Sandbag, Storage, Looter and Trainer commits each have separate publication/migration/archive/rollback records | High fixed overhead around small runtime changes | 3, 4, 7 |
-| Evidence overwhelmed current state | At checkpoint, status is about 1,000 lines and verification JSON about 31,000 lines, much of it release history | Re-reading and updating history consumes attention/context and obscures remaining features | 11 |
-| Established checks were repeatedly broadened | Repeated natural campaigns and browser save paths accompany successive small Castle additions | Additional confidence had diminishing value while major systems remained absent | 4, 5 |
-| Hero support was duplicated conceptually | Companion code already has nine class definitions, starting gear and combat effects, while the hero generator/choices/save validation are Sheriff-specific | Existing capability does not reach the ordinary New Game flow | 2, 10 |
-| Local certainty displaced the overall outcome | Twenty-four save/release milestones still end at nine Sheriff days | Individual successful checks did not demonstrate whole-game completion | 1, 5, 13 |
+The last two full suites took14.225s and12.222s; builds took roughly0.8–6s.
+Execution time does not explain the larger development cycle. Repository evidence
+cannot allocate billing or exact time percentages; do not invent them.
 
-The central decision error was applying the strongest faithfulness standard to
-almost every detail before achieving breadth. Once that became habitual, each
-small, readily provable addition appeared to be the safest next task. There was
-no effective reassessment of progress per unit of work. Autonomous continuation
-and the watcher perpetuated that choice; recurrence does not improve throughput.
+| Observed bottleneck | Specific correction |
+| --- | --- |
+| Remaining work mixes release evidence with small cosmetic details, encouraging another easily provable visual increment | Use finite completion gates in current status. Prioritize missing reachable behavior, reproduced failures, hosting and sustained stability. Exact filters/audio/RNG matching stay deferred. |
+| Each small checkpoint repeats browser recovery, disposable-slot setup, export/import/Continue and documentation | Group related changes before one browser phase. Use the affected flow; do not automatically repeat a whole save ceremony for UI-only code. Reload for changed code/startup; otherwise prefer Return to Title/Continue. |
+| Bounded searches still become truncated batch reads, including trait investigation and initial reboot recovery in this review | Print a compact inventory first; inspect only flagged functions. Bound output across the whole batch. Avoid dumping runtime/request metadata or broad app lists. |
+| This review document grew to about270 lines of chronological appendices | Consolidate current findings and operating rules here; Git preserves earlier detail. Do not duplicate trace archives in current docs. |
+| Initial browser recovery after the reboot attempted APIs that are no longer exposed | Stop after bounded discovery. Restore the documented preview independently and retain earlier browser evidence; do not build a replacement automation protocol or disturb the user's desktop. |
 
-A second cause is structural: save validation mixes structural integrity checks
-with assertions about early-game content and historical implementation limits.
-Repeated day/class enumerations make a content addition look like a format change.
-This invites another migration/release cycle. Generalize the restrictions when
-their supported feature is implemented; do not remove guards to expose missing
-enemy behavior or silently substitute invented mechanics.
+The concern about repeated small visual releases is a selection/overhead pattern,
+not proof those features were worthless. The real iframe input defect, omitted
+audio preloads and startup failures justified their focused checks and corrections.
 
-Resource control was also missing. The app goal record reports about15.27million
-accumulated tokens and9.85hours; it does not distinguish billing categories or
-provide a trustworthy dollar allocation. Repeatedly supplying long source reads,
-generated traces and historical reports increases context work. On the resumed
-run, the412-test suite completed in about8seconds and a production build in about
-5seconds. Test execution itself does not explain the much longer feature cycles;
-designing bespoke probes, repeated UI/release work and reasoning/reporting around
-each increment are the stronger demonstrated targets for reduction.
+## Applied during this review
 
-The quality target was also too open-ended. "Absolutely perfect" supplied no
-practical rule for deciding when another fidelity probe had earned its cost.
-Use the original feature inventory as the completion boundary, structural and
-behavioral checks as acceptance evidence, and a finite list of documented
-differences. Pixel, audio and incidental RNG-order matching can follow broader
-coverage. Comparisons observed under Ruffle establish agreement with that
-reference runtime; they do not independently prove identical native Flash behavior.
+A finite connection screen covered all52 defined traits. Guardian9 is aggregated
+into party skills and consumed by castle retaliation; Shotgun105 uses generic
+weapon-requirement checks. Neither apparent missing direct reference was a missing
+feature. Source checks also supported the existing manual-reload gate and One hit
+kill boss exclusion. This establishes connections, not every formula, condition or
+balance outcome. No52-skill matrix or speculative rule change was justified.
 
-The original-game comparison machinery is worth keeping. It detects errors that
-tests written from the port alone cannot detect. Its expansion was disproportionate:
-not every new day or purchase needs a bespoke SWF driver and another large stored
-fixture. Existing passing comparisons remain evidence for unchanged behavior.
-Seeded repeatability proves reproducibility, not equivalence to Flash; generated
-fixtures and test counts must never be used as a completion percentage.
+A missing required town-layout JSON reproduced a functional startup failure:
+loading reached100%, title creation partly ran and scene callbacks threw. The fix
+checks required caches/textures before creating the UI, guards updates until the
+scene is ready and offers an in-game Retry. Optional audio failure still permits
+play. This uses the existing loader, not another loading framework.
 
-Collaboration also creates coordination/context costs, but the available records
-do not establish its share of the spend. Per the user's instruction, all further
-work is solo. Recurring work was subsequently reauthorized in the current goal.
+Actual muted checks covered required-data failure, Retry, optional background
+audio failure, healthy recovery and Continue. A readiness-guard correction warranted
+one focused failure/retry recheck. Full exports before/after are byte-identical
+(v41, tick674); all served fault-injection files were restored. New Game/combat
+font-fallback evidence and the unchanged572-test suite are reused. No save or
+simulation change required a new campaign replay. Reboot recovery retained these
+artifacts and restored the preview at its documented URL.
 
-## Changed working rules
+An intermittent ready-but-black screenshot recurred once; Continue rendered the
+battle correctly. Its cause is unresolved. Loader recovery does not establish a
+fix for that observation. An unchanged iframe download path twice reported success
+without a delivered file in IAB: retain that limit, rather than retrying indefinitely
+or claiming ordinary-browser compatibility from an API return.
 
-1. **Feature completeness first.** Preserve original assets, rules, balance and
-   saves where known. Accept documented cosmetic, audio timing and RNG-order
-   differences when exact matching would block substantial playable functionality.
-   Do not invent balance or claim parity for approximations.
-2. **Choose a complete user capability.** Examples: all starting classes through
-   creation/combat/growth/save, general campaign progression, or a complete town
-   activity. A calendar day is not automatically a new project.
-3. **Reuse implemented systems.** Share class definitions and skill selection
-   with companions; keep the simulation independent of rendering. Consolidate
-   only duplication directly encountered by the feature being added.
-4. **Use proportional automation.** Deterministic targeted tests for new rules,
-   save/restore replay for affected state, representative boundary cases and one
-   integrated browser smoke. Run the full existing suite once at an integrated
-   checkpoint, or earlier for a concrete cross-cutting risk. Avoid fresh giant
-   fixture sets and full original-game replays for unchanged code.
-5. **Test late states directly.** Controlled state setup and accelerated simulation
-   should exercise unlocks, high levels, dense battles, unusual equipment and
-   failures. Keep a smaller natural campaign smoke to catch progression errors.
-   Distinguish controlled-state tests from naturally acquired progress.
-6. **Release at useful checkpoints.** Keep the existing Git recovery baseline and
-   local save backup. Build and update the ordinary local application after a
-   meaningful group of features; do not create another ZIP/hash manifesto and
-   full rollback copy for every small change.
-7. **Keep records concise.** A current coverage summary, explicit differences,
-   checks actually run and next missing systems. Retain historical evidence in
-   place without copying it into every new report or rereading it wholesale.
-8. **Control resource use.** Solo work, bounded tool output, shared test helpers,
-   no automatic expansion of the test matrix. The user subsequently authorized
-   a 30-minute continuation watcher and three-hour workflow review; see the
-   [current goal](long-term-goal.md). Reviews must improve useful throughput.
-   Reassess immediately when another small feature demands a parallel family of
-   bespoke tools or repeated repair work. Do not infer access to dollar billing.
-9. **Quiet browser testing.** Default the port to muted unless the user explicitly
-   enabled sound; persist that preference. Reuse the existing Codex browser tab.
-   Do not open audible original-game diagnostics during routine verification.
+## Working rules retained
 
-## Current development order
+1. Deliver a useful capability through ordinary play. Reuse existing classes,
+   simulation, saves, fixtures and asset extraction. No disconnected opt-in demos.
+2. Preserve known rules, balance, English and original artwork. Record intentional
+   differences. Exact presentation/RNG matching and the late-game hitbox complaint
+   remain deferred as directed.
+3. Test changed rules and meaningful failures proportionately. Add save/replay
+   checks when persisted state changes. Broaden only for a concrete integration
+   risk; reuse unchanged full-suite, campaign and original-game results.
+4. Exercise late states directly with controlled saves and accelerated simulation;
+   retain a smaller natural progression check. Do not make calendar days separate
+   delivery units or build bespoke harness families for every purchase.
+5. Use one muted browser phase for an integrated slice, reuse the existing tab,
+   preserve the whole user adventure/collection and never enter native fullscreen.
+   Observe the actual UI phase before dependent canvas actions.
+6. Keep practical Git/save recovery; push useful checkpoints. No repeated release
+   archives, hash manifestos or full migration ceremonies for minor additions.
+7. Read current docs and affected code, not historical traces. Discover tools by
+   precise name. On a stale supported browser binding, one documented recovery
+   attempt is enough; unavailable automation is not permission to invent a client.
+8. Work solo. Scheduled reviews must change a demonstrated bottleneck or preserve
+   the working approach; recurrence itself is not progress. Do not recreate the
+   native app goal the user cleared.
 
-The former class/campaign/town priorities are implemented; use current status for
-their evidence and limits. Original-game/Ruffle adventure import now has independent
-save/search evidence beyond controlled schema files. Address remaining original
-interactions and browser/hosting/stability/performance gaps; historical player
-files remain an explicit compatibility limit.
-Defer costly cosmetic/audio matching and the late-game hitbox complaint as directed.
+## Evidence boundaries and corrected assumptions
 
-Completion remains the original game's feature coverage with documented intentional
-differences. This is a priority change, not a claim that the current port is close
-to complete or that an overnight finish can be promised.
+- Seeded self-replay proves reproducibility, not original-game equivalence. Test
+  totals are not completion percentages. Ruffle comparisons do not prove native
+  Adobe Flash equivalence or compatibility with historical player SOL files.
+- A controlled40-day run encountered18 kinds; absence of Dragon in that valid
+  sequence is not a product defect. Separate per-kind checks cover all19. The
+  fixture must copy mission loot like production, rather than alias old town state.
+- Five minutes near60 FPS with matching simulation/wall time is useful evidence,
+  not an hours-long stability result. Phaser's reported delta is smoothed; raw
+  stalls and memory remain separate measurements.
+- Muted silence does not prove sound readiness; inspect the loaded cache. A tool
+  wait timeout does not prove the product stalled when later observations complete.
+- Source AI target-acquisition continues can explain a one-frame counter difference;
+  do not change balance from counter divergence alone. Compare exported JSON bytes
+  rather than cross-realm REPL object prototypes.
 
-## Subsequent operating correction — 2026-11-02
-
-The user explicitly reauthorized recurring work and a deep workflow review every
-three hours. The [current goal](long-term-goal.md) records both schedules and
-defers the hitbox complaint until core coverage is complete. Do not reread large
-historical verification files at each wakeup. Filter tool discovery by precise
-tool names before printing descriptions: broad description matches produced
-large irrelevant output during watcher setup. A retained browser session reported
-`browser.user is unavailable`; one runtime reset restored the same tab without
-new windows. Prefer that bounded recovery over repeated handle acquisition.
-
-## Scheduled review — 2026-11-02 16:02 UTC
-
-Observed progress: native save slots/help/options, hero AI/focus/orders, Sister
-reactions, medal paths/import/hints/announcements, full town narratives and lifetime
-statistics now reach ordinary play. Work stayed solo, muted and save-preserving.
-The last three full suites took11.7–13.3 seconds and passed. No new campaign-specific
-harnesses or unchanged full campaign replays were added. Preserve these practices.
-
-The larger remaining Flash adventure import was briefly investigated, then deferred
-for another small statistic fix. Recent narrow slices each repeated browser setup,
-save restoration and release documentation. This is evidence of a selection/overhead
-pattern, not a measured billing allocation. Prioritize that complete import next;
-group connected minor corrections instead of making every detail a new release.
-
-Concrete waste: multiple source reads were truncated; a substring search for kills
-also returned skills. Use exact words/symbols and bounded function ranges, with a
-small result set before expanding. The medal-notice slice built three times as
-minor edits continued after browser QA. Finish implementation first, then run one
-suite/build/browser phase; repeat only checks affected by a necessary correction.
-
-Browser asset waits expired twice but loading completed without another reload or
-console error. This does not diagnose a product stall. The latest statistics check
-successfully used Save/Return to Title/Continue instead of reloading all assets;
-make that the normal save check and reload only to load changed code or test startup.
-Keep one browser phase per integrated slice; the tool's stale-session documentation
-output is fixed overhead, so avoid unnecessary phases rather than layering recovery.
-
-Current status had390 lines, much of it chronological browser evidence. Keep current
-capabilities, active gaps and a compact evidence index; Git retains older detail.
-No test count establishes parity/completion. Billing and the cause of occasional
-browser-tool delays remain unmeasured. No new infrastructure or agents are justified.
-
-Applied this review: compressed current status from390 lines to273 before adding
-the new coverage, and resumed Flash adventure import rather than another cosmetic
-slice. Reused the existing AMF reader/encoder and save validator. The browser check
-exposed clipped preview text, warranting a focused text/build recheck; metadata
-alone did not establish that the rendered prompt was usable. Actual player SOL
-files remain missing evidence, so controlled round trips are not called full parity.
-
-Independent save check: captured two actual original-game SOLs through Ruffle's
-Save Manager, then reused the existing converter/tests and ordinary browser import.
-No production changes or extra harness were needed. Two native regressions and13
-affected checks pass; reuse the unchanged full-suite/build results. This establishes
-one source-save path and an independent fixed-search comparison, not general parity.
-
-A rushed canvas action batch reached a town Resting notice instead of the intended
-title. Equal exports alone had not proved navigation. With rendered pause/title/town
-observations, Return to Title/Continue succeeded and the full save remained equal.
-Confirm actual UI phases before dependent canvas actions; town Return to Title is
-direct and must not be followed by a guessed confirmation click. No product defect
-was established. The transient disposable notice was cleared and the user's whole
-adventure/collection restored exactly.
-
-Falling-rat work exposed two test assumptions. The controlled late-day setup
-aliased battle loot to the previous town's mission; production already copied it.
-Make fixtures follow that copy. A changed valid RNG sequence omitted Dragon in
-one40-day run, disproving the test's every-kind-per-seed requirement. Keep the full
-progression smoke and report its actual encounters; retain separate per-kind and
-seeded mission coverage. Do not search for a seed merely to restore a reassuring count.
-
-Muted checks caught no playback errors when recent Chain Gun/drop sounds were
-absent from the explicit preload list. Corrected those four keys and exposed the
-loaded-key list through existing DOM diagnostics. Verify cache readiness for new
-audio while remaining muted; silence or a missing console error does not prove
-the asset is connected. A five-minute crowded browser check reused existing frame
-metadata and normal save import, with no new harness. Local TimeStep source shows
-the existing delta is smoothed; distinguish it from raw frame gaps as well as
-whole-run stall/memory evidence. No optimization was justified
-by the observed60 FPS and simulation progress matching wall time.
-
-Website embedding exposed a real integration defect: host-page clicks reached
-Phaser's parent-window mousedown listener using the wrong document coordinates.
-After reproducing native-to-small resize resuming paused combat, inspecting that
-vendor boundary identified the shared cause. Removing only outside presses kept
-canvas controls; an outside bow-release check then required capture in both own
-and accessible parent windows. These failures justified focused rebuilds, not a
-new simulation harness or unchanged campaign replay. Browser metadata plus an
-actual exported arrow established completion, rather than the release event alone.
-
-Two iframe export attempts showed a success status but delivered no file in IAB.
-Stop retrying that unchanged route: record the compatibility limit and use the
-working direct URL to inspect the saved checkpoint and restore the user's whole
-backup. Do not infer ordinary-browser download behavior or change export code
-without evidence. Same-origin host reload/Continue passed; no broader hosting
-claim follows. Temporary host controls were removed from the served build.
-
-Late ranged attacks reused the existing enemy-arrow state/render/save path and
-campaign tests, rather than adding a parallel projectile harness. A controlled
-launch screenshot plus a frozen mid-flight import/Continue established rendering
-and saved state without trying to click within a subsecond flight repeatedly.
-Space resumes a paused battle but reloads during play; use Escape for pausing.
-Compare serialized JSON when checking UI exports: REPL structuredClone prototypes
-made a strict object comparison report false differences despite identical data.
-
-Combat feedback reused actor containers, saved bonus counters and the existing
-effect lifecycle. The apparent one-frame companion countdown drift was traced to
-the source's target-acquisition continue, not a different clock. Preserve it;
-observed counter divergence alone does not justify a balance fix. A short public
-DOM phase wait captured readable moving text without repeated screenshot polling.
-An expiry wait timed out, but the next DOM/screenshot showed both effects cleared;
-record that limit rather than claiming a measured expiry time or rerunning it.
-
-This continuation read keyboard, campaign-limit and soak sections before choosing
-one concrete startup failure. That widened context without delivering behavior.
-Choose one remaining gap from current status for the initial bounded experiment;
-switch once if disproved. The invalid-font experiment produced a real failure,
-fixed with a local catch and verified through ordinary New Game; no loader
-framework, extra harness or unchanged simulation-suite replay was needed.
+Next priority: remaining reachable functionality if demonstrated, sustained real
+browser stability and the documented hosting/browser boundaries. Do not substitute
+more cosmetic slices for these gates or call the port complete from passing tests.

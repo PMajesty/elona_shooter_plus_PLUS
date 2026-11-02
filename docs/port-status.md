@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v41, resilient font loading for website startup**.
+Updated 2026-11-02. Current local build: **v41, recoverable website startup**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -15,6 +15,9 @@ An individual font-load rejection now uses browser fallback fonts while the rest
 of startup proceeds. Previously one bad font prevented the canvas/game from being
 created at all. Original fonts remain the normal path; fallback keys are visible
 in DOM metadata and console warnings, without extra game controls or labels.
+Missing required assets now stop before partial title creation and show an in-game
+Retry. Required JSON caches and original image/clip textures are checked, and scene
+updates wait for successful initialization. Optional failed audio does not block play.
 
 All eight original hero classes are connected to ordinary New Game, equipment,
 skill choices, growth, combat and saves. Rogue/Hunter start with Little Girl;
@@ -246,8 +249,8 @@ historical player SOL compatibility remains unverified.
 
 - Last full suite: **572 tests pass**. Four new checks cover critical countdown,
   boss-wave warnings, source notice queue boundaries and extracted feedback assets.
-  Current typecheck/build pass; bundle: assets/index-A_4bf3wf.js. The font-loading
-  correction leaves simulation/save code unchanged, so the572-test result is reused.
+  Current typecheck/build pass; bundle: assets/index-BnnXZxvQ.js. Startup recovery
+  leaves simulation/save code unchanged, so the572-test result is reused.
   Existing source/deterministic checks cover
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
@@ -278,11 +281,31 @@ Reuse it for unchanged behavior rather than repeating whole browser/campaign run
 | Combat feedback | `combat-feedback-verification.json`, `combat-feedback-browser.png`, `combat-level-up.png`: original boss text and both ally auras render; an ordinary shot levels the controlled hero1→2 with original artwork. Active bonuses survive full-envelope Continue, old notices do not replay, and both auras clear on expiry. Companion counter's one-frame acquisition delay follows the source continue; no clock change was made. |
 | Font failure | `font-fallback-verification.json`, `font-failure-before.png`, `font-fallback-browser.png`: a zeroed served ui.ttf aborted the old build before canvas creation. The patched build reached ordinary Sheriff New Game/character creation/combat and fired5→4 rounds with that same fault. Restored font bytes match the source; healthy reload has no fallbacks and Continue preserves the entire tick18 save. User adventure/collection restored exactly. Original Flash/Ruffle startup path is unchanged. |
 
+| Required-asset recovery | `asset-retry-verification.json`, `asset-retry-browser.png`, `asset-recovery-browser.png`: missing town-layout JSON previously left a partial title and scene errors. Patched startup names the failed file, offers Retry and avoids scene callbacks before readiness. Actual Retry recovers the title/Continue; optional background-audio failure also permits play. Full tick674 exports before/after are byte-identical; source/served fault-injection files match again. |
+
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. The Codex app crash
 stopped the preview; recovery at the same URL did not establish its crash cause.
 Historical verification stays in Git and port-verification.json; do not reread it
 for routine continuation.
+
+## Completion gates
+
+- **Reachable original content:** classes, enemies/cycles, weapons/skills, town,
+  progression, modes/MODs, medals and ordinary controls are connected above. A
+  finite52-trait connection screen found no disconnected consumer; this does not
+  establish every formula or whole-game balance. Resolve demonstrated missing
+  interactions before spending further effort on exact presentation.
+- **Website and saves:** ordinary startup, New Game, combat/results/town,
+  Continue, imports/exports and embedding must remain usable with preserved saves.
+  Direct-route and same-origin input/save evidence exists; browser/origin policy
+  limits below still require representative evidence or an explicit support scope.
+- **Correctness and stability:** retain affected source comparisons/deterministic
+  checks, then extend the five-minute dense baseline to sustained real browser
+  operation with raw stall/memory observations. Passing tests alone is insufficient.
+- **Finish boundary:** document a finite accepted difference list and supported
+  hosting/browser scope, resolve material failures, then pause both watchers and
+  report. Exact cosmetic/audio/RNG matching is not an unbounded prerequisite.
 
 ## Remaining features and differences
 
@@ -322,7 +345,9 @@ for routine continuation.
    observation is claimed.
    The separately reproduced font-load failure above is fixed; it does not explain
    that earlier ready-but-black rendering observation. Fallback font appearance
-   can differ; hanging font requests/missing essential artwork remain untested.
+   can differ; hanging requests, arbitrary missing artwork and malformed-but-present
+   asset schemas remain untested. Missing required town-layout JSON and optional
+   background-audio failure have the focused recovery evidence above.
 5. Falling-rat bodies and later enemy hit regions use rendered alpha; exact Flash
    filter/vector boundary matching remains unverified. Searching preserves the source's ineffective Trouble HP expression;
    its restored original narrative still promises an HP increase.

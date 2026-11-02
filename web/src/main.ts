@@ -65,6 +65,15 @@ const status = {
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}assets/${path}`;
 const MENU_X = -15.587619764971691;
 const bootStarted = performance.now();
+
+function showStartupFailure(message: string): void {
+  const panel = document.createElement('div'); panel.className = 'startup-error';
+  const explanation = document.createElement('p'); explanation.textContent = message;
+  const retry = document.createElement('button'); retry.type = 'button'; retry.textContent = 'Retry';
+  retry.addEventListener('click', () => window.location.reload());
+  panel.append(explanation, retry); loadStatus.replaceChildren(panel); loadStatus.hidden = false;
+  container.dataset.startupError = message;
+}
 const USED_SOUNDS = new Set(['soundSearch', 'soundEat1', 'soundParty', 'soundClick1', 'soundGun3', 'soundReloading2', 'soundReloaded2', 'soundThrow1', 'soundExp1', 'soundDead3', 'soundDead5', 'soundDead7', 'soundDeadChicken', 'soundDeadBoss1', 'soundDamage1', 'soundPop1', 'soundBattleBegin', 'soundBattleEnd', 'soundKilled', 'soundRampage', 'soundComplete', 'soundGold1', 'soundBgForest']);
 for (let index = 0; index < 5; index++) USED_SOUNDS.add(`soundGoodshot${index}`);
 USED_SOUNDS.add('soundGood');
@@ -82,6 +91,8 @@ let manifest: Manifest;
 let gameScene: ElonaScene;
 
 class ElonaScene extends Phaser.Scene {
+  private ready = false;
+  private failedRequiredAssets = new Set<string>();
   private combatNotices = new CombatNotices();
   private combatNoticeViews = new Map<CombatNotice, Phaser.GameObjects.Container>();
   screen: Screen = 'title';
@@ -158,10 +169,21 @@ class ElonaScene extends Phaser.Scene {
     for (const [key, asset] of Object.entries(manifest.clips)) this.load.atlas(key, assetUrl(asset.image), assetUrl(asset.json));
     for (const [key, file] of Object.entries(manifest.sounds)) if (USED_SOUNDS.has(key)) this.load.audio(key, assetUrl(file));
     this.load.on('progress', (progress: number) => { loadStatus.textContent = `Loading original game assets… ${Math.round(progress * 100)}%`; });
-    this.load.on('loaderror', (file: Phaser.Loader.File) => { loadStatus.textContent = `Unable to load ${file.key}. Reload to try again.`; });
+    this.load.on('loaderror', (file: Phaser.Loader.File) => {
+      if (file.type === 'audio') console.warn(`Sound ${file.key} is unavailable; continuing without it.`);
+      else this.failedRequiredAssets.add(file.key);
+    });
   }
 
   create(): void {
+    // Ошибка разбора JSON не всегда вызывает loaderror; проверяем готовые кэши до создания интерфейса.
+    const missing = new Set(this.failedRequiredAssets);
+    for (const key of ['ally-animation', 'collision-geometry', 'town-layout']) if (!this.cache.json.exists(key)) missing.add(key);
+    for (const key of [...Object.keys(manifest.images), ...Object.keys(manifest.clips)]) if (!this.textures.exists(key)) missing.add(key);
+    if (missing.size) {
+      showStartupFailure(`Some game files could not be loaded (${[...missing].slice(0, 3).join(', ')}${missing.size > 3 ? ', …' : ''}). Please retry.`);
+      return;
+    }
     gameScene = this;
     // Все 273 изображения charaPic в SWF используют несглаживаемую заливку 0x43.
     // Сохраняем дробные исходные координаты, но исключаем размытие соседних пикселей тела.
@@ -236,6 +258,7 @@ class ElonaScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => window.removeEventListener('keydown', combatKey));
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
+    this.ready = true;
   }
 
   private reset(screen: Screen): void {
@@ -699,6 +722,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
+    if (!this.ready) return;
     this.updatePresentation(delta);
     if (this.screen !== 'battle' || !this.sim || this.paused) return;
     const pointer = this.input.activePointer;
@@ -1858,4 +1882,4 @@ fileInput.addEventListener('change', async () => {
   finally { fileInput.value = ''; }
 });
 window.addEventListener('pagehide', () => { if (gameScene?.screen === 'battle') gameScene.saveGame(false); });
-void boot().catch(error => { loadStatus.hidden = false; loadStatus.textContent = `Unable to start: ${error.message}`; console.error(error); });
+void boot().catch(error => { showStartupFailure('The game could not start. Please check your connection and retry.'); console.error(error); });
