@@ -13,6 +13,8 @@ unless you previously enabled it; the mute preference persists between visits.
 ## Current capabilities
 
 - All eight hero classes: class-specific gear, growth and earned skill choices.
+  New Game shows the original class/starting-skill rows and English descriptions
+  in the original hint artwork; locked classes retain their ?????? labels.
   Rogue and Hunter start with Little Girl; Militia has its class grenade,
   starting rifle, Simple Flame Thrower and Simple Chain Gun.
   Sniper, Ranger, Duelist and Noble unlock through the four starting-class medals.

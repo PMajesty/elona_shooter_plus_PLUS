@@ -88,6 +88,15 @@ favicon404 rather than hidden: retain it separately from game errors. No repeat
 hour or new simulation fixture was justified; the earlier black screenshot remains
 undiagnosed.
 
+Residual-source browsing widened before finding the next useful outcome. Bound
+future searches to one visible missing interaction. New Game did omit its class
+skill and getClass descriptions; the source row/hint rendering now replaces the
+partial summary. An initial browser assertion wrongly expected medal Luck during
+creation and used the wrong ID. Source call sites establish that bonuses apply
+on Proceed; correct the assumption and preserve that timing rather than adding
+another preview mechanism. Sixteen existing class/reference checks and actual
+creation/Continue pass. Exact camera motion remains deferred.
+
 An intermittent ready-but-black screenshot recurred once; Continue rendered the
 battle correctly. Its cause is unresolved. Loader recovery does not establish a
 fix for that observation. An unchanged iframe download path twice reported success

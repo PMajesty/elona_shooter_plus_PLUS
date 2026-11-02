@@ -3,6 +3,7 @@ import { GAME_MODS, type GameMod } from './game-mods.ts';
 import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
 import Phaser from 'phaser';
 import { HERO_CLASSES, heroClassUnlocked, type HeroClass } from './hero-classes.ts';
+import { createGeneInfoView } from './gene-info-view.ts';
 import { createProfile, mergeProfile, mergeProfiles, validProfile, type GlobalProfile } from './profile.ts';
 import { MEDALS } from './medals.ts';
 import { MedalNotices, type MedalNotice } from './medal-notices.ts';
@@ -326,6 +327,7 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.castleUpgrades;
     delete container.dataset.titleName; delete container.dataset.titleSalary; delete container.dataset.claimTitleAvailable;
     delete container.dataset.medalHint;
+    delete container.dataset.geneHint; delete container.dataset.geneTraits; delete container.dataset.geneClassLabels;
     delete container.dataset.carryOverAvailable; delete container.dataset.carryOverConfirmation;
     container.dataset.carryOver = String(Boolean(this.sim?.state.carryOver));
   }
@@ -466,7 +468,7 @@ class ElonaScene extends Phaser.Scene {
       const x = 176 + index % 11 * 32;
       const y = 131 + Math.floor(index / 11) * 30;
       this.clip('charaPic', index * 10 + 5, x - 11.95, y - 14.7)?.setScale(1, 0.9530487);
-      this.zone(x - 14, y - 17, 30, 31, () => { this.appearance = index; this.sim?.rerollOpeningHero(); this.moveSelection(); });
+      this.zone(x - 14, y - 17, 30, 31, () => { this.appearance = index; this.sim?.rerollOpeningHero(); this.moveSelection(); refreshClass(); });
     }
     this.selection = this.add.rectangle(0, 0, 28, 29).setStrokeStyle(1, 0x8c3420).setOrigin(0);
     this.root.add(this.selection); this.moveSelection();
@@ -474,17 +476,21 @@ class ElonaScene extends Phaser.Scene {
     const radios: (Phaser.GameObjects.Image | undefined)[] = [];
     const labels: Phaser.GameObjects.Text[] = [];
     const hint = this.text(280, 205, '', 13, '#2d315b');
-    const summary = this.text(294, 224, '', 13).setLineSpacing(4);
+    const info = createGeneInfoView(this, manifest, this.cache.json.get('town-layout') as TownLayout & PartyLayout,
+      hint => { if (hint) container.dataset.geneHint = JSON.stringify(hint); else delete container.dataset.geneHint; });
+    this.root.add(info.root);
     const refreshClass = () => {
       const selected = this.sim!.state.player.classId, definition = HERO_CLASSES[selected];
       classes.forEach((id, index) => {
         radios[index]?.setFrame(id === selected ? '2' : '1');
         labels[index].setColor(id === selected ? '#22170e' : '#514b36');
-        labels[index].setAlpha(heroClassUnlocked(id, this.profile.medals) ? 1 : 0.35);
+        const unlocked = heroClassUnlocked(id, this.profile.medals);
+        labels[index].setText(unlocked ? HERO_CLASSES[id].name : '??????').setAlpha(unlocked ? 1 : 0.5);
+        radios[index]?.setAlpha(unlocked ? 1 : 0.5);
       });
       hint.setText(definition.hint);
-      summary.setText(Object.entries(definition.traits).map(([id, level]) =>
-        `${ALL_TRAITS[Number(id)].name}${level > 1 ? ` ${level}` : ''}`).join('\n'));
+      container.dataset.geneTraits = JSON.stringify(info.update(this.sim!.state.player.traits));
+      container.dataset.geneClassLabels = JSON.stringify(labels.map(label => label.text));
       this.updateHud();
       container.dataset.heroClass = selected;
       container.dataset.classPage = String(page);
@@ -502,12 +508,12 @@ class ElonaScene extends Phaser.Scene {
           this.playSound('soundBeep'); return;
         }
         this.sim?.rerollOpeningHero(id); refreshClass();
-      }).setName(`hero-class-${id}`);
+      }).setName(`hero-class-${id}`).on('pointerover', () => info.showClass(id, heroClassUnlocked(id, this.profile.medals))).on('pointerout', info.hide);
     });
     refreshClass();
     this.originalButton('button_proceed', 267, 301, () => this.startGame());
     this.originalButton('button_gameMods', 408, 301, () => this.showGameMods(page));
-    this.text(159, 302, 'Next Page', 13, '#2d315b');
+    this.text(159, 302, page === 0 ? 'Next Page' : 'Previous Page', 13, '#2d315b');
     const modeNames = [['casual', 'Casual Mode'], ['hardcore', 'Hardcore Mode']] as const;
     const modeMarkers = modeNames.map(([mode, name], index) => this.text(413, 252 + index * 22, '', 12, '#2d315b', 'Arial'));
     const refreshMode = () => modeNames.forEach(([mode, name], index) => modeMarkers[index].setText(`${this.sim!.state.mode === mode ? '[x]' : '[ ]'} ${name}`));

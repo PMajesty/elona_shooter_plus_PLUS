@@ -2,14 +2,14 @@ import { ALL_TRAITS, CLASS_CHOICE_ORDER } from './party-progression.ts';
 import { availableClassTraits, rollClassChoices, applyClassChoice, type TraitLevels } from './progression.ts';
 
 export const HERO_CLASSES = {
-  rogue: { id: 3, name: 'Rogue', traits: { 103: 2, 104: 1, 108: 1 }, hint: 'Starts with Little Girl.' },
-  hunter: { id: 1, name: 'Hunter', traits: { 103: 1, 104: 1, 105: 1, 109: 1 }, hint: 'Starts with Little Girl.' },
-  sheriff: { id: 6, name: 'Sheriff', traits: { 105: 2, 121: 1 }, hint: 'Starts with a shotgun.' },
-  militia: { id: 4, name: 'Militia', traits: { 104: 2, 106: 1 }, hint: 'Starts with a rifle.' },
-  sniper: { id: 2, name: 'Sniper', traits: { 104: 2, 119: 1 }, hint: 'Starts with a rifle.', unlockMedal: 68 },
-  ranger: { id: 5, name: 'Ranger', traits: { 103: 1, 106: 2 }, hint: 'Starts with cheap worn HMG.', unlockMedal: 65 },
-  duelist: { id: 7, name: 'Duelist', traits: { 103: 3 }, hint: 'Starts with a modified pistol.', unlockMedal: 66 },
-  noble: { id: 8, name: 'Noble', traits: { 103: 1, 104: 1, 105: 1, 106: 1 }, hint: 'Starts with a modified SMG.', unlockMedal: 67 },
+  rogue: { id: 3, name: 'Rogue', traits: { 103: 2, 104: 1, 108: 1 }, hint: 'Starts with Little Girl.', description: 'Rogues are the best money winners and also learn many useful skills that benefit the entire party.' },
+  hunter: { id: 1, name: 'Hunter', traits: { 103: 1, 104: 1, 105: 1, 109: 1 }, hint: 'Starts with Little Girl.', description: 'Hunters do not confine themselves to a single field. They aim at developing all around skills and receive many skills to choose from. ' },
+  sheriff: { id: 6, name: 'Sheriff', traits: { 105: 2, 121: 1 }, hint: 'Starts with a shotgun.', description: 'Sheriffs are the experts of shotgun. Though they somewhat lack teamwork, they are deadly at close range combat.' },
+  militia: { id: 4, name: 'Militia', traits: { 104: 2, 106: 1 }, hint: 'Starts with a rifle.', description: 'Militia can use both rifles and big guns well. A militia can learn a wide variety of combat skills and a few party skills.' },
+  sniper: { id: 2, name: 'Sniper', traits: { 104: 2, 119: 1 }, hint: 'Starts with a rifle.', description: "Snipers are simply the best damage dealers. They don't get any party skill nor are they good at shooting at crowds, but they can take out the enemies one by one pretty quickly.", unlockMedal: 68 },
+  ranger: { id: 5, name: 'Ranger', traits: { 103: 1, 106: 2 }, hint: 'Starts with cheap worn HMG.', description: 'Rangers use big guns effectively and are also good natural leaders. They can take out big crowds and raise the morale of the party with their party skills.', unlockMedal: 65 },
+  duelist: { id: 7, name: 'Duelist', traits: { 103: 3 }, hint: 'Starts with a modified pistol.', description: 'Duelists are the specialists of small guns. They learn various tactics and skills to adapt to any combat situation.', unlockMedal: 66 },
+  noble: { id: 8, name: 'Noble', traits: { 103: 1, 104: 1, 105: 1, 106: 1 }, hint: 'Starts with a modified smg.', description: 'Nobles start with only few basic skills and no unique skills. However, they have the biggest potentials and possibilities.', unlockMedal: 67 },
 } as const;
 export type HeroClass = keyof typeof HERO_CLASSES;
 export function isHeroClass(value: unknown): value is HeroClass {

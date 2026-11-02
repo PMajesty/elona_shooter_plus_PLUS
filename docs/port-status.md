@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-03. Current local build: **v41, safe graphics-context recovery**.
+Updated 2026-11-03. Current local build: **v41, original New Game class/skill information**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -39,8 +39,15 @@ from consuming lives/progress. No extra controls, save fields or gameplay RNG dr
 are added. It does not diagnose the earlier intermittent IAB black screenshot.
 
 All eight original hero classes are connected to ordinary New Game, equipment,
-skill choices, growth, combat and saves. Rogue/Hunter start with Little Girl;
-Militia has its starting weapons and periodic grenade. Sniper, Ranger, Duelist
+skill choices, growth, combat and saves.
+New Game now lists the class skill and generated starting skills with the original
+icons, grouping and four-row columns. The old static partial summary is removed.
+Original getClass English descriptions and skill descriptions use the existing
+hint1657 artwork. Locked classes show ?????? and the original medal requirement;
+page navigation says Previous Page on the second page. Starting medal bonuses
+still apply on Proceed, matching the source; they are not prematurely previewed.
+Rogue/Hunter start with Little Girl; Militia has its starting weapons and periodic
+grenade. Sniper, Ranger, Duelist
 and Noble unlock through the four original level10 class medals. Sniper's idle
 charge, Ranger's party rampage, Duelist's frenzy and Noble's passive bonuses work
 in combat. The first three use the original adrenaline bar artwork.
@@ -268,10 +275,11 @@ historical player SOL compatibility remains unverified.
 
 - Last full suite: **572 tests pass**. Four new checks cover critical countdown,
   boss-wave warnings, source notice queue boundaries and extracted feedback assets.
-  Current typecheck/build pass; bundle: assets/index-Che6vgmI.js. The twelve mode/slot
-  and572-test baselines are reused: graphics-loss handling changes browser lifecycle,
-  with no simulation, storage format or gameplay-rule changes. Forced-loss/recovery
-  browser checks include exact full saves, blocked resume and actual resumed firing.
+  Current typecheck/build pass; bundle: assets/index-CFtqDa6w.js. Sixteen affected
+  class/original-reference checks pass. The572-test baseline is reused: New Game
+  information changes no simulation, storage format or gameplay rules. Ordinary
+  creation, hints, locked/unlocked classes and full-envelope Continue pass in a
+  muted isolated browser; controlled medals exercise the advanced classes.
   Existing source/deterministic checks cover
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
@@ -319,6 +327,7 @@ Reuse it for unchanged behavior rather than repeating whole browser/campaign run
 | Save failures | `save-failure-before.json`, `save-failure-verification.json`, `save-{all,profile}-browser.png`: injected storage failures previously produced only hidden status text. Actual Save Game now shows the original dialog, blocks Space, dismisses with Escape and exports the full unchanged envelope on Yes. Medal-only failure preserves the stored adventure. Healthy Save Game/reload/Continue remains exact. All checks use isolated muted contexts. |
 | Edge cross-origin embed | `edge-cross-site-verification.json`, `edge-cross-site-browser.png`: actual HTTP host/game origins differ; default-policy Edge156 supports input isolation, scaled shooting, delivered export and exact full-envelope host reload/Continue. No script errors/failed requests or fullscreen. The first intercepted-host experiment was blocked before game loading by local-network checks; a real host response passed without changing security settings. Temporary host removed; user profile untouched. |
 | Graphics loss | `context-loss-before.json`, `context-recovery-verification.json`, `context-recovery-browser.png`: actual WEBGL_lose_context previously advanced tick681→697 while invisible. Patched combat stays at681 through loss/resume attempts, restores paused, preserves the full frozen save across reload/Continue, tolerates loss while already paused and resumes normal shooting5→4. No game script/console errors; a separately attributed favicon404 remains. User profile untouched. |
+| New Game information | `gene-info-verification.json`, `gene-{class-hint,locked,noble}-browser.png`: class skill/starting skills and original English hover text render; locked names/requirement match source. A controlled medal collection unlocks all four advanced labels; Noble proceeds into combat and its full save survives Continue exactly. Source medal bonuses apply only on Proceed; the check confirms Luck is absent before and present afterward. No script errors; user profile untouched. |
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. The Codex app crash
