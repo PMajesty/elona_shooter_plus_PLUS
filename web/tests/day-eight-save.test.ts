@@ -1,3 +1,4 @@
+import { SAVE_VERSION } from '../src/save-version.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation, type EnemyState } from '../src/simulation.ts';
@@ -60,7 +61,7 @@ test('v22 town7 migrates without rerolls and normal Rest preserves upgrades, par
   assert.ok(before.town?.preparation === 'ready'); assert.equal(before.town.mission.absorbFix, 0.03);
   const legacy: Record<string, any> = structuredClone(before); legacy.version = 22;
   const untouched = structuredClone(legacy), migrated = Simulation.fromSave(legacy);
-  assert.deepEqual(migrated.toSave(), { ...before, version: 24 }); assert.deepEqual(legacy, untouched);
+  assert.deepEqual(migrated.toSave(), { ...before, version: SAVE_VERSION }); assert.deepEqual(legacy, untouched);
   assert.equal(migrated.state.rng, before.rng);
   assert.equal(simulation.startNextDay(), true); assert.equal(migrated.startNextDay(), true);
   assert.deepEqual(migrated.state, simulation.state); assert.deepEqual(migrated.events, simulation.events);

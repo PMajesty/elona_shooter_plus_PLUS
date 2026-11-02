@@ -10,6 +10,10 @@ in the original, distinguish defects from intended rules, and retain before/afte
 regressions for deliberate fixes. Do not preserve a demonstrated bug solely for
 literal parity or rush a speculative hitbox redesign.
 Build complete playable slices in `web/`; label incomplete coverage honestly.
+User amendment on 2026-11-02: work solo, prioritize feature completeness over exact
+cosmetic/audio/RNG fidelity, and use proportionate validation. Read
+`docs/development-process-review.md` for the process correction. Reuse the existing
+browser tab and keep testing muted. Do not restart recurring work automatically.
 Use original extracted assets. Do not replace original behavior with invented
 mechanics merely to make a demo work. Record intentional fixes and differences.
 

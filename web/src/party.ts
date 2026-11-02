@@ -35,6 +35,24 @@ export function createPartyState(candidate?: Readonly<FirstTownRecruit>): PartyS
   return party;
 }
 
+/** gameStart выдаёт Hunter/Rogue одного Guardian до подготовки боевой сцены. */
+export function addStartingLittleGirl(party: PartyState, random: () => number): void {
+  const sex = Math.trunc(random() * 2);
+  // Имя, потенциалы, база и портрет генерируются, затем gameStart их заменяет.
+  random(); random(); random(); random(); random();
+  const nextTrait = Math.trunc(random() * 100);
+  random();
+  const weapon = new ItemFactory(random, { day: 1 }).generate(24);
+  party.slots[0] = { slot: 1, exists: true, weapon, member: {
+    devType: 9, sex, name: 'Little Girl', appearance: 50, potentialAim: 0.7, potentialTeam: 0.8,
+    nextTrait, trained: 0, optBoss: true, optWall: true, kills: 0, earnedGold: 0,
+    money: 200, cost: 400, ai: 6, focus: -1, level: 1, exp: 0, skillPoints: 0,
+    traits: { 9: 1, 900: 1, 901: 1, 103: 1, 105: 1, 113: 2 },
+    weaponExp: [0, 0, 0, 0, 0], shootTimer: 0, accuracyFix: 0, rampageTicks: 0,
+    bowDrawing: false, aiState: null,
+  } };
+}
+
 /** town.recruit остаётся снимком генерации; изменяемый кандидат принадлежит только слоту 5. */
 export function installCandidate(party: PartyState, recruit: Readonly<FirstTownRecruit>): void {
   const candidate = party.slots[4];

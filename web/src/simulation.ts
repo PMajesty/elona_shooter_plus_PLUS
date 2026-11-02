@@ -1,20 +1,22 @@
+import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
+import { HERO_CLASSES, isHeroClass, applyHeroChoice, availableHeroTraits, rollHeroChoices, type HeroClass } from './hero-classes.ts';
 import { ENEMIES, FIRST_DAY, GRENADE, SHOTGUN, SIMULATION_HZ, STARTING_CLASS, TIMER_HZ, WORLD, type EnemyKind, type Rect } from './content.ts';
 import { generateLowLevelMission, generateLowLevelWaves, type LowLevelMission } from './missions.ts';
-import { generateSheriffHero, isKnownHeroInitialization, levelUpHero, reconstructSheriffHero, type KnownHeroInitialization } from './hero.ts';
+import { generateHero, isKnownHeroInitialization, levelUpHero, reconstructSheriffHero, type KnownHeroInitialization } from './hero.ts';
 import { advanceReload, autoReloadReady, COMBAT_TRAIT, combatTrait, criticalType, hitscanHit, hitscanShotModifiers, criticalKillCooldown, duelistHitFrenzy, livingWeaponKill, rampageDuration, recoverAccuracy, reloadTimer, shotDamage, shotSpread, weaponBehavior, weaponHitDamage, weaponHitEffects, weaponStats } from './combat-stats.ts';
 import { BASE_ITEM_FIELDS, ITEM_TYPE, ItemFactory, collectLoot as collectLootItem, createStartingInventory, isOccupiedItem, itemPrice, swapInventorySlots, type Item } from './items.ts';
 import { prepareEarlyTown, type FirstTownPreparation } from './town-preparation.ts';
 import { validTownPreparation } from './town-save.ts';
-import { TRAIT, SHERIFF_TRAITS, SHERIFF_CHOICE_ORDER, applySheriffChoice, availableSheriffTraits, createSheriffTraits, rollSheriffChoices, type TraitLevels } from './progression.ts';
+import { TRAIT, createSheriffTraits, type TraitLevels } from './progression.ts';
 import { shadowHitAtFrame } from './collision.ts';
 import { advanceProtection, explosionContains, explosionStats, planConsumableUse } from './consumables.ts';
 import { advanceProjectile, createProjectile, type ExplosionKind, type ProjectileState } from './projectiles.ts';
 import { createUpgradePreview, modMountFailure, upgradeCost, type TownEquipmentAction, type TownEquipmentOutcome, type LootItemAddress, type LootEquipmentAction } from './equipment.ts';
 import { advanceEnemyArrow, createEnemyArrow, type EnemyArrowState } from './enemy-arrows.ts';
 import { ARCHER_DISPLAY_WIDTHS, FLY_DISPLAY_WIDTHS, barbarianParentWidth, lavaParentWidth } from './enemy-display-bounds.ts';
-import { createPartyState, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
-import { partySkills, gainCompanionTrait, levelUpCompanion, companionWage, type PartySkillState } from './party-progression.ts';
-import { createPartyAIShared, createPartyAIState, refreshPartyAI, partyActorPosition, registerPartyTarget, alertParty, clearPartyTargetCache, clearPartyAITarget, stepPartyAIFrame, stepPartyAITimer, type PartyAIShared, type PartyAITarget, type PartyAIContext, type PartyAICallbacks } from './party-ai.ts';
+import { createPartyState, addStartingLittleGirl, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
+import { ALL_TRAITS, CLASS_CHOICE_ORDER, partySkills, gainCompanionTrait, levelUpCompanion, companionWage, type PartySkillState } from './party-progression.ts';
+import { createPartyAIShared, createPartyAIState, selectPartyTarget, refreshPartyAI, partyActorPosition, registerPartyTarget, alertParty, clearPartyTargetCache, clearPartyAITarget, stepPartyAIFrame, stepPartyAITimer, type PartyAIShared, type PartyAITarget, type PartyAIContext, type PartyAICallbacks } from './party-ai.ts';
 import { repairEarlyV15AirTargets, validatePartySave } from './party-save.ts';
 import { castleUpgradeCost, castleUpkeep, castleRepairAmount, castleDamageMultiplier, castleTrainerMultiplier, type CastleUpgradeKind, type CastleUpgradeOutcome } from './castle-upgrades.ts';
 
@@ -37,12 +39,12 @@ export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCoun
 export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'>;
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
 export interface SimulationState {
-  version: 24; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9; tick: number; timerRemainder: number; rng: number; nextUid: number;
+  version: typeof SAVE_VERSION; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9; tick: number; timerRemainder: number; rng: number; nextUid: number;
   activeMission: ActiveMission; resultBefore: number; earnedMedals: number[]; perfectDays: number; bossesSpawned: number;
   hero: KnownHeroInitialization; title: 0 | 1;
   castleHp: number; castleMaxHp: number; wallLevel: number; wallFixCount: number; repairmanLevel: number; sandbagLevel: number; looterLevel: number; trainerLevel: number; gold: number; totalMoney: number; kills: number; criticalKills: number;
   aimX: number; aimY: number; fireHeld: boolean; pendingShot: boolean;
-  player: { classId: 'sheriff'; level: number; exp: number; skillPoints: number; traits: TraitLevels; weaponExp: number[]; selectedSlot: number; shootTimer: number; accuracyFix: number; rampageTicks: number; bowDrawing: boolean };
+  player: { classId: HeroClass; grenadeCount: number; level: number; exp: number; skillPoints: number; traits: TraitLevels; weaponExp: number[]; selectedSlot: number; shootTimer: number; accuracyFix: number; rampageTicks: number; bowDrawing: boolean };
   waveIndex: number; waves: WaveState[]; bossWave: number; newWave: boolean; spawnTimer: number; noDamage: boolean;
   enemies: EnemyState[]; projectiles: ProjectileState[]; enemyArrows: EnemyArrowState[]; loot: number[];
   itemCooldowns: number[];
@@ -61,7 +63,7 @@ export interface SimulationState {
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
 export interface SimulationEvent { actorSlot?: number; type: 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
-export interface SimulationOptions { hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean }
+export interface SimulationOptions { hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass }
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
 export type PurchaseOutcome = 'purchased' | 'occupied' | 'not-enough-gold' | 'unavailable';
@@ -110,13 +112,14 @@ export class Simulation {
     };
     // New Game готовит миссию до первого updateGene; волны появляются после Proceed.
     this.pendingOpeningMission = generateLowLevelMission(0, 1, random);
-    const generated = generateSheriffHero(random);
+    const classId = options.heroClass ?? 'sheriff';
+    const generated = generateHero(random, classId);
     this.state = {
-      version: 24, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
+      version: SAVE_VERSION, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
       activeMission: this.missionParameters(this.pendingOpeningMission), resultBefore: STARTING_CLASS.money, earnedMedals: [40], perfectDays: 0, bossesSpawned: 0,
       castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, wallLevel: 1, wallFixCount: 0, repairmanLevel: 0, sandbagLevel: 0, looterLevel: 0, trainerLevel: 0, gold: STARTING_CLASS.money, totalMoney: 0, kills: 0, criticalKills: 0,
       aimX: 300, aimY: 240, fireHeld: false, pendingShot: false,
-      player: { classId: 'sheriff', level: 1, exp: 0, skillPoints: 0, traits: generated.traits, weaponExp: [0, 0, 0, 0, 0], selectedSlot: 0, shootTimer: 0, accuracyFix: 0, rampageTicks: 0, bowDrawing: false },
+      player: { classId, grenadeCount: 325 - (generated.traits[4] ?? 0) * 4, level: 1, exp: 0, skillPoints: 0, traits: generated.traits, weaponExp: [0, 0, 0, 0, 0], selectedSlot: 0, shootTimer: 0, accuracyFix: 0, rampageTicks: 0, bowDrawing: false },
       waveIndex: FIRST_DAY.waves, waves: [], bossWave: 2, newWave: true, spawnTimer: 30, noDamage: true,
       enemies: [], projectiles: [], enemyArrows: [], loot: [], result: { reward: 0, perfectBonus: 0, upkeep: 0, tax: 0, salary: 0, wages: 0, netReward: 0 },
       itemCooldowns: Array(5).fill(0), protection: { counter: 0, blueMultiplierAdd: 0 }, inventory: generated.inventory, lootOffers: Array(8).fill(null), postbattle: 'none', inventoryProvenance: 'original-generation',
@@ -180,6 +183,7 @@ export class Simulation {
   }
 
   private initializePartyBattle(): void {
+    this.state.player.grenadeCount = Math.max(100, 325 - (this.state.player.traits[4] ?? 0) * 4);
     this.refreshPartySkills(); this.state.partyAI = createPartyAIShared(); this.state.retainedAITargets = [];
     for (const slot of this.state.party.slots.slice(0, 4)) if (slot.member) {
       slot.member.aiState = createPartyAIState(slot.slot);
@@ -298,18 +302,20 @@ export class Simulation {
     return true;
   }
 
-  rerollOpeningHero(): boolean {
+  rerollOpeningHero(classId: HeroClass = this.state.player.classId): boolean {
     if (!this.pendingOpeningMission) return false;
-    const generated = generateSheriffHero(() => this.random(), this.state.inventory);
+    const generated = generateHero(() => this.random(), classId, this.state.inventory);
     this.state.hero = generated.hero;
-    Object.assign(this.state.player, { level: generated.level, exp: generated.exp, skillPoints: generated.skillPoints, traits: generated.traits });
+    Object.assign(this.state.player, { classId, grenadeCount: 325 - (generated.traits[4] ?? 0) * 4, level: generated.level, exp: generated.exp, skillPoints: generated.skillPoints, traits: generated.traits });
     this.state.inventory = generated.inventory;
     return true;
   }
 
   startOpeningBattle(): boolean {
     if (!this.pendingOpeningMission) return false;
+    if (this.state.player.classId === 'hunter' || this.state.player.classId === 'rogue') addStartingLittleGirl(this.state.party, () => this.random());
     this.applyOpeningMission(this.pendingOpeningMission);
+    this.initializePartyBattle();
     this.pendingOpeningMission = undefined;
     return true;
   }
@@ -633,6 +639,17 @@ export class Simulation {
     if (item?.reloadTime) this.advanceActorReload(0);
     this.state.partyAI.sharedWeaponRange = item?.range ?? null;
     const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
+    if (player.traits[4] && --player.grenadeCount < 0) {
+      const actor = { slot: 0, exists: true, member: null, weapon: item };
+      const target = selectPartyTarget(actor, 2, partyContext, 6);
+      if (!target || target.x > WORLD.playerX) player.grenadeCount += 10;
+      else {
+        partyCallbacks.throwMilitiaGrenade(actor, { targetUid: target.uid,
+          x: target.x + target.speed * (15 + this.random() * 20), y: target.y,
+          damage: int(combatTrait(COMBAT_TRAIT.MILITIA, player.traits)), speedBase: 12 });
+        player.grenadeCount = Math.max(100, 325 - player.traits[4] * 4);
+      }
+    }
     for (const slot of this.state.party.slots.slice(0, 4)) stepPartyAITimer(slot, partyContext, partyCallbacks);
     if (state.newWave) {
       state.newWave = false;
@@ -790,7 +807,7 @@ export class Simulation {
   }
 
   private levelUp(): void {
-    const growth = levelUpHero(this.state.player, this.state.hero, () => this.random());
+    const growth = levelUpHero(this.state.player, this.state.hero, () => this.random(), this.state.player.classId);
     Object.assign(this.state.player, { level: growth.level, exp: growth.exp, skillPoints: growth.skillPoints, traits: growth.traits });
     this.events.push({ type: 'level-up', amount: growth.level });
   }
@@ -1213,7 +1230,7 @@ export class Simulation {
   }
 
   private prepareSkillChoices(): void {
-    this.state.skillChoices = this.state.player.skillPoints > 0 ? rollSheriffChoices(this.state.player.level, this.state.player.traits, () => this.random()) : [];
+    this.state.skillChoices = this.state.player.skillPoints > 0 ? rollHeroChoices(this.state.player.classId, this.state.player.level, this.state.player.traits, () => this.random()) : [];
     this.state.postbattle = this.state.skillChoices.length > 0 ? 'skill' : 'result';
     if (this.state.postbattle === 'result') this.prepareResult();
   }
@@ -1379,7 +1396,7 @@ export class Simulation {
 
   chooseSkill(id: number): boolean {
     if (this.state.phase !== 'victory' || this.state.postbattle !== 'skill' || this.state.player.skillPoints < 1) return false;
-    if (!applySheriffChoice(this.state.player.traits, this.state.skillChoices, id)) return false;
+    if (!applyHeroChoice(this.state.player.classId, this.state.player.traits, this.state.skillChoices, id)) return false;
     this.state.player.skillPoints--;
     this.prepareSkillChoices();
     return true;
@@ -1391,7 +1408,7 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
-    if (!record(value) || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24].includes(Number(value.version)) || typeof value.version !== 'number' || (![1, 2, 3, 4, 5, 6, 7, 8, 9].includes(Number(value.day)) || typeof value.day !== 'number' || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7) || (value.version < 23 && value.day === 8) || (value.version < 24 && value.day === 9)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
+    if (!record(value) || !supportedSaveVersion(value.version) || (![1, 2, 3, 4, 5, 6, 7, 8, 9].includes(Number(value.day)) || typeof value.day !== 'number' || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7) || (value.version < 23 && value.day === 8) || (value.version < 24 && value.day === 9)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || ![2, ...(Number(value.day) >= 2 ? [3] : [])].includes(Number(value.bossWave)) || (value.waveIndex === 5 && value.newWave !== true)) throw new Error('Invalid counters.');
@@ -1407,7 +1424,7 @@ export class Simulation {
     const legacyEquipment = value.version < 7;
     const legacyProjectiles = value.version < 8;
     const playerNumbers = ['level', 'exp', 'skillPoints', 'shootTimer', 'accuracyFix', 'rampageTicks'];
-    if (!record(player) || player.classId !== 'sheriff' || playerNumbers.some(key => !finite(player[key])) || Number(player.level) < 1) throw new Error('Invalid player state.');
+    if (!record(player) || !isHeroClass(player.classId) || value.version < 25 && player.classId !== 'sheriff' || playerNumbers.some(key => !finite(player[key])) || Number(player.level) < 1) throw new Error('Invalid player state.');
     if (['level', 'exp', 'skillPoints'].some(key => !Number.isInteger(player[key]) || Number(player[key]) < 0) || Number(player.exp) >= 1000) throw new Error('Invalid player counters.');
     if (!legacyProjectiles && typeof player.bowDrawing !== 'boolean') throw new Error('Invalid bow draw state.');
     if (legacyEquipment) {
@@ -1492,6 +1509,8 @@ export class Simulation {
     if (value.version < 20) simulation.state.pendingLootAction = null;
     if (value.version < 21) simulation.state.looterLevel = 0;
     if (value.version < 22) simulation.state.trainerLevel = 0;
+    if (value.version < 25) simulation.state.player.grenadeCount = 325;
+    else if (!Number.isInteger(player.grenadeCount) || Number(player.grenadeCount) < 0 || Number(player.grenadeCount) > 325) throw new Error('Invalid Militia grenade counter.');
     if (value.version < 15) {
       const town = simulation.state.town?.preparation === 'ready' ? simulation.state.town : simulation.state.previousTown;
       simulation.state.party = createPartyState(town?.recruit);
@@ -1583,7 +1602,7 @@ export class Simulation {
         reconstructionRng >>>= 0;
         return reconstructionRng / 4294967296;
       };
-      simulation.state.version = 24;
+      simulation.state.version = SAVE_VERSION;
       simulation.state.inventory = createStartingInventory(reconstructionRandom);
       simulation.state.lootOffers = Array(8).fill(null);
       simulation.state.postbattle = 'none';
@@ -1624,7 +1643,7 @@ export class Simulation {
       if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > (value.version < 15 ? 4 : 14) || !validTownPreparation(state.previousTown, validItem, (state.day - 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8, state.activeMission.absorbFix) || state.activeMission.reward !== state.previousTown.mission.reward) throw new Error('Invalid previous town.');
     } else if (state.previousTown !== null) throw new Error('Unexpected previous town.');
     if (Number(value.version) < 3) {
-      state.version = 24;
+      state.version = SAVE_VERSION;
       if (state.phase === 'victory' && state.postbattle === 'result') {
         // Старый результат пропускал награды босса и навыки; новые награды расходуют основной поток.
         state.postbattle = 'loot';
@@ -1640,12 +1659,12 @@ export class Simulation {
       state.player.traits[TRAIT.BASE_TEAMWORK] ??= reconstructed.baseTeamwork;
     }
     if (!isKnownHeroInitialization(state.hero) || ![TRAIT.BASE_AIMING, TRAIT.BASE_TEAMWORK].every(id => Number.isInteger(state.player.traits[id]) && state.player.traits[id] >= 1)) throw new Error('Invalid hero initialization.');
-    if (!record(state.player.traits) || Object.entries(state.player.traits).some(([id, level]) => !Object.hasOwn(SHERIFF_TRAITS, id) || !Number.isInteger(level) || level < 0 || level > SHERIFF_TRAITS[Number(id)].maxLevel) || state.player.traits[TRAIT.SHERIFF] !== state.player.level || (state.player.traits[TRAIT.SHOTGUN] ?? 0) < 2 || (state.player.traits[TRAIT.FURY] ?? 0) < 1) throw new Error('Invalid Sheriff traits.');
+    if (!record(state.player.traits) || Object.entries(state.player.traits).some(([id, level]) => !Object.hasOwn(ALL_TRAITS, id) || !Number.isInteger(level) || level < 0 || level > ALL_TRAITS[Number(id)].maxLevel) || state.player.traits[HERO_CLASSES[state.player.classId].id] !== state.player.level || Object.entries(HERO_CLASSES[state.player.classId].traits).some(([id, level]) => (state.player.traits[Number(id)] ?? 0) < level) || Object.keys(state.player.traits).some(id => Number(id) < 100 && Number(id) !== HERO_CLASSES[state.player.classId].id && state.player.traits[Number(id)] > 0)) throw new Error('Invalid hero traits.');
     // Пустой список не даёт исходному listTrait2 ни одного допустимого навыка даже до fallback.
-    if (state.phase === 'victory' && state.player.skillPoints > 0 && availableSheriffTraits(state.player.level, state.player.traits).length === 0) throw new Error('Pending skill points have no available Sheriff skill.');
-    if (!Array.isArray(state.skillChoices) || state.skillChoices.length > 5 || state.skillChoices.some(id => !Number.isInteger(id) || !SHERIFF_CHOICE_ORDER.includes(id)) || new Set(state.skillChoices).size !== state.skillChoices.length) throw new Error('Invalid skill choices.');
+    if (state.phase === 'victory' && state.player.skillPoints > 0 && availableHeroTraits(state.player.classId, state.player.level, state.player.traits).length === 0) throw new Error('Pending skill points have no available hero skill.');
+    if (!Array.isArray(state.skillChoices) || state.skillChoices.length > 5 || state.skillChoices.some(id => !Number.isInteger(id) || !CLASS_CHOICE_ORDER[HERO_CLASSES[state.player.classId].id].includes(id)) || new Set(state.skillChoices).size !== state.skillChoices.length) throw new Error('Invalid skill choices.');
     if (state.postbattle === 'skill') {
-      const available = availableSheriffTraits(state.player.level, state.player.traits);
+      const available = availableHeroTraits(state.player.classId, state.player.level, state.player.traits);
       if (state.player.skillPoints < 1 || state.skillChoices.length !== 3 + (state.player.traits[TRAIT.CAPABLE] ?? 0) || state.skillChoices.some(id => !available.includes(id)) || state.lootOffers.some(isOccupiedItem)) throw new Error('Invalid pending skill selection.');
     } else if (state.skillChoices.length !== 0) throw new Error('Unexpected pending skill choices.');
     if ((state.postbattle === 'boss-loot' && state.bossKilled === 0) || (state.postbattle === 'result' && state.player.skillPoints !== 0)) throw new Error('Invalid completed rewards.');
@@ -1693,7 +1712,7 @@ export class Simulation {
         if (!isOccupiedItem(mod) || mod.type !== ITEM_TYPE.mod || !isOccupiedItem(gun) || gun.type !== ITEM_TYPE.gun) throw new Error('Invalid pending mod items.');
       } else throw new Error('Unknown pending town equipment action.');
     }
-    state.version = 24;
+    state.version = SAVE_VERSION;
     // Уже оплаченный результат v4 не пересчитывается; недостающая первая лавка создаётся один раз.
     if (state.phase === 'town' && state.town?.preparation === 'pending') simulation.prepareTown();
     return simulation;

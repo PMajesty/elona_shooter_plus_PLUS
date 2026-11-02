@@ -1,3 +1,4 @@
+import { SAVE_VERSION } from '../src/save-version.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation } from '../src/simulation.ts';
@@ -128,7 +129,7 @@ test('version 1–3 pending reward migration reverses early payment and restores
     const untouched = structuredClone(oldSave);
     let migrated = Simulation.fromSave(oldSave);
     assert.deepEqual(oldSave, untouched);
-    assert.equal(migrated.state.version, 24);
+    assert.equal(migrated.state.version, SAVE_VERSION);
     assert.equal(migrated.state.gold, oldSave.gold - oldSave.result.netReward);
     assert.equal(migrated.state.rng, oldSave.rng);
     assert.equal(migrated.state.town, null);
@@ -173,7 +174,7 @@ test('version 4 town migration prepares its missing stock once without repeating
   const untouched = structuredClone(oldSave);
   const migrated = Simulation.fromSave(oldSave);
   assert.deepEqual(oldSave, untouched);
-  assert.equal(migrated.state.version, 24);
+  assert.equal(migrated.state.version, SAVE_VERSION);
   assert.equal(migrated.state.phase, 'town');
   assert.equal(migrated.state.town?.preparation, 'ready');
   assert.equal(migrated.state.town?.ap, 2);

@@ -1,3 +1,4 @@
+import { SAVE_VERSION } from '../src/save-version.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation } from '../src/simulation.ts';
@@ -21,7 +22,7 @@ test('v7 in-flight grenade migration preserves its stored trajectory, damage, RN
   const untouched = structuredClone(legacy);
   const migrated = Simulation.fromSave(legacy);
   assert.deepEqual(legacy, untouched);
-  assert.equal(migrated.state.version, 24);
+  assert.equal(migrated.state.version, SAVE_VERSION);
   assert.equal(Object.hasOwn(migrated.state, 'grenades'), false);
   assert.equal(migrated.state.player.bowDrawing, false);
   assert.equal(migrated.state.rng, legacy.rng);

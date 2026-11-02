@@ -1,4 +1,6 @@
+import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
 import Phaser from 'phaser';
+import { HERO_CLASSES, isHeroClass, type HeroClass } from './hero-classes.ts';
 import { Simulation, type EnemyState, type SimulationEvent } from './simulation.ts';
 import { WORLD } from './content.ts';
 import { weaponPresentation } from './combat-stats.ts';
@@ -22,7 +24,7 @@ interface ImageAsset { file: string; width: number; height: number; originX: num
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number; frameAlpha?: number[] }
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual }
-interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24; appearance: number; simulation: unknown }
+interface PortSave { format: 'elona-shooter-browser'; version: number; appearance: number; simulation: unknown }
 type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
@@ -134,7 +136,7 @@ class ElonaScene extends Phaser.Scene {
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Sheriff Days 1–9, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Ragnarok, Castle page 2, remaining town actions, Day 10 onward and other playable classes are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Rogue, Hunter, Sheriff and Militia Days 1–9, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Ragnarok, Castle page 2, remaining town actions, Day 10 onward and unlockable hero classes are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
     document.querySelector<HTMLButtonElement>('#import-save')!.disabled = false;
   }
@@ -247,7 +249,9 @@ class ElonaScene extends Phaser.Scene {
     }
     const saved = readSave();
     const savedDay = saved.kind === 'saved' ? (saved.data as { simulation?: { day?: unknown } } | null)?.simulation?.day : undefined;
-    this.text(469, 32, saved.kind === 'saved' ? (typeof savedDay === 'number' && [1, 2, 3, 4, 5, 6, 7, 8, 9].includes(savedDay) ? `Sheriff · Day ${savedDay}` : 'Saved Sheriff') : 'Empty Save', 12, '#151515', 'Arial').setBackgroundColor('#ede9de').setFixedSize(137, 20);
+    const savedClass = saved.kind === 'saved' ? (saved.data as { simulation?: { player?: { classId?: unknown } } } | null)?.simulation?.player?.classId : undefined;
+    const className = isHeroClass(savedClass) ? HERO_CLASSES[savedClass].name : 'Hero';
+    this.text(469, 32, saved.kind === 'saved' ? (typeof savedDay === 'number' && [1, 2, 3, 4, 5, 6, 7, 8, 9].includes(savedDay) ? `${className} · Day ${savedDay}` : `Saved ${className}`) : 'Empty Save', 12, '#151515', 'Arial').setBackgroundColor('#ede9de').setFixedSize(137, 20);
     this.text(334, 11, 'Most Days Survived: 0 / 0 (HC) / 0 (Casual)', 12, '#ffffff').setShadow(1, 1, '#000000', 2);
     if (saved.kind === 'error') status.textContent = saved.message;
   }
@@ -279,18 +283,31 @@ class ElonaScene extends Phaser.Scene {
     }
     this.selection = this.add.rectangle(0, 0, 28, 29).setStrokeStyle(1, 0x8c3420).setOrigin(0);
     this.root.add(this.selection); this.moveSelection();
-    ['Rogue', 'Hunter', 'Sheriff', 'Militia'].forEach((name, index) => {
-      const y = 214 + index * 20;
-      if (manifest.clips.radioButton) this.clip('radioButton', index === 2 ? 2 : 1, 180, y);
-      else this.root.add(this.add.circle(180, y, 6, index === 2 ? 0xa24b28 : 0x8f8d7e).setStrokeStyle(1, 0x514b36));
-      this.text(194, y - 7, name, 14, index === 2 ? '#22170e' : '#7e7765');
-      this.zone(171, y - 8, 90, 18, () => {
-        if (index === 2) this.sim?.rerollOpeningHero();
-        else status.textContent = `${name} has not been ported yet. Sheriff is available in this first playable slice.`;
+    const classes = Object.keys(HERO_CLASSES) as HeroClass[];
+    const radios: (Phaser.GameObjects.Image | undefined)[] = [];
+    const labels: Phaser.GameObjects.Text[] = [];
+    const hint = this.text(280, 205, '', 13, '#2d315b');
+    const summary = this.text(294, 224, '', 13).setLineSpacing(4);
+    const refreshClass = () => {
+      const selected = this.sim!.state.player.classId, definition = HERO_CLASSES[selected];
+      classes.forEach((id, index) => {
+        radios[index]?.setFrame(id === selected ? '2' : '1');
+        labels[index].setColor(id === selected ? '#22170e' : '#514b36');
       });
+      hint.setText(definition.hint);
+      summary.setText(Object.entries(definition.traits).map(([id, level]) =>
+        `${ALL_TRAITS[Number(id)].name}${level > 1 ? ` ${level}` : ''}`).join('\n'));
+      this.updateHud();
+    };
+    classes.forEach((id, index) => {
+      const y = 214 + index * 20;
+      radios.push(this.clip('radioButton', id === 'sheriff' ? 2 : 1, 180, y));
+      labels.push(this.text(194, y - 7, HERO_CLASSES[id].name, 14));
+      this.zone(171, y - 8, 90, 18, () => {
+        this.sim?.rerollOpeningHero(id); refreshClass();
+      }).setName(`hero-class-${id}`);
     });
-    this.text(280, 205, 'Starts with a shotgun.', 13, '#2d315b');
-    this.text(294, 224, 'Sheriff\nShotgun 2\nFury', 13).setLineSpacing(4);
+    refreshClass();
     this.originalButton('button_proceed', 267, 301, () => this.startGame());
     this.originalButton('button_gameMods', 408, 301, () => { status.textContent = 'Game MODs will return as their underlying systems are ported.'; });
     this.text(159, 302, 'Next Page', 13, '#8e8470');
@@ -1037,7 +1054,7 @@ class ElonaScene extends Phaser.Scene {
         kind: id < 100 ? 'class' : id >= 900 ? 'base' : definition?.party ? 'party' : 'normal' };
     });
     const members: PartyViewMember[] = [{ slot: 0, name: 'You', appearance: this.appearance, level: state.player.level, exp: state.player.exp,
-      className: 'Sheriff', wageLabel: state.title ? 'Honorary Citizen' : 'Newcomer', kill: null, earn: null, weapon: this.sim.weapon,
+      className: HERO_CLASSES[state.player.classId].name, wageLabel: state.title ? 'Honorary Citizen' : 'Newcomer', kill: null, earn: null, weapon: this.sim.weapon,
       traits: traits(state.player.traits), traitLevels: state.player.traits, focusedTrait: -1, order: -1, prioritizeBoss: false, prioritizeWall: false, controlsEnabled: false }];
     for (const slot of state.party.slots) {
       if (!slot.exists || !slot.member) continue;
@@ -1115,7 +1132,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   makeSave(): PortSave | undefined {
-    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 24, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
+    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: SAVE_VERSION, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
   }
 
   saveGame(notify = true): boolean {
@@ -1128,7 +1145,7 @@ class ElonaScene extends Phaser.Scene {
 
   private parseSave(raw: unknown): { simulation: Simulation; appearance: number } {
     const save = raw as Partial<PortSave> | null;
-    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
+    if (!save || save.format !== 'elona-shooter-browser' || !supportedSaveVersion(save.version) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
     return { simulation: Simulation.fromSave(save.simulation, this.simulationOptions()), appearance: save.appearance! };
   }
 
@@ -1141,7 +1158,8 @@ class ElonaScene extends Phaser.Scene {
   loadGame(raw: unknown): void {
     const validated = this.parseSave(raw);
     this.sim = validated.simulation; this.appearance = validated.appearance;
-    if (this.sim.state.phase === 'battle') this.enterBattle(); else this.showOutcome();
+    if (this.sim.state.phase === 'battle') { this.enterBattle(); this.togglePause(); }
+    else this.showOutcome();
     status.textContent = 'Saved game restored.';
   }
 
@@ -1149,7 +1167,11 @@ class ElonaScene extends Phaser.Scene {
 
   playSound(key: string, volume = 0.7, pan = 0): void { if (this.cache.audio.exists(key)) this.sound.play(key, { volume, pan }); }
   toggleMute(): void { this.muted = !this.muted; this.sound.mute = this.muted; storeMute(this.muted); this.updateSoundButton(); }
-  private updateSoundButton(): void { document.querySelector('#sound')!.textContent = this.muted ? 'Sound off' : 'Sound on'; }
+  private updateSoundButton(): void {
+    const button = document.querySelector('#sound')!;
+    button.textContent = this.muted ? 'Sound: muted' : 'Sound: on';
+    button.setAttribute('aria-pressed', String(this.muted));
+  }
 }
 
 async function boot(): Promise<void> {

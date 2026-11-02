@@ -1,3 +1,4 @@
+import { SAVE_VERSION } from '../src/save-version.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation, type EnemyState } from '../src/simulation.ts';
@@ -304,7 +305,7 @@ test('v14 town migration installs the retained candidate without RNG, preparatio
   const untouched = structuredClone(legacy);
   const migrated = Simulation.fromSave(legacy);
   assert.deepEqual(legacy, untouched);
-  assert.equal(migrated.state.version, 24);
+  assert.equal(migrated.state.version, SAVE_VERSION);
   assert.equal(migrated.state.rng, legacy.rng); assert.equal(migrated.state.gold, legacy.gold);
   assert.equal(migrated.state.totalMoney, legacy.totalMoney);
   assert.deepEqual(migrated.state.inventory, legacy.inventory);

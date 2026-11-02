@@ -1,3 +1,4 @@
+import { SAVE_VERSION } from '../src/save-version.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation, type SimulationState } from '../src/simulation.ts';
@@ -95,7 +96,7 @@ test('v2 battle migration preserves existing item metadata and its combat random
   const untouched = structuredClone(oldSave);
   const migrated = Simulation.fromSave(oldSave);
   assert.deepEqual(oldSave, untouched);
-  assert.equal(migrated.state.version, 24);
+  assert.equal(migrated.state.version, SAVE_VERSION);
   assert.equal(migrated.state.rng, oldSave.rng);
   assert.deepEqual(migrated.state.inventory, oldSave.inventory);
   assert.deepEqual(migrated.state.waves, oldSave.waves);
@@ -173,9 +174,9 @@ test('an imported pending reward with no eligible skill is rejected before its l
   const untouched = structuredClone(saved);
   assert.equal(saved.player.skillPoints, 1);
   assert.ok(saved.lootOffers.some(isOccupiedItem));
-  assert.throws(() => Simulation.fromSave(saved), /no available Sheriff skill/);
+  assert.throws(() => Simulation.fromSave(saved), /no available hero skill/);
   assert.deepEqual(saved, untouched);
-  assert.throws(() => simulation.finishLoot(), /No Sheriff skills are available/);
+  assert.throws(() => simulation.finishLoot(), /No hero skills are available/);
   assert.deepEqual(simulation.toSave(), saved);
 });
 

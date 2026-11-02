@@ -96,17 +96,25 @@ export function calcTrait(id: number, level: number): number {
 }
 
 export function availableSheriffTraits(characterLevel: number, traits: Readonly<TraitLevels>): number[] {
+  return availableClassTraits(SHERIFF_CHOICE_ORDER, SHERIFF_TRAITS, characterLevel, traits);
+}
+
+export function availableClassTraits(order: readonly number[], definitions: Readonly<Record<number, TraitDefinition>>, characterLevel: number, traits: Readonly<TraitLevels>): number[] {
   // Оба базовых навыка заведомо существуют; неизвестны только их неперенесённые значения.
   const owned = Object.values(traits).filter(level => level !== undefined && level !== 0).length + (traits[TRAIT.BASE_AIMING] === undefined ? 1 : 0) + (traits[TRAIT.BASE_TEAMWORK] === undefined ? 1 : 0);
-  return SHERIFF_CHOICE_ORDER.filter(id => {
-    const level = traits[id] ?? 0, definition = SHERIFF_TRAITS[id];
+  return order.filter(id => {
+    const level = traits[id] ?? 0, definition = definitions[id];
     return definition.maxLevel >= level + 1 && definition.requiredLevel <= characterLevel && !(owned > 17 && level === 0);
   });
 }
 
 export function rollSheriffChoices(characterLevel: number, traits: Readonly<TraitLevels>, random: () => number, focus = -1): number[] {
-  const pool = availableSheriffTraits(characterLevel, traits);
-  if (pool.length === 0) throw new Error('No Sheriff skills are available for this level.');
+  return rollClassChoices(SHERIFF_CHOICE_ORDER, SHERIFF_TRAITS, characterLevel, traits, random, focus);
+}
+
+export function rollClassChoices(order: readonly number[], definitions: Readonly<Record<number, TraitDefinition>>, characterLevel: number, traits: Readonly<TraitLevels>, random: () => number, focus = -1): number[] {
+  const pool = availableClassTraits(order, definitions, characterLevel, traits);
+  if (pool.length === 0) throw new Error('No hero skills are available for this level.');
   const choices: number[] = [];
   let attempts = 0;
   const count = 3 + calcTrait(TRAIT.CAPABLE, traits[TRAIT.CAPABLE] ?? 0);
@@ -122,8 +130,8 @@ export function rollSheriffChoices(characterLevel: number, traits: Readonly<Trai
     if (index === -1) index = Math.trunc(random() * pool.length);
     attempts++;
     // listTrait2 после 2000 попыток выдаёт начало списка класса, даже с предельными навыками.
-    if (attempts > 2000) choices.push(SHERIFF_CHOICE_ORDER[choices.length]);
-    else if (pool[index] !== -1 && SHERIFF_TRAITS[pool[index]].maxLevel >= (traits[pool[index]] ?? 0) + 1) {
+    if (attempts > 2000) choices.push(order[choices.length]);
+    else if (pool[index] !== -1 && definitions[pool[index]].maxLevel >= (traits[pool[index]] ?? 0) + 1) {
       choices.push(pool[index]); pool[index] = -1;
     }
   }
@@ -131,9 +139,13 @@ export function rollSheriffChoices(characterLevel: number, traits: Readonly<Trai
 }
 
 export function applySheriffChoice(traits: TraitLevels, choices: readonly number[], id: number): boolean {
-  if (!Number.isInteger(id) || !SHERIFF_CHOICE_ORDER.includes(id) || !choices.includes(id)) return false;
+  return applyClassChoice(SHERIFF_CHOICE_ORDER, SHERIFF_TRAITS, traits, choices, id);
+}
+
+export function applyClassChoice(order: readonly number[], definitions: Readonly<Record<number, TraitDefinition>>, traits: TraitLevels, choices: readonly number[], id: number): boolean {
+  if (!Number.isInteger(id) || !order.includes(id) || !choices.includes(id)) return false;
   const level = traits[id] ?? 0;
-  if (level >= SHERIFF_TRAITS[id].maxLevel) return false;
+  if (level >= definitions[id].maxLevel) return false;
   traits[id] = level + 1;
   return true;
 }
@@ -143,10 +155,10 @@ export interface TraitDescription {
   maxLevel: number; currentEffect: string; nextEffect: string; canImprove: boolean;
 }
 
-export function describeTrait(id: number, traits: Readonly<TraitLevels>): TraitDescription {
-  if (!Object.hasOwn(SHERIFF_TRAITS, id)) throw new Error(`Unknown Sheriff trait: ${id}`);
-  const definition = SHERIFF_TRAITS[id], current = traits[id] ?? 0, next = current + 1;
-  const effect = (level: number) => level === 0 ? 'None' : `${definition.effectPrefix}${definition.displayLevel ? level : Math.trunc(calcTrait(id, level))}${definition.effectSuffix}${level === definition.maxLevel ? ' [Maxed]' : ''}`;
+export function describeTrait(id: number, traits: Readonly<TraitLevels>, definitions: Readonly<Record<number, TraitDefinition>> = SHERIFF_TRAITS): TraitDescription {
+  if (!Object.hasOwn(definitions, id)) throw new Error(`Unknown trait: ${id}`);
+  const definition = definitions[id], current = traits[id] ?? 0, next = current + 1;
+  const effect = (level: number) => level === 0 ? 'None' : `${definition.effectPrefix}${definition.displayLevel ? level : Math.trunc(definition.calculate(level))}${definition.effectSuffix}${level === definition.maxLevel ? ' [Maxed]' : ''}`;
   return {
     id, name: `${definition.name}${next > 1 ? ` ${next}` : '(New!)'}`,
     description: definition.description + (definition.party ? ' Party Skill.' : ''),

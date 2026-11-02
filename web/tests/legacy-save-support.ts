@@ -1,3 +1,4 @@
+import { SAVE_VERSION } from '../src/save-version.ts';
 import assert from 'node:assert/strict';
 import type { SimulationState } from '../src/simulation.ts';
 import { createPartyState } from '../src/party.ts';
@@ -10,7 +11,8 @@ import { ENEMIES } from '../src/content.ts';
 export function withLegacyPartyDefaults(value: Record<string, any>): Record<string, any> {
   const expected = structuredClone(value);
   const town = expected.town?.preparation === 'ready' ? expected.town : expected.previousTown;
-  expected.version = 24;
+  expected.version = SAVE_VERSION;
+  expected.player.grenadeCount = 325;
   expected.wallLevel = 1;
   expected.wallFixCount = 0;
   expected.repairmanLevel = 0;

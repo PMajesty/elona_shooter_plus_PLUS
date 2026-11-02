@@ -1,3 +1,4 @@
+import { SAVE_VERSION } from '../src/save-version.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation, type EnemyState } from '../src/simulation.ts';
@@ -156,7 +157,7 @@ test('v21 migration adds Trainer0 without changing Looter, capacity or pending l
   assert.equal(sim.startNextDay(), true); boundary(sim).finishDay();
   sim.state.lootOffers[0] = new ItemFactory(() => 0.5).generate(8);
   assert.equal(sim.beginLootModMount({ area: 'offers', index: 0 }, { area: 'inventory', index: 0 }), 'previewed');
-  const legacy = asLegacyV21Save(sim.toSave()), untouched = structuredClone(legacy), expected = { ...legacy, version: 24, trainerLevel: 0 };
+  const legacy = asLegacyV21Save(sim.toSave()), untouched = structuredClone(legacy), expected = { ...legacy, version: SAVE_VERSION, trainerLevel: 0 };
   assert.deepEqual(Simulation.fromSave(legacy).toSave(), expected); assert.deepEqual(legacy, untouched);
   assert.deepEqual(Simulation.fromSave({ ...legacy, trainerLevel: 10 }).toSave(), expected);
   for (const invalidLevel of [undefined, null, -1, 0.5, '1', Infinity, NaN, 1e200]) {

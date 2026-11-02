@@ -32,8 +32,8 @@ export function exportSave(data: unknown): void {
 }
 
 export function readMute(): boolean {
-  try { return JSON.parse(localStorage.getItem(OPTIONS_KEY) ?? '{}').muted === true; }
-  catch { return false; }
+  try { return JSON.parse(localStorage.getItem(OPTIONS_KEY) ?? '{}').muted !== false; }
+  catch { return true; }
 }
 
 export function storeMute(muted: boolean): void {

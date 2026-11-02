@@ -1,3 +1,4 @@
+import { SAVE_VERSION } from '../src/save-version.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation } from '../src/simulation.ts';
@@ -26,7 +27,7 @@ test('New Game integrates mission then hero then waves without mixing their RNG 
     assert.deepEqual(simulation.state.loot, mission.loot);
     assert.deepEqual(simulation.state.waves, waves.waves);
     assert.equal(simulation.state.rng, reference.state());
-    assert.equal(simulation.state.version, 24);
+    assert.equal(simulation.state.version, SAVE_VERSION);
     assert.deepEqual(Simulation.fromSave(simulation.toSave()).state, simulation.state);
   }
 });

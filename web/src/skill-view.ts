@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { describeTrait, type TraitLevels } from './progression.ts';
+import { ALL_TRAITS } from './party-progression.ts';
 import type { LootViewManifest } from './loot-view.ts';
 
 export interface SkillViewState { skillChoices: readonly number[]; player: { traits: TraitLevels } }
@@ -33,7 +34,7 @@ export function createSkillView(scene: Phaser.Scene, state: SkillViewState, mani
     if (selected !== undefined) callbacks.choose(selected);
   });
   state.skillChoices.forEach((id, index) => {
-    const info = describeTrait(id, state.player.traits);
+    const info = describeTrait(id, state.player.traits, ALL_TRAITS);
     const y = 180 + index * 20;
     const asset = manifest.clips.radioButton;
     const radio = scene.add.image(158 - asset.originX, y - asset.originY, 'radioButton', '1').setOrigin(0);

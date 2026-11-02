@@ -1,5 +1,6 @@
 import { ItemFactory, PLAYER_INVENTORY_SLOTS, type Item } from './items.ts';
-import { createSheriffTraits, SHERIFF_TRAITS, TRAIT, type TraitLevels } from './progression.ts';
+import { SHERIFF_TRAITS, TRAIT, type TraitLevels } from './progression.ts';
+import { HERO_CLASSES, startingHeroTraits, type HeroClass } from './hero-classes.ts';
 
 interface HeroRolls {
   sex: 0 | 1; name: 'You'; potentialAim: number; potentialTeam: number; nextTrait: number;
@@ -45,7 +46,7 @@ export function unknownHeroInitialization(): UnknownHeroInitialization {
 }
 
 /** Один исходный levelUp: проверка порогового опыта остаётся обязанностью вызывающего кода. */
-export function levelUpHero(progress: Readonly<HeroProgress>, hero: HeroInitialization, random: () => number): HeroLevelResult {
+export function levelUpHero(progress: Readonly<HeroProgress>, hero: HeroInitialization, random: () => number, classId: HeroClass = 'sheriff'): HeroLevelResult {
   if (!isKnownHeroInitialization(hero)) throw new Error('Hero growth requires known or explicitly reconstructed potentials.');
   if (!positiveInteger(progress.level) || !Number.isFinite(progress.exp) || progress.exp < 0
     || !Number.isSafeInteger(progress.skillPoints) || progress.skillPoints < 0
@@ -59,7 +60,7 @@ export function levelUpHero(progress: Readonly<HeroProgress>, hero: HeroInitiali
   return {
     level, exp: progress.exp % 1000, skillPoints: progress.skillPoints + 1,
     traits: {
-      ...progress.traits, [TRAIT.SHERIFF]: level,
+      ...progress.traits, [HERO_CLASSES[classId].id]: level,
       [TRAIT.BASE_AIMING]: progress.traits[TRAIT.BASE_AIMING] + Number(aimingGained),
       [TRAIT.BASE_TEAMWORK]: progress.traits[TRAIT.BASE_TEAMWORK] + Number(teamworkGained),
     },
@@ -86,8 +87,12 @@ function rollHeroBase(random: () => number, level = 1) {
 
 /** Граница generatePlayer(0, 1, Sheriff); портрет и подготовка миссии принадлежат вызывающему коду. */
 export function generateSheriffHero(random: () => number, previousInventory: readonly (Readonly<Item> | null)[] = []): GeneratedSheriffHero {
+  return generateHero(random, 'sheriff', previousInventory);
+}
+
+export function generateHero(random: () => number, classId: HeroClass, previousInventory: readonly (Readonly<Item> | null)[] = []): GeneratedSheriffHero {
   const { baseAiming, baseTeamwork, ...rolls } = rollHeroBase(random);
-  const traits = createSheriffTraits(baseAiming, baseTeamwork);
+  const traits = startingHeroTraits(classId, baseAiming, baseTeamwork);
   const inventory = Array.from({ length: PLAYER_INVENTORY_SLOTS }, (_, index) => previousInventory[index] ? { ...previousInventory[index] } as Item : null);
   const factory = new ItemFactory(random, { day: 1 });
   // Исходные поля слота сохраняются; сначала граната, затем временный лук и дробовик.
@@ -95,7 +100,22 @@ export function generateSheriffHero(random: () => number, previousInventory: rea
   Object.assign(grenade, { lv: 1, name: "Soldier's Grenade", attack: 45, ammoMax: 5, ammo: 5, value: 100 });
   inventory[1] = grenade;
   const bow = factory.generate(24, inventory[0] ?? undefined);
-  inventory[0] = factory.generate(3, bow);
+  switch (classId) {
+    case 'sheriff': inventory[0] = factory.generate(3, bow); break;
+    case 'rogue': inventory[0] = factory.generate(1, bow); break;
+    case 'hunter':
+      inventory[0] = factory.generate(23, bow);
+      Object.assign(inventory[0], { name: "Hunter's Crossbow", shootRate: 32, baseAccuracy: 160, attack: 30, reqLv: 1 });
+      break;
+    case 'militia':
+      inventory[0] = factory.generate(4, bow);
+      inventory[2] = factory.generate(40, inventory[2] ?? undefined);
+      Object.assign(inventory[2], { name: 'Simple Flame Thrower', attack: 10, reqLv: 1, modMax: 1 });
+      factory.enchant(inventory[2], 11, 1);
+      inventory[3] = factory.generate(16, inventory[3] ?? undefined);
+      Object.assign(inventory[3], { name: 'Simple Chain Gun', reqLv: 1 });
+      break;
+  }
   return { hero: { provenance: 'original-generation', ...rolls }, level: 1, exp: 0, skillPoints: 0, traits, inventory };
 }
 
