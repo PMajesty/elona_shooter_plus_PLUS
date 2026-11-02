@@ -53,7 +53,7 @@ test('v12 saves gain only v13 title and result fields, without consuming RNG or 
   legacy.version = 12; delete legacy.title; delete legacy.result.tax; delete legacy.result.salary;
   const before = structuredClone(legacy);
   const migrated = Simulation.fromSave(legacy);
-  assert.deepEqual(migrated.toSave(), { ...legacy, version: 13, title: 0, result: { ...legacy.result, tax: 0, salary: 0 } });
+  assert.deepEqual(migrated.toSave(), { ...legacy, version: 14, title: 0, result: { ...legacy.result, tax: 0, salary: 0 } });
   assert.equal(migrated.state.rng, legacy.rng);
   assert.deepEqual(legacy, before);
   assert.deepEqual(restore(migrated).state, migrated.state);

@@ -71,6 +71,8 @@ let thirdDayVictories = 0;
 let fourthDayVictories = 0;
 let fifthDayVictories = 0;
 let sixthDayVictories = 0;
+let seventhDayVictories = 0;
+let seventhDayArrivals = 0;
 let titleClaims = 0;
 let equipmentSelections = 0;
 let modificationPreviews = 0, modsMounted = 0, weaponsUpgraded = 0, upgradeCancellations = 0;
@@ -85,8 +87,9 @@ try {
       lastCheckpoint = simulation.toSave(); inputs = [];
       let checkpoints = 1;
       let daysCompleted = 0;
-      for (let day = 1; day <= 6; day++) {
+      for (let day = 1; day <= 7; day++) {
         assert.equal(simulation.state.day, day);
+        if (day === 7) seventhDayArrivals++;
         for (let frame = 0; frame < 6000 && simulation.state.phase === 'battle'; frame++) {
           const input = inputFor(simulation, policy);
           inputs.push(input);
@@ -113,7 +116,13 @@ try {
         }
         assert.notEqual(simulation.state.phase, 'battle', `Day ${day} did not terminate within 6000 frames.`);
         if (policy === 'idle') assert.equal(simulation.state.phase, 'defeat');
-        if (simulation.state.phase === 'victory') { daysCompleted++; if (day === 2) secondDayVictories++; if (day === 3) thirdDayVictories++; if (day === 4) fourthDayVictories++; if (day === 5) fifthDayVictories++; if (day === 6) sixthDayVictories++; }
+        if (simulation.state.phase === 'victory') { daysCompleted++; if (day === 2) secondDayVictories++; if (day === 3) thirdDayVictories++; if (day === 4) fourthDayVictories++; if (day === 5) fifthDayVictories++; if (day === 6) sixthDayVictories++; if (day === 7) seventhDayVictories++; }
+        if (day === 7 && simulation.state.phase === 'victory') {
+          assert.equal(simulation.state.title, 1);
+          assert.equal(simulation.state.result.salary, 100);
+          assert.equal(simulation.state.result.tax, 45);
+          assert.equal(simulation.state.result.netReward, 735 + simulation.state.result.perfectBonus);
+        }
         let rewardActions = 0;
         while (simulation.state.phase === 'victory' && simulation.state.postbattle !== 'result') {
           assert.ok(rewardActions++ < 30, 'Earned rewards did not reach results.');
@@ -185,7 +194,7 @@ try {
             modsMounted++; townActions++;
           }
           if (simulation.state.town?.preparation === 'ready' && simulation.state.town.ap >= 4) {
-            const upgradeSlot = simulation.state.inventory.findIndex((item, index) => isOccupiedItem(item) && item.type === ITEM_TYPE.gun && (day === 6 || index > 1));
+            const upgradeSlot = simulation.state.inventory.findIndex((item, index) => isOccupiedItem(item) && item.type === ITEM_TYPE.gun && (day === 7 || index > 1));
             if (upgradeSlot >= 0) {
               assert.equal(simulation.beginWeaponUpgrade(upgradeSlot), 'previewed');
               assert.equal(restored.beginWeaponUpgrade(upgradeSlot), 'previewed');
@@ -224,7 +233,7 @@ try {
           lastCheckpoint = JSON.parse(JSON.stringify(simulation.toSave()));
           restored = Simulation.fromSave(lastCheckpoint, simulationOptions);
           checkpoints++;
-          if (day < 6) {
+          if (day < 7) {
             const previous = simulation.toSave();
             assert.equal(simulation.startNextDay(), true);
             assert.equal(restored.startNextDay(), true);
@@ -255,13 +264,14 @@ try {
   assert.ok(fifthDayVictories > 0, 'No scenario completed Day 5.');
   assert.ok(sixthDayVictories > 0, 'No scenario completed Day 6.');
   assert.ok(titleClaims > 0, 'No scenario claimed and saved the Day6 title.');
+  assert.ok(seventhDayArrivals > 0, 'No scenario entered Day 7.');
   const report = {
     status: 'passed', seedCount, policies, scenarios: results.length, simulationFrames: frames,
-    checkpoints: results.reduce((sum, result) => sum + result.checkpoints, 0), rewardTransitions, townActions, restTransitions, secondDayVictories, thirdDayVictories, fourthDayVictories, fifthDayVictories, sixthDayVictories, titleClaims, equipmentSelections,
+    checkpoints: results.reduce((sum, result) => sum + result.checkpoints, 0), rewardTransitions, townActions, restTransitions, secondDayVictories, thirdDayVictories, fourthDayVictories, fifthDayVictories, sixthDayVictories, seventhDayArrivals, seventhDayVictories, titleClaims, equipmentSelections,
     modificationPreviews, modsMounted, weaponsUpgraded, upgradeCancellations,
     elapsedMs: Math.round(performance.now() - started),
     collision: 'Production ordinary-enemy contours; boss uses the documented rectangular headless fallback',
-    limits: ['Port self-consistency, finite state and JSON replay only; not an original-game parity proof', 'Sheriff Days 1–6 only; boss shape geometry not exercised', 'No browser rendering, input latency, audio or wall-clock performance comparison'],
+    limits: ['Port self-consistency, finite state and JSON replay only; not an original-game parity proof', 'Sheriff Days 1–7 only; boss shape geometry not exercised', 'Day7 arrivals and victories are separate observed counts; this policy does not guarantee a win', 'No browser rendering, input latency, audio or wall-clock performance comparison'],
     results,
   };
   writeFileSync(resolve(outputDirectory, 'report.json'), JSON.stringify(report, null, 2) + '\n');

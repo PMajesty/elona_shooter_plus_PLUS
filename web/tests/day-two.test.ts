@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { Simulation } from '../src/simulation.ts';
 import { TRAIT } from '../src/progression.ts';
 import { ItemFactory } from '../src/items.ts';
+import { ENEMIES, type EnemyKind } from '../src/content.ts';
 
 function restore(simulation: Simulation): Simulation {
   const saved = JSON.parse(JSON.stringify(simulation.toSave()));
@@ -15,10 +16,19 @@ function playBattle(simulation: Simulation, observe: () => void = () => {}): voi
   // Это проверка связного состояния: стандартный hitTest использует прямоугольники,
   // а независимые исходные контуры и браузерная проводка проверяются отдельно.
   for (let frame = 0; frame < 6000 && simulation.state.phase === 'battle'; frame++) {
-    const target = simulation.state.enemies.filter(enemy => enemy.hp > 0 && enemy.x > 20).sort((a, b) => b.x - a.x)[0];
+    // В седьмой день видимый замах босса и лучники требуют приоритета над ближней целью.
+    const priority = (enemy: { kind: EnemyKind; bossAction?: number }) => simulation.state.day !== 7 ? 0
+      : enemy.kind === 'boss' && enemy.bossAction === 5 ? 1000 : enemy.kind === 'archer' ? 500 : 0;
+    const target = simulation.state.enemies.filter(enemy => enemy.hp > 0 && enemy.x > 20)
+      .sort((a, b) => priority(b) - priority(a) || b.x - a.x)[0];
+    const critical = target && simulation.state.day === 7 && !['boss', 'fly'].includes(target.kind)
+      ? ENEMIES[target.kind].critical : [0, 0, 0, 0];
     const weapon = simulation.weapon!;
-    simulation.tick({ aimX: target?.x ?? 450, aimY: target?.y ?? 240,
+    simulation.tick({ aimX: target ? target.x + (critical[0] + critical[1]) / 2 : 450,
+      aimY: target ? target.y + (critical[2] + critical[3]) / 2 : 240,
       firePressed: Boolean(target) && weapon.reloadTime === 0 && weapon.ammo > 0,
+      slot: simulation.state.day === 7 && target?.kind === 'boss' && simulation.state.inventory[1]!.ammo > 0
+        && simulation.state.itemCooldowns[1] === 0 ? 1 : undefined,
       reload: weapon.ammo === 0 || (!target && weapon.ammo < 3) });
     observe();
   }
@@ -92,7 +102,7 @@ test('normal first battle, rewards and town lead to a saved Day 2 with the prepa
   }
 });
 
-test('six connected days preserve historical absorption, boss progression, Day6 tax and the final town boundary', () => {
+test('seven connected days preserve historical absorption, boss progression, title salary and the final town boundary', () => {
   let simulation = firstTown();
   assert.equal(simulation.state.earnedMedals.includes(60), false);
   assert.equal(simulation.freeRepair(), 'repaired');
@@ -175,6 +185,7 @@ test('six connected days preserve historical absorption, boss progression, Day6 
   assert.equal(simulation.state.town.mission.level, 5);
   assert.equal(simulation.state.town.mission.loot.at(-1), 1037);
   simulation = restore(simulation);
+  assert.equal(simulation.freeRepair(), 'repaired');
   const fifthTown = simulation.toSave();
   assert.equal(simulation.startNextDay(), true);
   assert.equal(simulation.state.day, 6);
@@ -202,8 +213,46 @@ test('six connected days preserve historical absorption, boss progression, Day6 
   assert.equal(simulation.state.town.mission.loot.at(-1), 1106);
   simulation = restore(simulation);
   const sixthTown = simulation.toSave();
+  assert.equal(simulation.claimTitle(), 'claimed');
+  assert.equal(simulation.state.title, 1);
+  assert.equal(simulation.state.town!.ap, sixthTown.town!.ap - 4);
+  assert.equal(simulation.state.gold, sixthTown.gold);
+  assert.equal(simulation.state.rng, sixthTown.rng);
+  assert.deepEqual(simulation.state.result, sixthTown.result);
+  simulation = restore(simulation);
+  const titledTown = simulation.toSave();
+  assert.equal(simulation.startNextDay(), true);
+  assert.equal(simulation.state.day, 7);
+  assert.equal(simulation.state.title, 1);
+  assert.deepEqual(simulation.state.previousTown, titledTown.town);
+  assert.equal(simulation.state.activeMission.level, 6);
+  assert.equal(simulation.state.activeMission.reward, 720);
+  assert.equal(simulation.state.loot.at(-1), 1106);
+  assert.equal(simulation.state.gold, titledTown.gold);
+  assert.equal(simulation.state.castleHp, titledTown.castleHp);
+  simulation = restore(simulation);
+  let seventhBossSeen = false;
+  playBattle(simulation, () => {
+    const boss = simulation.state.enemies.find(enemy => enemy.kind === 'boss');
+    if (boss) { seventhBossSeen = true; assert.equal(boss.maxHp, 300); assert.equal(boss.appearance, 57); }
+  });
+  assert.equal(seventhBossSeen, true);
+  assert.equal(simulation.state.result.reward, 720);
+  assert.equal(simulation.state.result.perfectBonus, simulation.state.noDamage ? 216 : 0);
+  assert.equal(simulation.state.result.upkeep, 40);
+  assert.equal(simulation.state.result.tax, 45);
+  assert.equal(simulation.state.result.salary, 100);
+  assert.equal(simulation.state.result.netReward, 735 + simulation.state.result.perfectBonus);
+  simulation = claimRewards(simulation);
+  assert.equal(simulation.enterTown(), true);
+  assert.ok(simulation.state.town?.preparation === 'ready');
+  assert.equal(simulation.state.town.mission.level, 7);
+  assert.ok(simulation.state.town.mission.loot.every(id => id === 1038));
+  assert.equal(simulation.state.title, 1);
+  simulation = restore(simulation);
+  const seventhTown = simulation.toSave();
   assert.equal(simulation.startNextDay(), false);
-  assert.deepEqual(simulation.toSave(), sixthTown);
+  assert.deepEqual(simulation.toSave(), seventhTown);
 });
 
 test('weapon experience requires strictly more than 44 at Shotgun level 2 and discards excess after one increase', () => {

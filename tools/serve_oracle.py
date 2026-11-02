@@ -9,6 +9,9 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / ".build/oracle/browser-report.json"
 REPORTS = {
+    "/api/seventh-day-waves-report": ROOT / ".build/oracle/seventh-day-waves-browser-report.json",
+    "/api/seventh-town-report": ROOT / ".build/oracle/seventh-town-browser-report.json",
+    "/api/boss-special-report": ROOT / ".build/oracle/boss-special-browser-report.json",
     "/api/sixth-day-waves-report": ROOT / ".build/oracle/sixth-day-waves-browser-report.json",
     "/api/sixth-town-report": ROOT / ".build/oracle/sixth-town-browser-report.json",
     "/api/barbarian-report": ROOT / ".build/oracle/barbarian-browser-report.json",
@@ -40,6 +43,12 @@ REPORTS = {
     "/api/town-preparation-report": ROOT / ".build/oracle/town-preparation-browser-report.json",
 }
 ROUTES = {
+    "/seventh-day-waves-reference.swf": ROOT / ".build/oracle/seventh-day-waves-reference.swf",
+    "/seventh-day-waves-build-report.json": ROOT / ".build/oracle/seventh-day-waves-build-report.json",
+    "/seventh-town-reference.swf": ROOT / ".build/oracle/seventh-town-reference.swf",
+    "/seventh-town-build-report.json": ROOT / ".build/oracle/seventh-town-build-report.json",
+    "/boss-special-reference.swf": ROOT / ".build/oracle/boss-special-reference.swf",
+    "/boss-special-build-report.json": ROOT / ".build/oracle/boss-special-build-report.json",
     "/sixth-day-waves-reference.swf": ROOT / ".build/oracle/sixth-day-waves-reference.swf",
     "/sixth-day-waves-build-report.json": ROOT / ".build/oracle/sixth-day-waves-build-report.json",
     "/sixth-town-reference.swf": ROOT / ".build/oracle/sixth-town-reference.swf",

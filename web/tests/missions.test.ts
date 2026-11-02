@@ -88,12 +88,28 @@ test('fifth-town preparation retains Holy Grail through sixth-day waves', () => 
   assert.equal(generated.waves.flatMap(wave => wave.enemies).filter(kind => kind === 'boss').length, 1);
 });
 
-test('sixth-town preparation guarantees Crow Statue without enabling seventh-day combat', () => {
+test('sixth-town preparation retains Crow Statue through seventh-day waves', () => {
   let draws = 0;
   const mission = generateLowLevelMission(6, 6, () => { draws++; return 0.99; }, { absorbFix: 0.02 });
   assert.equal(draws, 2);
   assert.equal(mission.powerOrg, 1520); assert.equal(mission.reward, 720); assert.equal(mission.spawnRate, 13.8);
   assert.equal(mission.absorbFix, 0.02);
   assert.deepEqual(mission.loot, [1038, 1106]);
-  assert.throws(() => generateLowLevelWaves(mission, 6, () => 0.5), /Unsupported low-level wave configuration/);
+  const before = structuredClone(mission);
+  const generated = generateLowLevelWaves(mission, 7, () => 0.5);
+  assert.deepEqual(mission, before);
+  assert.equal(generated.waves.length, 5);
+  assert.equal(generated.waves.flatMap(wave => wave.enemies).filter(kind => kind === 'boss').length, 1);
+});
+
+test('seventh-town preparation has no guaranteed calendar loot and does not enable eighth-day waves', () => {
+  for (const value of [0.5, 0.99]) {
+    let draws = 0;
+    const mission = generateLowLevelMission(7, 7, () => { draws++; return value; }, { absorbFix: 0.03 });
+    assert.equal(draws, 2);
+    assert.equal(mission.powerOrg, 1640); assert.equal(mission.reward, 740); assert.equal(mission.spawnRate, 13.6);
+    assert.equal(mission.absorbFix, 0.03);
+    assert.deepEqual(mission.loot, value > 0.97 ? [1038] : []);
+    assert.throws(() => generateLowLevelWaves(mission, 7, () => 0.5), /Unsupported low-level wave configuration/);
+  }
 });

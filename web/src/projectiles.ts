@@ -36,7 +36,8 @@ export function createProjectile(input: ProjectileLaunch): ProjectileState {
   // Отдельный вертикальный путь исправляет исходное деление на ноль без смещения цели.
   const vertical = Math.abs(targetX - startX) < 0.01;
   if (vertical) targetX = startX;
-  let speed = input.speedBase * (vertical ? 1 : Math.atan2(Math.abs(targetX - startX) * 2, Math.abs(targetY - startY)) * 2 / Math.PI) + (kind === 'rocket' ? 1.5 : 0.1);
+  // Сохраняем порядок умножений источника: перегруппировка меняет младший бит скорости.
+  let speed = (vertical ? input.speedBase : input.speedBase * Math.atan2(Math.abs(targetX - startX) * 2, Math.abs(targetY - startY)) * 2 / Math.PI) + (kind === 'rocket' ? 1.5 : 0.1);
   if (kind === 'arrow') { if (targetY < 150) speed *= 1.5; targetY += 6; }
   if (kind === 'bolt') targetY += 4;
   if (kind === 'gravity') speed /= 4;

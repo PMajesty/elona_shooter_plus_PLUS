@@ -33,7 +33,7 @@ test('v8 migration adds empty town-equipment state without consuming RNG or chan
   const legacy = asLegacyV8Save(simulation.toSave()), untouched = structuredClone(legacy);
   const restored = Simulation.fromSave(legacy);
   assert.deepEqual(legacy, untouched);
-  assert.deepEqual(restored.state, { ...legacy, version: 13, upgradeReference: null, pendingTownAction: null, enemyArrows: [] });
+  assert.deepEqual(restored.state, { ...legacy, version: 14, upgradeReference: null, pendingTownAction: null, enemyArrows: [] });
   for (let frame = 0; frame < 35; frame++) {
     restored.tick(); simulation.tick();
     assert.deepEqual(restored.state, simulation.state);

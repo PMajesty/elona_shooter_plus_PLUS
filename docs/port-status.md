@@ -1,19 +1,20 @@
 # Browser port status
 
-Current implementation: **six connected Sheriff days**, with owned firearms and
+Current implementation: **seven connected Sheriff days**, with owned firearms and
 consumables, ordinary/boss loot, earned skills, prepared towns, shop transactions,
-weapon Upgrade, MOD mounting, Free Repair, Rest and the first title claim.
+weapon Upgrade, MOD mounting, Free Repair, Rest, the first title claim and its salary.
 This is not a complete remake.
 The TypeScript/Phaser client runs independently of Flash and Ruffle; the preserved
 game remains the reference for behavior, content and appearance.
 
-The verified **v13 six-day release** is served at
-`http://127.0.0.1:5175/elona/`. Its deployable archive is
-`.build/elona-shooter-browser-day6-slice.zip` (7,906,573 bytes); the previous v12
-release is retained in `.build/browser-before-day6` and its Day5 archive.
-All 267 tested release files match the served directory and archive. The bundle
-is `assets/index-Bilu_2M0.js`; the archive SHA-256 is
-`47851e21b61f1b57015f96ce6433d521217b91ead1a261d7db33c4a7c90c420f`.
+The **v14 seven-day release** is served at `http://127.0.0.1:5175/elona/` after
+automated checks, focused browser acceptance and production New Game smoke testing.
+All 267 tested files from `.build/browser-day7-final` match the published build
+and archive. The bundle is `assets/index-D24uJwik.js`; the deployable archive is
+`.build/elona-shooter-browser-day7-slice.zip` (7,906,878 bytes), SHA-256
+`8d65af22d9e2f2b41e64d483cf10172e874dcad30398ceb4a8eb8183e19d577f`.
+The verified v13 release remains in `.build/browser-before-day7` and
+`.build/elona-shooter-browser-day6-slice.zip` for rollback.
 Browser boundaries and historical milestones are in
 [port verification](port-verification.json).
 
@@ -36,14 +37,17 @@ establish this late-game diagnosis.
 
 - Title, New Game, 22 appearances and Sheriff creation, including original hidden
   hero rolls, pre-Proceed rerolls and level growth.
-- Opening mission0 and prepared missions1–5 on displayed Days1–6, victory/defeat,
+- Opening mission0 and prepared missions1–6 on displayed Days1–7, victory/defeat,
   rewards and subsequent towns. Day4 includes BATCH1 wave selection, boss shields,
   fourth-town MOD stock and level-2 recruit growth. Day5 adds AIR waves and Fly
   movement, hovering, knockback, distant shadow, death and castle exit. The fifth
   town returns to ordinary stock, generates level-2/3 recruits and prepares
   mission5 with the Holy Grail reward. Day6 adds Barbarian movement, rage,
   accelerated attacks, knockback and death. Town6 prepares mission6 with Crow
-  Statue1106; Day7 combat remains disabled.
+  Statue1106. Day7 adds RANGED wave selection and the boss grenade special;
+  the wall is hit at release and the travelling grenade's explosion is cosmetic.
+  Its seventh town can generate level-4 recruits and prepares mission7; Day8
+  combat remains disabled.
 - Mouse aiming/shooting and keys 1–5 for owned slots. Damage, accuracy, cadence,
   ammo, skill requirements, manual/magazine reload, automatic fire/reload and
   covered Sheriff skills use source-derived calculations.
@@ -54,7 +58,7 @@ establish this late-game diagnosis.
   selected; charges and per-slot cooldowns persist. Hammers spend a charge even
   at full HP; the Grail is single-use.
 - Original art, fonts, audio, layered character animation, boss health bars and
-  the source boss appearance progression for the six covered days.
+  the source boss appearance progression for the seven covered days.
 - Ordinary loot → earned boss prizes → earned Sheriff skill choices → results.
   Gold settles once. Six inventory slots, offers and choices persist without rerolls.
 - Town preparation retains stock, cards, next-mission/recruit data and search
@@ -69,15 +73,18 @@ establish this late-game diagnosis.
   items, as in the source. A shop MOD must first be bought into an empty slot.
 - Free Repair costs 2 AP, restores the wall and costs no gold/RNG. A full wall
   rejects before the insufficient-AP check. Mission → Rest starts the next prepared battle
-  after dialog acknowledgment into Days2–6, without healing or spending gold/AP. Guns refill;
+  after dialog acknowledgment into Days2–7, without healing or spending gold/AP. Guns refill;
   consumable charges stay spent.
 - Day6 settlement deducts the first 10 GP tax separately from default upkeep 40.
   Mission → Claim title costs 4 AP and grants Honorary Citizen, once eligible.
   It consumes no RNG and pays no immediate gold. Its 100 GP salary begins at the
-  following settlement; that source-method case is tested but Day7 is not playable.
+  following settlement. Day7 deducts 45 GP tax and default upkeep 40; a previously
+  earned title adds 100 GP salary once. A delayed first title can still be claimed
+  in town7 without changing its already settled result. Seven perfect completions
+  add medal62's absorption to future preparation, preserving active mission history.
 - Pause, browser-local save, Continue and validated JSON import/export.
 
-Other classes, Day 7+, Ragnarok, recruiting/party AI, other card/search actions, stock
+Other classes, Day 8+, Ragnarok, recruiting/party AI, other card/search actions, stock
 refresh, most castle/economy actions, complete global medals and original Flash
 save conversion remain unfinished. Companion/town skills cannot exercise systems
 that are still absent. No completion percentage is inferred from extracted assets
@@ -96,8 +103,14 @@ Ordinary-enemy collision uses original filled contours and placement matrices,
 including persisted sheep shadow history. Bosses use rendered alpha geometry;
 the headless soak uses an explicitly documented boss rectangle fallback.
 
-Current saves use **version 13**, accepting port versions **1–12** through their
-existing migrations. Barbarian records require rage state, rage-effect frame and
+Current saves use **version 14**, accepting port versions **1–13** through their
+existing migrations. Boss action5 windup and released grenades resume with their
+stored state. Only a Day7 v14 grenade with damage -1 and no owned weapon slot may
+use the cosmetic sentinel; other negative damage and older/day-mismatched saves
+are rejected. Earned titles remain valid during Day7 battles and results, and
+seventh-town recruit growth/medal history are validated without rerolling.
+
+Version **13** added Barbarian and the first title. Barbarian records require rage state, rage-effect frame and
 hit-particle frames/offsets: these affect source collision and the parent-width
 knockback clamp. The earned title persists; older saves initialize title 0 without
 RNG consumption. No old save gains fabricated Barbarian history. Active mission
@@ -148,11 +161,24 @@ no Flash plugin, Ruffle, external CDN or gameplay server.
 
 ## Evidence and intentional corrections
 
-The published v13 release passes **234 tests**, focused browser acceptance and
-production New Game/save restoration. Historical v11/v12 release checks below
+The published v14 release passes **252 tests**, the release build, nine focused
+browser checks and production New Game smoke testing. Historical v11–v13 release checks below
 retain their original scope.
 Original comparisons use controlled inputs/random draws and expected
 results captured from the original, never regenerated from the port.
+
+Day7 source captures match **ten wave cases**, **38 town/economy/recruit
+observations** and **337 boss-special states**. They cover the RANGED branch and
+fallback selection, level-four recruit thresholds/growth, salary/tax/medal timing,
+special probability and level guards, windup, release, grenade flight, surviving
+hits and death before/after release. Wall damage occurs at release; landing adds
+art and two shake RNG draws without a second hit. All boss-special fields match
+exactly after retaining the source's arithmetic order in projectile speed; the
+initial one-ULP differences remain recorded. No comparison tolerance was widened.
+See [wave notes](../web/docs/seventh-day-wave-source.md),
+[town notes](../web/docs/seventh-town-source.md) and
+[boss-special notes](../web/docs/boss-special-source.md). Existing assets remain
+86 images, 40 clips, 89 sounds and five fonts.
 
 Day6 source captures match **nine wave cases**, **22 town/economy/title
 observations**, and **671 Barbarian states** plus **12 collision grids/76,800
@@ -167,7 +193,8 @@ correction or a late-game hitbox diagnosis. See
 The sixth-town cases cover ordinary preparation, recruit thresholds, the first
 tax, title eligibility/claim/acknowledgment and controlled future salary timing.
 Claiming the title after the Day6 result cannot retroactively change that result.
-The two Day7 salary cases observe source methods only and do not enable Day7.
+Those two historical Day7 salary cases observed source methods only; the current
+Day7 integration and its separate reference suite extend that earlier boundary.
 See [sixth-town source notes](../web/docs/sixth-town-source.md).
 
 Day5 source captures match **nine wave cases** and **17 fifth-town/recruit
@@ -223,17 +250,28 @@ town and six second-town snapshots; three final Rest transitions from 12 origina
 observations; 19 ordinary-enemy grids/77,824 points; and 14 projectile scenarios/
 650 source steps, with separate native-birth and vertical diagnostics.
 
-The latest six-day campaign soak passed **96 scenarios across 32 seeds**, with
-**411,504 frames, 4,490 JSON checkpoints, 699 reward transitions, 760 town actions
-and 161 Rest transitions**. It reached **32 Day2 victories, 32 Day3 victories,
+The latest seven-day campaign soak passed **96 scenarios across 32 seeds**, with
+**412,874 frames, 4,501 JSON checkpoints, 699 reward transitions, 760 town actions
+and 162 Rest transitions**. It reached **32 Day2 victories, 32 Day3 victories,
 25 Day4 victories and 13 Day5 victories**. Thirteen scenarios entered Day6;
-one won and claimed the title. The run exercised **297 equipment selections,
+one won, claimed the title and entered Day7; **zero won Day7**. The run exercised **297 equipment selections,
 124 upgrade previews, 29 MOD mounts, 27 upgrades and 97 cancellations**,
 with exact continued state/events after save/restore. Idle, aimed and interrupted policies
 exercise actual integrated commands. The earlier projectile sweep separately
 passed 27 configured cases/9,720 updates/1,080 checkpoints; 21 vertical regressions
 check finite completion. These are bounded replay/stability tests, not original
 parity, ordinary acquisition of every configured gun, or browser performance proof.
+
+A separate connected campaign test reaches a Day7 victory with 10 HP using
+ordinary fifth-town Free Repair, boss-windup/Archer targeting priority, critical
+aim and an owned grenade. Rewards, title salary and seventh-town save/restore
+then complete. This test uses rectangular hit geometry and retains its pre-existing
+Day1 39-HP setup; it is not production-contour or original-balance proof. All
+recorded attempts from the earned 11-HP checkpoint using production ordinary
+contours failed. Both these failures and the successful rectangle-based test
+remain recorded separately, including
+`.build/test-probes/day7-connected-campaign-report.json` and the Day7 provenance
+files under `.build/browser-qa/`. No full browser campaign victory is claimed.
 
 Historical browser input on the v9 candidate verified MOD No→swap, MOD Yes, before/after
 upgrade display, red skill requirement, pending-preview reload/Continue, payment
@@ -322,14 +360,37 @@ browser-save comparisons are recorded in `.build/day6-publication.json`,
 `.build/browser-qa/day6-ui-verification.json` and
 `.build/browser-qa/day6-production-verification.json`.
 
+The v14 browser entered Day7 through ordinary Rest from the earned Day6 town,
+retaining title 1, 11 HP and 4,596 gold; Continue restored the complete save
+unchanged. A separate imported Day7 result from the documented rectangle-based
+campaign test proceeded to the seventh town and restored exactly through Continue.
+That result fixture does not establish a browser victory using production geometry.
+A controlled boss at (160,240) completed its windup, damaged the wall from 11 to 9
+and launched one grenade. The 15-update in-flight export matched normal production
+ticks, and Continue restored it exactly. A further 43 updates matched the full
+expected state, including the cosmetic explosion at tick 12601, no further wall
+hit and removal of the projectile. All nine full-envelope comparisons passed;
+the controlled setup and render observations remain separate from original-source
+and complete-campaign parity claims.
+
+The same tested v14 bytes were published. Production New Game reached tick 0
+with 40 HP, 200 gold and five shells. The prior live v13 save was restored through
+the UI, paused at tick 674 with 40 HP, 209 gold, five shells, 10 kills and boss
+HP 75/150; no console errors were observed. The complete envelope matched the
+expected v13→v14 migration, preserving appearance, and the resulting v14 save
+restored exactly. Current publication and browser evidence are in
+`.build/day7-publication.json`, `.build/browser-qa/day7-ui-verification.json`
+and `.build/browser-qa/day7-production-verification.json`; the restored production screenshot
+is `.build/browser-qa/day7-production-restored.jpg`.
+
 ## Next integrated work and continuation
 
-The next campaign boundary is Day7: mission6 introduces RANGED waves and the boss
-special attack. Integrate those source behaviors, the now-earned salary and
-relevant town/economy thresholds before
-enabling Rest beyond Day6. Keep progression and replay checks connected to
-ordinary playable flow. Hiring, other deferred town actions and the unproven
-late-game hitbox report remain explicit work beyond the six-day slice.
+The next integration priority is hiring and party AI,
+an original early-game feature, before indefinitely extending the solo campaign.
+Connect recruitment, party behavior and their costs to ordinary town/combat flow.
+Later campaign work still includes Lava and further town thresholds; Day8 onward
+remains unavailable. The veteran late-game hitbox report is still unproven and
+requires its own failing original encounter before a correction is claimed.
 
 The long-term goal and the existing **30-minute watcher remain active**. Unchanged
 monitoring stays quiet. The user is asleep and authorized autonomous continuation;

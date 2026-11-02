@@ -59,7 +59,7 @@ test('v11 migration changes only the version; current Fly saves require valid co
   const simulation = new Simulation(42);
   const legacy: Record<string, any> = simulation.toSave(); legacy.version = 11;
   const untouched = structuredClone(legacy);
-  assert.deepEqual(Simulation.fromSave(legacy).toSave(), {...legacy, version: 13});
+  assert.deepEqual(Simulation.fromSave(legacy).toSave(), {...legacy, version: 14});
   assert.deepEqual(legacy, untouched);
   const {simulation: flySimulation} = isolatedFly();
   for (const corrupt of [

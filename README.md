@@ -1,19 +1,19 @@
 # Elona Shooter Plus PLUS
 
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
-Phaser 4. The current implementation covers **six connected Sheriff days**:
+Phaser 4. The current implementation covers **seven connected Sheriff days**:
 choose one of 22 appearances, fight, collect ordinary and boss loot, choose earned
 skills, enter town, buy/sell and upgrade weapons, mount MODs, use Free Repair,
-then Rest into Days 2–6 with your retained equipment. Victory, defeat,
+then Rest into Days 2–7 with your retained equipment. Victory, defeat,
 rewards, town entry and save/restore work across these stages. Original English
 artwork, fonts, audio and credits are retained.
 
-The six-day v13 release has passed automated checks, focused browser acceptance
-and production New Game/save restoration. Its deployable archive is
-`.build/elona-shooter-browser-day6-slice.zip`; the previous five-day v12 release
+The seven-day **v14 release** has passed the automated checks below, focused
+browser acceptance and production New Game smoke testing. Its deployable archive
+is `.build/elona-shooter-browser-day7-slice.zip`; the previous six-day v13 release
 is retained for rollback.
 
-This is not yet the complete game. Day 7 onward, other classes, full town
+This is not yet the complete game. Day 8 onward, other classes, full town
 management, recruiting and other card actions, Ragnarok and
 original Flash save conversion remain to be ported. Ordinary firearms use owned
 item statistics and weapon-skill requirements; the covered Sheriff combat skills
@@ -86,9 +86,9 @@ owned slot to buy it. Owned items can be moved or swapped; dropping one outside
 the slots asks to sell it. Only Yes confirms, and any other dialog click cancels.
 Shop Tokens discount stock. Town HP, AP, prepared data and full inventory records
 survive save/restore. **Mission → Rest** opens the original Resting dialog;
-acknowledging it begins the prepared next battle, up to Day 6. Rest does not heal
+acknowledging it begins the prepared next battle, up to Day 7. Rest does not heal
 the castle, spend AP or cost gold. Guns refill; consumable charges stay spent.
-Days 2–6 each end in their own rewards and prepared town. Day 4 adds the source's
+Days 2–7 each end in their own rewards and prepared town. Day 4 adds the source's
 harder BATCH1 wave pattern and boss shield. The boss turns when retreating,
 plays its original firing and shield frames, and reduces guarded damage to
 one tenth plus one. The fourth town generates the original MOD sale with a
@@ -106,8 +106,13 @@ remain intact. Rage artwork participates in collision; hit particles also affect
 the original knockback bounds. The sixth-day result includes the first **10 GP tax**.
 In town, **Mission → Claim title** spends **4 AP** to grant **Honorary Citizen**;
 it pays no gold immediately and does not change the settled result. Its **100 GP
-salary** starts with the following day's settlement, which is source-tested but
-not yet reachable in ordinary play. Rest beyond Day 6 remains unavailable.
+salary** starts with the following day's settlement. Day 7 adds the original
+RANGED wave branch and the boss grenade special: the wall takes damage at release,
+while the later explosion is cosmetic. Surviving hits during windup double only
+the boss's damage accumulator; a lethal hit prevents an unreleased grenade.
+Day 7 settlement includes 45 GP tax, default upkeep of 40 GP and any earned title
+salary. Its town can generate level-4 recruits; seven perfect days grant the next
+absorption medal for future mission preparation. Rest beyond Day 7 remains unavailable.
 Recruiting, other card actions and Refresh Stock remain unavailable.
 
 In the shop, **Upgrade Weapon** requires **4 AP** to enter selection mode.
@@ -127,9 +132,11 @@ Rejected mounting keeps both items. **No or clicking outside this confirmation
 swaps the MOD and gun**, matching the original owned-inventory behavior; it does
 not cancel like a sale. Stock MODs must first be bought into an empty owned slot.
 
-Saves now use **version 13**; versions **1–12** are accepted. Barbarian rage,
-temporary effect frames/offsets and the earned title persist. Older saves begin
-without a title and retain their RNG and inventory. Fly hover counters,
+Saves now use **version 14**; versions **1–13** are accepted. Day 7 boss windup,
+released cosmetic grenades and the active title persist without relaunching or
+rerolling. Barbarian rage and temporary effect frames/offsets remain saved.
+Pre-v13 saves begin without a title and retain their RNG and inventory; v13
+titles remain intact. Fly hover counters,
 animation and shadow history persist, alongside boss facing, Archer attack
 counters and cosmetic arrow flight. Older saves retain the applicable migration
 rules, including an empty enemy-arrow list and the former boss-facing default
@@ -141,7 +148,7 @@ their stored positions, damage and remaining lifetime. Ammo and reload timers li
 on the owned items, with a selected slot, five item cooldowns and saved
 protection state. Weapon experience is tracked separately for Small Gun, Big
 Gun, Rifle, Shotgun and other items. Legacy scalar experience maps to Shotgun;
-the old ammo/cooldown fields migrate without rerolling inventory. Days 2–6 saves
+the old ammo/cooldown fields migrate without rerolling inventory. Days 2–7 saves
 retain the prepared mission and prior town, including the historical absorption
 bonus that applied when battle began. New characters retain the
 original hidden growth potentials and base aiming/teamwork rolls. Portrait and
@@ -242,30 +249,56 @@ parent's hit particles change the left knockback clamp. See
 [Barbarian notes](web/docs/barbarian-source.md) and
 [sixth-town notes](web/docs/sixth-town-source.md) for the controlled boundaries.
 
-The current **v13 release passes 234 tests**. Browser checks verified Rest into
+Day 7 adds **ten original wave cases**, **38 town/economy/recruit observations**
+and **337 boss-special snapshots**, all matching the captured original. The boss
+comparison covers branch boundaries, stopped windup, release-time wall damage,
+grenade flight, shake RNG and death before/after release. See
+[boss-special notes](web/docs/boss-special-source.md),
+[seventh-day wave notes](web/docs/seventh-day-wave-source.md) and
+[seventh-town notes](web/docs/seventh-town-source.md).
+
+The current **v14 release passes 252 tests** and the release build. Nine focused
+browser checks verified Rest into Day7, Continue, result-to-town progression and
+a controlled boss's windup, grenade flight and cosmetic landing against full
+expected saves. All 267 tested files match the published build and archive.
+Production New Game reached tick 0 with 40 HP, 200 gold and five shells; the prior
+v13 save was restored through the UI at tick 674 with exact full-envelope migration
+equality, including appearance. No console errors were observed. These checkpoint
+checks do not claim a complete manually played browser campaign.
+
+The previous v13 release passed browser checks for Rest into
 Day 6, settlement, Claim title and a controlled Barbarian's rage/hit effects
 against complete expected saves, with unchanged Continue exports. All 267 tested
 release files match the published build and archive. Production New Game reached
 tick 0 with 40 HP, 200 gold and five shells; the previous live v12 save restored as
 v13 with exact full-save migration equality and no observed console errors.
-These checkpoint checks do not claim a complete manually played browser campaign.
 The previous v12 release's Rest/Fly checks remain historical evidence. Details
 and limits are recorded in
 [port verification](docs/port-verification.json).
 
 `npm.cmd run test:soak` automatically exercises 32 seeds with idle, aimed and
 interrupted-input policies. It checks finite state, battle completion and exact
-JSON save/replay state and event equality through all six days, earned rewards,
+JSON save/replay state and event equality across the supported campaign, earned rewards,
 town preparation, repair, shop transactions, weapon modifications and Rest.
-The latest run passed **96 scenarios, 411,504 frames and 4,490 checkpoints**,
-including **699 reward transitions, 760 town actions and 161 Rest transitions**.
+The latest run passed **96 scenarios, 412,874 frames and 4,501 checkpoints**,
+including **699 reward transitions, 760 town actions and 162 Rest transitions**.
 It reached **32 Day2 wins, 32 Day3 wins, 25 Day4 wins and 13 Day5 wins**. Thirteen
-scenarios entered Day6; one won and claimed the title. It also exercised
+scenarios entered Day6; one won, claimed the title and entered Day7. **None won
+Day7 under these policies.** It also exercised
 **124 upgrade previews, 27 upgrades, 97 cancellations and 29 mounted MODs**.
 Defeats under the bounded test policies remain valid outcomes.
 Reports and reproducible failure checkpoints are written beneath `.build/soak/`.
 This is a stability check, not
 evidence that every original feature has been ported.
+
+A separate connected test wins Day7 with 10 HP using ordinary repair, targeting
+priority and an owned grenade, then checks rewards, salary and town save/restore.
+It uses rectangular hit geometry and retains its existing Day1 setup of 39 HP;
+it does not establish production collision or original balance parity. All
+recorded attempts from the earned 11-HP Day7 checkpoint using production ordinary
+contours failed and are preserved. Hiring and party AI are the next integration
+priority before further campaign expansion; they are original early-game systems
+that remain absent here.
 
 `npm.cmd run test:projectile-soak` separately exercises eight projectile guns
 and hand grenades under three seeds: **27 scenarios, 9,720 frames and 1,080
@@ -305,6 +338,9 @@ python tools/build_fifth_town_oracle.py
 python tools/build_sixth_day_wave_oracle.py
 python tools/build_barbarian_oracle.py
 python tools/build_sixth_town_oracle.py
+python tools/build_seventh_day_wave_oracle.py
+python tools/build_boss_special_oracle.py
+python tools/build_seventh_town_oracle.py
 python tools/serve_oracle.py
 ```
 
@@ -331,7 +367,10 @@ and `npm.cmd run test:third-town-reference`. Day 4 uses `?suite=fourth-day-waves
 `test:fifth-day-wave-reference`, `test:fly-reference` and `test:fifth-town-reference`.
 Day 6 uses `?suite=sixth-day-waves`, `?suite=barbarian` and `?suite=sixth-town`,
 with `test:sixth-day-wave-reference`, `test:barbarian-reference` and
-`test:sixth-town-reference`.
+`test:sixth-town-reference`. Day 7 uses `?suite=seventh-day-waves`,
+`?suite=boss-special` and `?suite=seventh-town`, with
+`test:seventh-day-wave-reference`, `test:boss-special-reference` and
+`test:seventh-town-reference`.
 Run these scripts with `npm.cmd run` from `web/`. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, use the matching comparison command: `npm.cmd run test:reference`,

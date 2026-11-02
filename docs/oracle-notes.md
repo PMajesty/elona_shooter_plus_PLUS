@@ -1578,3 +1578,40 @@ Regenerate with `python tools/build_sixth_town_oracle.py`, capture
 `?suite=sixth-town` twice, then run `npm.cmd run test:sixth-town-reference` from
 `web/`. Focused checks:
 `node --experimental-strip-types --test tests/sixth-town.test.ts tests/sixth-town-reference.test.ts`.
+
+## Seventh-town preparation and level-four recruits
+
+Two identical Ruffle 0.7.1 runs of `build_seventh_town_oracle.py` captured
+**38 observations**, matching production **38/38**. The boundary contains six
+full towns, all nine recruit classes at level 4, reversed Sheriff growth,
+four probes around 10/21 and 20/21, twelve Day 7 settlement cases and six
+title states. Controlled prefixes still advance the underlying RNG. The
+original generation/economy methods are unchanged; the extracted `frame71`
+save call remains an observation of the source save boundary.
+
+The source confirms three growth steps, SP 3, cost 550 and hidden-growth maximum
+13 for level-four candidates. Shared offer and Militia slot metadata survive.
+Calendar day 7 has no guaranteed loot, while medals 60/61/62 produce 0.03
+absorption in the newly prepared mission. Day 7 settlement deducts tax 45 plus
+upkeep 40, applies salary 100 only for an existing title, and spends three RNG
+draws. Unclaimed first titles remain available; inherited title 1 cannot be
+claimed again. Title actions consume no RNG or immediate money. Full-town
+seeds 42/1/3735928559 consume 94/112/204 draws. Five focused tests include
+source provenance, both recruit thresholds and an extra-draw negative control.
+Earlier town fixtures remain unchanged. See
+[the seventh-town source map](../web/docs/seventh-town-source.md).
+
+All 3491 tags and non-code resources are preserved; only DoABC 2782 changes
+under the diagnostic version 10 header. This boundary does not establish
+Day 8 combat, native town rendering or whole-campaign scheduling.
+
+- Diagnostic SWF SHA-256: `c1b408a6bb287eb9fc611339246c08dceab432e39ee722271133300247257b2c`.
+- Canonical trace SHA-256: `39dabd5c3cb8516c274afabccdd05f1ab0400e0324d4aa066070b93b212a8806`.
+- Accepted fixture: `web/tests/fixtures/original-seventh-town-trace.json`.
+- Browser capture: `.build/oracle/seventh-town-browser-report.json`, dated `2026-11-02T00:42:13.324Z`.
+- Comparison: `.build/oracle/seventh-town-comparison-report.json`.
+
+Regenerate with `python tools/build_seventh_town_oracle.py`, capture
+`?suite=seventh-town` twice, then run `npm.cmd run test:seventh-town-reference`
+from `web/`. Focused tests:
+`node --experimental-strip-types --test tests/seventh-town.test.ts tests/seventh-town-reference.test.ts`.

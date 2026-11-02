@@ -17,7 +17,7 @@ interface ImageAsset { file: string; width: number; height: number; originX: num
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number; frameAlpha?: number[] }
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual }
-interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13; appearance: number; simulation: unknown }
+interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14; appearance: number; simulation: unknown }
 type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
@@ -125,7 +125,7 @@ class ElonaScene extends Phaser.Scene {
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Sheriff Days 1–6, rewards, the shop, weapon upgrades, MOD mounting, Free Repair, Claim Title and Rest are playable. Number keys 1–5 use owned equipment and consumables; hold and release the mouse to draw and fire a bow. Ragnarok, other town actions, Day 7 onward and other classes are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Sheriff Days 1–7, rewards, the shop, weapon upgrades, MOD mounting, Free Repair, Claim Title and Rest are playable. Number keys 1–5 use owned equipment and consumables; hold and release the mouse to draw and fire a bow. Ragnarok, other town actions, Day 8 onward and other classes are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
   }
 
@@ -222,7 +222,7 @@ class ElonaScene extends Phaser.Scene {
     }
     const saved = readSave();
     const savedDay = saved.kind === 'saved' ? (saved.data as { simulation?: { day?: unknown } } | null)?.simulation?.day : undefined;
-    this.text(469, 32, saved.kind === 'saved' ? (typeof savedDay === 'number' && [1, 2, 3, 4, 5, 6].includes(savedDay) ? `Sheriff · Day ${savedDay}` : 'Saved Sheriff') : 'Empty Save', 12, '#151515', 'Arial').setBackgroundColor('#ede9de').setFixedSize(137, 20);
+    this.text(469, 32, saved.kind === 'saved' ? (typeof savedDay === 'number' && [1, 2, 3, 4, 5, 6, 7].includes(savedDay) ? `Sheriff · Day ${savedDay}` : 'Saved Sheriff') : 'Empty Save', 12, '#151515', 'Arial').setBackgroundColor('#ede9de').setFixedSize(137, 20);
     this.text(334, 11, 'Most Days Survived: 0 / 0 (HC) / 0 (Casual)', 12, '#ffffff').setShadow(1, 1, '#000000', 2);
     if (saved.kind === 'error') status.textContent = saved.message;
   }
@@ -234,7 +234,7 @@ class ElonaScene extends Phaser.Scene {
     this.root.add(this.add.rectangle(0, 0, 620, 380, 0x000000, 0.45).setOrigin(0));
     this.root.add(this.add.rectangle(90, 50, 440, 280, 0xe0d1ae).setOrigin(0).setStrokeStyle(2, 0x9e8c61));
     this.text(123, 73, 'How to Play', 26);
-    this.text(123, 121, 'Mouse: aim and fire; bows hold/release.\n1–5 select or use an inventory slot.\nSpace reloads; click cancels manual reload.\nEsc pauses; Space also resumes.\n\nDefend the castle until the day ends.\nMission → Rest starts the next day (up to\nDay 6) without repairing the castle.', 16).setLineSpacing(3);
+    this.text(123, 121, 'Mouse: aim and fire; bows hold/release.\n1–5 select or use an inventory slot.\nSpace reloads; click cancels manual reload.\nEsc pauses; Space also resumes.\n\nDefend the castle until the day ends.\nMission → Rest starts the next day (up to\nDay 7) without repairing the castle.', 16).setLineSpacing(3);
     this.labelButton(245, 288, 'Return to Title', () => this.showTitle(), 145);
   }
 
@@ -578,10 +578,10 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private renderEvent(event: SimulationEvent): void {
-    if (event.type === 'boss-shot') {
+    if (event.type === 'boss-shot' || event.type === 'boss-special') {
       // getWeaponInfo использует gun6/gun2, а soundPos делит поле на 20 звуковых позиций.
       const pan = Phaser.Math.Clamp(Math.trunc(Math.trunc(event.x ?? 0) / 25), 0, 19) * 0.08 - 0.8;
-      this.playSound(event.weaponId === 1 ? 'soundGun6' : 'soundGun2', 0.9, pan);
+      this.playSound(event.type === 'boss-special' ? 'soundGun11' : event.weaponId === 1 ? 'soundGun6' : 'soundGun2', 0.9, pan);
       return;
     }
     const sound: Partial<Record<SimulationEvent['type'], string>> = { shot: 'soundGun3', reload: 'soundReloading2', reloaded: 'soundReloaded2', grenade: 'soundThrow1', explosion: 'soundExp1', kill: 'soundDead1', 'castle-hit': 'soundDamage1', wave: 'soundPop1', victory: 'soundBattleEnd', defeat: 'soundKilled', rampage: 'soundRampage', 'level-up': 'soundComplete', gold: 'soundGold1' };
@@ -883,7 +883,7 @@ class ElonaScene extends Phaser.Scene {
       : dialog === 'title' ? 'Honorary Citizen — daily salary: 100 GP, beginning with the next completed day. Click to continue.'
       : dialog === 'rest' ? `Click to finish resting and begin Day ${this.sim.state.day + 1}.`
       : tab === 'shop' ? (saleSlot === null ? 'Click stock, then an empty owned slot to buy. Drop an owned item outside its slots to sell; confirmation is required.' : 'Confirm the sale with Yes, or click elsewhere to keep the item.')
-      : `Shop buys and sells items. Castle → Free Repair restores the walls for 2 AP. ${this.sim.state.day < 6 ? `Mission → Rest begins Day ${this.sim.state.day + 1}.` : 'Day 7 is not available yet.'}`;
+      : `Shop buys and sells items. Castle → Free Repair restores the walls for 2 AP. ${this.sim.state.day < 7 ? `Mission → Rest begins Day ${this.sim.state.day + 1}.` : 'Day 8 is not available yet.'}`;
   }
 
   togglePause(): void {
@@ -904,7 +904,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   makeSave(): PortSave | undefined {
-    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 13, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
+    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 14, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
   }
 
   saveGame(notify = true): boolean {
@@ -917,7 +917,7 @@ class ElonaScene extends Phaser.Scene {
 
   private parseSave(raw: unknown): { simulation: Simulation; appearance: number } {
     const save = raw as Partial<PortSave> | null;
-    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
+    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
     return { simulation: Simulation.fromSave(save.simulation, this.simulationOptions()), appearance: save.appearance! };
   }
 

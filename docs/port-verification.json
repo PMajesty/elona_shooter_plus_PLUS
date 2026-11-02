@@ -1,6 +1,6 @@
 {
   "date": "2026-11-02",
-  "milestone": "Connected Sheriff Days1–6, original Barbarian movement/rage/effect geometry, sixth-town preparation, Day6 tax and Claim Title, v13 persistence",
+  "milestone": "Connected Sheriff Days1–7, original RANGED waves and boss special attack, seventh-town preparation/recruit growth, title salary and medal62, v14 persistence; published locally and browser-verified",
   "complete_port": false,
   "environment": {
     "os": "Windows",
@@ -10,7 +10,7 @@
     "vite": "8.3.5"
   },
   "automated": {
-    "simulation_tests_passed": 234,
+    "simulation_tests_passed": 252,
     "simulation_tests_failed": 0,
     "typescript": "passed",
     "production_build": "passed",
@@ -24,27 +24,30 @@
         "interruptions"
       ],
       "scenarios": 96,
-      "simulationFrames": 411504,
-      "checkpoints": 4490,
+      "simulationFrames": 412874,
+      "checkpoints": 4501,
       "rewardTransitions": 699,
       "townActions": 760,
-      "restTransitions": 161,
+      "restTransitions": 162,
       "secondDayVictories": 32,
       "thirdDayVictories": 32,
       "fourthDayVictories": 25,
       "fifthDayVictories": 13,
       "sixthDayVictories": 1,
+      "seventhDayArrivals": 1,
+      "seventhDayVictories": 0,
       "titleClaims": 1,
       "equipmentSelections": 297,
       "modificationPreviews": 124,
       "modsMounted": 29,
       "weaponsUpgraded": 27,
       "upgradeCancellations": 97,
-      "elapsedMs": 56050,
+      "elapsedMs": 54948,
       "collision": "Production ordinary-enemy contours; boss uses the documented rectangular headless fallback",
       "limits": [
         "Port self-consistency, finite state and JSON replay only; not an original-game parity proof",
-        "Sheriff Days 1–6 only; boss shape geometry not exercised",
+        "Sheriff Days 1–7 only; boss shape geometry not exercised",
+        "Day7 arrivals and victories are separate observed counts; this policy does not guarantee a win",
         "No browser rendering, input latency, audio or wall-clock performance comparison"
       ],
       "results": [
@@ -151,12 +154,12 @@
         {
           "seed": 3668339987,
           "policy": "aimed",
-          "phase": "town",
-          "day": 6,
+          "phase": "defeat",
+          "day": 7,
           "daysCompleted": 6,
-          "ticks": 12060,
-          "kills": 59,
-          "checkpoints": 140
+          "ticks": 13430,
+          "kills": 33,
+          "checkpoints": 151
         },
         {
           "seed": 3668339987,
@@ -1563,9 +1566,158 @@
         "malformed saved progress rejected"
       ]
     },
-    "test_output": ".build/day6-final-tests.txt",
-    "python_tools_compile": "passed: sixth-day-wave, sixth-town and Barbarian builders executed and produced validated diagnostic SWFs; prior builder/extraction verification retained in their reports",
-    "build_output": ".build/day6-final-build.txt"
+    "test_output": ".build/day7-final-tests.txt",
+    "python_tools_compile": "passed: seventh-day-wave, seventh-town and boss-special builders produced resource-preserving diagnostic SWFs; actual repeated runtime captures and comparisons are recorded separately",
+    "build_output": ".build/day7-final-build.txt",
+    "seeded_soak_report": ".build/soak/report.json",
+    "seeded_soak_report_sha256": "cd792a7108e3bfe00ddb9c11c8159f0f8dd5ca3ccaec24fefbc4604d60b221db",
+    "connected_campaign": {
+      "status": "passed",
+      "test": "web/tests/day-two.test.ts",
+      "report": ".build/test-probes/day7-connected-campaign-report.json",
+      "collision": "Default rectangular headless hit testing for every enemy; neither ordinary source contours nor browser boss alpha geometry.",
+      "setup": "Pre-existing Day1 castleHp39 deliberately distinguishes medal history. No added HP/hero/RNG edits for Day7.",
+      "ordinary_actions": "Fifth-town Free Repair, sixth-town Claim Title, Day7 critical aim, visible boss special wind-up then Archer priority, and one owned grenade.",
+      "day7_start_hp": 32,
+      "day7_final_hp": 10,
+      "day7_final_tick": 15038,
+      "checks": [
+        "Day7 victory and reward stages",
+        "Title salary100, tax45, normal net735",
+        "Seventh-town save/restore and Day8 blocked"
+      ],
+      "limits": [
+        "Not an all-contour campaign or original balance proof",
+        "Earlier losing policies and full winning inputs retained in the report"
+      ]
+    },
+    "day7_ordinary_contour_policy_experiments": {
+      "scope": "Headless recorded ordinary-input policies, using production ordinary-enemy contours and boss rectangle fallback. These are not browser playthroughs.",
+      "source": "Earned Day6 title checkpoint hasHP11/AP0; Grail/equipped alternatives replay their documented earlier branch.",
+      "cases": [
+        {
+          "policy": "center",
+          "status": "failed",
+          "report": ".build/browser-qa/day7-center-provenance.json",
+          "outcome": {
+            "day": 7,
+            "phase": "defeat",
+            "tick": 13697,
+            "castleHp": 0,
+            "gold": 4630,
+            "totalMoney": 4680,
+            "kills": 27,
+            "rng": 687194250,
+            "title": 1,
+            "result": {
+              "reward": 0,
+              "perfectBonus": 0,
+              "upkeep": 0,
+              "tax": 0,
+              "salary": 0,
+              "netReward": 0
+            }
+          }
+        },
+        {
+          "policy": "critical",
+          "status": "failed",
+          "report": ".build/browser-qa/day7-critical-provenance.json",
+          "outcome": {
+            "day": 7,
+            "phase": "defeat",
+            "tick": 13706,
+            "castleHp": 0,
+            "gold": 4612,
+            "totalMoney": 4662,
+            "kills": 26,
+            "rng": 4203459964,
+            "title": 1,
+            "result": {
+              "reward": 0,
+              "perfectBonus": 0,
+              "upkeep": 0,
+              "tax": 0,
+              "salary": 0,
+              "netReward": 0
+            }
+          }
+        },
+        {
+          "policy": "grail",
+          "status": "failed",
+          "report": ".build/browser-qa/day7-grail-provenance.json",
+          "outcome": {
+            "day": 7,
+            "phase": "defeat",
+            "tick": 13832,
+            "castleHp": 0,
+            "gold": 4643,
+            "totalMoney": 4693,
+            "kills": 31,
+            "rng": 3611530631,
+            "title": 1,
+            "result": {
+              "reward": 0,
+              "perfectBonus": 0,
+              "upkeep": 0,
+              "tax": 0,
+              "salary": 0,
+              "netReward": 0
+            }
+          }
+        },
+        {
+          "policy": "casting-first",
+          "status": "failed",
+          "report": ".build/browser-qa/day7-casting-first-provenance.json",
+          "outcome": {
+            "day": 7,
+            "phase": "defeat",
+            "tick": 13677,
+            "castleHp": 0,
+            "gold": 4618,
+            "totalMoney": 4668,
+            "kills": 24,
+            "rng": 3273155746,
+            "title": 1,
+            "result": {
+              "reward": 0,
+              "perfectBonus": 0,
+              "upkeep": 0,
+              "tax": 0,
+              "salary": 0,
+              "netReward": 0
+            }
+          }
+        },
+        {
+          "policy": "equipped",
+          "status": "failed",
+          "report": ".build/browser-qa/day7-equipped-provenance.json",
+          "outcome": {
+            "day": 6,
+            "phase": "defeat",
+            "tick": 11918,
+            "castleHp": 0,
+            "gold": 3894,
+            "totalMoney": 3894,
+            "kills": 43,
+            "rng": 3339772933,
+            "title": 0,
+            "result": {
+              "reward": 0,
+              "perfectBonus": 0,
+              "upkeep": 0,
+              "tax": 0,
+              "salary": 0,
+              "netReward": 0
+            }
+          }
+        }
+      ],
+      "conclusion": "All retained policies lost, including one equipped branch onDay6; no ordinary-contour Day7 victory is claimed. No balance changes made to make a policy win."
+    }
   },
   "browser_checks": {
     "new_game": {
@@ -2882,9 +3034,366 @@
         "report_sha256": "7eb5fd53c7485974bdf107a7922b55823e6f39b077bf158558b29333d4e83e81",
         "candidate_files_published_unchanged": true
       }
+    },
+    "seventh_day": {
+      "status": "passed",
+      "updatedAt": "2026-11-02T00:58:40.281Z",
+      "bundle": "assets/index-D24uJwik.js",
+      "checks": {
+        "rest": {
+          "status": "passed",
+          "actual": "day7-rest-ui-v14.json",
+          "expected": "day7-center-rest-expected-v14.json",
+          "fullEnvelopeEquality": true,
+          "exactCurrentVersionRestore": true,
+          "day": 7,
+          "tick": 12561,
+          "hp": 11,
+          "gold": 4596,
+          "title": 1
+        },
+        "continue": {
+          "status": "passed",
+          "actual": "day7-continue-ui-v14.json",
+          "expected": "day7-rest-ui-v14.json",
+          "fullEnvelopeEquality": true,
+          "exactCurrentVersionRestore": true,
+          "day": 7,
+          "tick": 12561,
+          "hp": 11,
+          "gold": 4596,
+          "title": 1
+        },
+        "resultImport": {
+          "status": "passed",
+          "actual": "day7-result-ui-v14.json",
+          "expected": "day7-result-before-town-v14.json",
+          "fullEnvelopeEquality": true,
+          "exactCurrentVersionRestore": true,
+          "day": 7,
+          "tick": 15038,
+          "hp": 10,
+          "gold": 5369,
+          "title": 1
+        },
+        "resultProceed": {
+          "status": "passed",
+          "actual": "day7-town-ui-v14.json",
+          "expected": "day7-town-expected-v14.json",
+          "fullEnvelopeEquality": true,
+          "exactCurrentVersionRestore": true,
+          "day": 7,
+          "tick": 15038,
+          "hp": 10,
+          "gold": 5369,
+          "title": 1
+        },
+        "townContinue": {
+          "status": "passed",
+          "actual": "day7-town-continue-ui-v14.json",
+          "expected": "day7-town-ui-v14.json",
+          "fullEnvelopeEquality": true,
+          "exactCurrentVersionRestore": true,
+          "day": 7,
+          "tick": 15038,
+          "hp": 10,
+          "gold": 5369,
+          "title": 1
+        },
+        "bossImport": {
+          "status": "passed",
+          "actual": "day7-boss-import-ui-v14.json",
+          "expected": "day7-boss-windup-v14.json",
+          "fullEnvelopeEquality": true,
+          "exactCurrentVersionRestore": true,
+          "day": 7,
+          "tick": 12561,
+          "hp": 11,
+          "gold": 4596,
+          "title": 1
+        },
+        "bossUpdates": {
+          "status": "passed",
+          "browserExport": 67,
+          "fullEnvelopeEquality": true,
+          "exactCurrentVersionRestore": true,
+          "productionTickReplay": true,
+          "updates": 15,
+          "actualAim": {
+            "x": 264,
+            "y": 540
+          },
+          "tick": 12576,
+          "castleBefore": 11,
+          "castleAfter": 9,
+          "boss": {
+            "uid": 334,
+            "frame": 183,
+            "action": -1,
+            "idle": 18
+          },
+          "grenade": {
+            "uid": 335,
+            "kind": "grenade",
+            "weaponSlot": null,
+            "damage": -1,
+            "x": 300.4,
+            "y": 107.35,
+            "startX": 160,
+            "startY": 240,
+            "targetX": 583.0341184698045,
+            "targetY": 199.02582860551775,
+            "speed": -11.730319130853578,
+            "count": 25,
+            "curve": 0.003,
+            "penetrations": 0,
+            "rotation": 72,
+            "rotationStep": 0,
+            "scale": 1,
+            "alpha": 1,
+            "shadowY": 226.45,
+            "shadowAlpha": 1,
+            "shadowVisible": true,
+            "frame": 12,
+            "pulseFrame": 13,
+            "acceleration": 0,
+            "direction": -1,
+            "removed": false,
+            "verticalProgress": null
+          },
+          "observedReplayEvents": {
+            "bossSpecial": 1,
+            "castleHit": 1,
+            "explosion": 0
+          }
+        },
+        "bossContinue": {
+          "status": "passed",
+          "actual": "day7-boss-continue-ui-v14.json",
+          "expected": "day7-boss-live-ui-v14.json",
+          "fullEnvelopeEquality": true,
+          "exactCurrentVersionRestore": true,
+          "day": 7,
+          "tick": 12576,
+          "hp": 9,
+          "gold": 4596,
+          "title": 1
+        },
+        "bossLanding": {
+          "status": "passed",
+          "browserExport": 69,
+          "fullEnvelopeEquality": true,
+          "productionTickReplay": true,
+          "exactCurrentVersionRestore": true,
+          "updatesAfterFlight": 43,
+          "totalUpdates": 58,
+          "actualAim": {
+            "x": 264,
+            "y": 540
+          },
+          "tick": 12619,
+          "explosionTick": 12601,
+          "explosions": 1,
+          "furtherCastleHits": 0,
+          "castleHp": 9,
+          "projectileCount": 0,
+          "enemies": [
+            {
+              "uid": 334,
+              "kind": "boss",
+              "x": 195.65,
+              "y": 240,
+              "frame": 200,
+              "action": 2
+            },
+            {
+              "uid": 336,
+              "kind": "rat",
+              "x": 7.433353030122818,
+              "y": 253,
+              "frame": 24,
+              "action": 0
+            }
+          ]
+        }
+      },
+      "waiting": [],
+      "files": {
+        "day7-center-town-before-rest-v14.json": {
+          "sha256": "a9dac8609914d355378a0e1476cff6a236504d236de0d9132884060b5b0277a5"
+        },
+        "day7-rest-ui-v14.json": {
+          "sha256": "bc1328e95e174d0053ae3022553a4a80a4a00f3a33e00ce2b4edd29becda64b6"
+        },
+        "day7-center-rest-expected-v14.json": {
+          "sha256": "bc1328e95e174d0053ae3022553a4a80a4a00f3a33e00ce2b4edd29becda64b6"
+        },
+        "day7-continue-ui-v14.json": {
+          "sha256": "bc1328e95e174d0053ae3022553a4a80a4a00f3a33e00ce2b4edd29becda64b6"
+        },
+        "day7-result-before-town-v14.json": {
+          "sha256": "5920034862048d96b117ba4d226b9587d87cb1f6788d17e4aa3e3d2813d14e50"
+        },
+        "day7-result-ui-v14.json": {
+          "sha256": "bf484c6f125c5bf131bc8d9ba61964831e0df797e71c8403cfe517fd5a715a75"
+        },
+        "day7-town-ui-v14.json": {
+          "sha256": "8d6158f0cffbed20475fe37033011e93f1889b8ee189c40eb305dba29141137f"
+        },
+        "day7-town-expected-v14.json": {
+          "sha256": "2de66859503cfe74b5c4f498272e6db2ef7c50587494a7108d8ea93a288508c5"
+        },
+        "day7-town-continue-ui-v14.json": {
+          "sha256": "8d6158f0cffbed20475fe37033011e93f1889b8ee189c40eb305dba29141137f"
+        },
+        "day7-boss-import-ui-v14.json": {
+          "sha256": "bc7cebd600f74cc4eed474c060b968adfe66f47c76c26664d252787841660df5"
+        },
+        "day7-boss-windup-v14.json": {
+          "sha256": "cbe23d444ce5a86719d10bbb154f1c44faf439565b2d0cabbd87d5710b8b2084"
+        },
+        "day7-boss-live-ui-v14.json": {
+          "sha256": "c57e59dd8c5858e5c86c2e381473294a981c92e82c204a9d9c97b21ad6dbe2ca"
+        },
+        "day7-boss-continue-ui-v14.json": {
+          "sha256": "c57e59dd8c5858e5c86c2e381473294a981c92e82c204a9d9c97b21ad6dbe2ca"
+        },
+        "day7-boss-landing-ui-v14.json": {
+          "sha256": "7e03c86c0bab333c2cb856722e20c1a742c4d67c8384c33bb11f0abf619e1861"
+        },
+        "day7-production-before-v13.json": {
+          "sha256": "a45828c8e63e2f16edf325c192241a71f255f454d31b172b6b3577bc3b1014a3"
+        },
+        "day7-production-ui-v14.json": {
+          "sha256": "45aac4b7bc4d864e60545bfbf9dbccd458407529f07393f15112a96aadcc5a47"
+        },
+        "day7-production-new-game.json": {
+          "sha256": "efa5beb70637e8ba5d1e8a1f4827768799dc348401286ed61fe0a792c246bca4"
+        }
+      },
+      "fixtureChecks": {
+        "restPublicTransition": true,
+        "resultPublicProceed": true,
+        "reward": 720,
+        "salary": 100,
+        "tax": 45,
+        "upkeep": 40,
+        "combinedDeduction": 85,
+        "netReward": 735,
+        "settledGold": 5369
+      },
+      "provenance": [
+        "day7-center-provenance.json",
+        "day7-result-provenance.json",
+        "day7-boss-provenance.json"
+      ],
+      "limits": [
+        "This verifier measures complete exported save equality and production public-method replay. It does not itself operate a browser or establish pixel/audio results.",
+        "Rest uses the earned contour-tested Day6 town checkpoint; its later Day7 contour policy lost and that failure remains recorded.",
+        "Result/Proceed uses a distinct connected headless test, initial Day1 castleHp39 and rectangular hit fallback for every enemy. Its recorded Day7 inputs naturally won; this is not an ordinary-contour victory claim.",
+        "The boss encounter is explicitly controlled. The first15 and subsequent43 browser updates are reproduced using exported aim264,540 and no shots/actions, including the ordinary subsequent rat spawn; this does not establish natural boss acquisition.",
+        "Independent original-source references establish source parity separately from these port replay checks."
+      ],
+      "exportSources": {
+        "rest": 64,
+        "continue": 65,
+        "bossImport": 66,
+        "bossUpdates": 67,
+        "bossContinue": 68,
+        "bossLanding": 69,
+        "resultImport": 70,
+        "resultProceed": 71,
+        "townContinue": 72
+      },
+      "browserObservation": {
+        "source": "Root CUA observation, separate from this state comparator",
+        "screenshots": [
+          "day7-boss-flight-ui.jpg",
+          "day7-boss-explosion-ui.jpg",
+          "day7-salary-result-ui.jpg"
+        ],
+        "originalGrenadeBodyAndShadowVisible": true,
+        "resultScreen": {
+          "reward": 720,
+          "castleIncome": 100,
+          "taxAndUpkeep": -85,
+          "gold": 5369
+        },
+        "reportedErrors": [],
+        "immediateCastleDamageObserved": "11 to 9",
+        "audioOutputVerified": false,
+        "boundedWait": "A 3-second projectile-empty wait expired at flight frame17; the same page continued normally and later landed. No restart was performed."
+      },
+      "production": {
+        "status": "passed",
+        "servedRoute": "5175/elona",
+        "bundle": "assets/index-D24uJwik.js",
+        "sourceExport": 73,
+        "restoredExport": 74,
+        "fullEnvelopeMigrationEquality": true,
+        "exactCurrentVersionRestore": true,
+        "appearance": 0,
+        "outerVersion": 14,
+        "restored": {
+          "tick": 674,
+          "hp": 40,
+          "gold": 209,
+          "ammo": 5,
+          "kills": 10,
+          "bossHp": 75,
+          "bossMaxHp": 150
+        },
+        "newGame": {
+          "evidence": "day7-production-new-game.json",
+          "source": "Actual published-page DOM recorded by root CUA",
+          "tick": 0,
+          "hp": 40,
+          "gold": 200,
+          "ammo": 5,
+          "day": 1,
+          "phase": "battle",
+          "paused": true,
+          "inventory": [
+            3,
+            11,
+            null,
+            null,
+            null,
+            null
+          ],
+          "observedLoadMs": 6057
+        },
+        "files": {
+          "day7-production-before-v13.json": {
+            "sha256": "a45828c8e63e2f16edf325c192241a71f255f454d31b172b6b3577bc3b1014a3"
+          },
+          "day7-production-ui-v14.json": {
+            "sha256": "45aac4b7bc4d864e60545bfbf9dbccd458407529f07393f15112a96aadcc5a47"
+          },
+          "day7-production-new-game.json": {
+            "sha256": "efa5beb70637e8ba5d1e8a1f4827768799dc348401286ed61fe0a792c246bca4"
+          }
+        },
+        "browserObservation": {
+          "source": "Root CUA published-page check",
+          "reportedErrors": [],
+          "screenshot": "day7-production-restored.jpg",
+          "restoredPaused": true
+        },
+        "limits": [
+          "The live backup is the preserved Day1 checkpoint at tick674. Its migration verifies state retention across publication, not a naturally played Day7 victory.",
+          "New Game is established by actual recorded DOM fields; full-envelope equality applies to the separately restored backup.",
+          "Pixel, audio and performance coverage are not inferred from successful save comparison."
+        ]
+      },
+      "report": ".build/browser-qa/day7-ui-verification.json",
+      "candidate_checks_passed": 9,
+      "publication_report": ".build/day7-publication.json",
+      "production_smoke": "passed",
+      "production_verification_report": ".build/browser-qa/day7-production-verification.json"
     }
   },
-  "checkpoint_provenance": "Generated using public Simulation API, seed 42 and normal fire/reload inputs with rectangular fallback collision. No state edits. Imported through the normal file picker. These checks are not a complete manual playthrough or parity proof. New boss full/half/dead checks deliberately edit only boss HP/death frame in a copied checkpoint; they are controlled fixtures, not normal-play captures. Older victory/defeat checks predate the source-backed wave RNG correction. Historical loot checkpoint uses post-item-integration New Game with seed42; see .build/browser-qa/loot-expected.json. Older numerical checkpoints above are retained as dated evidence and are not expected outputs for the new initial RNG boundary. Historical Day2 checkpoint provenance is stored in browser_checks.equipment_rest_day2: real two-day inputs, production ordinary contours and documented boss fallback, no phase overrides. Day5 provenance is .build/browser-qa/day5-ui-provenance.json: ordinary recorded Day4 combat/rewards from an earned third-town save, then normal Rest. The focused Fly fixture explicitly controls actor position/counter, RNG and wave delay; it is not an ordinary campaign capture. Day6 evidence separates earned-town Rest/Continue (HP3), the distinct ordinary-repair branch that completed Day6 (HP11), and a controlled Barbarian hit/rage fixture. Full export/action replay covers browser exports53–61; the initial unrepaired defeat remains preserved. See browser_checks.sixth_day and its three provenance records. These are not full manually played campaigns, source parity proofs or pixel comparisons.",
+  "checkpoint_provenance": "Generated using public Simulation API, seed 42 and normal fire/reload inputs with rectangular fallback collision. No state edits. Imported through the normal file picker. These checks are not a complete manual playthrough or parity proof. New boss full/half/dead checks deliberately edit only boss HP/death frame in a copied checkpoint; they are controlled fixtures, not normal-play captures. Older victory/defeat checks predate the source-backed wave RNG correction. Historical loot checkpoint uses post-item-integration New Game with seed42; see .build/browser-qa/loot-expected.json. Older numerical checkpoints above are retained as dated evidence and are not expected outputs for the new initial RNG boundary. Historical Day2 checkpoint provenance is stored in browser_checks.equipment_rest_day2: real two-day inputs, production ordinary contours and documented boss fallback, no phase overrides. Day5 provenance is .build/browser-qa/day5-ui-provenance.json: ordinary recorded Day4 combat/rewards from an earned third-town save, then normal Rest. The focused Fly fixture explicitly controls actor position/counter, RNG and wave delay; it is not an ordinary campaign capture. Day6 evidence separates earned-town Rest/Continue (HP3), the distinct ordinary-repair branch that completed Day6 (HP11), and a controlled Barbarian hit/rage fixture. Full export/action replay covers browser exports53–61; the initial unrepaired defeat remains preserved. See browser_checks.sixth_day and its three provenance records. These are not full manually played campaigns, source parity proofs or pixel comparisons. Day7 candidate testing separates the existing all-rectangle seed42 connected test (including its historical Day1 HP39 setup) from production ordinary-contour policy attempts, all of which lost. Boss special browser fixtures explicitly configure boss creation, position and action after an earned Rest; candidate browser exports64–72 now match complete state replay and the unchanged files are published locally; published New Game and actual v13 backup export73→v14 export74 now pass with exact full-envelope migration equality at tick674. This restored checkpoint is Day1 and does not establish a naturally played Day7 victory. See automated.connected_campaign, automated.day7_ordinary_contour_policy_experiments and browser_checks.seventh_day.",
   "performance": {
     "comparison_with_flash_or_ruffle": "not measured",
     "sample": {
@@ -2893,7 +3402,12 @@
       "max_frame_ms": 18.34,
       "frames_above_50ms_in_rolling_window": 0
     },
-    "startup": "Historical pre-v7 measurement: assets ready in 274 ms; uncontrolled cache/network. Current hidden-tab samples are not a comparable performance benchmark."
+    "startup": "Historical pre-v7 measurement: assets ready in 274 ms; uncontrolled cache/network. Current hidden-tab samples are not a comparable performance benchmark.",
+    "day7_published_startup": {
+      "observed_load_ms": 6057,
+      "source": ".build/browser-qa/day7-production-new-game.json",
+      "scope": "One recorded published-page New Game DOM observation. Cache/network and reference-runtime conditions are uncontrolled; no Flash/Ruffle speedup or latency comparison is claimed."
+    }
   },
   "screenshots": [
     ".build/browser-qa/character-creation.jpg",
@@ -2929,7 +3443,11 @@
     ".build/browser-qa/day6-results-ui.jpg",
     ".build/browser-qa/day6-title-award-ui.jpg",
     ".build/browser-qa/day6-barbarian-rage-ui.jpg",
-    ".build/browser-qa/day6-production-restored.jpg"
+    ".build/browser-qa/day6-production-restored.jpg",
+    ".build/browser-qa/day7-boss-flight-ui.jpg",
+    ".build/browser-qa/day7-boss-explosion-ui.jpg",
+    ".build/browser-qa/day7-salary-result-ui.jpg",
+    ".build/browser-qa/day7-production-restored.jpg"
   ],
   "preserved_baselines": {
     "original/elonashooter1.3.swf": {
@@ -9429,33 +9947,122 @@
       ],
       "originalScenarios": 13,
       "preserved_source_semantics": "Unequal rage speed/speedOrg formulas, permanent rampage flag, rage child targeting, parent hit-particle clamp bounds, and independent effect removal. No intentional Barbarian balance or hitbox correction."
+    },
+    "seventh-day-waves": {
+      "status": "passed",
+      "matchedSnapshots": 10,
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "ff3d698e9400cc321954838abb784c03839e9933aedc6da10bb50ba3c8fbdb7a",
+      "traceSha256": "3c44ced37fae7098b420faeb8f68a736df20bf1d00425157f5cde067b411f6da",
+      "boundary": "Original generateMission(6) on calendar day6 then preGenerateWave on calendar day7 versus the production mission and wave generators",
+      "limits": [
+        "Synchronous original methods; Rest interaction, enemy behavior and whole battle scheduling are separate checks",
+        "Constants and the explicit prefix are legal RNG boundary inputs, not claims that a seeded production stream reaches those sequences",
+        "Original observations establish AIR/BATCH1/RANGED/ordinary selection coverage; final waves, delays, mission state and RNG accounting are compared independently"
+      ],
+      "runtime": "@ruffle-rs/ruffle 0.7.1",
+      "captured_at": "2026-11-02T00:41:03.834Z",
+      "two_runs_identical": true,
+      "non_code_resources_identical": true,
+      "fixture": "web/tests/fixtures/original-seventh-day-wave-trace.json",
+      "report": ".build/oracle/seventh-day-waves-comparison-report.json"
+    },
+    "seventh-town": {
+      "status": "passed",
+      "matchedSnapshots": 38,
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "c1b408a6bb287eb9fc611339246c08dceab432e39ee722271133300247257b2c",
+      "traceSha256": "39dabd5c3cb8516c274afabccdd05f1ab0400e0324d4aa066070b93b212a8806",
+      "checks": [
+        "Day7 ordered town preparation and retained offer/Militia metadata",
+        "No guaranteed calendar loot; optional1038 roll preserved",
+        "All nine classes at level4 and both sides of10/21,20/21 thresholds",
+        "Exact RNG draw count and state",
+        "Day7 tax45/upkeep40, normal/perfect settlement with title0/1",
+        "Claim Title4AP without immediate gold/RNG; inherited-title rejection",
+        "Medal60/61/62 absorption.03 in prepared mission7"
+      ],
+      "limits": [
+        "Default upgrades and solo Sheriff party",
+        "Day8 combat and higher title tiers are outside this boundary",
+        "Original title dialog text/art are observed; their browser rendering is checked separately",
+        "Town generation and result/action cases have separate controlled RNG boundaries"
+      ],
+      "runtime": "@ruffle-rs/ruffle 0.7.1",
+      "captured_at": "2026-11-02T00:42:13.324Z",
+      "two_runs_identical": true,
+      "non_code_resources_identical": true,
+      "fixture": "web/tests/fixtures/original-seventh-town-trace.json",
+      "report": ".build/oracle/seventh-town-comparison-report.json",
+      "matchedTownSnapshots": 6,
+      "matchedRecruitSnapshots": 14,
+      "matchedSettlementSnapshots": 12,
+      "matchedTitleSnapshots": 6
+    },
+    "boss-special": {
+      "status": "passed",
+      "matchedSnapshots": 337,
+      "comparedSnapshots": 337,
+      "maximumRotationError": 0,
+      "sourceErrors": [],
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "ff498f9d152972b59cbf27b6ef666a9188fd7941c5d42da1827bd74a9c0107f3",
+      "traceSha256": "370d1694b3fe8828bc8e3581a7d0127aabcbc7578eddd3253892af82612b5081",
+      "checks": [
+        "Exact source shield/special branch thresholds and level guard",
+        "Windup, release, repeat and interruption under original damage",
+        "Production boss, projectile and castle-damage paths, including complete RNG accounting",
+        "Original grenade transforms, lifetime and cosmetic landing after immediate castle damage"
+      ],
+      "limits": [
+        "Explicit AI/child/previous-projectile clock; native full-battle scheduling is not asserted",
+        "Controlled random prefixes advance the seeded stream normally and replace returned values only",
+        "Direct source damage calls isolate interruption; they are not geometric hits or full shooting volleys",
+        "Two releases are a controlled action re-entry, not a measured natural recurrence frequency",
+        "All compared numeric fields, including projectile angles, compare exactly without a tolerance",
+        "Level20 rocket special, level10 reactive shield and level15 boss rage are outside this Day7 slice"
+      ],
+      "runtime": "@ruffle-rs/ruffle 0.7.1",
+      "captured_at": "2026-11-02T00:42:46.241Z",
+      "two_runs_identical": true,
+      "non_code_resources_identical": true,
+      "fixture": "web/tests/fixtures/original-boss-special-trace.json",
+      "report": ".build/oracle/boss-special-comparison-report.json",
+      "originalScenarios": 9,
+      "preserved_source_semantics": "Immediate release-time castle damage; separate damage=-1/weaponSlot=null cosmetic grenade, source landing sound/effect and two shake RNG draws without a second hit. Nonvertical projectile arithmetic follows original operation order exactly."
     }
   },
   "production_recovery": {
     "status": "passed",
-    "release_directory": ".build/browser-day6-final",
-    "previous_directory": ".build/browser-before-day6",
-    "current_bundle": "assets/index-Bilu_2M0.js",
-    "candidate_bundle": "assets/index-Bilu_2M0.js",
+    "release_directory": ".build/browser-day7-final",
+    "previous_directory": ".build/browser-before-day7",
+    "current_bundle": "assets/index-D24uJwik.js",
+    "candidate_bundle": "assets/index-D24uJwik.js",
     "candidate_build_matches_production": true,
     "candidate_difference": "None; tested candidate files published unchanged",
     "copied_release_files_hash_checked": 267,
     "archive_files_hash_checked": 267,
-    "current_package": ".build/elona-shooter-browser-day6-slice.zip",
-    "current_package_bytes": 7906573,
-    "current_package_sha256": "47851e21b61f1b57015f96ce6433d521217b91ead1a261d7db33c4a7c90c420f",
-    "previous_package": ".build/elona-shooter-browser-day5-slice.zip",
-    "previous_bundle": "assets/index-DFJdBXM_.js",
-    "production_verification": ".build/browser-qa/day6-production-verification.json",
+    "current_package": ".build/elona-shooter-browser-day7-slice.zip",
+    "current_package_bytes": 7906878,
+    "current_package_sha256": "8d65af22d9e2f2b41e64d483cf10172e874dcad30398ceb4a8eb8183e19d577f",
+    "previous_package": ".build/elona-shooter-browser-day6-slice.zip",
+    "previous_bundle": "assets/index-Bilu_2M0.js",
+    "production_browser_verification": ".build/browser-qa/day7-production-verification.json",
+    "production_restored_screenshot": ".build/browser-qa/day7-production-restored.jpg",
+    "production_console_errors": [],
+    "publication_report": ".build/day7-publication.json",
+    "current_save_version": 14,
     "production_browser_smoke": "passed",
-    "production_verification_report": ".build/browser-qa/day6-production-verification.json",
+    "candidate_browser_verification": ".build/browser-qa/day7-ui-verification.json",
+    "production_verification_report": ".build/browser-qa/day7-production-verification.json",
     "restored_battle": {
-      "source": ".build/browser-qa/day6-production-before-v12.json",
-      "export": ".build/browser-qa/day6-production-ui-v13.json",
-      "version": 13,
+      "source": ".build/browser-qa/day7-production-before-v13.json",
+      "export": ".build/browser-qa/day7-production-ui-v14.json",
+      "version": 14,
       "day": 1,
-      "tick": 674,
+      "appearance": 0,
       "paused": true,
+      "tick": 674,
       "hp": 40,
       "gold": 209,
       "ammo": 5,
@@ -9463,7 +10070,8 @@
       "bossHp": 75,
       "bossMaxHp": 150,
       "full_simulation_migration_equality": true,
-      "full_envelope_migration_equality": true
+      "full_envelope_migration_equality": true,
+      "exact_current_version_restore": true
     }
   },
   "milestone_history": [
@@ -9532,6 +10140,84 @@
           "full_simulation_migration_equality": true
         }
       }
+    },
+    {
+      "milestone": "Connected Sheriff Days1–6, original Barbarian movement/rage/effect geometry, sixth-town preparation, Day6 tax and Claim Title, v13 persistence",
+      "saveVersion": 13,
+      "tests_passed": 234,
+      "test_output": ".build/day6-final-tests.txt",
+      "build_output": ".build/day6-final-build.txt",
+      "seeded_soak": {
+        "status": "passed",
+        "seedCount": 32,
+        "policies": [
+          "idle",
+          "aimed",
+          "interruptions"
+        ],
+        "scenarios": 96,
+        "simulationFrames": 411504,
+        "checkpoints": 4490,
+        "rewardTransitions": 699,
+        "townActions": 760,
+        "restTransitions": 161,
+        "secondDayVictories": 32,
+        "thirdDayVictories": 32,
+        "fourthDayVictories": 25,
+        "fifthDayVictories": 13,
+        "sixthDayVictories": 1,
+        "titleClaims": 1,
+        "equipmentSelections": 297,
+        "modificationPreviews": 124,
+        "modsMounted": 29,
+        "weaponsUpgraded": 27,
+        "upgradeCancellations": 97,
+        "elapsedMs": 56050,
+        "collision": "Production ordinary-enemy contours; boss uses the documented rectangular headless fallback",
+        "limits": [
+          "Port self-consistency, finite state and JSON replay only; not an original-game parity proof",
+          "Sheriff Days 1–6 only; boss shape geometry not exercised",
+          "No browser rendering, input latency, audio or wall-clock performance comparison"
+        ]
+      },
+      "seeded_soak_report": ".build/soak/day6-report.json",
+      "seeded_soak_report_sha256": "7b45ffd940f819aa8159fa0b119c9299f764ab413bf450fb869b3b9766fa92d3",
+      "production_recovery": {
+        "status": "passed",
+        "release_directory": ".build/browser-day6-final",
+        "previous_directory": ".build/browser-before-day6",
+        "current_bundle": "assets/index-Bilu_2M0.js",
+        "candidate_bundle": "assets/index-Bilu_2M0.js",
+        "candidate_build_matches_production": true,
+        "candidate_difference": "None; tested candidate files published unchanged",
+        "copied_release_files_hash_checked": 267,
+        "archive_files_hash_checked": 267,
+        "current_package": ".build/elona-shooter-browser-day6-slice.zip",
+        "current_package_bytes": 7906573,
+        "current_package_sha256": "47851e21b61f1b57015f96ce6433d521217b91ead1a261d7db33c4a7c90c420f",
+        "previous_package": ".build/elona-shooter-browser-day5-slice.zip",
+        "previous_bundle": "assets/index-DFJdBXM_.js",
+        "production_verification": ".build/browser-qa/day6-production-verification.json",
+        "production_browser_smoke": "passed",
+        "production_verification_report": ".build/browser-qa/day6-production-verification.json",
+        "restored_battle": {
+          "source": ".build/browser-qa/day6-production-before-v12.json",
+          "export": ".build/browser-qa/day6-production-ui-v13.json",
+          "version": 13,
+          "day": 1,
+          "tick": 674,
+          "paused": true,
+          "hp": 40,
+          "gold": 209,
+          "ammo": 5,
+          "kills": 10,
+          "bossHp": 75,
+          "bossMaxHp": 150,
+          "full_simulation_migration_equality": true,
+          "full_envelope_migration_equality": true
+        }
+      },
+      "browser_checks": "docs/port-verification.json:browser_checks.sixth_day"
     }
   ]
 }
