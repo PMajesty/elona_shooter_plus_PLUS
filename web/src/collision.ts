@@ -3,8 +3,8 @@ import type { EnemyKind } from './content.ts';
 export type OrdinaryEnemyKind = Exclude<EnemyKind, 'boss'>;
 export interface OrdinaryEnemyGeometry { kind: OrdinaryEnemyKind; x: number; y: number; frame: number; shadowHit: boolean; rageEffectFrame?: number }
 export interface RgbaMask { width: number; height: number; data: ArrayLike<number> }
-interface OriginalShape { bounds: [number, number, number, number]; fills: number[][][] }
-interface OriginalPlacement { shape: string; matrix: [number, number, number, number, number, number]; shadow: boolean }
+export interface OriginalShape { bounds: [number, number, number, number]; fills: number[][][] }
+export interface OriginalPlacement { shape: string; matrix: [number, number, number, number, number, number]; shadow: boolean }
 export interface CollisionGeometry {
   version: 1; units: 'twips'; sourceSha256: string;
   shapes: Record<string, OriginalShape>;
@@ -71,7 +71,7 @@ function evenRound(value: number): number {
   const low = Math.floor(value), fraction = value - low;
   return fraction < 0.5 ? low : fraction > 0.5 ? low + 1 : low % 2 === 0 ? low : low + 1;
 }
-function placedShapeHit(shape: OriginalShape, placement: OriginalPlacement, x: number, y: number, ox = 0, oy = 0): boolean {
+export function placedShapeHit(shape: OriginalShape, placement: OriginalPlacement, x: number, y: number, ox = 0, oy = 0): boolean {
   const [a, b, c, d, tx, ty] = placement.matrix;
   // Обратная матрица строится в глобальных координатах с исходной точностью f32.
   const f = Math.fround;

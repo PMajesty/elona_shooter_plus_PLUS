@@ -77,6 +77,8 @@ def extract(xml_path=ROOT / ".build/reference/original.xml"):
             return [{"shape": str(symbol), "matrix": list(transform), "shadow": shadow}]
         found = []
         for item in placed_frame(definition.find("subTags"), frame):
+            if symbol == 2622 and item.get("name") == "sisterFire":
+                continue
             child = int(item.get("characterId"))
             found.extend(placements(child, 1, combine(transform, matrix(item)), shadow or item.get("name") == "shadow"))
         return found
@@ -87,6 +89,9 @@ def extract(xml_path=ROOT / ".build/reference/original.xml"):
                          "frames": {str(frame): placements(symbol, frame) for frame in range(1, count + 1)}}
     effects = {"enemyRage": {"symbol": 2385, "count": 14,
                "frames": {str(frame): placements(2385, frame) for frame in range(1, 15)}}}
+    sister = next(item for item in placed_frame(root.find("tags"), 33) if item.get("name") == "sister")
+    effects["castleSister"] = {"symbol": 2622, "count": 72,
+        "frames": {str(frame): placements(2622, frame, matrix(sister)) for frame in range(1, 73)}}
     def display_edges(symbol, frame=1, transform=(1, 0, 0, 1, 0, 0)):
         definition = definitions[symbol]
         if definition.get("shapeId"):
@@ -104,6 +109,14 @@ def extract(xml_path=ROOT / ".build/reference/original.xml"):
         hit_bounds[str(frame)] = [min(edges) / 20, max(edges) / 20]
     return {"version": 1, "units": "twips", "sourceSha256": hashlib.sha256((ROOT / "original/elonashooter1.3.swf").read_bytes()).hexdigest(),
             "shapes": shapes, "enemies": enemies, "effects": effects, "effectDisplayBounds": {"enemyHit": hit_bounds}}
+
+
+def write_castle_sister(geometry, target=ROOT / "web/src/castle-sister-geometry.json"):
+    clip = geometry["effects"]["castleSister"]
+    used = {item["shape"] for frame in clip["frames"].values() for item in frame}
+    target.write_text(json.dumps({"sourceSha256": geometry["sourceSha256"],
+        "shapes": {key: geometry["shapes"][key] for key in sorted(used)},
+        "frames": clip["frames"]}, separators=(",", ":")) + "\n", encoding="utf-8")
 
 
 def write_display_widths(geometry, target=ROOT / "web/src/enemy-display-bounds.ts"):

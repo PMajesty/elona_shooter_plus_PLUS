@@ -2286,6 +2286,25 @@
       "count": 1,
       "uniqueFrames": 1,
       "characterId": 1835
+    },
+    "castleSister": {
+      "image": "sprites/castleSister.png",
+      "json": "sprites/castleSister.json",
+      "originX": 19.3,
+      "originY": 34.4,
+      "frameWidth": 39,
+      "frameHeight": 54,
+      "labels": {
+        "stand": 4,
+        "damage": 7,
+        "kill": 20,
+        "dead": 45,
+        "joy": 80,
+        "attack": 98
+      },
+      "count": 127,
+      "uniqueFrames": 34,
+      "characterId": 2622
     }
   },
   "sounds": {

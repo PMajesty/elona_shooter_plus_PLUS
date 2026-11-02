@@ -1,4 +1,5 @@
 import { GAME_MODS, validGameMods, type GameMods, type GameMod } from './game-mods.ts';
+import { STANDING_SISTER, advanceCastleSister, castleSisterHit, validCastleSister, type CastleSister } from './castle-sister.ts';
 import { TITLES, isTitle, nextTitle, type Title } from './titles.ts';
 import { generateEarlyTownRecruit } from './recruits.ts';
 import { generateHenchman } from './party.ts';
@@ -50,6 +51,7 @@ export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCoun
 export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'> & { hire?: true; ragnarok?: true };
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
 export interface SimulationState {
+  castleSister?: CastleSister;
   heroAI?: { enabled: boolean; state: PartyAIState };
   recycleCount?: number;
   carryOver?: true;
@@ -79,7 +81,7 @@ export interface SimulationState {
   pendingPartyAction: PartyPendingAction | null;
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
-export interface SimulationEvent { actorSlot?: number; type: 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
+export interface SimulationEvent { actorSlot?: number; type: 'sister-killed' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
 export interface SimulationOptions { mods?: GameMods; mode?: GameMode; hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
@@ -502,6 +504,7 @@ export class Simulation {
     state.newWave = true; state.spawnTimer = town.mission.time; state.loot = [...town.mission.loot];
     state.phase = 'battle'; state.postbattle = 'none'; state.skillChoices = []; state.lootOffers = Array(8).fill(null);
     state.noDamage = true; state.criticalKills = 0; state.kills = 0; state.bossKilled = 0;
+    delete state.castleSister;
     state.enemies = []; state.projectiles = []; state.enemyArrows = []; state.itemCooldowns.fill(0);
     state.protection = { counter: 0, blueMultiplierAdd: 0 };
     state.pendingShot = state.fireHeld = false;
@@ -534,6 +537,7 @@ export class Simulation {
     this.state.fireHeld = Boolean(input.fireHeld);
     const player = this.state.player;
     this.state.tick++;
+    if (this.state.castleSister) advanceCastleSister(this.state.castleSister);
     // Новые MovieClip получают первый ENTER_FRAME только на следующем кадре.
     const projectileUidLimit = this.state.nextUid;
     if (input.slot !== undefined) this.useSlot(input.slot);
@@ -689,6 +693,11 @@ export class Simulation {
       let hitX = int(x + this.random() * spread - this.random() * spread);
       const hitY = int(y + this.random() * spread - this.random() * spread);
       pellets.push({ x: hitX, y: hitY });
+      const sister = this.state.castleSister ?? STANDING_SISTER;
+      if (!sister.dead && castleSisterHit(sister.frame, hitX, hitY)) {
+        this.state.castleSister = { ...sister, frame: 45, dead: true };
+        this.events.push({ type: 'sister-killed', x: 596, y: 97 });
+      }
       for (const enemy of this.state.enemies) {
         if (enemy.removed || !this.hitEnemy(enemy, hitX, hitY)) continue;
         // Обычный shoot и projectile procHit имеют разные правила RNG и отбрасывания.
@@ -1007,8 +1016,11 @@ export class Simulation {
     if (critical && actorSlot === 0) {
       this.state.criticalKills++;
       [10, 30, 50].forEach((count, index) => { if (this.state.criticalKills >= count) this.awardMedal(70 + index); });
-      // Здесь пока действует начальное условие sister.dead == false; повреждение сестры не реализовано.
-      goodShotIndex = int(this.random() * 5);
+      const sister = this.state.castleSister ?? STANDING_SISTER;
+      if (!sister.dead) {
+        this.state.castleSister = { ...sister, frame: 20 };
+        goodShotIndex = int(this.random() * 5);
+      }
     }
     if (int(this.random() * dropThreshold) <= 10) {
       enemy.drop = 1;
@@ -1051,6 +1063,8 @@ export class Simulation {
     const insurance = party.effects[TRAIT.INSURANCE];
     this.state.gold += insurance; this.state.totalMoney += insurance;
     if (this.random() * 100 < party.effects[TRAIT.DEFENDER]) { this.events.push({ type: 'defend' }); return; }
+    const sister = this.state.castleSister ?? STANDING_SISTER;
+    if (sister.free && !sister.dead) this.state.castleSister = { frame: 7, free: false, dead: false };
     // AS3 сначала приводит аргумент к int, затем ещё раз усекает результат после умножения.
     const damage = Math.max(1, int(int(amount) * (castleDamageMultiplier(this.state) - this.state.activeMission.absorbFix)));
     this.state.castleHp -= damage;
@@ -1952,6 +1966,7 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
+    if (record(value) && value.castleSister !== undefined && !validCastleSister(value.castleSister)) throw new Error('Invalid castle Sister state.');
     if (record(value) && value.heroAI !== undefined && (Number(value.version) < 38 || !record(value.heroAI)
       || typeof value.heroAI.enabled !== 'boolean' || !validPartyAIState(value.heroAI.state))) throw new Error('Invalid hero Fire at will state.');
     if (record(value) && value.recycleCount !== undefined && (Number(value.version) < 37 || !Number.isSafeInteger(value.recycleCount) || Number(value.recycleCount) < 0 || Number(value.recycleCount) > 1000000)) throw new Error('Invalid recycling count.');

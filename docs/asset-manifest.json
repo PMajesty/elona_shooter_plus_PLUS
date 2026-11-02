@@ -8,14 +8,14 @@
   "frameNames": "Original one-based Flash timeline frame numbers as strings",
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
-    "images": 118,
-    "clips": 62,
+    "images": 154,
+    "clips": 75,
     "sounds": 89,
     "fonts": 6
   },
   "runtimeAdjustments": [
     "Static screens omit runtime text placeholders and separately rendered controls",
-    "Sister is frozen at original stand frame 4 and sisterFire is hidden",
+    "Town Sister is frozen at stand frame4; battle Sister is rendered separately with original reactions and hidden sisterFire",
     "townHud applies the original eventGene bgAlpha.alpha=1",
     "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",
     "Town action labels are separate original foreground layers above their card buttons",

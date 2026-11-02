@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v38, remaining medal milestones and Museum hints**.
+Updated 2026-11-02. Current local build: **v38, original castle Sister combat interactions**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -37,6 +37,16 @@ trigger a shot at the AI target. The original Sister line/rage artwork indicates
 the mode. Saves retain its target/counters and Continue remains paused; Rest starts
 the next battle in manual mode. Earlier saves migrate without AI fields/RNG draws.
 Source: KeyDown (13190), onEnterFrame (2338), shoot (7812–7883), refreshPlayer (4655).
+The static castle Sister now uses her original damage, critical-kill cheering and
+death artwork/timelines. Ordinary hero/companion hitscan can kill her, including
+her original shadow contour; projectiles do not use that hitscan-only check.
+Unblocked castle damage triggers her reaction while she is free/alive. Death
+stops cheering and its voice-selection RNG draw, without removing critical-kill
+credit or adding a penalty/reward. Her optional saved frame/free/dead state replays
+deterministically; older saves retain their implicit living Sister unchanged.
+Rest revives her for the new battle. Collision uses extracted source contours in
+both headless simulation and browser, independently of rendering.
+Source: shoot8116, damageCastle10938, enemy.damage, sister_37 frame scripts.
 Ragnarok now uses the ordinary inventory controls: its artifact is consumed,
 30 real dinosaur spawns are attempted and the next spawn timer gains200 ticks.
 Winning the battle awards medal92, including its wage reduction and future-start
@@ -129,8 +139,8 @@ Source: pauseMenu/endPauseMenu, optionwindow_222, enemy.damage, startFire/fireWo
 
 ## Validation and limits
 
-- **520 tests passed**, with typechecking and production build passing. Latest
-  bundle: assets/index-Dd2iyTt7.js. Slot checks cover unchanged legacy storage,
+- **526 tests passed**, with typechecking and production build passing. Latest
+  bundle: assets/index-BzH28bd5.js. Slot checks cover unchanged legacy storage,
   eight independent adventures, selection persistence, shared medals/mute,
   deletion/tombstones, Hardcore isolation, corrupt data and failed writes.
   Existing deterministic checks cover classes, campaign, equipment services,
@@ -150,6 +160,9 @@ Source: pauseMenu/endPauseMenu, optionwindow_222, enemy.damage, startFire/fireWo
   Six further medal checks cover every survival threshold, ordinary Rest into
   Day150 with JSON replay, cumulative starting gold, both Impossible Badge paths,
   starting Fame, invalid records, Carry Over and the idempotent website medal.
+  Six Sister checks cover source contours, hero/companion hitscan, projectile
+  exclusion, damage/cheer interruption, protection/Defender, death RNG, JSON replay,
+  old/corrupt saves and revival at Rest.
 - The controlled full40-day campaign completed in96494 simulation frames, with
   all19 enemy kinds, rewards, towns and save boundaries. Its changed frame count
   follows the repeating MOD-sale correction and resulting generation RNG. Strong
@@ -227,6 +240,14 @@ Source: pauseMenu/endPauseMenu, optionwindow_222, enemy.damage, startFire/fireWo
   link was opened. The test slot was deleted and the user's whole envelope restored
   exactly, with no test medals or records left. No console errors/fullscreen.
   Evidence: .build/browser-qa/medal-completion-verification.json and original-medal-hint.png.
+- The muted Sister browser check used empty slot8: actual New Game rendered the
+  separate living sprite, a controlled ordinary shot killed her, animation stopped
+  at source frame72, and Continue retained the complete exported envelope. The test
+  slot was deleted; slot1 and the shared collection matched their fresh backup
+  exactly. No console errors/fullscreen. The first targeted background regeneration
+  passed the whole timeline instead of its selected frame, producing a black scene;
+  browser inspection caught it and the corrected export was rebuilt/verified.
+  Evidence: .build/browser-qa/castle-sister-verification.json and castle-sister-dead.png.
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. Historical details are
@@ -258,8 +279,7 @@ that the app's crash cause was fixed.
    component; external credits retain their original URLs, whose availability is unverified.
    The pause statistics' total-kill label still uses the current battle counter;
    a lifetime counter is not yet recorded. External Museum link availability is unverified.
-5. Separate static castle Sister damage/death interactions. Bird-rat falling
-   motion is approximate; later enemy hit regions use rendered alpha. Town/search/
+5. Bird-rat falling motion is approximate; later enemy hit regions use rendered alpha. Town/search/
    robbery outcomes use concise English messages rather than all original modals.
    Searching preserves the source's ineffective Trouble HP expression.
 6. The veteran late-game hitbox complaint remains unreproduced and **deferred

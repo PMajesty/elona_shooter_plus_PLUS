@@ -512,7 +512,8 @@ def runtime_clips(xml, sprites, manifest):
     specs = {"itemPicture": (2113, {"2"}, False), "radioButton": (2312, {"1", "8"}, False),
              "inventorySlot": (2121, {"2", "3", "4", "6"}, False),
              "sheepShadow": (910, {"1"}, True), "crowShadow": (981, {"1"}, True),
-             "gameOver": (2741, {"6", "9"}, False)}
+             "gameOver": (2741, {"6", "9"}, False),
+             "castleSister": (2622, {"5"}, False)}
     if FORCE or any(not list(directory.glob(f"DefineSprite_{value[0]}*")) for value in specs.values()):
         derived = copy.deepcopy(xml)
         for name, (character_id, depths, keep) in specs.items():
@@ -762,7 +763,7 @@ def main():
     omit_level = {"closeButton", "procButton", "itemDesc", "itemDesc2", "now"}
     omit_town_nav = {"missionButton", "shopButton", "castleButton", "charaButton", "equipButton", "medalButton"}
     for name, timeline, frame, omit, offset in [
-        ("title", tags, 22, omit_title, (0, 0)), ("battle", tags, 27, omit_battle, (0, 0)),
+        ("title", tags, 22, omit_title, (0, 0)), ("battle", tags, 27, omit_battle | {"sister"}, (0, 0)),
         ("townHud", tags, 65, omit_battle | omit_town_nav, (0, 0)),
         ("townScene", tags, 71, omit_battle | omit_town_nav | {"textCarryOver"}, (0, 0)),
         ("townMission", sprites[1995].find("subTags"), 40,
@@ -849,10 +850,11 @@ def main():
     animation = extract(xml_path, CACHE / "scripts/ally1.as")
     (DEST / "ally-animation.json").write_text(json.dumps(animation, separators=(",", ":")) + "\n", encoding="utf-8")
     manifest["allyAnimation"] = "ally-animation.json"
-    from extract_collision_geometry import extract as extract_collision, write_display_widths
+    from extract_collision_geometry import extract as extract_collision, write_display_widths, write_castle_sister
     collision = extract_collision(xml_path)
     (DEST / "collision-geometry.json").write_text(json.dumps(collision, separators=(",", ":")) + "\n", encoding="utf-8")
     write_display_widths(collision)
+    write_castle_sister(collision)
     manifest["collisionGeometry"] = "collision-geometry.json"
     (DEST / "town-layout.json").write_text(json.dumps(town_layout(xml, sprites), indent=2) + "\n", encoding="utf-8")
     write_medal_definitions()
@@ -868,7 +870,7 @@ def main():
                    "sounds": len(manifest["sounds"]), "fonts": len(manifest["fonts"])},
         "runtimeAdjustments": [
             "Static screens omit runtime text placeholders and separately rendered controls",
-            "Sister is frozen at original stand frame 4 and sisterFire is hidden",
+            "Town Sister is frozen at stand frame4; battle Sister is rendered separately with original reactions and hidden sisterFire",
             "townHud applies the original eventGene bgAlpha.alpha=1",
             "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",
             "Town action labels are separate original foreground layers above their card buttons",

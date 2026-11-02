@@ -25,6 +25,9 @@ unless you previously enabled it; the mute preference persists between visits.
 - F toggles the original Fire at will mode: the hero acquires targets, fires and
   reloads using the party AI, with its original accuracy penalty and Sister indicator.
   The mode/target state survives Continue; each new mission starts in manual mode.
+- The castle Sister reacts to damage and critical kills using her original
+  animations. Hero/companion hitscan can kill her, stopping her cheers; saves retain
+  her pose/state and Rest revives her. Collision is independent of rendering.
 - Equipment's original Recycle Gun and Charge Item actions: turn an owned gun into
   a random MOD for5 AP, or refill an eligible usable item for3 AP. Ten recycles earn
   Gun Mania, including its +15% MOD efficiency in mounting, generated weapons,
@@ -127,8 +130,8 @@ Temporary-hire checks cover confirmation, a full permanent party, actual AI fire
 projectile replay, half rewards, wages, departure and old-save migration.
 Museum checks cover payouts, medal thresholds, daily resets, action AP bonuses,
 correct hero-class awards and migration. Unlock checks cover the global collection,
-starting bonuses and actual class combat effects. Some medal effects and
-Flash-save conversion remain incomplete. Slot tests cover eight independent
+starting bonuses and actual class combat effects. Medal notification presentation
+and Flash-save conversion remain incomplete. Slot tests cover eight independent
 adventures, selection persistence, deletion, Hardcore isolation and storage failures.
 Additional controlled combat crosses Day40/80 through ordinary rewards, towns,
 Rest and JSON restores. Source-formula checks cover later cycles and Day1000 save

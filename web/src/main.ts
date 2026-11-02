@@ -28,6 +28,7 @@ import { ALL_TRAITS, companionWage } from './party-progression.ts';
 import { partyActorPosition } from './party-ai.ts';
 import { castleDamageMultiplier, castleLootMultiplier, castleRepairAmount, castleStorageLevel, castleTrainerMultiplier, castleUpgradeCost, castleUpkeep } from './castle-upgrades.ts';
 import { ITEM_TYPE, isOccupiedItem } from './items.ts';
+import { STANDING_SISTER } from './castle-sister.ts';
 import { alphaMaskHit, ordinaryEnemyHit, type CollisionGeometry } from './collision.ts';
 import type { ProjectileKind } from './projectiles.ts';
 import { titlePointerHit, titleStateHit, type TitleButtonState } from './title-hit.ts';
@@ -85,6 +86,7 @@ class ElonaScene extends Phaser.Scene {
   private projectileSprites = new Map<number, { container: Phaser.GameObjects.Container; body: Phaser.GameObjects.Container; images: Phaser.GameObjects.Image[]; shadow?: Phaser.GameObjects.Image }>();
   private enemyArrowSprites = new Map<number, { container: Phaser.GameObjects.Container; body: Phaser.GameObjects.Image; shadow: Phaser.GameObjects.Image }>();
   private playerSprite?: OriginalAlly;
+  private castleSisterSprite?: Phaser.GameObjects.Image;
   private companionSprites = new Map<number, OriginalAlly>();
   private companionCursors = new Map<number, Phaser.GameObjects.Image>();
   private companionBowSounds = new Map<number, Phaser.Sound.BaseSound>();
@@ -203,7 +205,7 @@ class ElonaScene extends Phaser.Scene {
     this.volumeIcon = undefined; this.pauseDialog = undefined; this.flash = undefined; this.flashFrames = 0; this.flashClock = 0;
     if (!this.celebration) delete container.dataset.fireworkFrames;
     this.helpLayer = undefined; delete container.dataset.helpPage; delete container.dataset.helpScroll;
-    this.fireAtWillSprites = undefined; delete container.dataset.fireAtWill;
+    this.fireAtWillSprites = undefined; this.castleSisterSprite = undefined; delete container.dataset.fireAtWill; delete container.dataset.castleSister;
     for (const arrow of this.enemyArrowSprites.values()) arrow.container.destroy(true);
     this.enemyArrowSprites.clear();
     this.enemySprites.clear(); this.enemyRageSprites.clear(); this.enemyHitSprites.clear(); this.bossFrames.clear(); this.bossBars.clear(); this.projectileSprites.clear(); this.hud.clear(); this.effects = []; this.hotbar = [];
@@ -472,7 +474,7 @@ class ElonaScene extends Phaser.Scene {
 
   private enterBattle(): void {
     this.reset('battle');
-    this.image('battle');
+    this.drawBattleBackground();
     this.playerSprite = new OriginalAlly(this, this.cache.json.get('ally-animation') as OriginalAllyMetadata, manifest.clips, this.appearance, WORLD.playerX, WORLD.playerY);
     this.root.add(this.playerSprite);
     this.playerSprite.setOriginalFrame(weaponPresentation(this.sim?.selectedItem?.id ?? 0).idleFrame);
@@ -486,6 +488,24 @@ class ElonaScene extends Phaser.Scene {
     if (this.cache.audio.exists('soundBgForest')) this.ambient = this.sound.add('soundBgForest', { volume: 0.3, loop: true });
     this.ambient?.play();
     this.paintBattle();
+  }
+
+  private drawBattleBackground(): void {
+    this.image('battle');
+    this.paintCastleSister();
+  }
+
+  private paintCastleSister(): void {
+    const sister = this.sim?.state.castleSister ?? STANDING_SISTER;
+    if (!this.castleSisterSprite) {
+      const { sister: position } = (this.cache.json.get('town-layout') as { fireAtWill: { sister: { x: number; y: number; scaleX: number; scaleY: number } } }).fireAtWill;
+      const asset = manifest.clips.castleSister;
+      this.castleSisterSprite = this.clip('castleSister', sister.frame, position.x, position.y)!
+        .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight)
+        .setPosition(position.x, position.y).setScale(position.scaleX, position.scaleY);
+    }
+    this.castleSisterSprite.setFrame(String(sister.frame));
+    container.dataset.castleSister = JSON.stringify(sister);
   }
 
   private drawHud(): void {
@@ -681,6 +701,7 @@ class ElonaScene extends Phaser.Scene {
   private paintBattle(): void {
     if (!this.sim) return;
     const state = this.sim.state;
+    this.paintCastleSister();
     const present = new Set<number>();
     for (const enemy of [...state.enemies].sort((a, b) => a.y - b.y)) {
       const key = this.enemyClip(enemy);
@@ -913,7 +934,7 @@ class ElonaScene extends Phaser.Scene {
       // cancelReload после последнего автоматического патрона получает уже нулевой таймер.
       if (event.automaticReload && manual) delete sound.reloaded;
     }
-    Object.assign(sound, { select: 'soundReloaded1', beep: 'soundBeep', repair: 'soundRepair1', protection: 'soundPray1', defend: 'soundDefend', pulse: 'soundPuls', 'enemy-arrow': 'soundBow1', 'enemy-rage': 'soundRampageEnemy', 'lava-explode': 'soundExp1' });
+    Object.assign(sound, { 'sister-killed': 'soundKilled', select: 'soundReloaded1', beep: 'soundBeep', repair: 'soundRepair1', protection: 'soundPray1', defend: 'soundDefend', pulse: 'soundPuls', 'enemy-arrow': 'soundBow1', 'enemy-rage': 'soundRampageEnemy', 'lava-explode': 'soundExp1' });
     if (event.message) status.textContent = event.message;
     if (event.type === 'kill') {
       const enemy = this.sim?.state.enemies.find(candidate => candidate.uid === event.enemyUid);
@@ -1008,7 +1029,7 @@ class ElonaScene extends Phaser.Scene {
     }
     const state = this.sim.state;
     this.reset(state.phase === 'victory' ? 'result' : 'defeat');
-    this.image('battle'); this.drawHud();
+    this.drawBattleBackground(); this.drawHud();
     this.playerSprite = new OriginalAlly(this, this.cache.json.get('ally-animation') as OriginalAllyMetadata, manifest.clips, this.appearance, WORLD.playerX, WORLD.playerY);
     this.root.add(this.playerSprite);
     this.paintBattle();
@@ -1105,7 +1126,7 @@ class ElonaScene extends Phaser.Scene {
     if (!this.sim || !['loot', 'boss-loot'].includes(this.sim.state.postbattle)) return;
     const bossReward = this.sim.state.postbattle === 'boss-loot';
     this.reset(bossReward ? 'boss-loot' : 'loot');
-    this.image('battle'); this.drawHud();
+    this.drawBattleBackground(); this.drawHud();
     this.updateHud();
     this.root.add(createLootView(this, this.sim.state, manifest, {
       move: (fromArea, from, toArea, to) => {
@@ -1142,7 +1163,7 @@ class ElonaScene extends Phaser.Scene {
   private showSkillChoice(): void {
     if (!this.sim || this.sim.state.postbattle !== 'skill') return;
     this.reset('skill');
-    this.image('battle'); this.drawHud(); this.updateHud();
+    this.drawBattleBackground(); this.drawHud(); this.updateHud();
     this.root.add(createSkillView(this, this.sim.state, manifest, {
       select: id => { container.dataset.selectedTrait = String(id); },
       choose: id => {
