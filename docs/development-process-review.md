@@ -1,6 +1,7 @@
 # Development process review
 
-Current review: 2026-11-02, scheduled23:09 UTC (2026-11-03 locally).
+Current review: 2026-11-02, scheduled23:09 UTC; cadence checked23:25 UTC
+(2026-11-03 locally).
 Earlier detail remains in Git. Follow the [goal](long-term-goal.md) and
 [current coverage/evidence/limits](port-status.md).
 
@@ -28,6 +29,7 @@ Repository evidence cannot allocate billing or exact time percentages.
 | Independent New Game and Barracks hint work repeated source interpretation; weapon skills were initially misclassified in creation and corrected in4f915e6 | Keep the now-shared source hint formatter/renderer and class limits. Group related ordinary callers before browser verification; do not infer source groups from numeric IDs when definitions are available. |
 | Several combined reads were truncated; one emitted6070 tokens despite a4900-token output budget. The review document again accumulated chronological continuations | Use a file/line inventory followed by one relevant function or short section. Budget the whole batch. Replace this document with current findings; Git preserves history. |
 | Three consecutive information slices followed the stability/hosting work while the completion gate still mixed release questions and cosmetic differences | Treat restored information as delivered. Next address a finite hosting gap: serve the production dist from a plain static server at a nested path and exercise the documented embed. Defer exact filters/audio/camera work. |
+| The saved continuation schedule was every10 minutes despite the user's30-minute request, confirmed in its automation.toml | Updated the existing heartbeat through the native automation tool to30 minutes, preserving its prompt, active status and chat. The workflow-review schedule already matches three hours. No billing/time savings are inferred. |
 
 The full-suite runtime is small; repeated orientation, setup and unfocused source
 reads are the demonstrated process concerns. No time/cost percentage follows.
