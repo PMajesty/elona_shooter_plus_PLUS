@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v27, four starting classes, Days1–40**.
+Updated 2026-11-02. Current local build: **v28, four starting classes, Days1–40**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -26,7 +26,11 @@ refreshes shop stock, Museum pays medal-based income, Chickens supply eggs, Sist
 launch shootable bombs, Villa boosts the next battle through Party, and Sp.Trainer
 permits lifetime skill-training sessions per troop. Prayer, Dinner, Party, egg
 collection, Taunt and Train are on the Mission board. Stock/recruit refresh cost
-2 AP each. Original assets and English UI are retained.
+2 AP each. Go searching costs 1 AP and implements the original event families,
+including rewards/setbacks, three-stage talent growth, inventory gifts, stock
+refresh, party XP, wall/chicken changes and fame income at the next settlement.
+Its separate saved random sequence continues across saves and days.
+Original assets and English UI are retained.
 
 Sound defaults to muted, remembers the user's preference and displays an explicit
 `Sound: muted` / `Sound: on` state. Browser testing uses one retained tab. The
@@ -34,7 +38,7 @@ interruption closed the earlier temporary tab; the replacement is retained for r
 
 ## Validation
 
-- The complete suite passes **432 tests**. The controlled full-cycle run completed
+- The complete suite passes **438 tests**. The controlled full-cycle run completed
   all40 days, rewards, towns and Rest/save boundaries over97293 simulation frames,
   encountering all19 implemented enemy kinds. Powerful test equipment/HP removes
   difficulty as a test obstacle; this is not a full-campaign balance claim.
@@ -45,6 +49,10 @@ interruption closed the earlier temporary tab; the replacement is retained for r
   upkeep, daily egg limits, AP, refresh ownership, persistent training, bonuses,
   bomb launches/chains and Love compensation. Combat checks measure actual Party
   damage, Dinner XP, Prayer absorption and Taunt enemy HP.
+- Search checks cover every outcome family, saved/reloaded repeatability, Quick
+  Eyed, full inventory, insufficient AP, nonfatal loss limits, talent growth,
+  next-settlement fame, and AP above14/XP above999. These are source-led behavior
+  tests, not a new instrumented-original comparison or proof of RNG parity.
 - Class combat restores identical full state/events after JSON restoration,
   including Little Girl's AI and the Militia cooldown. Invalid identities/counters
   are rejected. Prior Sheriff migration preserves inventory and combat RNG.
@@ -60,6 +68,11 @@ interruption closed the earlier temporary tab; the replacement is retained for r
   `.build/browser-qa/economy-restoration.json`. Economy/rotated-hit evidence:
   `.build/browser-qa/town-economy-verification.json` and
   `.build/browser-qa/sister-rotation-verification.json`.
+- Two v28 searches through the actual Mission card produced full exported state
+  equal to the expected simulation: AP14→12, fame0→2, search cursor13→19.
+  Evidence: `.build/browser-qa/search-verification.json` and `town-search.png`.
+  No browser errors; the original save was restored paused/muted and every field
+  equals its expected migration (`search-restoration.json`, tick674/HP40/gold209).
 - Natural class smoke tests use rectangle hit regions, like the older opening
   battle tests. They do not prove browser contour/pixel parity, balance across the
   full campaign or a performance advantage over Flash.
@@ -74,7 +87,7 @@ in [historical verification](port-verification.json) and Git history.
 1. Later campaign cycles beyond Day40, strength/large-enemy variants and the
    systems below. Day40 town prepares the next mission, but Rest is guarded until
    those cycles are implemented. This is not an endless-campaign claim.
-2. Searching, event-card actions, museum robbery, temporary Mission Hire,
+2. Event-card actions, museum robbery, temporary Mission Hire,
    Ragnarok and remaining global economy/medal systems. Museum income currently
    counts the medals known to this port; global medal carry-over is incomplete.
 3. Unlockable hero classes (Sniper, Ranger, Duelist, Noble), original multiple save
@@ -95,6 +108,11 @@ New town activities report outcomes in concise English status messages rather
 than recreating every event dialog. Bomb artwork is original; its combined
 shadow/body rotates together. The separate static castle Sister's damage/death
 interactions remain unported. Failed insufficient-AP actions preserve RNG.
+Searching retains the source's ineffective Trouble expression (`hpFix + value`
+without assignment); its message reports stronger enemies but does not alter HP.
+Search event text is concise English; original event-modal composition is deferred.
+Unspent training XP can exceed1000 until the usual progression check; saved XP/AP
+validation now accepts legitimate search gains instead of early-game-only limits.
 
 ## Working direction
 
@@ -104,5 +122,10 @@ known balance, document approximations, use accelerated deterministic scenarios
 and proportional comparisons/browser checks. Keep current-state docs concise.
 Exact30Hz/20Hz rates remain optional if observable timing is preserved.
 
-The long-term goal and 30-minute watcher remain paused in the app. This resumed
-work is user-directed; do not restart recurring unattended work automatically.
+The user reauthorized recurring work: the 30-minute continuation watcher and
+three-hour workflow meta-review are active. See [current goal](long-term-goal.md).
+Defer the reported late-game hitbox complaint until core port coverage is complete.
+The native goal card still contains the earlier paused goal: a supported update
+attempt was refused because this chat has an active writer. The revised repository
+goal and both active heartbeat prompts supersede that old wording; development
+continues through the authorized watchers without bypassing the writer lock.

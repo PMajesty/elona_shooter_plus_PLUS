@@ -1,4 +1,5 @@
 import { generateEarlyTownRecruit } from './recruits.ts';
+import { fixedSearchRandom } from './town-search.ts';
 import { createTownEconomy, validTownEconomy, museumIncome, TOWN_ACTIVITIES, type TownEconomy, type TownActivity } from './town-economy.ts';
 import { ENEMY_TIMELINES, type EnemyTimeline } from './enemy-timelines.ts';
 import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
@@ -58,7 +59,7 @@ export interface SimulationState {
   inventory: (Item | null)[]; lootOffers: (Item | null)[]; postbattle: 'none' | 'loot' | 'boss-loot' | 'skill' | 'result';
   inventoryProvenance: 'original-generation' | 'legacy-v1-reconstructed'; legacyReconstructionSeed?: number;
   bossKilled: number; skillChoices: number[]; traitsProvenance: 'known-starting-traits' | 'legacy-reconstructed'; bossKilledProvenance: 'observed' | 'legacy-inferred';
-  result: { museum?: number; reward: number; perfectBonus: number; upkeep: number; tax: number; salary: number; wages: number; netReward: number };
+  result: { museum?: number; fame?: number; reward: number; perfectBonus: number; upkeep: number; tax: number; salary: number; wages: number; netReward: number };
   town: null | { ap: number; preparation: 'pending' } | ReadyTown;
   previousTown: ReadyTown | null;
   upgradeReference: Item | null;
@@ -1372,10 +1373,11 @@ export class Simulation {
   private prepareResult(): void {
     if (this.state.phase !== 'victory' || this.state.postbattle !== 'result' || this.state.town !== null) return;
     // renewResult тратит бросок fame даже при fame=0; townEvent использует прежний кэш ACTIVE.
-    this.random();
+    const fame = int(this.state.economy.fame * this.random() * 15);
+    if (fame) { this.state.result.fame = fame; this.state.result.netReward += fame; }
     const extraAp = int(this.random() * this.random() * (this.state.partySkills.effects[123] + 1));
     this.state.gold += this.state.result.netReward;
-    this.state.totalMoney += this.state.result.reward + this.state.result.perfectBonus + this.state.result.salary + (this.state.result.museum ?? 0);
+    this.state.totalMoney += this.state.result.reward + this.state.result.perfectBonus + this.state.result.salary + (this.state.result.museum ?? 0) + fame;
     this.state.town = { ap: 4 + extraAp, preparation: 'pending' };
   }
 
@@ -1492,6 +1494,7 @@ export class Simulation {
   townActivityAvailable(action: TownActivity): boolean {
     if (!this.partyMutationAvailable()) return false;
     const town = this.state.town! as ReadyTown, e = this.state.economy;
+    if (action === 'search') return town.searched < Number.MAX_SAFE_INTEGER - 20;
     if (action === 'pray') return !town.flags.prayed;
     if (action === 'dinner') return town.mission.expFix === 1;
     if (action === 'party') return e.villa > 0 && !town.flags.partyHeld;
@@ -1506,7 +1509,11 @@ export class Simulation {
     const state = this.state, town = state.town as ReadyTown, e = state.economy, info = TOWN_ACTIVITIES[action];
     if (town.ap < info.cost) return { outcome: 'not-enough-ap', message: "You don't have enough action points!" };
     let message = '';
-    if (action === 'train') {
+    if (action === 'search') {
+      // AP списывается до события: случайная прибавка или потеря применяется к остатку.
+      town.ap -= info.cost;
+      return { outcome: 'done', message: this.searchTown() };
+    } else if (action === 'train') {
       const actors = [{ slot: 0, actor: state.player, devType: HERO_CLASSES[state.player.classId].id },
         ...state.party.slots.slice(0, 3).filter(slot => slot.exists).map(slot => ({ slot: slot.slot, actor: slot.member!, devType: slot.member!.devType }))];
       let index = 0;
@@ -1550,6 +1557,74 @@ export class Simulation {
     }
     town.ap -= info.cost;
     return { outcome: 'done', message };
+  }
+
+  private searchTown(): string {
+    const state = this.state, town = state.town as ReadyTown, e = state.economy;
+    const random = () => fixedSearchRandom(town.searched++);
+    if (random() * (100 + state.partySkills.effects[137]) < 35) {
+      if (random() < 0.15) {
+        const increase = 0.1 + random() / 5;
+        // В исходном search стоит hpFix + value без присваивания; не исправляем баланс молча.
+        return `Trouble: A fool taunted the enemies. They boast ${int(increase * 100)}% more HP tomorrow.`;
+      }
+      if (random() < 0.2) { town.ap = Math.max(0, town.ap - 2); return 'Chatterbox: An old lady delays you with endless chatter. You lose 2 action points.'; }
+      if (random() < 0.05 && e.chickens > 2) {
+        const lost = Math.min(int(random() * 4 + 2), e.chickens - 1); e.chickens -= lost;
+        return `Chickens gone: Crazy chickens broke out of the cage. You lost ${lost} chickens!`;
+      }
+      if (random() < 0.3 && state.castleHp > 1) {
+        const lost = Math.min(int(random() * state.castleMaxHp / 4 + 1), state.castleHp - 1); state.castleHp -= lost;
+        return 'Disaster: A mob destroyed the walls. You need to repair them at once.';
+      }
+      if (random() < 0.3 && state.gold > 0) {
+        const lost = Math.min(int(random() * 30 * state.day + 40) + 2, state.gold); state.gold -= lost;
+        return `Thief!: You were pickpocketed while shopping. You lost ${lost} gold pieces!`;
+      }
+      if (random() < 0.4) { town.ap = Math.max(0, town.ap - 1); return 'Ouch...: You trip over a stone and lose 1 action point.'; }
+      return 'Fruitless: You were unable to find anything useful in the town.';
+    }
+    if (random() < 0.15) {
+      if (++e.searchTraining < 3) return `Talent: You start to develop one of your skills. [Progress: ${e.searchTraining}/3]`;
+      e.searchTraining = 0;
+      const pool = availableHeroTraits(state.player.classId, state.player.level, state.player.traits);
+      const skill = pool[int(random() * pool.length)];
+      if (skill !== undefined) { state.player.traits[skill] = (state.player.traits[skill] ?? 0) + 1; this.refreshPartySkills(); }
+      return skill === undefined ? 'Talent: All available skills are already mastered.' : `Talent Flowered!: You gained ${ALL_TRAITS[skill].name}!`;
+    }
+    if (random() < 0.15) { e.fame++; return 'Popularity: Your fame has increased by 1.'; }
+    if (random() < 0.22) { state.castleMaxHp++; return 'Good news: An engineer fortified the castle walls. The walls now have +1 max HP.'; }
+    if (random() < 0.12) {
+      const count = int(random() * 4) + 2; e.chickens += count;
+      [30, 60, 120].forEach((threshold, i) => { if (e.chickens >= threshold) this.awardMedal(50 + i); });
+      return `Free Chicken: You find stray chickens and steal ${count} chickens.`;
+    }
+    if (random() < 0.2) {
+      random(); this.regenerateShop();
+      return "Sales Time: The shops are thronged with customers. The shop's inventory has been restocked.";
+    }
+    if (random() < 0.15) {
+      random();
+      const slot = state.inventory.findIndex(item => !isOccupiedItem(item));
+      if (slot < 0) return 'Gift?: You pick up something valuable. But your inventory is full...';
+      const item = this.equipmentFactory().randomItem(state.day * 100 + 1000, 3, state.inventory[slot] ?? undefined);
+      state.inventory[slot] = item;
+      return `Gift?: ${item.name} added to your inventory!`;
+    }
+    if (random() < 0.25) {
+      const amount = int(random() * 10) + 5;
+      // Исходный текст показывает amount, но player.exp хранит десятые доли опыта.
+      state.player.exp += amount * 10;
+      for (const slot of state.party.slots.slice(0, 4)) if (slot.member) slot.member.exp += amount * 10;
+      return `Training: You join a militia drill. Your party gains ${amount} exp.`;
+    }
+    if (random() < 0.3) { town.ap += 2; return 'Rejoice!: Soldiers buy you a drink at the bar. You gain 2 action points.'; }
+    if (random() < 0.15) { town.ap += 3; return 'Hero: The townspeople applaud your efforts. You gain 3 action points.'; }
+    if (random() < 0.65) {
+      const gold = int(random() * 10 * Math.min(state.day, 40) + 100) + 2; state.gold += gold; state.totalMoney += gold;
+      return `Look!: You found a wallet at the side of the road. You get ${gold} gold pieces!`;
+    }
+    return 'Nothing Found: You wander around the town looking for something but in vain.';
   }
 
   freeRepair(): RepairOutcome {
@@ -1652,7 +1727,7 @@ export class Simulation {
     const legacyProjectiles = value.version < 8;
     const playerNumbers = ['level', 'exp', 'skillPoints', 'shootTimer', 'accuracyFix', 'rampageTicks'];
     if (!record(player) || !isHeroClass(player.classId) || value.version < 25 && player.classId !== 'sheriff' || playerNumbers.some(key => !finite(player[key])) || Number(player.level) < 1) throw new Error('Invalid player state.');
-    if (['level', 'exp', 'skillPoints'].some(key => !Number.isInteger(player[key]) || Number(player[key]) < 0) || Number(player.exp) >= 1000) throw new Error('Invalid player counters.');
+    if (['level', 'exp', 'skillPoints'].some(key => !Number.isInteger(player[key]) || Number(player[key]) < 0) || Number(player.exp) > 1000000000) throw new Error('Invalid player counters.');
     if (!legacyProjectiles && typeof player.bowDrawing !== 'boolean') throw new Error('Invalid bow draw state.');
     if (legacyEquipment) {
       if (!Number.isInteger(player.weaponExp) || Number(player.weaponExp) < 0) throw new Error('Invalid legacy weapon experience.');
@@ -1737,7 +1812,10 @@ export class Simulation {
     if (value.version < 20) simulation.state.pendingLootAction = null;
     if (value.version < 21) simulation.state.looterLevel = 0;
     if (value.version < 27) simulation.state.economy = createTownEconomy();
-    else if (!validTownEconomy(value.economy)) throw new Error('Invalid town economy.');
+    else {
+      if (value.version < 28 && record(simulation.state.economy)) Object.assign(simulation.state.economy, { searchTraining: 0, fame: 0 });
+      if (!validTownEconomy(simulation.state.economy)) throw new Error('Invalid town economy.');
+    }
     if (value.version < 22) simulation.state.trainerLevel = 0;
     if (value.version < 25) simulation.state.player.grenadeCount = 325;
     else if (!Number.isInteger(player.grenadeCount) || Number(player.grenadeCount) < 0 || Number(player.grenadeCount) > 325) throw new Error('Invalid Militia grenade counter.');
@@ -1760,6 +1838,7 @@ export class Simulation {
     }
     if (![0, 1].includes(simulation.state.title) || (simulation.state.title === 1 && (simulation.state.day < 6 || (simulation.state.day === 6 && simulation.state.phase !== 'town')))) throw new Error('Invalid title.');
     if (['tax', 'salary'].some(key => !finite((simulation.state.result as unknown as Record<string, unknown>)[key]) || Number((simulation.state.result as unknown as Record<string, unknown>)[key]) < 0)) throw new Error('Invalid result income or tax.');
+    if (simulation.state.result.fame !== undefined && (!Number.isInteger(simulation.state.result.fame) || simulation.state.result.fame < 0 || simulation.state.result.fame > 15000000)) throw new Error('Invalid fame income.');
     simulation.state.projectiles = restoredProjectiles;
     if (value.version < 10) simulation.state.enemyArrows = [];
     const arrows = simulation.state.enemyArrows;
@@ -1907,7 +1986,7 @@ export class Simulation {
     }
     if (state.phase === 'town' || (state.phase === 'victory' && state.postbattle === 'result')) {
       const town = state.town as unknown;
-      if (!record(town) || !Number.isInteger(town.ap) || Number(town.ap) < 0 || Number(town.ap) > (value.version < 15 ? 4 : 14) || (state.phase === 'victory' && (Number(town.ap) < 4 || town.preparation !== 'pending')) || state.castleHp <= 0) throw new Error('Invalid first-town state.');
+      if (!record(town) || !Number.isInteger(town.ap) || Number(town.ap) < 0 || Number(town.ap) > (value.version < 15 ? 4 : value.version < 28 ? 14 : 1000000) || (state.phase === 'victory' && (Number(town.ap) < 4 || town.preparation !== 'pending')) || state.castleHp <= 0) throw new Error('Invalid first-town state.');
       if (town.preparation === 'ready') {
         if (value.version < 5 || state.phase !== 'town' || !validTownPreparation(town, validItem, state.day, simulation.medalAbsorption(), 'base') || state.lootOffers.some(item => item !== null)) throw new Error('Invalid prepared town.');
       } else if (town.preparation !== 'pending' || (value.version >= 5 && state.phase === 'town')) throw new Error('Missing town preparation.');

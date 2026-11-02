@@ -162,7 +162,7 @@ const finite = (value: unknown, low = -1e9, high = 1e9): value is number => type
 export function validPartyMember(value: unknown): value is PartyMember {
   if (!record(value) || !integer(value.devType, 1, 9) || !integer(value.sex, 0, 1)
     || !integer(value.appearance, 0, 59) || typeof value.name !== 'string' || value.name.length < 1 || value.name.length > 256) return false;
-  if (!integer(value.level, 1, 999) || !integer(value.exp, 0, 999) || !integer(value.skillPoints, 0, 999)
+  if (!integer(value.level, 1, 999) || !integer(value.exp, 0, 1000000000) || !integer(value.skillPoints, 0, 999)
     || !integer(value.nextTrait, 0, 99) || !integer(value.trained, 0) || !integer(value.kills, 0)
     || !finite(value.earnedGold, 0) || !finite(value.money, 0) || !finite(value.cost, 0)
     || !finite(value.potentialAim, 0, 1) || !finite(value.potentialTeam, 0, 1) || !integer(value.ai, 0, 6)

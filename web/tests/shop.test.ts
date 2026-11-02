@@ -156,7 +156,7 @@ test('prepared-town imports reject malformed generated data before changing a us
     value => { value.town.shop.pop(); }, value => { value.town.shop[0].num = -1; },
     value => { value.town.cards = [-7, -7, -7, -7, -7]; }, value => { value.town.mission.reward = 1; },
     value => { value.town.recruit.items[45].ammo = NaN; }, value => { value.town.recruit.pic = 22; },
-    value => { value.town.searched = 1000; }, value => { value.town.flags.prayed = true; },
+    value => { value.town.searched = Number.MAX_SAFE_INTEGER + 1; }, value => { value.town.flags.prayed = true; },
     value => { value.totalMoney = -1; }, value => { value.lootOffers[0] = { ...value.town.shop[0], num: 0 }; },
   ];
   for (const change of changes) {

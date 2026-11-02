@@ -199,7 +199,7 @@ test('town save validation rejects impossible phases, missing preparation and in
   const saved = simulation.toSave();
   for (const change of [
     { town: null }, { town: undefined }, { town: { ...saved.town, ap: -1 } },
-    { town: { ...saved.town, ap: 15 } }, { town: { ...saved.town, ap: 1.5 } },
+    { town: { ...saved.town, ap: 1000001 } }, { town: { ...saved.town, ap: 1.5 } },
     { town: { ap: 4, preparation: 'pending' } },
     { town: { ap: 4, preparation: 'complete' } }, { postbattle: 'loot' },
     { castleHp: 0 }, { day: 2 }, { version: 3 }, { phase: 'battle' },

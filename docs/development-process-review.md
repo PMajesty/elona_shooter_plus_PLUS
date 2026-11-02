@@ -90,7 +90,9 @@ this review.
    checks actually run and next missing systems. Retain historical evidence in
    place without copying it into every new report or rereading it wholesale.
 8. **Control resource use.** Solo work, bounded tool output, shared test helpers,
-   no recurring watcher restart, no automatic expansion of the test matrix.
+   no automatic expansion of the test matrix. The user subsequently authorized
+   a 30-minute continuation watcher and three-hour workflow review; see the
+   [current goal](long-term-goal.md). Reviews must improve useful throughput.
    Reassess immediately when another small feature demands a parallel family of
    bespoke tools or repeated repair work. Do not infer access to dollar billing.
 9. **Quiet browser testing.** Default the port to muted unless the user explicitly
@@ -111,3 +113,14 @@ this review.
 Completion remains the original game's feature coverage with documented intentional
 differences. This is a priority change, not a claim that the current port is close
 to complete or that an overnight finish can be promised.
+
+## Subsequent operating correction — 2026-11-02
+
+The user explicitly reauthorized recurring work and a deep workflow review every
+three hours. The [current goal](long-term-goal.md) records both schedules and
+defers the hitbox complaint until core coverage is complete. Do not reread large
+historical verification files at each wakeup. Filter tool discovery by precise
+tool names before printing descriptions: broad description matches produced
+large irrelevant output during watcher setup. A retained browser session reported
+`browser.user is unavailable`; one runtime reset restored the same tab without
+new windows. Prefer that bounded recovery over repeated handle acquisition.

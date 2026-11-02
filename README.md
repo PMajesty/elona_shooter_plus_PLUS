@@ -22,9 +22,10 @@ unless you previously enabled it; its button explicitly displays the current sta
   companions, equipment, orders, autonomous combat, growth and wages.
 - Both Castle pages: House, Wall, Sandbag, Storage, Looter, Fix Wall, Repairman,
   Trainer, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, with their effects.
-- Prayer, Dinner, Party, egg collection, Taunt and training; shop/recruit refresh,
+- Prayer, Dinner, Party, egg collection, Taunt and training; Go searching with
+  persistent outcomes, rewards, setbacks and talent growth; shop/recruit refresh,
   Free Repair, first title/salary and Rest. Sister bombs can be shot to explode.
-- One browser save with Continue and JSON import/export. Version27 accepts prior
+- One browser save with Continue and JSON import/export. Version28 accepts prior
   browser saves; original Flash saves require a future converter.
 
 Remaining work and validation limits are in [port status](docs/port-status.md).
@@ -66,6 +67,8 @@ generation, rewards, town/Rest transitions and saves. This verifies progression;
 full difficulty balance is not established by the controlled run. The economy
 checks cover purchases/caps, daily limits, income, AP, bonuses, training, refreshes,
 bomb launches/chains, saved actions and actual damage/XP effects.
+Search checks cover every event family, full inventory, AP/XP boundaries, retained
+random sequence, talent progress and fame income at the next settlement.
 Test counts do not establish whole-game completeness or full pixel parity.
 
 ## Original assets and recovery

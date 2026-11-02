@@ -5,15 +5,15 @@ Preserve the original English UI, content, balance and observable gameplay timin
 User amendment on 2026-11-01: exact 30 Hz frame and 20 Hz timer rates are not
 requirements. Keep them as reference clocks while useful; modernize scheduling
 when measured movement, firing, reload and enemy behavior remain faithful.
-Investigate the reported late-game hitbox problems in due course. Reproduce them
-in the original, distinguish defects from intended rules, and retain before/after
-regressions for deliberate fixes. Do not preserve a demonstrated bug solely for
-literal parity or rush a speculative hitbox redesign.
+User amendment on 2026-11-02: defer the reported late-game hitbox complaint until
+core port coverage is complete. Focus on the faithful port first.
 Build complete playable slices in `web/`; label incomplete coverage honestly.
 User amendment on 2026-11-02: work solo, prioritize feature completeness over exact
 cosmetic/audio/RNG fidelity, and use proportionate validation. Read
 `docs/development-process-review.md` for the process correction. Reuse the existing
-browser tab and keep testing muted. Do not restart recurring work automatically.
+browser tab and keep testing muted. The user explicitly reauthorized recurring
+work on 2026-11-02: a 30-minute continuation watcher and a three-hour workflow
+meta-review watchdog. Read `docs/long-term-goal.md` for the current objective.
 Use original extracted assets. Do not replace original behavior with invented
 mechanics merely to make a demo work. Record intentional fixes and differences.
 

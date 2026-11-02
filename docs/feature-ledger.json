@@ -2,33 +2,32 @@
   "schemaVersion": 1,
   "updated": "2026-11-02",
   "currentRelease": {
-    "saveVersion": 27,
+    "saveVersion": 28,
     "verificationStatus": "passed",
-    "implementedCampaign": "Four starting classes, Days1-40. Both Castle pages, six new economy upgrades, six Mission activities, stock/recruit refresh and shootable Sister bombs are integrated.",
+    "implementedCampaign": "Four starting classes, Days1-40, both Castle pages and seven Mission activities including persistent Go searching outcomes and fame income.",
     "publication": {
       "status": "local-build",
       "url": "http://127.0.0.1:5175/elona/",
-      "bundle": "assets/index-DynCdqrs.js",
-      "priorCheckpoint": "1c603a8"
+      "bundle": "assets/index-CC6LN0nQ.js",
+      "priorCheckpoint": "d29f42c"
     },
     "automatedVerification": {
-      "testsPassed": 432,
+      "testsPassed": 438,
       "fullSuite": true,
       "controlledCampaignFrames": 97293,
       "controlledCampaignDays": 40,
       "economyTests": 9,
-      "releaseBuildPassed": true
+      "releaseBuildPassed": true,
+      "searchTests": 6
     },
     "browserVerification": [
-      "Castle page2 and Smith purchase/expanded stock",
-      "Prayer, Training, Party, both refreshes and Rest into Day2",
-      "Rotated stationary Sister bomb visible-body click: one shot/one explosion",
-      "Original save restored paused and muted, all fields equal expected migration"
+      "Go searching twice through the ordinary Mission card: AP14 to12, fame0 to2, cursor13 to19; full exported state matches expected simulation",
+      "Original save restored paused/muted with all fields equal expected migration"
     ],
     "browserEvidence": [
-      ".build/browser-qa/town-economy-verification.json",
-      ".build/browser-qa/sister-rotation-verification.json",
-      ".build/browser-qa/economy-restoration.json"
+      ".build/browser-qa/search-verification.json",
+      ".build/browser-qa/search-restoration.json",
+      ".build/browser-qa/town-search.png"
     ],
     "knownGaps": "docs/port-status.md"
   },
@@ -756,7 +755,7 @@
         "MainTimeline:5410 generateCard"
       ],
       "status": "partial",
-      "implemented": "Mission Prayer, Dinner, Party, Collect eggs, Taunt and Train with original AP/formulas, daily limits and next-battle bonuses. Stock/recruit refresh for2 AP. English outcome messages and guarded state changes persist without rerolling.",
+      "implemented": "Mission Prayer, Dinner, Party, Collect eggs, Taunt, Train and Go searching with original AP/formulas, saved search sequence, search event families, talent growth, fame income and next-battle bonuses. Stock/recruit refresh for2 AP. Concise English outcome messages; effects persist without rerolling.",
       "evidence": [
         "web/tests/town-reference.test.ts: original action state/RNG comparisons",
         "web/tests/town.test.ts: action preconditions, AP costs and save/resume",
@@ -770,7 +769,7 @@
         "web/tests/day-eight-save.test.ts:ordinary Rest7→8 and town8 no-op guard"
       ],
       "unverified": [
-        "Searching and special event-card effects",
+        "Special event-card effects; no new original-runtime search comparison (source-led behavior tests only)",
         "Remaining original event dialogs and rare conditions"
       ]
     },
@@ -812,7 +811,7 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot, Continue and JSON import/export. V27 adds economy/counters/training, town modifiers and Sister launch/flight state, retaining Day1-40/party/equipment. Earlier saves receive zeroed economy without rerolling. Battles load paused.",
+      "implemented": "One browser slot, Continue and JSON import/export. V28 adds persistent search talent/fame, growing search cursor and legitimate town AP/XP gains. V27 adds economy/counters/training, town modifiers and Sister launch/flight state, retaining Day1-40/party/equipment. Earlier saves migrate without rerolling. Battles load paused.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",
