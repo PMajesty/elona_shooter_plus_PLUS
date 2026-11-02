@@ -1710,19 +1710,39 @@ class ElonaScene extends Phaser.Scene {
       ...(checkpoint && this.sim.state.mode !== 'hardcore' ? { carryCheckpoint: structuredClone(checkpoint) } : {}), ...(options ? { options } : {}) };
   }
 
+  private showSaveProblem(message: string, offerBackup: boolean): void {
+    if (!this.paused) this.togglePause();
+    this.pauseDialog?.destroy(true);
+    const layout = (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog;
+    // Ошибка браузерного хранилища видна в игре; обычное сохранение не открывает новых окон.
+    this.pauseDialog = createModConfirmation(this, manifest, layout, confirm => {
+      this.pauseDialog?.destroy(true); this.pauseDialog = undefined;
+      if (confirm && offerBackup) exportAdventure();
+    }, 'save-problem', message, !offerBackup);
+    this.pauseDialog.once('destroy', () => { delete container.dataset.saveProblem; });
+    this.root.add(this.pauseDialog);
+    container.dataset.saveProblem = JSON.stringify({ message, offerBackup });
+  }
+
   saveGame(notify = true): boolean {
     const save = this.makeSave();
     if (!save) {
       if (this.sim && !['title', 'gene', 'mods'].includes(this.screen) && !canSaveAdventure(this.sim.state)) {
         const cleared = clearSave(this.saveSlot); storeProfile(this.profile);
         if (notify || !cleared) status.textContent = cleared ? 'Hardcore Mode: you can only save or export the game in town.' : 'The Hardcore save could not be cleared from browser storage.';
+        if (notify) this.showSaveProblem('Hardcore Mode:\nSave or export in town.', false);
       } else if (notify) status.textContent = 'Start a game before saving.';
       return false;
     }
     const stored = storeSave(save, this.saveSlot);
     const profileStored = storeProfile(this.profile);
-    if (!profileStored && stored) { status.textContent = 'The game was saved, but the medal collection could not be stored. Export a backup.'; return true; }
+    if (!profileStored && stored) {
+      status.textContent = 'The game was saved, but the medal collection could not be stored. Export a backup.';
+      if (notify) this.showSaveProblem('Medals could not be saved.\nExport a backup now?', true);
+      return true;
+    }
     if (!stored || notify) status.textContent = stored ? 'Game saved in this browser. Export a save to keep a separate backup.' : 'Browser storage is unavailable. Export your save to keep your progress.';
+    if (!stored && notify) this.showSaveProblem('Browser save failed.\nExport a backup now?', true);
     return stored;
   }
 

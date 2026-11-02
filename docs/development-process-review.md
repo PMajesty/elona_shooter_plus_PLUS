@@ -56,11 +56,20 @@ The earlier IAB runtime is unavailable after reboot. A standard Playwright check
 using installed Chrome in one muted headless page restores automated browser
 verification without touching the user's profile or desktop. Actual same-origin
 iframe export delivers a file and direct Continue preserves its full envelope.
-A one-hour dense-battle measurement now records raw frame gaps, long tasks and
-heap samples to an ignored evidence file; completion remains pending. Reuse that
-active run rather than starting a duplicate. One fixture comparison needed the
+A one-hour dense-battle measurement recorded raw frame gaps, long tasks and
+heap samples to an ignored evidence file and completed on2026-11-03 local time.
+Final full-envelope export/reload/Continue matches. Keep the measured983ms maximum
+gap and sampled heap limits visible; a completed check does not mean perfect
+smoothness or no leaks. No duplicate run was started. One fixture comparison needed the
 known v40→v41 version migration, and a focus click hit the pause shade: correct
 those test assumptions, not product behavior.
+
+Continuation reproduced a silent explicit-save failure by blocking browser writes.
+Reused the original confirmation renderer to offer a JSON backup; actual Save Game,
+total/medal-only write failure, backup equality, modal keys and healthy Continue
+pass in isolated muted contexts. Twelve existing mode/slot checks and the new
+build pass; unchanged simulation/full-suite/hour evidence is reused. Automatic
+saves retain their existing behavior; do not claim all storage policies supported.
 
 An intermittent ready-but-black screenshot recurred once; Continue rendered the
 battle correctly. Its cause is unresolved. Loader recovery does not establish a

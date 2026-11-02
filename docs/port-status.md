@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v41, recoverable website startup**.
+Updated 2026-11-03. Current local build: **v41, visible save-failure recovery**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -20,6 +20,12 @@ in DOM metadata and console warnings, without extra game controls or labels.
 Missing required assets now stop before partial title creation and show an in-game
 Retry. Required JSON caches and original image/clip textures are checked, and scene
 updates wait for successful initialization. Optional failed audio does not block play.
+An explicit Save Game/Ctrl+S failure now uses the original in-game confirmation
+artwork and offers an immediate JSON backup. Adventure-write and medal-only
+failures have separate messages. Cancel/Escape leave combat paused; Space cannot
+resume under the prompt. Successful saves add no dialog. Hardcore combat keeps
+its town-only save/export rule and explains it with an acknowledgement.
+Automatic saves retain their existing non-interrupting behavior.
 
 All eight original hero classes are connected to ordinary New Game, equipment,
 skill choices, growth, combat and saves. Rogue/Hunter start with Little Girl;
@@ -251,8 +257,9 @@ historical player SOL compatibility remains unverified.
 
 - Last full suite: **572 tests pass**. Four new checks cover critical countdown,
   boss-wave warnings, source notice queue boundaries and extracted feedback assets.
-  Current typecheck/build pass; bundle: assets/index-BnnXZxvQ.js. Startup recovery
-  leaves simulation/save code unchanged, so the572-test result is reused.
+  Current typecheck/build pass; bundle: assets/index-vN9HJS3t.js. Twelve affected
+  mode/slot checks pass. The572-test baseline is reused: only save-error UI changed,
+  with no simulation, storage format or gameplay-rule changes.
   Existing source/deterministic checks cover
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
@@ -267,14 +274,19 @@ historical player SOL compatibility remains unverified.
   Day1, tick674, RNG1744019180, HP40, gold209. Slot8 is empty; slot1 is
   selected, paused/muted. No console errors or fullscreen during the latest check.
 
-Active sustained check: `.build/browser-qa/chrome-stability-verification.json`
-records one hour in a single isolated muted headless Chrome156 page. It reuses the
-Day41 dense fixture, raising only castle HP/max HP to10million to keep combat
-running. Raw rAF gaps, long tasks and heap samples are recorded each minute;
-final export/reload/Continue is automatic. **Running, not a passing result yet.**
-Inspect its state before continuing; do not launch a duplicate. The user's IAB
-profile/save is untouched. Standard Playwright is installed only under ignored
-`.tools/browser-qa/`; the temporary check is under `.build/browser-qa/`.
+Completed sustained check: `.build/browser-qa/chrome-stability-verification.json`
+records3600.017s in one isolated muted headless Chrome156 page; simulation advanced
+3598.567s. The controlled Day41 fixture starts150 enemies/six bosses/three companions
+and remains dense with131 enemies. Only castle HP/max HP was raised to10million.
+215870 raw rAF gaps average16.677ms: four exceed50ms, three exceed100ms, two exceed
+250ms; maximum983.4ms. No gaps exceed1s. One observed long task lasts68ms.
+Minute heap samples range16.2–43.7MiB, ending29.6MiB versus30.3MiB at the start;
+this does not prove absence of leaks or measure total process/GPU memory. There
+are no script errors/failed requests; final full-envelope export/reload/Continue
+matches exactly. Outlier causes remain unattributed. This run used BnnXZxvQ;
+the subsequent change affects only explicit save-error UI, so no repeat hour is
+justified. The browser closed automatically and the user's profile was untouched.
+Standard Playwright and temporary checks remain under ignored `.tools/`/`.build/`.
 
 Recent evidence is in ignored `.build/browser-qa/`; older detail remains in Git.
 Reuse it for unchanged behavior rather than repeating whole browser/campaign runs.
@@ -291,8 +303,8 @@ Reuse it for unchanged behavior rather than repeating whole browser/campaign run
 | Late enemy attacks | `late-attacks-verification.json`, `late-attacks-browser.png`: actual Cata/Tank/Dragon shots and Tank flash render; all four launch sounds are loaded while muted. A controlled tick6 save with all three flights survives import and actual Return to Title/Continue with the entire envelope unchanged. Source-derived motion/launch timing, flight removal, replay, legacy arrows and invalid kinds have automated checks. Transient flashes are not saved. |
 | Combat feedback | `combat-feedback-verification.json`, `combat-feedback-browser.png`, `combat-level-up.png`: original boss text and both ally auras render; an ordinary shot levels the controlled hero1→2 with original artwork. Active bonuses survive full-envelope Continue, old notices do not replay, and both auras clear on expiry. Companion counter's one-frame acquisition delay follows the source continue; no clock change was made. |
 | Font failure | `font-fallback-verification.json`, `font-failure-before.png`, `font-fallback-browser.png`: a zeroed served ui.ttf aborted the old build before canvas creation. The patched build reached ordinary Sheriff New Game/character creation/combat and fired5→4 rounds with that same fault. Restored font bytes match the source; healthy reload has no fallbacks and Continue preserves the entire tick18 save. User adventure/collection restored exactly. Original Flash/Ruffle startup path is unchanged. |
-
 | Required-asset recovery | `asset-retry-verification.json`, `asset-retry-browser.png`, `asset-recovery-browser.png`: missing town-layout JSON previously left a partial title and scene errors. Patched startup names the failed file, offers Retry and avoids scene callbacks before readiness. Actual Retry recovers the title/Continue; optional background-audio failure also permits play. Full tick674 exports before/after are byte-identical; source/served fault-injection files match again. |
+| Save failures | `save-failure-before.json`, `save-failure-verification.json`, `save-{all,profile}-browser.png`: injected storage failures previously produced only hidden status text. Actual Save Game now shows the original dialog, blocks Space, dismisses with Escape and exports the full unchanged envelope on Yes. Medal-only failure preserves the stored adventure. Healthy Save Game/reload/Continue remains exact. All checks use isolated muted contexts. |
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. The Codex app crash
@@ -312,16 +324,17 @@ for routine continuation.
   Direct-route and same-origin input/save evidence exists; browser/origin policy
   limits below still require representative evidence or an explicit support scope.
 - **Correctness and stability:** retain affected source comparisons/deterministic
-  checks, then extend the five-minute dense baseline to sustained real browser
-  operation with raw stall/memory observations. Passing tests alone is insufficient.
+  checks and sustained real browser operation with raw stall/memory observations.
+  The hour above passes with stated outliers/limits. Passing tests alone is insufficient.
 - **Finish boundary:** document a finite accepted difference list and supported
   hosting/browser scope, resolve material failures, then pause both watchers and
   report. Exact cosmetic/audio/RNG matching is not an unbounded prerequisite.
 
 ## Remaining features and differences
 
-1. Hours-long stability, broader browser/hosting performance and later difficulty
-   evidence. The five-minute crowded baseline above passes; the Day1000 save safety
+1. Broader browser/hosting performance and later difficulty evidence. The one-hour
+   controlled Chrome run above passes with stated limits; longer sessions/other
+   workloads are unverified. The Day1000 save safety
    boundary remains an intentional limit. Same-origin embedding has the input/save
    evidence above; cross-origin storage and IAB iframe download delivery remain open.
 2. All38 defined medal award paths and award notifications are connected. Preserve
