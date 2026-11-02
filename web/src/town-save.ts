@@ -19,8 +19,8 @@ export function validTownPreparation(value: unknown, validItem: (item: unknown) 
   const negotiator = value.preparationEffects?.missionNegotiator ?? 0;
   const mission = value.mission;
   const expected = generateLowLevelMission(day, day, () => 0, { negotiator });
-  const { loot: _loot, group: _group, bossWave: _bossWave, absorbFix: _absorb, hpFix: _hp, dmgFix: _dmg, expFix: _exp, reward: _reward, ...fixed } = expected;
-  if (!record(mission) || !fieldsEqual(mission, fixed) || !Array.isArray(mission.group) || mission.group.length !== 0
+  const { loot: _loot, group: _group, bossWave: _bossWave, hire: _hire, absorbFix: _absorb, hpFix: _hp, dmgFix: _dmg, expFix: _exp, reward: _reward, ...fixed } = expected;
+  if (!record(mission) || typeof mission.hire !== 'boolean' || !fieldsEqual(mission, fixed) || !Array.isArray(mission.group) || mission.group.length !== 0
     || (expected.bossDay ? mission.bossWave !== expected.wave - 1 : !integer(mission.bossWave, 2, 2 + Math.ceil(expected.wave / 3) - 1))) return false;
   const baseline = value.baseAbsorbFix ?? mission.absorbFix;
   if (typeof baseline !== 'number' || ![0, 0.01, 0.02, 0.03, 0.04].includes(baseline)

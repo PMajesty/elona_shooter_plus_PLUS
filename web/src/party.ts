@@ -4,6 +4,7 @@ import { ALL_TRAITS } from './party-progression.ts';
 import { validPartyAIState, type PartyAIState } from './party-ai.ts';
 import type { TraitLevels } from './progression.ts';
 import type { FirstTownRecruit, RecruitClass } from './recruits.ts';
+import { generateNpcRecruit } from './recruits.ts';
 
 export interface CombatActorState {
   level: number; exp: number; skillPoints: number; traits: TraitLevels; weaponExp: number[];
@@ -18,7 +19,7 @@ export interface PartyMember extends CombatActorState {
 export type PartySlotId = 1 | 2 | 3 | 4 | 5;
 export interface PartySlot { slot: PartySlotId; exists: boolean; member: PartyMember | null; weapon: Item | null }
 export interface PartyState { capacity: 1 | 2 | 3; slots: PartySlot[] }
-export type PartyPendingAction = { kind: 'hire' } | { kind: 'dismiss'; slot: number }
+export type PartyPendingAction = { kind: 'hire' } | { kind: 'henchman' } | { kind: 'dismiss'; slot: number }
   | { kind: 'party-mod'; inventorySlot: number; partySlot: number };
 export type HireOutcome = 'hired' | 'no-candidate' | 'party-full' | 'house-full' | 'not-enough-gold';
 export type PartyEquipmentAddress = { area: 'inventory' | 'party'; slot: number };
@@ -69,6 +70,23 @@ export function installCandidate(party: PartyState, recruit: Readonly<FirstTownR
     bowDrawing: previous?.bowDrawing ?? false, aiState: previous?.aiState ? structuredClone(previous.aiState) : null,
   };
   candidate.weapon = recruit.items[45] ? { ...recruit.items[45] } : null;
+}
+
+/** generateHenchman: отдельный четвёртый союзник, не занимающий постоянный дом. */
+export function generateHenchman(party: PartyState, day: number, random: () => number, engineer = 0): void {
+  const recruit = generateNpcRecruit(random, day, 10 + day, 4, {
+    previousSlots: { 45: party.slots[3].weapon }, itemContext: { engineer },
+  });
+  const weapon = new ItemFactory(random, { day, engineer }).generate(21, recruit.items[45]);
+  const member: PartyMember = {
+    devType: 4, sex: recruit.sex, name: recruit.name, appearance: recruit.pic,
+    potentialAim: recruit.potentialAim, potentialTeam: recruit.potentialTeam, nextTrait: recruit.nextTrait,
+    trained: 0, optBoss: false, optWall: true, kills: 0, earnedGold: 0, money: 200, cost: recruit.cost,
+    ai: 6, focus: -1, level: recruit.lv, exp: 0, skillPoints: recruit.sp,
+    traits: { ...recruit.trait, 106: 40 }, weaponExp: [...recruit.wexp], shootTimer: 0,
+    accuracyFix: 0, rampageTicks: 0, bowDrawing: false, aiState: null,
+  };
+  party.slots[3] = { slot: 4, exists: true, member, weapon };
 }
 
 export function hireFailure(party: PartyState, gold: number): Exclude<HireOutcome, 'hired'> | null {
@@ -179,14 +197,14 @@ export function validPartyMember(value: unknown): value is PartyMember {
 }
 
 export function validPartyState(value: unknown, validItem: (item: unknown) => item is Item,
-  options: { phase?: string } = {}): value is PartyState {
+  options: { phase?: string; allowHenchman?: boolean } = {}): value is PartyState {
   if (!record(value) || !integer(value.capacity, 1, 3) || !Array.isArray(value.slots) || value.slots.length !== 5) return false;
   let gap = false;
   for (let index = 0; index < 5; index++) {
     const slot = value.slots[index];
     if (!record(slot) || slot.slot !== index + 1 || typeof slot.exists !== 'boolean'
       || slot.member !== null && !validPartyMember(slot.member) || slot.weapon !== null && !validItem(slot.weapon)) return false;
-    if (slot.exists && slot.member === null || index === 3 && slot.exists) return false;
+    if (slot.exists && slot.member === null || index === 3 && slot.exists && !options.allowHenchman) return false;
     if (index < 3) {
       if (slot.exists && (gap || index >= value.capacity)) return false;
       if (!slot.exists) gap = true;
@@ -205,6 +223,7 @@ export function validPartyState(value: unknown, validItem: (item: unknown) => it
 
 export function validPartyPendingAction(action: unknown, party: PartyState, inventory: (Item | null)[], gold: number): action is PartyPendingAction {
   if (!record(action)) return false;
+  if (action.kind === 'henchman') return Object.keys(action).length === 1;
   if (action.kind === 'hire') return hireFailure(party, gold) === null;
   if (action.kind === 'dismiss') return integer(action.slot, 1, 3) && Boolean(partySlot(party, action.slot)?.exists);
   if (action.kind === 'party-mod') {

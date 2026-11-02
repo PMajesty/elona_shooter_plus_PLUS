@@ -909,12 +909,21 @@ class ElonaScene extends Phaser.Scene {
     // Восстановление открывает то же подтверждение, не вызывая генерацию повторно.
     if (pending) { tab = 'shop'; dialog = null; saleSlot = null; upgradeSelecting = false; }
     if (pendingParty) {
-      tab = pendingParty.kind === 'party-mod' ? 'equipment' : 'characters'; dialog = null; saleSlot = null; upgradeSelecting = false;
+      tab = pendingParty.kind === 'henchman' ? 'mission' : pendingParty.kind === 'party-mod' ? 'equipment' : 'characters'; dialog = null; saleSlot = null; upgradeSelecting = false;
       if (pendingParty.kind === 'hire') this.selectedCharacter = 5;
       else if (pendingParty.kind === 'dismiss') this.selectedCharacter = pendingParty.slot;
     }
     this.reset('town');
     this.root.add(createTownView(this, this.sim.state, manifest, this.cache.json.get('town-layout') as TownLayout, {
+      hire: () => {
+        if (this.sim!.requestMissionHire() === 'previewed') { this.playSound('soundScroll1'); this.saveGame(false); this.showTown('mission'); }
+        else { this.playSound('soundBeep'); status.textContent = 'A henchman is already contracted for this mission.'; }
+      },
+      confirmHire: answer => {
+        const outcome = this.sim!.resolvePartyAction(answer);
+        this.playSound(outcome === 'contracted' ? 'soundComplete' : 'soundClick1'); this.saveGame(false); this.showTown('mission');
+        status.textContent = outcome === 'contracted' ? "Hired Gun: You've hired a henchman for this mission. He will join when you rest." : 'Henchman contract cancelled.';
+      },
       select: next => { this.playSound('soundScroll1'); this.showTown(next); },
       actionHover: () => this.playSound('soundCard1'),
       message: value => { status.textContent = value; },
@@ -1060,6 +1069,7 @@ class ElonaScene extends Phaser.Scene {
       : dialog === 'repair' ? 'The castle walls are repaired. Click to continue.'
       : dialog === 'title' ? 'Honorary Citizen — daily salary: 100 GP, beginning with the next completed day. Click to continue.'
       : dialog === 'rest' ? `Click to finish resting and begin Day ${this.sim.state.day + 1}.`
+      : pendingParty?.kind === 'henchman' ? 'The henchman demands half the mission reward. Accept?'
       : pendingParty?.kind === 'hire' ? 'Yes pays the displayed cost and recruits this character. Any other click cancels.'
       : pendingParty?.kind === 'dismiss' ? 'Yes dismisses this companion. Any other click keeps them.'
       : pendingParty?.kind === 'party-mod' ? 'Yes mounts the MOD on the companion’s weapon. No or clicking elsewhere keeps both items unchanged.'

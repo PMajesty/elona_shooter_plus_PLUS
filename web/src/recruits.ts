@@ -50,9 +50,15 @@ export function generateFirstTownRecruit(random: () => number, options: RecruitG
 export function generateEarlyTownRecruit(random: () => number, day: number, options: RecruitGenerationOptions = {}): FirstTownRecruit {
   if (!validCampaignDay(day)) throw new RangeError('Unsupported campaign recruit day.');
   const level = (Math.trunc(random() * day * 0.3) + Math.trunc(day / 5) + 1);
+  return generateNpcRecruit(random, day, level, undefined, options);
+}
+
+/** generatePlayer: общий путь обычного кандидата и временного ополченца. */
+export function generateNpcRecruit(random: () => number, day: number, level: number, forcedClass?: RecruitClass, options: RecruitGenerationOptions = {}): FirstTownRecruit {
+  if (!validCampaignDay(day) || !Number.isInteger(level) || level < 1 || level > 999) throw new RangeError('Invalid NPC generation.');
   const sex = Math.trunc(random() * 2);
   const name = RECRUIT_NAMES[Math.trunc(random() * RECRUIT_NAMES.length)];
-  const devType = (Math.trunc(random() * 9) + 1) as RecruitClass;
+  const devType = forcedClass ?? (Math.trunc(random() * 9) + 1) as RecruitClass;
   const potentialAim = random() / 1.25 + 0.1;
   const potentialTeam = random() / 1.25 + 0.1;
   const trait: Record<number, number> = { [devType]: 1, 900: 1 + Math.trunc(random() * 10), 901: 1 + Math.trunc(random() * 10) };

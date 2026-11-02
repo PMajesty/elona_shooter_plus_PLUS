@@ -20,6 +20,7 @@ export interface TownLayout {
   castleUpgrades: { clip: string; children: Record<string, Placement>; x: number; y: number; columns: number; stepX: number; stepY: number;
     names: string[]; disabledAlpha: number; affordableColor: string; unavailableColor: string; pageButtons: string[]; hitRect: number[] };
   repairDialog: { image: string; children: Record<string, Placement> };
+  saleDialog: { image: string; children: Record<string, Placement> };
   claimTitleAction: { x: number; y: number; cardClip: string; cardFrame: number; cardRotation: number; hoverScale: number; pinClip: string; text: string; children: Record<string, Placement> };
 }
 interface TownViewState {
@@ -27,9 +28,10 @@ interface TownViewState {
   day: number; gold: number; castleHp: number; castleMaxHp: number; title: 0 | 1;
   wallLevel: number; wallFixCount: number; repairmanLevel: number; sandbagLevel: number; looterLevel: number; trainerLevel: number; party: { capacity: 1 | 2 | 3 };
   player: { level: number; exp: number; selectedSlot: number };
-  town: { ap: number; preparation: string } | null; inventory: (Item | null)[];
+  town: { ap: number; preparation: string; mission?: { hire: boolean } } | null; inventory: (Item | null)[];
+  pendingPartyAction: { kind: string } | null;
 }
-interface Callbacks { castlePage(page: 0 | 1): void; activity(action: TownActivity): void; activityAvailable(action: TownActivity): boolean; select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; dismiss(): void; message(value: string): void }
+interface Callbacks { hire(): void; confirmHire(answer: boolean): void; castlePage(page: 0 | 1): void; activity(action: TownActivity): void; activityAvailable(action: TownActivity): boolean; select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; dismiss(): void; message(value: string): void }
 
 /** Городские координаты и повороты берутся из исходного кадра 71 и его окон. */
 export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, dialog: TownDialog, castlePage: 0 | 1 = 0): Phaser.GameObjects.Container {
@@ -153,7 +155,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
       });
     } else {
       button('button_townRest', panel.children.act1, () => canRest ? callbacks.rest() : callbacks.message('The next campaign cycle is not available yet.'), x, y, canRest);
-      button('button_townHire', panel.children.act2, () => callbacks.message('Temporary henchmen are not available yet. Recruit permanent companions in Characters.'), x, y, false);
+      button('button_townHire', panel.children.act2, callbacks.hire, x, y, state.town?.preparation === 'ready' && !state.town.mission?.hire);
     }
     image(panel.labelsImage, x, 0).setAlpha(tab === 'mission' && !canRest ? 0.35 : 1);
     if (tab === 'mission') {
@@ -190,7 +192,16 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
       card.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); if (available) callbacks.claimTitle(); });
     }
   }
-  if (dialog) {
+  if (state.pendingPartyAction?.kind === 'henchman') {
+    const outside = scene.add.zone(0, 0, 620, 380).setOrigin(0).setInteractive(); root.add(outside);
+    outside.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); callbacks.confirmHire(false); });
+    const modal = layout.saleDialog;
+    image(modal.image);
+    text(modal.children.question, 'The henchman demands half the mission reward. Accept?');
+    for (const [name, answer] of [['yes', true], ['no', false]] as const) {
+      button(name === 'yes' ? 'button_dialogYes' : 'button_dialogNo', modal.children[name], () => callbacks.confirmHire(answer));
+    }
+  } else if (dialog) {
     const placement = layout.repairDialog;
     image(dialog === 'rest' ? 'eventRest' : dialog === 'title' ? 'eventNewTitle' : placement.image);
     text(placement.children.title, dialog === 'rest' ? 'Resting' : dialog === 'title' ? 'New Title!' : 'Free Repair!');

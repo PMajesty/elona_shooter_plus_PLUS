@@ -1,4 +1,5 @@
 import { generateEarlyTownRecruit } from './recruits.ts';
+import { generateHenchman } from './party.ts';
 import { fixedSearchRandom } from './town-search.ts';
 import { createTownEconomy, validTownEconomy, museumIncome, TOWN_ACTIVITIES, type TownEconomy, type TownActivity } from './town-economy.ts';
 import { ENEMY_TIMELINES, type EnemyTimeline } from './enemy-timelines.ts';
@@ -42,7 +43,7 @@ export interface EnemyState {
   type?: 0 | 1 | 2; tag?: number; onMark?: boolean;
 }
 export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCount: number }
-export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'>;
+export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'> & { hire?: true };
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
 export interface SimulationState {
   version: typeof SAVE_VERSION; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: number; tick: number; timerRemainder: number; rng: number; nextUid: number;
@@ -242,13 +243,21 @@ export class Simulation {
     this.state.pendingPartyAction = null;
     if (!confirm) return 'cancelled';
     let outcome: string = 'unavailable';
-    if (pending.kind === 'hire') {
+    if (pending.kind === 'henchman') {
+      const town = this.state.town;
+      if (town?.preparation === 'ready' && !town.mission.hire) { town.mission.hire = true; outcome = 'contracted'; }
+    } else if (pending.kind === 'hire') {
       const result = hireCandidate(this.state.party, this.state.gold);
       this.state.gold = result.gold; outcome = result.outcome;
     } else if (pending.kind === 'dismiss') outcome = dismissCompanion(this.state.party, pending.slot) ? 'dismissed' : 'unavailable';
     else outcome = resolvePartyMod(this.state.party, this.state.inventory, pending.inventorySlot, pending.partySlot, true, this.equipmentFactory());
     this.refreshPartySkills();
     return outcome;
+  }
+
+  requestMissionHire(): 'previewed' | 'unavailable' {
+    if (!this.partyMutationAvailable() || (this.state.town as ReadyTown).mission.hire) return 'unavailable';
+    this.state.pendingPartyAction = { kind: 'henchman' }; return 'previewed';
   }
 
   movePartyEquipment(from: PartyEquipmentAddress, to: PartyEquipmentAddress): 'moved' | 'previewed' | 'unavailable' {
@@ -346,7 +355,7 @@ export class Simulation {
 
   private missionParameters(mission: Readonly<LowLevelMission>): ActiveMission {
     const { level, fixedLv, strength, powerOrg, reward, spawnRate, hpFix, dmgFix, expFix, absorbFix, bossDay } = mission;
-    return { level, fixedLv, strength, powerOrg, reward, spawnRate, hpFix, dmgFix, expFix, absorbFix, bossDay };
+    return { level, fixedLv, strength, powerOrg, reward, spawnRate, hpFix, dmgFix, expFix, absorbFix, bossDay, ...(mission.hire ? { hire: true } : {}) };
   }
 
   private awardMedal(id: number): void {
@@ -359,6 +368,8 @@ export class Simulation {
     const town = this.state.town;
     if (this.state.phase !== 'town' || (this.state.pendingTownAction || this.state.pendingPartyAction) || this.state.day >= MAX_CAMPAIGN_DAY || town?.preparation !== 'ready' || town.mission.level !== this.state.day) return false;
     const state = this.state;
+    // Оригинал создаёт наёмника перед увеличением календарного дня.
+    if (town.mission.hire) generateHenchman(state.party, state.day, () => this.random(), state.partySkills.effects[120]);
     state.day = state.day + 1;
     state.previousTown = town;
     state.town = null;
@@ -1279,8 +1290,10 @@ export class Simulation {
       [1, 4, 7, 10].forEach((count, index) => { if (this.state.perfectDays >= count) this.awardMedal(60 + index); });
     }
     if (player.level >= 10) this.awardMedal(67);
-    const reward = this.state.activeMission.reward;
-    const perfectBonus = this.state.noDamage ? Math.trunc(reward * 1.3) - reward : 0;
+    const rewardShare = this.state.activeMission.hire ? 0.5 : 1;
+    const fullReward = this.state.activeMission.reward;
+    const reward = fullReward * rewardShare;
+    const perfectBonus = this.state.noDamage ? (Math.trunc(fullReward * 1.3) - fullReward) * rewardShare : 0;
     const tax = Math.max(0, this.state.day * 35 - 200);
     const salary = this.state.title === 1 ? 100 : 0;
     const wages = this.state.party.slots.slice(0, 4).reduce((total, slot) => total + (slot.exists && slot.member ? companionWage(slot.member, this.state.partySkills.effects[127], this.state.earnedMedals.includes(92)) : 0), 0);
@@ -1372,6 +1385,7 @@ export class Simulation {
 
   private prepareResult(): void {
     if (this.state.phase !== 'victory' || this.state.postbattle !== 'result' || this.state.town !== null) return;
+    if (this.state.activeMission.hire) { this.state.party.slots[3].exists = false; this.refreshPartySkills(); }
     // renewResult тратит бросок fame даже при fame=0; townEvent использует прежний кэш ACTIVE.
     const fame = int(this.state.economy.fame * this.random() * 15);
     if (fame) { this.state.result.fame = fame; this.state.result.netReward += fame; }
@@ -1953,7 +1967,7 @@ export class Simulation {
       if (!Number.isInteger(state.legacyReconstructionSeed) || state.legacyReconstructionSeed! < 1 || state.legacyReconstructionSeed! > 0xffffffff) throw new Error('Invalid legacy inventory provenance.');
     } else if (state.inventoryProvenance !== 'original-generation' || state.legacyReconstructionSeed !== undefined) throw new Error('Invalid inventory provenance.');
     if (state.day > 1) {
-      if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > (value.version < 15 ? 4 : 14) || !validTownPreparation(state.previousTown, validItem, state.day - 1, state.activeMission.absorbFix) || ['reward', 'hpFix', 'dmgFix', 'expFix', 'absorbFix'].some(key => state.activeMission[key as keyof ActiveMission] !== state.previousTown!.mission[key as keyof LowLevelMission])) throw new Error('Invalid previous town.');
+      if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > (value.version < 15 ? 4 : value.version < 28 ? 14 : 1000000) || !validTownPreparation(state.previousTown, validItem, state.day - 1, state.activeMission.absorbFix) || ['reward', 'hpFix', 'dmgFix', 'expFix', 'absorbFix'].some(key => state.activeMission[key as keyof ActiveMission] !== state.previousTown!.mission[key as keyof LowLevelMission]) || (Boolean(state.activeMission.hire) !== state.previousTown.mission.hire)) throw new Error('Invalid previous town.');
     } else if (state.previousTown !== null) throw new Error('Unexpected previous town.');
     if (Number(value.version) < 3) {
       state.version = SAVE_VERSION;

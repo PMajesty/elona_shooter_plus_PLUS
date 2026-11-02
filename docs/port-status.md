@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v28, four starting classes, Days1–40**.
+Updated 2026-11-02. Current local build: **v29, four starting classes, Days1–40**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -31,6 +31,10 @@ including rewards/setbacks, three-stage talent growth, inventory gifts, stock
 refresh, party XP, wall/chicken changes and fame income at the next settlement.
 Its separate saved random sequence continues across saves and days.
 Original assets and English UI are retained.
+Mission Hire now contracts a temporary Militia henchman in the fourth ally slot,
+without occupying a permanent house. He joins at Rest at level10 + the town day,
+uses a Rapid Bowgun and Big Gun40, fires at will and leaves at settlement. The
+mission reward (including the perfect bonus) is halved; source wages also apply.
 
 Sound defaults to muted, remembers the user's preference and displays an explicit
 `Sound: muted` / `Sound: on` state. Browser testing uses one retained tab. The
@@ -38,7 +42,7 @@ interruption closed the earlier temporary tab; the replacement is retained for r
 
 ## Validation
 
-- The complete suite passes **438 tests**. The controlled full-cycle run completed
+- The complete suite passes **444 tests**. The controlled full-cycle run completed
   all40 days, rewards, towns and Rest/save boundaries over97293 simulation frames,
   encountering all19 implemented enemy kinds. Powerful test equipment/HP removes
   difficulty as a test obstacle; this is not a full-campaign balance claim.
@@ -53,6 +57,10 @@ interruption closed the earlier temporary tab; the replacement is retained for r
   Eyed, full inventory, insufficient AP, nonfatal loss limits, talent growth,
   next-settlement fame, and AP above14/XP above999. These are source-led behavior
   tests, not a new instrumented-original comparison or proof of RNG parity.
+- Temporary-hire tests cover confirmation/cancellation and saved questions,
+  a full permanent party, source NPC generation, actual autonomous shooting,
+  projectile/state replay, normal/perfect half rewards, wages and departure.
+  Search AP above14 now also survives Rest's previous-town save boundary.
 - Class combat restores identical full state/events after JSON restoration,
   including Little Girl's AI and the Militia cooldown. Invalid identities/counters
   are rejected. Prior Sheriff migration preserves inventory and combat RNG.
@@ -73,6 +81,13 @@ interruption closed the earlier temporary tab; the replacement is retained for r
   Evidence: `.build/browser-qa/search-verification.json` and `town-search.png`.
   No browser errors; the original save was restored paused/muted and every field
   equals its expected migration (`search-restoration.json`, tick674/HP40/gold209).
+- V29 browser checks restored the pending Hire question, accepted the contract,
+  and used ordinary Rest to begin Day2 with the visible level11 henchman. Pending,
+  contracted and started-battle exports all equal their expected full simulation
+  state. No browser errors; same muted tab reused. Evidence:
+  `.build/browser-qa/henchman-verification.json` and `henchman-battle.png`.
+  The user's save is restored paused/muted with every field equal expected
+  migration (`henchman-restoration.json`, tick674/HP40/gold209).
 - Natural class smoke tests use rectangle hit regions, like the older opening
   battle tests. They do not prove browser contour/pixel parity, balance across the
   full campaign or a performance advantage over Flash.
@@ -87,7 +102,7 @@ in [historical verification](port-verification.json) and Git history.
 1. Later campaign cycles beyond Day40, strength/large-enemy variants and the
    systems below. Day40 town prepares the next mission, but Rest is guarded until
    those cycles are implemented. This is not an endless-campaign claim.
-2. Event-card actions, museum robbery, temporary Mission Hire,
+2. Event-card actions, museum robbery,
    Ragnarok and remaining global economy/medal systems. Museum income currently
    counts the medals known to this port; global medal carry-over is incomplete.
 3. Unlockable hero classes (Sniper, Ranger, Duelist, Noble), original multiple save
@@ -125,7 +140,5 @@ Exact30Hz/20Hz rates remain optional if observable timing is preserved.
 The user reauthorized recurring work: the 30-minute continuation watcher and
 three-hour workflow meta-review are active. See [current goal](long-term-goal.md).
 Defer the reported late-game hitbox complaint until core port coverage is complete.
-The native goal card still contains the earlier paused goal: a supported update
-attempt was refused because this chat has an active writer. The revised repository
-goal and both active heartbeat prompts supersede that old wording; development
-continues through the authorized watchers without bypassing the writer lock.
+The user cleared the native app goal. Do not recreate it without a new request;
+the revised repository objective and explicitly authorized watchers guide this work.
