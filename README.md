@@ -22,6 +22,7 @@ unless you previously enabled it; the mute preference persists between visits.
   Later cycles increase enemy strength and can spawn the original larger variants.
   The current browser save safety boundary is Day1000; this is not an endless-play claim.
 - Manual/automatic reload, owned firearms, bows, projectile weapons and consumables;
+  Chain Gun wind-up, release/resume and saved spin state work in manual and AI control.
   enemies, bosses and health bars; ordinary/boss loot, skills and settlements.
 - F toggles the original Fire at will mode: the hero acquires targets, fires and
   reloads using the party AI, with its original accuracy penalty and Sister indicator.
@@ -66,7 +67,7 @@ unless you previously enabled it; the mute preference persists between visits.
 - A persistent browser medal collection with class unlocks and original New Game
   starting bonuses. Eight browser save slots with the original title dropdown,
   trash icon and deletion confirmation, plus Continue and JSON import/export.
-  Version38 accepts prior browser saves; the original Flash medal/index file can
+  Version39 accepts prior browser saves; the original Flash medal/index file can
   be imported. Original Flash town adventures have a validated import path;
   compatibility with real players' files remains unverified.
 - Casual lowers encounter power/taxes and grants35% more kill XP. Hardcore uses

@@ -6,6 +6,7 @@ import { generateEarlyTownRecruit } from './recruits.ts';
 import { generateHenchman } from './party.ts';
 import { MEDALS } from './medals.ts';
 import { nextKillHistory, type KillHistory } from './kill-history.ts';
+import { advanceChainGunClock, idleChainGun, spinChainGun, type ChainGunState } from './combat-stats.ts';
 import { fixedSearchRandom } from './town-search.ts';
 import { createTownEconomy, validTownEconomy, museumIncome, TOWN_ACTIVITIES, type TownEconomy, type TownActivity } from './town-economy.ts';
 import { ENEMY_TIMELINES, type EnemyTimeline } from './enemy-timelines.ts';
@@ -69,7 +70,7 @@ export interface SimulationState {
   hero: KnownHeroInitialization; title: Title;
   castleHp: number; castleMaxHp: number; wallLevel: number; wallFixCount: number; repairmanLevel: number; sandbagLevel: number; looterLevel: number; trainerLevel: number; gold: number; totalMoney: number; kills: number; criticalKills: number;
   aimX: number; aimY: number; fireHeld: boolean; pendingShot: boolean;
-  player: { classId: HeroClass; classState?: { frenzy: number; idleCount: number; burst: number }; grenadeCount: number; level: number; exp: number; skillPoints: number; traits: TraitLevels; weaponExp: number[]; selectedSlot: number; shootTimer: number; accuracyFix: number; rampageTicks: number; bowDrawing: boolean };
+  player: { classId: HeroClass; classState?: { frenzy: number; idleCount: number; burst: number }; chainGun?: ChainGunState; grenadeCount: number; level: number; exp: number; skillPoints: number; traits: TraitLevels; weaponExp: number[]; selectedSlot: number; shootTimer: number; accuracyFix: number; rampageTicks: number; bowDrawing: boolean };
   waveIndex: number; waves: WaveState[]; bossWave: number; newWave: boolean; spawnTimer: number; noDamage: boolean;
   enemies: EnemyState[]; projectiles: ProjectileState[]; enemyArrows: EnemyArrowState[]; loot: number[];
   itemCooldowns: number[];
@@ -175,6 +176,7 @@ export class Simulation {
   get heroSettings(): Readonly<HeroSettings> { return this.state.heroSettings ?? DEFAULT_HERO_SETTINGS; }
   get heroAutomatic(): boolean { return this.heroSettings.order !== -1 || this.fireAtWill; }
   get heroClassState(): SimulationState['player']['classState'] { return this.state.heroAI?.state ?? this.state.player.classState; }
+  get heroChainState(): ChainGunState | undefined { return this.state.heroAI?.state ?? this.state.player.chainGun; }
 
   private heroAIActor(): PartyAIActor {
     const player = this.state.player;
@@ -202,6 +204,8 @@ export class Simulation {
       this.state.heroAI = { enabled: false, state: createPartyAIState(0) };
       refreshPartyAI(this.heroAIActor(), this.state.partySkills.effects[116]);
       if (meter) Object.assign(this.state.heroAI.state, meter);
+      if (this.state.player.chainGun) Object.assign(this.state.heroAI.state, this.state.player.chainGun);
+      delete this.state.player.chainGun;
       // AI хранит и классовые счётчики; второй копии в сохранении нет.
       delete this.state.player.classState;
     }
@@ -245,6 +249,7 @@ export class Simulation {
   }
 
   private initializePartyBattle(): void {
+    delete this.state.player.chainGun;
     if (this.state.heroAI) {
       delete this.state.heroAI;
       if (['sniper', 'ranger', 'duelist', 'noble'].includes(this.state.player.classId)) this.state.player.classState = { frenzy: 0, idleCount: 0, burst: 0 };
@@ -398,6 +403,7 @@ export class Simulation {
     if (previous) previous.reloadTime = 0;
     this.state.player.bowDrawing = false;
     this.state.player.selectedSlot = slot;
+    delete this.state.player.chainGun;
     if (this.state.heroAI) refreshPartyAI(this.heroAIActor(), this.state.partySkills.effects[116]);
     this.events.push({ type: 'select', weaponId: item.id });
     return true;
@@ -575,6 +581,7 @@ export class Simulation {
     if (input.reload) this.requestReload();
     const weapon = this.weapon;
     const bow = weapon?.id === 24 || weapon?.id === 25;
+    if (!this.heroAutomatic && weapon?.id === 16 && this.heroChainState) advanceChainGunClock(this.heroChainState);
     if (this.heroSettings.order === -1 && this.fireAtWill) {
       const ai = this.state.heroAI!.state;
       // MouseDown по-прежнему отменяет ручную перезарядку; выстрел берёт цель AI, не мышь.
@@ -612,6 +619,7 @@ export class Simulation {
     if (!this.heroAutomatic && player.rampageTicks > 0) player.rampageTicks--;
     this.state.itemCooldowns = this.state.itemCooldowns.map(time => Math.max(0, time - 1));
     if (!this.heroAutomatic && this.state.pendingShot && !(weapon?.reloadTime && !weapon.autoReload) && this.fireAt(this.state.aimX, this.state.aimY) && !weapon?.automatic) this.state.pendingShot = false;
+    if (!this.heroAutomatic && !this.state.pendingShot && weapon?.id === 16 && this.heroChainState) idleChainGun(this.heroChainState, true);
     this.state.partyAI.sharedWeaponRange = weapon?.range ?? null;
     const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
     if (this.heroAutomatic) stepPartyAIFrame(this.heroAIActor(), partyContext, partyCallbacks);
@@ -671,13 +679,9 @@ export class Simulation {
     player.shootTimer = stats.shootTimer;
     if (!manual && !item.automatic) player.shootTimer += int(this.random() * (item.shootRate / 1.5 / ai!.workRate));
     const behavior = weaponBehavior(item);
-    if (ai && item.id === 16) {
-      if (ai.chainMode !== 3) {
-        ai.chainMode = 2;
-        if (ai.chainPos > 82) ai.chainMode = 3;
-        ai.chainPos += 2; return true;
-      }
-      ai.chainPos = 82;
+    if (item.id === 16) {
+      const chain = ai ?? this.state.heroAI?.state ?? (this.state.player.chainGun ??= { chainMode: 0, chainPos: 0 });
+      if (!spinChainGun(chain)) return true;
     }
     if (behavior.bowDraw) {
       if (manual) this.state.pendingShot = false;
@@ -2039,6 +2043,10 @@ export class Simulation {
     const legacyProjectiles = value.version < 8;
     const playerNumbers = ['level', 'exp', 'skillPoints', 'shootTimer', 'accuracyFix', 'rampageTicks'];
     if (!record(player) || !isHeroClass(player.classId) || value.version < 25 && player.classId !== 'sheriff' || playerNumbers.some(key => !finite(player[key])) || Number(player.level) < 1) throw new Error('Invalid player state.');
+    if (player.chainGun !== undefined && (value.version < 39 || value.heroAI !== undefined || !record(player.chainGun)
+      || !Number.isInteger(player.chainGun.chainMode) || Number(player.chainGun.chainMode) < 0 || Number(player.chainGun.chainMode) > 3
+      || !Number.isInteger(player.chainGun.chainPos) || Number(player.chainGun.chainPos) < 0 || Number(player.chainGun.chainPos) > 86
+      || player.chainGun.chainTime !== undefined && (!finite(player.chainGun.chainTime) || player.chainGun.chainTime < 0 || player.chainGun.chainTime > 2462))) throw new Error('Invalid Chain Gun state.');
     const advancedHero = ['sniper', 'ranger', 'duelist', 'noble'].includes(player.classId);
     const control = record(value.heroAI) ? value.heroAI : undefined;
     const meter = control ? control.state as Record<string, unknown> : player.classState;

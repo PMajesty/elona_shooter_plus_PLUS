@@ -1,12 +1,12 @@
-import { COMBAT_TRAIT, combatTrait } from './combat-stats.ts';
+import { COMBAT_TRAIT, combatTrait, advanceChainGunClock, idleChainGun, type ChainGunState } from './combat-stats.ts';
 import type { Item } from './items.ts';
 import type { TraitLevels } from './progression.ts';
 
-export interface PartyAIState {
+export interface PartyAIState extends ChainGunState {
   targetUid: number | null; onMark: boolean; shooting: boolean;
   aimCount: number; aimTime: number; workRate: number; rangeFix: number;
   cursorX: number; cursorY: number; idleCount: number; frenzy: number; burst: number;
-  grenadeCount: number; chainMode: number; chainPos: number;
+  grenadeCount: number;
 }
 
 export interface PartyAICombatant {
@@ -64,6 +64,7 @@ export function createPartyAIState(slot: number): PartyAIState {
 export function validPartyAIState(value: unknown): value is PartyAIState {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const s = value as Record<string, unknown>;
+  if (s.chainTime !== undefined && (typeof s.chainTime !== 'number' || !Number.isFinite(s.chainTime) || s.chainTime < 0 || s.chainTime > 2462)) return false;
   const numbers = ['aimCount', 'aimTime', 'workRate', 'rangeFix', 'cursorX', 'cursorY', 'idleCount', 'frenzy', 'burst', 'grenadeCount', 'chainMode', 'chainPos'];
   if (numbers.some(key => typeof s[key] !== 'number' || !Number.isFinite(s[key]) || Math.abs(Number(s[key])) > 1e12)) return false;
   if (typeof s.onMark !== 'boolean' || typeof s.shooting !== 'boolean') return false;
@@ -104,6 +105,7 @@ export function refreshPartyAI(actor: PartyAIActor, leadership = 0): void {
   s.aimTime = Math.max(2, (18 - Math.sqrt(aiming) * 1.4 - aiming * 0.05) * 100 / (100 + leadership));
   s.workRate = Math.min(0.3, 0.03 + Math.sqrt(teamwork) * 0.025);
   s.chainMode = 0; s.chainPos = 0; s.burst = 0;
+  delete s.chainTime;
   s.grenadeCount = Math.max(100, 325 - (member.traits[COMBAT_TRAIT.MILITIA] ?? 0) * 4);
 }
 
@@ -192,6 +194,7 @@ export type PartyAIFrameOutcome = 'absent' | 'boss-mark' | 'acquired' | 'dead-ta
 export function stepPartyAIFrame(actor: PartyAIActor, context: PartyAIContext, callbacks: PartyAICallbacks): PartyAIFrameOutcome {
   if (!active(actor)) return 'absent';
   const member = actor.member, s = member.aiState;
+  if (actor.weapon?.id === 16) advanceChainGunClock(s);
   const manual = actor.slot === context.heroSlot && !context.fireAtWill;
   if (!manual) {
     if (member.optBoss && context.shared.targetBossUid !== null && !s.onMark) {
@@ -243,9 +246,8 @@ export function stepPartyAIFrame(actor: PartyAIActor, context: PartyAIContext, c
   else {
     s.idleCount += 0.033;
     if (actor.weapon?.id === 16) {
-      if (s.chainMode > 1) { callbacks.chainIdle?.(actor); s.chainMode = 1; }
-      if (manual || Math.abs(s.chainPos - 62) > 2) s.chainPos -= 2;
-      if (s.chainPos < 0) s.chainPos = 0;
+      if (s.chainMode > 1) callbacks.chainIdle?.(actor);
+      idleChainGun(s, manual);
     } else s.chainPos = 0;
   }
   return 'advanced';

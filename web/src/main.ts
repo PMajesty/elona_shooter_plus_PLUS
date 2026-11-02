@@ -135,6 +135,7 @@ class ElonaScene extends Phaser.Scene {
   private effects: { object: Phaser.GameObjects.GameObject; ticks: number; moveY?: number; clip?: string; frame?: number; enemyOffset?: { uid: number; x: number; y: number } }[] = [];
   private ambient?: Phaser.Sound.BaseSound;
   private bowSound?: Phaser.Sound.BaseSound;
+  private chainSounds = new Map<number, { mode: number; sound: Phaser.Sound.BaseSound }>();
   private fpsSamples: number[] = [];
   private maskCache = new Map<string, { width: number; height: number; data: Uint8ClampedArray }>();
 
@@ -235,6 +236,8 @@ class ElonaScene extends Phaser.Scene {
     this.enemyArrowSprites.clear();
     this.enemySprites.clear(); this.enemyRageSprites.clear(); this.enemyHitSprites.clear(); this.bossFrames.clear(); this.bossBars.clear(); this.projectileSprites.clear(); this.hud.clear(); this.effects = []; this.hotbar = [];
     this.bowSound?.destroy(); this.bowSound = undefined;
+    for (const entry of this.chainSounds.values()) entry.sound.destroy();
+    this.chainSounds.clear();
     for (const sound of this.companionBowSounds.values()) sound.destroy();
     this.companionBowSounds.clear(); this.companionSprites.clear(); this.companionCursors.clear();
     this.reloadAnimations = 0;
@@ -752,9 +755,31 @@ class ElonaScene extends Phaser.Scene {
       reloadTime: slot.weapon?.reloadTime ?? 0, bowDrawing: slot.member!.bowDrawing, cursorX: slot.member!.aiState?.cursorX, cursorY: slot.member!.aiState?.cursorY })));
   }
 
+  private syncChainSounds(): void {
+    if (!this.sim) return;
+    for (let slot = 0; slot <= 4; slot++) {
+      const member = slot ? this.sim.state.party.slots[slot - 1] : null;
+      const state = slot ? member?.exists ? member.member?.aiState : undefined : this.sim.heroChainState;
+      const mode = this.sim.actorWeapon(slot)?.id === 16 ? state?.chainMode ?? 0 : 0;
+      const previous = this.chainSounds.get(slot);
+      if (previous?.mode === mode) continue;
+      previous?.sound.destroy(); this.chainSounds.delete(slot);
+      if (!mode) continue;
+      const key = `soundChain${mode === 1 ? 2 : mode === 2 ? 1 : 3}`;
+      if (!this.cache.audio.exists(key)) continue;
+      const sound = this.sound.add(key, { volume: slot ? 0.2 : 0.65, pan: slot ? 0.8 : 0, loop: mode === 3 });
+      this.chainSounds.set(slot, { mode, sound });
+      // Позиция клипа следует сохранённым часам; сам звук не управляет симуляцией.
+      const seek = mode === 3 ? 0 : (state?.chainTime ?? 0) / 1000;
+      if (mode === 3 || seek < sound.duration) sound.play({ seek });
+      if (this.paused) sound.pause();
+    }
+  }
+
   private paintBattle(): void {
     if (!this.sim) return;
     const state = this.sim.state;
+    this.syncChainSounds();
     this.paintCastleSister();
     container.dataset.heroSettings = JSON.stringify(this.sim.heroSettings);
     container.dataset.heroAutomatic = String(this.sim.heroAutomatic);
@@ -987,6 +1012,7 @@ class ElonaScene extends Phaser.Scene {
     if (event.weaponId !== undefined) {
       const presentation = weaponPresentation(event.weaponId);
       sound.shot = `sound${presentation.sound[0].toUpperCase()}${presentation.sound.slice(1)}`;
+      if (event.weaponId === 16) delete sound.shot;
       const manual = actorWeapon?.manualReload;
       const reloadVariant = event.weaponId === 14 || event.weaponId === 15 ? 3 : 2;
       sound.reload = manual ? `soundReloading${reloadVariant}` : 'soundReloading1';
@@ -1171,6 +1197,7 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.gameMods = JSON.stringify(state.mods ?? {});
     container.dataset.heroClass = state.player.classId;
     container.dataset.classState = JSON.stringify(meter ?? null);
+    container.dataset.chainGun = JSON.stringify(this.sim.heroChainState ?? null);
     container.dataset.fireAtWill = String(this.sim!.fireAtWill);
     container.dataset.gold = String(state.gold); container.dataset.hp = String(state.castleHp);
     container.dataset.ammo = String(selected?.ammo ?? 0); container.dataset.grenades = String(state.inventory.filter(item => isOccupiedItem(item) && item.id === 11).reduce((total, item) => total + item!.ammo, 0));
@@ -1535,8 +1562,9 @@ class ElonaScene extends Phaser.Scene {
     this.paused = !this.paused; this.accumulator = 0; this.firePressed = this.fireReleased = false; this.firingGesture = this.firingReleaseOwned = false;
     container.dataset.paused = String(this.paused);
     this.celebration?.root.setVisible(!this.paused);
-    if (!this.paused) { status.hide(); this.pauseLayer?.destroy(true); this.pauseLayer = undefined; this.saveGame(false); this.ambient?.resume(); this.bowSound?.resume(); for (const sound of this.companionBowSounds.values()) sound.resume(); return; }
+    if (!this.paused) { status.hide(); this.pauseLayer?.destroy(true); this.pauseLayer = undefined; this.saveGame(false); this.ambient?.resume(); this.bowSound?.resume(); for (const sound of this.companionBowSounds.values()) sound.resume(); for (const entry of this.chainSounds.values()) entry.sound.resume(); return; }
     for (const sound of this.companionBowSounds.values()) sound.pause();
+    for (const entry of this.chainSounds.values()) entry.sound.pause();
     this.ambient?.pause(); this.bowSound?.pause(); this.saveGame(false);
     this.cursor?.setVisible(false);
     const data = this.cache.json.get('town-layout') as { pause: PauseLayout };

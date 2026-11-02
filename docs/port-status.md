@@ -1,7 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v38, Flash town adventure import**;
-original-game save compatibility regression added without changing the bundle.
+Updated 2026-11-02. Current local build: **v39, Chain Gun wind-up and interruption**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -36,6 +35,14 @@ Repeating encounter cycles are connected, including all19 enemy kinds,
 later bosses, shields/rage/rockets, bird-dropped rats and extracted animation attack
 frames. Manual/automatic reload, firearms, bows, projectiles, consumables, boss
 health bars, ordinary/boss loot, skills, results, towns and Rest are playable.
+The Chain Gun now winds up in manual control before spending bullets or applying
+shot recoil. Release stops firing and winds down; resuming uses retained spin.
+AI keeps its original idle-spin floor. Both modes use the original counter and
+2462ms sound-position cutoff through saved simulation time, independent of mute.
+Weapon changes/Rest reset spin; F transfers it without duplication. Original
+wind-up/down/loop clips follow the phase and pause/clear with the game. V39 retains
+optional manual spin/clock state; older saves add no spin fields or RNG draws.
+Source: onEnterFrame2477, shoot7896, refreshPlayer4622 and chainSoundLength984.
 The original fixed-level cycle controls enemy selection while calendar level
 controls power, rewards and boss counts. Every40 levels adds200 strength: ordinary
 enemy HP/attack and movement speed scale by their source formulas. After Day40,
@@ -192,10 +199,10 @@ historical player SOL compatibility remains unverified.
 
 ## Validation and limits
 
-- Last full suite: **556 tests pass**; typechecking and production build pass.
-  Added two native-save regressions; all13 affected import checks pass. The unchanged
-  production code/build and unrelated checks were reused. Bundle:
-  assets/index-fS9OoWkY.js. Existing deterministic/source comparisons cover hero
+- **562 tests verified**, with typechecking and production build passing. The full
+  run passed561/562; correcting one new test's mismatched aim setup gave4/4 on its
+  focused rerun, with unrelated passing results reused. Bundle:
+  assets/index-D-xyh3iF.js. Existing deterministic/source comparisons cover hero
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
 - One controlled40-day campaign reached all19 enemy kinds in96494 frames using
@@ -210,16 +217,8 @@ historical player SOL compatibility remains unverified.
   all eight heroes, modes, exact owned/town contents, changed activities/options,
   inactive recruit cells, later-cycle Hardcore/Rest, deterministic replay and
   invalid/deleted/unsupported files. The existing AMF encoder fixture is shared.
-- Latest town-card check: Prayer/Search/stock/robbery/Rest displayed original
-  content, dismissal preserved full envelopes, Continue retained town, and Rest
-  started Day2. Evidence: .build/browser-qa/town-events-verification.json.
-- Latest medal-notice check: Prayer appeared, survived town redraw, expired and
-  did not repeat on Continue; full envelopes stayed equal. Evidence:
-  .build/browser-qa/medal-notices-verification.json and original-medal-award.png.
-- Latest lifetime-kill check: controlled seven-kill town, ordinary Rest into Day2,
-  original Statistics showed seven despite zero current kills; Save/Return to
-  Title/Continue retained the full envelope. Evidence:
-  .build/browser-qa/kill-history-verification.json and lifetime-kills.png.
+- Unchanged town-card, medal-notice and lifetime-kill browser checks retain their
+  .build/browser-qa/{town-events,medal-notices,kill-history}-verification.json evidence.
 - Flash adventure browser check: Cancel preserved the user's full envelope;
   a controlled Hunter Day3 file imported to slot8 matched the entire expected
   save, Continue stayed equal, and Rest started Day4 with an exact town Carry Over
@@ -234,9 +233,15 @@ historical player SOL compatibility remains unverified.
   independent of the test encoder. Evidence: .build/browser-qa/native-flash-verification.json,
   ruffle-original-search.png and native-import-search.png. This covers one source
   save under Ruffle, not historical player files, native Adobe Flash or the index.
-- Disposable slot8 was removed after each check. The user's whole Sheriff
-  adventure/collection was restored exactly: Day1, tick674, RNG1744019180, HP40,
-  gold209, paused/muted. No test medals/records, console errors or fullscreen.
+- Chain Gun browser check: controlled Militia mid-spin import matched the complete
+  expected envelope. A short hold retained220 ammo; a longer hold fired to181;
+  release stopped there and wound down. Save/Return to Title/Continue retained the
+  entire interrupted-spin envelope. Four new checks cover counter/clock boundaries,
+  recoil, release/resume, AI floor, F/weapon changes, JSON replay and old/invalid saves.
+  Evidence: .build/browser-qa/chain-gun-verification.json and chain-gun-browser.png.
+- Disposable slot8 was removed. The user's Sheriff adventure/collection was restored:
+  only envelope/simulation version38→39 changed. Day1, tick674, RNG1744019180, HP40,
+  gold209 remain unchanged, paused/muted. No test medals/records, console errors or fullscreen.
 - Earlier detailed evidence remains in Git (through146a891), existing
   .build/browser-qa records and historical verification. Reuse it for unchanged
   behavior. The source's inactive card/debug-start functions were audited below.
@@ -261,7 +266,8 @@ that the app's crash cause was fixed.
    rather than the original ComboBox's five-row scrolling list.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
    camera shake, decorative boss reticle, some ranged spell effects/frame sounds,
-   rage art, Chain Gun interruption timing and raster/filter/subpixel differences.
+   rage art and raster/filter/subpixel differences. Chain Gun phase playback follows
+   deterministic time; sample-perfect audio/native SoundChannel scheduling is unverified.
    Firework timing/tint/audio and screen flashes approximate the Flash presentation;
    medal notification glow/filter transitions are approximate.
    Low quality uses nearest filtering/pixel rounding rather than rerasterizing

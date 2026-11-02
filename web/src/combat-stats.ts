@@ -184,6 +184,33 @@ export function weaponPresentation(id: number): WeaponPresentation {
 }
 
 const PROJECTILES: Readonly<Partial<Record<number, ProjectileKind>>> = { 21: 'grenade', 22: 'rocket', 23: 'bolt', 26: 'bolt', 24: 'arrow', 25: 'arrow', 27: 'gravity', 40: 'flame' };
+export interface ChainGunState { chainMode: number; chainPos: number; chainTime?: number }
+const CHAIN_SOUND_LENGTH = 2462;
+
+/** Звуковой предел исходника выражен часами симуляции: mute/рендер не меняют оружие. */
+export function advanceChainGunClock(state: ChainGunState): void {
+  if (state.chainMode === 1 || state.chainMode === 2) state.chainTime = Math.min(CHAIN_SOUND_LENGTH, (state.chainTime ?? 0) + 1000 / 30);
+}
+
+export function spinChainGun(state: ChainGunState): boolean {
+  if (state.chainMode === 3) { state.chainPos = 82; return true; }
+  if (state.chainMode !== 2) {
+    state.chainTime = state.chainMode === 1 ? CHAIN_SOUND_LENGTH - (state.chainTime ?? CHAIN_SOUND_LENGTH) : 0;
+    state.chainMode = 2;
+  }
+  if (state.chainPos > 82 || (state.chainTime ?? 0) + 400 >= CHAIN_SOUND_LENGTH) { state.chainMode = 3; state.chainTime = 0; }
+  state.chainPos += 2;
+  return false;
+}
+
+export function idleChainGun(state: ChainGunState, manual: boolean): void {
+  if (state.chainMode > 1) {
+    state.chainTime = state.chainMode === 3 ? 0 : CHAIN_SOUND_LENGTH - (state.chainTime ?? 0);
+    state.chainMode = 1;
+  }
+  if (manual || Math.abs(state.chainPos - 62) > 2) state.chainPos = Math.max(0, state.chainPos - 2);
+}
+
 export function weaponBehavior(item: Readonly<Item>) {
   const projectile = item.special ? PROJECTILES[item.id] ?? null : null;
   return {
