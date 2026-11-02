@@ -1,7 +1,7 @@
 # Castle purchase UI
 
 The Castle panel presents the original eight first-page tiles. Fix Wall, Wall,
-Sandbag, House and Repairman use the production immediate-purchase API; Storage,
+Sandbag, Storage, House and Repairman use the production immediate-purchase API;
 Looter, Trainer and page2 are visibly disabled and explain their unavailable scope. This note covers the
 UI and asset boundary. Transaction evidence is in
 [castle-upgrades-source.md](castle-upgrades-source.md); browser acceptance is
@@ -43,7 +43,7 @@ in a browser.
 
 `MainTimeline.as:1322–1356` appends positive current levels, displays the cost,
 uses blue `#0000cc` when available and red `#cc0000` otherwise, and dims an
-unavailable tile to0.3. The port follows those values. The three unimplemented
+unavailable tile to0.3. The port follows those values. The two unimplemented
 tiles display their default source levels/prices but remain disabled regardless
 of gold. Page2 is unavailable. No other Castle purchase is exposed by this UI.
 
@@ -55,12 +55,12 @@ Failure beeps; the small explanatory status messages are port UI rather than
 quotes from the original game. Affordability is recomputed by the transaction
 API, so rendered prices never authorize a stale purchase.
 
-Upkeep comes from `castleUpkeep(state)` and all five prices from
+Upkeep comes from `castleUpkeep(state)` and all six prices from
 `castleUpgradeCost`. Free Repair continues to rebuild the panel after healing.
-Main accepts save envelopes1–18 and emits18. The town DOM diagnostic
+Main accepts save envelopes1–19 and emits19. The town DOM diagnostic
 `data-castle-upgrades` exposes House, Wall, maxHP, upkeep, the Fix Wall purchase
 counter, Repairman level/repair amount, Sandbag level/damage multiplier/absorption
-percentage and the five current costs for ordinary
+percentage, derived Storage level/capacity and the six current costs for ordinary
 browser checks; it is not an alternate action interface.
 
 ## Paid repair and Repairman extension
@@ -123,6 +123,53 @@ existing payment sound and Castle rebuild, and cap feedback identifies Sandbag.
 No new damage effect, sound, alternate input path or timer is introduced by the
 UI. Production damage integration, source comparison, save/replay and browser
 acceptance remain separate evidence owned by the integration work.
+
+## Storage extension and expanded inventory
+
+Storage is tile3 at parent origin `(474.41238023502831,118)`; atlasframes7/8
+provide the unchanged up/over artwork. The displayed level is derived from
+`inventory.length - 5`, matching initial Storage1/six slots and maximum
+Storage11/sixteen slots. No duplicated saved Storage field is introduced. Price
+is `(slots - 4)² * 30 + 250` before purchase, and becomes0 at16 slots. Each
+purchase adds one empty owned slot and40 recurring upkeep. The source hint at
+`MainTimeline.as:11877` is "Buying this upgrade gives you +1 extra inventory
+slot." with the current capacity detail. Cap and affordability reuse the original
+disabled tile style and payment/denial path. The runtime remains the authority
+for capacity, payment and pending-dialog guards.
+
+Owned inventory IDs20–35 are represented by port indices0–15. The original
+shop (`11742–11746`) and Equipment (`4533–4537`) grids use local
+`x=140+(index%8)*50`, `y=250+floor(index/8)*48`. Existing `town-layout.json`
+already contains this eight-column/48px row metadata. Their views already
+iterate `state.inventory.length`, so no layout or art replacement is needed.
+Town's parent offset gives actual row origins y228/276 and leftmost x164.41238.
+Shop buy/swap/sale, Upgrade, MOD and Token callbacks pass the full slot index;
+Equipment uses the same dynamic indices for both hero-owned and companion moves.
+These routes still use the existing modal guards and cancellation behavior.
+
+`procLootMenu`,11174–11188 retains eight offers and iterates all owned slots,
+with local owned rows at224/272. The loot panel already bakes parent y−26, so
+its dynamic rows are198/246, leftmost x124.41238 after the existing menu slide.
+`loot-view.ts` now iterates actual capacity with eight columns and48px row
+spacing. Its old port status text at y262 would cover the second row, so that
+copy hides when capacity exceeds8; messages use the existing status below the
+canvas. Slot artwork, tooltips, pickup/drop, offer count and Proceed placement
+remain unchanged. Main's `data-inventory-slots` exposes the actual capacity in
+battle/reward/town states, and Castle diagnostics include derived level/cost.
+Only the first five owned slots show hotkey numbers and are available to battle
+selection/cooldowns, as in `createInvSlot`,3553–3556. Storage is not extra hotkeys.
+
+There is an existing scoped difference: the original common `invDrag` route
+at2990–2996 allows MOD→gun confirmation during loot as well as town. The port
+still allows mounting in town only. Its loot message explicitly directs the
+player to town and preserves both items; adding reward-phase confirmation and
+persistence is separate work. Expanded-slot loot transfer coverage must not be
+reported as loot-MOD parity.
+
+The v19 wrapper accepts versions1–19 and the runtime owns canonical length6–16
+validation/migration. No sprite, font, sound, extractor or layout file changes
+are needed for this extension. Source placement inspection and shared typecheck
+are separate from the root's browser checks of second-row actions and persistence.
 
 ## Preservation and reproduction
 

@@ -61,7 +61,8 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
   if (mode === 'boss') text(295, 78, `You've successfully killed ${state.bossKilled ?? 0} boss(es) therefore received some prizes!`, 12).setWordWrapWidth(238);
   const background = scene.add.zone(-MENU_X, 0, 620, 380).setOrigin(0).setInteractive();
   root.add(background);
-  const status = text(140, 262, '', 12, '#8e2f20').setWordWrapWidth(390);
+  // Второй исходный ряд занимает прежнюю полосу подсказки порта; сообщение остаётся под canvas.
+  const status = text(140, 262, '', 12, '#8e2f20').setWordWrapWidth(390).setVisible(state.inventory.length <= 8);
   const message = (value: string) => { status.setText(value); callbacks.message?.(value); };
 
   const tooltip = scene.add.container(0, 0).setVisible(false);
@@ -138,7 +139,7 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
       }
       if (carrying.area === area && carrying.index === index) { clearCarry(); return; }
       if (carrying.item.type === ITEM_TYPE.mod && item?.type === ITEM_TYPE.gun) {
-        clearCarry(); message('Mounting mods is not available yet. Choose an empty slot.'); return;
+        clearCarry(); message('Mount MODs in town. Choose an empty slot here.'); return;
       }
       // Успех синхронно уничтожает этот вид: после callback нельзя обращаться к его объектам.
       if (callbacks.move(carrying.area, carrying.index, area, index)) return;
@@ -147,7 +148,8 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
   };
 
   for (let index = 0; index < 8; index++) addSlot('offers', index, state.lootOffers[index] ?? null, 140 + index * 50, 129);
-  for (let index = 0; index < 6; index++) addSlot('inventory', index, state.inventory[index] ?? null, 140 + index * 50, 198);
+  // procLootMenu: (140 + column*50, 224 + row*48); сдвиг окна y=-26 уже запечён в панель.
+  for (let index = 0; index < state.inventory.length; index++) addSlot('inventory', index, state.inventory[index] ?? null, 140 + index % 8 * 50, 198 + Math.floor(index / 8) * 48);
 
   const proceed = image('button_proceed', 271, 301).setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 });
   proceed.setName('loot-proceed');

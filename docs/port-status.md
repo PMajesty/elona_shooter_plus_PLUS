@@ -4,17 +4,20 @@ Current implementation: **seven connected Sheriff days**, with owned firearms an
 consumables, ordinary/boss loot, earned skills, prepared towns, shop transactions,
 weapon Upgrade, MOD mounting, Free Repair, Rest, the first title claim and its salary,
 plus permanent recruitment, companion equipment, autonomous AI, growth and wages,
-and Castle House capacity two/three, Wall, Sandbag, paid Fix Wall and Repairman purchases.
+and Castle House capacity two/three, Wall, Sandbag, expanded Storage, paid Fix Wall and Repairman purchases.
 This is not a complete remake.
 The TypeScript/Phaser client runs independently of Flash and Ruffle; the preserved
 game remains the reference for behavior, content and appearance.
 
-The **v18 Sandbag release** is served at `http://127.0.0.1:5175/elona/` after
-automated/source checks, six complete-save browser checks and final production
-New Game/exact v17-save migration and restore checks. All 308 files from
-`.build/browser-sandbag-final` match the live build and ZIP. The bundle is
-`assets/index-2cijlKJd.js`; the deployable archive is
-`.build/elona-shooter-browser-sandbag-slice.zip` (8,574,403 bytes), SHA-256
+The **v19 Storage release** is served at `http://127.0.0.1:5175/elona/` after
+automated/source checks, fourteen complete-save UI checks and final production
+New Game/exact v18-save migration and restore checks. All 308 files from
+`.build/browser-storage-final` match the live build and ZIP. The bundle is
+`assets/index-Cb35fe28.js`; the deployable archive is
+`.build/elona-shooter-browser-storage-slice.zip` (8,574,659 bytes), SHA-256
+`d9ca912bb4b049b8a966b5f3b9d72c5bc72dbbe43377d1c1dde11aef8745cd58`.
+The verified v18 release remains in `.build/browser-before-storage` (all 308 files)
+and `.build/elona-shooter-browser-sandbag-slice.zip` (8,574,403 bytes), SHA-256
 `945b2023d734cf5569c0cab3ec3d187423c6747210148d96930f80fb7b972d1e`.
 The verified v17 release remains in `.build/browser-before-sandbag` (all 308 files)
 and `.build/elona-shooter-browser-repair-slice.zip` (8,574,119 bytes), SHA-256
@@ -72,7 +75,7 @@ establish this late-game diagnosis.
 - Original art, fonts, audio, layered character animation, boss health bars and
   the source boss appearance progression for the seven covered days.
 - Ordinary loot → earned boss prizes → earned Sheriff skill choices → results.
-  Gold settles once. Six inventory slots, offers and choices persist without rerolls.
+  Gold settles once. Owned inventory slots, offers and choices persist without rerolls.
 - Town preparation retains stock, cards, next-mission/recruit data and search
   initialization in source order. Purchases, owned swaps, confirmed sales and
   Shop Token discounts work. Generated data does not imply its action is playable.
@@ -93,7 +96,7 @@ establish this late-game diagnosis.
   the damage deficit; its price is derived from maxHP (first 240 GP). House adds 50
   upkeep per level and Wall adds 10 per purchase. Existing settled results remain
   historical. The original tiles, prices, levels and affordability are displayed;
-  Storage, Looter, Trainer and page2 remain disabled.
+  Looter, Trainer and page2 remain disabled.
 - Paid **Fix Wall** costs 8 GP per missing HP, heals fully and increments its
   retained purchase count, without AP/RNG/dialog. Full HP cost 0 disables it.
   **Repairman** costs `250 × level² + 700` before purchase and adds 60 GP upkeep
@@ -103,11 +106,18 @@ establish this late-game diagnosis.
   the final battle-completion boundary performs no repair. Automatic repair
   refreshes the HP HUD silently, matching the source; no new flash or sound.
 - **Sandbag** costs `240 × level² + 1000` before purchase and caps at10.
-  It adds40 upkeep per level and changes the castle damage multiplier to
+  It adds 40 upkeep per level and changes the castle damage multiplier to
   `1 - level * 0.05`; mission absorption and existing protection/rounding remain
   in the source damage path. Purchase does not heal or change historical results,
   and cap/insufficient-gold guards charge nothing. The original tile, source
   level0 acquisition message and float-truncated absorption hint are retained.
+- **Storage** increases inventory from 6 to 16 slots, one per purchase, with derived
+  level `slots - 5`. Cost is `(slots - 4)² × 30 + 250` before purchase; full
+  capacity disables payment. Each extra slot adds 40 upkeep. The source eight-column
+  shop/Equipment/loot grids wrap into a second row. Expanded indices work through
+  shop buy/sale/swap/Token/Upgrade/MOD and companion equipment; only the first five
+  retain combat hotkeys/cooldowns. Loot transfer supports extra slots, but original
+  loot-phase MOD confirmation remains unported and is explicitly directed to town.
 - Day6 settlement deducts the first 10 GP tax separately from default upkeep 40.
   Mission → Claim title costs 4 AP and grants Honorary Citizen, once eligible.
   It consumes no RNG and pays no immediate gold. Its 100 GP salary begins at the
@@ -150,7 +160,12 @@ Ordinary-enemy collision uses original filled contours and placement matrices,
 including persisted sheep shadow history. Bosses use rendered alpha geometry;
 the headless soak uses an explicitly documented boss rectangle fallback.
 
-Current saves use **version 18**, accepting port versions **1–17**.
+Current saves use **version 19**, accepting port versions **1–18**.
+Inventory length 6–16 is canonical, and Storage level is derived without a duplicate
+saved field. Legacy versions keep their strict six-slot inventory with metadata,
+RNG and paid history preserved; migration does not grant capacity or buy upgrades.
+Current pending actions validate indices against actual capacity. Version18's
+Sandbag state remains intact.
 Sandbag level is an integer0–10; legacy saves initialize it to zero without
 purchases, healing, RNG changes or repricing historical results. Version17's
 repair state remains intact.
@@ -228,7 +243,41 @@ no Flash plugin, Ruffle, external CDN or gameplay server.
 
 ## Evidence and intentional corrections
 
-The v18 Sandbag release passes **319 tests**, TypeScript checking and its build
+The v19 Storage release passes **331 tests**, TypeScript checking and its build
+(`assets/index-Cb35fe28.js`). **All 37 original observations match**. The initial
+36/37 comparison exposed consumable reload metadata being cleared too early at
+battle completion; correcting that boundary preserves it until the source's
+later reset. Four focused reference tests include three negative controls that
+detect discarded inactive metadata, the premature timer reset and refilling only
+the original six slots. Controlled method comparisons remain separate from
+native scheduling, full rewards and browser rendering.
+
+Fourteen UI checks match complete expected save envelopes: purchases to 7/9/16
+slots, insufficient-gold/cap guards, buys into slots 9/16, owned transfer, Continue,
+loot into slot 9, Upgrade preview/confirmation in the expanded inventory, Rest
+preserving a backpack Hammer's two charges, and earned result/town entry with 80
+upkeep. The first five checks ran before the consumable metadata correction and
+were re-compared against the final runtime; the other nine ran on the final
+candidate. All 305 public asset files are unchanged, and all 308 candidate/live/ZIP
+files match. Production New Game reached tick 0, HP 40, gold 200, ammo 5 and six
+inventory slots. The actual v18 backup migrated and restored with exact
+full-envelope equality at tick 674, HP 40, gold 209 and unchanged RNG; paused and
+no console errors. Evidence: `.build/browser-qa/storage-ui-verification.json`,
+`.build/browser-qa/storage-production-verification.json` and
+`.build/storage-publication.json`; screenshot `storage-production-restored.jpg`.
+
+The corrected Storage soak passes **nine scenarios, 135,074 frames and 1,491
+checkpoints**, including 54 Rest transitions, 253 reward actions, 34 Storage
+purchases, 34 expanded-slot loot transfers and 45 Rest transitions with occupied
+extra slots. Seven natural campaigns finish Day7; one loses there. The separate
+capital-start adds **20,000 gold only** at an earned first town, buys sixteen
+slots through normal purchases and finishes Day7. It grants no items and does
+not establish natural maximum-capacity affordability. Exact state/event replay
+uses original ordinary contours and the documented boss rectangle fallback;
+this is integration evidence, not original balance or browser scheduling parity.
+Report: `.build/storage-party-soak/report.json`.
+
+The historical v18 Sandbag release passed **319 tests**, TypeScript checking and its build
 (`assets/index-2cijlKJd.js`, 308 files). Two identical original runs match **25
 observations**: 12 damage cases, six controlled starting states and seven purchase
 outcomes. A strengthened 100-damage case produces 48 damage and distinguishes the
@@ -608,13 +657,11 @@ reports are in `.build/repair-party-soak/`.
 
 ## Next integrated work and continuation
 
-The next useful slice is **Castle Storage**: the source expands the existing owned
-inventory from 6 to 16 slots, one slot per purchase, while battle keys/hotbar stay
-limited to the first five. The first purchase costs 370 GP; each level adds 40 GP
-upkeep. Connect the ordinary purchase to shop, loot, equipment, MOD/Upgrade, sales,
-Rest and save/restore, including the 8-to-9 slot row wrap and 16-slot cap.
-Looter and Trainer remain separate bounded Castle slices. This fills
-early town interactions before extending the campaign again.
+The next slice is **MOD mounting during loot**, using original confirmation,
+cancel and persistence probes followed by integration into ordinary/boss rewards.
+This remains an explicit gap in the expanded inventory flow; town MOD support
+does not establish reward-phase parity. Looter valuation is another bounded Castle
+candidate. Trainer remains separate work before broader campaign expansion.
 The [Castle source audit](../web/docs/castle-upgrades-source.md) and
 [UI notes](../web/docs/castle-upgrades-ui-source.md) retain the current boundaries.
 Later campaign work still includes Lava and further town thresholds; Day8 onward

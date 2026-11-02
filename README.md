@@ -3,19 +3,19 @@
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
 Phaser 4. The current implementation covers **seven connected Sheriff days**:
 choose one of 22 appearances, fight, collect ordinary and boss loot, choose earned
-skills, enter town, hire permanent companions, improve the House, Wall and Sandbags, employ
+skills, enter town, hire permanent companions, improve the House, Wall and Sandbags, expand Storage, employ
 a Repairman, exchange equipment, buy/sell and upgrade weapons, mount MODs, repair
 the castle with gold or AP, then Rest into Days 2–7 with your
 retained party and equipment. Victory, defeat,
 rewards, town entry and save/restore work across these stages. Original English
 artwork, fonts, audio and credits are retained.
 
-The seven-day **v18 Sandbag release** is published at
+The seven-day **v19 Storage release** is published at
 [the local release](http://127.0.0.1:5175/elona/) after automated/source checks,
-six complete-save browser checks and successful production New Game and exact
-v17-save migration/restore checks. Its deployable archive is
-`.build/elona-shooter-browser-sandbag-slice.zip`; the verified v17 release is retained
-in `.build/browser-before-sandbag` and the prior repair archive.
+fourteen complete-save UI checks and successful production New Game and exact
+v18-save migration/restore checks. Its deployable archive is
+`.build/elona-shooter-browser-storage-slice.zip`; the verified v18 release is retained
+in `.build/browser-before-storage` and the prior Sandbag archive.
 
 This is not yet the complete game. Day 8 onward, other playable hero classes, full town
 management, the other Castle upgrades, temporary henchmen, recruit refresh, other card actions, Ragnarok and
@@ -76,8 +76,8 @@ introducing another gameplay correction.
 After victory, the reward sequence is **ordinary loot → earned boss prizes →
 earned skill choices → results**. Click an item to pick it up and click a slot to
 place or swap it; click outside the slots to cancel. Proceed leaves unclaimed
-items behind. Skill choices show original descriptions and previews. The six
-inventory slots, offers, pending choices and chosen traits persist without
+items behind. Skill choices show original descriptions and previews. Owned inventory slots,
+offers, pending choices and chosen traits persist without
 rerolling when you reload a current save. Gold is settled once after the reward
 choices finish, when results appear.
 
@@ -104,8 +104,17 @@ at **level 10**. Each level lowers the castle damage multiplier by0.05 and adds
 **40 GP daily upkeep**. Existing mission absorption, protection and integer
 rounding/minimum-damage rules still apply; buying it does not heal. At the cap,
 repeated clicks cost nothing. The displayed absorption hint retains the original
-floating-point calculation and truncation. Storage, Looter, Trainer and Castle
-page2 remain unavailable.
+floating-point calculation and truncation.
+
+**Storage** adds one owned slot per purchase, from **six to sixteen**. The first
+costs **370 GP**; later prices are `(current slots - 4)² × 30 + 250`. Each extra
+slot adds **40 GP daily upkeep**. Shop, Equipment and ordinary/boss loot show eight
+columns and a second row when needed. Purchases, sales, swaps, town Upgrade/MODs,
+Shop Tokens and companion equipment use the expanded slots; only the **first five**
+remain battle hotkeys. At16 slots, further purchases cost nothing and are blocked.
+Looter, Trainer and Castle page2 remain unavailable. **MOD mounting during loot
+is still unported**: keep the MOD and mount it in town; expanded loot transfer
+support does not imply that confirmation works during rewards.
 Town preparation generates stock, cards, next-mission data and a
 recruit once. Open the Shop tab, click stock to pick it up, then click an empty
 owned slot to buy it. Owned items can be moved or swapped; dropping one outside
@@ -175,7 +184,10 @@ Rejected mounting keeps both items. **No or clicking outside this confirmation
 swaps the MOD and gun**, matching the original owned-inventory behavior; it does
 not cancel like a sale. Stock MODs must first be bought into an empty owned slot.
 
-Saves now use **version 18**; versions **1–17** are accepted. Sandbag
+Saves now use **version 19**; versions **1–18** are accepted. Capacity
+is the owned inventory length 6–16; Storage level is derived as slots minus five,
+with no duplicate saved level. Legacy saves retain their six-slot inventory
+without purchases, RNG changes or discarded item metadata. Sandbag
 level0–10 persists; older saves initialize it to zero without spending, healing,
 changing RNG or repricing settled results. Repairman
 level and the paid Fix Wall purchase count persist. Older saves initialize both
@@ -310,7 +322,41 @@ grenade flight, shake RNG and death before/after release. See
 [seventh-day wave notes](web/docs/seventh-day-wave-source.md) and
 [seventh-town notes](web/docs/seventh-town-source.md).
 
-The v18 Sandbag release passes **319 tests**, TypeScript checking and its build
+The v19 Storage release passes **331 tests**, TypeScript checking and its build
+(`assets/index-Cb35fe28.js`). **All 37 original observations match**. The initial
+36/37 comparison exposed consumable reload metadata being cleared too early at
+battle completion; correcting that boundary preserves it until the source's
+later reset. Four focused reference tests include three negative controls that
+detect discarded inactive metadata, the premature timer reset and refilling only
+the original six slots. Controlled method comparisons remain separate from
+native scheduling, full rewards and browser rendering.
+
+Fourteen UI checks match complete expected save envelopes: purchases to 7/9/16
+slots, insufficient-gold/cap guards, buys into slots 9/16, owned transfer, Continue,
+loot into slot 9, Upgrade preview/confirmation in the expanded inventory, Rest
+preserving a backpack Hammer's two charges, and earned result/town entry with 80
+upkeep. The first five checks ran before the consumable metadata correction and
+were re-compared against the final runtime; the other nine ran on the final
+candidate. All 305 public asset files are unchanged, and all 308 candidate/live/ZIP
+files match. Production New Game reached tick 0, HP 40, gold 200, ammo 5 and six
+inventory slots. The actual v18 backup migrated and restored with exact
+full-envelope equality at tick 674, HP 40, gold 209 and unchanged RNG; paused and
+no console errors. Evidence: `.build/browser-qa/storage-ui-verification.json`,
+`.build/browser-qa/storage-production-verification.json` and
+`.build/storage-publication.json`; screenshot `storage-production-restored.jpg`.
+
+The corrected Storage soak passes **nine scenarios, 135,074 frames and 1,491
+checkpoints**, including 54 Rest transitions, 253 reward actions, 34 Storage
+purchases, 34 expanded-slot loot transfers and 45 Rest transitions with occupied
+extra slots. Seven natural campaigns finish Day7; one loses there. The separate
+capital-start adds **20,000 gold only** at an earned first town, buys sixteen
+slots through normal purchases and finishes Day7. It grants no items and does
+not establish natural maximum-capacity affordability. Exact state/event replay
+uses original ordinary contours and the documented boss rectangle fallback;
+this is integration evidence, not original balance or browser scheduling parity.
+Report: `.build/storage-party-soak/report.json`.
+
+The historical v18 Sandbag release passed **319 tests**, TypeScript checking and its build
 (`assets/index-2cijlKJd.js`, 308 files). Two identical original runs match **25
 observations**: 12 damage cases, six controlled starting states and seven purchase
 outcomes. A strengthened 100-damage case produces 48 damage and distinguishes the
@@ -472,10 +518,10 @@ or native browser scheduling parity. Run
 `node --experimental-strip-types scripts/party-soak.ts 8 repair` from `web`;
 reports are in `.build/repair-party-soak/`.
 
-The next useful Castle slice is **Storage**, after auditing its capacity limit,
-prices and effects across inventory, shop, loot and save/restore. Looter and Trainer
-remain separate Castle work, alongside Day8/Lava and the unproven veteran
-late-game hitbox complaint.
+The next slice is **MOD mounting during loot**: capture original confirmation,
+cancel and persistence probes, then connect the behavior through the ordinary
+reward flow. Looter valuation is another bounded Castle candidate; Trainer,
+Day8/Lava and the unproven veteran late-game hitbox complaint remain later work.
 
 `npm.cmd run test:projectile-soak` separately exercises eight projectile guns
 and hand grenades under three seeds: **27 scenarios, 9,720 frames and 1,080
@@ -521,6 +567,7 @@ python tools/build_seventh_town_oracle.py
 python tools/build_castle_upgrades_oracle.py
 python tools/build_castle_repair_oracle.py
 python tools/build_castle_sandbag_oracle.py
+python tools/build_castle_storage_oracle.py
 python tools/serve_oracle.py
 ```
 
@@ -554,7 +601,8 @@ with `test:sixth-day-wave-reference`, `test:barbarian-reference` and
 `?suite=castle-upgrades` and `npm.cmd run test:castle-upgrades-reference`. Paid
 repair and Repairman use `?suite=castle-repair` and
 `npm.cmd run test:castle-repair-reference`. Sandbags use `?suite=castle-sandbag`
-and `npm.cmd run test:castle-sandbag-reference`.
+and `npm.cmd run test:castle-sandbag-reference`. Storage uses `?suite=castle-storage`
+and `npm.cmd run test:castle-storage-reference`.
 Run these scripts with `npm.cmd run` from `web/`. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, use the matching comparison command: `npm.cmd run test:reference`,
@@ -575,7 +623,7 @@ for controlled state, source preservation and limitations, and the
 The runtime assets are included under `web/public/assets/`, so ordinary browser
 development does not require Java or Flash tooling. Their manifest records
 original symbol IDs, frame numbers and registration offsets.
-The selected package contains **102 images, 48 clips, 89 sounds and six fonts**,
+The selected package contains **108 images, 49 clips, 89 sounds and six fonts**,
 including Archer, Fly and Barbarian timelines, the separate Archer arrow,
 boss guard and Barbarian hit/rage effects, title-action artwork and original
 collision contours, plus Characters/Equipment panels, portraits and controls.

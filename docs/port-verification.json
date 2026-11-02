@@ -1,6 +1,6 @@
 {
   "date": "2026-11-02",
-  "milestone": "Sandbag purchases, source integer damage absorption and upkeep, v18 persistence; published locally and browser-verified",
+  "milestone": "Storage purchases and expanded owned inventory through sixteen slots, original refill boundaries and upkeep, v19 persistence; published locally and browser-verified",
   "complete_port": false,
   "environment": {
     "os": "Windows",
@@ -10,19 +10,18 @@
     "vite": "8.3.5"
   },
   "automated": {
-    "simulation_tests_passed": 319,
+    "simulation_tests_passed": 331,
     "simulation_tests_failed": 0,
     "typescript": "passed",
     "candidate_build": "passed",
     "production_build": "identical to verified candidate",
-    "test_output": ".build/sandbag-tests-output.txt",
-    "build_output": ".build/sandbag-build-output.txt",
-    "python_tools_compile": "passed: Castle Sandbag diagnostic builder and oracle server",
-    "sandbag_party_soak": {
+    "test_output": ".build/storage-tests-output.txt",
+    "build_output": ".build/storage-build-output.txt",
+    "storage_party_soak": {
       "status": "passed",
       "seedCount": 8,
       "sourceHashes": {
-        "simulation.ts": "fac3acc3803ef393eb367359f6bc5c4134b78f62caf2826f5b34a1b5eebef882",
+        "simulation.ts": "10e6a3238b8862e93b81c17aab5d5a2e06b1dab201576b89b87b6ea0ab73ffa9",
         "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
         "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
         "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
@@ -31,15 +30,24 @@
         "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
         "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
         "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
-        "castle-upgrades.ts": "e64edfcd88cc84d8036cc898652d82a88fd54c52be9e779207f856acc060fcff"
+        "castle-upgrades.ts": "1c67c39f830ebf5aa60bc8d9bfcf56989817ba359be0dfc58a92afc839ab1ba8"
       },
       "geometrySha256": "505b48ffe234d7187db5445bd4306f0d104648985d18a0719e7c47605fec3ad2",
       "scenarios": 9,
-      "frames": 132552,
-      "checkpoints": 1470,
-      "restTransitions": 53,
-      "rewardActions": 219,
+      "frames": 135074,
+      "checkpoints": 1491,
+      "restTransitions": 54,
+      "rewardActions": 253,
       "reachedDays": {
+        "1": 8,
+        "2": 9,
+        "3": 9,
+        "4": 9,
+        "5": 9,
+        "6": 9,
+        "7": 9
+      },
+      "wonDays": {
         "1": 8,
         "2": 9,
         "3": 9,
@@ -48,58 +56,52 @@
         "6": 9,
         "7": 8
       },
-      "wonDays": {
-        "1": 8,
-        "2": 9,
-        "3": 9,
-        "4": 9,
-        "5": 9,
-        "6": 8,
-        "7": 8
-      },
       "naturallyHiredClasses": [
+        1,
         2,
         3,
         4,
+        6,
         8,
         9
       ],
-      "sandbagPurchases": 19,
-      "ambiguousSandbagFrames": 1,
-      "positiveDamageReductions": 1,
-      "avoidedDamage": 1,
-      "fixWallPurchases": 11,
-      "repairmanPurchases": 17,
-      "positiveRepairObservations": 41,
-      "housePurchases": 1,
+      "storagePurchases": 34,
+      "maximumInventorySlots": 16,
+      "expandedLootTransfers": 34,
+      "housePurchases": 5,
       "wallPurchases": 9,
       "maximumCompanions": 2,
       "partyBattleCounts": {
         "0": 8,
         "1": 49,
-        "2": 4
+        "2": 5
       },
-      "expandedNaturalScenarios": [],
+      "expandedNaturalScenarios": [
+        "natural-0",
+        "natural-1",
+        "natural-3",
+        "natural-6"
+      ],
       "actorActivity": {
         "1": {
-          "shots": 1730,
-          "hits": 1451,
-          "damage": 72762,
-          "kills": 854,
-          "reloads": 759,
-          "reloadCompletions": 128,
-          "bowDraws": 428,
-          "levelUps": 48
+          "shots": 1918,
+          "hits": 1615,
+          "damage": 83335,
+          "kills": 955,
+          "reloads": 908,
+          "reloadCompletions": 158,
+          "bowDraws": 437,
+          "levelUps": 53
         },
         "2": {
-          "shots": 0,
-          "hits": 0,
-          "damage": 0,
-          "kills": 0,
-          "reloads": 0,
-          "reloadCompletions": 0,
+          "shots": 100,
+          "hits": 96,
+          "damage": 5842,
+          "kills": 84,
+          "reloads": 94,
+          "reloadCompletions": 20,
           "bowDraws": 0,
-          "levelUps": 0
+          "levelUps": 5
         },
         "3": {
           "shots": 0,
@@ -112,25 +114,211 @@
           "levelUps": 0
         }
       },
-      "elapsedMs": 79085,
+      "elapsedMs": 29775,
       "collision": "Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts",
-      "policy": "Aimed Sheriff and autonomous companions; prioritize Sandbag1, Sandbag2 from town4, then Repairman/House/Wall/hiring and paid/free repair policy. Reserve first hire cost. Natural runs have no grants. Separate capital-start grants12000gold only at earned first town, buys Sandbag4 normally, sets companions to armor-only/no priorities through normal town actions and avoids aiming at Crows until one positive reduction occurs. This input exposure addresses integer rounding that masks low-level Sandbags against small early-game hits. Measured damage pairs replay a single actual frame with only Sandbag level set to0; accept single-hit, same-final-RNG, surviving-wall pairs. This counterfactual is port integration evidence, separate from original damage reference.",
+      "policy": "Aimed Sheriff and autonomous companions; buy capacity7/8/9 from town1/2/3 when affordable, reserve first hire cost, then existing House/Wall/hiring policy. Collect actual loot into first available slot including expanded backpack. Check every extra item across Rest and full-state/event replay. Natural starts have no grants; separate capital-start adds20000gold only at earned first town and buys all16slots through ordinary transactions. No granted items, forced kills or private battle completion.",
       "limits": [
         "Port full-state/event replay and finite-state checks, not independent original parity or browser validation",
         "Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred",
-        "Natural scenarios and the one capital-start are separate: the latter grants12000gold only at an earned first town; it does not establish natural three-companion affordability within seven days",
+        "Capital capacity16 evidence grants20000gold only at earned first town; it does not establish natural full Storage affordability within seven days",
         "Deaths count castle defeats; companions have no separate HP/death model in the source combat actor"
       ],
-      "acceptedDamagePairs": 186,
-      "unchangedDamagePairs": 185,
-      "naturalDay7Wins": 8,
-      "capitalOutcome": "Day6 castle defeat; companions remain on the deliberately chosen armor-only/no-priority orders. No invincibility or forced completion.",
-      "positiveReductionProvenance": "One actual Crow impact in capital-sandbag-exposure, Day3tick3553: damage3 with purchased Sandbag4 vs4 with onlylevel reset0, sameRNG. Natural level1/2 hit pairs show no positive integer reduction.",
-      "failedAssumption": "Prior run at levels1/2 did not exercise positive reduction; existing medal absorption and truncation masked the small percentage. Its completed campaigns and failed coverage assertion are preserved in .build/sandbag-party-soak-low-damage; individual hit counts were not saved by that older failure handler. All8 natural replay operation streams are unchanged in the revised run."
+      "restObservations": 54,
+      "occupiedExtraSlotRestObservations": 45,
+      "fixtureCount": 263,
+      "naturalDay7Wins": 7,
+      "campaignOutcomes": [
+        {
+          "id": "natural-0",
+          "kind": "natural",
+          "finalDay": 7,
+          "phase": "town",
+          "castleHp": 45,
+          "gold": 18
+        },
+        {
+          "id": "natural-1",
+          "kind": "natural",
+          "finalDay": 7,
+          "phase": "town",
+          "castleHp": 45,
+          "gold": 315
+        },
+        {
+          "id": "natural-2",
+          "kind": "natural",
+          "finalDay": 7,
+          "phase": "town",
+          "castleHp": 45,
+          "gold": 1950
+        },
+        {
+          "id": "natural-3",
+          "kind": "natural",
+          "finalDay": 7,
+          "phase": "town",
+          "castleHp": 45,
+          "gold": 45
+        },
+        {
+          "id": "natural-4",
+          "kind": "natural",
+          "finalDay": 7,
+          "phase": "defeat",
+          "castleHp": 0,
+          "gold": 1567
+        },
+        {
+          "id": "natural-5",
+          "kind": "natural",
+          "finalDay": 7,
+          "phase": "town",
+          "castleHp": 45,
+          "gold": 2313
+        },
+        {
+          "id": "natural-6",
+          "kind": "natural",
+          "finalDay": 7,
+          "phase": "town",
+          "castleHp": 45,
+          "gold": 319
+        },
+        {
+          "id": "natural-7",
+          "kind": "natural",
+          "finalDay": 7,
+          "phase": "town",
+          "castleHp": 45,
+          "gold": 2431
+        },
+        {
+          "id": "capital-storage-capacity",
+          "kind": "capital-start",
+          "finalDay": 7,
+          "phase": "town",
+          "castleHp": 45,
+          "gold": 2255
+        }
+      ],
+      "capitalProvenance": "Only +20000 gold at an actually earned first town; all sixteen slots purchased through ordinary transactions. This does not establish natural full-capacity affordability within seven days.",
+      "metadataCorrection": "Original capture confirmed fillAmmo preserves consumable ammo and reload metadata; updateAlly at Rest resets the timer only. The prior run is retained in .build/storage-party-soak-before-metadata-fix. All nine operation replay files and recorded outcomes are unchanged in the corrected-runtime run."
     },
-    "sandbag_party_soak_report": ".build/sandbag-party-soak/report.json",
-    "sandbag_party_soak_report_sha256": "8c76ff58c9e4a829f95cfacb9f2ef52e6ff5e7fb6502ff29f184945bc03b962d",
-    "sandbag_party_soak_fixtures": ".build/browser-qa/sandbag-party-soak-fixtures.json",
+    "storage_party_soak_report": ".build/storage-party-soak/report.json",
+    "storage_party_soak_report_sha256": "a1ab896d0f21bd28efcf188f4689a87599e330d447aa11219c841fa51613676b",
+    "storage_party_soak_fixtures": ".build/browser-qa/storage-party-soak-fixtures.json",
+    "independent_soak_audit": {
+      "status": "passed",
+      "sourceHashes": {
+        "simulation.ts": "10e6a3238b8862e93b81c17aab5d5a2e06b1dab201576b89b87b6ea0ab73ffa9",
+        "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
+        "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
+        "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
+        "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
+        "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
+        "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
+        "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
+        "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
+        "castle-upgrades.ts": "1c67c39f830ebf5aa60bc8d9bfcf56989817ba359be0dfc58a92afc839ab1ba8"
+      },
+      "fixtureHashesVerified": 263,
+      "capitalOnlyGold": 20000,
+      "observations": [
+        {
+          "scenario": "natural-0",
+          "before": "before-loot-slot7",
+          "after": "loot-slot7",
+          "operations": 1,
+          "occupiedRest": null,
+          "fullStateMatch": true
+        },
+        {
+          "scenario": "natural-0",
+          "before": "before-loot-slot8",
+          "after": "loot-slot8",
+          "operations": 1,
+          "occupiedRest": null,
+          "fullStateMatch": true
+        },
+        {
+          "scenario": "natural-0",
+          "before": "before-loot-slot9",
+          "after": "loot-slot9",
+          "operations": 1,
+          "occupiedRest": null,
+          "fullStateMatch": true
+        },
+        {
+          "scenario": "natural-0",
+          "before": "loot-slot7",
+          "after": "before-loot-slot8",
+          "operations": 2118,
+          "occupiedRest": 1,
+          "fullStateMatch": true
+        },
+        {
+          "scenario": "capital-storage-capacity",
+          "before": "before-storage7",
+          "after": "storage7",
+          "operations": 1,
+          "occupiedRest": null,
+          "fullStateMatch": true
+        },
+        {
+          "scenario": "capital-storage-capacity",
+          "before": "before-storage8",
+          "after": "storage8",
+          "operations": 1,
+          "occupiedRest": null,
+          "fullStateMatch": true
+        },
+        {
+          "scenario": "capital-storage-capacity",
+          "before": "before-storage9",
+          "after": "storage9",
+          "operations": 1,
+          "occupiedRest": null,
+          "fullStateMatch": true
+        },
+        {
+          "scenario": "capital-storage-capacity",
+          "before": "before-storage16",
+          "after": "storage16",
+          "operations": 1,
+          "occupiedRest": null,
+          "fullStateMatch": true
+        },
+        {
+          "scenario": "capital-storage-capacity",
+          "before": "before-storage-rest",
+          "after": "storage-rest",
+          "operations": 1,
+          "occupiedRest": 0,
+          "fullStateMatch": true
+        }
+      ],
+      "limits": [
+        "Independent selected operation replay of port production state; not original parity or browser evidence",
+        "Original ordinary-enemy contours; boss rectangle fallback as recorded by the campaign runner"
+      ],
+      "preFixComparison": {
+        "replayFiles": 9,
+        "allReplayFilesByteIdentical": true,
+        "unchangedReportFields": [
+          "results",
+          "storageRestObservations",
+          "storagePurchases",
+          "expandedLootTransfers",
+          "frames",
+          "checkpoints",
+          "reachedDays",
+          "wonDays",
+          "snapshots"
+        ],
+        "allListedFieldsEqual": true
+      }
+    },
+    "independent_soak_audit_report": ".build/browser-qa/storage-soak-audit.json",
     "asset_preservation": {
       "status": "passed",
       "oldReleaseFiles": 308,
@@ -139,15 +327,15 @@
         "index.html"
       ],
       "added": [
-        "assets/index-2cijlKJd.js"
+        "assets/index-Cb35fe28.js"
       ],
       "removed": [
-        "assets/index-XNVk3crn.js"
+        "assets/index-2cijlKJd.js"
       ],
       "unchangedPublicAssetFiles": 305,
       "allAssetsPreserved": true
     },
-    "prior_evidence": "Repair, Castle and prior campaign runs remain historical in milestone_history; no fresh v18 claim is inferred from them."
+    "prior_evidence": "Sandbag, Repair, Castle and earlier campaign runs remain historical in milestone_history; no fresh v19 claim is inferred from them."
   },
   "browser_checks": {
     "new_game": {
@@ -2711,9 +2899,948 @@
       "browserPaused": true,
       "consoleErrors": [],
       "screenshot": "sandbag-production-restored.jpg"
+    },
+    "castle_storage": {
+      "status": "passed",
+      "report": ".build/browser-qa/storage-ui-verification.json",
+      "checkCount": 14,
+      "checks": {
+        "storage7": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-storage7-v19.json",
+          "expectedFrom": "storage-party-natural-0-before-storage7-v19.json",
+          "args": [],
+          "day": 1,
+          "tick": 1658,
+          "gold": 625,
+          "ap": 4,
+          "rng": 251928491,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 7,
+          "storageLevel": 2,
+          "futureUpkeep": 80,
+          "settledUpkeep": 40,
+          "settledWages": 0,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 3,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            null,
+            null
+          ]
+        },
+        "storage9": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-storage9-v19.json",
+          "expectedFrom": "storage-party-natural-0-before-storage9-v19.json",
+          "args": [],
+          "day": 3,
+          "tick": 5387,
+          "gold": 432,
+          "ap": 4,
+          "rng": 688830609,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 9,
+          "storageLevel": 4,
+          "futureUpkeep": 160,
+          "settledUpkeep": 120,
+          "settledWages": 58,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 2,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 28,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 103,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            null
+          ]
+        },
+        "blocked": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-blocked-v19.json",
+          "expectedFrom": "storage-ui-storage9-v19.json",
+          "args": [],
+          "day": 3,
+          "tick": 5387,
+          "gold": 432,
+          "ap": 4,
+          "rng": 688830609,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 9,
+          "storageLevel": 4,
+          "futureUpkeep": 160,
+          "settledUpkeep": 120,
+          "settledWages": 58,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 2,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 28,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 103,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            null
+          ]
+        },
+        "buy9": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-buy9-v19.json",
+          "expectedFrom": "storage-ui-storage9-v19.json",
+          "args": [
+            1,
+            8
+          ],
+          "day": 3,
+          "tick": 5387,
+          "gold": 87,
+          "ap": 4,
+          "rng": 688830609,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 9,
+          "storageLevel": 4,
+          "futureUpkeep": 160,
+          "settledUpkeep": 120,
+          "settledWages": 58,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 2,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 28,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 103,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 12,
+              "ammo": 2,
+              "reloadTime": 0
+            }
+          ]
+        },
+        "swap-to-backpack": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-swap-to-backpack-v19.json",
+          "expectedFrom": "storage-ui-buy9-v19.json",
+          "args": [
+            0,
+            8
+          ],
+          "day": 3,
+          "tick": 5387,
+          "gold": 87,
+          "ap": 4,
+          "rng": 688830609,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 9,
+          "storageLevel": 4,
+          "futureUpkeep": 160,
+          "settledUpkeep": 120,
+          "settledWages": 58,
+          "inventory": [
+            {
+              "id": 12,
+              "ammo": 2,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 2,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 28,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 103,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            }
+          ]
+        },
+        "restore": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-restore-v19.json",
+          "expectedFrom": "storage-ui-swap-to-backpack-v19.json",
+          "args": [],
+          "day": 3,
+          "tick": 5387,
+          "gold": 87,
+          "ap": 4,
+          "rng": 688830609,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 9,
+          "storageLevel": 4,
+          "futureUpkeep": 160,
+          "settledUpkeep": 120,
+          "settledWages": 58,
+          "inventory": [
+            {
+              "id": 12,
+              "ammo": 2,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 2,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 28,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 103,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            }
+          ]
+        },
+        "loot9": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-loot9-v19.json",
+          "expectedFrom": "storage-party-natural-0-before-loot-slot9-v19.json",
+          "args": [
+            0,
+            8
+          ],
+          "day": 4,
+          "tick": 7470,
+          "gold": 454,
+          "ap": null,
+          "rng": 3630472838,
+          "hp": 39,
+          "maxHp": 40,
+          "capacity": 9,
+          "storageLevel": 4,
+          "futureUpkeep": 160,
+          "settledUpkeep": 160,
+          "settledWages": 69,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 28,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 103,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 35,
+              "ammo": 0,
+              "reloadTime": 0
+            }
+          ]
+        },
+        "storage16": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-storage16-v19.json",
+          "expectedFrom": "storage-party-capital-storage-capacity-before-storage16-v19.json",
+          "args": [],
+          "day": 1,
+          "tick": 1658,
+          "gold": 3345,
+          "ap": 4,
+          "rng": 251928491,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 16,
+          "storageLevel": 11,
+          "futureUpkeep": 440,
+          "settledUpkeep": 40,
+          "settledWages": 0,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 3,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "capped": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-capped-v19.json",
+          "expectedFrom": "storage-ui-storage16-v19.json",
+          "args": [],
+          "day": 1,
+          "tick": 1658,
+          "gold": 3345,
+          "ap": 4,
+          "rng": 251928491,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 16,
+          "storageLevel": 11,
+          "futureUpkeep": 440,
+          "settledUpkeep": 40,
+          "settledWages": 0,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 3,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "buy16": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-buy16-v19.json",
+          "expectedFrom": "storage-ui-storage16-v19.json",
+          "args": [
+            1,
+            15
+          ],
+          "day": 1,
+          "tick": 1658,
+          "gold": 2789,
+          "ap": 4,
+          "rng": 251928491,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 16,
+          "storageLevel": 11,
+          "futureUpkeep": 440,
+          "settledUpkeep": 40,
+          "settledWages": 0,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 3,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            {
+              "id": 36,
+              "ammo": 80,
+              "reloadTime": 0
+            }
+          ]
+        },
+        "upgrade-preview": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-upgrade-preview-v19.json",
+          "expectedFrom": "storage-ui-buy16-v19.json",
+          "args": [
+            15
+          ],
+          "day": 1,
+          "tick": 1658,
+          "gold": 2789,
+          "ap": 4,
+          "rng": 2258720387,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 16,
+          "storageLevel": 11,
+          "futureUpkeep": 440,
+          "settledUpkeep": 40,
+          "settledWages": 0,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 3,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            {
+              "id": 36,
+              "ammo": 80,
+              "reloadTime": 0
+            }
+          ]
+        },
+        "upgrade-confirm": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-upgrade-confirm-v19.json",
+          "expectedFrom": "storage-ui-upgrade-preview-v19.json",
+          "args": [],
+          "day": 1,
+          "tick": 1658,
+          "gold": 1622,
+          "ap": 0,
+          "rng": 2258720387,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 16,
+          "storageLevel": 11,
+          "futureUpkeep": 440,
+          "settledUpkeep": 40,
+          "settledWages": 0,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 3,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            {
+              "id": 36,
+              "ammo": 80,
+              "reloadTime": 0
+            }
+          ]
+        },
+        "rest": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-rest-v19.json",
+          "expectedFrom": "storage-ui-buy9-v19.json",
+          "args": [],
+          "day": 4,
+          "tick": 5387,
+          "gold": 87,
+          "ap": null,
+          "rng": 1287780969,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 9,
+          "storageLevel": 4,
+          "futureUpkeep": 160,
+          "settledUpkeep": 0,
+          "settledWages": 0,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 2,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 28,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 103,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 12,
+              "ammo": 2,
+              "reloadTime": 0
+            }
+          ]
+        },
+        "result-town": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "storage-ui-result-town-v19.json",
+          "expectedFrom": "storage-party-natural-0-storage-result-v19.json",
+          "args": [],
+          "day": 2,
+          "tick": 3275,
+          "gold": 948,
+          "ap": 4,
+          "rng": 423535753,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 7,
+          "storageLevel": 2,
+          "futureUpkeep": 80,
+          "settledUpkeep": 80,
+          "settledWages": 53,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 2,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 28,
+              "ammo": 0,
+              "reloadTime": 0
+            }
+          ]
+        }
+      },
+      "scope": "Actual CUA Storage, inventory and persistence actions enumerated in the report; full exported envelopes compared. Extra backpack slots are separate from the five battle selection slots.",
+      "limits": [
+        "Imported earned checkpoints, not a manually played full browser campaign.",
+        "The headless capacity-sixteen checkpoint uses explicitly disclosed capital; natural scenarios exercise purchases through capacity nine.",
+        "Port replay and browser checks are separate from the 37 independent original-method observations. No new pixel, audio or performance parity claim."
+      ],
+      "consoleErrors": [],
+      "candidateBuildReuse": {
+        "firstFiveChecks": [
+          "storage7",
+          "storage9",
+          "blocked",
+          "buy9",
+          "swap-to-backpack"
+        ],
+        "initialBundle": "assets/index-TCf-NGxf.js",
+        "finalBundle": "assets/index-Cb35fe28.js",
+        "reason": "The only intervening runtime change preserves consumable reload metadata during battle settlement. These five browser actions do not exercise settlement; all exported envelopes were compared again against the corrected runtime. The remaining nine checks ran against the final bundle."
+      }
+    },
+    "storage_production": {
+      "status": "passed",
+      "bundle": "assets/index-Cb35fe28.js",
+      "newGame": {
+        "tick": 0,
+        "hp": 40,
+        "gold": 200,
+        "ammo": 5,
+        "inventorySlots": 6,
+        "wallLevel": 1,
+        "capacity": 1,
+        "repairmanLevel": 0,
+        "wallFixCount": 0,
+        "sandbagLevel": 0
+      },
+      "migration": {
+        "from": 18,
+        "to": 19,
+        "fullEnvelopeEquality": true,
+        "exactCurrentRestore": true,
+        "tick": 674,
+        "hp": 40,
+        "gold": 209,
+        "wallLevel": 1,
+        "rngUnchanged": true
+      },
+      "browserPaused": true,
+      "consoleErrors": [],
+      "screenshot": "storage-production-restored.jpg"
     }
   },
-  "checkpoint_provenance": "Sandbag fixtures carry operation indexes and byte hashes in sandbag-party-soak-fixtures.json. Eight natural campaigns have no grants. The one capital scenario starts from earned first town+12000gold only, buys Sandbag4 normally, sets companion armor-only/no priorities through town actions, and avoids shooting Crows until a reduced hit occurs. It later loses onDay6; the natural runs all finishDay7. Full browser damage comparison uses this disclosed capital checkpoint; purchased-level/result checks use natural checkpoints.",
+  "checkpoint_provenance": "Storage fixtures carry operation indexes and byte hashes in storage-party-soak-fixtures.json. Eight natural campaigns have no grants; seven win Day7 and natural-4 loses Day7. The separate capital scenario starts from earned first town +20000 gold only and buys capacity sixteen normally. Actual loot reaches expanded slots and is checked through Rest. The full-state/event replay uses production ordinary-enemy contours and the disclosed boss rectangle fallback.",
   "performance": {
     "comparison_with_flash_or_ruffle": "not measured",
     "sample": {
@@ -2731,7 +3858,8 @@
     "party_release": "No new wall-clock browser/Flash comparison. Headless throughput and background-tab update counts are not performance parity evidence.",
     "castle_release": "No new Flash/browser performance comparison. Headless simulation throughput and the background-browser ten-update check are not latency or rendering performance evidence.",
     "repair_release": "No new Flash/browser performance comparison. The six-update hidden-browser healing check establishes state behavior only.",
-    "sandbag_release": "No new Flash/browser performance comparison; seven normal hidden-browser updates establish state behavior only."
+    "sandbag_release": "No new Flash/browser performance comparison; seven normal hidden-browser updates establish state behavior only.",
+    "storage_release": "No new Flash/browser performance comparison; the campaign run measures deterministic state/event replay and finite state, not native browser performance."
   },
   "screenshots": [
     ".build/browser-qa/character-creation.jpg",
@@ -2786,7 +3914,12 @@
     ".build/browser-qa/sandbag-level2.jpg",
     ".build/browser-qa/sandbag-crow-hit.jpg",
     ".build/browser-qa/sandbag-result-upkeep.jpg",
-    ".build/browser-qa/sandbag-production-restored.jpg"
+    ".build/browser-qa/sandbag-production-restored.jpg",
+    ".build/browser-qa/storage-full-shop.jpg",
+    ".build/browser-qa/storage-loot-row9.jpg",
+    ".build/browser-qa/storage-production-restored.jpg",
+    ".build/browser-qa/storage-result-upkeep.jpg",
+    ".build/browser-qa/storage-row9-shop.jpg"
   ],
   "preserved_baselines": {
     "original/elonashooter1.3.swf": {
@@ -9979,32 +11112,316 @@
         "Town mouse-position seam drives original shape-hit handler; fresh town generation and actual browser clicks are separate",
         "Source order observations and UI descriptions supplement state comparison; visual/audio rendering, save migration and connected battles require separate integration evidence"
       ]
+    },
+    "castle_storage": {
+      "status": "passed",
+      "observedSnapshots": 37,
+      "matchedSnapshots": 37,
+      "comparisons": [
+        {
+          "scenario": "backpack-ammo-and-keys",
+          "boundary": "ammo",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "backpack-ammo-and-keys",
+          "boundary": "ammo",
+          "op": "key6",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "backpack-ammo-and-keys",
+          "boundary": "ammo",
+          "op": "fillAmmo",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "backpack-ammo-and-keys",
+          "boundary": "ammo",
+          "op": "updateAlly",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "storage-insufficient",
+          "boundary": "purchase",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "storage-insufficient",
+          "boundary": "purchase",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "storage-first",
+          "boundary": "purchase",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "storage-first",
+          "boundary": "purchase",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "storage-row-two",
+          "boundary": "purchase",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "storage-row-two",
+          "boundary": "purchase",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "storage-final",
+          "boundary": "purchase",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "storage-final",
+          "boundary": "purchase",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "storage-cap",
+          "boundary": "purchase",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "storage-cap",
+          "boundary": "purchase",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "storage-sequence",
+          "boundary": "purchase",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "storage-sequence",
+          "boundary": "purchase",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "storage-sequence",
+          "boundary": "purchase",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "shop-buy",
+          "boundary": "transaction",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "shop-buy",
+          "boundary": "transaction",
+          "op": "transfer",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "loot-collect",
+          "boundary": "transaction",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "loot-collect",
+          "boundary": "transaction",
+          "op": "transfer",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-move",
+          "boundary": "transaction",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-move",
+          "boundary": "transaction",
+          "op": "transfer",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "mod-confirm",
+          "boundary": "transaction",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "mod-confirm",
+          "boundary": "transaction",
+          "op": "preview",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "mod-confirm",
+          "boundary": "transaction",
+          "op": "confirm",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "mod-cancel",
+          "boundary": "transaction",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "mod-cancel",
+          "boundary": "transaction",
+          "op": "preview",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "mod-cancel",
+          "boundary": "transaction",
+          "op": "cancel",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade",
+          "boundary": "transaction",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade",
+          "boundary": "transaction",
+          "op": "preview",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "upgrade",
+          "boundary": "transaction",
+          "op": "confirm",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sale",
+          "boundary": "transaction",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sale",
+          "boundary": "transaction",
+          "op": "preview",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sale",
+          "boundary": "transaction",
+          "op": "confirm",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "token",
+          "boundary": "transaction",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "token",
+          "boundary": "transaction",
+          "op": "transfer",
+          "matched": true,
+          "differences": []
+        }
+      ],
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "4caf0485cac7eaa7c0d8df0a8255899d94dd06bee1efd6864c05998c9b598968",
+      "traceSha256": "7ef3c3b02c73d861c2432f91401f00e358d5fdb89cf8496ea2c61b006d3fe65b",
+      "checks": [
+        "Actual Storage tile3 purchases, affordability, capacity6 through16, prices and upkeep",
+        "AP0, unchanged totalMoney/HP/prepared town/party cache/settled result and zero purchase RNG",
+        "All33 item fields through slot35: stock purchase, loot collection, owned swap, MOD confirm/cancel, Upgrade preview/confirm, sale and Shop Token",
+        "Original sixth-key rejection and all-owned-slot gun/consumable refill boundaries"
+      ],
+      "limits": [
+        "Controlled original methods and input seams; fresh town generation, real browser clicks and native scheduling are separate",
+        "Ammo comparison projects occupied owned slots and inactive ally weapon; uninitialized empty-cell reload metadata is not represented by port null slots",
+        "Port finishDay is stopped before reward generation; startNextDay item projection excludes wave RNG outside original updateAlly boundary",
+        "Sale preview is observed without mutation; production confirmation UI is independent of the immediate sale domain operation",
+        "Loot MOD confirmation remains a known port gap; this fixture compares town MOD transactions only",
+        "Source UI slot positions/hotkey labels are recorded; actual port rendering and save/resume have separate browser checks"
+      ]
     }
   },
   "production_recovery": {
     "status": "passed",
-    "release_directory": ".build/browser-sandbag-final",
-    "previous_directory": ".build/browser-before-sandbag",
-    "current_bundle": "assets/index-2cijlKJd.js",
+    "release_directory": ".build/browser-storage-final",
+    "previous_directory": ".build/browser-before-storage",
+    "current_bundle": "assets/index-Cb35fe28.js",
     "candidate_build_matches_production": true,
     "copied_release_files_hash_checked": 308,
     "archive_files_hash_checked": 308,
-    "current_package": ".build/elona-shooter-browser-sandbag-slice.zip",
-    "current_package_bytes": 8574403,
-    "current_package_sha256": "945b2023d734cf5569c0cab3ec3d187423c6747210148d96930f80fb7b972d1e",
-    "previous_package": ".build/elona-shooter-browser-repair-slice.zip",
-    "previous_bundle": "assets/index-XNVk3crn.js",
-    "candidate_browser_verification": ".build/browser-qa/sandbag-ui-verification.json",
-    "production_backup": ".build/browser-qa/sandbag-production-before-v17.json",
-    "production_browser_verification": ".build/browser-qa/sandbag-production-verification.json",
-    "production_restored_screenshot": ".build/browser-qa/sandbag-production-restored.jpg",
+    "current_package": ".build/elona-shooter-browser-storage-slice.zip",
+    "current_package_bytes": 8574659,
+    "current_package_sha256": "d9ca912bb4b049b8a966b5f3b9d72c5bc72dbbe43377d1c1dde11aef8745cd58",
+    "previous_package": ".build/elona-shooter-browser-sandbag-slice.zip",
+    "previous_bundle": "assets/index-2cijlKJd.js",
+    "candidate_browser_verification": ".build/browser-qa/storage-ui-verification.json",
+    "production_backup": ".build/browser-qa/storage-production-before-v18.json",
+    "production_browser_verification": ".build/browser-qa/storage-production-verification.json",
+    "production_restored_screenshot": ".build/browser-qa/storage-production-restored.jpg",
     "production_console_errors": [],
-    "publication_report": ".build/sandbag-publication.json",
-    "current_save_version": 18,
+    "publication_report": ".build/storage-publication.json",
+    "current_save_version": 19,
     "production_browser_smoke": "passed",
     "restored_battle": {
-      "from": 17,
-      "to": 18,
+      "from": 18,
+      "to": 19,
       "fullEnvelopeEquality": true,
       "exactCurrentRestore": true,
       "tick": 674,
@@ -13455,6 +14872,364 @@
           "browserPaused": true,
           "consoleErrors": [],
           "screenshot": "repair-production-restored.jpg"
+        }
+      }
+    },
+    {
+      "milestone": "Sandbag purchases, source integer damage absorption and upkeep, v18 persistence; published locally and browser-verified",
+      "saveVersion": 18,
+      "automated": {
+        "simulation_tests_passed": 319,
+        "simulation_tests_failed": 0,
+        "typescript": "passed",
+        "candidate_build": "passed",
+        "production_build": "identical to verified candidate",
+        "test_output": ".build/sandbag-tests-output.txt",
+        "build_output": ".build/sandbag-build-output.txt",
+        "python_tools_compile": "passed: Castle Sandbag diagnostic builder and oracle server",
+        "sandbag_party_soak": {
+          "status": "passed",
+          "seedCount": 8,
+          "sourceHashes": {
+            "simulation.ts": "fac3acc3803ef393eb367359f6bc5c4134b78f62caf2826f5b34a1b5eebef882",
+            "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
+            "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
+            "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
+            "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
+            "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
+            "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
+            "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
+            "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
+            "castle-upgrades.ts": "e64edfcd88cc84d8036cc898652d82a88fd54c52be9e779207f856acc060fcff"
+          },
+          "geometrySha256": "505b48ffe234d7187db5445bd4306f0d104648985d18a0719e7c47605fec3ad2",
+          "scenarios": 9,
+          "frames": 132552,
+          "checkpoints": 1470,
+          "restTransitions": 53,
+          "rewardActions": 219,
+          "reachedDays": {
+            "1": 8,
+            "2": 9,
+            "3": 9,
+            "4": 9,
+            "5": 9,
+            "6": 9,
+            "7": 8
+          },
+          "wonDays": {
+            "1": 8,
+            "2": 9,
+            "3": 9,
+            "4": 9,
+            "5": 9,
+            "6": 8,
+            "7": 8
+          },
+          "naturallyHiredClasses": [
+            2,
+            3,
+            4,
+            8,
+            9
+          ],
+          "sandbagPurchases": 19,
+          "ambiguousSandbagFrames": 1,
+          "positiveDamageReductions": 1,
+          "avoidedDamage": 1,
+          "fixWallPurchases": 11,
+          "repairmanPurchases": 17,
+          "positiveRepairObservations": 41,
+          "housePurchases": 1,
+          "wallPurchases": 9,
+          "maximumCompanions": 2,
+          "partyBattleCounts": {
+            "0": 8,
+            "1": 49,
+            "2": 4
+          },
+          "expandedNaturalScenarios": [],
+          "actorActivity": {
+            "1": {
+              "shots": 1730,
+              "hits": 1451,
+              "damage": 72762,
+              "kills": 854,
+              "reloads": 759,
+              "reloadCompletions": 128,
+              "bowDraws": 428,
+              "levelUps": 48
+            },
+            "2": {
+              "shots": 0,
+              "hits": 0,
+              "damage": 0,
+              "kills": 0,
+              "reloads": 0,
+              "reloadCompletions": 0,
+              "bowDraws": 0,
+              "levelUps": 0
+            },
+            "3": {
+              "shots": 0,
+              "hits": 0,
+              "damage": 0,
+              "kills": 0,
+              "reloads": 0,
+              "reloadCompletions": 0,
+              "bowDraws": 0,
+              "levelUps": 0
+            }
+          },
+          "elapsedMs": 79085,
+          "collision": "Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts",
+          "policy": "Aimed Sheriff and autonomous companions; prioritize Sandbag1, Sandbag2 from town4, then Repairman/House/Wall/hiring and paid/free repair policy. Reserve first hire cost. Natural runs have no grants. Separate capital-start grants12000gold only at earned first town, buys Sandbag4 normally, sets companions to armor-only/no priorities through normal town actions and avoids aiming at Crows until one positive reduction occurs. This input exposure addresses integer rounding that masks low-level Sandbags against small early-game hits. Measured damage pairs replay a single actual frame with only Sandbag level set to0; accept single-hit, same-final-RNG, surviving-wall pairs. This counterfactual is port integration evidence, separate from original damage reference.",
+          "limits": [
+            "Port full-state/event replay and finite-state checks, not independent original parity or browser validation",
+            "Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred",
+            "Natural scenarios and the one capital-start are separate: the latter grants12000gold only at an earned first town; it does not establish natural three-companion affordability within seven days",
+            "Deaths count castle defeats; companions have no separate HP/death model in the source combat actor"
+          ],
+          "acceptedDamagePairs": 186,
+          "unchangedDamagePairs": 185,
+          "naturalDay7Wins": 8,
+          "capitalOutcome": "Day6 castle defeat; companions remain on the deliberately chosen armor-only/no-priority orders. No invincibility or forced completion.",
+          "positiveReductionProvenance": "One actual Crow impact in capital-sandbag-exposure, Day3tick3553: damage3 with purchased Sandbag4 vs4 with onlylevel reset0, sameRNG. Natural level1/2 hit pairs show no positive integer reduction.",
+          "failedAssumption": "Prior run at levels1/2 did not exercise positive reduction; existing medal absorption and truncation masked the small percentage. Its completed campaigns and failed coverage assertion are preserved in .build/sandbag-party-soak-low-damage; individual hit counts were not saved by that older failure handler. All8 natural replay operation streams are unchanged in the revised run."
+        },
+        "sandbag_party_soak_report": ".build/sandbag-party-soak/report.json",
+        "sandbag_party_soak_report_sha256": "8c76ff58c9e4a829f95cfacb9f2ef52e6ff5e7fb6502ff29f184945bc03b962d",
+        "sandbag_party_soak_fixtures": ".build/browser-qa/sandbag-party-soak-fixtures.json",
+        "asset_preservation": {
+          "status": "passed",
+          "oldReleaseFiles": 308,
+          "newReleaseFiles": 308,
+          "changed": [
+            "index.html"
+          ],
+          "added": [
+            "assets/index-2cijlKJd.js"
+          ],
+          "removed": [
+            "assets/index-XNVk3crn.js"
+          ],
+          "unchangedPublicAssetFiles": 305,
+          "allAssetsPreserved": true
+        },
+        "prior_evidence": "Repair, Castle and prior campaign runs remain historical in milestone_history; no fresh v18 claim is inferred from them."
+      },
+      "production_recovery": {
+        "status": "passed",
+        "release_directory": ".build/browser-sandbag-final",
+        "previous_directory": ".build/browser-before-sandbag",
+        "current_bundle": "assets/index-2cijlKJd.js",
+        "candidate_build_matches_production": true,
+        "copied_release_files_hash_checked": 308,
+        "archive_files_hash_checked": 308,
+        "current_package": ".build/elona-shooter-browser-sandbag-slice.zip",
+        "current_package_bytes": 8574403,
+        "current_package_sha256": "945b2023d734cf5569c0cab3ec3d187423c6747210148d96930f80fb7b972d1e",
+        "previous_package": ".build/elona-shooter-browser-repair-slice.zip",
+        "previous_bundle": "assets/index-XNVk3crn.js",
+        "candidate_browser_verification": ".build/browser-qa/sandbag-ui-verification.json",
+        "production_backup": ".build/browser-qa/sandbag-production-before-v17.json",
+        "production_browser_verification": ".build/browser-qa/sandbag-production-verification.json",
+        "production_restored_screenshot": ".build/browser-qa/sandbag-production-restored.jpg",
+        "production_console_errors": [],
+        "publication_report": ".build/sandbag-publication.json",
+        "current_save_version": 18,
+        "production_browser_smoke": "passed",
+        "restored_battle": {
+          "from": 17,
+          "to": 18,
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "tick": 674,
+          "hp": 40,
+          "gold": 209,
+          "wallLevel": 1,
+          "rngUnchanged": true
+        }
+      },
+      "browser_checks": {
+        "castle_sandbag": {
+          "status": "passed",
+          "report": ".build/browser-qa/sandbag-ui-verification.json",
+          "checks": {
+            "sandbag1": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "sandbag-ui-sandbag1-v18.json",
+              "expectedFrom": "sandbag-party-natural-0-before-sandbag1-v18.json",
+              "day": 2,
+              "tick": 3275,
+              "gold": 358,
+              "ap": 4,
+              "rng": 423535753,
+              "hp": 40,
+              "maxHp": 40,
+              "sandbagLevel": 1,
+              "repairmanLevel": 0,
+              "futureUpkeep": 80,
+              "settledUpkeep": 40,
+              "settledWages": 53
+            },
+            "blocked": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "sandbag-ui-blocked-v18.json",
+              "expectedFrom": "sandbag-ui-sandbag1-v18.json",
+              "day": 2,
+              "tick": 3275,
+              "gold": 358,
+              "ap": 4,
+              "rng": 423535753,
+              "hp": 40,
+              "maxHp": 40,
+              "sandbagLevel": 1,
+              "repairmanLevel": 0,
+              "futureUpkeep": 80,
+              "settledUpkeep": 40,
+              "settledWages": 53
+            },
+            "sandbag2": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "sandbag-ui-sandbag2-v18.json",
+              "expectedFrom": "sandbag-party-natural-0-before-sandbag2-v18.json",
+              "day": 6,
+              "tick": 12852,
+              "gold": 96,
+              "ap": 4,
+              "rng": 2254390660,
+              "hp": 45,
+              "maxHp": 45,
+              "sandbagLevel": 2,
+              "repairmanLevel": 2,
+              "futureUpkeep": 250,
+              "settledUpkeep": 210,
+              "settledWages": 79
+            },
+            "restore": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "sandbag-ui-restore-v18.json",
+              "expectedFrom": "sandbag-ui-sandbag2-v18.json",
+              "day": 6,
+              "tick": 12852,
+              "gold": 96,
+              "ap": 4,
+              "rng": 2254390660,
+              "hp": 45,
+              "maxHp": 45,
+              "sandbagLevel": 2,
+              "repairmanLevel": 2,
+              "futureUpkeep": 250,
+              "settledUpkeep": 210,
+              "settledWages": 79
+            },
+            "combat-hit": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "sandbag-ui-combat-hit-v18.json",
+              "expectedFrom": "sandbag-party-capital-sandbag-exposure-before-sandbag-hit-v18.json",
+              "day": 3,
+              "tick": 3559,
+              "gold": 2248,
+              "ap": null,
+              "rng": 70421558,
+              "hp": 42,
+              "maxHp": 45,
+              "sandbagLevel": 4,
+              "repairmanLevel": 1,
+              "futureUpkeep": 320,
+              "settledUpkeep": 0,
+              "settledWages": 0,
+              "frames": 7,
+              "damageWith": 3,
+              "damageWithout": 4,
+              "control": "Same browser input and starting state; only Sandbag level changed to0; final RNG equal. Port integration evidence, not original reference."
+            },
+            "result-town": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "sandbag-ui-result-town-v18.json",
+              "expectedFrom": "sandbag-party-natural-0-sandbag-result-v18.json",
+              "day": 3,
+              "tick": 5387,
+              "gold": 1132,
+              "ap": 4,
+              "rng": 688830609,
+              "hp": 40,
+              "maxHp": 40,
+              "sandbagLevel": 1,
+              "repairmanLevel": 0,
+              "futureUpkeep": 80,
+              "settledUpkeep": 80,
+              "settledWages": 58
+            }
+          },
+          "scope": "Actual CUA level1/2 purchases, insufficient-gold guard, reload/Continue, seven normal browser updates across Crow impact and earned result Proceed; full exported envelopes compared.",
+          "damage": {
+            "input": ".build/browser-qa/sandbag-party-capital-sandbag-exposure-before-sandbag-hit-v18.json",
+            "fromTick": 3552,
+            "toTick": 3559,
+            "fromHp": 45,
+            "toHp": 42,
+            "maxHp": 45,
+            "sandbagLevel": 4,
+            "controlDamage": 4,
+            "actualDamage": 3,
+            "finalRngEqual": true
+          },
+          "result": {
+            "input": ".build/browser-qa/sandbag-party-natural-0-sandbag-result-v18.json",
+            "day": 3,
+            "upkeep": 80,
+            "wages": 58,
+            "gold": 1132
+          },
+          "consoleErrors": [],
+          "limits": [
+            "Imported earned checkpoints, not a manually played full browser campaign.",
+            "The positive-damage browser checkpoint comes from the explicitly funded input-exposure scenario; it does not establish natural Sandbag4 affordability within seven days.",
+            "Counterfactual damage replay is port integration evidence, separate from independent original damage cases. No new pixel/audio/performance parity claim."
+          ]
+        },
+        "sandbag_production": {
+          "status": "passed",
+          "bundle": "assets/index-2cijlKJd.js",
+          "newGame": {
+            "tick": 0,
+            "hp": 40,
+            "gold": 200,
+            "ammo": 5,
+            "wallLevel": 1,
+            "capacity": 1,
+            "repairmanLevel": 0,
+            "wallFixCount": 0,
+            "sandbagLevel": 0
+          },
+          "migration": {
+            "from": 17,
+            "to": 18,
+            "fullEnvelopeEquality": true,
+            "exactCurrentRestore": true,
+            "tick": 674,
+            "hp": 40,
+            "gold": 209,
+            "wallLevel": 1,
+            "rngUnchanged": true
+          },
+          "browserPaused": true,
+          "consoleErrors": [],
+          "screenshot": "sandbag-production-restored.jpg"
         }
       }
     }

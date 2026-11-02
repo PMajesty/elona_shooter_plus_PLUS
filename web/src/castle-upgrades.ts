@@ -1,4 +1,4 @@
-export type CastleUpgradeKind = 'house' | 'wall' | 'fix-wall' | 'repairman' | 'sandbag';
+export type CastleUpgradeKind = 'house' | 'wall' | 'fix-wall' | 'repairman' | 'sandbag' | 'storage';
 export type CastleUpgradeOutcome = 'purchased' | 'not-enough-gold' | 'capped' | 'unavailable';
 export interface CastleUpgradeState {
   party: { capacity: 1 | 2 | 3 };
@@ -6,6 +6,7 @@ export interface CastleUpgradeState {
   castleMaxHp: number;
   repairmanLevel: number;
   sandbagLevel: number;
+  inventory: readonly unknown[];
 }
 
 export function castleUpgradeCost(kind: CastleUpgradeKind, state: CastleUpgradeState): number {
@@ -14,12 +15,18 @@ export function castleUpgradeCost(kind: CastleUpgradeKind, state: CastleUpgradeS
   if (kind === 'fix-wall') return Math.trunc(8 * (state.castleMaxHp - state.castleHp));
   if (kind === 'repairman') return state.repairmanLevel * state.repairmanLevel * 250 + 700;
   if (kind === 'sandbag') return state.sandbagLevel >= 10 ? 0 : state.sandbagLevel * state.sandbagLevel * 240 + 1000;
+  if (kind === 'storage') return state.inventory.length >= 16 ? 0 : (state.inventory.length - 4) ** 2 * 30 + 250;
   return Math.trunc(state.castleMaxHp * state.castleMaxHp / 2.5 - 400);
 }
 
 export function castleUpkeep(state: CastleUpgradeState): number {
-  // Main.calcUnkeep: остальные улучшения пока исходные, Storage=1, Hard Badge отсутствует.
-  return Math.max(0, (state.party.capacity - 1) * 50 + state.repairmanLevel * 60 + (state.castleMaxHp - 40) * 2 + state.sandbagLevel * 40 + 40);
+  // Main.calcUnkeep: не перенесённые улучшения исходные; Hard Badge пока отсутствует.
+  return Math.max(0, (state.party.capacity - 1) * 50 + state.repairmanLevel * 60 + (state.castleMaxHp - 40) * 2 + state.sandbagLevel * 40 + castleStorageLevel(state) * 40);
+}
+
+export function castleStorageLevel(state: Pick<CastleUpgradeState, 'inventory'>): number {
+  // В исходнике storage и invSlot увеличиваются вместе; не храним вторую копию вместимости.
+  return state.inventory.length - 5;
 }
 
 export function castleRepairAmount(state: Pick<CastleUpgradeState, 'repairmanLevel'>): number {

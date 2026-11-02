@@ -13,9 +13,10 @@ import { installCandidate } from '../src/party.ts';
 import { castleUpgradeCost, castleUpkeep } from '../src/castle-upgrades.ts';
 
 const sandbagMode = process.argv[3] === 'sandbag';
+const storageMode = process.argv[3] === 'storage';
 const repairMode = sandbagMode || process.argv[3] === 'repair';
-const castleMode = repairMode || process.argv[3] === 'castle';
-const fixturePrefix = sandbagMode ? 'sandbag-party' : repairMode ? 'repair-party' : castleMode ? 'castle-party' : 'party';
+const castleMode = storageMode || repairMode || process.argv[3] === 'castle';
+const fixturePrefix = storageMode ? 'storage-party' : sandbagMode ? 'sandbag-party' : repairMode ? 'repair-party' : castleMode ? 'castle-party' : 'party';
 const output = fileURLToPath(new URL(`../../.build/${fixturePrefix}-soak`, import.meta.url));
 const browserOutput = fileURLToPath(new URL('../../.build/browser-qa', import.meta.url));
 mkdirSync(output, { recursive: true }); mkdirSync(browserOutput, { recursive: true });
@@ -53,6 +54,8 @@ const expandedNaturalScenarios = new Set<string>();
 let housePurchases = 0, wallPurchases = 0, maximumCompanions = 0;
 let fixWallPurchases = 0, repairmanPurchases = 0;
 let sandbagPurchases = 0, ambiguousSandbagFrames = 0;
+let storagePurchases = 0, maximumInventorySlots = 6, expandedLootTransfers = 0;
+const storageRestObservations: { scenario: string; day: number; capacity: number; occupiedExtraSlots: number }[] = [];
 const sandbagObservations: { scenario: string; tick: number; day: number; level: number; damageWith: number; damageWithout: number; avoided: number; rng: number }[] = [];
 const repairObservations: { scenario: string; tick: number; day: number; level: number; waveBefore: number; hpBefore: number; damage: number; hpAfter: number; restoredHp: number }[] = [];
 
@@ -102,8 +105,8 @@ function run(current: Scenario, initial?: Save): void {
   const activeClass = () => simulation.state.party.slots.find(slot => slot.slot <= 3 && slot.exists)?.member?.devType;
   const activeCount = () => simulation.state.party.slots.filter(slot => slot.slot <= 3 && slot.exists).length;
   const recordFixture = (reason: string, state = simulation.toSave()) => {
-    const classId = activeClass();
-    if (!classId || recorded.has(reason)) return;
+    const classId = activeClass() ?? (storageMode ? 0 : undefined);
+    if (classId === undefined || recorded.has(reason)) return;
     recorded.add(reason);
     const version = state.version;
     const file = `${fixturePrefix}-${current.id}-${reason}-v${version}.json`, value = { format: 'elona-shooter-browser', version, appearance: 0, simulation: state };
@@ -195,13 +198,18 @@ function run(current: Scenario, initial?: Save): void {
           assert.equal(act('chooseSkill', [choice], sim => sim.chooseSkill(choice)), true);
         } else {
           const offer = state.lootOffers.findIndex(isOccupiedItem), slot = state.inventory.findIndex(item => !isOccupiedItem(item));
-          if (offer >= 0 && slot >= 0) assert.equal(act('collectLoot', [offer, slot], sim => sim.collectLoot(offer, slot)), true);
+          if (offer >= 0 && slot >= 0) {
+            if (storageMode && slot >= 6) recordFixture(`before-loot-slot${slot + 1}`);
+            assert.equal(act('collectLoot', [offer, slot], sim => sim.collectLoot(offer, slot)), true);
+            if (storageMode && slot >= 6) { expandedLootTransfers++; recordFixture(`loot-slot${slot + 1}`); }
+          }
           else assert.equal(act('finishLoot', [], sim => sim.finishLoot()), true);
         }
         totalRewards++; save();
       }
       if (castleMode) assert.equal(simulation.state.result.upkeep, castleUpkeep(simulation.state));
       if (sandbagMode && simulation.state.sandbagLevel > 0) recordFixture('sandbag-result');
+      if (storageMode && simulation.state.inventory.length > 6) recordFixture('storage-result');
       if (activeClass()) { activity.wages += simulation.state.result.wages; activity.wageSettlements++; recordFixture('result'); if (castleMode) recordFixture(`result-party${activeCount()}`); }
       assert.equal(act('enterTown', [], sim => sim.enterTown()), true); save();
     }
@@ -213,6 +221,16 @@ function run(current: Scenario, initial?: Save): void {
     if (castleMode) {
       const state = simulation.state;
       const candidateCost = state.party.slots[4].member?.cost ?? 0;
+      while (storageMode && state.inventory.length < (current.kind === 'capital-start' ? 16 : Math.min(9, 6 + day))
+        && state.gold >= castleUpgradeCost('storage', state) + (activeCount() === 0 ? candidateCost : 0)) {
+        recordFixture(`before-storage${state.inventory.length + 1}`);
+        const previousResult = clone(state.result), previousItems = clone(state.inventory);
+        assert.equal(act('buyCastleUpgrade', ['storage'], sim => sim.buyCastleUpgrade('storage')), 'purchased');
+        storagePurchases++; maximumInventorySlots = Math.max(maximumInventorySlots, state.inventory.length);
+        assert.deepEqual(state.result, previousResult, 'Storage purchase repriced an already paid result');
+        assert.deepEqual(state.inventory, [...previousItems, null], 'Storage changed existing items or granted an item');
+        recordFixture(`storage${state.inventory.length}`); save();
+      }
       while (sandbagMode && state.sandbagLevel < (current.kind === 'capital-start' ? 4 : day >= 4 ? 2 : 1)
         && state.gold >= castleUpgradeCost('sandbag', state) + (activeCount() === 0 ? candidateCost : 0)) {
         recordFixture(`before-sandbag${state.sandbagLevel + 1}`);
@@ -277,7 +295,20 @@ function run(current: Scenario, initial?: Save): void {
       fixWallPurchases++; recordFixture('fix-wall'); save();
     } else { act('freeRepair', [], sim => sim.freeRepair()); save(); }
     if (day === 7) break;
+    const beforeRestInventory = storageMode ? clone(simulation.state.inventory) : undefined;
+    if (storageMode && simulation.state.inventory.length > 6) recordFixture('before-storage-rest');
     assert.equal(act('startNextDay', [], sim => sim.startNextDay()), true); totalRest++; rests++;
+    if (beforeRestInventory) {
+      assert.equal(simulation.state.inventory.length, beforeRestInventory.length);
+      for (let slot = 6; slot < beforeRestInventory.length; slot++) {
+        const before = beforeRestInventory[slot], after = simulation.state.inventory[slot];
+        assert.deepEqual(after, before ? { ...before, reloadTime: 0, ammo: before.type === 4 ? before.ammo : before.ammoMax } : null,
+          'Rest failed to preserve or normalize an expanded inventory item');
+      }
+      storageRestObservations.push({ scenario: current.id, day: simulation.state.day, capacity: simulation.state.inventory.length,
+        occupiedExtraSlots: simulation.state.inventory.slice(6).filter(isOccupiedItem).length });
+      if (simulation.state.inventory.length > 6) recordFixture('storage-rest');
+    }
     recordFixture('battle-entry'); if (castleMode) recordFixture(`battle-party${activeCount()}`); save();
   }
   save();
@@ -315,14 +346,15 @@ try {
   if (castleMode) {
     const value = clone(firstTown.save);
     // Явный капитал — единственный контролируемый вход; кандидаты и бои затем идут обычным путём.
-    value.gold += 12000;
-    run({ id: sandbagMode ? 'capital-sandbag-exposure' : 'capital-three-companions', seed: firstTown.seed, kind: 'capital-start',
-      origin: `${firstTown.scenario} earned first town at operation${firstTown.operations}; add12000gold only; no grants to HP, traits, equipment, candidates or campaign RNG` }, value);
-    if (!sandbagMode) {
+    const capital = storageMode ? 20000 : 12000;
+    value.gold += capital;
+    run({ id: storageMode ? 'capital-storage-capacity' : sandbagMode ? 'capital-sandbag-exposure' : 'capital-three-companions', seed: firstTown.seed, kind: 'capital-start',
+      origin: `${firstTown.scenario} earned first town at operation${firstTown.operations}; add${capital}gold only; no grants to HP, traits, equipment, candidates or campaign RNG` }, value);
+    if (!sandbagMode && !storageMode) {
       assert.ok((partyBattleCounts[2] ?? 0) > 0 && (partyBattleCounts[3] ?? 0) > 0, 'Expanded parties never entered battle');
       assert.ok(actorActivity[2].shots > 0 && actorActivity[3].shots > 0, 'Additional companion slots never fired');
     }
-    if (!sandbagMode) assert.ok(expandedNaturalScenarios.size > 0, 'No natural campaign earned an expanded party');
+    if (!sandbagMode && !storageMode) assert.ok(expandedNaturalScenarios.size > 0, 'No natural campaign earned an expanded party');
   } else assert.ok(Object.values(classes).every(row => row.natural.battles + row.controlled.battles > 0), 'One or more classes never entered battle');
   if (repairMode) {
     assert.ok(fixWallPurchases > 0 && repairmanPurchases > 0, 'Campaigns did not exercise both repair purchases');
@@ -332,8 +364,14 @@ try {
     assert.ok(sandbagPurchases > 0, 'Campaigns did not buy Sandbags');
     assert.ok(sandbagObservations.some(row => row.avoided > 0), 'No campaign had measured damage reduction');
   }
+  if (storageMode) {
+    assert.ok(storagePurchases > 0 && maximumInventorySlots === 16, 'Storage capacity was not purchased through its source cap');
+    assert.ok(expandedLootTransfers > 0, 'No loot reached an expanded slot');
+    assert.ok(storageRestObservations.some(row => row.occupiedExtraSlots > 0), 'No expanded item survived Rest');
+  }
   const report = { status: 'passed', seedCount, sourceHashes, geometrySha256, scenarios: results.length, frames: totalFrames, checkpoints: totalCheckpoints, restTransitions: totalRest,
     rewardActions: totalRewards, reachedDays, wonDays, naturallyHiredClasses: [...naturalHired].sort(), classes: castleMode ? undefined : classes,
+    ...(storageMode ? { storagePurchases, maximumInventorySlots, expandedLootTransfers, storageRestObservations } : {}),
     ...(sandbagMode ? { sandbagPurchases, sandbagObservations, ambiguousSandbagFrames,
       positiveDamageReductions: sandbagObservations.filter(row => row.avoided > 0).length,
       avoidedDamage: sandbagObservations.reduce((sum, row) => sum + row.avoided, 0) } : {}),
@@ -344,12 +382,14 @@ try {
         ['shots', 'hits', 'damage', 'kills', 'reloads', 'reloadCompletions', 'bowDraws', 'levelUps'].map(key => [key, value[key as keyof Activity]]))])) } : {}),
     elapsedMs: Math.round(performance.now() - started),
     collision: 'Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts',
-    policy: sandbagMode ? 'Aimed Sheriff and autonomous companions; prioritize Sandbag1, Sandbag2 from town4, then Repairman/House/Wall/hiring and paid/free repair policy. Reserve first hire cost. Natural runs have no grants. Separate capital-start grants12000gold only at earned first town, buys Sandbag4 normally, sets companions to armor-only/no priorities through normal town actions and avoids aiming at Crows until one positive reduction occurs. This input exposure addresses integer rounding that masks low-level Sandbags against small early-game hits. Measured damage pairs replay a single actual frame with only Sandbag level set to0; accept single-hit, same-final-RNG, surviving-wall pairs. This counterfactual is port integration evidence, separate from original damage reference.'
+    policy: storageMode ? 'Aimed Sheriff and autonomous companions; buy capacity7/8/9 from town1/2/3 when affordable, reserve first hire cost, then existing House/Wall/hiring policy. Collect actual loot into first available slot including expanded backpack. Check every extra item across Rest and full-state/event replay. Natural starts have no grants; separate capital-start adds20000gold only at earned first town and buys all16slots through ordinary transactions. No granted items, forced kills or private battle completion.'
+      : sandbagMode ? 'Aimed Sheriff and autonomous companions; prioritize Sandbag1, Sandbag2 from town4, then Repairman/House/Wall/hiring and paid/free repair policy. Reserve first hire cost. Natural runs have no grants. Separate capital-start grants12000gold only at earned first town, buys Sandbag4 normally, sets companions to armor-only/no priorities through normal town actions and avoids aiming at Crows until one positive reduction occurs. This input exposure addresses integer rounding that masks low-level Sandbags against small early-game hits. Measured damage pairs replay a single actual frame with only Sandbag level set to0; accept single-hit, same-final-RNG, surviving-wall pairs. This counterfactual is port integration evidence, separate from original damage reference.'
       : repairMode ? 'Aimed Sheriff and autonomous companions; prioritize Repairman1 when affordable (reserve first hire cost), Repairman2 from town4, then existing House/Wall/hiring policy. Pay Fix Wall on damaged even days when affordable; otherwise Free Repair. Separate capital-start grants12000gold only at an earned first town. No forced kills, HP grants or battle completion. Wave observations exclude leech weapons and item repair and account for same-frame castle-hit events.'
       : castleMode ? 'Aimed Sheriff plus autonomous permanent companions; buy House with enough gold for the next generated candidate, buy one Wall from town2 onward when affordable, then hire through ordinary confirmation; Free Repair and Day6 title before Rest; natural runs have no grants. Separate capital-start adds12000gold at an earned first town to exercise the three-slot party before the current Day7 boundary.'
       : 'Aimed Sheriff plus autonomous companion; generated equipment and skills retained; collect available loot; source skill choice indexed by seed/day; hire when affordable; Free Repair and Day6 title before Rest; no grants, invincibility, private battle completion or forced kills',
     limits: ['Port full-state/event replay and finite-state checks, not independent original parity or browser validation', 'Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred',
-      castleMode ? 'Natural scenarios and the one capital-start are separate: the latter grants12000gold only at an earned first town; it does not establish natural three-companion affordability within seven days'
+      storageMode ? 'Capital capacity16 evidence grants20000gold only at earned first town; it does not establish natural full Storage affordability within seven days'
+      : castleMode ? 'Natural scenarios and the one capital-start are separate: the latter grants12000gold only at an earned first town; it does not establish natural three-companion affordability within seven days'
         : 'Controlled starts replace only the candidate generated at an actually earned first town, with provenance recorded separately',
       'Deaths count castle defeats; companions have no separate HP/death model in the source combat actor'], snapshots, results };
   writeFileSync(resolve(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
