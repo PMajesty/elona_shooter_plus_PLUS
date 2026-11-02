@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v36, Carry Over, eight hero classes**.
+Updated 2026-11-02. Current local build: **v36, all honorary titles and Carry Over**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -59,6 +59,12 @@ Sp.Trainer training. Prayer, Dinner, Taunt, searches and paid shop/recruit refre
 apply their source effects. Searches retain their own saved random sequence.
 Both original Museum medal pages show all38 English descriptions and earned states;
 visitor robbery, action-medal AP bonuses and class/day/perfect-day medals work.
+Claim title supports all eight promotions through King, on days6/11/16/26/41/61/
+81/101, with salaries100/200/400/700/1000/1500/2000/3000 GP. Delayed claims advance
+one rank per4 AP; the new salary pays from the next settlement. Mission availability,
+original event text and the character panel use the same rank. This extends the
+existing numeric title field without changing the save format or earlier saves.
+Source: MainTimeline.newTitle (9752), titleList (9247), claim dialog (10632).
 
 Original assets, English UI and credits remain. Sound starts muted unless the user
 enabled it. Browser testing reuses a tab when available and keeps it muted. One browser save,
@@ -66,8 +72,10 @@ Continue and JSON backups work; imported/continued battles open paused.
 
 ## Validation and limits
 
-- **485 tests passed**, with typechecking and production build passing. Latest
-  bundle: assets/index-DmWw82Ak.js. Carry Over checks cover full-town restoration,
+- **489 tests passed**, with typechecking and production build passing. Latest
+  bundle: assets/index-Bq_noECi.js. Title checks cover every unlock day, sequential
+  late claims, AP refusal, settlement credits, rank limits and save/Carry Over
+  restoration. Carry Over checks cover full-town restoration,
   minimum/earned money, AP, medal restrictions, repeated JSON replay and refusal
   of Day1/Hardcore/incompatible/malformed checkpoints. Existing MOD checks cover selection/reset without
   hero/RNG rerolls, combined Casual/Intense power, both skipped batch branches,
@@ -94,6 +102,10 @@ Continue and JSON backups work; imported/continued battles open paused.
   preserves the battle and checkpoint. Recursive checkpoint import was refused
   without changing the active envelope. No console errors. Evidence:
   .build/browser-qa/carry-over-verification.json and carry-over-confirmation.png.
+- The muted title browser check claimed King in a controlled Day101 town and
+  verified the original dialog,3000 GP salary and character title. Export changed
+  only rank/AP; Continue retained the entire envelope. Evidence:
+  .build/browser-qa/titles-verification.json and title-king.png. No console errors.
 - Earlier browser evidence covers reload/combat/results/town, activities, hires,
   Museum, class unlocks, Ragnarok and both difficulty modes. Hardcore battle export
   is refused and Continue has no battle save; its town checkpoint loads and Rest
@@ -114,7 +126,7 @@ that the app's crash cause was fixed.
 1. Long-session stability/performance and difficulty evidence beyond the first
    cycle; the current Day1000 save safety boundary remains an intentional limit.
 2. Remaining medal effects/triggers, including recycling/modding bonuses and
-   decorative fireworks; later honorary titles and salary progression.
+   decorative fireworks.
 3. Original six save slots/global slot UI, deletion and Flash save conversion.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
    camera shake, decorative boss reticle, some ranged spell effects/frame sounds,

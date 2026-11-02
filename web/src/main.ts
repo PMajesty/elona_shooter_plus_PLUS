@@ -5,6 +5,7 @@ import Phaser from 'phaser';
 import { HERO_CLASSES, heroClassUnlocked, isHeroClass, type HeroClass } from './hero-classes.ts';
 import { createProfile, mergeProfile, mergeProfiles, validProfile, type GlobalProfile } from './profile.ts';
 import { MEDALS } from './medals.ts';
+import { TITLES, nextTitle } from './titles.ts';
 import { Simulation, type SimulationState, type EnemyState, type SimulationEvent } from './simulation.ts';
 import { WORLD } from './content.ts';
 import { weaponPresentation } from './combat-stats.ts';
@@ -184,6 +185,7 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.pendingTownAction; delete container.dataset.pendingLootAction; delete container.dataset.upgradePreview;
     delete container.dataset.party; delete container.dataset.partySelection; delete container.dataset.pendingPartyAction; delete container.dataset.companionVisuals;
     delete container.dataset.castleUpgrades;
+    delete container.dataset.titleName; delete container.dataset.titleSalary; delete container.dataset.claimTitleAvailable;
     delete container.dataset.carryOverAvailable; delete container.dataset.carryOverConfirmation;
     container.dataset.carryOver = String(Boolean(this.sim?.state.carryOver));
   }
@@ -1174,6 +1176,9 @@ class ElonaScene extends Phaser.Scene {
       trainer: this.sim.state.trainerLevel, trainerCost: castleUpgradeCost('trainer', this.sim.state),
       trainerMultiplier: castleTrainerMultiplier(this.sim.state), trainerExperienceIncreasePercent: Math.trunc(castleTrainerMultiplier(this.sim.state) * 100 - 100) });
     container.dataset.title = String(this.sim.state.title);
+    container.dataset.titleName = TITLES[this.sim.state.title].name;
+    container.dataset.titleSalary = String(TITLES[this.sim.state.title].salary);
+    container.dataset.claimTitleAvailable = String(nextTitle(this.sim.state.title, this.sim.state.day) !== undefined);
     container.dataset.townTab = tab ?? 'none';
     container.dataset.medalPage = String(this.medalPage);
     container.dataset.earnedMedals = JSON.stringify(this.sim.state.earnedMedals);
@@ -1192,7 +1197,7 @@ class ElonaScene extends Phaser.Scene {
       : pending?.kind === 'mod' ? 'Yes mounts the MOD. No or clicking elsewhere swaps these two inventory items.'
       : upgradeSelecting ? 'Choose an owned weapon to upgrade. Click elsewhere to cancel. Upgrade keeps mounted mods.'
       : dialog === 'repair' ? 'The castle walls are repaired. Click to continue.'
-      : dialog === 'title' ? 'Honorary Citizen — daily salary: 100 GP, beginning with the next completed day. Click to continue.'
+      : dialog === 'title' ? `${TITLES[this.sim.state.title].name} — daily salary: ${TITLES[this.sim.state.title].salary} GP, beginning with the next completed day. Click to continue.`
       : dialog === 'rest' ? `Click to finish resting and begin Day ${this.sim.state.day + 1}.`
       : pendingParty?.kind === 'henchman' ? 'The henchman demands half the mission reward. Accept?'
       : pendingParty?.kind === 'hire' ? 'Yes pays the displayed cost and recruits this character. Any other click cancels.'
@@ -1214,7 +1219,7 @@ class ElonaScene extends Phaser.Scene {
         kind: id < 100 ? 'class' : id >= 900 ? 'base' : definition?.party ? 'party' : 'normal' };
     });
     const members: PartyViewMember[] = [{ slot: 0, name: 'You', appearance: this.appearance, level: state.player.level, exp: state.player.exp,
-      className: HERO_CLASSES[state.player.classId].name, wageLabel: state.title ? 'Honorary Citizen' : 'Newcomer', kill: null, earn: null, weapon: this.sim.weapon,
+      className: HERO_CLASSES[state.player.classId].name, wageLabel: TITLES[state.title].name, kill: null, earn: null, weapon: this.sim.weapon,
       traits: traits(state.player.traits), traitLevels: state.player.traits, focusedTrait: -1, order: -1, prioritizeBoss: false, prioritizeWall: false, controlsEnabled: false }];
     for (const slot of state.party.slots) {
       if (!slot.exists || !slot.member) continue;

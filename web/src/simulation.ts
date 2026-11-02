@@ -1,4 +1,5 @@
 import { GAME_MODS, validGameMods, type GameMods, type GameMod } from './game-mods.ts';
+import { TITLES, isTitle, nextTitle, type Title } from './titles.ts';
 import { generateEarlyTownRecruit } from './recruits.ts';
 import { generateHenchman } from './party.ts';
 import { MEDALS } from './medals.ts';
@@ -55,7 +56,7 @@ export interface SimulationState {
   version: typeof SAVE_VERSION; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: number; tick: number; timerRemainder: number; rng: number; nextUid: number;
   activeMission: ActiveMission; resultBefore: number; earnedMedals: number[]; perfectDays: number; bossesSpawned: number;
   economy: TownEconomy;
-  hero: KnownHeroInitialization; title: 0 | 1;
+  hero: KnownHeroInitialization; title: Title;
   castleHp: number; castleMaxHp: number; wallLevel: number; wallFixCount: number; repairmanLevel: number; sandbagLevel: number; looterLevel: number; trainerLevel: number; gold: number; totalMoney: number; kills: number; criticalKills: number;
   aimX: number; aimY: number; fireHeld: boolean; pendingShot: boolean;
   player: { classId: HeroClass; classState?: { frenzy: number; idleCount: number; burst: number }; grenadeCount: number; level: number; exp: number; skillPoints: number; traits: TraitLevels; weaponExp: number[]; selectedSlot: number; shootTimer: number; accuracyFix: number; rampageTicks: number; bowDrawing: boolean };
@@ -1404,7 +1405,7 @@ export class Simulation {
     const reward = fullReward * rewardShare;
     const perfectBonus = this.state.noDamage ? (Math.trunc(fullReward * 1.3) - fullReward) * rewardShare : 0;
     const tax = Math.max(0, this.state.mode === 'casual' ? this.state.day * 20 - 400 : this.state.day * 35 - 200);
-    const salary = this.state.title === 1 ? 100 : 0;
+    const salary = TITLES[this.state.title].salary;
     const wages = this.state.party.slots.slice(0, 4).reduce((total, slot) => total + (slot.exists && slot.member ? companionWage(slot.member, this.state.partySkills.effects[127], this.state.earnedMedals.includes(92)) : 0), 0);
     const upkeep = castleUpkeep(this.state);
     const museum = museumIncome(this.state.economy.museum, this.state.earnedMedals);
@@ -1791,11 +1792,12 @@ export class Simulation {
 
   claimTitle(): 'claimed' | 'not-enough-ap' | 'unavailable' {
     const state = this.state;
-    if (state.phase !== 'town' || state.town?.preparation !== 'ready' || state.pendingTownAction || state.pendingPartyAction || state.day < 6 || state.title !== 0) return 'unavailable';
+    const next = nextTitle(state.title, state.day);
+    if (state.phase !== 'town' || state.town?.preparation !== 'ready' || state.pendingTownAction || state.pendingPartyAction || next === undefined) return 'unavailable';
     if (state.town.ap < 4) return 'not-enough-ap';
     // Титул меняется после расчёта дня; первая зарплата входит только в следующий итог.
     state.town.ap -= 4;
-    state.title = 1;
+    state.title = next;
     return 'claimed';
   }
 
@@ -2004,7 +2006,8 @@ export class Simulation {
       simulation.state.result.tax = 0;
       simulation.state.result.salary = 0;
     }
-    if (![0, 1].includes(simulation.state.title) || (simulation.state.title === 1 && (simulation.state.day < 6 || (simulation.state.day === 6 && simulation.state.phase !== 'town')))) throw new Error('Invalid title.');
+    const title = simulation.state.title;
+    if (!isTitle(title) || title > 0 && (simulation.state.day < TITLES[title].day || simulation.state.day === TITLES[title].day && simulation.state.phase !== 'town')) throw new Error('Invalid title.');
     if (['tax', 'salary'].some(key => !finite((simulation.state.result as unknown as Record<string, unknown>)[key]) || Number((simulation.state.result as unknown as Record<string, unknown>)[key]) < 0)) throw new Error('Invalid result income or tax.');
     if (simulation.state.result.fame !== undefined && (!Number.isInteger(simulation.state.result.fame) || simulation.state.result.fame < 0 || simulation.state.result.fame > 15000000)) throw new Error('Invalid fame income.');
     simulation.state.projectiles = restoredProjectiles;

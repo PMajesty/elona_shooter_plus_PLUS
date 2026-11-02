@@ -1,6 +1,7 @@
 import { TOWN_ACTIVITIES, museumIncome, type TownActivity, type TownEconomy } from './town-economy.ts';
 import { MEDALS } from './medals.ts';
 import { MAX_CAMPAIGN_DAY } from './missions.ts';
+import { TITLES, nextTitle, type Title } from './titles.ts';
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
@@ -27,7 +28,7 @@ export interface TownLayout {
 }
 interface TownViewState {
   economy: TownEconomy; earnedMedals: number[];
-  day: number; gold: number; castleHp: number; castleMaxHp: number; title: 0 | 1;
+  day: number; gold: number; castleHp: number; castleMaxHp: number; title: Title;
   wallLevel: number; wallFixCount: number; repairmanLevel: number; sandbagLevel: number; looterLevel: number; trainerLevel: number; party: { capacity: 1 | 2 | 3 };
   player: { level: number; exp: number; selectedSlot: number };
   town: { ap: number; preparation: string; mission?: { hire: boolean } } | null; inventory: (Item | null)[];
@@ -178,7 +179,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         });
       }
       const action = layout.claimTitleAction;
-      const available = state.day >= 6 && state.title === 0;
+      const available = nextTitle(state.title, state.day) !== undefined;
       const actionX = x + action.x, actionY = y + action.y;
       const cardAsset = manifest.clips[action.cardClip], pinAsset = manifest.clips[action.pinClip];
       const card = scene.add.image(actionX + action.children.card.x, actionY + action.children.card.y, action.cardClip, String(action.cardFrame))
@@ -233,7 +234,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     text(placement.children.title, dialog === 'rest' ? 'Resting' : dialog === 'title' ? 'New Title!' : 'Free Repair!');
     text(placement.children.text, dialog === 'rest'
       ? 'The day is finally over! You relax for the first time today and settle down to enjoy the warm, cozy bed.'
-      : dialog === 'title' ? 'Your remarkable achievements have been acknowledged and you are granted a new title, Honorary Citizen! You will receive 100 gold pieces every day as a salary.'
+      : dialog === 'title' ? `Your remarkable achievements have been acknowledged and you are granted a new title, ${TITLES[state.title].name}! You will receive ${TITLES[state.title].salary} gold pieces every day as a salary.`
       : 'Citizens acknowledge your hard work and decided to rebuild the castle walls for free!');
     image('button_eventOk', placement.children.okButton.x, placement.children.okButton.y, placement.children.okButton);
     // Исходный procEventDialog принимает любое нажатие; отдых начинается только после него.

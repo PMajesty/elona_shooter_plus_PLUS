@@ -3,7 +3,7 @@
 A TypeScript/Phaser browser remake of Elona Shooter Plus 1.3.0.4.
 The current local build supports **all eight original hero classes** and
 **repeating campaign cycles**, including Casual and Hardcore modes. This is an
-incomplete remake; remaining medal effects, titles and the original save-slot UI are still being ported.
+incomplete remake; remaining medal effects and the original save-slot UI are still being ported.
 
 Open [the local game](http://127.0.0.1:5175/elona/).
 Original artwork, English text, audio and credits are retained. Sound starts muted
@@ -30,7 +30,7 @@ unless you previously enabled it; its button explicitly displays the current sta
   Trainer, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, with their effects.
 - Prayer, Dinner, Party, egg collection, Taunt and training; Go searching with
   persistent outcomes, rewards, setbacks and talent growth; shop/recruit refresh,
-  Free Repair, first title/salary and Rest. Mission Hire contracts a temporary
+  Free Repair, all eight honorary promotions/salaries and Rest. Mission Hire contracts a temporary
   Militia henchman with a Rapid Bowgun for half the next mission reward; he joins
   through Rest and leaves at settlement. Sister bombs can be shot to explode.
 - Museum/Medals navigation, both original medal pages and English descriptions;
@@ -97,7 +97,7 @@ Temporary-hire checks cover confirmation, a full permanent party, actual AI fire
 projectile replay, half rewards, wages, departure and old-save migration.
 Museum checks cover payouts, medal thresholds, daily resets, action AP bonuses,
 correct hero-class awards and migration. Unlock checks cover the global collection,
-starting bonuses and actual class combat effects. Some medal effects, later titles and
+starting bonuses and actual class combat effects. Some medal effects and
 the original six save slots remain incomplete.
 Additional controlled combat crosses Day40/80 through ordinary rewards, towns,
 Rest and JSON restores. Source-formula checks cover later cycles and Day1000 save
@@ -111,6 +111,11 @@ party-based weapon generation limits, plus AP, repeating sales and save replay.
 Carry Over is available after defeat from Day2 outside Hardcore: restore the last
 town, add battle earnings (minimum200 GP) and1 AP, with original medal restrictions.
 Checks cover full restoration, repeated retries, JSON replay and invalid checkpoints.
+Claim title now follows every original rank through King on Day101, with daily
+salaries from100 to3000 GP. Delayed promotions stay sequential and cost4 AP each;
+the new salary first pays at the next settlement. Numeric title saves keep their
+existing format. Tests cover all unlock days, AP refusal, final-rank limits,
+settlement credits and save/Carry Over restoration.
 Legacy battle saves gain a Carry Over town snapshot at their next Rest.
 The source's alternative-start branches have no reachable player control; see the
 [source audit](docs/port-status.md).
