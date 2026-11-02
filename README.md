@@ -69,7 +69,7 @@ unless you previously enabled it; the mute preference persists between visits.
 - A persistent browser medal collection with class unlocks and original New Game
   starting bonuses. Eight browser save slots with the original title dropdown,
   trash icon and deletion confirmation, plus Continue and JSON import/export.
-  Version40 accepts prior browser saves; the original Flash medal/index file can
+  Version41 accepts prior browser saves; the original Flash medal/index file can
   be imported. Original Flash town adventures have a validated import path;
   compatibility with real players' files remains unverified.
 - Casual lowers encounter power/taxes and grants35% more kill XP. Hardcore uses

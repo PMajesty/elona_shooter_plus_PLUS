@@ -52,6 +52,16 @@ font-fallback evidence and the unchanged572-test suite are reused. No save or
 simulation change required a new campaign replay. Reboot recovery retained these
 artifacts and restored the preview at its documented URL.
 
+The earlier IAB runtime is unavailable after reboot. A standard Playwright check
+using installed Chrome in one muted headless page restores automated browser
+verification without touching the user's profile or desktop. Actual same-origin
+iframe export delivers a file and direct Continue preserves its full envelope.
+A one-hour dense-battle measurement now records raw frame gaps, long tasks and
+heap samples to an ignored evidence file; completion remains pending. Reuse that
+active run rather than starting a duplicate. One fixture comparison needed the
+known v40→v41 version migration, and a focus click hit the pause shade: correct
+those test assumptions, not product behavior.
+
 An intermittent ready-but-black screenshot recurred once; Continue rendered the
 battle correctly. Its cause is unresolved. Loader recovery does not establish a
 fix for that observation. An unchanged iframe download path twice reported success

@@ -10,7 +10,9 @@ parent-window mousedown listener had interpreted surrounding website controls as
 game clicks, including resuming paused combat. Owned bow releases work in both
 the iframe and accessible parent window. Focus loss pauses play. Same-origin
 host-page reload/Continue and direct-route access to the same save slots work;
-the README includes an embed example. Iframe download delivery remains unverified.
+the README includes an embed example. Stock Chrome156 also delivers an actual
+iframe export file and direct Continue preserves its full envelope. IAB iframe
+download delivery remains unverified; no broader browser/origin claim follows.
 An individual font-load rejection now uses browser fallback fonts while the rest
 of startup proceeds. Previously one bad font prevented the canvas/game from being
 created at all. Original fonts remain the normal path; fallback keys are visible
@@ -265,6 +267,15 @@ historical player SOL compatibility remains unverified.
   Day1, tick674, RNG1744019180, HP40, gold209. Slot8 is empty; slot1 is
   selected, paused/muted. No console errors or fullscreen during the latest check.
 
+Active sustained check: `.build/browser-qa/chrome-stability-verification.json`
+records one hour in a single isolated muted headless Chrome156 page. It reuses the
+Day41 dense fixture, raising only castle HP/max HP to10million to keep combat
+running. Raw rAF gaps, long tasks and heap samples are recorded each minute;
+final export/reload/Continue is automatic. **Running, not a passing result yet.**
+Inspect its state before continuing; do not launch a duplicate. The user's IAB
+profile/save is untouched. Standard Playwright is installed only under ignored
+`.tools/browser-qa/`; the temporary check is under `.build/browser-qa/`.
+
 Recent evidence is in ignored `.build/browser-qa/`; older detail remains in Git.
 Reuse it for unchanged behavior rather than repeating whole browser/campaign runs.
 
@@ -312,7 +323,7 @@ for routine continuation.
 1. Hours-long stability, broader browser/hosting performance and later difficulty
    evidence. The five-minute crowded baseline above passes; the Day1000 save safety
    boundary remains an intentional limit. Same-origin embedding has the input/save
-   evidence above; cross-origin storage and iframe download delivery remain open.
+   evidence above; cross-origin storage and IAB iframe download delivery remain open.
 2. All38 defined medal award paths and award notifications are connected. Preserve
    source bonus discrepancies: Kongregate advertises a
    wage discount, but wage3610 checks Ragnarok92; medal91 does not add another
