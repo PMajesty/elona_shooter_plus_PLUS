@@ -71,6 +71,14 @@ pass in isolated muted contexts. Twelve existing mode/slot checks and the new
 build pass; unchanged simulation/full-suite/hour evidence is reused. Automatic
 saves retain their existing behavior; do not claim all storage policies supported.
 
+The next hosting check used stock Edge with different host/game origins. The
+intercepted host was blocked by local-network access checks before loading game
+code. One bounded correction served a real temporary host file; input isolation,
+scaled fire, delivered export and full-envelope host reload/Continue then passed.
+No security flags/permissions or game code changed, and the host file was removed.
+Keep this result scoped to the measured HTTP/default-policy case; do not infer
+public hosting or every storage policy from it. Reuse the current build/tests.
+
 An intermittent ready-but-black screenshot recurred once; Continue rendered the
 battle correctly. Its cause is unresolved. Loader recovery does not establish a
 fix for that observation. An unchanged iframe download path twice reported success

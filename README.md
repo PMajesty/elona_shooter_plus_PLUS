@@ -180,15 +180,21 @@ For a responsive embed on the same website:
 The game pauses when focus leaves it. Surrounding website controls do not start
 shots or resume combat; a shot begun inside the game can finish outside the frame.
 Same-origin iframe save/Continue across a host-page reload and shared slots with
-the direct game URL have been checked. Keep the direct URL available for backups:
-JSON export downloads work there, while iframe download delivery remains unverified
-in the in-app browser. Cross-origin storage/download policies and sandboxed embeds
-have not been verified. The fullscreen icon is for the player to operate.
+the direct game URL have been checked. Stock Chrome156 delivers iframe JSON exports.
+Edge156 also passes an actual cross-origin HTTP embed check: host clicks preserve
+pause, a360px display fires correctly, export delivers a file and host-page
+reload/Continue restores the complete save. This uses loopback origins under default
+browser policies, not public HTTPS/CDN or restrictive privacy-policy variants.
+Keep the direct URL available for backups: iframe download delivery remains
+unverified in the in-app browser. Sandboxed embeds remain unverified. The
+fullscreen icon is for the player to operate.
 
-A controlled five-minute Day41 browser stress check began with150 enemies,
-including six bosses, and three companions. Sampled rendering stayed near60 FPS
-while simulation kept pace with elapsed time; its full save reloaded exactly.
-This is a local baseline, not a Flash comparison or hours-long stability evidence.
+A controlled one-hour Day41 Chrome check began with150 enemies, including six
+bosses, and three companions. Simulation advanced3598.567s in3600.017s wall time,
+and the complete save restored exactly. Raw frame gaps averaged16.677ms with two
+gaps above250ms and a983.4ms maximum. Sampled heap ended below its starting value;
+this is not proof of leak-free operation. See current status for scope and limits.
+No performance advantage over native Flash is claimed.
 
 The simulation is independent of rendering. Existing original-game comparisons
 remain available through `web/package.json`; rerun those affected by a change.

@@ -13,6 +13,12 @@ host-page reload/Continue and direct-route access to the same save slots work;
 the README includes an embed example. Stock Chrome156 also delivers an actual
 iframe export file and direct Continue preserves its full envelope. IAB iframe
 download delivery remains unverified; no broader browser/origin claim follows.
+Edge156 now passes an actual cross-origin HTTP host check (localhost host,
+127.0.0.1 game): outside host clicks preserve pause, scaled fire spends5→4 rounds,
+export delivers a file and host-page reload/Continue matches the full envelope.
+The360px display retains the620×380 render buffer. Direct-route save labels also
+remain populated in this default-policy context. Public HTTPS/CDN hosting,
+sandboxed embeds and restrictive privacy-policy variants remain unverified.
 An individual font-load rejection now uses browser fallback fonts while the rest
 of startup proceeds. Previously one bad font prevented the canvas/game from being
 created at all. Original fonts remain the normal path; fallback keys are visible
@@ -305,6 +311,7 @@ Reuse it for unchanged behavior rather than repeating whole browser/campaign run
 | Font failure | `font-fallback-verification.json`, `font-failure-before.png`, `font-fallback-browser.png`: a zeroed served ui.ttf aborted the old build before canvas creation. The patched build reached ordinary Sheriff New Game/character creation/combat and fired5→4 rounds with that same fault. Restored font bytes match the source; healthy reload has no fallbacks and Continue preserves the entire tick18 save. User adventure/collection restored exactly. Original Flash/Ruffle startup path is unchanged. |
 | Required-asset recovery | `asset-retry-verification.json`, `asset-retry-browser.png`, `asset-recovery-browser.png`: missing town-layout JSON previously left a partial title and scene errors. Patched startup names the failed file, offers Retry and avoids scene callbacks before readiness. Actual Retry recovers the title/Continue; optional background-audio failure also permits play. Full tick674 exports before/after are byte-identical; source/served fault-injection files match again. |
 | Save failures | `save-failure-before.json`, `save-failure-verification.json`, `save-{all,profile}-browser.png`: injected storage failures previously produced only hidden status text. Actual Save Game now shows the original dialog, blocks Space, dismisses with Escape and exports the full unchanged envelope on Yes. Medal-only failure preserves the stored adventure. Healthy Save Game/reload/Continue remains exact. All checks use isolated muted contexts. |
+| Edge cross-origin embed | `edge-cross-site-verification.json`, `edge-cross-site-browser.png`: actual HTTP host/game origins differ; default-policy Edge156 supports input isolation, scaled shooting, delivered export and exact full-envelope host reload/Continue. No script errors/failed requests or fullscreen. The first intercepted-host experiment was blocked before game loading by local-network checks; a real host response passed without changing security settings. Temporary host removed; user profile untouched. |
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. The Codex app crash
@@ -336,7 +343,8 @@ for routine continuation.
    controlled Chrome run above passes with stated limits; longer sessions/other
    workloads are unverified. The Day1000 save safety
    boundary remains an intentional limit. Same-origin embedding has the input/save
-   evidence above; cross-origin storage and IAB iframe download delivery remain open.
+   evidence above. Edge's cross-origin default-policy case also passes; public
+   HTTPS/CDN, sandbox/privacy-policy variants and IAB iframe download delivery remain open.
 2. All38 defined medal award paths and award notifications are connected. Preserve
    source bonus discrepancies: Kongregate advertises a
    wage discount, but wage3610 checks Ragnarok92; medal91 does not add another
