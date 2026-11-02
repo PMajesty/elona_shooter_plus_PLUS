@@ -167,6 +167,11 @@ preview at `http://127.0.0.1:5175/elona/` serves `web/dist/`.
 To restore that preview after an app restart, run
 `npm.cmd --prefix web run preview -- --port 5175 --strictPort --base /elona/`.
 
+A controlled five-minute Day41 browser stress check began with150 enemies,
+including six bosses, and three companions. Sampled rendering stayed near60 FPS
+while simulation kept pace with elapsed time; its full save reloaded exactly.
+This is a local baseline, not a Flash comparison or hours-long stability evidence.
+
 The simulation is independent of rendering. Existing original-game comparisons
 remain available through `web/package.json`; rerun those affected by a change.
 Class checks cover gear, growth, skill selection, JSON restore/replay, Militia

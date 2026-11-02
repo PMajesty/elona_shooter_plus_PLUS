@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v40, bird-dropped rat behavior**.
+Updated 2026-11-02. Current local build: **v40, audio preload correction and crowded-battle baseline**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -53,6 +53,11 @@ fall fields replay in life/death; legacy straight-fall saves migrate without RNG
 draws. Newly spawned enemies begin moving on the next frame.
 Source: enemy constructor279, rat1353/bird1399/death921, enemy_rat.frame1;
 original body1258/shadow680, extracted with the existing campaign asset tool.
+The Chain Gun's three phase sounds and bird-drop cue are now included in audio
+preloading. Their recent simulation/render connections had omitted that list.
+Muted browser inspection confirms all four in the loaded cache; audible playback
+and exact sample timing remain unverified. Loaded keys are inspectable through
+the existing game's DOM metadata without adding visible controls.
 The original fixed-level cycle controls enemy selection while calendar level
 controls power, rewards and boss counts. Every40 levels adds200 strength: ordinary
 enemy HP/attack and movement speed scale by their source formulas. After Day40,
@@ -209,10 +214,10 @@ historical player SOL compatibility remains unverified.
 
 ## Validation and limits
 
-- **565 tests pass**, with typechecking and production build passing. A subsequent
-  test-only knockback assertion passed in the three affected checks; unchanged
-  full-suite/build evidence was reused. Bundle:
-  assets/index-BwVNE_GZ.js. Existing deterministic/source comparisons cover hero
+- Last full suite: **565 tests pass**; the three fall checks also passed after a
+  test-only knockback assertion. Simulation/save code is unchanged by the audio
+  loader correction, so those results were reused. Current typecheck/build pass.
+  Bundle: assets/index-9vmVDnBg.js. Existing deterministic/source comparisons cover hero
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
 - The current controlled40-day campaign reached18 enemy kinds in96827 frames using
@@ -220,7 +225,7 @@ historical player SOL compatibility remains unverified.
   mission and per-enemy checks cover all kinds. An earlier run encountered all19;
   this is an observation, not a guarantee for every seed or difficulty-parity evidence.
   Other checks cover later-cycle boundaries/formulas, Day150 medals and Day1000
-  saves. Long-session browser performance and later difficulty remain unmeasured.
+  saves. Hours-long browser stability and later difficulty remain unmeasured.
 - Muted browser evidence covers New Game, combat/reload/F/results/town, original
   controls/help/options, equipment/services/hires, all eight slots, JSON saves,
   Carry Over, medal unlocks/Museum, Sister reactions and Flash collection import.
@@ -251,8 +256,8 @@ historical player SOL compatibility remains unverified.
   entire interrupted-spin envelope. Four new checks cover counter/clock boundaries,
   recoil, release/resume, AI floor, F/weapon changes, JSON replay and old/invalid saves.
   Evidence: .build/browser-qa/chain-gun-verification.json and chain-gun-browser.png.
-- Disposable slot8 was removed. The user's Sheriff adventure/collection was restored:
-  only envelope/simulation version39→40 changed. Day1, tick674, RNG1744019180, HP40,
+- Disposable slot8 was removed. The user's complete Sheriff adventure/collection
+  was restored exactly at v40: Day1, tick674, RNG1744019180, HP40,
   gold209 remain unchanged, paused/muted. No test medals/records, console errors or fullscreen.
 - Falling-rat browser check: a controlled Day26 live fall imported exactly, and
   an ordinary mouse shot hit the visible body in the air (one bullet, actual kill).
@@ -260,6 +265,17 @@ historical player SOL compatibility remains unverified.
   shadow remained separated. Three source-rule regressions cover drift/rotation,
   AI acquisition/aiming, knockback, death/landing, replay and legacy/invalid saves.
   Evidence: .build/browser-qa/bird-drop-verification.json and bird-drop-browser.png.
+- Crowded-battle baseline: a controlled Day41 began with150 enemies (six bosses),
+  three companions with launchers/Wind Bow, and hero Chain Gun AI. After313.821s,
+  131 enemies and all companions remained active; simulation advanced313.833s.
+  Five later300-sample windows of Phaser's smoothed render delta averaged
+  16.67–16.72ms (59.8–60 FPS). These are not raw frame gaps or a full-run stall
+  distribution. No console
+  errors. The133041-byte end save reloaded with the complete envelope unchanged;
+  headless round-trip/90-tick replay also passed. Evidence:
+  .build/browser-qa/crowded-battle-verification.json and crowded-battle-browser.png.
+  This is local controlled density evidence, not balance, memory profiling,
+  hours-long stability, cross-browser hosting or a measured Flash advantage.
 - Earlier detailed evidence remains in Git (through146a891), existing
   .build/browser-qa records and historical verification. Reuse it for unchanged
   behavior. The source's inactive card/debug-start functions were audited below.
@@ -272,8 +288,9 @@ that the app's crash cause was fixed.
 
 ## Remaining features and differences
 
-1. Long-session stability/performance and difficulty evidence beyond the first
-   cycle; the current Day1000 save safety boundary remains an intentional limit.
+1. Hours-long stability, broader browser/hosting performance and later difficulty
+   evidence. The five-minute crowded baseline above passes; the Day1000 save safety
+   boundary remains an intentional limit.
 2. All38 defined medal award paths and award notifications are connected. Preserve
    source bonus discrepancies: Kongregate advertises a
    wage discount, but wage3610 checks Ragnarok92; medal91 does not add another
@@ -298,6 +315,9 @@ that the app's crash cause was fixed.
    component; external credits retain their original URLs, whose availability is unverified.
    External Museum link availability is unverified. Older Day2+ browser saves lack
    earlier kill totals, so their lifetime statistic remains a marked lower bound.
+   One in-app-browser reload showed black canvas screenshots despite title/audio
+   readiness; an empty-field focus click restored the title without an error.
+   Cause and ordinary-browser reproduction are unverified; no startup fix is claimed.
 5. Falling-rat bodies and later enemy hit regions use rendered alpha; exact Flash
    filter/vector boundary matching remains unverified. Searching preserves the source's ineffective Trouble HP expression;
    its restored original narrative still promises an HP increase.

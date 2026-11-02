@@ -73,6 +73,7 @@ for (const key of ['soundReloading1', 'soundReloading3', 'soundReloaded3', 'soun
 for (const key of ['soundDead4', 'soundDead8', 'soundDead9']) USED_SOUNDS.add(key);
 for (const key of ['soundBow1', 'soundBow2', 'soundDead1', 'soundDead2', 'soundDead6', 'soundFireball', 'soundRampageEnemy', 'soundPuls', 'soundLow']) USED_SOUNDS.add(key);
 USED_SOUNDS.add('soundFirework');
+for (const key of ['soundChain1', 'soundChain2', 'soundChain3', 'soundDrop']) USED_SOUNDS.add(key);
 let manifest: Manifest;
 let gameScene: ElonaScene;
 
@@ -164,6 +165,7 @@ class ElonaScene extends Phaser.Scene {
     loadStatus.hidden = true;
     container.dataset.loadMs = (performance.now() - bootStarted).toFixed(0);
     this.sound.mute = this.muted;
+    container.dataset.loadedSounds = JSON.stringify([...USED_SOUNDS].filter(key => this.cache.audio.exists(key)));
     container.dataset.muted = String(this.muted);
     this.root = this.add.container(0, 0);
     this.input.mouse?.disableContextMenu();

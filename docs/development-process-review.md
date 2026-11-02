@@ -181,3 +181,13 @@ Make fixtures follow that copy. A changed valid RNG sequence omitted Dragon in
 one40-day run, disproving the test's every-kind-per-seed requirement. Keep the full
 progression smoke and report its actual encounters; retain separate per-kind and
 seeded mission coverage. Do not search for a seed merely to restore a reassuring count.
+
+Muted checks caught no playback errors when recent Chain Gun/drop sounds were
+absent from the explicit preload list. Corrected those four keys and exposed the
+loaded-key list through existing DOM diagnostics. Verify cache readiness for new
+audio while remaining muted; silence or a missing console error does not prove
+the asset is connected. A five-minute crowded browser check reused existing frame
+metadata and normal save import, with no new harness. Local TimeStep source shows
+the existing delta is smoothed; distinguish it from raw frame gaps as well as
+whole-run stall/memory evidence. No optimization was justified
+by the observed60 FPS and simulation progress matching wall time.
