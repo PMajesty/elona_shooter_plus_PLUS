@@ -79,6 +79,15 @@ No security flags/permissions or game code changed, and the host file was remove
 Keep this result scoped to the measured HTTP/default-policy case; do not infer
 public hosting or every storage policy from it. Reuse the current build/tests.
 
+A sampled zero-ammo state did not establish a reload defect: later hour-run samples
+show refill/firing cycles. Leave the working rule unchanged. A separate actual
+WebGL-loss experiment did reproduce invisible combat progressing; browser-only
+pause/update guards fix it. Forced loss, blocked resume, restored artwork, full-save
+Continue and resumed shooting pass. A failing console assertion was attributed to
+favicon404 rather than hidden: retain it separately from game errors. No repeat
+hour or new simulation fixture was justified; the earlier black screenshot remains
+undiagnosed.
+
 An intermittent ready-but-black screenshot recurred once; Continue rendered the
 battle correctly. Its cause is unresolved. Loader recovery does not establish a
 fix for that observation. An unchanged iframe download path twice reported success

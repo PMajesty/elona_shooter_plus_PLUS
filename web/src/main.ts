@@ -92,6 +92,7 @@ let gameScene: ElonaScene;
 
 class ElonaScene extends Phaser.Scene {
   private ready = false;
+  private graphicsLost = false;
   private failedRequiredAssets = new Set<string>();
   private combatNotices = new CombatNotices();
   private combatNoticeViews = new Map<CombatNotice, Phaser.GameObjects.Container>();
@@ -257,6 +258,18 @@ class ElonaScene extends Phaser.Scene {
     window.addEventListener('keydown', combatKey);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => window.removeEventListener('keydown', combatKey));
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
+    const contextLost = () => {
+      this.graphicsLost = true; container.dataset.webglContext = 'lost';
+      if (this.screen === 'battle' && !this.paused) this.togglePause();
+    };
+    const contextRestored = () => { this.graphicsLost = false; container.dataset.webglContext = 'ready'; };
+    this.game.canvas.addEventListener('webglcontextlost', contextLost);
+    this.game.canvas.addEventListener('webglcontextrestored', contextRestored);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.game.canvas.removeEventListener('webglcontextlost', contextLost);
+      this.game.canvas.removeEventListener('webglcontextrestored', contextRestored);
+    });
+    container.dataset.webglContext = 'ready';
     this.showTitle();
     this.ready = true;
   }
@@ -722,7 +735,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
-    if (!this.ready) return;
+    if (!this.ready || this.graphicsLost) return;
     this.updatePresentation(delta);
     if (this.screen !== 'battle' || !this.sim || this.paused) return;
     const pointer = this.input.activePointer;
@@ -1672,6 +1685,8 @@ class ElonaScene extends Phaser.Scene {
 
   togglePause(): void {
     if (!['battle', 'town', 'result'].includes(this.screen)) return;
+    // Пока графический контекст потерян, игрок не должен возобновить невидимый бой.
+    if (this.paused && this.graphicsLost) return;
     this.paused = !this.paused; this.accumulator = 0; this.firePressed = this.fireReleased = false; this.firingGesture = this.firingReleaseOwned = false;
     container.dataset.paused = String(this.paused);
     this.celebration?.root.setVisible(!this.paused);

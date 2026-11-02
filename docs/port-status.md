@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-03. Current local build: **v41, visible save-failure recovery**.
+Updated 2026-11-03. Current local build: **v41, safe graphics-context recovery**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -32,6 +32,11 @@ failures have separate messages. Cancel/Escape leave combat paused; Space cannot
 resume under the prompt. Successful saves add no dialog. Hardcore combat keeps
 its town-only save/export rule and explains it with an acknowledgement.
 Automatic saves retain their existing non-interrupting behavior.
+Loss of WebGL now freezes updates and pauses active combat. Resume controls remain
+blocked while the context is lost; after Phaser restores rendering, the original
+pause menu stays open for the player to resume. This prevents invisible combat
+from consuming lives/progress. No extra controls, save fields or gameplay RNG draws
+are added. It does not diagnose the earlier intermittent IAB black screenshot.
 
 All eight original hero classes are connected to ordinary New Game, equipment,
 skill choices, growth, combat and saves. Rogue/Hunter start with Little Girl;
@@ -263,9 +268,10 @@ historical player SOL compatibility remains unverified.
 
 - Last full suite: **572 tests pass**. Four new checks cover critical countdown,
   boss-wave warnings, source notice queue boundaries and extracted feedback assets.
-  Current typecheck/build pass; bundle: assets/index-vN9HJS3t.js. Twelve affected
-  mode/slot checks pass. The572-test baseline is reused: only save-error UI changed,
-  with no simulation, storage format or gameplay-rule changes.
+  Current typecheck/build pass; bundle: assets/index-Che6vgmI.js. The twelve mode/slot
+  and572-test baselines are reused: graphics-loss handling changes browser lifecycle,
+  with no simulation, storage format or gameplay-rule changes. Forced-loss/recovery
+  browser checks include exact full saves, blocked resume and actual resumed firing.
   Existing source/deterministic checks cover
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
@@ -312,6 +318,7 @@ Reuse it for unchanged behavior rather than repeating whole browser/campaign run
 | Required-asset recovery | `asset-retry-verification.json`, `asset-retry-browser.png`, `asset-recovery-browser.png`: missing town-layout JSON previously left a partial title and scene errors. Patched startup names the failed file, offers Retry and avoids scene callbacks before readiness. Actual Retry recovers the title/Continue; optional background-audio failure also permits play. Full tick674 exports before/after are byte-identical; source/served fault-injection files match again. |
 | Save failures | `save-failure-before.json`, `save-failure-verification.json`, `save-{all,profile}-browser.png`: injected storage failures previously produced only hidden status text. Actual Save Game now shows the original dialog, blocks Space, dismisses with Escape and exports the full unchanged envelope on Yes. Medal-only failure preserves the stored adventure. Healthy Save Game/reload/Continue remains exact. All checks use isolated muted contexts. |
 | Edge cross-origin embed | `edge-cross-site-verification.json`, `edge-cross-site-browser.png`: actual HTTP host/game origins differ; default-policy Edge156 supports input isolation, scaled shooting, delivered export and exact full-envelope host reload/Continue. No script errors/failed requests or fullscreen. The first intercepted-host experiment was blocked before game loading by local-network checks; a real host response passed without changing security settings. Temporary host removed; user profile untouched. |
+| Graphics loss | `context-loss-before.json`, `context-recovery-verification.json`, `context-recovery-browser.png`: actual WEBGL_lose_context previously advanced tick681→697 while invisible. Patched combat stays at681 through loss/resume attempts, restores paused, preserves the full frozen save across reload/Continue, tolerates loss while already paused and resumes normal shooting5→4. No game script/console errors; a separately attributed favicon404 remains. User profile untouched. |
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. The Codex app crash

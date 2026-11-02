@@ -179,6 +179,8 @@ For a responsive embed on the same website:
 
 The game pauses when focus leaves it. Surrounding website controls do not start
 shots or resume combat; a shot begun inside the game can finish outside the frame.
+If the browser loses the game's graphics context, combat also freezes and stays
+paused after rendering returns. The player resumes through the normal controls.
 Same-origin iframe save/Continue across a host-page reload and shared slots with
 the direct game URL have been checked. Stock Chrome156 delivers iframe JSON exports.
 Edge156 also passes an actual cross-origin HTTP embed check: host clicks preserve
