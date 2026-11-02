@@ -9,7 +9,7 @@
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
     "images": 152,
-    "clips": 76,
+    "clips": 77,
     "sounds": 89,
     "fonts": 6
   },
@@ -25,6 +25,7 @@
     "Shop Upgrade and Refresh labels are separate so each retains its own enabled state",
     "Item comparison popup retains original static labels and renders saved before/after values separately",
     "Town events use original eventWindow2437 and separate card2336 frames with runtime text",
+    "Medal awards use infoPop2291 positions/alpha and infoPopup2290 artwork with runtime text; animated glow/filter changes are approximate",
     "gene and result retain offset (0,-26); application applies menu slide X offset",
     "Item quantities and radio labels are rendered by the application",
     "allyBack and allyFront retain source depths around separately selected charaPic poses",

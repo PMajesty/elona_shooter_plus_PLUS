@@ -358,6 +358,24 @@ def item_popup_asset(xml, sprite):
     return atlas("itemPopup", 1791, sprite, directory, svg_directory)
 
 
+def info_popup_asset(xml, sprite):
+    """Исходная плашка уведомления без динамического infoText."""
+    directory, svg_directory = WORK / "info-popup", WORK / "info-popup-svg"
+    if FORCE or not list(directory.glob("DefineSprite_2290*")):
+        derived = copy.deepcopy(xml)
+        target = next(tag for tag in derived.find("tags") if tag.get("spriteId") == "2290")
+        timeline = target.find("subTags")
+        for tag in list(timeline):
+            if tag.get("name") == "infoText":
+                timeline.remove(tag)
+        path, swf_path = WORK / "info-popup.xml", WORK / "info-popup.swf"
+        ET.ElementTree(derived).write(path, encoding="utf-8", xml_declaration=True)
+        ffdec(["-xml2swf", path, swf_path], "info-popup-swf")
+        ffdec(["-ignorebackground", "-selectid", "2290", "-export", "sprite", directory, swf_path], "info-popup-png")
+        ffdec(["-ignorebackground", "-selectid", "2290", "-format", "sprite:svg", "-export", "sprite", svg_directory, swf_path], "info-popup-svg")
+    return atlas("infoPopup", 2290, sprite, directory, svg_directory)
+
+
 def party_portrait_background(xml, sprite):
     """Запекает bg вместе с исходными матрицей, alpha и blur в координатах ally3."""
     directory, svg_directory = WORK / "party-portrait-background", WORK / "party-portrait-background-svg"
@@ -670,6 +688,11 @@ def town_layout(xml, sprites):
             "saleDialog": {"characterId": 2131, "frame": 1, "image": "shopSaleDialog",
                            "children": placements(sprites[2131].find("subTags"), 1)},
             "itemPopup": {"characterId": 1791, "clip": "itemPopup", "children": placements(sprites[1791].find("subTags"), 1)},
+            "infoPopup": {"characterId": 2291, "children": placements(sprites[2290].find("subTags"), 1),
+                          "frames": [None if not (tags := placed_frame(sprites[2291].find("subTags"), frame)) else {
+                              "y": int(tags[0].find("matrix").get("translateY", "0")) / 20,
+                              "alpha": int(tags[0].find("colorTransform").get("alphaMultTerm", "256")) / 256
+                          } for frame in range(1, 151)]},
             "repairDialog": {"characterId": 2437, "frame": 1, "image": "eventWindow",
                              "cardFrame": 2, "children": placements(sprites[2437].find("subTags"), 1)},
             "claimTitleAction": {"characterId": 2431, "sourceIndex": 9, "x": 465, "y": 255,
@@ -743,6 +766,7 @@ def main():
     for name, i in CLIPS.items():
         manifest["clips"][name] = atlas(name, i, sprites[i])
     manifest["clips"]["itemPopup"] = item_popup_asset(xml, sprites[1791])
+    manifest["clips"]["infoPopup"] = info_popup_asset(xml, sprites[2290])
     manifest["clips"]["partyPortraitBackground"] = party_portrait_background(xml, sprites[685])
     manifest["clips"]["castleUpgradeTiles"] = castle_upgrade_tiles(xml, sprites)
     manifest["clips"]["shieldHit"] = effect_segment_asset(xml, sprites[1459], "shieldHit", "shield-hit", 140, 146, [0.7, 0.7, 0.5, 0.5, 0.2, 0.2])
@@ -877,6 +901,7 @@ def main():
             "Shop Upgrade and Refresh labels are separate so each retains its own enabled state",
             "Item comparison popup retains original static labels and renders saved before/after values separately",
             "Town events use original eventWindow2437 and separate card2336 frames with runtime text",
+            "Medal awards use infoPop2291 positions/alpha and infoPopup2290 artwork with runtime text; animated glow/filter changes are approximate",
             "gene and result retain offset (0,-26); application applies menu slide X offset",
             "Item quantities and radio labels are rendered by the application",
             "allyBack and allyFront retain source depths around separately selected charaPic poses",

@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v38, original town event cards and narratives**.
+Updated 2026-11-02. Current local build: **v38, original medal award notifications**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -105,6 +105,11 @@ click. Museum descriptions now use the original fixed hint1657 artwork/fields;
 locked medals show the original requirement and ???? bonus. This corrects descriptions
 being sent only to the hidden page status. No save format or RNG changes were needed.
 Source: startBattleMedal6732, museumMedal1101, kongregateLink1623, updateMedals5635.
+New awards now use the original infoPop artwork, English announcement and sound.
+Its ten slots retain source battle/town positions and alpha/movement frames,
+release their slot at139 and disappear at150. Notifications survive town redraws,
+consume no RNG and are transient; Continue/import suppress already-owned awards.
+Source: getMedal10511, popInfo5748 and infoPop2291 frame scripts.
 Equipment's original Recycle Gun and Charge Item buttons are connected with their
 selection prompt, eligible-slot dimming and cancellation. Recycle costs5 AP and
 replaces an owned gun with a random MOD using value/2+250; Charge Item costs3 AP
@@ -168,8 +173,8 @@ Other encodings/types fail before storage changes. Source: saveIndex10961/loadIn
 
 ## Validation and limits
 
-- **543 tests passed**, with typechecking and production build passing. Latest
-  bundle: assets/index-C-ZJCORr.js. Slot checks cover unchanged legacy storage,
+- **547 tests passed**, with typechecking and production build passing. Latest
+  bundle: assets/index-p2d_cYXA.js. Slot checks cover unchanged legacy storage,
   eight independent adventures, selection persistence, shared medals/mute,
   deletion/tombstones, Hardcore isolation, corrupt data and failed writes.
   Existing deterministic checks cover classes, campaign, equipment services,
@@ -205,6 +210,8 @@ Other encodings/types fail before storage changes. Source: saveIndex10961/loadIn
   Three town-event content checks compare fixed English text, activity cards/titles
   and robbery amounts with the preserved ActionScript, including JSON round trips.
   The existing18 deterministic search cases also check source narrative prefixes.
+  Four medal-notice checks cover original text/layout, idempotence, slot overflow,
+  frame139/150 reuse/removal, shared/saved award suppression and unchanged JSON/RNG.
 - The controlled full40-day campaign completed in96494 simulation frames, with
   all19 enemy kinds, rewards, towns and save boundaries. Its changed frame count
   follows the repeating MOD-sale correction and resulting generation RNG. Strong
@@ -321,6 +328,15 @@ Other encodings/types fail before storage changes. Source: saveIndex10961/loadIn
   .build/browser-qa/town-events-verification.json, original-town-prayer.png and
   original-town-new-goods.png. Unchanged campaigns were not replayed.
 
+- The muted medal-notice check earned Prayer from a controlled14-prayer town in
+  slot8. The original notification appeared above the event card, survived its
+  dismissal, then expired. Dismissal and Continue preserved the entire exported
+  envelope; Continue did not announce saved medals. The disposable run was deleted
+  and the user's full adventure/collection restored exactly. No console errors or
+  fullscreen activation. Evidence: .build/browser-qa/medal-notices-verification.json
+  and original-medal-award.png. Asset loading exceeded the browser tool's wait
+  deadline on two reloads but completed without another reload or a game error.
+
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. Historical details are
 in Git and [historical verification](port-verification.json). The Codex app crash
@@ -331,8 +347,8 @@ that the app's crash cause was fixed.
 
 1. Long-session stability/performance and difficulty evidence beyond the first
    cycle; the current Day1000 save safety boundary remains an intentional limit.
-2. All38 defined medal award paths are connected; award-notification presentation
-   remains partial. Preserve source bonus discrepancies: Kongregate advertises a
+2. All38 defined medal award paths and award notifications are connected. Preserve
+   source bonus discrepancies: Kongregate advertises a
    wage discount, but wage3610 checks Ragnarok92; medal91 does not add another
    discount. Ha-na-bi's advertised firework bonus likewise differs from startFire.
 3. Flash adventure conversion; medal/index import is implemented. The browser dropdown displays all eight choices at once,
@@ -341,6 +357,7 @@ that the app's crash cause was fixed.
    camera shake, decorative boss reticle, some ranged spell effects/frame sounds,
    rage art, Chain Gun interruption timing and raster/filter/subpixel differences.
    Firework timing/tint/audio and screen flashes approximate the Flash presentation;
+   medal notification glow/filter transitions are approximate.
    low quality uses nearest filtering/pixel rounding rather than rerasterizing
    original vectors. The right pause panel shifts50px left and statistics panel15px
    up to fit620×380. Statistics

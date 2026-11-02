@@ -57,6 +57,8 @@ unless you previously enabled it; the mute preference persists between visits.
   robbery for 2 AP with daily diminishing payouts, Robber skill/medal bonuses,
   saved counters and action medals with their next-town AP chances.
   The original medal hint panel shows earned bonuses and locked requirements.
+  Newly earned medals display the original notification artwork, wording and
+  sound; Continue/import do not repeat existing awards.
   All six survival milestones through Day150 and the Day100 Hardcore Museum badge
   are connected to the shared collection and future-start gold/Fame bonuses.
   The original Kongregate link and its visit medal are available in the Museum.

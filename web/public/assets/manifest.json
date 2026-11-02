@@ -2303,6 +2303,18 @@
       "count": 16,
       "uniqueFrames": 16,
       "characterId": 2336
+    },
+    "infoPopup": {
+      "image": "sprites/infoPopup.png",
+      "json": "sprites/infoPopup.json",
+      "originX": 0.0,
+      "originY": -0.5,
+      "frameWidth": 371,
+      "frameHeight": 27,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2290
     }
   },
   "sounds": {

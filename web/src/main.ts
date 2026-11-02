@@ -5,6 +5,8 @@ import Phaser from 'phaser';
 import { HERO_CLASSES, heroClassUnlocked, type HeroClass } from './hero-classes.ts';
 import { createProfile, mergeProfile, mergeProfiles, validProfile, type GlobalProfile } from './profile.ts';
 import { MEDALS } from './medals.ts';
+import { MedalNotices, type MedalNotice } from './medal-notices.ts';
+import { createMedalNoticeView, updateMedalNoticeView, type InfoPopupLayout } from './medal-notice-view.ts';
 import { createTownEventView } from './town-event-view.ts';
 import { TOWN_NOTICES, townEvent, type TownNotice } from './town-events.ts';
 import { readFlashCollection } from './flash-profile.ts';
@@ -60,6 +62,7 @@ const bootStarted = performance.now();
 const USED_SOUNDS = new Set(['soundSearch', 'soundEat1', 'soundParty', 'soundClick1', 'soundGun3', 'soundReloading2', 'soundReloaded2', 'soundThrow1', 'soundExp1', 'soundDead3', 'soundDead5', 'soundDead7', 'soundDeadChicken', 'soundDeadBoss1', 'soundDamage1', 'soundPop1', 'soundBattleBegin', 'soundBattleEnd', 'soundKilled', 'soundRampage', 'soundComplete', 'soundGold1', 'soundBgForest']);
 for (let index = 0; index < 5; index++) USED_SOUNDS.add(`soundGoodshot${index}`);
 USED_SOUNDS.add('soundGood');
+USED_SOUNDS.add('soundMedal');
 USED_SOUNDS.add('soundReloaded1');
 for (const key of ['soundBgTown', 'soundRepair1', 'soundBeep', 'soundScroll1', 'soundPay1', 'soundMod']) USED_SOUNDS.add(key);
 for (let index = 1; index <= 15; index++) USED_SOUNDS.add(`soundGun${index}`);
@@ -99,6 +102,8 @@ class ElonaScene extends Phaser.Scene {
   private modsClassPage: 0 | 1 = 0;
   private castlePage: 0 | 1 = 0;
   private medalPage: 0 | 1 = 0;
+  private medalNotices = new MedalNotices();
+  private medalNoticeViews = new Map<MedalNotice, Phaser.GameObjects.Container>();
   private profileRead = readProfile();
   private profile = this.profileRead.profile;
   private ammoFill?: Phaser.GameObjects.Image;
@@ -378,7 +383,10 @@ class ElonaScene extends Phaser.Scene {
   showGene(page: 0 | 1 = 0, keepHero = false): void {
     this.reset('gene');
     if (!keepHero) { this.options = { ...DEFAULT_GAME_OPTIONS }; this.applyRenderingOptions(); }
-    if (!keepHero || !this.sim) this.sim = new Simulation(Date.now(), { ...this.simulationOptions(), medals: this.profile.medals, deferOpeningWaves: true });
+    if (!keepHero || !this.sim) {
+      this.clearMedalNotices(this.profile.medals);
+      this.sim = new Simulation(Date.now(), { ...this.simulationOptions(), medals: this.profile.medals, deferOpeningWaves: true });
+    }
     this.image(manifest.images.townHud ? 'townHud' : 'town');
     this.drawHud();
     const background = new Set(this.root.list);
@@ -578,7 +586,31 @@ class ElonaScene extends Phaser.Scene {
     if (this.options.disableFlash) { this.flashFrames = 0; this.flash?.setVisible(false); }
   }
 
+  private clearMedalNotices(known: readonly number[]): void {
+    this.medalNotices.reset(known);
+    for (const view of this.medalNoticeViews.values()) view.destroy(true);
+    this.medalNoticeViews.clear(); delete container.dataset.medalNotices;
+  }
+
+  private updateMedalNotices(delta: number): void {
+    this.medalNotices.advance(Math.min(delta, 250));
+    const layout = (this.cache.json.get('town-layout') as { infoPopup: InfoPopupLayout }).infoPopup;
+    if (this.sim && !['title', 'gene', 'mods'].includes(this.screen)) {
+      for (const notice of this.medalNotices.observe(this.sim.state.earnedMedals, this.screen === 'battle')) {
+        this.playSound('soundMedal');
+        this.medalNoticeViews.set(notice, createMedalNoticeView(this, manifest, layout, notice));
+      }
+    }
+    for (const [notice, view] of this.medalNoticeViews) {
+      if (!this.medalNotices.active.includes(notice)) { view.destroy(true); this.medalNoticeViews.delete(notice); }
+      else updateMedalNoticeView(view, layout, notice);
+    }
+    const notices = JSON.stringify(this.medalNotices.active.map(({ id, slot, frame, battle, text }) => ({ id, slot, frame, battle, text })));
+    if (container.dataset.medalNotices !== notices) container.dataset.medalNotices = notices;
+  }
+
   private updatePresentation(delta: number): void {
+    this.updateMedalNotices(delta);
     if (this.paused) return;
     this.celebration?.advance(delta);
     if (this.celebration) {
@@ -648,6 +680,8 @@ class ElonaScene extends Phaser.Scene {
       for (const event of this.sim.events) this.renderEvent(event);
       if (this.sim.state.tick % 150 === 0) this.saveGame(false);
     }
+    // Последний выстрел может выдать медаль и закончить бой в одном кадре.
+    this.updateMedalNotices(0);
     this.paintBattle();
     if (this.sim.state.phase !== 'battle') {
       this.saveGame(false);
@@ -1574,6 +1608,7 @@ class ElonaScene extends Phaser.Scene {
     if (restoreCollection && validated.profile) this.profile = createProfile();
     if (validated.profile) this.profile = mergeProfiles(this.profile, validated.profile);
     this.profile = mergeProfile(this.profile, validated.simulation.state); if (storeProfile(this.profile)) delete this.profileRead.warning;
+    this.clearMedalNotices([...this.profile.medals, ...validated.simulation.state.earnedMedals]);
     this.sim = validated.simulation; this.appearance = validated.appearance;
     this.options = validated.options; this.applyRenderingOptions();
     this.carryCheckpoint = validated.carryCheckpoint;
