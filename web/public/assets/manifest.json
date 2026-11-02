@@ -2104,6 +2104,30 @@
       "count": 1,
       "uniqueFrames": 1,
       "characterId": 1521
+    },
+    "sisterFireAtWill": {
+      "image": "sprites/sisterFireAtWill.png",
+      "json": "sprites/sisterFireAtWill.json",
+      "originX": 46.75,
+      "originY": 32.35,
+      "frameWidth": 61,
+      "frameHeight": 45,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2593
+    },
+    "fireAtWillRage": {
+      "image": "sprites/fireAtWillRage.png",
+      "json": "sprites/fireAtWillRage.json",
+      "originX": 21.75,
+      "originY": 48.0,
+      "frameWidth": 43,
+      "frameHeight": 49,
+      "labels": {},
+      "count": 14,
+      "uniqueFrames": 7,
+      "characterId": 2386
     }
   },
   "sounds": {

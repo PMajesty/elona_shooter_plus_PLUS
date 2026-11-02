@@ -94,6 +94,7 @@ class ElonaScene extends Phaser.Scene {
   private cursor?: Phaser.GameObjects.Graphics;
   private pauseLayer?: Phaser.GameObjects.Container;
   private helpLayer?: Phaser.GameObjects.Container;
+  private fireAtWillSprites?: { fire: Phaser.GameObjects.Image; rage: Phaser.GameObjects.Image };
   private firePressed = false;
   private fireReleased = false;
   private firingGesture = false;
@@ -151,22 +152,26 @@ class ElonaScene extends Phaser.Scene {
     this.input.on('gameover', (_time: number, event: MouseEvent | TouchEvent) => {
       if (this.firingReleaseOwned && 'buttons' in event && (event.buttons & 1) !== 0) this.firingGesture = true;
     });
-    this.input.keyboard?.on('keydown-SPACE', (event: KeyboardEvent) => {
-      event.preventDefault();
-      if (this.helpLayer) return;
-      if (this.screen !== 'battle') return;
-      if (this.paused) this.togglePause();
-      else this.reloadRequested = true;
-    });
-    this.input.keyboard?.on('keydown-ESC', () => {
-      if (this.helpLayer) this.closeHelp();
-      else if (this.screen === 'battle') this.togglePause();
-      else if (this.screen === 'gene') this.showTitle();
-      else if (this.screen === 'mods') this.leaveGameMods();
-    });
-    ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE'].forEach((key, slot) => {
-      this.input.keyboard?.on(`keydown-${key}`, () => { if (this.screen === 'battle' && !this.paused) this.slotRequested = slot; });
-    });
+    // В фоновой вкладке очередь Phaser повторно доставляла Escape/F после следующего кадра.
+    // Прямое событие DOM выполняет переключение один раз и не зависит от частоты рендеринга.
+    const combatKey = (event: KeyboardEvent) => {
+      if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (event.code === 'Escape') {
+        if (this.helpLayer) this.closeHelp();
+        else if (this.screen === 'battle') this.togglePause();
+        else if (this.screen === 'gene') this.showTitle();
+        else if (this.screen === 'mods') this.leaveGameMods();
+      } else if (event.code === 'Space') {
+        event.preventDefault();
+        if (this.screen !== 'battle' || this.helpLayer) return;
+        if (this.paused) this.togglePause(); else this.reloadRequested = true;
+      } else if (this.screen === 'battle' && !this.paused && !this.helpLayer) {
+        if (event.code === 'KeyF' && this.sim?.toggleFireAtWill()) { this.playSound('soundReloaded2'); this.paintBattle(); }
+        else if (/^Digit[1-5]$/.test(event.code)) this.slotRequested = Number(event.code.slice(-1)) - 1;
+      }
+    };
+    window.addEventListener('keydown', combatKey);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => window.removeEventListener('keydown', combatKey));
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
   }
@@ -181,6 +186,7 @@ class ElonaScene extends Phaser.Scene {
     this.input.setDefaultCursor('default');
     this.root.removeAll(true);
     this.helpLayer = undefined; delete container.dataset.helpPage; delete container.dataset.helpScroll;
+    this.fireAtWillSprites = undefined; delete container.dataset.fireAtWill;
     for (const arrow of this.enemyArrowSprites.values()) arrow.container.destroy(true);
     this.enemyArrowSprites.clear();
     this.enemySprites.clear(); this.enemyRageSprites.clear(); this.enemyHitSprites.clear(); this.bossFrames.clear(); this.bossBars.clear(); this.projectileSprites.clear(); this.hud.clear(); this.effects = []; this.hotbar = [];
@@ -493,6 +499,26 @@ class ElonaScene extends Phaser.Scene {
     this.updateHud();
   }
 
+  private paintFireAtWill(): void {
+    if (this.sim?.fireAtWill && !this.fireAtWillSprites) {
+      const data = this.cache.json.get('town-layout') as { fireAtWill: {
+        sister: { x: number; y: number; scaleX: number; scaleY: number };
+        fire: { x: number; y: number; scaleX: number; scaleY: number; rotationDegrees: number }; rageOffsetY: number;
+      } };
+      const { sister, fire, rageOffsetY } = data.fireAtWill;
+      const flame = this.clip('sisterFireAtWill', 1, sister.x + fire.x * sister.scaleX, sister.y + fire.y * sister.scaleY)!;
+      flame.setScale(sister.scaleX * fire.scaleX, sister.scaleY * fire.scaleY).setAngle(fire.rotationDegrees);
+      const rage = this.clip('fireAtWillRage', 1, sister.x, sister.y + rageOffsetY * sister.scaleY)!;
+      rage.setScale(sister.scaleX, sister.scaleY);
+      this.fireAtWillSprites = { fire: flame, rage };
+    }
+    if (this.fireAtWillSprites) {
+      this.fireAtWillSprites.fire.setVisible(this.sim?.fireAtWill ?? false);
+      this.fireAtWillSprites.rage.setVisible(this.sim?.fireAtWill ?? false)
+        .setFrame(String((this.sim?.state.tick ?? 0) % manifest.clips.fireAtWillRage.count + 1));
+    }
+  }
+
   update(_time: number, delta: number): void {
     if (this.screen !== 'battle' || !this.sim || this.paused) return;
     const pointer = this.input.activePointer;
@@ -666,6 +692,7 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.barbarians = JSON.stringify(state.enemies.filter(enemy => enemy.kind === 'barbarian').map(({ uid, x, y, hp, frame, rampage, rageEffectFrame }) => ({ uid, x, y, hp, frame, rampage, rageEffectFrame })));
     container.dataset.lava = JSON.stringify(state.enemies.filter(enemy => enemy.kind === 'lava').map(({ uid, x, y, hp, frame, attacking, alerted, shadowHit }) => ({ uid, x, y, hp, frame, attacking, alerted, shadowHit })));
     this.paintEnemyArrows();
+    this.paintFireAtWill();
   }
 
   private paintEnemyArrows(): void {
@@ -978,7 +1005,7 @@ class ElonaScene extends Phaser.Scene {
       cooldown.setVisible(remaining > 0).setScale(Math.max(0, remaining - 1) / timerMax, 1);
     });
     this.ammoFill?.setScale(selected && selected.ammoMax > 0 ? selected.ammo / selected.ammoMax : 0, 1);
-    const meter = state.player.classState;
+    const meter = this.sim!.heroClassState;
     if (meter && this.adrenalineFill) {
       const level = state.player.traits[HERO_CLASSES[state.player.classId].id];
       const ratio = state.player.classId === 'ranger' ? meter.frenzy / 1000
@@ -990,6 +1017,7 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.gameMods = JSON.stringify(state.mods ?? {});
     container.dataset.heroClass = state.player.classId;
     container.dataset.classState = JSON.stringify(meter ?? null);
+    container.dataset.fireAtWill = String(this.sim!.fireAtWill);
     container.dataset.gold = String(state.gold); container.dataset.hp = String(state.castleHp);
     container.dataset.ammo = String(selected?.ammo ?? 0); container.dataset.grenades = String(state.inventory.filter(item => isOccupiedItem(item) && item.id === 11).reduce((total, item) => total + item!.ammo, 0));
     container.dataset.selectedSlot = String(state.player.selectedSlot);

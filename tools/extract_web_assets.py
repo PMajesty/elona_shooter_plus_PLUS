@@ -58,6 +58,7 @@ BUTTONS.update({"button_helpBattle": 1936, "button_helpTown": 1938,
                 "button_helpLink": 1978, "button_pauseHelp": 1493})
 CLIPS.update({"helpTextAreaSkin": 1504, "helpScrollUp": 1519,
               "helpScrollDown": 1522, "helpScrollThumb": 1521})
+CLIPS.update({"sisterFireAtWill": 2593, "fireAtWillRage": 2386})
 FORCE = False
 
 
@@ -592,6 +593,8 @@ def town_layout(xml, sprites):
     links = {index: url for index, url in re.findall(r'url\[(\d+)\] = "(.*?)";', links_body) if url}
     return {"version": 1, "sourceSha256": ORIGINAL_SHA256, "rootFrame": 71,
             "titleSaves": {"children": {name: value for name, value in placements(tags, 22).items() if name in {"saveBox", "trash"}}},
+            "fireAtWill": {"sister": placements(tags, 33)["sister"],
+                           "fire": placements(sprites[2622].find("subTags"), 4)["sisterFire"], "rageOffsetY": 16},
             "help": {"position": {"x": 600 - sum(i ** 1.7 for i in range(16)), "y": -20},
                      "pages": [{"image": f"help{page}", "children": placements(sprites[1995].find("subTags"), 161 + page)}
                                for page in range(1, 5)], "tips": tips, "links": links,

@@ -73,6 +73,7 @@ export function validatePartySave(state: SimulationState, validItem: (value: unk
     if (cell.uid !== null && byId.get(cell.uid)?.type !== rowIndex) throw new Error('Invalid party target row.');
   }
   for (const slot of state.party.slots.slice(0, 4)) if (slot.exists && slot.member?.aiState && !reference(slot.member.aiState.targetUid)) throw new Error('Missing companion target.');
+  if (state.heroAI && !reference(state.heroAI.state.targetUid)) throw new Error('Missing hero target.');
   for (const enemy of state.enemies) if (!integer(enemy.tag, 0, 60) || typeof enemy.onMark !== 'boolean'
     || enemy.type !== (ENEMIES[enemy.kind].airborne ? 1 : ENEMIES[enemy.kind].armor ? 2 : 0)) throw new Error('Invalid enemy targeting state.');
   for (const projectile of state.projectiles) {

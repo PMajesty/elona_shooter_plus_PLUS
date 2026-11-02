@@ -22,6 +22,9 @@ unless you previously enabled it; the mute preference persists between visits.
   The current browser save safety boundary is Day1000; this is not an endless-play claim.
 - Manual/automatic reload, owned firearms, bows, projectile weapons and consumables;
   enemies, bosses and health bars; ordinary/boss loot, skills and settlements.
+- F toggles the original Fire at will mode: the hero acquires targets, fires and
+  reloads using the party AI, with its original accuracy penalty and Sister indicator.
+  The mode/target state survives Continue; each new mission starts in manual mode.
 - Equipment's original Recycle Gun and Charge Item actions: turn an owned gun into
   a random MOD for5 AP, or refill an eligible usable item for3 AP. Ten recycles earn
   Gun Mania, including its +15% MOD efficiency in mounting, generated weapons,
@@ -43,7 +46,7 @@ unless you previously enabled it; the mute preference persists between visits.
 - A persistent browser medal collection with class unlocks and original New Game
   starting bonuses. Eight browser save slots with the original title dropdown,
   trash icon and deletion confirmation, plus Continue and JSON import/export.
-  Version37 accepts prior browser saves; original Flash saves require a future converter.
+  Version38 accepts prior browser saves; original Flash saves require a future converter.
 - Casual lowers encounter power/taxes and grants35% more kill XP. Hardcore uses
   normal combat, deletes the resumable save when a battle starts and permits
   saving/export only in town. Each mode has a separate best-day record.
@@ -71,7 +74,7 @@ npm.cmd run dev
 
 Open the Vite URL, choose New Game, select a class/appearance and press Proceed.
 Mouse aims/fires; hold/release for bows. Space reloads, 1–5 select/use items,
-Esc pauses. Losing focus also pauses combat. Continue restores the local save;
+F toggles Fire at will, Esc pauses. Losing focus also pauses combat. Continue restores the local save;
 export a backup to transfer it between browsers or websites. Current-format imports
 restore the saved medal collection as well as the adventure. Legacy imports merge
 their medals into the existing collection; Continue preserves the collection.

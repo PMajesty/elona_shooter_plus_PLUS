@@ -24,7 +24,7 @@ import { advanceEnemyArrow, createEnemyArrow, type EnemyArrowState } from './ene
 import { ARCHER_DISPLAY_WIDTHS, FLY_DISPLAY_WIDTHS, barbarianParentWidth, lavaParentWidth } from './enemy-display-bounds.ts';
 import { createPartyState, addStartingLittleGirl, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
 import { ALL_TRAITS, CLASS_CHOICE_ORDER, availableCompanionTraits, partySkills, gainCompanionTrait, levelUpCompanion, companionWage, type PartySkillState } from './party-progression.ts';
-import { createPartyAIShared, createPartyAIState, selectPartyTarget, refreshPartyAI, partyActorPosition, registerPartyTarget, alertParty, clearPartyTargetCache, clearPartyAITarget, stepPartyAIFrame, stepPartyAITimer, type PartyAIShared, type PartyAITarget, type PartyAIContext, type PartyAICallbacks } from './party-ai.ts';
+import { createPartyAIShared, createPartyAIState, validPartyAIState, selectPartyTarget, refreshPartyAI, partyActorPosition, registerPartyTarget, alertParty, clearPartyTargetCache, clearPartyAITarget, stepPartyAIFrame, stepPartyAITimer, type PartyAIState, type PartyAIActor, type PartyAIShared, type PartyAITarget, type PartyAIContext, type PartyAICallbacks } from './party-ai.ts';
 import { repairEarlyV15AirTargets, validatePartySave } from './party-save.ts';
 import { CASTLE_UPGRADES, castleUpgradeCost, castleUpkeep, castleRepairAmount, castleDamageMultiplier, castleTrainerMultiplier, type CastleUpgradeKind, type CastleUpgradeOutcome } from './castle-upgrades.ts';
 
@@ -50,6 +50,7 @@ export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCoun
 export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'> & { hire?: true; ragnarok?: true };
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
 export interface SimulationState {
+  heroAI?: { enabled: boolean; state: PartyAIState };
   recycleCount?: number;
   carryOver?: true;
   mods?: GameMods;
@@ -162,6 +163,36 @@ export class Simulation {
     return isOccupiedItem(item) && item.type === ITEM_TYPE.gun ? item : null;
   }
 
+  get fireAtWill(): boolean { return this.state.heroAI?.enabled ?? false; }
+  get heroClassState(): SimulationState['player']['classState'] { return this.state.heroAI?.state ?? this.state.player.classState; }
+
+  private heroAIActor(): PartyAIActor {
+    const player = this.state.player;
+    return { slot: 0, exists: true, weapon: this.weapon, member: {
+      traits: player.traits, ai: 6, optBoss: true, optWall: true, aiState: this.state.heroAI?.state ?? null,
+      get shootTimer() { return player.shootTimer; }, set shootTimer(value) { player.shootTimer = value; },
+      get rampageTicks() { return player.rampageTicks; }, set rampageTicks(value) { player.rampageTicks = value; },
+    } };
+  }
+
+  private battleAIActors(): PartyAIActor[] {
+    return [...(this.state.heroAI ? [this.heroAIActor()] : []), ...this.state.party.slots.slice(0, 4)];
+  }
+
+  toggleFireAtWill(): boolean {
+    if (this.state.phase !== 'battle' || this.pendingOpeningMission) return false;
+    if (!this.state.heroAI) {
+      const meter = this.state.player.classState;
+      this.state.heroAI = { enabled: false, state: createPartyAIState(0) };
+      refreshPartyAI(this.heroAIActor(), this.state.partySkills.effects[116]);
+      if (meter) Object.assign(this.state.heroAI.state, meter);
+      // После первого F общий AI хранит и классовые счётчики; второй копии в сохранении нет.
+      delete this.state.player.classState;
+    }
+    this.state.heroAI.enabled = !this.state.heroAI.enabled;
+    return true;
+  }
+
   private actor(slot: number): CombatActorState | undefined {
     if (slot === 0) return this.state.player;
     const entry = partySlot(this.state.party, slot);
@@ -173,7 +204,7 @@ export class Simulation {
   }
 
   private partyAIContext(): PartyAIContext {
-    return { shared: this.state.partyAI, random: () => this.random(), heroSlot: 0, fireAtWill: false,
+    return { shared: this.state.partyAI, random: () => this.random(), heroSlot: 0, fireAtWill: this.fireAtWill,
       getTarget: uid => this.state.enemies.find(enemy => enemy.uid === uid) as PartyAITarget | undefined
         ?? this.state.retainedAITargets.find(enemy => enemy.uid === uid) };
   }
@@ -200,6 +231,10 @@ export class Simulation {
   }
 
   private initializePartyBattle(): void {
+    if (this.state.heroAI) {
+      delete this.state.heroAI;
+      if (['sniper', 'ranger', 'duelist', 'noble'].includes(this.state.player.classId)) this.state.player.classState = { frenzy: 0, idleCount: 0, burst: 0 };
+    }
     if (this.state.player.classState) Object.assign(this.state.player.classState, { frenzy: 0, idleCount: 0, burst: 0 });
     [10, 20, 35].forEach((day, index) => { if (this.state.day >= day) this.awardMedal(41 + index); });
     const e = this.state.economy;
@@ -220,7 +255,7 @@ export class Simulation {
 
   private retainAITargets(): void {
     const references = new Set<number>();
-    for (const slot of this.state.party.slots.slice(0, 4)) if (slot.exists && slot.member?.aiState?.targetUid) references.add(slot.member.aiState.targetUid);
+    for (const slot of this.battleAIActors()) if (slot.exists && slot.member?.aiState?.targetUid) references.add(slot.member.aiState.targetUid);
     for (const row of this.state.partyAI.targets) for (const cell of row) if (cell.uid !== null) references.add(cell.uid);
     if (this.state.partyAI.targetBossUid !== null) references.add(this.state.partyAI.targetBossUid);
     if (this.state.partyAI.nextAlertUid !== null) references.add(this.state.partyAI.nextAlertUid);
@@ -331,6 +366,7 @@ export class Simulation {
     if (previous) previous.reloadTime = 0;
     this.state.player.bowDrawing = false;
     this.state.player.selectedSlot = slot;
+    if (this.state.heroAI) refreshPartyAI(this.heroAIActor(), this.state.partySkills.effects[116]);
     this.events.push({ type: 'select', weaponId: item.id });
     return true;
   }
@@ -499,28 +535,46 @@ export class Simulation {
     if (input.reload) this.requestReload();
     const weapon = this.weapon;
     const bow = weapon?.id === 24 || weapon?.id === 25;
-    if (fireReleased && bow) {
+    if (this.fireAtWill) {
+      const ai = this.state.heroAI!.state;
+      // MouseDown по-прежнему отменяет ручную перезарядку; выстрел берёт цель AI, не мышь.
+      if (firePressed) {
+        if (weapon?.reloadTime && weapon.manualReload && !weapon.autoReload) {
+          weapon.reloadTime = 0; this.events.push({ type: 'reloaded', weaponId: weapon.id });
+        } else ai.shooting = true;
+      }
+      if (fireReleased) {
+        ai.burst = 0;
+        if (bow && player.bowDrawing) this.partyAICallbacks().shoot(this.heroAIActor());
+        ai.shooting = false;
+      }
+    }
+    if (!this.fireAtWill && fireReleased && bow) {
       if (player.bowDrawing) this.fireAt(this.state.aimX, this.state.aimY);
       this.state.pendingShot = false;
-    } else if (firePressed && !(bow && player.bowDrawing)) {
+    } else if (!this.fireAtWill && firePressed && !(bow && player.bowDrawing)) {
       if (weapon?.reloadTime && weapon.manualReload && !weapon.autoReload) {
         weapon.reloadTime = 0; this.events.push({ type: 'reloaded', weaponId: weapon.id });
         this.state.pendingShot = false;
       } else this.state.pendingShot = true;
-    } else if (!input.fireHeld) this.state.pendingShot = false;
-    if (player.shootTimer > -10000) player.shootTimer -= this.state.inventory[player.selectedSlot]?.shootRate ?? 0;
-    if (player.classState) {
-      if (player.traits[COMBAT_TRAIT.DUELIST]) player.classState.frenzy = Math.max(0, player.classState.frenzy - 0.12);
-      if (!this.state.pendingShot) player.classState.idleCount += 0.033;
-      if (fireReleased) player.classState.burst = 0;
+    } else if (!input.fireHeld || this.fireAtWill) this.state.pendingShot = false;
+    const meter = this.heroClassState;
+    if (!this.fireAtWill) {
+      if (player.shootTimer > -10000) player.shootTimer -= this.state.inventory[player.selectedSlot]?.shootRate ?? 0;
+      if (meter) {
+        if (player.traits[COMBAT_TRAIT.DUELIST]) meter.frenzy = Math.max(0, meter.frenzy - 0.12);
+        if (!this.state.pendingShot) meter.idleCount += 0.033;
+        if (fireReleased) meter.burst = 0;
+      }
     }
     const protection = advanceProtection(this.state.protection.counter, this.state.protection.blueMultiplierAdd);
     this.state.protection = { counter: protection.counter, blueMultiplierAdd: protection.blueMultiplierAdd };
-    if (player.rampageTicks > 0) player.rampageTicks--;
+    if (!this.fireAtWill && player.rampageTicks > 0) player.rampageTicks--;
     this.state.itemCooldowns = this.state.itemCooldowns.map(time => Math.max(0, time - 1));
-    if (this.state.pendingShot && !(weapon?.reloadTime && !weapon.autoReload) && this.fireAt(this.state.aimX, this.state.aimY) && !weapon?.automatic) this.state.pendingShot = false;
+    if (!this.fireAtWill && this.state.pendingShot && !(weapon?.reloadTime && !weapon.autoReload) && this.fireAt(this.state.aimX, this.state.aimY) && !weapon?.automatic) this.state.pendingShot = false;
     this.state.partyAI.sharedWeaponRange = weapon?.range ?? null;
     const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
+    if (this.fireAtWill) stepPartyAIFrame(this.heroAIActor(), partyContext, partyCallbacks);
     for (const slot of this.state.party.slots.slice(0, 4)) stepPartyAIFrame(slot, partyContext, partyCallbacks);
     for (const enemy of this.state.enemies) this.tickEnemy(enemy);
     this.tickProjectiles(projectileUidLimit);
@@ -537,7 +591,7 @@ export class Simulation {
   }
 
   fireAt(x: number, y: number): boolean {
-    if (!finite(x) || !finite(y) || this.state.phase !== 'battle' || this.pendingOpeningMission) return false;
+    if (!finite(x) || !finite(y) || this.state.phase !== 'battle' || this.pendingOpeningMission || this.fireAtWill) return false;
     this.state.aimX = x; this.state.aimY = y;
     return this.fireActorAt(0, x, y);
   }
@@ -545,12 +599,12 @@ export class Simulation {
   private fireActorAt(actorSlot: number, x: number, y: number): boolean {
     const player = this.actor(actorSlot);
     if (!player) return false;
-    const manual = actorSlot === 0;
+    const manual = actorSlot === 0 && !this.fireAtWill;
     const member = actorSlot ? partySlot(this.state.party, actorSlot)!.member! : null;
-    const ai = member?.aiState;
-    const meter = ai ?? (manual ? this.state.player.classState : undefined);
+    const ai = actorSlot === 0 && this.fireAtWill ? this.state.heroAI!.state : member?.aiState;
+    const meter = ai ?? (actorSlot === 0 ? this.heroClassState : undefined);
     const position = partyActorPosition(actorSlot);
-    const weaponSlot = manual ? this.state.player.selectedSlot : 0;
+    const weaponSlot = actorSlot === 0 ? this.state.player.selectedSlot : 0;
     if (player.shootTimer > 0) return false;
     const item = this.actorWeapon(actorSlot);
     if (!item) {
@@ -573,7 +627,7 @@ export class Simulation {
       else if (ai) { ai.shooting = false; ai.burst = 0; }
       this.requestActorReload(actorSlot); return false;
     }
-    const spread = shotSpread(item, player.traits, player.accuracyFix, { tight: this.state.mods?.tight, manualControl: manual, fireAtWill: member?.ai === 6 });
+    const spread = shotSpread(item, player.traits, player.accuracyFix, { tight: this.state.mods?.tight, manualControl: manual, fireAtWill: actorSlot === 0 && this.fireAtWill || member?.ai === 6 });
     player.shootTimer = stats.shootTimer;
     if (!manual && !item.automatic) player.shootTimer += int(this.random() * (item.shootRate / 1.5 / ai!.workRate));
     const behavior = weaponBehavior(item);
@@ -671,7 +725,7 @@ export class Simulation {
       if (enemy.hp > 0) hitLivingEnemy = true;
       enemy.knockBack = combatTrait(TRAIT.SHERIFF, actor.traits);
       const item = this.actorWeapon(actorSlot);
-      const meter = member?.aiState ?? (actorSlot === 0 ? this.state.player.classState : undefined);
+      const meter = member?.aiState ?? (actorSlot === 0 ? this.heroClassState : undefined);
       if (meter && item) meter.frenzy = duelistHitFrenzy(item, actor.traits, meter.frenzy, 'projectile');
       this.damageEnemy(enemy, damage, critical, weaponSlot, int(x), int(y), actorSlot);
     }
@@ -693,7 +747,7 @@ export class Simulation {
     const actor = this.actor(actorSlot), item = this.actorWeapon(actorSlot);
     if (this.state.phase !== 'battle' || !actor || !item || item.reloadTime > 0) return false;
     item.reloadTime = reloadTimer(item, actor.traits);
-    if (actorSlot === 0 && this.state.player.classState) this.state.player.classState.burst = 0;
+    if (actorSlot === 0 && this.heroClassState) this.heroClassState.burst = 0;
     this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'reload', weaponId: item.id, automaticReload: item.autoReload > 0 });
     return true;
   }
@@ -747,7 +801,10 @@ export class Simulation {
     if (state.castleHp <= 0) { state.phase = 'defeat'; player.bowDrawing = false; this.events.push({ type: 'defeat' }); return; }
     const item = this.weapon;
     if (item && autoReloadReady(item, player.shootTimer)) this.requestReload(false);
-    if (item?.reloadTime) this.advanceActorReload(0);
+    if (item?.reloadTime) {
+      this.advanceActorReload(0);
+      if (this.fireAtWill && !item.autoReload) this.heroClassState!.idleCount = Math.max(0, this.heroClassState!.idleCount - 0.15);
+    }
     this.state.partyAI.sharedWeaponRange = item?.range ?? null;
     const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
     if (player.traits[4] && --player.grenadeCount < 0) {
@@ -910,7 +967,7 @@ export class Simulation {
     player.weaponExp[skillIndex < 0 ? 4 : skillIndex]++;
     let dropThreshold = 150 * 100 / (100 + combatTrait(COMBAT_TRAIT.LUCK, player.traits));
     if (player.rampageTicks > 0) dropThreshold /= 1.5;
-    const classMeter = member?.aiState ?? (actorSlot === 0 ? this.state.player.classState : undefined);
+    const classMeter = member?.aiState ?? (actorSlot === 0 ? this.heroClassState : undefined);
     if (classMeter && player.traits[COMBAT_TRAIT.RANGER]) {
       classMeter.frenzy += int(enemy.exp * 125 / (100 + player.level * 5));
       if (classMeter.frenzy >= 1000) {
@@ -1085,7 +1142,7 @@ export class Simulation {
     if (enemy.kind === 'lava') {
       enemy.x = twipCoordinate(enemy.x + enemy.speed);
       if (enemy.x >= WORLD.defenseLine - 300 && !enemy.alerted) {
-        alertParty(enemy as PartyAITarget, this.state.party.slots.slice(0, 4), this.partyAIContext());
+        alertParty(enemy as PartyAITarget, this.battleAIActors(), this.partyAIContext());
         enemy.alerted = true;
       }
       if (enemy.x >= WORLD.defenseLine && !enemy.attacking) {
@@ -1224,7 +1281,7 @@ export class Simulation {
     if (!action) return;
     if (action.shadow !== undefined) enemy.shadowHit = action.shadow;
     if (action.attacked) enemy.attacked = true;
-    if (action.alert && enemy.hp > 0) alertParty(enemy as PartyAITarget, this.state.party.slots.slice(0, 4), this.partyAIContext());
+    if (action.alert && enemy.hp > 0) alertParty(enemy as PartyAITarget, this.battleAIActors(), this.partyAIContext());
     if (action.damage && enemy.hp > 0) this.damageCastle(enemy.attack, enemy);
     if (action.jump && action.jump !== enemy.frame) { enemy.frame = action.jump; this.runLaterFrame(enemy, timeline); }
   }
@@ -1881,6 +1938,8 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
+    if (record(value) && value.heroAI !== undefined && (Number(value.version) < 38 || !record(value.heroAI)
+      || typeof value.heroAI.enabled !== 'boolean' || !validPartyAIState(value.heroAI.state))) throw new Error('Invalid hero Fire at will state.');
     if (record(value) && value.recycleCount !== undefined && (Number(value.version) < 37 || !Number.isSafeInteger(value.recycleCount) || Number(value.recycleCount) < 0 || Number(value.recycleCount) > 1000000)) throw new Error('Invalid recycling count.');
     if (record(value) && (value.carryCheckpoint !== undefined || value.carryOver !== undefined && (Number(value.version) < 36 || value.carryOver !== true || value.mode === 'hardcore'))) throw new Error('Invalid Carry Over state.');
     if (!record(value) || !supportedSaveVersion(value.version) || (!validCampaignDay(value.day) || (value.version < 32 && Number(value.day) > 40) || (value.version < 26 && Number(value.day) > 9) || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7) || (value.version < 23 && value.day === 8) || (value.version < 24 && value.day === 9)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
@@ -1903,8 +1962,9 @@ export class Simulation {
     const playerNumbers = ['level', 'exp', 'skillPoints', 'shootTimer', 'accuracyFix', 'rampageTicks'];
     if (!record(player) || !isHeroClass(player.classId) || value.version < 25 && player.classId !== 'sheriff' || playerNumbers.some(key => !finite(player[key])) || Number(player.level) < 1) throw new Error('Invalid player state.');
     const advancedHero = ['sniper', 'ranger', 'duelist', 'noble'].includes(player.classId);
-    const meter = player.classState;
-    if (advancedHero ? value.version < 31 || !record(meter) || ['frenzy', 'idleCount', 'burst'].some(key => !finite(meter[key]) || Number(meter[key]) < 0 || Number(meter[key]) > 1000000) || !Number.isInteger(meter.burst) : meter !== undefined) throw new Error('Invalid hero class state.');
+    const control = record(value.heroAI) ? value.heroAI : undefined;
+    const meter = control ? control.state as Record<string, unknown> : player.classState;
+    if (control && player.classState !== undefined || (advancedHero ? value.version < 31 || !record(meter) || ['frenzy', 'idleCount', 'burst'].some(key => !finite(meter[key]) || Number(meter[key]) < 0 || Number(meter[key]) > 1000000) || !Number.isInteger(meter.burst) : !control && meter !== undefined)) throw new Error('Invalid hero class state.');
     if (['level', 'exp', 'skillPoints'].some(key => !Number.isInteger(player[key]) || Number(player[key]) < 0) || Number(player.exp) > 1000000000) throw new Error('Invalid player counters.');
     if (!legacyProjectiles && typeof player.bowDrawing !== 'boolean') throw new Error('Invalid bow draw state.');
     if (legacyEquipment) {
