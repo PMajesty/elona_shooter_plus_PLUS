@@ -7,6 +7,8 @@ import { createProfile, mergeProfile, mergeProfiles, validProfile, type GlobalPr
 import { MEDALS } from './medals.ts';
 import { MedalNotices, type MedalNotice } from './medal-notices.ts';
 import { createMedalNoticeView, updateMedalNoticeView, type InfoPopupLayout } from './medal-notice-view.ts';
+import { CombatNotices, type CombatNotice } from './combat-notices.ts';
+import { createCombatNoticeView, updateCombatNoticeView, type CombatNoticeLayout } from './combat-notice-view.ts';
 import { createTownEventView } from './town-event-view.ts';
 import { TOWN_NOTICES, townEvent, type TownNotice } from './town-events.ts';
 import { readFlashCollection } from './flash-profile.ts';
@@ -80,6 +82,8 @@ let manifest: Manifest;
 let gameScene: ElonaScene;
 
 class ElonaScene extends Phaser.Scene {
+  private combatNotices = new CombatNotices();
+  private combatNoticeViews = new Map<CombatNotice, Phaser.GameObjects.Container>();
   screen: Screen = 'title';
   sim?: Simulation;
   saveSlot = readSelectedSlot();
@@ -235,6 +239,10 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private reset(screen: Screen): void {
+    this.combatNotices.reset();
+    for (const view of this.combatNoticeViews.values()) view.destroy(true);
+    this.combatNoticeViews.clear(); delete container.dataset.combatNotices;
+    delete container.dataset.rampageEffects;
     const keepTownAmbience = this.screen === 'town' && screen === 'town';
     this.screen = screen;
     this.paused = false;
@@ -519,12 +527,12 @@ class ElonaScene extends Phaser.Scene {
   startGame(): void {
     this.carryCheckpoint = undefined;
     if (!this.sim?.startOpeningBattle()) this.sim = new Simulation(Date.now(), this.simulationOptions());
-    this.enterBattle();
+    this.enterBattle(true);
     this.saveGame(false);
     this.playSound('soundBattleBegin');
   }
 
-  private enterBattle(): void {
+  private enterBattle(announce = false): void {
     this.reset('battle');
     this.drawBattleBackground();
     this.playerSprite = new OriginalAlly(this, this.cache.json.get('ally-animation') as OriginalAllyMetadata, manifest.clips, this.appearance, WORLD.playerX, WORLD.playerY);
@@ -540,6 +548,7 @@ class ElonaScene extends Phaser.Scene {
     if (this.cache.audio.exists('soundBgForest')) this.ambient = this.sound.add('soundBgForest', { volume: 0.3, loop: true });
     this.ambient?.play();
     this.paintBattle();
+    if (announce && this.sim?.state.activeMission.bossDay) this.announceCombat('Boss Day!');
   }
 
   private drawBattleBackground(): void {
@@ -637,6 +646,13 @@ class ElonaScene extends Phaser.Scene {
 
   private updatePresentation(delta: number): void {
     this.updateMedalNotices(delta);
+    this.combatNotices.advance(Math.min(delta, 250));
+    const layout = (this.cache.json.get('town-layout') as { combatNotices: CombatNoticeLayout }).combatNotices;
+    for (const [notice, view] of this.combatNoticeViews) {
+      if (!this.combatNotices.active.includes(notice)) { view.destroy(true); this.combatNoticeViews.delete(notice); }
+      else updateCombatNoticeView(view, layout, notice);
+    }
+    container.dataset.combatNotices = JSON.stringify(this.combatNotices.active);
     if (this.paused) return;
     this.celebration?.advance(delta);
     if (this.celebration) {
@@ -766,6 +782,7 @@ class ElonaScene extends Phaser.Scene {
         this.root.add(actor); this.companionSprites.set(slot.slot, actor);
       }
       actor.setPosition(position.x, position.y);
+      actor.setRampageFrame(member.rampageTicks > 0 ? this.sim.state.tick % 12 + 1 : 0);
       if (cursor && member.aiState) cursor.setPosition(member.aiState.cursorX, member.aiState.cursorY).setVisible(this.screen === 'battle');
       else cursor?.setVisible(false);
       if (!member.bowDrawing) { this.companionBowSounds.get(slot.slot)?.destroy(); this.companionBowSounds.delete(slot.slot); }
@@ -878,9 +895,12 @@ class ElonaScene extends Phaser.Scene {
     for (const [uid, sprites] of this.enemyHitSprites) if (!present.has(uid)) { for (const sprite of sprites) sprite.destroy(); this.enemyHitSprites.delete(uid); }
     this.paintBossBars();
     if (this.playerSprite) {
+      this.playerSprite.setRampageFrame(state.player.rampageTicks > 0 ? state.tick % 12 + 1 : 0);
       this.root.bringToTop(this.playerSprite);
     }
     this.syncCompanionActors();
+    container.dataset.rampageEffects = JSON.stringify([state.player, ...state.party.slots.slice(0, 4).map(slot => slot.exists ? slot.member : null)]
+      .flatMap((actor, slot) => actor && actor.rampageTicks > 0 ? [{ slot, ticks: actor.rampageTicks, frame: state.tick % 12 + 1 }] : []));
     this.paintProjectiles();
     this.updateHud();
     for (const text of this.hud.values()) this.root.bringToTop(text);
@@ -1140,12 +1160,25 @@ class ElonaScene extends Phaser.Scene {
       const effect = this.clip('layhand', 1, event.x ?? 550, event.y ?? 270);
       if (effect) this.effects.push({ object: effect, ticks: manifest.clips.layhand.count, clip: 'layhand', frame: 1 });
     }
-    if (event.type === 'wave' || event.type === 'rampage' || event.type === 'level-up' || event.type === 'ragnarok') {
-      if ((event.type === 'rampage' && actorSlot === 0) || event.type === 'ragnarok') this.flashFrames = 15;
-      const position = actorSlot === 0 ? { x: 310, y: 90 } : partyActorPosition(actorSlot);
-      const message = this.text(position.x, position.y - (actorSlot ? 35 : 0), event.type === 'wave' ? `Wave ${event.amount}` : event.type === 'rampage' ? 'RAMPAGE!' : event.type === 'ragnarok' ? event.message! : 'Level Up!', actorSlot ? 14 : 27, '#ffefb0').setOrigin(0.5).setShadow(2, 2, '#000000', 3);
-      this.effects.push({ object: message, ticks: 45 });
+    if (event.type === 'level-up') {
+      const position = actorSlot === 0 ? { x: WORLD.playerX, y: WORLD.playerY } : partyActorPosition(actorSlot);
+      const asset = manifest.clips.levelUp;
+      const effect = this.add.image(position.x, position.y, 'levelUp', '1')
+        .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setDepth(1);
+      this.effects.push({ object: effect, ticks: asset.count, clip: 'levelUp', frame: 1 });
     }
+    if (event.type === 'rampage' && actorSlot === 0) { this.flashFrames = 15; this.announceCombat('Rampage!!'); }
+    if (event.type === 'ragnarok') { this.flashFrames = 15; this.announceCombat(event.message!); }
+    if ((event.type === 'wave' || event.type === 'combat-notice') && event.message) this.announceCombat(event.message);
+  }
+
+  private announceCombat(text: string): void {
+    const notice = this.combatNotices.add(text);
+    const layout = (this.cache.json.get('town-layout') as { combatNotices: CombatNoticeLayout }).combatNotices;
+    const view = createCombatNoticeView(this, layout, notice);
+    updateCombatNoticeView(view, layout, notice);
+    this.combatNoticeViews.set(notice, view);
+    container.dataset.combatNotices = JSON.stringify(this.combatNotices.active);
   }
 
   private animateEffects(): void {
@@ -1469,7 +1502,7 @@ class ElonaScene extends Phaser.Scene {
           if (this.sim!.startNextDay()) {
             this.carryCheckpoint = this.sim!.state.mode === 'hardcore' ? undefined : checkpoint;
             // procEventDialog воспроизводит второй щелчок внутри ветки сна.
-            this.playSound('soundClick1'); this.enterBattle(); this.saveGame(false); this.playSound('soundBattleBegin');
+            this.playSound('soundClick1'); this.enterBattle(true); this.saveGame(false); this.playSound('soundBattleBegin');
             status.textContent = `Day ${this.sim!.state.day} begins.`;
           } else { this.showTown('mission'); status.textContent = 'The next day is not available yet.'; }
         } else this.showTown(typeof dialog === 'object' ? tab : dialog === 'title' ? 'mission' : 'castle');

@@ -48,6 +48,7 @@ export class OriginalAlly extends Phaser.GameObjects.Container {
   private readonly body2: Phaser.GameObjects.Image;
   private readonly back?: Phaser.GameObjects.Image;
   private readonly front?: Phaser.GameObjects.Image;
+  private rampage?: Phaser.GameObjects.Image;
   private appearance: number;
   private frame = 109;
   private playing = false;
@@ -73,6 +74,17 @@ export class OriginalAlly extends Phaser.GameObjects.Container {
 
   get currentOriginalFrame(): number { return this.frame; }
   get isOriginalPlaying(): boolean { return this.playing; }
+
+  setRampageFrame(frame: number): this {
+    if (!frame) { this.rampage?.destroy(); this.rampage = undefined; return this; }
+    const asset = this.clips.allyRampage;
+    if (!this.rampage) {
+      this.rampage = new Phaser.GameObjects.Image(this.scene, -asset.originX, 18 - asset.originY, 'allyRampage', String(frame)).setOrigin(0);
+      this.add(this.rampage);
+    }
+    this.rampage.setFrame(String(frame)); this.bringToTop(this.rampage);
+    return this;
+  }
 
   private makeLayer(key: string): Phaser.GameObjects.Image | undefined {
     const origin = this.clips[key];

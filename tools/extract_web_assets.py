@@ -406,6 +406,7 @@ def party_portrait_background(xml, sprite):
 
 def effect_segment_asset(xml, sprite, name, cache_name, start, end, alpha):
     """Извлекает исходный диапазон эффекта без кадров других его анимаций."""
+    symbol = int(sprite.get('spriteId'))
     directory, svg_directory = WORK / cache_name, WORK / (cache_name + "-svg")
     segment = copy.deepcopy(sprite)
     segment.set("frameCount", str(end - start))
@@ -420,19 +421,27 @@ def effect_segment_asset(xml, sprite, name, cache_name, start, end, alpha):
         depths = [tag.get("depth") for tag in selected]
         timeline.append(ET.Element("item", type="ShowFrameTag", forceWriteAsLong="false"))
     timeline.append(ET.Element("item", type="EndTag", forceWriteAsLong="false"))
-    if FORCE or not list(directory.glob("DefineSprite_1459*")):
+    if FORCE or not list(directory.glob(f"DefineSprite_{symbol}*")):
         derived = copy.deepcopy(xml)
-        target = next(tag for tag in derived.find("tags") if tag.get("spriteId") == "1459")
+        target = next(tag for tag in derived.find("tags") if tag.get("spriteId") == str(symbol))
         target.set("frameCount", str(end - start))
         target.remove(target.find("subTags"))
         target.append(copy.deepcopy(timeline))
         path, swf_path = WORK / (cache_name + ".xml"), WORK / (cache_name + ".swf")
         ET.ElementTree(derived).write(path, encoding="utf-8", xml_declaration=True)
         ffdec(["-xml2swf", path, swf_path], cache_name + "-swf")
-        ffdec(["-ignorebackground", "-selectid", "1459", "-export", "sprite", directory, swf_path], cache_name + "-png")
-        ffdec(["-ignorebackground", "-selectid", "1459", "-format", "sprite:svg", "-export", "sprite", svg_directory, swf_path], cache_name + "-svg")
-    return {**atlas(name, 1459, segment, directory, svg_directory),
+        ffdec(["-ignorebackground", "-selectid", str(symbol), "-export", "sprite", directory, swf_path], cache_name + "-png")
+        ffdec(["-ignorebackground", "-selectid", str(symbol), "-format", "sprite:svg", "-export", "sprite", svg_directory, swf_path], cache_name + "-svg")
+    return {**atlas(name, symbol, segment, directory, svg_directory),
             "sourceFrameStart": start, "frameAlpha": alpha}
+
+
+def combat_feedback_assets(xml, sprites, manifest):
+    for directory, extra, suffix in [(CACHE, [], 'png'), (ROOT / '.build/svg-bounds', ['-format', 'sprite:svg'], 'svg')]:
+        if not list(directory.glob('DefineSprite_2386*')):
+            ffdec(['-ignorebackground', '-selectid', '2386', *extra, '-export', 'sprite', directory, SOURCE], 'ally-rampage-' + suffix)
+    manifest['clips']['allyRampage'] = atlas('allyRampage', 2386, sprites[2386])
+    manifest['clips']['levelUp'] = effect_segment_asset(xml, sprites[1411], 'levelUp', 'ally-level-up', 20, 51, [1] * 31)
 
 
 def castle_upgrade_tiles(xml, sprites):
@@ -625,6 +634,14 @@ def town_layout(xml, sprites):
     option_labels = {name: json.loads('"' + label.replace("\\'", "'") + '"')
                      for name, label in re.findall(r'(opt\w+)\.label = "(.*?)";', option_source)}
     pause_children = placements(sprites[1995].find("subTags"), 10)
+    notice_frames = []
+    for frame in range(1, 93):
+        placement = placements(sprites[2390].find('subTags'), frame)['msg']
+        value = {key: placement[key] for key in ['x', 'y', 'scaleX', 'scaleY']}
+        tag = next(tag for tag in placed_frame(sprites[2390].find('subTags'), frame) if tag.get('name') == 'msg')
+        color = tag.find('colorTransform')
+        value['alpha'] = int(color.get('alphaMultTerm', '256')) / 256 if color is not None else 1
+        notice_frames.append(value)
     # Исходная панель обрезает заголовок справа и последний флажок снизу в области620×380.
     for name in ("returnTitleButton", "saveGameButton", "helpButton"):
         pause_children[name]["x"] -= 50
@@ -700,7 +717,8 @@ def town_layout(xml, sprites):
                                  "hoverScale": 1.04, "pinClip": "townActionPin", "text": "4 AP\nClaim title",
                                  "children": placements(sprites[2431].find("subTags"), 1)},
             "newTitleDialog": {"characterId": 2437, "frame": 1, "image": "eventWindow",
-                               "cardFrame": 3, "children": placements(sprites[2437].find("subTags"), 1)}}
+                               "cardFrame": 3, "children": placements(sprites[2437].find("subTags"), 1)},
+            "combatNotices": {"frames": notice_frames, "field": placements(sprites[2388].find('subTags'), 1)['msg']}}
 
 
 def pause_screen(xml, sprites):
@@ -773,6 +791,7 @@ def main():
     # Наблюдаемые значения alpha хранятся Flash с точностью 1/256.
     manifest["clips"]["bloodHit"] = effect_segment_asset(xml, sprites[1459], "bloodHit", "enemy-hit-blood", 50, 63, [1, 1, 1, 1, 204/256, 204/256, 153/256, 153/256, 102/256, 102/256, 25/256, 25/256, 25/256])
     manifest["clips"]["criticalHit"] = effect_segment_asset(xml, sprites[1459], "criticalHit", "enemy-hit-critical", 70, 76, [1] * 6)
+    combat_feedback_assets(xml, sprites, manifest)
     projectile_assets(xml, sprites, manifest)
     for layer in ["back", "front"]:
         manifest["clips"]["ally" + layer.capitalize()] = ally_effects(xml, sprites[838], layer)
@@ -887,6 +906,8 @@ def main():
         "runtimeManifest": "web/public/assets/manifest.json", "frameRate": 30,
         "frameNames": "Original one-based Flash timeline frame numbers as strings",
         "origins": "Pixel offset from exported image top-left to Flash registration point",
+        "combatFeedback": {"auraSymbol": 2386, "levelUpSymbol": 1411, "levelUpFrames": [20, 50],
+                           "noticeSymbol": 2390, "noticeField": 2387, "noticeFont": 682},
         "counts": {"images": len(manifest["images"]), "clips": len(manifest["clips"]),
                    "sounds": len(manifest["sounds"]), "fonts": len(manifest["fonts"])},
         "runtimeAdjustments": [

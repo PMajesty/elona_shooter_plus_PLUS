@@ -9,7 +9,7 @@
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
     "images": 152,
-    "clips": 80,
+    "clips": 82,
     "sounds": 89,
     "fonts": 6
   },
@@ -75,5 +75,16 @@
     },
     "motion": "web/src/enemy-arrows.ts",
     "damage": "source launch frame; flight is decorative"
+  },
+  "combatFeedback": {
+    "auraSymbol": 2386,
+    "levelUpSymbol": 1411,
+    "levelUpFrames": [
+      20,
+      50
+    ],
+    "noticeSymbol": 2390,
+    "noticeField": 2387,
+    "noticeFont": 682
   }
 }

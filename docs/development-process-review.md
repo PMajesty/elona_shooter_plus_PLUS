@@ -215,3 +215,11 @@ and saved state without trying to click within a subsecond flight repeatedly.
 Space resumes a paused battle but reloads during play; use Escape for pausing.
 Compare serialized JSON when checking UI exports: REPL structuredClone prototypes
 made a strict object comparison report false differences despite identical data.
+
+Combat feedback reused actor containers, saved bonus counters and the existing
+effect lifecycle. The apparent one-frame companion countdown drift was traced to
+the source's target-acquisition continue, not a different clock. Preserve it;
+observed counter divergence alone does not justify a balance fix. A short public
+DOM phase wait captured readable moving text without repeated screenshot polling.
+An expiry wait timed out, but the next DOM/screenshot showed both effects cleared;
+record that limit rather than claiming a measured expiry time or rerunning it.

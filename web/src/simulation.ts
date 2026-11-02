@@ -26,6 +26,7 @@ import { advanceProtection, explosionContains, explosionStats, planConsumableUse
 import { advanceProjectile, createProjectile, type ExplosionKind, type ProjectileState } from './projectiles.ts';
 import { EQUIPMENT_SERVICE_COST, equipmentServiceEligible, createUpgradePreview, modMountFailure, upgradeCost, type EquipmentService, type TownEquipmentAction, type TownEquipmentOutcome, type LootItemAddress, type LootEquipmentAction } from './equipment.ts';
 import { advanceEnemyArrow, createEnemyArrow, createEnemyShot, type EnemyArrowState } from './enemy-arrows.ts';
+import { CRITICAL_STREAK_MESSAGES } from './combat-notices.ts';
 import { ARCHER_DISPLAY_WIDTHS, FLY_DISPLAY_WIDTHS, barbarianParentWidth, lavaParentWidth } from './enemy-display-bounds.ts';
 import { createPartyState, addStartingLittleGirl, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
 import { ALL_TRAITS, CLASS_CHOICE_ORDER, availableCompanionTraits, partySkills, gainCompanionTrait, levelUpCompanion, companionWage, type PartySkillState } from './party-progression.ts';
@@ -90,7 +91,7 @@ export interface SimulationState {
   pendingPartyAction: PartyPendingAction | null;
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
-export interface SimulationEvent { actorSlot?: number; enemyKind?: EnemyKind; type: 'enemy-attack' | 'enemy-drop' | 'sister-killed' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
+export interface SimulationEvent { actorSlot?: number; enemyKind?: EnemyKind; type: 'combat-notice' | 'enemy-attack' | 'enemy-drop' | 'sister-killed' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
 export interface SimulationOptions { mods?: GameMods; mode?: GameMode; hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
@@ -885,7 +886,8 @@ export class Simulation {
         this.finishDay(); return;
       }
       state.waveIndex--;
-      this.events.push({ type: 'wave', amount: state.waves.length - state.waveIndex });
+      this.events.push({ type: 'wave', amount: state.waves.length - state.waveIndex,
+        ...(state.waveIndex === state.bossWave ? { message: 'Incoming Boss!!' } : {}) });
       if (state.repairmanLevel) state.castleHp = Math.min(state.castleMaxHp, state.castleHp + castleRepairAmount(state));
       // Исходный onTick оценивает остаток урона после ремонта, включая первую волну.
       if (state.castleHp < state.castleMaxHp) state.noDamage = false;
@@ -1049,7 +1051,10 @@ export class Simulation {
     enemy.exp = int(experience);
     if (critical) {
       if (player.traits[COMBAT_TRAIT.ROGUE]) dropThreshold = 1;
-      if (player.rampageTicks <= 0 && --player.rampageTicks === -7) this.startRampage(actorSlot);
+      if (player.rampageTicks <= 0) {
+        if (--player.rampageTicks === -7) this.startRampage(actorSlot);
+        else if (actorSlot === 0) this.events.push({ type: 'combat-notice', message: CRITICAL_STREAK_MESSAGES[-player.rampageTicks] });
+      }
     }
     // enemy проверяет несуществующее root.pc: наблюдаемый trainerFix действует и на героя.
     // Умножаем после всех int-преобразований EXP; опыт оружия и фиксированные +250 не меняются.

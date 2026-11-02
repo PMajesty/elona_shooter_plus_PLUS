@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v41, original late-enemy attack projectiles**.
+Updated 2026-11-02. Current local build: **v41, original combat announcements and ally rampage feedback**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -18,6 +18,16 @@ Militia has its starting weapons and periodic grenade. Sniper, Ranger, Duelist
 and Noble unlock through the four original level10 class medals. Sniper's idle
 charge, Ranger's party rampage, Duelist's frenzy and Noble's passive bonuses work
 in combat. The first three use the original adrenaline bar artwork.
+Active hero/companion rampage now shows the original looping aura and disappears
+when its saved bonus expires. Six original critical-kill countdown lines lead to
+"Rampage!!"; Boss Day, Incoming Boss and Ragnarok use the original bottom text
+field, font, motion/fade and waiting queue. Generic Wave/Level Up overlays are
+removed; level-up uses its original separate animation. Continue restores active
+auras without replaying old announcements. No save fields, format bump or combat
+RNG changes were required. Aura phase follows saved tick; exact filters and the
+original rampage bottom-bar tint remain differences.
+Source: rampage7284/rampageOn12299/endRampage12472, textEffect2390,
+levelUp10480/effect2 symbol1411 frames20–50, onTick8363 and battle-start1549.
 
 The hero's original Barrack controls are connected: focus an owned non-base skill,
 choose Hero Mode or any of seven AI orders, and set Boss/Defend priorities.
@@ -230,10 +240,10 @@ historical player SOL compatibility remains unverified.
 
 ## Validation and limits
 
-- Last full suite: **568 tests pass**. Three affected checks passed again after
-  tightening imported projectile-kind validation. Current typecheck/build pass;
-  bundle: assets/index-vYPYHC8g.js. Browser rendering used index-CJ-uDcPE.js before
-  that validation-only tightening. Existing source/deterministic checks cover
+- Last full suite: **572 tests pass**. Four new checks cover critical countdown,
+  boss-wave warnings, source notice queue boundaries and extracted feedback assets.
+  Current typecheck/build pass; bundle: assets/index-DCU8Q6NM.js.
+  Existing source/deterministic checks cover
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
 - The controlled40-day campaign reached18 enemy kinds in96827 frames using strong
@@ -243,8 +253,8 @@ historical player SOL compatibility remains unverified.
 - Muted browser checks cover New Game, combat/reload/F/results/town, original
   controls/help/options, equipment/services/hires, all eight slots, JSON saves,
   Carry Over, medals/Museum, Sister reactions and Flash imports. Current user's
-  entire adventure/collection is restored except the explicit v40→v41 version
-  fields: Day1, tick674, RNG1744019180, HP40, gold209. Slot8 is empty; slot1 is
+  entire adventure/collection is restored exactly at v41:
+  Day1, tick674, RNG1744019180, HP40, gold209. Slot8 is empty; slot1 is
   selected, paused/muted. No console errors or fullscreen during the latest check.
 
 Recent evidence is in ignored `.build/browser-qa/`; older detail remains in Git.
@@ -260,6 +270,7 @@ Reuse it for unchanged behavior rather than repeating whole browser/campaign run
 | Crowded battle | `crowded-battle-verification.json`: controlled Day41 starts150 enemies/six bosses/three companions;313.821s wall vs313.833s simulation, five smoothed render windows near60 FPS;133041-byte save reloads exactly. Not raw frame-gap/stall, memory, hours-long or Flash-performance evidence. |
 | Website embedding | `embedding-verification.json`: host input/resizing preserves paused metadata;360px display keeps620×380 buffer and working rifle fire10→9; outside bow release creates an arrow; host reload/Continue retains tick170/selection/ammo. Temporary host removed. Two iframe exports reported success without a file in IAB; direct export worked. Other browser/origin policies remain unverified. |
 | Late enemy attacks | `late-attacks-verification.json`, `late-attacks-browser.png`: actual Cata/Tank/Dragon shots and Tank flash render; all four launch sounds are loaded while muted. A controlled tick6 save with all three flights survives import and actual Return to Title/Continue with the entire envelope unchanged. Source-derived motion/launch timing, flight removal, replay, legacy arrows and invalid kinds have automated checks. Transient flashes are not saved. |
+| Combat feedback | `combat-feedback-verification.json`, `combat-feedback-browser.png`, `combat-level-up.png`: original boss text and both ally auras render; an ordinary shot levels the controlled hero1→2 with original artwork. Active bonuses survive full-envelope Continue, old notices do not replay, and both auras clear on expiry. Companion counter's one-frame acquisition delay follows the source continue; no clock change was made. |
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. The Codex app crash
@@ -283,7 +294,9 @@ for routine continuation.
    rather than the original ComboBox's five-row scrolling list.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
    camera shake, decorative boss reticle, other enemy frame sounds,
-   rage art and raster/filter/subpixel differences. Chain Gun phase playback follows
+   rampage bottom-bar tint and raster/filter/subpixel differences. Ally aura phase
+   derives from saved tick; textEffect motion/fade is extracted, but exact text
+   filters remain approximate. Chain Gun phase playback follows
    deterministic time; sample-perfect audio/native SoundChannel scheduling is unverified.
    Firework timing/tint/audio and screen flashes approximate the Flash presentation;
    medal notification glow/filter transitions are approximate.
