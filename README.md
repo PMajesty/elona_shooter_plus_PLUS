@@ -167,8 +167,22 @@ npm.cmd run build
 
 Publish the **contents of `web/dist/`** at a path on your website, or embed that
 URL in an iframe. The build uses relative asset paths. No Flash plugin, Ruffle,
-Node process or gameplay server is required on the website. The existing local
-preview at `http://127.0.0.1:5175/elona/` serves `web/dist/`.
+Node process or gameplay server is required on the website. Upload the complete
+folder, including assets, and use its folder URL with a trailing slash. A copied
+production build has been checked at /games/elona/ on a plain Python static server:
+New Game, combat, iframe export and exact save/Continue restoration pass. This is
+a local HTTP check; the actual website's HTTPS/CDN policies still need verification.
+
+For an independent static preview, run this from the repository root:
+
+```powershell
+python -m http.server 8080 --bind 127.0.0.1 --directory web/dist
+```
+
+Open http://127.0.0.1:8080/ rather than double-clicking index.html. Browser saves
+belong to the browser/site origin; export a backup before moving between hostnames,
+HTTP/HTTPS or ports. The existing local preview at
+`http://127.0.0.1:5175/elona/` serves `web/dist/`.
 To restore that preview after an app restart, run
 `npm.cmd --prefix web run preview -- --port 5175 --strictPort --base /elona/`.
 

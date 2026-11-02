@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-03. Current local build: **v41, visible Continue/import failure recovery**.
+Updated 2026-11-03. Current local build: **v41, save recovery and plain static hosting verified**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -19,6 +19,12 @@ export delivers a file and host-page reload/Continue matches the full envelope.
 The360px display retains the620×380 render buffer. Direct-route save labels also
 remain populated in this default-policy context. Public HTTPS/CDN hosting,
 sandboxed embeds and restrictive privacy-policy variants remain unverified.
+A copy of the production dist also passes on Python's plain static HTTP server at
+/games/elona/, without Vite, URL fallback or a gameplay backend. The folder redirect,
+New Game, fire5→4, direct-to-iframe full save, host input isolation, delivered export
+and host reload/Continue pass in stock Chrome156. No requests fail or return errors.
+The local uncached check loads in1099ms and transfers12,986,070 bytes in250 resource
+requests; this is loopback evidence, not a public-network loading-speed claim.
 An individual font-load rejection now uses browser fallback fonts while the rest
 of startup proceeds. Previously one bad font prevented the canvas/game from being
 created at all. Original fonts remain the normal path; fallback keys are visible
@@ -350,6 +356,7 @@ Reuse it for unchanged behavior rather than repeating whole browser/campaign run
 | Item information | `item-popup-verification.json`, `item-popup-{equipment,shop,upgrade,loot}-browser.png`: original panel fields/artwork render across equipment, shop, loot and upgrade comparison. Red requirements, modified living-weapon progress and non-gun descriptions are readable. Hover/carry preserve the full save; equipment moves, purchase cost, loot collection and upgrade Cancel work. Final full-envelope Continue matches. Controlled fixture variants, muted isolated Chrome, no script errors or user-profile changes. |
 | Skill information | `trait-hint-verification.json`, `trait-hint-{barracks,sniper,party}-browser.png`: all five source fields render; weapon focus preserves gold/AP/RNG, hovering preserves the entire save and Continue restores it exactly. Noble skill order matches source; controlled advanced-class unlocks permit an ordinary Sniper start and shot10→9. Muted isolated Chrome, no script errors or changes to the user profile. |
 | Continue/import recovery | `save-recovery-verification.json`, `save-recovery-{corrupt,import}-browser.png`: unreadable JSON and unsupported-version Continue show original-artwork acknowledgements; raw adventure/collection remain exact. Another slot loads normally. Blocked imported-adventure writes preserve the prior stored run and export the complete imported envelope; Space cannot resume under the prompt. Medal-only failure is distinct; healthy import/Continue remain exact. Isolated muted Chrome, no script errors or user-profile changes. |
+| Plain static hosting | `static-host-verification.json`, `static-host-browser.png`: copied dist on Python3.14.4 http.server under /games/elona/ passes New Game/fire, same-origin embed input, actual export and exact direct/embedded/reloaded Continue. No Vite/backend, script errors or failed/error requests. One isolated muted Chrome156 page; user profile and native fullscreen untouched. Server/browser close afterward. |
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. The Codex app crash
@@ -366,8 +373,9 @@ for routine continuation.
   interactions before spending further effort on exact presentation.
 - **Website and saves:** ordinary startup, New Game, combat/results/town,
   Continue, imports/exports and embedding must remain usable with preserved saves.
-  Direct-route and same-origin input/save evidence exists; browser/origin policy
-  limits below still require representative evidence or an explicit support scope.
+  Direct-route, same-origin static-folder/iframe and Edge cross-origin input/save
+  evidence exists. The actual website URL/platform is still needed for its HTTPS
+  deployment check; unrelated browser/policy variants are support limits.
 - **Correctness and stability:** retain affected source comparisons/deterministic
   checks and sustained real browser operation with raw stall/memory observations.
   The hour above passes with stated outliers/limits. Passing tests alone is insufficient.
@@ -377,12 +385,15 @@ for routine continuation.
 
 ## Remaining features and differences
 
-1. Broader browser/hosting performance and later difficulty evidence. The one-hour
-   controlled Chrome run above passes with stated limits; longer sessions/other
-   workloads are unverified. The Day1000 save safety
-   boundary remains an intentional limit. Same-origin embedding has the input/save
-   evidence above. Edge's cross-origin default-policy case also passes; public
-   HTTPS/CDN, sandbox/privacy-policy variants and IAB iframe download delivery remain open.
+1. Verify the actual website deployment once its URL/platform is supplied; that
+   information was requested. Plain static nested-folder hosting and same-origin
+   embedding now pass. The measured desktop scope is stock Windows Chrome156 and
+   Edge156 with JavaScript, WebGL and ordinary browser storage. Mobile/touch,
+   sandboxed/restrictive-policy embeds, public CDN policies and IAB iframe download
+   delivery remain unverified support cases. The completed one-hour Chrome check
+   is retained; another unchanged soak is not a prerequisite. Natural late-game
+   balance is not established by controlled strong-gear scenarios. Day1000 remains
+   the intentional save safety boundary.
 2. All38 defined medal award paths and award notifications are connected. Preserve
    source bonus discrepancies: Kongregate advertises a
    wage discount, but wage3610 checks Ragnarok92; medal91 does not add another
