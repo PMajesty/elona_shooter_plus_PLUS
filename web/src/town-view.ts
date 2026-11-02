@@ -79,7 +79,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
   }
   if (tab === 'mission' || tab === 'castle') {
     const panel = layout[tab], { x, y } = layout.menuPosition;
-    const canRest = state.day < 7 && state.town?.preparation === 'ready';
+    const canRest = state.day < 8 && state.town?.preparation === 'ready';
     // Вертикальный сдвиг уже запечён в статическую панель; её кнопкам он нужен отдельно.
     image(panel.image, x, 0);
     button('button_windowClose', panel.children.closeButton, () => callbacks.select(null), x, y);
@@ -142,7 +142,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         }
       });
     } else {
-      button('button_townRest', panel.children.act1, () => canRest ? callbacks.rest() : callbacks.message('Day 8 is not available yet.'), x, y, canRest);
+      button('button_townRest', panel.children.act1, () => canRest ? callbacks.rest() : callbacks.message('Day 9 is not available yet.'), x, y, canRest);
       button('button_townHire', panel.children.act2, () => callbacks.message('Temporary henchmen are not available yet. Recruit permanent companions in Characters.'), x, y, false);
     }
     image(panel.labelsImage, x, 0).setAlpha(tab === 'mission' && !canRest ? 0.35 : 1);

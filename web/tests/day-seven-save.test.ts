@@ -94,7 +94,10 @@ test('the seventh perfect medal affects only new town preparation, and a delayed
   assert.throws(() => Simulation.fromSave(earlier), /Invalid earned medals/);
   earlier.version = 13;
   assert.throws(() => Simulation.fromSave(earlier), /Invalid earned medals/);
-  assert.equal(simulation.startNextDay(), false);
+  assert.equal(simulation.startNextDay(), true);
+  assert.equal(simulation.state.day, 8);
+  assert.equal(simulation.state.activeMission.absorbFix, 0.03);
+  assert.deepEqual(restore(simulation).state, simulation.state);
 });
 
 test('boss windup and released visual-only grenade replay exactly; new projectiles do not move on their birth tick', () => {

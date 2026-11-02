@@ -1,18 +1,27 @@
 # Elona Shooter Plus PLUS
 
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
-Phaser 4. The current implementation covers **seven connected Sheriff days**:
+Phaser 4. The published **v23 release** covers **eight connected Sheriff days**:
 choose one of 22 appearances, fight, collect ordinary and boss loot, choose earned
 skills, enter town, hire permanent companions, improve the House, Wall and Sandbags,
 expand Storage, employ Repairmen and Trainers, exchange equipment, buy/sell and
 upgrade weapons, mount MODs, repair
-the castle with gold or AP, then Rest into Days 2–7 with your
+the castle with gold or AP, then Rest into Days 2–8 with your
 retained party and equipment. Victory, defeat,
 rewards, town entry and save/restore work across these stages. Original English
 artwork, fonts, audio and credits are retained.
 
-The **v22 Trainer release** is published at
-[the local release](http://127.0.0.1:5175/elona/) after 363 passing tests,
+Day 8 adds Lava, the original later spawn batching, the eighth settlement/town
+and the first possible Mk-3 random weapons. The release passes **386 tests**,
+the accepted source comparisons, four natural eight-day campaigns and five
+complete-save browser checks. It is published at
+[the local release](http://127.0.0.1:5175/elona/) with successful production New Game
+and exact v22-save migration/restore checks. All **310 live and archive files**
+match the tested build. The deployable archive is
+`.build/elona-shooter-browser-day-eight-slice.zip`; the verified v22 release remains
+in `.build/browser-before-day-eight` and the Trainer archive below.
+
+The historical **v22 Trainer release** was published after 363 passing tests,
 27 accepted original observations, seven complete-save UI checks and production
 New Game/exact v21-save migration and restore checks. Trainer connects the original
 Castle purchase to hero and companion kill XP, with no recurring upkeep.
@@ -28,7 +37,7 @@ Its deployable archive is `.build/elona-shooter-browser-looter-slice.zip`;
 the verified v20 release remains in `.build/browser-before-looter` and the prior
 loot MOD archive. Earlier recovery and verification evidence is retained below.
 
-This is not yet the complete game. Day 8 onward, other playable hero classes, full town
+This is not yet the complete game. Day 9 onward, other playable hero classes, full town
 management, the other Castle upgrades, temporary henchmen, recruit refresh, other card actions, Ragnarok and
 original Flash save conversion remain to be ported. Ordinary firearms use owned
 item statistics and weapon-skill requirements; the covered Sheriff combat skills
@@ -148,10 +157,10 @@ owned slot to buy it. Owned items can be moved or swapped; dropping one outside
 the slots asks to sell it. Only Yes confirms, and any other dialog click cancels.
 Shop Tokens discount stock. Town HP, AP, prepared data and full inventory records
 survive save/restore. **Mission → Rest** opens the original Resting dialog;
-acknowledging it begins the prepared next battle, up to Day 7. Rest does not heal
+acknowledging it begins the prepared next battle, up to Day 8. Rest does not heal
 the castle, spend AP or cost gold. A purchased Repairman heals when the opening
 wave starts after Rest. Guns refill; consumable charges stay spent.
-Days 2–7 each end in their own rewards and prepared town. Day 4 adds the source's
+Days 2–8 each end in their own rewards and prepared town. Day 4 adds the source's
 harder BATCH1 wave pattern and boss shield. The boss turns when retreating,
 plays its original firing and shield frames, and reduces guarded damage to
 one tenth plus one. The fourth town generates the original MOD sale with a
@@ -175,7 +184,14 @@ while the later explosion is cosmetic. Surviving hits during windup double only
 the boss's damage accumulator; a lethal hit prevents an unreleased grenade.
 Day 7 settlement includes 45 GP tax, default upkeep of 40 GP and any earned title
 salary. Its town can generate level-4 recruits; seven perfect days grant the next
-absorption medal for future mission preparation. Rest beyond Day 7 remains unavailable.
+absorption medal for future mission preparation. The release carries that
+prepared mission and its historical absorption into Day 8. Lava warns the party,
+keeps moving during its attack and explodes against the wall; killing it before
+the explosion uses its ordinary death/reward path. Day 8 also permits source
+Sheep batching. Its result has 80 GP tax plus actual upkeep and wages, with any
+earned title salary. Town 8 retains normal stock and level-2–4 recruits, permits
+Mk-3 random weapon variation and prepares mission 8 without guaranteed calendar
+loot. Rest beyond Day 8 remains unavailable.
 Recruit refresh, temporary Mission Hire, other card actions and Refresh Stock remain unavailable.
 
 Open **Characters**, select the candidate and choose **Recruit** to hire one of
@@ -216,7 +232,11 @@ gun does not collect it automatically. While confirmation is open, clicks cannot
 also move another item or advance rewards. Stock MODs must first be bought into
 an empty owned slot.
 
-Current saves use **version 22**; versions **1–21** are accepted. Canonical
+Current saves use **version 23**; versions **1–22** are accepted. Version22
+migration changes the format version without rerolling existing state. Day8
+records retain the prepared/prior town and historical absorption; Lava requires
+its alert flag and hit-effect history alongside the existing enemy state. Older
+or earlier-day saves cannot introduce Lava. Canonical
 `trainerLevel` is a nonnegative integer; older saves initialize it to zero without
 purchases, XP changes or RNG draws. Existing `looterLevel`, items, offers, party
 state and settled results remain unchanged. Pending
@@ -251,7 +271,7 @@ their stored positions, damage and remaining lifetime. Ammo and reload timers li
 on the owned items, with a selected slot, five item cooldowns and saved
 protection state. Weapon experience is tracked separately for Small Gun, Big
 Gun, Rifle, Shotgun and other items. Legacy scalar experience maps to Shotgun;
-the old ammo/cooldown fields migrate without rerolling inventory. Days 2–7 saves
+the old ammo/cooldown fields migrate without rerolling inventory. Days 2–8 saves
 retain the prepared mission and prior town, including the historical absorption
 bonus that applied when battle began. New characters retain the
 original hidden growth potentials and base aiming/teamwork rolls. Portrait and
@@ -359,6 +379,55 @@ grenade flight, shake RNG and death before/after release. See
 [boss-special notes](web/docs/boss-special-source.md),
 [seventh-day wave notes](web/docs/seventh-day-wave-source.md) and
 [seventh-town notes](web/docs/seventh-town-source.md).
+
+The v23 Day8 release matches **10 original wave cases**, **10 timer-spawn
+observations**, **18 town/recruit/variation/settlement observations**, and **659
+Lava states plus 12 collision grids (76,800 sampled points)**. The source captures
+are repeatable and retain the original method bodies and non-code resources.
+They establish the declared method boundaries and sampled geometry, not complete
+native scheduling or pixel parity. See [Day8 wave/spawn notes](web/docs/eighth-day-wave-source.md),
+[town notes](web/docs/eighth-town-source.md) and [Lava notes](web/docs/lava-source.md).
+
+The Lava comparison exposed six port-only false positives at the explosion
+corpse's slanted edge. The correction retains the full global f32 inverse
+transform, its separate integer-twip rounding stages and ties-to-even behavior;
+the original expected points and tolerance are unchanged. Earlier contour
+references still pass. These corpse checks can consume hit-processing RNG, so
+the correction matters beyond appearance. It does not reproduce the reported
+veteran late-game hitbox problem. Focused save checks cover prepared mission
+history, party/upgrades, actual companion alert, both Lava death paths and
+version22 migration without rerolls.
+
+The published build passes **386 tests**, TypeScript checking and its build.
+Four fresh natural campaigns all win Day8, with **72,263 simulation ticks**, 764
+runner checkpoints and 93 captured fixtures, without gold, HP, item or RNG grants.
+They observe four Lava spawns/kills, one alert and five multi-spawn callbacks.
+Independent replay verifies all 93 fixture hashes/full states and **72,494
+operations and events**, restoring at 81 distinct fixture boundaries; it does
+not recreate the runner's separate checkpoint schedule. Ordinary enemies use
+production contours; headless bosses retain the declared rectangle fallback.
+
+A separate ordinary-input branch from the earned natural-2 Day7 town changes
+companion orders and deliberately allows a Lava attack. Its 663 operations,
+658 ticks and seven fixtures replay exactly: the explosion reduces HP43→32,
+credits no kill and removes the actor. This is an earned branch, not another
+independent campaign or a granted encounter. Five complete-envelope browser
+checks pass for Rest into Day8, Continue, the actual one-frame Lava34→35
+explosion, result→town8 and blocked Day9. No console errors were observed.
+The final title shows `Sheriff · Day 8`. Production New Game starts at tick0,
+HP40, gold200 and five shells; restoring the actual v22 backup yields the exact
+expected v23 envelope at tick674, HP40 and gold209, with unchanged RNG, paused
+and no console errors. The bundle is `assets/index-CPbT627r.js`. All 310 live/ZIP
+files match `.build/browser-day-eight-release`; the ZIP is 8,665,911 bytes,
+SHA-256 `d94325f7ef63956bd3f0f86527e385f24fae799b3b0b777ac089a35546d6772d`.
+Rollback `.build/browser-before-day-eight` preserves all 308 v22 files. Evidence:
+`.build/day-eight-party-soak/report.json`,
+`.build/browser-qa/day-eight-scenario-audit.json`,
+`.build/browser-qa/day-eight-lava-exposure-audit.json` and
+`.build/browser-qa/day-eight-ui-verification.json`,
+`.build/browser-qa/day-eight-final-label-verification.json`,
+`.build/browser-qa/day-eight-production-verification.json` and
+`.build/day-eight-publication.json`.
 
 The v22 Trainer release passes **363 tests**, TypeScript checking and its build
 (`assets/index-mtID2Ws9.js`). **All 27 original observations are accepted**:
@@ -671,11 +740,10 @@ or native browser scheduling parity. Run
 `node --experimental-strip-types scripts/party-soak.ts 8 repair` from `web`;
 reports are in `.build/repair-party-soak/`.
 
-The next useful slice is a source audit of **Day8/Lava and its town, recruit and
-boss dependencies**, followed by connected Rest → battle → rewards → town when
-those dependencies fit a bounded implementation. This extends progression coverage
-before optional Castle page2 work. Day8 is not enabled yet; the veteran late-game
-hitbox complaint still needs its own failing original encounter.
+The next useful progression slice is a
+source audit of **Day9 and its mission, enemy, boss and town dependencies** before
+enabling that battle. Optional Castle page2 remains deferred. The veteran
+late-game hitbox complaint still needs its own failing original encounter.
 
 `npm.cmd run test:projectile-soak` separately exercises eight projectile guns
 and hand grenades under three seeds: **27 scenarios, 9,720 frames and 1,080
@@ -718,6 +786,10 @@ python tools/build_sixth_town_oracle.py
 python tools/build_seventh_day_wave_oracle.py
 python tools/build_boss_special_oracle.py
 python tools/build_seventh_town_oracle.py
+python tools/build_eighth_day_wave_oracle.py
+python tools/build_eighth_day_spawn_oracle.py
+python tools/build_eighth_town_oracle.py
+python tools/build_lava_oracle.py
 python tools/build_castle_upgrades_oracle.py
 python tools/build_castle_repair_oracle.py
 python tools/build_castle_sandbag_oracle.py
@@ -754,7 +826,10 @@ with `test:sixth-day-wave-reference`, `test:barbarian-reference` and
 `test:sixth-town-reference`. Day 7 uses `?suite=seventh-day-waves`,
 `?suite=boss-special` and `?suite=seventh-town`, with
 `test:seventh-day-wave-reference`, `test:boss-special-reference` and
-`test:seventh-town-reference`. Castle House/Wall transactions use
+`test:seventh-town-reference`. Day8 uses `?suite=eighth-day-waves`,
+`?suite=eighth-day-spawn`, `?suite=eighth-town` and `?suite=lava`, with
+`test:eighth-day-wave-reference`, `test:eighth-day-spawn-reference`,
+`test:eighth-town-reference` and `test:lava-reference`. Castle House/Wall transactions use
 `?suite=castle-upgrades` and `npm.cmd run test:castle-upgrades-reference`. Paid
 repair and Repairman use `?suite=castle-repair` and
 `npm.cmd run test:castle-repair-reference`. Sandbags use `?suite=castle-sandbag`

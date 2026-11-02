@@ -20,7 +20,7 @@ WORK = ROOT / ".build/web-assets"
 DEST = ROOT / "web/public/assets"
 CLIPS = {"charaPic": 677, "enemy_sheep": 910,
          "enemy_chicken": 1063, "enemy_rat": 1295, "enemy_crow": 981, "enemy_archer": 1092, "enemy_fly": 952,
-         "enemy_barbarian": 1340, "enemyRage": 2385,
+         "enemy_barbarian": 1340, "enemy_lava": 883, "enemyRage": 2385,
          "explosion": 2235, "itemPicture": 2113, "ammoBar": 2698, "radioButton": 2312,
          "grenadeBody": 2275, "grenadeShadow": 2199, "bossHealthFill": 2411, "shopCoin": 1442,
          "layhand": 2226, "itemTimer": 2370, "launcherGrenadeBody": 2238,
@@ -784,6 +784,7 @@ def main():
             "Archer retains all 210 original frames and filled collision contours; its separate enemy arrow retains stage-overlay registration",
             "Fly retains all 126 original frames, including the shadow and falling corpse about104 pixels below its root; collision and display widths use source geometric bounds",
             "Barbarian retains symbol1340 and its temporary rage effect2385; source effect frames1-12 are drawn at local y20 and removed on13",
+            "Lava retains all 223 source frames and embedded explosion artwork; attack and ordinary death use distinct timeline paths with persistent shadow exclusion",
             "Claim title uses the original Mission action card2426 frame3, pin2430 and action2431 placement; New Title dialog uses event card2336 frame3",
             "shieldHit contains original effect1459 frames140-145 with frame-script alpha metadata; source frame146 removes it",
             "gravityBody flattens original nested pulse frames 1-13 with the inherited mc color transform",

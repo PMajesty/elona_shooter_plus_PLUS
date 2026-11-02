@@ -124,7 +124,7 @@ test('v19 migration preserves expanded inventory and RNG while adding only a nul
   const sim = loot('loot', 16); setup(sim, 'offers', 'inventory');
   const legacy = asLegacyV19Save(sim.toSave()), untouched = structuredClone(legacy);
   const migrated = Simulation.fromSave(legacy);
-  assert.deepEqual(migrated.toSave(), { ...legacy, version: 22, trainerLevel: 0, looterLevel: 0, pendingLootAction: null });
+  assert.deepEqual(migrated.toSave(), { ...legacy, version: 23, trainerLevel: 0, looterLevel: 0, pendingLootAction: null });
   assert.deepEqual(legacy, untouched);
   assert.deepEqual(Simulation.fromSave({ ...legacy, pendingLootAction: { kind: 'unknown' } }).state, migrated.state);
 });

@@ -102,7 +102,7 @@ test('normal first battle, rewards and town lead to a saved Day 2 with the prepa
   }
 });
 
-test('seven connected days preserve historical absorption, boss progression, title salary and the final town boundary', () => {
+test('seven connected days preserve historical absorption, boss progression and title salary before Rest into Day8', () => {
   let simulation = firstTown();
   assert.equal(simulation.state.earnedMedals.includes(60), false);
   assert.equal(simulation.freeRepair(), 'repaired');
@@ -251,8 +251,13 @@ test('seven connected days preserve historical absorption, boss progression, tit
   assert.equal(simulation.state.title, 1);
   simulation = restore(simulation);
   const seventhTown = simulation.toSave();
-  assert.equal(simulation.startNextDay(), false);
-  assert.deepEqual(simulation.toSave(), seventhTown);
+  assert.equal(simulation.startNextDay(), true);
+  assert.equal(simulation.state.day, 8);
+  assert.deepEqual(simulation.state.previousTown, seventhTown.town);
+  assert.equal(simulation.state.activeMission.level, 7);
+  assert.equal(simulation.state.castleHp, seventhTown.castleHp);
+  assert.equal(simulation.state.gold, seventhTown.gold);
+  assert.deepEqual(restore(simulation).state, simulation.state);
 });
 
 test('weapon experience requires strictly more than 44 at Shotgun level 2 and discards excess after one increase', () => {

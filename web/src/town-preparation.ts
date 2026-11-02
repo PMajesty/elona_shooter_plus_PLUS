@@ -3,7 +3,7 @@ import { generateLowLevelMission } from './missions.ts';
 import { generateEarlyTownRecruit, type FirstTownRecruit } from './recruits.ts';
 
 export interface FirstTownMission {
-  level: 1 | 2 | 3 | 4 | 5 | 6 | 7; fixedLv: 1 | 2 | 3 | 4 | 5 | 6 | 7; strength: 0; power: 920 | 1040 | 1160 | 1280 | 1400 | 1520 | 1640; powerOrg: 920 | 1040 | 1160 | 1280 | 1400 | 1520 | 1640; reward: number;
+  level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8; fixedLv: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8; strength: 0; power: 920 | 1040 | 1160 | 1280 | 1400 | 1520 | 1640 | 1760; powerOrg: 920 | 1040 | 1160 | 1280 | 1400 | 1520 | 1640 | 1760; reward: number;
   hire: false; ragnarok: false; wave: 5; spawnRate: number; group: number[];
   waveType: 0; loot: number[]; newWave: true; time: 30; bossDay: false; bossWave: number;
   note: ''; hpFix: 1; dmgFix: 1; expFix: 1; absorbFix: number; bossKilled: 0;
@@ -46,8 +46,8 @@ export function prepareFirstTown(random: () => number, input: FirstTownPreparati
   return prepareEarlyTown(random, 1, input);
 }
 
-export function prepareEarlyTown(random: () => number, day: 1 | 2 | 3 | 4 | 5 | 6 | 7, input: FirstTownPreparationInput = {}): FirstTownPreparation {
-  if (![1, 2, 3, 4, 5, 6, 7].includes(day)) throw new RangeError('Town preparation is limited to days 1 through 7.');
+export function prepareEarlyTown(random: () => number, day: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8, input: FirstTownPreparationInput = {}): FirstTownPreparation {
+  if (![1, 2, 3, 4, 5, 6, 7, 8].includes(day)) throw new RangeError('Town preparation is limited to days 1 through 8.');
   const effects: TownPreparationEffects = { shopEngineer: input.shopEngineer ?? 0,
     missionNegotiator: input.missionNegotiator ?? 0, recruitEngineer: input.recruitEngineer ?? 0 };
   if (!validTownPreparationEffects(effects)) throw new RangeError('Invalid original town preparation effects.');

@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from extract_web_assets import placed_frame
 
 ROOT = Path(__file__).resolve().parents[1]
-SYMBOLS = {"sheep": 910, "rat": 1295, "chicken": 1063, "crow": 981, "archer": 1092, "fly": 952, "barbarian": 1340}
+SYMBOLS = {"sheep": 910, "rat": 1295, "chicken": 1063, "crow": 981, "archer": 1092, "fly": 952, "barbarian": 1340, "lava": 883}
 
 
 def matrix(tag):
@@ -109,7 +109,7 @@ def extract(xml_path=ROOT / ".build/reference/original.xml"):
 def write_display_widths(geometry, target=ROOT / "web/src/enemy-display-bounds.ts"):
     """Сохраняет display bounds лучника и мухи для исходного ограничения отбрасывания."""
     tables, sections, bound_tables = {}, [], {}
-    for kind in ("archer", "fly", "barbarian"):
+    for kind in ("archer", "fly", "barbarian", "lava"):
         enemy = geometry["enemies"][kind]
         widths, bounds = [0], [[0, 0]]
         for frame in range(1, enemy["count"] + 1):
@@ -125,7 +125,9 @@ def write_display_widths(geometry, target=ROOT / "web/src/enemy-display-bounds.t
                 # таблица Archer сохраняется без изменения непроверенных промежутков.
                 # Barbarian trace подтвердил то же округление: 16.25 вместо 16.2;
                 # исправляем только новый символ, не меняя принятые старые таблицы.
-                quantize = (lambda value: math.floor(value + 0.5)) if kind in ("fly", "barbarian") else int
+                # Отдельный trace Lava подтвердил такое округление нового символа,
+                # включая временные частицы; старые таблицы не изменяются.
+                quantize = (lambda value: math.floor(value + 0.5)) if kind in ("fly", "barbarian", "lava") else int
                 edges.extend(quantize(a * px + c * py + x) for px, py in
                              [(left, top), (right, top), (left, bottom), (right, bottom)])
             widths.append((max(edges) - min(edges)) / 20 if edges else 0)
@@ -146,7 +148,7 @@ def write_display_widths(geometry, target=ROOT / "web/src/enemy-display-bounds.t
             edges.extend(int(a * px + c * py + x) for px, py in
                          [(left, top), (right, top), (left, bottom), (right, bottom)])
         rage_bounds.append([min(edges) / 20, max(edges) / 20] if edges else [0, 0])
-    for name, bounds in [("BARBARIAN_DISPLAY_X_BOUNDS", bound_tables["barbarian"]), ("ENEMY_RAGE_DISPLAY_X_BOUNDS", rage_bounds)]:
+    for name, bounds in [("BARBARIAN_DISPLAY_X_BOUNDS", bound_tables["barbarian"]), ("LAVA_DISPLAY_X_BOUNDS", bound_tables["lava"]), ("ENEMY_RAGE_DISPLAY_X_BOUNDS", rage_bounds)]:
         sections.append(f"export const {name}: readonly (readonly [number, number])[] = " + json.dumps(bounds) + ";\n")
     sections.append("/** Исходная ширина mc с временным дочерним эффектом ярости. */\n"
                     "export function barbarianDisplayWidth(frame: number, rageEffectFrame = 0): number {\n"
@@ -162,6 +164,15 @@ def write_display_widths(geometry, target=ROOT / "web/src/enemy-display-bounds.t
                     "  const body = BARBARIAN_DISPLAY_X_BOUNDS[frame], rage = ENEMY_RAGE_DISPLAY_X_BOUNDS[rageEffectFrame];\n"
                     "  let left = Math.round(body[0] * 20), right = Math.round(body[1] * 20);\n"
                     "  if (rageEffectFrame > 0 && rage) { left = Math.min(left, Math.round(rage[0] * 20)); right = Math.max(right, Math.round(rage[1] * 20)); }\n"
+                    "  for (const effect of hitEffects) {\n"
+                    "    const bounds = ENEMY_HIT_DISPLAY_X_BOUNDS[effect.frame], x = Math.round(effect.x * 20);\n"
+                    "    left = Math.min(left, Math.round(bounds[0] * 20) + x); right = Math.max(right, Math.round(bounds[1] * 20) + x);\n"
+                    "  }\n"
+                    "  return (right - left) / 20;\n}\n")
+    sections.append("/** Lava использует исходную ширину родителя с теми же внешними частицами попадания. */\n"
+                    "export function lavaParentWidth(frame: number, hitEffects: readonly { frame: number; x: number }[] = []): number {\n"
+                    "  const body = LAVA_DISPLAY_X_BOUNDS[frame];\n"
+                    "  let left = Math.round(body[0] * 20), right = Math.round(body[1] * 20);\n"
                     "  for (const effect of hitEffects) {\n"
                     "    const bounds = ENEMY_HIT_DISPLAY_X_BOUNDS[effect.frame], x = Math.round(effect.x * 20);\n"
                     "    left = Math.min(left, Math.round(bounds[0] * 20) + x); right = Math.max(right, Math.round(bounds[1] * 20) + x);\n"

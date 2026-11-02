@@ -978,6 +978,24 @@
       "uniqueFrames": 31,
       "characterId": 1340
     },
+    "enemy_lava": {
+      "image": "sprites/enemy_lava.png",
+      "json": "sprites/enemy_lava.json",
+      "originX": 35.45,
+      "originY": 38.35,
+      "frameWidth": 73,
+      "frameHeight": 62,
+      "labels": {
+        "init": 1,
+        "alive": 4,
+        "attack": 23,
+        "dead": 98,
+        "null": 223
+      },
+      "count": 223,
+      "uniqueFrames": 43,
+      "characterId": 883
+    },
     "enemyRage": {
       "image": "sprites/enemyRage.png",
       "json": "sprites/enemyRage.json",

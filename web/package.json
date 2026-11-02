@@ -59,7 +59,13 @@
     "test:castle-looter-reference": "node --experimental-strip-types scripts/compare-castle-looter-reference.ts",
     "test:looter-party-soak": "node --experimental-strip-types scripts/party-soak.ts 4 looter",
     "test:castle-trainer-reference": "node --experimental-strip-types scripts/compare-castle-trainer-reference.ts",
-    "test:trainer-party-soak": "node --experimental-strip-types scripts/party-soak.ts 4 trainer"
+    "test:trainer-party-soak": "node --experimental-strip-types scripts/party-soak.ts 4 trainer",
+    "test:eighth-day-wave-reference": "node --experimental-strip-types scripts/compare-eighth-day-wave-reference.ts",
+    "test:eighth-day-spawn-reference": "node --experimental-strip-types scripts/compare-eighth-day-spawn-reference.ts",
+    "test:eighth-town-reference": "node --experimental-strip-types scripts/compare-eighth-town-reference.ts",
+    "test:lava-reference": "node --experimental-strip-types scripts/compare-lava-reference.ts",
+    "test:day-eight-party-soak": "node --experimental-strip-types scripts/party-soak.ts 4 day-eight",
+    "test:day-eight-lava-exposure": "node --experimental-strip-types scripts/day-eight-lava-exposure.ts"
   },
   "dependencies": {
     "phaser": "4.2.1"

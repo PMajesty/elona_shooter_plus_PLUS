@@ -14,6 +14,11 @@ export interface CollisionGeometry {
 
 /** Флаг задают только скрипты определённых кадров; возврат sheep 32→5 его не восстанавливает. */
 export function shadowHitAtFrame(kind: EnemyKind, frame: number, previous?: boolean): boolean {
+  if (kind === 'lava') {
+    if (frame === 1) return true;
+    if (frame === 23) return false;
+    return previous ?? frame < 23;
+  }
   if (kind === 'barbarian' && frame === 1) return true;
   if (kind === 'sheep') {
     if (frame === 1 || frame === 107) return true;
@@ -61,13 +66,23 @@ function fillHit(edges: number[][], x: number, y: number): boolean {
   return crossings % 2 !== 0;
 }
 
-function placedShapeHit(shape: OriginalShape, placement: OriginalPlacement, x: number, y: number): boolean {
+/** Матрица Ruffle округляет обе стадии отдельно: ближайший twip, половины к чётному. */
+function evenRound(value: number): number {
+  const low = Math.floor(value), fraction = value - low;
+  return fraction < 0.5 ? low : fraction > 0.5 ? low + 1 : low % 2 === 0 ? low : low + 1;
+}
+function placedShapeHit(shape: OriginalShape, placement: OriginalPlacement, x: number, y: number, ox = 0, oy = 0): boolean {
   const [a, b, c, d, tx, ty] = placement.matrix;
-  const determinant = a * d - b * c;
+  // Обратная матрица строится в глобальных координатах с исходной точностью f32.
+  const f = Math.fround;
+  const determinant = f(f(a * d) - f(b * c));
   if (!determinant) return false;
-  const dx = x - tx, dy = y - ty;
-  const localX = Math.trunc((d * dx - c * dy) / determinant);
-  const localY = Math.trunc((a * dy - b * dx) / determinant);
+  const ia = f(d / determinant), ib = f(b / -determinant), ic = f(c / -determinant), id = f(a / determinant);
+  const gtx = f(tx + ox), gty = f(ty + oy);
+  const itx = evenRound(f(f(f(d * gtx) - f(c * gty)) / -determinant));
+  const ity = evenRound(f(f(f(b * gtx) - f(a * gty)) / determinant));
+  const localX = evenRound(f(f(ia * f(x)) + f(ic * f(y)))) + itx;
+  const localY = evenRound(f(f(ib * f(x)) + f(id * f(y)))) + ity;
   const [left, top, right, bottom] = shape.bounds;
   return localX >= left && localX <= right && localY >= top && localY <= bottom && shape.fills.some(edges => fillHit(edges, localX, localY));
 }
@@ -78,20 +93,21 @@ export function ordinaryEnemyHit(
 ): boolean {
   const clip = geometry.enemies[enemy.kind];
   const placements = clip.frames[String(enemy.frame)] ?? clip.frames['1'];
-  // Дисплей Flash хранит координаты в двадцатых долях пикселя с усечением к нулю.
-  const localX = Math.trunc(x * 20) - Math.trunc(enemy.x * 20);
-  const localY = Math.trunc(y * 20) - Math.trunc(enemy.y * 20);
+  // Сам объект хранит twip-координаты; обратную матрицу нельзя заменить
+  // предварительным вычитанием его позиции: порядок округления меняет края. Не учитываем здесь корневое смещение экрана.
+  const localX = Math.trunc(x * 20), ox = Math.trunc(enemy.x * 20);
+  const localY = Math.trunc(y * 20), oy = Math.trunc(enemy.y * 20);
   const excludeShadow = !enemy.shadowHit;
   let bodyHit = false;
   for (const placement of placements) {
-    if (!placedShapeHit(geometry.shapes[placement.shape], placement, localX, localY)) continue;
+    if (!placedShapeHit(geometry.shapes[placement.shape], placement, localX, localY, ox, oy)) continue;
     if (excludeShadow && placement.shadow) return false;
     bodyHit = true;
   }
   // Исходная вспышка ярости — дочерний объект mc и участвует в его hitTestPoint.
   if (enemy.kind === 'barbarian' && enemy.rageEffectFrame && enemy.rageEffectFrame < 13) {
     for (const placement of geometry.effects?.enemyRage.frames[String(enemy.rageEffectFrame)] ?? []) {
-      if (placedShapeHit(geometry.shapes[placement.shape], placement, localX, localY - 400)) bodyHit = true;
+      if (placedShapeHit(geometry.shapes[placement.shape], placement, localX, localY, ox, oy + 400)) bodyHit = true;
     }
   }
   return bodyHit;

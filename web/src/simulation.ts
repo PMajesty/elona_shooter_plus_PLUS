@@ -11,10 +11,10 @@ import { advanceProtection, explosionContains, explosionStats, planConsumableUse
 import { advanceProjectile, createProjectile, type ExplosionKind, type ProjectileState } from './projectiles.ts';
 import { createUpgradePreview, modMountFailure, upgradeCost, type TownEquipmentAction, type TownEquipmentOutcome, type LootItemAddress, type LootEquipmentAction } from './equipment.ts';
 import { advanceEnemyArrow, createEnemyArrow, type EnemyArrowState } from './enemy-arrows.ts';
-import { ARCHER_DISPLAY_WIDTHS, FLY_DISPLAY_WIDTHS, barbarianParentWidth } from './enemy-display-bounds.ts';
+import { ARCHER_DISPLAY_WIDTHS, FLY_DISPLAY_WIDTHS, barbarianParentWidth, lavaParentWidth } from './enemy-display-bounds.ts';
 import { createPartyState, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
 import { partySkills, gainCompanionTrait, levelUpCompanion, companionWage, type PartySkillState } from './party-progression.ts';
-import { createPartyAIShared, createPartyAIState, refreshPartyAI, partyActorPosition, registerPartyTarget, clearPartyTargetCache, clearPartyAITarget, stepPartyAIFrame, stepPartyAITimer, type PartyAIShared, type PartyAITarget, type PartyAIContext, type PartyAICallbacks } from './party-ai.ts';
+import { createPartyAIShared, createPartyAIState, refreshPartyAI, partyActorPosition, registerPartyTarget, alertParty, clearPartyTargetCache, clearPartyAITarget, stepPartyAIFrame, stepPartyAITimer, type PartyAIShared, type PartyAITarget, type PartyAIContext, type PartyAICallbacks } from './party-ai.ts';
 import { repairEarlyV15AirTargets, validatePartySave } from './party-save.ts';
 import { castleUpgradeCost, castleUpkeep, castleRepairAmount, castleDamageMultiplier, castleTrainerMultiplier, type CastleUpgradeKind, type CastleUpgradeOutcome } from './castle-upgrades.ts';
 
@@ -26,6 +26,7 @@ export interface EnemyState {
   bossAction: number; bossCount: number; bossIdle: number; bossFireNum: number; bossWeapon: number; bossDamage: number; appearance: number;
   rangedCounter?: number;
   flyCounter?: number;
+  alerted?: boolean;
   rampage?: 0 | 100;
   rageEffectFrame?: number;
   hitEffects?: { frame: number; x: number; y: number }[];
@@ -36,7 +37,7 @@ export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCoun
 export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'>;
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
 export interface SimulationState {
-  version: 22; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1 | 2 | 3 | 4 | 5 | 6 | 7; tick: number; timerRemainder: number; rng: number; nextUid: number;
+  version: 23; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8; tick: number; timerRemainder: number; rng: number; nextUid: number;
   activeMission: ActiveMission; resultBefore: number; earnedMedals: number[]; perfectDays: number; bossesSpawned: number;
   hero: KnownHeroInitialization; title: 0 | 1;
   castleHp: number; castleMaxHp: number; wallLevel: number; wallFixCount: number; repairmanLevel: number; sandbagLevel: number; looterLevel: number; trainerLevel: number; gold: number; totalMoney: number; kills: number; criticalKills: number;
@@ -59,7 +60,7 @@ export interface SimulationState {
   pendingPartyAction: PartyPendingAction | null;
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
-export interface SimulationEvent { actorSlot?: number; type: 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
+export interface SimulationEvent { actorSlot?: number; type: 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
 export interface SimulationOptions { hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean }
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
@@ -111,7 +112,7 @@ export class Simulation {
     this.pendingOpeningMission = generateLowLevelMission(0, 1, random);
     const generated = generateSheriffHero(random);
     this.state = {
-      version: 22, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
+      version: 23, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
       activeMission: this.missionParameters(this.pendingOpeningMission), resultBefore: STARTING_CLASS.money, earnedMedals: [40], perfectDays: 0, bossesSpawned: 0,
       castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, wallLevel: 1, wallFixCount: 0, repairmanLevel: 0, sandbagLevel: 0, looterLevel: 0, trainerLevel: 0, gold: STARTING_CLASS.money, totalMoney: 0, kills: 0, criticalKills: 0,
       aimX: 300, aimY: 240, fireHeld: false, pendingShot: false,
@@ -340,9 +341,9 @@ export class Simulation {
 
   startNextDay(): boolean {
     const town = this.state.town;
-    if (this.state.phase !== 'town' || (this.state.pendingTownAction || this.state.pendingPartyAction) || this.state.day >= 7 || town?.preparation !== 'ready' || town.mission.level !== this.state.day) return false;
+    if (this.state.phase !== 'town' || (this.state.pendingTownAction || this.state.pendingPartyAction) || this.state.day >= 8 || town?.preparation !== 'ready' || town.mission.level !== this.state.day) return false;
     const state = this.state;
-    state.day = (state.day + 1) as 2 | 3 | 4 | 5 | 6 | 7;
+    state.day = (state.day + 1) as 2 | 3 | 4 | 5 | 6 | 7 | 8;
     state.previousTown = town;
     state.town = null;
     state.activeMission = this.missionParameters(town.mission);
@@ -651,11 +652,13 @@ export class Simulation {
         const wave = state.waves[state.waveIndex];
         if (!wave.enemies.length) state.newWave = true;
         else {
-          const kind = wave.enemies.pop()!;
-          this.spawnEnemy(kind);
-          state.spawnTimer = wave.delays.pop()!;
-          // На миссиях 0–5 проверка уровня всегда прерывает цикл после одного врага.
-          this.random();
+          // Исходник сравнивает индекс с уже убывающей длиной pop, а не исходным размером.
+          for (let index = 0; index < wave.enemies.length; index++) {
+            const kind = wave.enemies.pop()!;
+            this.spawnEnemy(kind);
+            state.spawnTimer = wave.delays.pop()! + index * 4;
+            if (ENEMIES[kind].level > this.random() * state.activeMission.level - 6 || this.random() > 0.8) break;
+          }
         }
       }
     }
@@ -674,7 +677,7 @@ export class Simulation {
     const yRoll = this.random();
     const y = int(kind === 'fly' ? yRoll * 70 / 1.5 + 80 : yRoll * (kind === 'boss' ? 105 : definition.airborne ? 70 : WORLD.groundWidth) + (kind === 'boss' ? 195 : definition.airborne ? 40 : WORLD.groundLine));
     const hp = kind === 'boss' ? 150 + this.state.activeMission.level * 25 : definition.hp;
-    const ranged = kind === 'archer' ? { rangedCounter: 120 } : kind === 'fly' ? { flyCounter: 0 } : kind === 'barbarian' ? { rampage: 0 as const, rageEffectFrame: 0, hitEffects: [] } : {};
+    const ranged = kind === 'archer' ? { rangedCounter: 120 } : kind === 'fly' ? { flyCounter: 0 } : kind === 'barbarian' ? { rampage: 0 as const, rageEffectFrame: 0, hitEffects: [] } : kind === 'lava' ? { alerted: false, hitEffects: [] } : {};
     const appearance = kind === 'boss' ? 51 + this.state.bossesSpawned++ % 15 : 0;
     const uid = this.state.nextUid++;
     this.state.enemies.push({ uid, kind, type: definition.airborne ? 1 : 0, tag: 0, onMark: false, x: -20, y, hp, maxHp: hp, speed, speedOrg: speed, attack: definition.attack, gold, exp: 1 + int(definition.power * 0.4), knockBack: 0, disarmed: 0, attacking: false, attacked: false, frame: kind === 'rat' ? 14 : 1, shadowHit: shadowHitAtFrame(kind, kind === 'rat' ? 14 : 1), deathTicks: 0, drop: 0, removed: false, bossAction: kind === 'boss' ? 3 : 0, bossCount, bossIdle: 0, bossFireNum: 0, bossWeapon, bossDamage: 0, appearance, ...(kind === 'boss' ? { bossFacing: -1 as const } : {}), ...ranged });
@@ -698,7 +701,7 @@ export class Simulation {
       Object.assign(enemy, { speed: effects.speed, speedOrg: effects.speedOrg, attack: effects.attack, disarmed: effects.disarmed, knockBack: effects.knockBack });
       this.state.castleHp = effects.castleHp;
     }
-    if (enemy.kind === 'barbarian') {
+    if (enemy.kind === 'barbarian' || enemy.kind === 'lava') {
       // Кровь и критический эффект — дети enemy, поэтому меняют левый предел отбрасывания.
       const local = { x: twipCoordinate(x - enemy.x), y: twipCoordinate(y - enemy.y) };
       enemy.hitEffects!.push({ frame: 50, ...local });
@@ -781,7 +784,7 @@ export class Simulation {
     const groupSize = this.state.waves[Math.max(0, this.state.waveIndex)].initialCount;
     if (int(this.random() * groupSize * 5) === 0 || int(this.random() * 400 * groupSize) < this.state.partySkills.effects[109]) { enemy.drop = 2; this.state.loot.push(definition.loot); }
     if (enemy.kind === 'boss') { enemy.drop = 1; this.state.bossKilled++; }
-    enemy.frame = enemy.kind === 'sheep' ? 107 : enemy.kind === 'rat' ? 93 : enemy.kind === 'chicken' ? 208 : enemy.kind === 'crow' ? 58 : enemy.kind === 'archer' ? 94 : enemy.kind === 'fly' ? 12 : enemy.kind === 'barbarian' ? 84 : enemy.kind === 'boss' ? 281 : 1;
+    enemy.frame = enemy.kind === 'sheep' ? 107 : enemy.kind === 'rat' ? 93 : enemy.kind === 'chicken' ? 208 : enemy.kind === 'crow' ? 58 : enemy.kind === 'archer' ? 94 : enemy.kind === 'fly' ? 12 : enemy.kind === 'barbarian' ? 84 : enemy.kind === 'lava' ? 98 : enemy.kind === 'boss' ? 281 : 1;
     enemy.shadowHit = shadowHitAtFrame(enemy.kind, enemy.frame, enemy.shadowHit);
     this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'kill', x: enemy.x, y: enemy.y, critical, enemyUid: enemy.uid, goodShotIndex });
   }
@@ -839,7 +842,7 @@ export class Simulation {
     if (enemy.kind === 'barbarian' && enemy.rageEffectFrame) {
       enemy.rageEffectFrame = enemy.rageEffectFrame === 12 ? 0 : enemy.rageEffectFrame + 1;
     }
-    if (enemy.kind === 'barbarian') {
+    if (enemy.kind === 'barbarian' || enemy.kind === 'lava') {
       enemy.hitEffects = enemy.hitEffects!.filter(effect => effect.frame !== 62 && effect.frame !== 75);
       for (const effect of enemy.hitEffects) effect.frame++;
     }
@@ -849,18 +852,25 @@ export class Simulation {
     if (enemy.removed) return;
     if (enemy.hp <= 0) {
       enemy.deathTicks++;
-      const deathEnds: Record<EnemyKind, number> = { sheep: 129, rat: 128, chicken: 239, crow: 87, archer: 125, fly: 41, barbarian: 119, boss: 403 };
+      const deathEnds: Record<EnemyKind, number> = { sheep: 129, rat: 128, chicken: 239, crow: 87, archer: 125, fly: 41, barbarian: 119, lava: 128, boss: 403 };
       enemy.frame = Math.min(enemy.frame + 1, deathEnds[enemy.kind]);
+      if (enemy.kind === 'lava' && enemy.frame === 51) {
+        enemy.removed = true; enemy.hp = -1; enemy.frame = 223; enemy.deathTicks = 201;
+        return;
+      }
       enemy.shadowHit = shadowHitAtFrame(enemy.kind, enemy.frame, enemy.shadowHit);
       if (enemy.deathTicks === 50 && enemy.drop === 1) { this.state.gold += enemy.gold; this.state.totalMoney += enemy.gold; this.events.push({ type: 'gold', amount: enemy.gold, x: enemy.x, y: enemy.y }); }
       if (enemy.deathTicks >= 200) {
         enemy.removed = true;
         if (enemy.kind === 'fly') { enemy.hp = -1; enemy.frame = 126; enemy.deathTicks = 201; }
         if (enemy.kind === 'barbarian') { enemy.hp = -1; enemy.frame = 252; enemy.deathTicks = 201; }
+        if (enemy.kind === 'lava') { enemy.hp = -1; enemy.frame = 223; enemy.deathTicks = 201; }
       }
       return;
     }
     registerPartyTarget(enemy as PartyAITarget, this.state.partyAI);
+    // После начала прыжка Lava отменяет отбрасывание, но продолжает обычное движение AI.
+    if (enemy.kind === 'lava' && enemy.attacking && enemy.knockBack > 0) enemy.knockBack = 0;
     if (enemy.knockBack > 0) {
       if (enemy.attacking) {
         enemy.attacking = false; enemy.speed = enemy.speedOrg; enemy.frame = enemy.kind === 'rat' ? 14 : enemy.kind === 'barbarian' ? 3 : 5;
@@ -868,13 +878,26 @@ export class Simulation {
       }
       enemy.knockBack--;
       enemy.x -= enemy.knockBack ** 2 / 40 + ENEMIES[enemy.kind].knockResistance / 2 + 0.2;
-      if (enemy.kind === 'archer' || enemy.kind === 'fly' || enemy.kind === 'barbarian') enemy.x = twipCoordinate(enemy.x);
-      const width = enemy.kind === 'archer' ? ARCHER_DISPLAY_WIDTHS[enemy.frame] : enemy.kind === 'fly' ? FLY_DISPLAY_WIDTHS[enemy.frame] : enemy.kind === 'barbarian' ? barbarianParentWidth(enemy.frame, enemy.rageEffectFrame, enemy.hitEffects) : 60;
+      if (enemy.kind === 'archer' || enemy.kind === 'fly' || enemy.kind === 'barbarian' || enemy.kind === 'lava') enemy.x = twipCoordinate(enemy.x);
+      const width = enemy.kind === 'archer' ? ARCHER_DISPLAY_WIDTHS[enemy.frame] : enemy.kind === 'fly' ? FLY_DISPLAY_WIDTHS[enemy.frame] : enemy.kind === 'barbarian' ? barbarianParentWidth(enemy.frame, enemy.rageEffectFrame, enemy.hitEffects) : enemy.kind === 'lava' ? lavaParentWidth(enemy.frame, enemy.hitEffects) : 60;
       enemy.x = Math.max(-width, enemy.x);
       this.advanceEnemyAnimation(enemy);
       return;
     }
     if (enemy.kind === 'boss') { this.tickBoss(enemy); this.advanceBossAnimation(enemy); return; }
+    if (enemy.kind === 'lava') {
+      enemy.x = twipCoordinate(enemy.x + enemy.speed);
+      if (enemy.x >= WORLD.defenseLine - 300 && !enemy.alerted) {
+        alertParty(enemy as PartyAITarget, this.state.party.slots.slice(0, 4), this.partyAIContext());
+        enemy.alerted = true;
+      }
+      if (enemy.x >= WORLD.defenseLine && !enemy.attacking) {
+        enemy.attacking = true; enemy.frame = 23;
+        enemy.shadowHit = false;
+      }
+      this.advanceEnemyAnimation(enemy);
+      return;
+    }
     if (enemy.kind === 'barbarian') {
       if (!enemy.attacking) {
         enemy.x = twipCoordinate(enemy.x + enemy.speed);
@@ -950,7 +973,17 @@ export class Simulation {
 
   private advanceEnemyAnimation(enemy: EnemyState): void {
     enemy.frame++;
-    if (enemy.kind === 'sheep') {
+    if (enemy.kind === 'lava') {
+      if (enemy.frame === 20) enemy.frame = 4;
+      if (enemy.frame === 23 || enemy.frame === 86) { enemy.frame = 23; enemy.shadowHit = false; }
+      if (enemy.frame === 35) {
+        // У исходного взрыва нет атакующего аргумента: Guardian не отвечает ему ударом.
+        this.damageCastle(enemy.attack);
+        this.random(); this.random();
+        this.events.push({ type: 'lava-explode', x: enemy.x, y: enemy.y, enemyUid: enemy.uid });
+        enemy.hp = -1;
+      }
+    } else if (enemy.kind === 'sheep') {
       if (enemy.frame === 29) enemy.frame = 5;
       if (enemy.frame === 44) this.damageCastle(enemy.attack, enemy);
       if (enemy.frame === 95) enemy.frame = 32;
@@ -1358,7 +1391,7 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
-    if (!record(value) || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22].includes(Number(value.version)) || typeof value.version !== 'number' || (![1, 2, 3, 4, 5, 6, 7].includes(Number(value.day)) || typeof value.day !== 'number' || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
+    if (!record(value) || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].includes(Number(value.version)) || typeof value.version !== 'number' || (![1, 2, 3, 4, 5, 6, 7, 8].includes(Number(value.day)) || typeof value.day !== 'number' || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7) || (value.version < 23 && value.day === 8)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || ![2, ...(Number(value.day) >= 2 ? [3] : [])].includes(Number(value.bossWave)) || (value.waveIndex === 5 && value.newWave !== true)) throw new Error('Invalid counters.');
@@ -1386,11 +1419,12 @@ export class Simulation {
       if (!Array.isArray(value.itemCooldowns) || value.itemCooldowns.length !== 5 || value.itemCooldowns.some(time => !Number.isInteger(time) || time < 0 || time > 2001)) throw new Error('Invalid item cooldowns.');
       if (!record(value.protection) || !Number.isInteger(value.protection.counter) || Number(value.protection.counter) < -99 || Number(value.protection.counter) > 250 || !finite(value.protection.blueMultiplierAdd) || value.protection.blueMultiplierAdd < -0.2 || value.protection.blueMultiplierAdd > 1.4) throw new Error('Invalid protection effect.');
       const mission = value.activeMission, level = Number(value.day) - 1;
-      if (!record(mission) || Object.entries({ level, fixedLv: level, strength: 0, powerOrg: 800 + level * 120, ...(value.version < 15 || value.day === 1 ? { reward: 600 + level * 20 } : {}), spawnRate: 15 - level / 5, hpFix: 1, dmgFix: 1, expFix: 1, bossDay: false }).some(([key, expected]) => mission[key] !== expected) || !Number.isInteger(mission.reward) || (![0, 0.01, ...(Number(value.day) >= 5 ? [0.02] : [])].includes(Number(mission.absorbFix)) || typeof mission.absorbFix !== 'number') || (value.day === 1 && mission.absorbFix !== 0)) throw new Error('Invalid active mission.');
+      if (!record(mission) || Object.entries({ level, fixedLv: level, strength: 0, powerOrg: 800 + level * 120, ...(value.version < 15 || value.day === 1 ? { reward: 600 + level * 20 } : {}), spawnRate: 15 - level / 5, hpFix: 1, dmgFix: 1, expFix: 1, bossDay: false }).some(([key, expected]) => mission[key] !== expected) || !Number.isInteger(mission.reward) || (![0, 0.01, ...(Number(value.day) >= 5 ? [0.02] : []), ...(Number(value.day) >= 8 ? [0.03] : [])].includes(Number(mission.absorbFix)) || typeof mission.absorbFix !== 'number') || (value.day === 1 && mission.absorbFix !== 0)) throw new Error('Invalid active mission.');
       if (!finite(value.resultBefore) || !Number.isInteger(value.perfectDays) || Number(value.perfectDays) < 0 || Number(value.perfectDays) > Number(value.day) || !Number.isInteger(value.bossesSpawned) || Number(value.bossesSpawned) < 0 || Number(value.bossesSpawned) > Number(value.day)) throw new Error('Invalid campaign counters.');
-      if (!Array.isArray(value.earnedMedals) || new Set(value.earnedMedals).size !== value.earnedMedals.length || !value.earnedMedals.includes(40) || value.earnedMedals.some(id => ![40, 60, 61, 62, 67, 70, 71, 72, 92, 93].includes(id)) || (value.earnedMedals.includes(62) && (value.version < 14 || value.day !== 7 || value.perfectDays !== 7 || !['victory', 'town'].includes(String(value.phase))))) throw new Error('Invalid earned medals.');
+      if (!Array.isArray(value.earnedMedals) || new Set(value.earnedMedals).size !== value.earnedMedals.length || !value.earnedMedals.includes(40) || value.earnedMedals.some(id => ![40, 60, 61, 62, 67, 70, 71, 72, 92, 93].includes(id)) || (value.earnedMedals.includes(62) && (value.version < 14 || Number(value.day) < 7 || Number(value.perfectDays) < 7 || (value.day === 7 && !['victory', 'town'].includes(String(value.phase)))))) throw new Error('Invalid earned medals.');
     }
     if (!Array.isArray(value.waves) || value.waves.length !== 5 || value.waves.some(wave => !record(wave) || !Array.isArray(wave.enemies) || wave.enemies.length > 200 || wave.enemies.some(kind => typeof kind !== 'string' || !Object.hasOwn(ENEMIES, kind)) || !Array.isArray(wave.delays) || wave.delays.length !== wave.enemies.length || wave.delays.some(delay => !finite(delay) || delay < 0 || delay > 1000) || !finite(wave.initialCount) || wave.initialCount < wave.enemies.length)) throw new Error('Invalid wave state.');
+    if ((Number(value.version) < 23 || Number(value.day) < 8) && (value.waves as unknown as WaveState[]).some(wave => wave.enemies.includes('lava'))) throw new Error('Lava is unavailable in this saved mission.');
     const enemyNumbers = ['uid', 'x', 'y', 'hp', 'maxHp', 'speed', 'speedOrg', 'attack', 'gold', 'exp', 'knockBack', 'frame', 'deathTicks', 'drop', 'bossAction', 'bossCount', 'bossIdle', 'bossFireNum', 'bossWeapon'];
     if (!Array.isArray(value.enemies) || value.enemies.length > 200 || value.enemies.some(enemy => !record(enemy) || typeof enemy.kind !== 'string' || !Object.hasOwn(ENEMIES, enemy.kind) || enemyNumbers.some(key => !finite(enemy[key])) || Number(enemy.maxHp) <= 0 || Number(enemy.hp) > Number(enemy.maxHp) || ['attacking', 'attacked', 'removed'].some(key => typeof enemy[key] !== 'boolean') || (enemy.shadowHit !== undefined && typeof enemy.shadowHit !== 'boolean'))) throw new Error('Invalid enemies.');
     if (!legacyEquipment && value.enemies.some(enemy => typeof (enemy as Record<string, unknown>).shadowHit !== 'boolean')) throw new Error('Missing enemy shadow history.');
@@ -1429,7 +1463,7 @@ export class Simulation {
     const projectileKinds = ['hand-grenade', 'grenade', 'rocket', 'bolt', 'arrow', 'gravity', 'flame'];
     for (const actor of restoredProjectiles) {
       if (!record(actor) || !projectileKinds.includes(String(actor.kind)) || projectileNumbers.some(key => !finite(actor[key])) || ['shadowVisible', 'removed'].some(key => typeof actor[key] !== 'boolean') || actor.removed) throw new Error('Invalid projectile state.');
-      const bossGrenade = actor.damage === -1 && actor.kind === 'grenade' && actor.weaponSlot === null && value.version >= 14 && value.day === 7;
+      const bossGrenade = actor.damage === -1 && actor.kind === 'grenade' && actor.weaponSlot === null && value.version >= 14 && Number(value.day) >= 7;
       if (['uid', 'damage', 'penetrations', 'frame', 'pulseFrame'].some(key => !Number.isInteger(actor[key]) || Number(actor[key]) < (key === 'uid' || key === 'pulseFrame' ? 1 : key === 'damage' && bossGrenade ? -1 : 0)) || !Number.isInteger(actor.count) || actor.pulseFrame > actor.frame + 1 || actor.damage > 1e9) throw new Error('Invalid projectile counters.');
       if (actor.verticalProgress === null ? Math.abs(actor.targetX - actor.startX) < 0.001 : !finite(actor.verticalProgress) || actor.verticalProgress < 0 || actor.targetX !== actor.startX || actor.x !== actor.startX) throw new Error('Invalid vertical projectile path.');
       if (actor.speed === 0 || actor.direction !== (actor.targetX > actor.startX ? -1 : 1) || actor.scale <= 0 || actor.scale > 10 || actor.alpha < -0.125 || actor.alpha > 1 || actor.shadowAlpha < -0.1 || actor.shadowAlpha > 1 || actor.acceleration < 0) throw new Error('Invalid projectile geometry.');
@@ -1511,7 +1545,8 @@ export class Simulation {
       if (enemy.kind === 'archer' && (Number(value.version) < 10 || !Number.isInteger(enemy.rangedCounter) || enemy.rangedCounter! < 0 || enemy.rangedCounter! > 120 || !Number.isInteger(enemy.frame) || enemy.frame < 1 || enemy.frame > 125)) throw new Error('Invalid archer state.');
       if (enemy.kind === 'fly' && (Number(value.version) < 12 || !Number.isInteger(enemy.flyCounter) || enemy.flyCounter! < 0 || enemy.flyCounter! > 1e9 || !Number.isInteger(enemy.frame) || enemy.frame < 1 || (enemy.frame > 41 && enemy.frame !== 126))) throw new Error('Invalid Fly state.');
       if (enemy.kind === 'barbarian' && (Number(value.version) < 13 || ![0, 100].includes(enemy.rampage!) || !Number.isInteger(enemy.rageEffectFrame) || enemy.rageEffectFrame! < 0 || enemy.rageEffectFrame! > 12 || (enemy.rampage === 0 && enemy.rageEffectFrame !== 0) || !Number.isInteger(enemy.frame) || enemy.frame < 1 || (enemy.frame > 119 && enemy.frame !== 252))) throw new Error('Invalid Barbarian state.');
-      if (enemy.kind === 'barbarian' && (!Array.isArray(enemy.hitEffects) || enemy.hitEffects.length > 2000 || enemy.hitEffects.some(effect => !record(effect) || !Number.isInteger(effect.frame) || !((effect.frame >= 50 && effect.frame <= 62) || (effect.frame >= 70 && effect.frame <= 75)) || !finite(effect.x) || !finite(effect.y)))) throw new Error('Invalid Barbarian hit effects.');
+      if ((enemy.kind === 'barbarian' || enemy.kind === 'lava') && (!Array.isArray(enemy.hitEffects) || enemy.hitEffects.length > 2000 || enemy.hitEffects.some(effect => !record(effect) || !Number.isInteger(effect.frame) || !((effect.frame >= 50 && effect.frame <= 62) || (effect.frame >= 70 && effect.frame <= 75)) || !finite(effect.x) || !finite(effect.y)))) throw new Error('Invalid enemy hit effects.');
+      if (enemy.kind === 'lava' && (Number(value.version) < 23 || Number(value.day) < 8 || typeof enemy.alerted !== 'boolean' || !Number.isInteger(enemy.frame) || enemy.frame < 1 || (enemy.frame > 128 && enemy.frame !== 223))) throw new Error('Invalid Lava state.');
       if (enemy.kind === 'boss') {
         if (value.version < 11) {
           enemy.bossFacing = -1;
@@ -1548,7 +1583,7 @@ export class Simulation {
         reconstructionRng >>>= 0;
         return reconstructionRng / 4294967296;
       };
-      simulation.state.version = 22;
+      simulation.state.version = 23;
       simulation.state.inventory = createStartingInventory(reconstructionRandom);
       simulation.state.lootOffers = Array(8).fill(null);
       simulation.state.postbattle = 'none';
@@ -1586,10 +1621,10 @@ export class Simulation {
       if (!Number.isInteger(state.legacyReconstructionSeed) || state.legacyReconstructionSeed! < 1 || state.legacyReconstructionSeed! > 0xffffffff) throw new Error('Invalid legacy inventory provenance.');
     } else if (state.inventoryProvenance !== 'original-generation' || state.legacyReconstructionSeed !== undefined) throw new Error('Invalid inventory provenance.');
     if (state.day > 1) {
-      if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > (value.version < 15 ? 4 : 14) || !validTownPreparation(state.previousTown, validItem, (state.day - 1) as 1 | 2 | 3 | 4 | 5 | 6, state.activeMission.absorbFix) || state.activeMission.reward !== state.previousTown.mission.reward) throw new Error('Invalid previous town.');
+      if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > (value.version < 15 ? 4 : 14) || !validTownPreparation(state.previousTown, validItem, (state.day - 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7, state.activeMission.absorbFix) || state.activeMission.reward !== state.previousTown.mission.reward) throw new Error('Invalid previous town.');
     } else if (state.previousTown !== null) throw new Error('Unexpected previous town.');
     if (Number(value.version) < 3) {
-      state.version = 22;
+      state.version = 23;
       if (state.phase === 'victory' && state.postbattle === 'result') {
         // Старый результат пропускал награды босса и навыки; новые награды расходуют основной поток.
         state.postbattle = 'loot';
@@ -1658,7 +1693,7 @@ export class Simulation {
         if (!isOccupiedItem(mod) || mod.type !== ITEM_TYPE.mod || !isOccupiedItem(gun) || gun.type !== ITEM_TYPE.gun) throw new Error('Invalid pending mod items.');
       } else throw new Error('Unknown pending town equipment action.');
     }
-    state.version = 22;
+    state.version = 23;
     // Уже оплаченный результат v4 не пересчитывается; недостающая первая лавка создаётся один раз.
     if (state.phase === 'town' && state.town?.preparation === 'pending') simulation.prepareTown();
     return simulation;

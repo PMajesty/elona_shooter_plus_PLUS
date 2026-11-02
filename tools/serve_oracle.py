@@ -9,6 +9,10 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / ".build/oracle/browser-report.json"
 REPORTS = {
+    "/api/eighth-day-waves-report": ROOT / ".build/oracle/eighth-day-waves-browser-report.json",
+    "/api/eighth-day-spawn-report": ROOT / ".build/oracle/eighth-day-spawn-browser-report.json",
+    "/api/eighth-town-report": ROOT / ".build/oracle/eighth-town-browser-report.json",
+    "/api/lava-report": ROOT / ".build/oracle/lava-browser-report.json",
     "/api/castle-trainer-report": ROOT / ".build/oracle/castle-trainer-browser-report.json",
     "/api/castle-looter-report": ROOT / ".build/oracle/castle-looter-browser-report.json",
     "/api/loot-mod-report": ROOT / ".build/oracle/loot-mod-browser-report.json",
@@ -55,6 +59,14 @@ REPORTS = {
     "/api/town-preparation-report": ROOT / ".build/oracle/town-preparation-browser-report.json",
 }
 ROUTES = {
+    "/eighth-day-waves-reference.swf": ROOT / ".build/oracle/eighth-day-waves-reference.swf",
+    "/eighth-day-waves-build-report.json": ROOT / ".build/oracle/eighth-day-waves-build-report.json",
+    "/eighth-day-spawn-reference.swf": ROOT / ".build/oracle/eighth-day-spawn-reference.swf",
+    "/eighth-day-spawn-build-report.json": ROOT / ".build/oracle/eighth-day-spawn-build-report.json",
+    "/eighth-town-reference.swf": ROOT / ".build/oracle/eighth-town-reference.swf",
+    "/eighth-town-build-report.json": ROOT / ".build/oracle/eighth-town-build-report.json",
+    "/lava-reference.swf": ROOT / ".build/oracle/lava-reference.swf",
+    "/lava-build-report.json": ROOT / ".build/oracle/lava-build-report.json",
     "/castle-trainer-reference.swf": ROOT / ".build/oracle/castle-trainer-reference.swf",
     "/castle-trainer-build-report.json": ROOT / ".build/oracle/castle-trainer-build-report.json",
     "/castle-looter-reference.swf": ROOT / ".build/oracle/castle-looter-reference.swf",
