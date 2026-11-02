@@ -3,19 +3,19 @@
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
 Phaser 4. The current implementation covers **seven connected Sheriff days**:
 choose one of 22 appearances, fight, collect ordinary and boss loot, choose earned
-skills, enter town, hire permanent companions, improve the House and Wall, employ
+skills, enter town, hire permanent companions, improve the House, Wall and Sandbags, employ
 a Repairman, exchange equipment, buy/sell and upgrade weapons, mount MODs, repair
 the castle with gold or AP, then Rest into Days 2–7 with your
 retained party and equipment. Victory, defeat,
 rewards, town entry and save/restore work across these stages. Original English
 artwork, fonts, audio and credits are retained.
 
-The seven-day **v17 repair release** is published at
+The seven-day **v18 Sandbag release** is published at
 [the local release](http://127.0.0.1:5175/elona/) after automated/source checks,
-eight complete-save browser checks and successful production New Game and exact
-v16-save migration/restore checks. Its deployable archive is
-`.build/elona-shooter-browser-repair-slice.zip`; the verified v16 release is retained
-in `.build/browser-before-repair` and the prior Castle archive.
+six complete-save browser checks and successful production New Game and exact
+v17-save migration/restore checks. Its deployable archive is
+`.build/elona-shooter-browser-sandbag-slice.zip`; the verified v17 release is retained
+in `.build/browser-before-sandbag` and the prior repair archive.
 
 This is not yet the complete game. Day 8 onward, other playable hero classes, full town
 management, the other Castle upgrades, temporary henchmen, recruit refresh, other card actions, Ragnarok and
@@ -99,7 +99,13 @@ adds **60 GP daily upkeep** and repairs **2 HP per level** when an opening or
 ordinary wave begins, capped at maximum HP. Buying it does not heal immediately.
 The final battle-completion boundary does not repair. Wave repair occurs before
 the original perfect-wave check, but cannot undo a previously lost perfect bonus.
-Sandbag, Storage, Looter, Trainer and Castle page2 remain unavailable.
+**Sandbag** costs **1,000 GP** initially, then `240 × level² + 1,000`, and caps
+at **level 10**. Each level lowers the castle damage multiplier by0.05 and adds
+**40 GP daily upkeep**. Existing mission absorption, protection and integer
+rounding/minimum-damage rules still apply; buying it does not heal. At the cap,
+repeated clicks cost nothing. The displayed absorption hint retains the original
+floating-point calculation and truncation. Storage, Looter, Trainer and Castle
+page2 remain unavailable.
 Town preparation generates stock, cards, next-mission data and a
 recruit once. Open the Shop tab, click stock to pick it up, then click an empty
 owned slot to buy it. Owned items can be moved or swapped; dropping one outside
@@ -169,7 +175,9 @@ Rejected mounting keeps both items. **No or clicking outside this confirmation
 swaps the MOD and gun**, matching the original owned-inventory behavior; it does
 not cancel like a sale. Stock MODs must first be bought into an empty owned slot.
 
-Saves now use **version 17**; versions **1–16** are accepted. Repairman
+Saves now use **version 18**; versions **1–17** are accepted. Sandbag
+level0–10 persists; older saves initialize it to zero without spending, healing,
+changing RNG or repricing settled results. Repairman
 level and the paid Fix Wall purchase count persist. Older saves initialize both
 to zero without buying, healing, consuming RNG or changing settled results. House
 capacity, Wall level and maximum HP persist as distinct fields. Legacy saves
@@ -302,7 +310,45 @@ grenade flight, shake RNG and death before/after release. See
 [seventh-day wave notes](web/docs/seventh-day-wave-source.md) and
 [seventh-town notes](web/docs/seventh-town-source.md).
 
-The v17 repair release passes **309 tests**, TypeScript checking and its build
+The v18 Sandbag release passes **319 tests**, TypeScript checking and its build
+(`assets/index-2cijlKJd.js`, 308 files). Two identical original runs match **25
+observations**: 12 damage cases, six controlled starting states and seven purchase
+outcomes. A strengthened 100-damage case produces 48 damage and distinguishes the
+source's additive mission absorption from the 49 produced by multiplying the two
+reductions; no tolerance was widened. See [Sandbag source notes](web/docs/castle-sandbag-source.md).
+
+Six browser checks match complete expected save envelopes: level 1/2 purchases,
+insufficient-gold rejection, Continue, seven actual combat updates from
+3552→3559 with HP 45→42 and unchanged expected RNG, and earned Day3 settlement
+with 80 upkeep/58 wages followed by town entry. The paired replay without Sandbags
+takes 4 damage instead of 3. No console errors were observed. All 305 public assets
+remain byte-identical, and all 308 candidate/live/archive files match. Production New Game exported v18 at tick 0 with 40 HP, 200 gold, five shells
+and Sandbag/repair fields at zero. The actual live v17 backup migrated and
+restored with complete-envelope equality at tick 674, 40 HP and 209 gold,
+preserving RNG; paused with no console errors. Evidence:
+`.build/browser-qa/sandbag-production-verification.json` and
+`.build/sandbag-publication.json`; screenshot `sandbag-production-restored.jpg`.
+
+Its separate soak passes **nine scenarios, 132,552 frames and 1,470 checkpoints**,
+with 53 Rest transitions, 219 reward actions, 19 Sandbag purchases, 17 Repairman
+purchases, 11 Fix Wall purchases and 41 positive wave heals. All eight natural
+campaigns finish Day7. A separate earned-first-town run adds 12,000 gold only,
+buys Sandbag 4 through ordinary purchases, sets companions to Armor-only through
+the normal town order action and temporarily avoids aiming at Crows to expose larger
+hits. That exposure policy ends in Day6 defeat; it is not another natural win.
+
+Among 186 accepted single-hit frame comparisons, one shows a positive integer
+reduction: at Day 3 tick 3553 the capital-start takes 3 damage with Sandbag 4 versus 4
+when the same production frame is replayed with only the Sandbag level set to 0.
+Accepted pairs preserve final RNG and a surviving wall; one ambiguous lethal
+frame is excluded. The first low-damage attempt produced no positive reduction
+and remains recorded in `.build/sandbag-party-soak-low-damage/`. The adjusted
+run is `.build/sandbag-party-soak/report.json`. This is limited port integration
+evidence, not original balance parity; ordinary source contours and the documented
+boss rectangle remain the collision boundary. Run `npm.cmd run test:sandbag-party-soak`
+from `web` to reproduce that policy.
+
+The historical v17 repair release passed **309 tests**, TypeScript checking and its build
 (`assets/index-XNVk3crn.js`). Two identical original runs match **37 observations**:
 17 controlled starting states, eleven tile transactions and nine timer outcomes.
 These include repair eligibility/payment, wave heal/clamp order, perfect-state
@@ -426,10 +472,10 @@ or native browser scheduling parity. Run
 `node --experimental-strip-types scripts/party-soak.ts 8 repair` from `web`;
 reports are in `.build/repair-party-soak/`.
 
-The next useful slice is **Castle Sandbags**, with the original absorption,
-price, cap and upkeep connected to battle damage and save/restore. Source behavior
-must be checked before implementation. Storage, Looter and Trainer remain later
-Castle work, alongside Day8/Lava and the unproven veteran late-game hitbox complaint.
+The next useful Castle slice is **Storage**, after auditing its capacity limit,
+prices and effects across inventory, shop, loot and save/restore. Looter and Trainer
+remain separate Castle work, alongside Day8/Lava and the unproven veteran
+late-game hitbox complaint.
 
 `npm.cmd run test:projectile-soak` separately exercises eight projectile guns
 and hand grenades under three seeds: **27 scenarios, 9,720 frames and 1,080
@@ -474,6 +520,7 @@ python tools/build_boss_special_oracle.py
 python tools/build_seventh_town_oracle.py
 python tools/build_castle_upgrades_oracle.py
 python tools/build_castle_repair_oracle.py
+python tools/build_castle_sandbag_oracle.py
 python tools/serve_oracle.py
 ```
 
@@ -506,7 +553,8 @@ with `test:sixth-day-wave-reference`, `test:barbarian-reference` and
 `test:seventh-town-reference`. Castle House/Wall transactions use
 `?suite=castle-upgrades` and `npm.cmd run test:castle-upgrades-reference`. Paid
 repair and Repairman use `?suite=castle-repair` and
-`npm.cmd run test:castle-repair-reference`.
+`npm.cmd run test:castle-repair-reference`. Sandbags use `?suite=castle-sandbag`
+and `npm.cmd run test:castle-sandbag-reference`.
 Run these scripts with `npm.cmd run` from `web/`. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, use the matching comparison command: `npm.cmd run test:reference`,

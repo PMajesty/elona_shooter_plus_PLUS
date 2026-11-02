@@ -4,17 +4,20 @@ Current implementation: **seven connected Sheriff days**, with owned firearms an
 consumables, ordinary/boss loot, earned skills, prepared towns, shop transactions,
 weapon Upgrade, MOD mounting, Free Repair, Rest, the first title claim and its salary,
 plus permanent recruitment, companion equipment, autonomous AI, growth and wages,
-and Castle House capacity two/three, Wall, paid Fix Wall and Repairman purchases.
+and Castle House capacity two/three, Wall, Sandbag, paid Fix Wall and Repairman purchases.
 This is not a complete remake.
 The TypeScript/Phaser client runs independently of Flash and Ruffle; the preserved
 game remains the reference for behavior, content and appearance.
 
-The **v17 repair release** is served at `http://127.0.0.1:5175/elona/` after
-automated/source checks, eight complete-save browser checks and final production
-New Game/exact v16-save migration and restore checks. All 308 files from
-`.build/browser-repair-final` match publication and the archive. The bundle is
-`assets/index-XNVk3crn.js`; the deployable archive is
-`.build/elona-shooter-browser-repair-slice.zip` (8,574,119 bytes), SHA-256
+The **v18 Sandbag release** is served at `http://127.0.0.1:5175/elona/` after
+automated/source checks, six complete-save browser checks and final production
+New Game/exact v17-save migration and restore checks. All 308 files from
+`.build/browser-sandbag-final` match the live build and ZIP. The bundle is
+`assets/index-2cijlKJd.js`; the deployable archive is
+`.build/elona-shooter-browser-sandbag-slice.zip` (8,574,403 bytes), SHA-256
+`945b2023d734cf5569c0cab3ec3d187423c6747210148d96930f80fb7b972d1e`.
+The verified v17 release remains in `.build/browser-before-sandbag` (all 308 files)
+and `.build/elona-shooter-browser-repair-slice.zip` (8,574,119 bytes), SHA-256
 `5c19dbe91bc98155ce4886a619becbf36af285c13234ce57da33c9e7c3594988`.
 
 The verified v16 release remains in `.build/browser-before-repair` (all 308 files)
@@ -90,7 +93,7 @@ establish this late-game diagnosis.
   the damage deficit; its price is derived from maxHP (first 240 GP). House adds 50
   upkeep per level and Wall adds 10 per purchase. Existing settled results remain
   historical. The original tiles, prices, levels and affordability are displayed;
-  Sandbag, Storage, Looter, Trainer and page2 remain disabled.
+  Storage, Looter, Trainer and page2 remain disabled.
 - Paid **Fix Wall** costs 8 GP per missing HP, heals fully and increments its
   retained purchase count, without AP/RNG/dialog. Full HP cost 0 disables it.
   **Repairman** costs `250 × level² + 700` before purchase and adds 60 GP upkeep
@@ -99,6 +102,12 @@ establish this late-game diagnosis.
   the perfect-wave check. A previously false perfect flag remains false, and
   the final battle-completion boundary performs no repair. Automatic repair
   refreshes the HP HUD silently, matching the source; no new flash or sound.
+- **Sandbag** costs `240 × level² + 1000` before purchase and caps at10.
+  It adds40 upkeep per level and changes the castle damage multiplier to
+  `1 - level * 0.05`; mission absorption and existing protection/rounding remain
+  in the source damage path. Purchase does not heal or change historical results,
+  and cap/insufficient-gold guards charge nothing. The original tile, source
+  level0 acquisition message and float-truncated absorption hint are retained.
 - Day6 settlement deducts the first 10 GP tax separately from default upkeep 40.
   Mission → Claim title costs 4 AP and grants Honorary Citizen, once eligible.
   It consumes no RNG and pays no immediate gold. Its 100 GP salary begins at the
@@ -141,7 +150,10 @@ Ordinary-enemy collision uses original filled contours and placement matrices,
 including persisted sheep shadow history. Bosses use rendered alpha geometry;
 the headless soak uses an explicitly documented boss rectangle fallback.
 
-Current saves use **version 17**, accepting port versions **1–16**.
+Current saves use **version 18**, accepting port versions **1–17**.
+Sandbag level is an integer0–10; legacy saves initialize it to zero without
+purchases, healing, RNG changes or repricing historical results. Version17's
+repair state remains intact.
 Repairman level and paid Fix Wall count are canonical nonnegative integers;
 legacy saves initialize them to zero without repairs, costs, RNG changes or
 repricing settlement. Existing wave-boundary state prevents repeated repair on
@@ -216,7 +228,45 @@ no Flash plugin, Ruffle, external CDN or gameplay server.
 
 ## Evidence and intentional corrections
 
-The v17 repair release passes **309 tests**, TypeScript checking and its build
+The v18 Sandbag release passes **319 tests**, TypeScript checking and its build
+(`assets/index-2cijlKJd.js`, 308 files). Two identical original runs match **25
+observations**: 12 damage cases, six controlled starting states and seven purchase
+outcomes. A strengthened 100-damage case produces 48 damage and distinguishes the
+source's additive mission absorption from the 49 produced by multiplying the two
+reductions; no tolerance was widened. See [Sandbag source notes](../web/docs/castle-sandbag-source.md).
+
+Six browser checks match complete expected save envelopes: level 1/2 purchases,
+insufficient-gold rejection, Continue, seven actual combat updates from
+3552→3559 with HP 45→42 and unchanged expected RNG, and earned Day3 settlement
+with 80 upkeep/58 wages followed by town entry. The paired replay without Sandbags
+takes 4 damage instead of 3. No console errors were observed. All 305 public assets
+remain byte-identical, and all 308 candidate/live/archive files match. Production New Game exported v18 at tick 0 with 40 HP, 200 gold, five shells
+and Sandbag/repair fields at zero. The actual live v17 backup migrated and
+restored with complete-envelope equality at tick 674, 40 HP and 209 gold,
+preserving RNG; paused with no console errors. Evidence:
+`.build/browser-qa/sandbag-production-verification.json` and
+`.build/sandbag-publication.json`; screenshot `sandbag-production-restored.jpg`.
+
+Its separate soak passes **nine scenarios, 132,552 frames and 1,470 checkpoints**,
+with 53 Rest transitions, 219 reward actions, 19 Sandbag purchases, 17 Repairman
+purchases, 11 Fix Wall purchases and 41 positive wave heals. All eight natural
+campaigns finish Day7. A separate earned-first-town run adds 12,000 gold only,
+buys Sandbag 4 through ordinary purchases, sets companions to Armor-only through
+the normal town order action and temporarily avoids aiming at Crows to expose larger
+hits. That exposure policy ends in Day6 defeat; it is not another natural win.
+
+Among 186 accepted single-hit frame comparisons, one shows a positive integer
+reduction: at Day 3 tick 3553 the capital-start takes 3 damage with Sandbag 4 versus 4
+when the same production frame is replayed with only the Sandbag level set to 0.
+Accepted pairs preserve final RNG and a surviving wall; one ambiguous lethal
+frame is excluded. The first low-damage attempt produced no positive reduction
+and remains recorded in `.build/sandbag-party-soak-low-damage/`. The adjusted
+run is `.build/sandbag-party-soak/report.json`. This is limited port integration
+evidence, not original balance parity; ordinary source contours and the documented
+boss rectangle remain the collision boundary. Command from `web`:
+`npm.cmd run test:sandbag-party-soak`.
+
+The historical v17 repair release passed **309 tests**, TypeScript checking and its build
 (`assets/index-XNVk3crn.js`). Two identical original runs match **37 observations**:
 17 controlled starting states, eleven tile transactions and nine timer outcomes.
 These include repair eligibility/payment, wave heal/clamp order, perfect-state
@@ -558,10 +608,13 @@ reports are in `.build/repair-party-soak/`.
 
 ## Next integrated work and continuation
 
-The next useful slice is **Castle Sandbags**: audit original absorption, price,
-cap and upkeep, then connect the ordinary tile purchase to battle damage and
-save/restore. Storage, Looter and Trainer remain separate bounded Castle slices.
-This fills early town/combat interactions before extending the campaign again.
+The next useful slice is **Castle Storage**: the source expands the existing owned
+inventory from 6 to 16 slots, one slot per purchase, while battle keys/hotbar stay
+limited to the first five. The first purchase costs 370 GP; each level adds 40 GP
+upkeep. Connect the ordinary purchase to shop, loot, equipment, MOD/Upgrade, sales,
+Rest and save/restore, including the 8-to-9 slot row wrap and 16-slot cap.
+Looter and Trainer remain separate bounded Castle slices. This fills
+early town interactions before extending the campaign again.
 The [Castle source audit](../web/docs/castle-upgrades-source.md) and
 [UI notes](../web/docs/castle-upgrades-ui-source.md) retain the current boundaries.
 Later campaign work still includes Lava and further town thresholds; Day8 onward

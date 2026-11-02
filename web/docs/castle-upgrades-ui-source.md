@@ -1,7 +1,7 @@
 # Castle purchase UI
 
 The Castle panel presents the original eight first-page tiles. Fix Wall, Wall,
-House and Repairman use the production immediate-purchase API; Sandbag, Storage,
+Sandbag, House and Repairman use the production immediate-purchase API; Storage,
 Looter, Trainer and page2 are visibly disabled and explain their unavailable scope. This note covers the
 UI and asset boundary. Transaction evidence is in
 [castle-upgrades-source.md](castle-upgrades-source.md); browser acceptance is
@@ -43,7 +43,7 @@ in a browser.
 
 `MainTimeline.as:1322–1356` appends positive current levels, displays the cost,
 uses blue `#0000cc` when available and red `#cc0000` otherwise, and dims an
-unavailable tile to0.3. The port follows those values. The four unimplemented
+unavailable tile to0.3. The port follows those values. The three unimplemented
 tiles display their default source levels/prices but remain disabled regardless
 of gold. Page2 is unavailable. No other Castle purchase is exposed by this UI.
 
@@ -55,11 +55,12 @@ Failure beeps; the small explanatory status messages are port UI rather than
 quotes from the original game. Affordability is recomputed by the transaction
 API, so rendered prices never authorize a stale purchase.
 
-Upkeep comes from `castleUpkeep(state)` and all four prices from
+Upkeep comes from `castleUpkeep(state)` and all five prices from
 `castleUpgradeCost`. Free Repair continues to rebuild the panel after healing.
-Main accepts save envelopes1–17 and emits17. The town DOM diagnostic
+Main accepts save envelopes1–18 and emits18. The town DOM diagnostic
 `data-castle-upgrades` exposes House, Wall, maxHP, upkeep, the Fix Wall purchase
-counter, Repairman level/repair amount and the four current costs for ordinary
+counter, Repairman level/repair amount, Sandbag level/damage multiplier/absorption
+percentage and the five current costs for ordinary
 browser checks; it is not an alternate action interface.
 
 ## Paid repair and Repairman extension
@@ -96,6 +97,32 @@ retains its separate repair sound and event dialog.
 This UI extension is typechecked after runtime integration. Actual purchase,
 wave-boundary, save/Continue and browser acceptance are separately recorded by
 the integration owner; this note alone does not establish them.
+
+## Sandbag extension
+
+Sandbag is tile2 at parent origin `(374.41238023502831,118)`. Existing atlas
+frames5/6 contain its normal/hover art, so the v18 integration changes no assets.
+The current source level appears as `Sandbag Lv N` above zero. The source price
+is `level² * 240 + 1000` (`MainTimeline.as:12629–12631`); at level10 it becomes0
+and the tile dims/disables (`12673`). Repeated clicks then beep without payment,
+matching the common Castle transaction guard. Each level adds40 recurring upkeep
+(`1666`). Existing repair, House and Wall state is retained.
+
+The description at11876 is "Stronger sandbags will absorb more damage done to
+the wall." The level0 detail is replaced by the generic not-yet-acquired text
+at11900–11902. Positive levels use the source expression
+`int(100 - castleAbsorb() * 100)` in "(Currently, sandbag will absorb N% damage)".
+`castleAbsorb`,1423–1426 returns `1 - level * 0.05`. The UI calls the production
+`castleDamageMultiplier` helper and preserves this exact floating arithmetic
+and truncation instead of simplifying the display to `level * 5`.
+
+`main.ts` includes `sandbag`, `sandbagCost`, `damageMultiplier` and
+`sandbagAbsorptionPercent` in the ordinary town diagnostic. It emits/imports
+v18 envelopes; the runtime owns validation and v17 migration. Success uses the
+existing payment sound and Castle rebuild, and cap feedback identifies Sandbag.
+No new damage effect, sound, alternate input path or timer is introduced by the
+UI. Production damage integration, source comparison, save/replay and browser
+acceptance remain separate evidence owned by the integration work.
 
 ## Preservation and reproduction
 

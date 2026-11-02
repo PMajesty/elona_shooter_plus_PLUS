@@ -12,9 +12,10 @@ import { generateEarlyTownRecruit } from '../src/recruits.ts';
 import { installCandidate } from '../src/party.ts';
 import { castleUpgradeCost, castleUpkeep } from '../src/castle-upgrades.ts';
 
-const repairMode = process.argv[3] === 'repair';
+const sandbagMode = process.argv[3] === 'sandbag';
+const repairMode = sandbagMode || process.argv[3] === 'repair';
 const castleMode = repairMode || process.argv[3] === 'castle';
-const fixturePrefix = repairMode ? 'repair-party' : castleMode ? 'castle-party' : 'party';
+const fixturePrefix = sandbagMode ? 'sandbag-party' : repairMode ? 'repair-party' : castleMode ? 'castle-party' : 'party';
 const output = fileURLToPath(new URL(`../../.build/${fixturePrefix}-soak`, import.meta.url));
 const browserOutput = fileURLToPath(new URL('../../.build/browser-qa', import.meta.url));
 mkdirSync(output, { recursive: true }); mkdirSync(browserOutput, { recursive: true });
@@ -51,6 +52,8 @@ const partyBattleCounts: Record<number, number> = {};
 const expandedNaturalScenarios = new Set<string>();
 let housePurchases = 0, wallPurchases = 0, maximumCompanions = 0;
 let fixWallPurchases = 0, repairmanPurchases = 0;
+let sandbagPurchases = 0, ambiguousSandbagFrames = 0;
+const sandbagObservations: { scenario: string; tick: number; day: number; level: number; damageWith: number; damageWithout: number; avoided: number; rng: number }[] = [];
 const repairObservations: { scenario: string; tick: number; day: number; level: number; waveBefore: number; hpBefore: number; damage: number; hpAfter: number; restoredHp: number }[] = [];
 
 function finite(value: unknown, path = 'state'): void {
@@ -60,9 +63,9 @@ function finite(value: unknown, path = 'state'): void {
 }
 
 // Герой целится обычным вводом; союзник получает только сохранённый исходный приказ и действует сам.
-function inputFor(simulation: Simulation): Input {
+function inputFor(simulation: Simulation, exposeCrow = false): Input {
   const state = simulation.state, weapon = simulation.weapon;
-  const target = state.enemies.filter(enemy => enemy.hp > 0 && enemy.x > 20).sort((a, b) => b.x - a.x)[0];
+  const target = state.enemies.filter(enemy => enemy.hp > 0 && enemy.x > 20 && !(exposeCrow && enemy.kind === 'crow')).sort((a, b) => b.x - a.x)[0];
   const grenade = state.inventory[1];
   return { aimX: target?.x ?? 450, aimY: target?.y ?? 240,
     firePressed: Boolean(target && weapon && weapon.reloadTime === 0 && weapon.ammo > 0),
@@ -129,10 +132,31 @@ function run(current: Scenario, initial?: Save): void {
       partyBattleCounts[activeCount()] = (partyBattleCounts[activeCount()] ?? 0) + 1;
       if (activeClass()) activity.battles++;
       for (let frame = 0; frame < 6000 && simulation.state.phase === 'battle'; frame++) {
-        const input = inputFor(simulation);
+        const input = inputFor(simulation, sandbagMode && current.kind === 'capital-start'
+          && !sandbagObservations.some(row => row.scenario === current.id && row.avoided > 0));
+        const beforeSandbag = sandbagMode && simulation.state.sandbagLevel > 0 ? clone(simulation.toSave()) : undefined;
         const beforeRepair = repairMode && simulation.state.repairmanLevel > 0 && simulation.state.newWave && simulation.state.waveIndex > 0
           && simulation.state.timerRemainder + 20 >= 30 ? clone(simulation.toSave()) : undefined;
         act('tick', [input], sim => sim.tick(input)); totalFrames++;
+        if (beforeSandbag) {
+          const hits = simulation.events.filter(event => event.type === 'castle-hit');
+          if (hits.length) {
+            // Контроль меняет только уровень мешков на один кадр; это проверка интеграции порта, не исходный oracle.
+            const control = Simulation.fromSave({ ...beforeSandbag, sandbagLevel: 0 }, options);
+            control.tick(input);
+            const controlHits = control.events.filter(event => event.type === 'castle-hit');
+            if (hits.length === 1 && controlHits.length === 1 && control.state.rng === simulation.state.rng
+              && simulation.state.castleHp > 0 && control.state.castleHp > 0) {
+              const damageWith = hits[0].amount!, damageWithout = controlHits[0].amount!;
+              assert.ok(damageWith <= damageWithout, 'Sandbags increased an otherwise identical castle hit');
+              sandbagObservations.push({ scenario: current.id, tick: simulation.state.tick, day, level: beforeSandbag.sandbagLevel,
+                damageWith, damageWithout, avoided: damageWithout - damageWith, rng: simulation.state.rng });
+              if (damageWith < damageWithout && !beforeSandbag.enemies.some(enemy => enemy.kind === 'boss')) {
+                recordFixture('before-sandbag-hit', beforeSandbag); recordFixture('after-sandbag-hit'); save();
+              }
+            } else ambiguousSandbagFrames++;
+          }
+        }
         if (beforeRepair && simulation.events.some(event => event.type === 'wave')
           && !simulation.events.some(event => event.type === 'repair')
           && !beforeRepair.inventory.some(item => isOccupiedItem(item) && item.leech)
@@ -177,6 +201,7 @@ function run(current: Scenario, initial?: Save): void {
         totalRewards++; save();
       }
       if (castleMode) assert.equal(simulation.state.result.upkeep, castleUpkeep(simulation.state));
+      if (sandbagMode && simulation.state.sandbagLevel > 0) recordFixture('sandbag-result');
       if (activeClass()) { activity.wages += simulation.state.result.wages; activity.wageSettlements++; recordFixture('result'); if (castleMode) recordFixture(`result-party${activeCount()}`); }
       assert.equal(act('enterTown', [], sim => sim.enterTown()), true); save();
     }
@@ -188,6 +213,15 @@ function run(current: Scenario, initial?: Save): void {
     if (castleMode) {
       const state = simulation.state;
       const candidateCost = state.party.slots[4].member?.cost ?? 0;
+      while (sandbagMode && state.sandbagLevel < (current.kind === 'capital-start' ? 4 : day >= 4 ? 2 : 1)
+        && state.gold >= castleUpgradeCost('sandbag', state) + (activeCount() === 0 ? candidateCost : 0)) {
+        recordFixture(`before-sandbag${state.sandbagLevel + 1}`);
+        const previousResult = clone(state.result);
+        assert.equal(act('buyCastleUpgrade', ['sandbag'], sim => sim.buyCastleUpgrade('sandbag')), 'purchased');
+        sandbagPurchases++;
+        assert.deepEqual(state.result, previousResult, 'Sandbag purchase repriced an already paid result');
+        recordFixture(`sandbag${state.sandbagLevel}`); save();
+      }
       if (repairMode && state.repairmanLevel < (day >= 4 ? 2 : 1)
         && state.gold >= castleUpgradeCost('repairman', state) + (activeCount() === 0 ? candidateCost : 0)) {
         recordFixture(`before-repairman${state.repairmanLevel + 1}`);
@@ -227,6 +261,13 @@ function run(current: Scenario, initial?: Save): void {
         if (castleMode && current.kind === 'natural' && activeCount() >= 2) expandedNaturalScenarios.add(current.id);
         recordFixture('hired-town'); if (castleMode) recordFixture(`hired${activeCount()}`); save();
       } else assert.ok(['not-enough-gold', 'no-candidate', 'house-full', 'party-full'].includes(String(outcome)));
+    }
+    if (sandbagMode && current.kind === 'capital-start') {
+      for (const slot of simulation.state.party.slots.filter(slot => slot.exists && slot.slot <= 3)) {
+        assert.equal(act('setCompanionOrder', [slot.slot, 5], sim => sim.setCompanionOrder(slot.slot, 5)), true);
+        assert.equal(act('setCompanionPriorities', [slot.slot, { boss: false, wall: false }], sim => sim.setCompanionPriorities(slot.slot, { boss: false, wall: false })), true);
+      }
+      save();
     }
     if (day === 6) act('claimTitle', [], sim => sim.claimTitle());
     if (repairMode && simulation.state.castleHp < simulation.state.castleMaxHp && day % 2 === 0
@@ -275,18 +316,27 @@ try {
     const value = clone(firstTown.save);
     // Явный капитал — единственный контролируемый вход; кандидаты и бои затем идут обычным путём.
     value.gold += 12000;
-    run({ id: 'capital-three-companions', seed: firstTown.seed, kind: 'capital-start',
+    run({ id: sandbagMode ? 'capital-sandbag-exposure' : 'capital-three-companions', seed: firstTown.seed, kind: 'capital-start',
       origin: `${firstTown.scenario} earned first town at operation${firstTown.operations}; add12000gold only; no grants to HP, traits, equipment, candidates or campaign RNG` }, value);
-    assert.ok((partyBattleCounts[2] ?? 0) > 0 && (partyBattleCounts[3] ?? 0) > 0, 'Expanded parties never entered battle');
-    assert.ok(actorActivity[2].shots > 0 && actorActivity[3].shots > 0, 'Additional companion slots never fired');
-    assert.ok(expandedNaturalScenarios.size > 0, 'No natural campaign earned an expanded party');
+    if (!sandbagMode) {
+      assert.ok((partyBattleCounts[2] ?? 0) > 0 && (partyBattleCounts[3] ?? 0) > 0, 'Expanded parties never entered battle');
+      assert.ok(actorActivity[2].shots > 0 && actorActivity[3].shots > 0, 'Additional companion slots never fired');
+    }
+    if (!sandbagMode) assert.ok(expandedNaturalScenarios.size > 0, 'No natural campaign earned an expanded party');
   } else assert.ok(Object.values(classes).every(row => row.natural.battles + row.controlled.battles > 0), 'One or more classes never entered battle');
   if (repairMode) {
     assert.ok(fixWallPurchases > 0 && repairmanPurchases > 0, 'Campaigns did not exercise both repair purchases');
     assert.ok(repairObservations.some(row => row.scenario.startsWith('natural-') && row.restoredHp > 0), 'No natural campaign actually healed at a wave boundary');
   }
+  if (sandbagMode) {
+    assert.ok(sandbagPurchases > 0, 'Campaigns did not buy Sandbags');
+    assert.ok(sandbagObservations.some(row => row.avoided > 0), 'No campaign had measured damage reduction');
+  }
   const report = { status: 'passed', seedCount, sourceHashes, geometrySha256, scenarios: results.length, frames: totalFrames, checkpoints: totalCheckpoints, restTransitions: totalRest,
     rewardActions: totalRewards, reachedDays, wonDays, naturallyHiredClasses: [...naturalHired].sort(), classes: castleMode ? undefined : classes,
+    ...(sandbagMode ? { sandbagPurchases, sandbagObservations, ambiguousSandbagFrames,
+      positiveDamageReductions: sandbagObservations.filter(row => row.avoided > 0).length,
+      avoidedDamage: sandbagObservations.reduce((sum, row) => sum + row.avoided, 0) } : {}),
     ...(repairMode ? { fixWallPurchases, repairmanPurchases, repairObservations,
       positiveRepairObservations: repairObservations.filter(row => row.restoredHp > 0).length } : {}),
     ...(castleMode ? { housePurchases, wallPurchases, maximumCompanions, partyBattleCounts, expandedNaturalScenarios: [...expandedNaturalScenarios],
@@ -294,7 +344,8 @@ try {
         ['shots', 'hits', 'damage', 'kills', 'reloads', 'reloadCompletions', 'bowDraws', 'levelUps'].map(key => [key, value[key as keyof Activity]]))])) } : {}),
     elapsedMs: Math.round(performance.now() - started),
     collision: 'Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts',
-    policy: repairMode ? 'Aimed Sheriff and autonomous companions; prioritize Repairman1 when affordable (reserve first hire cost), Repairman2 from town4, then existing House/Wall/hiring policy. Pay Fix Wall on damaged even days when affordable; otherwise Free Repair. Separate capital-start grants12000gold only at an earned first town. No forced kills, HP grants or battle completion. Wave observations exclude leech weapons and item repair and account for same-frame castle-hit events.'
+    policy: sandbagMode ? 'Aimed Sheriff and autonomous companions; prioritize Sandbag1, Sandbag2 from town4, then Repairman/House/Wall/hiring and paid/free repair policy. Reserve first hire cost. Natural runs have no grants. Separate capital-start grants12000gold only at earned first town, buys Sandbag4 normally, sets companions to armor-only/no priorities through normal town actions and avoids aiming at Crows until one positive reduction occurs. This input exposure addresses integer rounding that masks low-level Sandbags against small early-game hits. Measured damage pairs replay a single actual frame with only Sandbag level set to0; accept single-hit, same-final-RNG, surviving-wall pairs. This counterfactual is port integration evidence, separate from original damage reference.'
+      : repairMode ? 'Aimed Sheriff and autonomous companions; prioritize Repairman1 when affordable (reserve first hire cost), Repairman2 from town4, then existing House/Wall/hiring policy. Pay Fix Wall on damaged even days when affordable; otherwise Free Repair. Separate capital-start grants12000gold only at an earned first town. No forced kills, HP grants or battle completion. Wave observations exclude leech weapons and item repair and account for same-frame castle-hit events.'
       : castleMode ? 'Aimed Sheriff plus autonomous permanent companions; buy House with enough gold for the next generated candidate, buy one Wall from town2 onward when affordable, then hire through ordinary confirmation; Free Repair and Day6 title before Rest; natural runs have no grants. Separate capital-start adds12000gold at an earned first town to exercise the three-slot party before the current Day7 boundary.'
       : 'Aimed Sheriff plus autonomous companion; generated equipment and skills retained; collect available loot; source skill choice indexed by seed/day; hire when affordable; Free Repair and Day6 title before Rest; no grants, invincibility, private battle completion or forced kills',
     limits: ['Port full-state/event replay and finite-state checks, not independent original parity or browser validation', 'Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred',
@@ -306,6 +357,7 @@ try {
   console.log(JSON.stringify({ ...report, classes: undefined, snapshots: undefined, results: undefined }, null, 2));
 } catch (error) {
   writeFileSync(resolve(output, 'failure.json'), JSON.stringify({ scenario, sourceHashes, geometrySha256, checkpoint, operationsSinceCheckpoint: sinceCheckpoint,
-    completedResults: results, error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) }, null, 2) + '\n');
+    completedResults: results, sandbagObservations, ambiguousSandbagFrames, repairObservations,
+    error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) }, null, 2) + '\n');
   throw error;
 }

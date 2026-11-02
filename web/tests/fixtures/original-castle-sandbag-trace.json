@@ -1,0 +1,5254 @@
+{
+  "format": "elona-original-castle-sandbag-trace",
+  "version": 1,
+  "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "instrumentedSwfSha256": "e66246721657a2c54ef5fc7b56247073b1ce5e04f7ca961bf4c05e3730574046",
+  "traceSha256": "d8f6da8a183f51bc97e10cfb3a5edcce676e0f4e96b1f7c0b42fd5d6d8782027",
+  "runtime": "@ruffle-rs/ruffle 0.7.1",
+  "capturedAt": "2026-11-02T02:55:10.176Z",
+  "boundary": "Original Castle tile2 purchases and damageCastle with nonlethal Guardian retaliation, Insurance/Defender/LastHope and source integer absorption",
+  "limits": [
+    "Controlled method calls, explicit party inputs and declared RNG prefixes; not native battle scheduling or earning/acquiring every skill",
+    "Guardian target is one original nonlethal Sheep; kill/progression and broader attacker classes have separate references",
+    "Town mouse-position seam drives original shape-hit handler; fresh town generation and actual browser clicks are separate",
+    "Source order observations and UI descriptions supplement state comparison; visual/audio rendering, save migration and connected battles require separate integration evidence"
+  ],
+  "records": [
+    {
+      "clock": "synchronous-original-damage-and-town-input",
+      "continuedTownEntry": true,
+      "damageCases": 12,
+      "guardianTarget": "original-nonlethal-sheep",
+      "kind": "castle-sandbag",
+      "rng": "xorshift32-with-declared-prefix",
+      "seed": 3735928559,
+      "type": "ready",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 33,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 1,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 0,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 1,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 0,
+        "totalMoney": 500
+      },
+      "boundary": "damage",
+      "config": {
+        "damage": 7,
+        "level": 0,
+        "name": "unupgraded"
+      },
+      "damageEvents": [],
+      "drawCount": 2,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.2792530485894531
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.5551386629231274
+        }
+      ],
+      "kind": "castle-sandbag",
+      "order": [
+        {
+          "amount": 7,
+          "drawCount": 1,
+          "event": "castle-hit"
+        }
+      ],
+      "rngState": 2384302402,
+      "scenario": "unupgraded",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 34,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.95,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 1,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.95,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 1,
+        "totalMoney": 500
+      },
+      "boundary": "damage",
+      "config": {
+        "damage": 7,
+        "level": 1,
+        "name": "first-level"
+      },
+      "damageEvents": [],
+      "drawCount": 2,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.2792530485894531
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.5551386629231274
+        }
+      ],
+      "kind": "castle-sandbag",
+      "order": [
+        {
+          "amount": 6,
+          "drawCount": 1,
+          "event": "castle-hit"
+        }
+      ],
+      "rngState": 2384302402,
+      "scenario": "first-level",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0.01,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 46,
+        "castleMaxHp": 140,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.95,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 1,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0.01,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 140,
+        "castleMaxHp": 140,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.95,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 1,
+        "totalMoney": 500
+      },
+      "boundary": "damage",
+      "config": {
+        "absorb": 0.01,
+        "damage": 100,
+        "hp": 140,
+        "level": 1,
+        "maxHp": 140,
+        "name": "first-level-medal"
+      },
+      "damageEvents": [],
+      "drawCount": 2,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.2792530485894531
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.5551386629231274
+        }
+      ],
+      "kind": "castle-sandbag",
+      "order": [
+        {
+          "amount": 94,
+          "drawCount": 1,
+          "event": "castle-hit"
+        }
+      ],
+      "rngState": 2384302402,
+      "scenario": "first-level-medal",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0.02,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 92,
+        "castleMaxHp": 140,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0.02,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 140,
+        "castleMaxHp": 140,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 500
+      },
+      "boundary": "damage",
+      "config": {
+        "absorb": 0.02,
+        "damage": 100,
+        "hp": 140,
+        "level": 10,
+        "maxHp": 140,
+        "name": "maximum-medal"
+      },
+      "damageEvents": [],
+      "drawCount": 2,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.2792530485894531
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.5551386629231274
+        }
+      ],
+      "kind": "castle-sandbag",
+      "order": [
+        {
+          "amount": 48,
+          "drawCount": 1,
+          "event": "castle-hit"
+        }
+      ],
+      "rngState": 2384302402,
+      "scenario": "maximum-medal",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0.02,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 39,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0.02,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 500
+      },
+      "boundary": "damage",
+      "config": {
+        "absorb": 0.02,
+        "damage": 1,
+        "level": 10,
+        "name": "minimum-one"
+      },
+      "damageEvents": [],
+      "drawCount": 2,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.2792530485894531
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.5551386629231274
+        }
+      ],
+      "kind": "castle-sandbag",
+      "order": [
+        {
+          "amount": 1,
+          "drawCount": 1,
+          "event": "castle-hit"
+        }
+      ],
+      "rngState": 2384302402,
+      "scenario": "minimum-one",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0.02,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 34,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.95,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 1,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0.02,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.95,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 1,
+        "totalMoney": 500
+      },
+      "boundary": "damage",
+      "config": {
+        "absorb": 0.02,
+        "damage": 7.9,
+        "level": 1,
+        "name": "typed-input"
+      },
+      "damageEvents": [],
+      "drawCount": 2,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.2792530485894531
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.5551386629231274
+        }
+      ],
+      "kind": "castle-sandbag",
+      "order": [
+        {
+          "amount": 6,
+          "drawCount": 1,
+          "event": "castle-hit"
+        }
+      ],
+      "rngState": 2384302402,
+      "scenario": "typed-input",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 39,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 500
+      },
+      "boundary": "damage",
+      "config": {
+        "damage": 3,
+        "level": 10,
+        "name": "maximum-no-medal"
+      },
+      "damageEvents": [],
+      "drawCount": 2,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.2792530485894531
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.5551386629231274
+        }
+      ],
+      "kind": "castle-sandbag",
+      "order": [
+        {
+          "amount": 1,
+          "drawCount": 1,
+          "event": "castle-hit"
+        }
+      ],
+      "rngState": 2384302402,
+      "scenario": "maximum-no-medal",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 103,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "113": 1,
+              "118": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 103,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 5,
+            "116": 0,
+            "117": 0,
+            "118": 3,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 1,
+            "116": 0,
+            "117": 0,
+            "118": 2,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 503
+      },
+      "before": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "113": 1,
+              "118": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": null,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": null,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 5,
+            "116": 0,
+            "117": 0,
+            "118": 3,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 1,
+            "116": 0,
+            "117": 0,
+            "118": 2,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 500
+      },
+      "boundary": "damage",
+      "config": {
+        "damage": 20,
+        "defender": 1,
+        "insurance": 2,
+        "level": 10,
+        "name": "insurance-before-defender",
+        "prefix": [
+          0
+        ]
+      },
+      "damageEvents": [],
+      "drawCount": 1,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0
+        }
+      ],
+      "kind": "castle-sandbag",
+      "order": [
+        {
+          "drawCount": 0,
+          "event": "insurance"
+        },
+        {
+          "drawCount": 1,
+          "event": "defend"
+        }
+      ],
+      "rngState": 1199382711,
+      "scenario": "insurance-before-defender",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 103,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "113": 1,
+              "118": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": 0,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 996,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 103,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 7,
+            "116": 0,
+            "117": 0,
+            "118": 3,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 4,
+          "guardianSlots": [
+            0,
+            1
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 2,
+            "116": 0,
+            "117": 0,
+            "118": 2,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 503
+      },
+      "before": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "113": 1,
+              "118": 2,
+              "121": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": 0,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 7,
+            "116": 0,
+            "117": 0,
+            "118": 3,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 4,
+          "guardianSlots": [
+            0,
+            1
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 2,
+            "116": 0,
+            "117": 0,
+            "118": 2,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 500
+      },
+      "boundary": "damage",
+      "config": {
+        "damage": 20,
+        "defender": 1,
+        "guardian": true,
+        "insurance": 2,
+        "level": 10,
+        "name": "guardian-before-defender",
+        "prefix": [
+          0.99,
+          0
+        ]
+      },
+      "damageEvents": [
+        {
+          "actorSlot": 1,
+          "critType": 0,
+          "damage": 4,
+          "drawCount": 1,
+          "enemyId": 3,
+          "hpBefore": 1000,
+          "x": 200,
+          "y": 220
+        }
+      ],
+      "drawCount": 2,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.99
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0
+        }
+      ],
+      "kind": "castle-sandbag",
+      "order": [
+        {
+          "actorSlot": 1,
+          "drawCount": 1,
+          "event": "guardian-hit"
+        },
+        {
+          "drawCount": 1,
+          "event": "insurance"
+        },
+        {
+          "drawCount": 2,
+          "event": "defend"
+        }
+      ],
+      "rngState": 2384302402,
+      "scenario": "guardian-before-defender",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 103,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 339,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "113": 1,
+              "118": 2,
+              "121": 1,
+              "134": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": 0,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 39,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 996,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 103,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 7,
+            "116": 0,
+            "117": 0,
+            "118": 3,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 4,
+          "guardianSlots": [
+            0,
+            1
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 2,
+            "116": 0,
+            "117": 0,
+            "118": 2,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 503
+      },
+      "before": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "113": 1,
+              "118": 2,
+              "121": 1,
+              "134": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": 0,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 7,
+            "116": 0,
+            "117": 0,
+            "118": 3,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 4,
+          "guardianSlots": [
+            0,
+            1
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 2,
+            "116": 0,
+            "117": 0,
+            "118": 2,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 500
+      },
+      "boundary": "damage",
+      "config": {
+        "damage": 3,
+        "defender": 1,
+        "guardian": true,
+        "insurance": 2,
+        "lastHope": 1,
+        "level": 10,
+        "name": "guardian-then-last-hope",
+        "prefix": [
+          0.01,
+          0.99,
+          0.99,
+          0
+        ]
+      },
+      "damageEvents": [
+        {
+          "actorSlot": 0,
+          "critType": 0,
+          "damage": 4,
+          "drawCount": 1,
+          "enemyId": 3,
+          "hpBefore": 1000,
+          "x": 200,
+          "y": 220
+        }
+      ],
+      "drawCount": 6,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.01
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.99
+        },
+        {
+          "index": 3,
+          "state": 3129746520,
+          "value": 0.99
+        },
+        {
+          "index": 4,
+          "state": 4276113467,
+          "value": 0
+        },
+        {
+          "index": 5,
+          "state": 1745748808,
+          "value": 0.40646381862461567
+        },
+        {
+          "index": 6,
+          "state": 2760751131,
+          "value": 0.6427874627988786
+        }
+      ],
+      "kind": "castle-sandbag",
+      "order": [
+        {
+          "actorSlot": 0,
+          "drawCount": 1,
+          "event": "guardian-hit"
+        },
+        {
+          "drawCount": 1,
+          "event": "insurance"
+        },
+        {
+          "amount": 1,
+          "drawCount": 2,
+          "event": "castle-hit"
+        }
+      ],
+      "rngState": 2760751131,
+      "scenario": "guardian-then-last-hope",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "134": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": 0,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 5,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "121": 1,
+              "134": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": 0,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": false,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 6,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 0,
+          "guardianSlots": [
+            0
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 0,
+            "116": 0,
+            "117": 0,
+            "118": 0,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 0,
+        "sandbagLevel": 10,
+        "totalMoney": 500
+      },
+      "boundary": "damage",
+      "config": {
+        "damage": 3,
+        "hp": 6,
+        "lastHope": 1,
+        "level": 10,
+        "name": "last-hope-low",
+        "prefix": [
+          0.99,
+          0.99,
+          0
+        ]
+      },
+      "damageEvents": [],
+      "drawCount": 3,
+      "draws": [
+        {
+          "index": 1,
+          "state": 1199382711,
+          "value": 0.99
+        },
+        {
+          "index": 2,
+          "state": 2384302402,
+          "value": 0.99
+        },
+        {
+          "index": 3,
+          "state": 3129746520,
+          "value": 0
+        }
+      ],
+      "kind": "castle-sandbag",
+      "order": [
+        {
+          "amount": 1,
+          "drawCount": 1,
+          "event": "castle-hit"
+        }
+      ],
+      "rngState": 3129746520,
+      "scenario": "last-hope-low",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "after": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "113": 1,
+              "118": 2,
+              "121": 1,
+              "134": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": 0,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 7,
+            "116": 0,
+            "117": 0,
+            "118": 3,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 4,
+          "guardianSlots": [
+            0,
+            1
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 2,
+            "116": 0,
+            "117": 0,
+            "118": 2,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 1,
+        "sandbagLevel": 10,
+        "totalMoney": 500
+      },
+      "before": {
+        "absorbFix": 0,
+        "actors": [
+          {
+            "accuracyFix": 0,
+            "appearance": 0,
+            "burst": 0,
+            "chain": 0,
+            "devType": 6,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 100,
+            "nextTrait": 86,
+            "potentialAim": 0.1887656694278121,
+            "potentialTeam": 0.7795015215873718,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 0,
+            "traits": {
+              "6": 1,
+              "105": 2,
+              "113": 1,
+              "118": 2,
+              "121": 1,
+              "134": 1,
+              "900": 9,
+              "901": 4
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 3
+          },
+          {
+            "accuracyFix": 0,
+            "appearance": 10,
+            "burst": 0,
+            "chain": 0,
+            "devType": 9,
+            "earnedGold": 0,
+            "exists": true,
+            "exp": 0,
+            "focus": -1,
+            "frenzy": 0,
+            "idleCount": 0,
+            "kills": 0,
+            "level": 1,
+            "money": 200,
+            "nextTrait": 57,
+            "potentialAim": 0.6054350052028894,
+            "potentialTeam": 0.7026438908651471,
+            "rampageTicks": 0,
+            "shootTimer": 0,
+            "skillPoints": 0,
+            "slot": 1,
+            "traits": {
+              "9": 1,
+              "103": 1,
+              "105": 1,
+              "113": 2,
+              "900": 6,
+              "901": 6
+            },
+            "weaponExp": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "wexpRef": 0
+          }
+        ],
+        "castleHp": 40,
+        "castleMaxHp": 40,
+        "enemy": {
+          "alive": true,
+          "attack": 1,
+          "attacked": false,
+          "attacking": false,
+          "boss": {
+            "action": null,
+            "count": null,
+            "fireNum": null,
+            "hpMax": null,
+            "idle": null,
+            "weapon": null
+          },
+          "bounds": {
+            "height": 17.95,
+            "width": 28.95,
+            "x": -14,
+            "y": -1.95
+          },
+          "crit": [
+            4,
+            19,
+            -1,
+            9
+          ],
+          "deathTicks": 0,
+          "drop": 0,
+          "dropping": false,
+          "exp": 29,
+          "frame": 5,
+          "free": false,
+          "gold": 9,
+          "height": 17.95,
+          "hp": 1000,
+          "id": 3,
+          "knockBack": 0,
+          "level": 0,
+          "scaleX": 1,
+          "scaleY": 1,
+          "shadowHit": true,
+          "speed": 0.9258746025152504,
+          "speedOrg": 0.9258746025152504,
+          "type": 0,
+          "width": 28.95,
+          "x": 200,
+          "y": 220
+        },
+        "gold": 100,
+        "multiplier": 0.5,
+        "party": {
+          "effects": {
+            "109": 0,
+            "112": 0,
+            "113": 7,
+            "116": 0,
+            "117": 0,
+            "118": 3,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          },
+          "guardian": 4,
+          "guardianSlots": [
+            0,
+            1
+          ],
+          "levels": {
+            "109": 0,
+            "112": 0,
+            "113": 2,
+            "116": 0,
+            "117": 0,
+            "118": 2,
+            "120": 0,
+            "122": 0,
+            "123": 0,
+            "124": 0,
+            "125": 0,
+            "126": 0,
+            "127": 0,
+            "137": 0,
+            "138": 0,
+            "139": 0
+          }
+        },
+        "protection": 1,
+        "sandbagLevel": 10,
+        "totalMoney": 500
+      },
+      "boundary": "damage",
+      "config": {
+        "damage": 20,
+        "defender": 1,
+        "guardian": true,
+        "insurance": 2,
+        "lastHope": 1,
+        "level": 10,
+        "name": "protection-before-all",
+        "protection": 1
+      },
+      "damageEvents": [],
+      "drawCount": 0,
+      "draws": [],
+      "kind": "castle-sandbag",
+      "order": [
+        {
+          "drawCount": 0,
+          "event": "defend"
+        }
+      ],
+      "rngState": 3735928559,
+      "scenario": "protection-before-all",
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "ap": 0,
+      "boundary": "town",
+      "dialog": false,
+      "drawCount": 0,
+      "eventDialog": false,
+      "gold": 999,
+      "hp": 30,
+      "kind": "castle-sandbag",
+      "maxHp": 40,
+      "multiplier": 1,
+      "op": "before",
+      "rngState": 42,
+      "sandbagLevel": 0,
+      "scenario": "sandbag-insufficient",
+      "tile": {
+        "cost": 1000,
+        "hint": [
+          "Stronger sandbags will absorb more damage done to the wall.",
+          "[ You haven't acquired this upgrade yet ]"
+        ],
+        "mouseEnabled": false,
+        "name": "Sandbag",
+        "possible": false,
+        "priceText": "1000"
+      },
+      "totalMoney": 1234,
+      "type": "snapshot",
+      "upkeep": 40,
+      "upkeepText": "40",
+      "version": 1
+    },
+    {
+      "ap": 0,
+      "boundary": "town",
+      "dialog": false,
+      "drawCount": 0,
+      "eventDialog": false,
+      "gold": 999,
+      "hp": 30,
+      "kind": "castle-sandbag",
+      "maxHp": 40,
+      "multiplier": 1,
+      "op": "click",
+      "rngState": 42,
+      "sandbagLevel": 0,
+      "scenario": "sandbag-insufficient",
+      "tile": {
+        "cost": 1000,
+        "hint": [
+          "Stronger sandbags will absorb more damage done to the wall.",
+          "[ You haven't acquired this upgrade yet ]"
+        ],
+        "mouseEnabled": false,
+        "name": "Sandbag",
+        "possible": false,
+        "priceText": "1000"
+      },
+      "totalMoney": 1234,
+      "type": "snapshot",
+      "upkeep": 40,
+      "upkeepText": "40",
+      "version": 1
+    },
+    {
+      "ap": 0,
+      "boundary": "town",
+      "dialog": false,
+      "drawCount": 0,
+      "eventDialog": false,
+      "gold": 1000,
+      "hp": 30,
+      "kind": "castle-sandbag",
+      "maxHp": 40,
+      "multiplier": 1,
+      "op": "before",
+      "rngState": 42,
+      "sandbagLevel": 0,
+      "scenario": "sandbag-first",
+      "tile": {
+        "cost": 1000,
+        "hint": [
+          "Stronger sandbags will absorb more damage done to the wall.",
+          "[ You haven't acquired this upgrade yet ]"
+        ],
+        "mouseEnabled": true,
+        "name": "Sandbag",
+        "possible": true,
+        "priceText": "1000"
+      },
+      "totalMoney": 1234,
+      "type": "snapshot",
+      "upkeep": 40,
+      "upkeepText": "40",
+      "version": 1
+    },
+    {
+      "ap": 0,
+      "boundary": "town",
+      "dialog": false,
+      "drawCount": 0,
+      "eventDialog": false,
+      "gold": 0,
+      "hp": 30,
+      "kind": "castle-sandbag",
+      "maxHp": 40,
+      "multiplier": 0.95,
+      "op": "click",
+      "rngState": 42,
+      "sandbagLevel": 1,
+      "scenario": "sandbag-first",
+      "tile": {
+        "cost": 1240,
+        "hint": [
+          "Stronger sandbags will absorb more damage done to the wall.",
+          "(Currently, sandbag will absorb 5% damage)"
+        ],
+        "mouseEnabled": false,
+        "name": "Sandbag Lv 1",
+        "possible": false,
+        "priceText": "1240"
+      },
+      "totalMoney": 1234,
+      "type": "snapshot",
+      "upkeep": 80,
+      "upkeepText": "80",
+      "version": 1
+    },
+    {
+      "ap": 0,
+      "boundary": "town",
+      "dialog": false,
+      "drawCount": 0,
+      "eventDialog": false,
+      "gold": 1240,
+      "hp": 30,
+      "kind": "castle-sandbag",
+      "maxHp": 40,
+      "multiplier": 0.95,
+      "op": "before",
+      "rngState": 42,
+      "sandbagLevel": 1,
+      "scenario": "sandbag-second",
+      "tile": {
+        "cost": 1240,
+        "hint": [
+          "Stronger sandbags will absorb more damage done to the wall.",
+          "(Currently, sandbag will absorb 5% damage)"
+        ],
+        "mouseEnabled": true,
+        "name": "Sandbag Lv 1",
+        "possible": true,
+        "priceText": "1240"
+      },
+      "totalMoney": 1234,
+      "type": "snapshot",
+      "upkeep": 80,
+      "upkeepText": "80",
+      "version": 1
+    },
+    {
+      "ap": 0,
+      "boundary": "town",
+      "dialog": false,
+      "drawCount": 0,
+      "eventDialog": false,
+      "gold": 0,
+      "hp": 30,
+      "kind": "castle-sandbag",
+      "maxHp": 40,
+      "multiplier": 0.9,
+      "op": "click",
+      "rngState": 42,
+      "sandbagLevel": 2,
+      "scenario": "sandbag-second",
+      "tile": {
+        "cost": 1960,
+        "hint": [
+          "Stronger sandbags will absorb more damage done to the wall.",
+          "(Currently, sandbag will absorb 10% damage)"
+        ],
+        "mouseEnabled": false,
+        "name": "Sandbag Lv 2",
+        "possible": false,
+        "priceText": "1960"
+      },
+      "totalMoney": 1234,
+      "type": "snapshot",
+      "upkeep": 120,
+      "upkeepText": "120",
+      "version": 1
+    },
+    {
+      "ap": 0,
+      "boundary": "town",
+      "dialog": false,
+      "drawCount": 0,
+      "eventDialog": false,
+      "gold": 2240,
+      "hp": 30,
+      "kind": "castle-sandbag",
+      "maxHp": 40,
+      "multiplier": 1,
+      "op": "before",
+      "rngState": 42,
+      "sandbagLevel": 0,
+      "scenario": "sandbag-sequence",
+      "tile": {
+        "cost": 1000,
+        "hint": [
+          "Stronger sandbags will absorb more damage done to the wall.",
+          "[ You haven't acquired this upgrade yet ]"
+        ],
+        "mouseEnabled": true,
+        "name": "Sandbag",
+        "possible": true,
+        "priceText": "1000"
+      },
+      "totalMoney": 1234,
+      "type": "snapshot",
+      "upkeep": 40,
+      "upkeepText": "40",
+      "version": 1
+    },
+    {
+      "ap": 0,
+      "boundary": "town",
+      "dialog": false,
+      "drawCount": 0,
+      "eventDialog": false,
+      "gold": 1240,
+      "hp": 30,
+      "kind": "castle-sandbag",
+      "maxHp": 40,
+      "multiplier": 0.95,
+      "op": "click",
+      "rngState": 42,
+      "sandbagLevel": 1,
+      "scenario": "sandbag-sequence",
+      "tile": {
+        "cost": 1240,
+        "hint": [
+          "Stronger sandbags will absorb more damage done to the wall.",
+          "(Currently, sandbag will absorb 5% damage)"
+        ],
+        "mouseEnabled": true,
+        "name": "Sandbag Lv 1",
+        "possible": true,
+        "priceText": "1240"
+      },
+      "totalMoney": 1234,
+      "type": "snapshot",
+      "upkeep": 80,
+      "upkeepText": "80",
+      "version": 1
+    },
+    {
+      "ap": 0,
+      "boundary": "town",
+      "dialog": false,
+      "drawCount": 0,
+      "eventDialog": false,
+      "gold": 0,
+      "hp": 30,
+      "kind": "castle-sandbag",
+      "maxHp": 40,
+      "multiplier": 0.9,
+      "op": "click",
+      "rngState": 42,
+      "sandbagLevel": 2,
+      "scenario": "sandbag-sequence",
+      "tile": {
+        "cost": 1960,
+        "hint": [
+          "Stronger sandbags will absorb more damage done to the wall.",
+          "(Currently, sandbag will absorb 10% damage)"
+        ],
+        "mouseEnabled": false,
+        "name": "Sandbag Lv 2",
+        "possible": false,
+        "priceText": "1960"
+      },
+      "totalMoney": 1234,
+      "type": "snapshot",
+      "upkeep": 120,
+      "upkeepText": "120",
+      "version": 1
+    },
+    {
+      "ap": 0,
+      "boundary": "town",
+      "dialog": false,
+      "drawCount": 0,
+      "eventDialog": false,
+      "gold": 20440,
+      "hp": 30,
+      "kind": "castle-sandbag",
+      "maxHp": 40,
+      "multiplier": 0.55,
+      "op": "before",
+      "rngState": 42,
+      "sandbagLevel": 9,
+      "scenario": "sandbag-final",
+      "tile": {
+        "cost": 20440,
+        "hint": [
+          "Stronger sandbags will absorb more damage done to the wall.",
+          "(Currently, sandbag will absorb 44% damage)"
+        ],
+        "mouseEnabled": true,
+        "name": "Sandbag Lv 9",
+        "possible": true,
+        "priceText": "20440"
+      },
+      "totalMoney": 1234,
+      "type": "snapshot",
+      "upkeep": 400,
+      "upkeepText": "400",
+      "version": 1
+    },
+    {
+      "ap": 0,
+      "boundary": "town",
+      "dialog": false,
+      "drawCount": 0,
+      "eventDialog": false,
+      "gold": 0,
+      "hp": 30,
+      "kind": "castle-sandbag",
+      "maxHp": 40,
+      "multiplier": 0.5,
+      "op": "click",
+      "rngState": 42,
+      "sandbagLevel": 10,
+      "scenario": "sandbag-final",
+      "tile": {
+        "cost": 0,
+        "hint": [
+          "Stronger sandbags will absorb more damage done to the wall.",
+          "(Currently, sandbag will absorb 50% damage)"
+        ],
+        "mouseEnabled": false,
+        "name": "Sandbag Lv 10",
+        "possible": false,
+        "priceText": "0"
+      },
+      "totalMoney": 1234,
+      "type": "snapshot",
+      "upkeep": 440,
+      "upkeepText": "440",
+      "version": 1
+    },
+    {
+      "ap": 0,
+      "boundary": "town",
+      "dialog": false,
+      "drawCount": 0,
+      "eventDialog": false,
+      "gold": 100000,
+      "hp": 30,
+      "kind": "castle-sandbag",
+      "maxHp": 40,
+      "multiplier": 0.5,
+      "op": "before",
+      "rngState": 42,
+      "sandbagLevel": 10,
+      "scenario": "sandbag-cap",
+      "tile": {
+        "cost": 0,
+        "hint": [
+          "Stronger sandbags will absorb more damage done to the wall.",
+          "(Currently, sandbag will absorb 50% damage)"
+        ],
+        "mouseEnabled": false,
+        "name": "Sandbag Lv 10",
+        "possible": false,
+        "priceText": "0"
+      },
+      "totalMoney": 1234,
+      "type": "snapshot",
+      "upkeep": 440,
+      "upkeepText": "440",
+      "version": 1
+    },
+    {
+      "ap": 0,
+      "boundary": "town",
+      "dialog": false,
+      "drawCount": 0,
+      "eventDialog": false,
+      "gold": 100000,
+      "hp": 30,
+      "kind": "castle-sandbag",
+      "maxHp": 40,
+      "multiplier": 0.5,
+      "op": "click",
+      "rngState": 42,
+      "sandbagLevel": 10,
+      "scenario": "sandbag-cap",
+      "tile": {
+        "cost": 0,
+        "hint": [
+          "Stronger sandbags will absorb more damage done to the wall.",
+          "(Currently, sandbag will absorb 50% damage)"
+        ],
+        "mouseEnabled": false,
+        "name": "Sandbag Lv 10",
+        "possible": false,
+        "priceText": "0"
+      },
+      "totalMoney": 1234,
+      "type": "snapshot",
+      "upkeep": 440,
+      "upkeepText": "440",
+      "version": 1
+    },
+    {
+      "damageCases": 12,
+      "kind": "castle-sandbag",
+      "ok": true,
+      "snapshots": 25,
+      "townCases": 6,
+      "type": "complete",
+      "version": 1
+    }
+  ]
+}

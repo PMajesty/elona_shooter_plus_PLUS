@@ -10,10 +10,11 @@ import { ENEMIES } from '../src/content.ts';
 export function withLegacyPartyDefaults(value: Record<string, any>): Record<string, any> {
   const expected = structuredClone(value);
   const town = expected.town?.preparation === 'ready' ? expected.town : expected.previousTown;
-  expected.version = 17;
+  expected.version = 18;
   expected.wallLevel = 1;
   expected.wallFixCount = 0;
   expected.repairmanLevel = 0;
+  expected.sandbagLevel = 0;
   expected.party = createPartyState(town?.recruit);
   expected.partySkills = partySkills([{ traits: expected.player.traits ?? createSheriffTraits() }]);
   expected.partyAI = createPartyAIShared();
@@ -28,8 +29,16 @@ export function withLegacyPartyDefaults(value: Record<string, any>): Record<stri
   return expected;
 }
 
-export function asLegacyV16Save(state: SimulationState): Record<string, any> {
+export function asLegacyV17Save(state: SimulationState): Record<string, any> {
   const value: Record<string, any> = structuredClone(state);
+  assert.equal(value.sandbagLevel, 0);
+  delete value.sandbagLevel;
+  value.version = 17;
+  return value;
+}
+
+export function asLegacyV16Save(state: SimulationState): Record<string, any> {
+  const value = asLegacyV17Save(state);
   assert.equal(value.wallFixCount, 0);
   assert.equal(value.repairmanLevel, 0);
   delete value.wallFixCount; delete value.repairmanLevel;

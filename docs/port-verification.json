@@ -1,6 +1,6 @@
 {
   "date": "2026-11-02",
-  "milestone": "Paid Fix Wall and Repairman purchases, source-ordered wave healing, future upkeep and v17 persistence; published locally and browser-verified",
+  "milestone": "Sandbag purchases, source integer damage absorption and upkeep, v18 persistence; published locally and browser-verified",
   "complete_port": false,
   "environment": {
     "os": "Windows",
@@ -10,19 +10,19 @@
     "vite": "8.3.5"
   },
   "automated": {
-    "simulation_tests_passed": 309,
+    "simulation_tests_passed": 319,
     "simulation_tests_failed": 0,
     "typescript": "passed",
     "candidate_build": "passed",
     "production_build": "identical to verified candidate",
-    "test_output": ".build/repair-tests-output.txt",
-    "build_output": ".build/repair-build-output.txt",
-    "python_tools_compile": "passed: Castle repair diagnostic builder and oracle server",
-    "repair_party_soak": {
+    "test_output": ".build/sandbag-tests-output.txt",
+    "build_output": ".build/sandbag-build-output.txt",
+    "python_tools_compile": "passed: Castle Sandbag diagnostic builder and oracle server",
+    "sandbag_party_soak": {
       "status": "passed",
       "seedCount": 8,
       "sourceHashes": {
-        "simulation.ts": "3ff31a259e93715f45530956fc36cbe80960a1ad502d29dd701cb3f554a649d3",
+        "simulation.ts": "fac3acc3803ef393eb367359f6bc5c4134b78f62caf2826f5b34a1b5eebef882",
         "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
         "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
         "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
@@ -31,14 +31,14 @@
         "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
         "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
         "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
-        "castle-upgrades.ts": "eecc52653b69a25df279c9384b05879c9f6468a0a8a7f7ed02985ed35c633503"
+        "castle-upgrades.ts": "e64edfcd88cc84d8036cc898652d82a88fd54c52be9e779207f856acc060fcff"
       },
       "geometrySha256": "505b48ffe234d7187db5445bd4306f0d104648985d18a0719e7c47605fec3ad2",
       "scenarios": 9,
-      "frames": 135549,
-      "checkpoints": 1487,
-      "restTransitions": 54,
-      "rewardActions": 223,
+      "frames": 132552,
+      "checkpoints": 1470,
+      "restTransitions": 53,
+      "rewardActions": 219,
       "reachedDays": {
         "1": 8,
         "2": 9,
@@ -46,7 +46,7 @@
         "4": 9,
         "5": 9,
         "6": 9,
-        "7": 9
+        "7": 8
       },
       "wonDays": {
         "1": 8,
@@ -54,94 +54,83 @@
         "3": 9,
         "4": 9,
         "5": 9,
-        "6": 9,
-        "7": 9
+        "6": 8,
+        "7": 8
       },
       "naturallyHiredClasses": [
         2,
         3,
         4,
-        5,
-        6,
-        7,
         8,
         9
       ],
-      "fixWallPurchases": 10,
-      "repairmanPurchases": 18,
-      "positiveRepairObservations": 29,
-      "housePurchases": 8,
+      "sandbagPurchases": 19,
+      "ambiguousSandbagFrames": 1,
+      "positiveDamageReductions": 1,
+      "avoidedDamage": 1,
+      "fixWallPurchases": 11,
+      "repairmanPurchases": 17,
+      "positiveRepairObservations": 41,
+      "housePurchases": 1,
       "wallPurchases": 9,
-      "maximumCompanions": 3,
+      "maximumCompanions": 2,
       "partyBattleCounts": {
         "0": 8,
         "1": 49,
-        "2": 1,
-        "3": 4
+        "2": 4
       },
-      "expandedNaturalScenarios": [
-        "natural-0",
-        "natural-1",
-        "natural-3",
-        "natural-5",
-        "natural-6",
-        "natural-7"
-      ],
+      "expandedNaturalScenarios": [],
       "actorActivity": {
         "1": {
-          "shots": 1853,
-          "hits": 1547,
-          "damage": 81550,
-          "kills": 940,
-          "reloads": 879,
-          "reloadCompletions": 153,
+          "shots": 1730,
+          "hits": 1451,
+          "damage": 72762,
+          "kills": 854,
+          "reloads": 759,
+          "reloadCompletions": 128,
           "bowDraws": 428,
-          "levelUps": 52
+          "levelUps": 48
         },
         "2": {
-          "shots": 77,
-          "hits": 68,
-          "damage": 4258,
-          "kills": 54,
-          "reloads": 69,
-          "reloadCompletions": 16,
+          "shots": 0,
+          "hits": 0,
+          "damage": 0,
+          "kills": 0,
+          "reloads": 0,
+          "reloadCompletions": 0,
           "bowDraws": 0,
-          "levelUps": 4
+          "levelUps": 0
         },
         "3": {
-          "shots": 67,
-          "hits": 57,
-          "damage": 3837,
-          "kills": 48,
-          "reloads": 61,
-          "reloadCompletions": 14,
+          "shots": 0,
+          "hits": 0,
+          "damage": 0,
+          "kills": 0,
+          "reloads": 0,
+          "reloadCompletions": 0,
           "bowDraws": 0,
-          "levelUps": 5
+          "levelUps": 0
         }
       },
-      "elapsedMs": 27290,
+      "elapsedMs": 79085,
       "collision": "Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts",
-      "policy": "Aimed Sheriff and autonomous companions; prioritize Repairman1 when affordable (reserve first hire cost), Repairman2 from town4, then existing House/Wall/hiring policy. Pay Fix Wall on damaged even days when affordable; otherwise Free Repair. Separate capital-start grants12000gold only at an earned first town. No forced kills, HP grants or battle completion. Wave observations exclude leech weapons and item repair and account for same-frame castle-hit events.",
+      "policy": "Aimed Sheriff and autonomous companions; prioritize Sandbag1, Sandbag2 from town4, then Repairman/House/Wall/hiring and paid/free repair policy. Reserve first hire cost. Natural runs have no grants. Separate capital-start grants12000gold only at earned first town, buys Sandbag4 normally, sets companions to armor-only/no priorities through normal town actions and avoids aiming at Crows until one positive reduction occurs. This input exposure addresses integer rounding that masks low-level Sandbags against small early-game hits. Measured damage pairs replay a single actual frame with only Sandbag level set to0; accept single-hit, same-final-RNG, surviving-wall pairs. This counterfactual is port integration evidence, separate from original damage reference.",
       "limits": [
         "Port full-state/event replay and finite-state checks, not independent original parity or browser validation",
         "Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred",
         "Natural scenarios and the one capital-start are separate: the latter grants12000gold only at an earned first town; it does not establish natural three-companion affordability within seven days",
         "Deaths count castle defeats; companions have no separate HP/death model in the source combat actor"
       ],
-      "eligibleWaveObservations": 205,
-      "observedRestoredHp": 64,
-      "positiveNaturalScenarios": [
-        "natural-1",
-        "natural-2",
-        "natural-3",
-        "natural-4",
-        "natural-7"
-      ],
-      "partyBattleCoverage": "Expanded two/three-companion battles in this repair-priority run are capital-start only; natural second hires occurred at Day7 town. Prior Castle soak independently retains natural two-companion battle evidence."
+      "acceptedDamagePairs": 186,
+      "unchangedDamagePairs": 185,
+      "naturalDay7Wins": 8,
+      "capitalOutcome": "Day6 castle defeat; companions remain on the deliberately chosen armor-only/no-priority orders. No invincibility or forced completion.",
+      "positiveReductionProvenance": "One actual Crow impact in capital-sandbag-exposure, Day3tick3553: damage3 with purchased Sandbag4 vs4 with onlylevel reset0, sameRNG. Natural level1/2 hit pairs show no positive integer reduction.",
+      "failedAssumption": "Prior run at levels1/2 did not exercise positive reduction; existing medal absorption and truncation masked the small percentage. Its completed campaigns and failed coverage assertion are preserved in .build/sandbag-party-soak-low-damage; individual hit counts were not saved by that older failure handler. All8 natural replay operation streams are unchanged in the revised run."
     },
-    "repair_party_soak_report": ".build/repair-party-soak/report.json",
-    "repair_party_soak_report_sha256": "e909b1ca4a2b147d82147bbc018d2f0ae3d24fe78c8ca635a23ef5087802775e",
-    "repair_party_soak_fixtures": ".build/browser-qa/repair-party-soak-fixtures.json",
+    "sandbag_party_soak_report": ".build/sandbag-party-soak/report.json",
+    "sandbag_party_soak_report_sha256": "8c76ff58c9e4a829f95cfacb9f2ef52e6ff5e7fb6502ff29f184945bc03b962d",
+    "sandbag_party_soak_fixtures": ".build/browser-qa/sandbag-party-soak-fixtures.json",
     "asset_preservation": {
       "status": "passed",
       "oldReleaseFiles": 308,
@@ -150,15 +139,15 @@
         "index.html"
       ],
       "added": [
-        "assets/index-XNVk3crn.js"
+        "assets/index-2cijlKJd.js"
       ],
       "removed": [
-        "assets/index-s1hKilh5.js"
+        "assets/index-XNVk3crn.js"
       ],
       "unchangedPublicAssetFiles": 305,
       "allAssetsPreserved": true
     },
-    "prior_evidence": "Prior Castle, party and solo campaign evidence remains historical in milestone_history; it is not recast as a new v17 run."
+    "prior_evidence": "Repair, Castle and prior campaign runs remain historical in milestone_history; no fresh v18 claim is inferred from them."
   },
   "browser_checks": {
     "new_game": {
@@ -2543,9 +2532,188 @@
       "browserPaused": true,
       "consoleErrors": [],
       "screenshot": "repair-production-restored.jpg"
+    },
+    "castle_sandbag": {
+      "status": "passed",
+      "report": ".build/browser-qa/sandbag-ui-verification.json",
+      "checks": {
+        "sandbag1": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "sandbag-ui-sandbag1-v18.json",
+          "expectedFrom": "sandbag-party-natural-0-before-sandbag1-v18.json",
+          "day": 2,
+          "tick": 3275,
+          "gold": 358,
+          "ap": 4,
+          "rng": 423535753,
+          "hp": 40,
+          "maxHp": 40,
+          "sandbagLevel": 1,
+          "repairmanLevel": 0,
+          "futureUpkeep": 80,
+          "settledUpkeep": 40,
+          "settledWages": 53
+        },
+        "blocked": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "sandbag-ui-blocked-v18.json",
+          "expectedFrom": "sandbag-ui-sandbag1-v18.json",
+          "day": 2,
+          "tick": 3275,
+          "gold": 358,
+          "ap": 4,
+          "rng": 423535753,
+          "hp": 40,
+          "maxHp": 40,
+          "sandbagLevel": 1,
+          "repairmanLevel": 0,
+          "futureUpkeep": 80,
+          "settledUpkeep": 40,
+          "settledWages": 53
+        },
+        "sandbag2": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "sandbag-ui-sandbag2-v18.json",
+          "expectedFrom": "sandbag-party-natural-0-before-sandbag2-v18.json",
+          "day": 6,
+          "tick": 12852,
+          "gold": 96,
+          "ap": 4,
+          "rng": 2254390660,
+          "hp": 45,
+          "maxHp": 45,
+          "sandbagLevel": 2,
+          "repairmanLevel": 2,
+          "futureUpkeep": 250,
+          "settledUpkeep": 210,
+          "settledWages": 79
+        },
+        "restore": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "sandbag-ui-restore-v18.json",
+          "expectedFrom": "sandbag-ui-sandbag2-v18.json",
+          "day": 6,
+          "tick": 12852,
+          "gold": 96,
+          "ap": 4,
+          "rng": 2254390660,
+          "hp": 45,
+          "maxHp": 45,
+          "sandbagLevel": 2,
+          "repairmanLevel": 2,
+          "futureUpkeep": 250,
+          "settledUpkeep": 210,
+          "settledWages": 79
+        },
+        "combat-hit": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "sandbag-ui-combat-hit-v18.json",
+          "expectedFrom": "sandbag-party-capital-sandbag-exposure-before-sandbag-hit-v18.json",
+          "day": 3,
+          "tick": 3559,
+          "gold": 2248,
+          "ap": null,
+          "rng": 70421558,
+          "hp": 42,
+          "maxHp": 45,
+          "sandbagLevel": 4,
+          "repairmanLevel": 1,
+          "futureUpkeep": 320,
+          "settledUpkeep": 0,
+          "settledWages": 0,
+          "frames": 7,
+          "damageWith": 3,
+          "damageWithout": 4,
+          "control": "Same browser input and starting state; only Sandbag level changed to0; final RNG equal. Port integration evidence, not original reference."
+        },
+        "result-town": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "sandbag-ui-result-town-v18.json",
+          "expectedFrom": "sandbag-party-natural-0-sandbag-result-v18.json",
+          "day": 3,
+          "tick": 5387,
+          "gold": 1132,
+          "ap": 4,
+          "rng": 688830609,
+          "hp": 40,
+          "maxHp": 40,
+          "sandbagLevel": 1,
+          "repairmanLevel": 0,
+          "futureUpkeep": 80,
+          "settledUpkeep": 80,
+          "settledWages": 58
+        }
+      },
+      "scope": "Actual CUA level1/2 purchases, insufficient-gold guard, reload/Continue, seven normal browser updates across Crow impact and earned result Proceed; full exported envelopes compared.",
+      "damage": {
+        "input": ".build/browser-qa/sandbag-party-capital-sandbag-exposure-before-sandbag-hit-v18.json",
+        "fromTick": 3552,
+        "toTick": 3559,
+        "fromHp": 45,
+        "toHp": 42,
+        "maxHp": 45,
+        "sandbagLevel": 4,
+        "controlDamage": 4,
+        "actualDamage": 3,
+        "finalRngEqual": true
+      },
+      "result": {
+        "input": ".build/browser-qa/sandbag-party-natural-0-sandbag-result-v18.json",
+        "day": 3,
+        "upkeep": 80,
+        "wages": 58,
+        "gold": 1132
+      },
+      "consoleErrors": [],
+      "limits": [
+        "Imported earned checkpoints, not a manually played full browser campaign.",
+        "The positive-damage browser checkpoint comes from the explicitly funded input-exposure scenario; it does not establish natural Sandbag4 affordability within seven days.",
+        "Counterfactual damage replay is port integration evidence, separate from independent original damage cases. No new pixel/audio/performance parity claim."
+      ]
+    },
+    "sandbag_production": {
+      "status": "passed",
+      "bundle": "assets/index-2cijlKJd.js",
+      "newGame": {
+        "tick": 0,
+        "hp": 40,
+        "gold": 200,
+        "ammo": 5,
+        "wallLevel": 1,
+        "capacity": 1,
+        "repairmanLevel": 0,
+        "wallFixCount": 0,
+        "sandbagLevel": 0
+      },
+      "migration": {
+        "from": 17,
+        "to": 18,
+        "fullEnvelopeEquality": true,
+        "exactCurrentRestore": true,
+        "tick": 674,
+        "hp": 40,
+        "gold": 209,
+        "wallLevel": 1,
+        "rngUnchanged": true
+      },
+      "browserPaused": true,
+      "consoleErrors": [],
+      "screenshot": "sandbag-production-restored.jpg"
     }
   },
-  "checkpoint_provenance": "Current repair campaign fixtures carry operation indexes and byte hashes in repair-party-soak-fixtures.json. Eight natural seeded campaigns have no grants. The one capital-start differs from an earned first-town save only by12000gold. Five natural campaigns supply29positive healing observations totaling64HP. The browser result checkpoint is replayed from natural-0 ordinary recorded operations; its provenance is saved separately. Historical fixtures retain their original limits.",
+  "checkpoint_provenance": "Sandbag fixtures carry operation indexes and byte hashes in sandbag-party-soak-fixtures.json. Eight natural campaigns have no grants. The one capital scenario starts from earned first town+12000gold only, buys Sandbag4 normally, sets companion armor-only/no priorities through town actions, and avoids shooting Crows until a reduced hit occurs. It later loses onDay6; the natural runs all finishDay7. Full browser damage comparison uses this disclosed capital checkpoint; purchased-level/result checks use natural checkpoints.",
   "performance": {
     "comparison_with_flash_or_ruffle": "not measured",
     "sample": {
@@ -2562,7 +2730,8 @@
     },
     "party_release": "No new wall-clock browser/Flash comparison. Headless throughput and background-tab update counts are not performance parity evidence.",
     "castle_release": "No new Flash/browser performance comparison. Headless simulation throughput and the background-browser ten-update check are not latency or rendering performance evidence.",
-    "repair_release": "No new Flash/browser performance comparison. The six-update hidden-browser healing check establishes state behavior only."
+    "repair_release": "No new Flash/browser performance comparison. The six-update hidden-browser healing check establishes state behavior only.",
+    "sandbag_release": "No new Flash/browser performance comparison; seven normal hidden-browser updates establish state behavior only."
   },
   "screenshots": [
     ".build/browser-qa/character-creation.jpg",
@@ -2613,7 +2782,11 @@
     ".build/browser-qa/repairman-level2.jpg",
     ".build/browser-qa/repair-wave-heal.jpg",
     ".build/browser-qa/repair-result-upkeep.jpg",
-    ".build/browser-qa/repair-production-restored.jpg"
+    ".build/browser-qa/repair-production-restored.jpg",
+    ".build/browser-qa/sandbag-level2.jpg",
+    ".build/browser-qa/sandbag-crow-hit.jpg",
+    ".build/browser-qa/sandbag-result-upkeep.jpg",
+    ".build/browser-qa/sandbag-production-restored.jpg"
   ],
   "preserved_baselines": {
     "original/elonashooter1.3.swf": {
@@ -9604,32 +9777,234 @@
         "UI descriptions and source pause/immune flags are captured, but their browser rendering/pause ownership are separate from the state comparison",
         "Save migration, actual clicks and connected battles require separate integration checks"
       ]
+    },
+    "castle_sandbag": {
+      "status": "passed",
+      "observedSnapshots": 25,
+      "damageCases": 12,
+      "townStartingStates": 6,
+      "townTransactions": 7,
+      "matchedSnapshots": 25,
+      "comparisons": [
+        {
+          "scenario": "unupgraded",
+          "boundary": "damage",
+          "op": "damage",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "first-level",
+          "boundary": "damage",
+          "op": "damage",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "first-level-medal",
+          "boundary": "damage",
+          "op": "damage",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "maximum-medal",
+          "boundary": "damage",
+          "op": "damage",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "minimum-one",
+          "boundary": "damage",
+          "op": "damage",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "typed-input",
+          "boundary": "damage",
+          "op": "damage",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "maximum-no-medal",
+          "boundary": "damage",
+          "op": "damage",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "insurance-before-defender",
+          "boundary": "damage",
+          "op": "damage",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "guardian-before-defender",
+          "boundary": "damage",
+          "op": "damage",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "guardian-then-last-hope",
+          "boundary": "damage",
+          "op": "damage",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "last-hope-low",
+          "boundary": "damage",
+          "op": "damage",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "protection-before-all",
+          "boundary": "damage",
+          "op": "damage",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sandbag-insufficient",
+          "boundary": "town",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sandbag-insufficient",
+          "boundary": "town",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sandbag-first",
+          "boundary": "town",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sandbag-first",
+          "boundary": "town",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sandbag-second",
+          "boundary": "town",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sandbag-second",
+          "boundary": "town",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sandbag-sequence",
+          "boundary": "town",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sandbag-sequence",
+          "boundary": "town",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sandbag-sequence",
+          "boundary": "town",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sandbag-final",
+          "boundary": "town",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sandbag-final",
+          "boundary": "town",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sandbag-cap",
+          "boundary": "town",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "sandbag-cap",
+          "boundary": "town",
+          "op": "click",
+          "matched": true,
+          "differences": []
+        }
+      ],
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "e66246721657a2c54ef5fc7b56247073b1ce5e04f7ca961bf4c05e3730574046",
+      "traceSha256": "d8f6da8a183f51bc97e10cfb3a5edcce676e0f4e96b1f7c0b42fd5d6d8782027",
+      "checks": [
+        "Actual Castle tile2 purchases, affordability, level10 cap, new prices and upkeep",
+        "AP0, unchanged totalMoney/HP/prepared town/party cache/settled result and zero purchase RNG",
+        "Sandbag0/1/10 and mission absorption0/.01/.02: typed integer input, post-multiply truncation and minimum1",
+        "Original nonlethal Guardian retaliation, Insurance before Defender, LastHope and protection guard",
+        "Exact shared RNG draws/state, guardian owner/damage and actor rampage state"
+      ],
+      "limits": [
+        "Controlled method calls, explicit party inputs and declared RNG prefixes; not native battle scheduling or earning/acquiring every skill",
+        "Guardian target is one original nonlethal Sheep; kill/progression and broader attacker classes have separate references",
+        "Town mouse-position seam drives original shape-hit handler; fresh town generation and actual browser clicks are separate",
+        "Source order observations and UI descriptions supplement state comparison; visual/audio rendering, save migration and connected battles require separate integration evidence"
+      ]
     }
   },
   "production_recovery": {
     "status": "passed",
-    "release_directory": ".build/browser-repair-final",
-    "previous_directory": ".build/browser-before-repair",
-    "current_bundle": "assets/index-XNVk3crn.js",
+    "release_directory": ".build/browser-sandbag-final",
+    "previous_directory": ".build/browser-before-sandbag",
+    "current_bundle": "assets/index-2cijlKJd.js",
     "candidate_build_matches_production": true,
     "copied_release_files_hash_checked": 308,
     "archive_files_hash_checked": 308,
-    "current_package": ".build/elona-shooter-browser-repair-slice.zip",
-    "current_package_bytes": 8574119,
-    "current_package_sha256": "5c19dbe91bc98155ce4886a619becbf36af285c13234ce57da33c9e7c3594988",
-    "previous_package": ".build/elona-shooter-browser-castle-slice.zip",
-    "previous_bundle": "assets/index-s1hKilh5.js",
-    "candidate_browser_verification": ".build/browser-qa/repair-ui-verification.json",
-    "production_backup": ".build/browser-qa/repair-production-before-v16.json",
-    "production_browser_verification": ".build/browser-qa/repair-production-verification.json",
-    "production_restored_screenshot": ".build/browser-qa/repair-production-restored.jpg",
+    "current_package": ".build/elona-shooter-browser-sandbag-slice.zip",
+    "current_package_bytes": 8574403,
+    "current_package_sha256": "945b2023d734cf5569c0cab3ec3d187423c6747210148d96930f80fb7b972d1e",
+    "previous_package": ".build/elona-shooter-browser-repair-slice.zip",
+    "previous_bundle": "assets/index-XNVk3crn.js",
+    "candidate_browser_verification": ".build/browser-qa/sandbag-ui-verification.json",
+    "production_backup": ".build/browser-qa/sandbag-production-before-v17.json",
+    "production_browser_verification": ".build/browser-qa/sandbag-production-verification.json",
+    "production_restored_screenshot": ".build/browser-qa/sandbag-production-restored.jpg",
     "production_console_errors": [],
-    "publication_report": ".build/repair-publication.json",
-    "current_save_version": 17,
+    "publication_report": ".build/sandbag-publication.json",
+    "current_save_version": 18,
     "production_browser_smoke": "passed",
     "restored_battle": {
-      "from": 16,
-      "to": 17,
+      "from": 17,
+      "to": 18,
       "fullEnvelopeEquality": true,
       "exactCurrentRestore": true,
       "tick": 674,
@@ -12656,6 +13031,430 @@
           "browserPaused": true,
           "consoleErrors": [],
           "screenshot": "castle-production-restored.jpg"
+        }
+      }
+    },
+    {
+      "milestone": "Paid Fix Wall and Repairman purchases, source-ordered wave healing, future upkeep and v17 persistence; published locally and browser-verified",
+      "saveVersion": 17,
+      "automated": {
+        "simulation_tests_passed": 309,
+        "simulation_tests_failed": 0,
+        "typescript": "passed",
+        "candidate_build": "passed",
+        "production_build": "identical to verified candidate",
+        "test_output": ".build/repair-tests-output.txt",
+        "build_output": ".build/repair-build-output.txt",
+        "python_tools_compile": "passed: Castle repair diagnostic builder and oracle server",
+        "repair_party_soak": {
+          "status": "passed",
+          "seedCount": 8,
+          "sourceHashes": {
+            "simulation.ts": "3ff31a259e93715f45530956fc36cbe80960a1ad502d29dd701cb3f554a649d3",
+            "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
+            "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
+            "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
+            "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
+            "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
+            "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
+            "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
+            "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
+            "castle-upgrades.ts": "eecc52653b69a25df279c9384b05879c9f6468a0a8a7f7ed02985ed35c633503"
+          },
+          "geometrySha256": "505b48ffe234d7187db5445bd4306f0d104648985d18a0719e7c47605fec3ad2",
+          "scenarios": 9,
+          "frames": 135549,
+          "checkpoints": 1487,
+          "restTransitions": 54,
+          "rewardActions": 223,
+          "reachedDays": {
+            "1": 8,
+            "2": 9,
+            "3": 9,
+            "4": 9,
+            "5": 9,
+            "6": 9,
+            "7": 9
+          },
+          "wonDays": {
+            "1": 8,
+            "2": 9,
+            "3": 9,
+            "4": 9,
+            "5": 9,
+            "6": 9,
+            "7": 9
+          },
+          "naturallyHiredClasses": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "fixWallPurchases": 10,
+          "repairmanPurchases": 18,
+          "positiveRepairObservations": 29,
+          "housePurchases": 8,
+          "wallPurchases": 9,
+          "maximumCompanions": 3,
+          "partyBattleCounts": {
+            "0": 8,
+            "1": 49,
+            "2": 1,
+            "3": 4
+          },
+          "expandedNaturalScenarios": [
+            "natural-0",
+            "natural-1",
+            "natural-3",
+            "natural-5",
+            "natural-6",
+            "natural-7"
+          ],
+          "actorActivity": {
+            "1": {
+              "shots": 1853,
+              "hits": 1547,
+              "damage": 81550,
+              "kills": 940,
+              "reloads": 879,
+              "reloadCompletions": 153,
+              "bowDraws": 428,
+              "levelUps": 52
+            },
+            "2": {
+              "shots": 77,
+              "hits": 68,
+              "damage": 4258,
+              "kills": 54,
+              "reloads": 69,
+              "reloadCompletions": 16,
+              "bowDraws": 0,
+              "levelUps": 4
+            },
+            "3": {
+              "shots": 67,
+              "hits": 57,
+              "damage": 3837,
+              "kills": 48,
+              "reloads": 61,
+              "reloadCompletions": 14,
+              "bowDraws": 0,
+              "levelUps": 5
+            }
+          },
+          "elapsedMs": 27290,
+          "collision": "Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts",
+          "policy": "Aimed Sheriff and autonomous companions; prioritize Repairman1 when affordable (reserve first hire cost), Repairman2 from town4, then existing House/Wall/hiring policy. Pay Fix Wall on damaged even days when affordable; otherwise Free Repair. Separate capital-start grants12000gold only at an earned first town. No forced kills, HP grants or battle completion. Wave observations exclude leech weapons and item repair and account for same-frame castle-hit events.",
+          "limits": [
+            "Port full-state/event replay and finite-state checks, not independent original parity or browser validation",
+            "Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred",
+            "Natural scenarios and the one capital-start are separate: the latter grants12000gold only at an earned first town; it does not establish natural three-companion affordability within seven days",
+            "Deaths count castle defeats; companions have no separate HP/death model in the source combat actor"
+          ],
+          "eligibleWaveObservations": 205,
+          "observedRestoredHp": 64,
+          "positiveNaturalScenarios": [
+            "natural-1",
+            "natural-2",
+            "natural-3",
+            "natural-4",
+            "natural-7"
+          ],
+          "partyBattleCoverage": "Expanded two/three-companion battles in this repair-priority run are capital-start only; natural second hires occurred at Day7 town. Prior Castle soak independently retains natural two-companion battle evidence."
+        },
+        "repair_party_soak_report": ".build/repair-party-soak/report.json",
+        "repair_party_soak_report_sha256": "e909b1ca4a2b147d82147bbc018d2f0ae3d24fe78c8ca635a23ef5087802775e",
+        "repair_party_soak_fixtures": ".build/browser-qa/repair-party-soak-fixtures.json",
+        "asset_preservation": {
+          "status": "passed",
+          "oldReleaseFiles": 308,
+          "newReleaseFiles": 308,
+          "changed": [
+            "index.html"
+          ],
+          "added": [
+            "assets/index-XNVk3crn.js"
+          ],
+          "removed": [
+            "assets/index-s1hKilh5.js"
+          ],
+          "unchangedPublicAssetFiles": 305,
+          "allAssetsPreserved": true
+        },
+        "prior_evidence": "Prior Castle, party and solo campaign evidence remains historical in milestone_history; it is not recast as a new v17 run."
+      },
+      "production_recovery": {
+        "status": "passed",
+        "release_directory": ".build/browser-repair-final",
+        "previous_directory": ".build/browser-before-repair",
+        "current_bundle": "assets/index-XNVk3crn.js",
+        "candidate_build_matches_production": true,
+        "copied_release_files_hash_checked": 308,
+        "archive_files_hash_checked": 308,
+        "current_package": ".build/elona-shooter-browser-repair-slice.zip",
+        "current_package_bytes": 8574119,
+        "current_package_sha256": "5c19dbe91bc98155ce4886a619becbf36af285c13234ce57da33c9e7c3594988",
+        "previous_package": ".build/elona-shooter-browser-castle-slice.zip",
+        "previous_bundle": "assets/index-s1hKilh5.js",
+        "candidate_browser_verification": ".build/browser-qa/repair-ui-verification.json",
+        "production_backup": ".build/browser-qa/repair-production-before-v16.json",
+        "production_browser_verification": ".build/browser-qa/repair-production-verification.json",
+        "production_restored_screenshot": ".build/browser-qa/repair-production-restored.jpg",
+        "production_console_errors": [],
+        "publication_report": ".build/repair-publication.json",
+        "current_save_version": 17,
+        "production_browser_smoke": "passed",
+        "restored_battle": {
+          "from": 16,
+          "to": 17,
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "tick": 674,
+          "hp": 40,
+          "gold": 209,
+          "wallLevel": 1,
+          "rngUnchanged": true
+        }
+      },
+      "browser_checks": {
+        "castle_repair": {
+          "status": "passed",
+          "report": ".build/browser-qa/repair-ui-verification.json",
+          "checks": {
+            "repairman1": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "repair-ui-repairman1-v17.json",
+              "expectedFrom": "repair-party-natural-0-before-repairman1-v17.json",
+              "day": 2,
+              "tick": 3275,
+              "gold": 658,
+              "rng": 423535753,
+              "ap": 4,
+              "hp": 40,
+              "maxHp": 40,
+              "wallLevel": 1,
+              "capacity": 1,
+              "repairmanLevel": 1,
+              "wallFixCount": 0,
+              "companions": 1,
+              "futureUpkeep": 100,
+              "settledUpkeep": 40,
+              "settledWages": 53
+            },
+            "blocked-repairman": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "repair-ui-blocked-repairman-v17.json",
+              "expectedFrom": "repair-ui-repairman1-v17.json",
+              "day": 2,
+              "tick": 3275,
+              "gold": 658,
+              "rng": 423535753,
+              "ap": 4,
+              "hp": 40,
+              "maxHp": 40,
+              "wallLevel": 1,
+              "capacity": 1,
+              "repairmanLevel": 1,
+              "wallFixCount": 0,
+              "companions": 1,
+              "futureUpkeep": 100,
+              "settledUpkeep": 40,
+              "settledWages": 53
+            },
+            "fix-wall": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "repair-ui-fix-wall-v17.json",
+              "expectedFrom": "repair-party-natural-2-before-fix-wall-v17.json",
+              "day": 2,
+              "tick": 3287,
+              "gold": 406,
+              "rng": 329904393,
+              "ap": 4,
+              "hp": 40,
+              "maxHp": 40,
+              "wallLevel": 1,
+              "capacity": 1,
+              "repairmanLevel": 1,
+              "wallFixCount": 1,
+              "companions": 1,
+              "futureUpkeep": 100,
+              "settledUpkeep": 40,
+              "settledWages": 73
+            },
+            "full-fix-wall": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "repair-ui-full-fix-wall-v17.json",
+              "expectedFrom": "repair-ui-fix-wall-v17.json",
+              "day": 2,
+              "tick": 3287,
+              "gold": 406,
+              "rng": 329904393,
+              "ap": 4,
+              "hp": 40,
+              "maxHp": 40,
+              "wallLevel": 1,
+              "capacity": 1,
+              "repairmanLevel": 1,
+              "wallFixCount": 1,
+              "companions": 1,
+              "futureUpkeep": 100,
+              "settledUpkeep": 40,
+              "settledWages": 73
+            },
+            "repairman2": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "repair-ui-repairman2-v17.json",
+              "expectedFrom": "repair-party-natural-0-before-repairman2-v17.json",
+              "day": 4,
+              "tick": 7470,
+              "gold": 965,
+              "rng": 2441273808,
+              "ap": 4,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 1,
+              "repairmanLevel": 2,
+              "wallFixCount": 0,
+              "companions": 1,
+              "futureUpkeep": 170,
+              "settledUpkeep": 110,
+              "settledWages": 69
+            },
+            "restore": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "repair-ui-restore-v17.json",
+              "expectedFrom": "repair-ui-repairman2-v17.json",
+              "day": 4,
+              "tick": 7470,
+              "gold": 965,
+              "rng": 2441273808,
+              "ap": 4,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 1,
+              "repairmanLevel": 2,
+              "wallFixCount": 0,
+              "companions": 1,
+              "futureUpkeep": 170,
+              "settledUpkeep": 110,
+              "settledWages": 69
+            },
+            "wave-heal": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "repair-ui-wave-heal-v17.json",
+              "expectedFrom": "repair-party-natural-1-before-wave-repair-v17.json",
+              "day": 6,
+              "tick": 10801,
+              "gold": 1601,
+              "rng": 609632831,
+              "ap": null,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 1,
+              "repairmanLevel": 2,
+              "wallFixCount": 0,
+              "companions": 1,
+              "futureUpkeep": 170,
+              "settledUpkeep": 0,
+              "settledWages": 0
+            },
+            "result-town": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "repair-ui-result-town-v17.json",
+              "expectedFrom": "repair-earned-day5-result-v17.json",
+              "day": 5,
+              "tick": 10005,
+              "gold": 1691,
+              "rng": 2393373146,
+              "ap": 4,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 1,
+              "repairmanLevel": 2,
+              "wallFixCount": 0,
+              "companions": 1,
+              "futureUpkeep": 170,
+              "settledUpkeep": 170,
+              "settledWages": 74
+            }
+          },
+          "source": "Actual CUA import, Castle clicks, Continue, six normal browser updates and result Proceed; exports compared in full.",
+          "waveHealing": {
+            "input": ".build/browser-qa/repair-party-natural-1-before-wave-repair-v17.json",
+            "fromTick": 10795,
+            "toTick": 10801,
+            "fromHp": 43,
+            "toHp": 45,
+            "maxHp": 45,
+            "repairmanLevel": 2
+          },
+          "result": {
+            "input": ".build/browser-qa/repair-earned-day5-result-v17.json",
+            "provenance": ".build/browser-qa/repair-earned-day5-result-provenance.json",
+            "day": 5,
+            "upkeep": 170,
+            "wages": 74,
+            "gold": 1691
+          },
+          "consoleErrors": [],
+          "limits": [
+            "Earned imported checkpoints, not a fully manually played browser campaign.",
+            "The first healing candidate contained a dead boss and a moving arrow; the headless comparison correctly refused to substitute rectangular boss geometry. The accepted complete-state browser comparison uses an earned ordinary-enemy-only checkpoint instead.",
+            "No new pixel/audio or wall-clock performance equivalence claim."
+          ]
+        },
+        "repair_production": {
+          "status": "passed",
+          "bundle": "assets/index-XNVk3crn.js",
+          "newGame": {
+            "tick": 0,
+            "hp": 40,
+            "gold": 200,
+            "ammo": 5,
+            "wallLevel": 1,
+            "capacity": 1,
+            "repairmanLevel": 0,
+            "wallFixCount": 0
+          },
+          "migration": {
+            "from": 16,
+            "to": 17,
+            "fullEnvelopeEquality": true,
+            "exactCurrentRestore": true,
+            "tick": 674,
+            "hp": 40,
+            "gold": 209,
+            "wallLevel": 1,
+            "rngUnchanged": true
+          },
+          "browserPaused": true,
+          "consoleErrors": [],
+          "screenshot": "repair-production-restored.jpg"
         }
       }
     }

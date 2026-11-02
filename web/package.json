@@ -17,6 +17,8 @@
     "test:castle-party-soak": "node --experimental-strip-types scripts/party-soak.ts 8 castle",
     "test:castle-repair-reference": "node --experimental-strip-types scripts/compare-castle-repair-reference.ts",
     "test:repair-party-soak": "node --experimental-strip-types scripts/party-soak.ts 8 repair",
+    "test:castle-sandbag-reference": "node --experimental-strip-types scripts/compare-castle-sandbag-reference.ts",
+    "test:sandbag-party-soak": "node --experimental-strip-types scripts/party-soak.ts 8 sandbag",
     "test:reference": "node --experimental-strip-types scripts/compare-reference.ts",
     "test:wave-reference": "node --experimental-strip-types scripts/compare-wave-reference.ts",
     "test:prepared-wave-reference": "node --experimental-strip-types scripts/compare-prepared-wave-reference.ts",
