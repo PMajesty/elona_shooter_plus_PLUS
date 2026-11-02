@@ -9,6 +9,9 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / ".build/oracle/browser-report.json"
 REPORTS = {
+    "/api/fly-report": ROOT / ".build/oracle/fly-browser-report.json",
+    "/api/fifth-town-report": ROOT / ".build/oracle/fifth-town-browser-report.json",
+    "/api/fifth-day-waves-report": ROOT / ".build/oracle/fifth-day-waves-browser-report.json",
     "/api/fourth-town-report": ROOT / ".build/oracle/fourth-town-browser-report.json",
     "/api/fourth-day-waves-report": ROOT / ".build/oracle/fourth-day-waves-browser-report.json",
     "/api/boss-ai-report": ROOT / ".build/oracle/boss-ai-browser-report.json",
@@ -34,6 +37,12 @@ REPORTS = {
     "/api/town-preparation-report": ROOT / ".build/oracle/town-preparation-browser-report.json",
 }
 ROUTES = {
+    "/fly-reference.swf": ROOT / ".build/oracle/fly-reference.swf",
+    "/fly-build-report.json": ROOT / ".build/oracle/fly-build-report.json",
+    "/fifth-town-reference.swf": ROOT / ".build/oracle/fifth-town-reference.swf",
+    "/fifth-town-build-report.json": ROOT / ".build/oracle/fifth-town-build-report.json",
+    "/fifth-day-waves-reference.swf": ROOT / ".build/oracle/fifth-day-waves-reference.swf",
+    "/fifth-day-waves-build-report.json": ROOT / ".build/oracle/fifth-day-waves-build-report.json",
     "/fourth-town-reference.swf": ROOT / ".build/oracle/fourth-town-reference.swf",
     "/fourth-town-build-report.json": ROOT / ".build/oracle/fourth-town-build-report.json",
     "/fourth-day-waves-reference.swf": ROOT / ".build/oracle/fourth-day-waves-reference.swf",

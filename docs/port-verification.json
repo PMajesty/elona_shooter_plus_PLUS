@@ -1,6 +1,6 @@
 {
   "date": "2026-11-02",
-  "milestone": "Connected Sheriff Days1–4, original BATCH1 waves, boss shield/facing/animation, fourth-town MOD sale and recruit growth, v11 persistence",
+  "milestone": "Connected Sheriff Days1–5, original AIR waves and Fly, fifth-town recruit growth and preparation, explicit stale Fly pool-state correction, v12 persistence",
   "complete_port": false,
   "environment": {
     "os": "Windows",
@@ -10,7 +10,7 @@
     "vite": "8.3.5"
   },
   "automated": {
-    "simulation_tests_passed": 198,
+    "simulation_tests_passed": 214,
     "simulation_tests_failed": 0,
     "typescript": "passed",
     "production_build": "passed",
@@ -24,24 +24,25 @@
         "interruptions"
       ],
       "scenarios": 96,
-      "simulationFrames": 331167,
-      "checkpoints": 3774,
-      "rewardTransitions": 657,
-      "townActions": 702,
-      "restTransitions": 123,
+      "simulationFrames": 386662,
+      "checkpoints": 4294,
+      "rewardTransitions": 696,
+      "townActions": 755,
+      "restTransitions": 148,
       "secondDayVictories": 32,
       "thirdDayVictories": 32,
       "fourthDayVictories": 25,
+      "fifthDayVictories": 13,
       "equipmentSelections": 297,
-      "modificationPreviews": 111,
-      "modsMounted": 19,
-      "weaponsUpgraded": 34,
-      "upgradeCancellations": 77,
-      "elapsedMs": 38362,
+      "modificationPreviews": 124,
+      "modsMounted": 29,
+      "weaponsUpgraded": 31,
+      "upgradeCancellations": 93,
+      "elapsedMs": 50569,
       "collision": "Production ordinary-enemy contours; boss uses the documented rectangular headless fallback",
       "limits": [
         "Port self-consistency, finite state and JSON replay only; not an original-game parity proof",
-        "Sheriff Days 1–4 only; boss shape geometry not exercised",
+        "Sheriff Days 1–5 only; boss shape geometry not exercised",
         "No browser rendering, input latency, audio or wall-clock performance comparison"
       ],
       "results": [
@@ -58,12 +59,12 @@
         {
           "seed": 42,
           "policy": "aimed",
-          "phase": "town",
-          "day": 4,
+          "phase": "defeat",
+          "day": 5,
           "daysCompleted": 4,
-          "ticks": 7481,
-          "kills": 49,
-          "checkpoints": 91
+          "ticks": 9246,
+          "kills": 43,
+          "checkpoints": 104
         },
         {
           "seed": 42,
@@ -89,11 +90,11 @@
           "seed": 2654435761,
           "policy": "aimed",
           "phase": "town",
-          "day": 4,
-          "daysCompleted": 4,
-          "ticks": 7824,
-          "kills": 66,
-          "checkpoints": 94
+          "day": 5,
+          "daysCompleted": 5,
+          "ticks": 10185,
+          "kills": 61,
+          "checkpoints": 120
         },
         {
           "seed": 2654435761,
@@ -149,11 +150,11 @@
           "seed": 3668339987,
           "policy": "aimed",
           "phase": "town",
-          "day": 4,
-          "daysCompleted": 4,
-          "ticks": 7398,
-          "kills": 51,
-          "checkpoints": 91
+          "day": 5,
+          "daysCompleted": 5,
+          "ticks": 9678,
+          "kills": 57,
+          "checkpoints": 115
         },
         {
           "seed": 3668339987,
@@ -178,12 +179,12 @@
         {
           "seed": 2027808452,
           "policy": "aimed",
-          "phase": "town",
-          "day": 4,
+          "phase": "defeat",
+          "day": 5,
           "daysCompleted": 4,
-          "ticks": 7457,
-          "kills": 46,
-          "checkpoints": 94
+          "ticks": 9515,
+          "kills": 51,
+          "checkpoints": 110
         },
         {
           "seed": 2027808452,
@@ -209,11 +210,11 @@
           "seed": 387276917,
           "policy": "aimed",
           "phase": "town",
-          "day": 4,
-          "daysCompleted": 4,
-          "ticks": 7409,
-          "kills": 54,
-          "checkpoints": 89
+          "day": 5,
+          "daysCompleted": 5,
+          "ticks": 9675,
+          "kills": 55,
+          "checkpoints": 113
         },
         {
           "seed": 387276917,
@@ -239,11 +240,11 @@
           "seed": 3041712678,
           "policy": "aimed",
           "phase": "town",
-          "day": 4,
-          "daysCompleted": 4,
-          "ticks": 7542,
-          "kills": 51,
-          "checkpoints": 90
+          "day": 5,
+          "daysCompleted": 5,
+          "ticks": 10095,
+          "kills": 67,
+          "checkpoints": 117
         },
         {
           "seed": 3041712678,
@@ -269,11 +270,11 @@
           "seed": 1401181143,
           "policy": "aimed",
           "phase": "town",
-          "day": 4,
-          "daysCompleted": 4,
-          "ticks": 7740,
-          "kills": 56,
-          "checkpoints": 93
+          "day": 5,
+          "daysCompleted": 5,
+          "ticks": 10073,
+          "kills": 60,
+          "checkpoints": 118
         },
         {
           "seed": 1401181143,
@@ -298,12 +299,12 @@
         {
           "seed": 4055616904,
           "policy": "aimed",
-          "phase": "town",
-          "day": 4,
+          "phase": "defeat",
+          "day": 5,
           "daysCompleted": 4,
-          "ticks": 7487,
-          "kills": 48,
-          "checkpoints": 90
+          "ticks": 9707,
+          "kills": 55,
+          "checkpoints": 107
         },
         {
           "seed": 4055616904,
@@ -329,11 +330,11 @@
           "seed": 2415085369,
           "policy": "aimed",
           "phase": "town",
-          "day": 4,
-          "daysCompleted": 4,
-          "ticks": 7442,
-          "kills": 49,
-          "checkpoints": 94
+          "day": 5,
+          "daysCompleted": 5,
+          "ticks": 9690,
+          "kills": 55,
+          "checkpoints": 119
         },
         {
           "seed": 2415085369,
@@ -358,12 +359,12 @@
         {
           "seed": 774553834,
           "policy": "aimed",
-          "phase": "town",
-          "day": 4,
+          "phase": "defeat",
+          "day": 5,
           "daysCompleted": 4,
-          "ticks": 7367,
-          "kills": 53,
-          "checkpoints": 90
+          "ticks": 9522,
+          "kills": 51,
+          "checkpoints": 106
         },
         {
           "seed": 774553834,
@@ -419,11 +420,11 @@
           "seed": 1788458060,
           "policy": "aimed",
           "phase": "town",
-          "day": 4,
-          "daysCompleted": 4,
-          "ticks": 7610,
-          "kills": 51,
-          "checkpoints": 91
+          "day": 5,
+          "daysCompleted": 5,
+          "ticks": 9920,
+          "kills": 59,
+          "checkpoints": 116
         },
         {
           "seed": 1788458060,
@@ -449,11 +450,11 @@
           "seed": 147926525,
           "policy": "aimed",
           "phase": "town",
-          "day": 4,
-          "daysCompleted": 4,
-          "ticks": 7761,
-          "kills": 62,
-          "checkpoints": 97
+          "day": 5,
+          "daysCompleted": 5,
+          "ticks": 10227,
+          "kills": 66,
+          "checkpoints": 124
         },
         {
           "seed": 147926525,
@@ -478,12 +479,12 @@
         {
           "seed": 2802362286,
           "policy": "aimed",
-          "phase": "town",
-          "day": 4,
+          "phase": "defeat",
+          "day": 5,
           "daysCompleted": 4,
-          "ticks": 7737,
-          "kills": 52,
-          "checkpoints": 95
+          "ticks": 9632,
+          "kills": 43,
+          "checkpoints": 109
         },
         {
           "seed": 2802362286,
@@ -539,11 +540,11 @@
           "seed": 3816266512,
           "policy": "aimed",
           "phase": "town",
-          "day": 4,
-          "daysCompleted": 4,
-          "ticks": 7364,
-          "kills": 46,
-          "checkpoints": 91
+          "day": 5,
+          "daysCompleted": 5,
+          "ticks": 9716,
+          "kills": 56,
+          "checkpoints": 117
         },
         {
           "seed": 3816266512,
@@ -568,12 +569,12 @@
         {
           "seed": 2175734977,
           "policy": "aimed",
-          "phase": "town",
-          "day": 4,
+          "phase": "defeat",
+          "day": 5,
           "daysCompleted": 4,
-          "ticks": 7352,
-          "kills": 47,
-          "checkpoints": 90
+          "ticks": 9026,
+          "kills": 35,
+          "checkpoints": 103
         },
         {
           "seed": 2175734977,
@@ -598,12 +599,12 @@
         {
           "seed": 535203442,
           "policy": "aimed",
-          "phase": "town",
-          "day": 4,
+          "phase": "defeat",
+          "day": 5,
           "daysCompleted": 4,
-          "ticks": 7661,
-          "kills": 52,
-          "checkpoints": 94
+          "ticks": 9356,
+          "kills": 41,
+          "checkpoints": 107
         },
         {
           "seed": 535203442,
@@ -628,12 +629,12 @@
         {
           "seed": 3189639203,
           "policy": "aimed",
-          "phase": "town",
-          "day": 4,
+          "phase": "defeat",
+          "day": 5,
           "daysCompleted": 4,
-          "ticks": 7770,
-          "kills": 63,
-          "checkpoints": 93
+          "ticks": 9906,
+          "kills": 49,
+          "checkpoints": 109
         },
         {
           "seed": 3189639203,
@@ -658,12 +659,12 @@
         {
           "seed": 1549107668,
           "policy": "aimed",
-          "phase": "town",
-          "day": 4,
+          "phase": "defeat",
+          "day": 5,
           "daysCompleted": 4,
-          "ticks": 7517,
-          "kills": 49,
-          "checkpoints": 93
+          "ticks": 9933,
+          "kills": 59,
+          "checkpoints": 111
         },
         {
           "seed": 1549107668,
@@ -719,11 +720,11 @@
           "seed": 2563011894,
           "policy": "aimed",
           "phase": "town",
-          "day": 4,
-          "daysCompleted": 4,
-          "ticks": 7629,
-          "kills": 53,
-          "checkpoints": 94
+          "day": 5,
+          "daysCompleted": 5,
+          "ticks": 9887,
+          "kills": 56,
+          "checkpoints": 117
         },
         {
           "seed": 2563011894,
@@ -779,11 +780,11 @@
           "seed": 3576916120,
           "policy": "aimed",
           "phase": "town",
-          "day": 4,
-          "daysCompleted": 4,
-          "ticks": 7271,
-          "kills": 47,
-          "checkpoints": 90
+          "day": 5,
+          "daysCompleted": 5,
+          "ticks": 9815,
+          "kills": 68,
+          "checkpoints": 118
         },
         {
           "seed": 3576916120,
@@ -809,11 +810,11 @@
           "seed": 1936384585,
           "policy": "aimed",
           "phase": "town",
-          "day": 4,
-          "daysCompleted": 4,
-          "ticks": 7626,
-          "kills": 53,
-          "checkpoints": 94
+          "day": 5,
+          "daysCompleted": 5,
+          "ticks": 9969,
+          "kills": 61,
+          "checkpoints": 120
         },
         {
           "seed": 1936384585,
@@ -838,12 +839,12 @@
         {
           "seed": 295853050,
           "policy": "aimed",
-          "phase": "town",
-          "day": 4,
+          "phase": "defeat",
+          "day": 5,
           "daysCompleted": 4,
-          "ticks": 7551,
-          "kills": 52,
-          "checkpoints": 90
+          "ticks": 9998,
+          "kills": 60,
+          "checkpoints": 108
         },
         {
           "seed": 295853050,
@@ -869,11 +870,11 @@
           "seed": 2950288811,
           "policy": "aimed",
           "phase": "town",
-          "day": 4,
-          "daysCompleted": 4,
-          "ticks": 7710,
-          "kills": 55,
-          "checkpoints": 93
+          "day": 5,
+          "daysCompleted": 5,
+          "ticks": 10026,
+          "kills": 60,
+          "checkpoints": 119
         },
         {
           "seed": 2950288811,
@@ -928,12 +929,12 @@
         {
           "seed": 3964193037,
           "policy": "aimed",
-          "phase": "town",
-          "day": 4,
+          "phase": "defeat",
+          "day": 5,
           "daysCompleted": 4,
-          "ticks": 7563,
-          "kills": 57,
-          "checkpoints": 92
+          "ticks": 10046,
+          "kills": 66,
+          "checkpoints": 111
         },
         {
           "seed": 3964193037,
@@ -958,12 +959,12 @@
         {
           "seed": 2323661502,
           "policy": "aimed",
-          "phase": "town",
-          "day": 4,
+          "phase": "defeat",
+          "day": 5,
           "daysCompleted": 4,
-          "ticks": 7451,
-          "kills": 52,
-          "checkpoints": 90
+          "ticks": 9372,
+          "kills": 47,
+          "checkpoints": 105
         },
         {
           "seed": 2323661502,
@@ -1560,8 +1561,9 @@
         "malformed saved progress rejected"
       ]
     },
-    "test_output": ".build/day4-final-tests.txt",
-    "python_tools_compile": "passed: fourth-day-wave, fourth-town and boss-ai builders, asset/contact extraction and oracle server"
+    "test_output": ".build/day5-final-tests.txt",
+    "python_tools_compile": "passed: fifth-day-wave, fifth-town and Fly builders, collision/asset extraction and oracle server",
+    "build_output": ".build/day5-final-build.txt"
   },
   "browser_checks": {
     "new_game": {
@@ -2499,9 +2501,143 @@
         "console_errors": [],
         "boundary": "Controlled existing shield state; actual mouse shotgun shot exercised guard effect/audio handler without errors. Audio output not independently captured."
       }
+    },
+    "fifth_day": {
+      "status": "passed",
+      "bundle": "assets/index-DFJdBXM_.js",
+      "rest": {
+        "fullEnvelopeEquality": true,
+        "expectedReplayedFromSavedTown": true,
+        "continueFullEnvelopeEquality": true,
+        "day": 5,
+        "phase": "battle",
+        "tick": 7569,
+        "castleHp": 24,
+        "gold": 3181
+      },
+      "fly": {
+        "updates": 7,
+        "actualAim": {
+          "x": 360,
+          "y": 540
+        },
+        "fullSimulationReplayEquality": true,
+        "continueFullEnvelopeEquality": true,
+        "tick": 7576,
+        "frame": 4,
+        "counter": 46,
+        "x": 310,
+        "y": 100,
+        "hp": 2,
+        "speed": 0
+      },
+      "shotObservation": {
+        "updatesAfterFlyCheckpoint": 16,
+        "savedAim": {
+          "x": 311,
+          "y": 102
+        },
+        "ammoBefore": 5,
+        "ammoAfter": 4,
+        "flyHpBefore": 2,
+        "flyHpAfter": 2,
+        "flyXAfter": 334.75,
+        "killsUnchanged": true,
+        "outcome": "One ammunition consumed; Fly survived at 2 HP. No hit claimed.",
+        "exactInputTimingReplay": false
+      },
+      "files": {
+        "day5-town-before-rest-v12.json": {
+          "sha256": "a9e0bdd8893d5543e6be1f8638d79e89dc0f9c2a7cb115dca7a50a64bc27e4ec"
+        },
+        "day5-rest-expected-v12.json": {
+          "sha256": "1d21854f5008e06a59622129f517a94319b1426862a8d752a347066b1b5850db"
+        },
+        "day5-rest-ui-v12.json": {
+          "sha256": "1d21854f5008e06a59622129f517a94319b1426862a8d752a347066b1b5850db"
+        },
+        "day5-continue-ui-v12.json": {
+          "sha256": "1d21854f5008e06a59622129f517a94319b1426862a8d752a347066b1b5850db"
+        },
+        "day5-fly-controlled-v12.json": {
+          "sha256": "eec8b3f8f64b2a139e75efa86922b09104cb89d79562f58da1258a087913392f"
+        },
+        "day5-fly-ui-v12.json": {
+          "sha256": "6e5d54c2bf01c218952adc6d7ea66a30d8f979e63c21aa8de7e634ec4b44da1d"
+        },
+        "day5-fly-continue-v12.json": {
+          "sha256": "6e5d54c2bf01c218952adc6d7ea66a30d8f979e63c21aa8de7e634ec4b44da1d"
+        },
+        "day5-fly-shot-ui-v12.json": {
+          "sha256": "48b750d161375517adff5fa6ac94441e90693fb7726a2deb59ebe2d53fbab947"
+        }
+      },
+      "provenance": {
+        "file": "day5-ui-provenance.json",
+        "sha256": "7be01fddf51e08e0673128c0654358ca83e21a61176b42d28b1a956044f8b564"
+      },
+      "limits": [
+        "Focused browser checkpoint, Rest and persistence verification; not a full manually played browser campaign.",
+        "The town checkpoint was earned by a recorded headless input policy using production ordinary-enemy contours and a documented boss rectangle fallback.",
+        "The Fly fixture deliberately controls one actor, RNG and spawn delay; this does not establish ordinary Fly acquisition or native Flash scheduling.",
+        "This script compares saved state, not pixels. Root browser observations provide the separate rendering/input evidence.",
+        "The saved shot is a miss; this report does not establish a successful Fly hit or replay the exact browser shot timing.",
+        "Original-versus-port behavior is covered by the separate independent source captures, not by these self-replay checks."
+      ],
+      "production": {
+        "url": "http://127.0.0.1:5175/elona/",
+        "bundle": "assets/index-DFJdBXM_.js",
+        "sameAsCandidate": true,
+        "fullMigrationEquality": true,
+        "source": "day5-production-before-v11.json",
+        "export": "day5-production-ui-v12.json",
+        "restoredTick": 674,
+        "paused": true,
+        "newGame": {
+          "ammo": "5",
+          "appearance": "0",
+          "bossBars": "0",
+          "bossHealth": "[]",
+          "bossVisuals": "[]",
+          "bowDrawing": "false",
+          "day": "1",
+          "enemies": "0",
+          "enemyArrows": "[]",
+          "frameMs": "0.00",
+          "gold": "200",
+          "grenades": "5",
+          "hp": "40",
+          "inventory": "[3,11,null,null,null,null]",
+          "itemCooldowns": "[0,0,0,0,0]",
+          "kills": "0",
+          "loadMs": "5705",
+          "maxFrameMs": "0.00",
+          "paused": "true",
+          "phase": "battle",
+          "playerFrame": "109",
+          "projectiles": "[]",
+          "reloadAnimations": "0",
+          "reloadTicks": "0",
+          "screen": "battle",
+          "selectedSlot": "0",
+          "slowFrames": "0",
+          "tick": "0"
+        },
+        "consoleErrors": []
+      },
+      "rendering": {
+        "observed": "Original Fly body, distant ground shadow and Day5 title badge rendered in candidate; production New Game and restored battle inspected",
+        "screenshots": [
+          ".build/browser-qa/day5-title-badge.jpg",
+          ".build/browser-qa/day5-fly-live.jpg",
+          ".build/browser-qa/day5-production-restored.jpg"
+        ],
+        "pixel_parity_claim": false
+      },
+      "candidateConsoleErrors": []
     }
   },
-  "checkpoint_provenance": "Generated using public Simulation API, seed 42 and normal fire/reload inputs with rectangular fallback collision. No state edits. Imported through the normal file picker. These checks are not a complete manual playthrough or parity proof. New boss full/half/dead checks deliberately edit only boss HP/death frame in a copied checkpoint; they are controlled fixtures, not normal-play captures. Older victory/defeat checks predate the source-backed wave RNG correction. Latest loot checkpoint uses post-item-integration New Game with seed42; see .build/browser-qa/loot-expected.json. Older numerical checkpoints above are retained as dated evidence and are not expected outputs for the new initial RNG boundary. Latest Day2 checkpoint provenance is stored in browser_checks.equipment_rest_day2: real two-day inputs, production ordinary contours and documented boss fallback, no phase overrides.",
+  "checkpoint_provenance": "Generated using public Simulation API, seed 42 and normal fire/reload inputs with rectangular fallback collision. No state edits. Imported through the normal file picker. These checks are not a complete manual playthrough or parity proof. New boss full/half/dead checks deliberately edit only boss HP/death frame in a copied checkpoint; they are controlled fixtures, not normal-play captures. Older victory/defeat checks predate the source-backed wave RNG correction. Latest loot checkpoint uses post-item-integration New Game with seed42; see .build/browser-qa/loot-expected.json. Older numerical checkpoints above are retained as dated evidence and are not expected outputs for the new initial RNG boundary. Latest Day2 checkpoint provenance is stored in browser_checks.equipment_rest_day2: real two-day inputs, production ordinary contours and documented boss fallback, no phase overrides. Day5 provenance is .build/browser-qa/day5-ui-provenance.json: ordinary recorded Day4 combat/rewards from an earned third-town save, then normal Rest. The focused Fly fixture explicitly controls actor position/counter, RNG and wave delay; it is not an ordinary campaign capture.",
   "performance": {
     "comparison_with_flash_or_ruffle": "not measured",
     "sample": {
@@ -2539,7 +2675,10 @@
     ".build/browser-qa/day4-title-badge.jpg",
     ".build/browser-qa/day4-boss-shield.jpg",
     ".build/browser-qa/day4-production-restored.jpg",
-    ".build/browser-qa/day4-shield-hit.jpg"
+    ".build/browser-qa/day4-shield-hit.jpg",
+    ".build/browser-qa/day5-title-badge.jpg",
+    ".build/browser-qa/day5-fly-live.jpg",
+    ".build/browser-qa/day5-production-restored.jpg"
   ],
   "preserved_baselines": {
     "original/elonashooter1.3.swf": {
@@ -8889,26 +9028,90 @@
       "trace_sha256": "1cb733b3cce8f452370657e846b1c3aad3137385accc8dc7de73b51deb634cee",
       "non_code_resources_identical": true,
       "report": ".build/oracle/boss-ai-comparison-report.json"
+    },
+    "fifth-day-waves": {
+      "matchedSnapshots": 9,
+      "boundary": "Original calendar4 mission4 preparation and calendar5 waves; AIR before BATCH1, ordered enemy selection and exact RNG",
+      "limits": [
+        "Synchronous generation, not whole-battle event scheduling",
+        "Constant and explicit prefix streams are controlled boundary cases; seed2 separately reaches14Flies naturally"
+      ],
+      "status": "passed",
+      "runtime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "53cb6eeee5397f98697478c6dd970659fc444538b41c86cbeb9b4b720ff8f78f",
+      "traceSha256": "eb6444578107846ce26478be4d4d32cb428e7d164d1b43426d1a31ce495555f0",
+      "two_runs_identical": true,
+      "non_code_resources_identical": true,
+      "fixture": "web/tests/fixtures/original-fifth-day-wave-trace.json",
+      "report": ".build/oracle/fifth-day-waves-comparison-report.json",
+      "captured_at": "2026-11-01T23:55:30.544Z"
+    },
+    "fifth-town": {
+      "matchedSnapshots": 17,
+      "matchedTownSnapshots": 6,
+      "matchedRecruitSnapshots": 11,
+      "boundary": "Original fifth-town ordered generation, prior metadata, hidden recruit growth and Holy Grail mission preparation",
+      "limits": [
+        "Prepared recruit records do not implement hiring or ally combat",
+        "Six full towns and eleven growth probes are bounded cases, not all RNG states"
+      ],
+      "status": "passed",
+      "runtime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "8cea1f726e41cb74f33b11e7803aac566122d5d1e45c9019942251f2dba7989f",
+      "traceSha256": "d0637440d53ac962a24e219ec5b8fb7424dd34d2f46dcb8297816b447c72e2bb",
+      "two_runs_identical": true,
+      "non_code_resources_identical": true,
+      "fixture": "web/tests/fixtures/original-fifth-town-trace.json",
+      "report": ".build/oracle/fifth-town-comparison-report.json",
+      "captured_at": "2026-11-01T23:53:24.404Z"
+    },
+    "fly": {
+      "matchedSnapshots": 503,
+      "comparedSnapshots": 503,
+      "rawReuseSnapshots": 73,
+      "originalSnapshots": 576,
+      "matchedGeometryGrids": 8,
+      "comparedGeometryPoints": 81920,
+      "boundary": "Fresh and explicitly reset original Fly state; raw reused-state defect observations retained separately",
+      "intentionalDifference": "Each Fly starts with counter0 and resistance1. Original reused objects can retain Fly counter45 or Sheep/Rat/Boss resistance. Corrected expected states come from an explicit original-field reset before original init, never port-generated expectations.",
+      "limits": [
+        "Explicit original AI then child-frame stepping, not native parent/child scheduling proof",
+        "73 raw-reuse observations intentionally differ from fresh-state port behavior; they are not counted as parity passes",
+        "Eight sampled frame grids do not cover every possible transform, history or overlapping-target case",
+        "Veteran late-game hitbox report remains unreproduced"
+      ],
+      "status": "passed",
+      "runtime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "89246db4326950b6b55f5614c31b23b6b1ca5ee4b16c560d572a718e3c5041b9",
+      "traceSha256": "f613f617ed93c955f94b0059092cac7918f6adcf66f47c845464ca8a8ab00a08",
+      "two_runs_identical": true,
+      "non_code_resources_identical": true,
+      "fixture": "web/tests/fixtures/original-fly-trace.json",
+      "report": ".build/oracle/fly-comparison-report.json",
+      "captured_at": "2026-11-01T23:53:18.988Z"
     }
   },
   "production_recovery": {
-    "release_directory": ".build/browser-day4-final",
-    "previous_directory": ".build/browser-before-day4",
-    "current_bundle": "assets/index-BipiGVRY.js",
-    "candidate_bundle": "assets/index-BipiGVRY.js",
+    "release_directory": ".build/browser-day5-final",
+    "previous_directory": ".build/browser-before-day5",
+    "current_bundle": "assets/index-DFJdBXM_.js",
+    "candidate_bundle": "assets/index-DFJdBXM_.js",
     "candidate_build_matches_production": true,
     "candidate_difference": "None; the tested candidate files were published unchanged",
-    "copied_release_files_hash_checked": 252,
-    "archive_files_hash_checked": 252,
-    "current_package": ".build/elona-shooter-browser-day4-slice.zip",
-    "current_package_bytes": 7592778,
-    "current_package_sha256": "b8c1d86bd386fa19166659010065f7d4664585d1cc2697a0704ad92af25abe9a",
-    "previous_package": ".build/elona-shooter-browser-day3-slice.zip",
-    "previous_bundle": "assets/index-C2GTv4Rt.js",
+    "copied_release_files_hash_checked": 254,
+    "archive_files_hash_checked": 254,
+    "current_package": ".build/elona-shooter-browser-day5-slice.zip",
+    "current_package_bytes": 7601534,
+    "current_package_sha256": "c1044a257db7a9362ec9e92202d06168ef19904782555a92b9673c746f30d876",
+    "previous_package": ".build/elona-shooter-browser-day4-slice.zip",
+    "previous_bundle": "assets/index-BipiGVRY.js",
     "restored_battle": {
-      "source": ".build/browser-qa/day4-production-before-v10.json",
-      "export": ".build/browser-qa/day4-production-ui-v11.json",
-      "version": 11,
+      "source": ".build/browser-qa/day5-production-before-v11.json",
+      "export": ".build/browser-qa/day5-production-ui-v12.json",
+      "version": 12,
       "day": 1,
       "tick": 674,
       "paused": true,

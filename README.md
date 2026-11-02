@@ -1,14 +1,17 @@
 # Elona Shooter Plus PLUS
 
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
-Phaser 4. The current implementation covers **four connected Sheriff days**:
+Phaser 4. The current implementation covers **five connected Sheriff days**:
 choose one of 22 appearances, fight, collect ordinary and boss loot, choose earned
 skills, enter town, buy/sell and upgrade weapons, mount MODs, use Free Repair,
-then Rest into Days 2, 3 and 4 with your retained equipment. Victory, defeat,
+then Rest into Days 2–5 with your retained equipment. Victory, defeat,
 rewards, town entry and save/restore work across these stages. Original English
 artwork, fonts, audio and credits are retained.
 
-This is not yet the complete game. Day 5 onward, other classes, full town
+The five-day v12 build passes the automated and focused browser checks described
+below and is published locally. The previous v11 build remains available for rollback.
+
+This is not yet the complete game. Day 6 onward, other classes, full town
 management, recruiting and card actions, Ragnarok and
 original Flash save conversion remain to be ported. Ordinary firearms use owned
 item statistics and weapon-skill requirements; the covered Sheriff combat skills
@@ -81,15 +84,21 @@ owned slot to buy it. Owned items can be moved or swapped; dropping one outside
 the slots asks to sell it. Only Yes confirms, and any other dialog click cancels.
 Shop Tokens discount stock. Town HP, AP, prepared data and full inventory records
 survive save/restore. **Mission → Rest** opens the original Resting dialog;
-acknowledging it begins the prepared next battle, up to Day 4. Rest does not heal
+acknowledging it begins the prepared next battle, up to Day 5. Rest does not heal
 the castle, spend AP or cost gold. Guns refill; consumable charges stay spent.
-Days 2–4 each end in their own rewards and prepared town. Day 4 adds the source's
+Days 2–5 each end in their own rewards and prepared town. Day 4 adds the source's
 harder BATCH1 wave pattern and boss shield. The boss turns when retreating,
 plays its original firing and shield frames, and reduces guarded damage to
 one tenth plus one. The fourth town generates the original MOD sale with a
 guaranteed Auto Reload Mod and may prepare a level-2 recruit. Four perfect
-days award the next protection medal for future mission preparation. Rest
-beyond Day 4 remains unavailable until Day 5's AIR waves and Fly are implemented.
+days award the next protection medal for future mission preparation. Day 5 adds
+AIR waves and the original Fly's flight, hovering, distant shadow and falling
+corpse. The fifth town returns to ordinary stock, can generate level-3 recruits
+and prepares the Holy Grail mission reward. Each Fly starts with counter 0 and
+knockback resistance 1: this deliberately fixes the observed original pool
+carrying those fields over from a previous enemy. Fresh and explicitly reset
+original runs provide the comparison; raw pooled cases remain recorded separately.
+Rest beyond Day 5 remains unavailable.
 Recruiting, card actions and Refresh Stock remain unavailable.
 
 In the shop, **Upgrade Weapon** requires **4 AP** to enter selection mode.
@@ -109,9 +118,11 @@ Rejected mounting keeps both items. **No or clicking outside this confirmation
 swaps the MOD and gun**, matching the original owned-inventory behavior; it does
 not cancel like a sale. Stock MODs must first be bought into an empty owned slot.
 
-Saves now use version 10; versions 1–9 are accepted. Archer attack counters and
-cosmetic arrow positions/flight state persist; older saves migrate with no
-in-flight enemy arrows. Pending Upgrade and MOD
+Saves now use **version 12**; versions **1–11** are accepted. Fly hover counters,
+animation and shadow history persist, alongside boss facing, Archer attack
+counters and cosmetic arrow flight. Older saves retain the applicable migration
+rules, including an empty enemy-arrow list and the former boss-facing default
+where those fields were absent. Pending Upgrade and MOD
 confirmations survive reload, preserving the chosen items and the exact stored
 upgrade preview without another random draw. In-flight projectiles and
 charged bows resume without relaunching or rerolling. Legacy hand grenades retain
@@ -119,7 +130,7 @@ their stored positions, damage and remaining lifetime. Ammo and reload timers li
 on the owned items, with a selected slot, five item cooldowns and saved
 protection state. Weapon experience is tracked separately for Small Gun, Big
 Gun, Rifle, Shotgun and other items. Legacy scalar experience maps to Shotgun;
-the old ammo/cooldown fields migrate without rerolling inventory. Days 2–3 saves
+the old ammo/cooldown fields migrate without rerolling inventory. Days 2–5 saves
 retain the prepared mission and prior town, including the historical absorption
 bonus that applied when battle began. New characters retain the
 original hidden growth potentials and base aiming/teamwork rolls. Portrait and
@@ -204,20 +215,30 @@ match the captured original within those controlled scenarios. The renderer
 also now tests a projectile against the boss's current pose. A controlled browser
 regression distinguishes the former miss from the corrected 40-damage hit.
 
-The integrated **v11** release passes **198 tests**. Browser Rest into Day4,
-Continue and an in-progress shield match their full expected saved states;
-Continue exports are byte-identical. Candidate and production use the same
-bundle. Evidence and limits are recorded in
+Day 5 adds **nine original wave cases**, **17 town/recruit observations**, and
+Fly comparisons covering **503 fresh or explicitly reset states** plus
+**eight full body/shadow grids containing 81,920 points**. Another **73 raw
+pooled states** preserve the source defect evidence. Exact Fly width and
+movement comparisons also exposed and corrected narrow bounds-rounding and
+signed-zero differences; the existing Archer bounds table is unchanged.
+See [Fly source notes](web/docs/fly-source.md) for the correction boundary.
+
+The current **v12 release passes 214 tests**. Browser Rest into Day5 matches the
+entire expected save, and Continue exports are byte-identical. A controlled Fly
+checkpoint matches seven elapsed simulation updates and restores identically.
+All 254 tested release files match the published build and deployable archive.
+Production New Game reaches combat; the previous live save restores exactly
+under v12 at tick674, paused, with no observed console errors. Evidence and limits are recorded in
 [port verification](docs/port-verification.json).
 
 `npm.cmd run test:soak` automatically exercises 32 seeds with idle, aimed and
 interrupted-input policies. It checks finite state, battle completion and exact
-JSON save/replay state and event equality through all four days, earned rewards,
+JSON save/replay state and event equality through all five days, earned rewards,
 town preparation, repair, shop transactions, weapon modifications and Rest.
-The latest run passed **96 scenarios, 331,167 frames and 3,774 checkpoints**,
-including **657 reward transitions, 702 town actions and 123 Rest transitions**.
-It reached **32 Day2 wins, 32 Day3 wins and 25 Day4 wins**, and exercised
-**111 upgrade previews, 34 upgrades, 77 cancellations and 19 mounted MODs**.
+The latest run passed **96 scenarios, 386,662 frames and 4,294 checkpoints**,
+including **696 reward transitions, 755 town actions and 148 Rest transitions**.
+It reached **32 Day2 wins, 32 Day3 wins, 25 Day4 wins and 13 Day5 wins**, and
+exercised **124 upgrade previews, 31 upgrades, 93 cancellations and 29 mounted MODs**.
 Defeats under the bounded test policies remain valid outcomes.
 Reports and reproducible failure checkpoints are written beneath `.build/soak/`.
 This is a stability check, not
@@ -252,6 +273,12 @@ python tools/build_modification_oracle.py
 python tools/build_third_day_wave_oracle.py
 python tools/build_archer_oracle.py
 python tools/build_third_town_oracle.py
+python tools/build_fourth_day_wave_oracle.py
+python tools/build_boss_ai_oracle.py
+python tools/build_fourth_town_oracle.py
+python tools/build_fifth_day_wave_oracle.py
+python tools/build_fly_oracle.py
+python tools/build_fifth_town_oracle.py
 python tools/serve_oracle.py
 ```
 
@@ -271,7 +298,12 @@ Use `?suite=modifications` for weapon Upgrade and MOD mounting, then run
 town preparation. Day 3 uses `?suite=third-day-waves`, `?suite=archer` and
 `?suite=third-town`, compared from `web/` with
 `npm.cmd run test:third-day-wave-reference`, `npm.cmd run test:archer-reference`
-and `npm.cmd run test:third-town-reference`. Each page runs the original
+and `npm.cmd run test:third-town-reference`. Day 4 uses `?suite=fourth-day-waves`,
+`?suite=boss-ai` and `?suite=fourth-town`, with `test:fourth-day-wave-reference`,
+`test:boss-ai-reference` and `test:fourth-town-reference`. Day 5 uses
+`?suite=fifth-day-waves`, `?suite=fly` and `?suite=fifth-town`, with
+`test:fifth-day-wave-reference`, `test:fly-reference` and `test:fifth-town-reference`.
+Run these scripts with `npm.cmd run` from `web/`. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, use the matching comparison command: `npm.cmd run test:reference`,
 `npm.cmd run test:wave-reference`, `npm.cmd run test:combat-reference`,
@@ -291,10 +323,10 @@ for controlled state, source preservation and limitations, and the
 The runtime assets are included under `web/public/assets/`, so ordinary browser
 development does not require Java or Flash tooling. Their manifest records
 original symbol IDs, frame numbers and registration offsets.
-The selected package contains **85 images, 32 clips, 89 sounds and five fonts**,
-including the full Archer timeline, its separate arrow and original collision
-contours. Generated display-width data keeps the Archer's knockback clamp
-independent of raster transparency or Phaser.
+The selected package contains **85 images, 34 clips, 89 sounds and five fonts**,
+including full Archer and Fly timelines, the separate Archer arrow, boss guard
+effects and original collision contours. Generated display-width data keeps
+Archer and Fly knockback clamps independent of raster transparency or Phaser.
 
 To regenerate assets from the preserved SWF, use Python 3 with Pillow, Java 21
 and **JPEXS FFDec 26.4.0**. Run from the repository root:

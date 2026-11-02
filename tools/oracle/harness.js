@@ -4,8 +4,11 @@ const stage = document.querySelector('#stage');
 const PREFIX = 'ELONA_ORACLE:';
 const STARTUP_PREFIX = 'ELONA_STARTUP:';
 const requestedSuite = new URLSearchParams(location.search).get('suite');
-const suite = ['waves', 'prepared-waves', 'third-day-waves', 'fourth-day-waves', 'archer', 'boss-ai', 'hero', 'shoot', 'equipment', 'rest', 'second-town', 'third-town', 'fourth-town', 'castle', 'projectiles', 'modifications', 'combat', 'geometry', 'loot', 'progression', 'town', 'town-preparation'].includes(requestedSuite) ? requestedSuite : 'reload';
+const suite = ['waves', 'prepared-waves', 'third-day-waves', 'fourth-day-waves', 'fifth-day-waves', 'fly', 'archer', 'boss-ai', 'hero', 'shoot', 'equipment', 'rest', 'second-town', 'third-town', 'fourth-town', 'fifth-town', 'castle', 'projectiles', 'modifications', 'combat', 'geometry', 'loot', 'progression', 'town', 'town-preparation'].includes(requestedSuite) ? requestedSuite : 'reload';
 const suites = {
+  fly: {swf:'/fly-reference.swf',build:'/fly-build-report.json',report:'/api/fly-report',clock:'Original Fly AI then explicit child-frame step, fresh/pooled/reset cases and filled body/shadow grids; native timeline scheduling is not asserted.'},
+  'fifth-town': {swf:'/fifth-town-reference.swf',build:'/fifth-town-build-report.json',report:'/api/fifth-town-report',clock:'Original day5 town generation and Holy Grail mission preparation, plus controlled level-two/three recruit growth; native town interaction is separate.'},
+  'fifth-day-waves': {swf:'/fifth-day-waves-reference.swf',build:'/fifth-day-waves-build-report.json',report:'/api/fifth-day-waves-report',clock:'Original mission4 prepared on day4, then waves on day5, including AIR/BATCH1 random boundaries; live combat is separate.'},
   'fourth-town': {swf:'/fourth-town-reference.swf',build:'/fourth-town-build-report.json',report:'/api/fourth-town-report',clock:'Original day4 town generation, MOD-sale overwrite and medal60/61 absorption, plus controlled level-two recruit growth in all nine classes; native town interaction is separate.'},
   'fourth-day-waves': {swf:'/fourth-day-waves-reference.swf',build:'/fourth-day-waves-build-report.json',report:'/api/fourth-day-waves-report',clock:'Original mission3 prepared on day3, then waves on day4, including controlled BATCH1 random boundaries; live combat is separate.'},
   'boss-ai': {swf:'/boss-ai-reference.swf',build:'/boss-ai-build-report.json',report:'/api/boss-ai-report',clock:'Original boss AI then explicit ally1 child-frame step; native timeline scheduling is not asserted.'},

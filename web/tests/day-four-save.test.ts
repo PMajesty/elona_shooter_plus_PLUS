@@ -66,7 +66,10 @@ test('fourth perfect day grants medal61 only to the newly prepared mission and r
   assert.equal(simulation.state.activeMission.absorbFix, 0.01);
   assert.equal(simulation.state.previousTown!.mission.absorbFix, 0.01);
   assert.deepEqual(Simulation.fromSave(simulation.toSave()).state, simulation.state);
-  assert.equal(simulation.startNextDay(), false);
+  assert.equal(simulation.startNextDay(), true);
+  assert.equal(simulation.state.day, 5);
+  assert.equal(simulation.state.activeMission.absorbFix, 0.02);
+  assert.deepEqual(Simulation.fromSave(simulation.toSave()).state, simulation.state);
 });
 
 test('v10 boss facing migrates without RNG or input mutation; current saves reject impossible facing/actions', () => {
@@ -77,7 +80,7 @@ test('v10 boss facing migrates without RNG or input mutation; current saves reje
   const untouched = structuredClone(legacy);
   const migrated = Simulation.fromSave(legacy);
   assert.deepEqual(legacy, untouched);
-  assert.deepEqual(migrated.toSave(), { ...legacy, version: 11, enemies: legacy.enemies.map((enemy: EnemyState) => ({ ...enemy, bossFacing: -1 })) });
+  assert.deepEqual(migrated.toSave(), { ...legacy, version: 12, enemies: legacy.enemies.map((enemy: EnemyState) => ({ ...enemy, bossFacing: -1 })) });
   for (const change of [
     (value: any) => { delete value.enemies[0].bossFacing; },
     (value: any) => { value.enemies[0].bossFacing = 0; },

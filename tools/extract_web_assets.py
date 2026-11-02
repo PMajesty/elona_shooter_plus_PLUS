@@ -19,7 +19,7 @@ CACHE = ROOT / ".build/export"
 WORK = ROOT / ".build/web-assets"
 DEST = ROOT / "web/public/assets"
 CLIPS = {"charaPic": 677, "enemy_sheep": 910,
-         "enemy_chicken": 1063, "enemy_rat": 1295, "enemy_crow": 981, "enemy_archer": 1092,
+         "enemy_chicken": 1063, "enemy_rat": 1295, "enemy_crow": 981, "enemy_archer": 1092, "enemy_fly": 952,
          "explosion": 2235, "itemPicture": 2113, "ammoBar": 2698, "radioButton": 2312,
          "grenadeBody": 2275, "grenadeShadow": 2199, "bossHealthFill": 2411, "shopCoin": 1442,
          "layhand": 2226, "itemTimer": 2370, "launcherGrenadeBody": 2238,
@@ -613,6 +613,7 @@ def main():
             "allyBack and allyFront retain source depths around separately selected charaPic poses",
             "Projectile metadata preserves original mc/shadow registration and layer order",
             "Archer retains all 210 original frames and filled collision contours; its separate enemy arrow retains stage-overlay registration",
+            "Fly retains all 126 original frames, including the shadow and falling corpse about104 pixels below its root; collision and display widths use source geometric bounds",
             "shieldHit contains original effect1459 frames140-145 with frame-script alpha metadata; source frame146 removes it",
             "gravityBody flattens original nested pulse frames 1-13 with the inherited mc color transform",
             "Gravity hard-light is decomposed into original-alpha multiply/add textures for the WebGL renderer",

@@ -763,6 +763,23 @@
       "uniqueFrames": 26,
       "characterId": 1092
     },
+    "enemy_fly": {
+      "image": "sprites/enemy_fly.png",
+      "json": "sprites/enemy_fly.json",
+      "originX": 9.6,
+      "originY": 7.65,
+      "frameWidth": 21,
+      "frameHeight": 122,
+      "labels": {
+        "init": 1,
+        "alive": 3,
+        "dead": 12,
+        "null": 126
+      },
+      "count": 126,
+      "uniqueFrames": 23,
+      "characterId": 952
+    },
     "explosion": {
       "image": "sprites/explosion.png",
       "json": "sprites/explosion.json",

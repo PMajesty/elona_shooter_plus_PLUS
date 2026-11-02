@@ -1,14 +1,15 @@
 # Browser port status
 
-Current playable scope: **four connected Sheriff days**, with owned firearms and
+Current implementation: **five connected Sheriff days**, with owned firearms and
 consumables, ordinary/boss loot, earned skills, prepared towns, shop transactions,
 weapon Upgrade, MOD mounting, Free Repair and Rest. This is not a complete remake.
 The TypeScript/Phaser client runs independently of Flash and Ruffle; the preserved
 game remains the reference for behavior, content and appearance.
 
-The **v11** build is served at `http://127.0.0.1:5175/elona/`. The deployable archive
-is `.build/elona-shooter-browser-day4-slice.zip`; the previous v10 release
-is retained in `.build/browser-before-day4`. All 252 release files match
+The **v12 five-day release** passes automated and focused browser checks and is served at
+`http://127.0.0.1:5175/elona/`. Its deployable archive
+is `.build/elona-shooter-browser-day5-slice.zip`; the previous v11 release
+is retained in `.build/browser-before-day5`. All 254 release files match
 the served directory and archive. Hashes, browser boundaries and historical
 milestones are in [port verification](port-verification.json).
 
@@ -31,10 +32,12 @@ establish this late-game diagnosis.
 
 - Title, New Game, 22 appearances and Sheriff creation, including original hidden
   hero rolls, pre-Proceed rerolls and level growth.
-- Opening mission0 and prepared missions1–3 on displayed Days1–4, victory/defeat,
+- Opening mission0 and prepared missions1–4 on displayed Days1–5, victory/defeat,
   rewards and subsequent towns. Day4 includes BATCH1 wave selection, boss shields,
-  fourth-town MOD stock and level-2 recruit growth. The fourth town prepares
-  mission4; Day5 combat remains disabled pending AIR waves and Fly behavior.
+  fourth-town MOD stock and level-2 recruit growth. Day5 adds AIR waves and Fly
+  movement, hovering, knockback, distant shadow, death and castle exit. The fifth
+  town returns to ordinary stock, generates level-2/3 recruits and prepares
+  mission5 with the Holy Grail reward; Day6 combat remains disabled.
 - Mouse aiming/shooting and keys 1–5 for owned slots. Damage, accuracy, cadence,
   ammo, skill requirements, manual/magazine reload, automatic fire/reload and
   covered Sheriff skills use source-derived calculations.
@@ -45,7 +48,7 @@ establish this late-game diagnosis.
   selected; charges and per-slot cooldowns persist. Hammers spend a charge even
   at full HP; the Grail is single-use.
 - Original art, fonts, audio, layered character animation, boss health bars and
-  the source boss appearance progression for the four covered days.
+  the source boss appearance progression for the five covered days.
 - Ordinary loot → earned boss prizes → earned Sheriff skill choices → results.
   Gold settles once. Six inventory slots, offers and choices persist without rerolls.
 - Town preparation retains stock, cards, next-mission/recruit data and search
@@ -60,11 +63,11 @@ establish this late-game diagnosis.
   items, as in the source. A shop MOD must first be bought into an empty slot.
 - Free Repair costs 2 AP, restores the wall and costs no gold/RNG. A full wall
   rejects before the insufficient-AP check. Mission → Rest starts the next prepared battle
-  after dialog acknowledgment into Days2–4, without healing or spending gold/AP. Guns refill;
+  after dialog acknowledgment into Days2–5, without healing or spending gold/AP. Guns refill;
   consumable charges stay spent.
 - Pause, browser-local save, Continue and validated JSON import/export.
 
-Other classes, Day 5+, Ragnarok, recruiting/party AI, card/search actions, stock
+Other classes, Day 6+, Ragnarok, recruiting/party AI, card/search actions, stock
 refresh, most castle/economy actions, complete global medals and original Flash
 save conversion remain unfinished. Companion/town skills cannot exercise systems
 that are still absent. No completion percentage is inferred from extracted assets
@@ -83,17 +86,23 @@ Ordinary-enemy collision uses original filled contours and placement matrices,
 including persisted sheep shadow history. Bosses use rendered alpha geometry;
 the headless soak uses an explicitly documented boss rectangle fallback.
 
-Version **9** retains the upgrade reference and pending Upgrade/MOD confirmation.
+Current saves use **version 12**, accepting port versions **1–11** through their
+existing migrations. Fly counters, frames and shadow history persist; current
+Fly records require valid version 12 state. Older saves did not contain Fly and
+do not acquire fabricated flight history. Day5 and fifth-town validation retains
+the active mission's historical absorption separately from future preparation.
+
+Version **9** added the upgrade reference and pending Upgrade/MOD confirmation.
 Continue restores the exact preview and opens its shop dialog; confirmation does
 not reroll. Other town mutations are blocked while it is pending. Original enchant
 can retain historical reload metadata after refilling a gun; town imports permit
 that metadata, while active-battle reload validation remains strict.
 
-Version **10** adds saved Archer counters and cosmetic arrow flight. Versions
-**1–9** remain accepted; migration adds an empty arrow list without RNG draws.
+Version **10** added saved Archer counters and cosmetic arrow flight. Its
+migration adds an empty arrow list to older saves without RNG draws.
 Day3 retains the just-completed Day2 town and historical mission absorption.
 Archer frame bounds are validated before the frame-width lookup can run.
-Version **11** adds Day4 and saved boss facing. Boss AI and its child animation
+Version **11** added Day4 and saved boss facing. Boss AI and its child animation
 advance together, preserving original firing stops, walk loops and shield hold.
 Versions1–10 migrate with their former left-facing default and no RNG draws;
 legacy walking frames212–219 normalize into the source200–211 walk cycle.
@@ -125,9 +134,28 @@ no Flash plugin, Ruffle, external CDN or gameplay server.
 
 ## Evidence and intentional corrections
 
-The integrated release passes **198 tests**, TypeScript checking and production
-build. Original comparisons use controlled inputs/random draws and expected
+The v12 release passes **214 tests**. Its browser acceptance and publication are
+verified below; historical v11 release checks retain their original scope.
+Original comparisons use controlled inputs/random draws and expected
 results captured from the original, never regenerated from the port.
+
+Day5 source captures match **nine wave cases** and **17 fifth-town/recruit
+observations**, including AIR, BATCH1 and fallback selection, ordinary stock,
+Holy Grail mission preparation and all nine recruit classes at level 3. Fly adds
+**503 matching fresh or explicitly reset state observations** and **eight full
+body/shadow grids containing 81,920 points**. Another **73 raw pooled states**
+remain separate evidence: original Fly initialization can inherit counter 45
+from a prior Fly or resistance 0.9/1.1/0 from Sheep/Rat/Boss. The port deliberately
+starts each Fly with counter 0/resistance 1, compared with an explicit two-field
+reset followed by the original initialization and AI. This fixes observed state
+leakage; it is not raw-pool parity or a late-game hitbox diagnosis.
+
+The first Fly comparison also exposed bounds-rounding and signed-zero
+differences. Measured Fly bounds now round transformed corners to the nearest
+twip; the accepted Archer table is unchanged. Existing explicit coordinate
+quantization canonicalizes zero at assignment without a comparator exemption.
+Before evidence, source hashes and limits are in
+[Fly source notes](../web/docs/fly-source.md) and [oracle notes](oracle-notes.md).
 
 Day4 source captures match **seven wave cases**, **16 fourth-town/recruit
 observations** and **305 boss observations** (301 states plus four guarded/open
@@ -138,7 +166,7 @@ held shield frame and skipped its pose script; that failed capture is retained,
 and the accepted capture enters through the original frame-script path.
 These are explicit method/child-frame observations, not native scheduling proof.
 
-Newest source captures match **five Day3 wave cases**, **six third-town cases**
+Day3 source captures match **five wave cases**, **six third-town cases**
 and **517 Archer states**, with **six filled-shape grids/24,576 points**. Boundary
 streams expose rare Archer selection and the Chicken fallback; all30 selectors
 per wave-generation case are observed. Archer AI, damage timing, arrow motion,
@@ -164,12 +192,12 @@ town and six second-town snapshots; three final Rest transitions from 12 origina
 observations; 19 ordinary-enemy grids/77,824 points; and 14 projectile scenarios/
 650 source steps, with separate native-birth and vertical diagnostics.
 
-The latest campaign soak passed **96 scenarios across 32 seeds**, with **331,167
-frames, 3,774 JSON checkpoints, 657 reward transitions, 702 town actions and 123 Rest
-transitions**. It reached **32 Day2 victories, 32 Day3 victories, 25 Day4 victories
-and 297 equipment selections**. It includes **111 upgrade previews, 19 MOD mounts,
-34 upgrades and 77 cancellations**, with exact
-continued state/events after save/restore. Idle, aimed and interrupted policies
+The latest five-day campaign soak passed **96 scenarios across 32 seeds**, with
+**386,662 frames, 4,294 JSON checkpoints, 696 reward transitions, 755 town actions
+and 148 Rest transitions**. It reached **32 Day2 victories, 32 Day3 victories,
+25 Day4 victories and 13 Day5 victories**, and exercised **297 equipment
+selections, 124 upgrade previews, 29 MOD mounts, 31 upgrades and 93 cancellations**,
+with exact continued state/events after save/restore. Idle, aimed and interrupted policies
 exercise actual integrated commands. The earlier projectile sweep separately
 passed 27 configured cases/9,720 updates/1,080 checkpoints; 21 vertical regressions
 check finite completion. These are bounded replay/stability tests, not original
@@ -221,21 +249,43 @@ projectile case hit the newly turned boss for40damage (185/225HP) and removed th
 bolt; all four browser updates matched an independent asset-geometry replay.
 The old cached pose missed that contact. This is a corrected port integration
 lag, not proof of the veteran's late-game complaint or exact Flash raster parity.
-The same252 tested files are published locally and match the deployable archive.
-Production New Game reached combat at tick0 with40HP,200gold and five shells.
+The same 252 tested v11 files were published locally and matched the deployable archive.
+That production New Game reached combat at tick0 with40HP,200gold and five shells.
 The prior v10 save was backed up and restored as v11 at tick674, paused; its
 entire simulation equals the expected migration. No console errors were observed.
 Previous-release files remain available for rollback.
 
+The v12 browser entered Day5 by Rest from an earned fourth-town checkpoint;
+the entire save equals the normal simulation transition and Continue exports
+are byte-identical. A controlled Fly rendered its small airborne body and distant
+ground shadow; its saved waiting state matches seven production updates and
+restores identically. An ordinary mouse shot consumed a shell but missed; this
+observation is not counted as a successful hit test. Source collision comparisons
+and automated death/exit replay provide separate behavior evidence.
+
+All 254 tested candidate files match the published build and deployable archive.
+Production New Game reached combat at tick0 with40HP,200gold and five shells.
+The previous live v11 save was restored as v12 at tick674, paused, with exact full
+migration equality and no observed console errors. Rollback files are retained
+in `.build/browser-before-day5`; release evidence is in
+[port verification](port-verification.json).
+
 ## Next integrated work and continuation
 
-Extend through Day5: mission4 adds AIR waves, a second fallback-selection draw
-and Fly behavior. First capture fresh and reused Fly instances: the original
-pool leaves direction counters and knockback resistance from earlier occupants.
-Use that evidence to decide preservation or an explicit, tested correction.
-Fifth-town preparation needs recruit levels2–3 and guaranteed Holy Grail1037.
-Keep automatic progression and save checks connected to ordinary playable flow;
-include source enemy lifecycles before enabling newly reachable species.
+The next campaign boundary is Day6: implement source-compared Barbarian behavior,
+mission5 waves, the first10GP tax and the4AP Honorary Citizen title action before
+enabling Rest into it. The title's100GP salary first applies to the following
+settlement. Keep automatic progression and save checks
+connected to ordinary playable flow. Hiring, other deferred town actions and
+the unproven late-game hitbox report remain explicit work beyond the five-day slice.
+
+The bounded source audit identifies Barbarian id7/symbol1340 as newly reachable
+through mission5's level+2 selection. Its surviving-hit rage branch modifies both
+speed and speedOrg, with an unusual multiplication in the original; capture the
+hit → rage → knockback sequence before deciding whether to preserve or correct it.
+Day6 keeps AIR/BATCH1; RANGED and the boss special attack start at mission6/Day7.
+The fifth town's Holy Grail is carried into Day6, while town6 prepares Crow Statue1106.
+These findings define the next experiment; they do not mark Day6 implemented.
 
 The long-term goal and the existing **30-minute watcher remain active**. Unchanged
 monitoring stays quiet. The user is asleep and authorized autonomous continuation;

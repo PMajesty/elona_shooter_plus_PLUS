@@ -2,13 +2,14 @@
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
 from extract_web_assets import placed_frame
 
 ROOT = Path(__file__).resolve().parents[1]
-SYMBOLS = {"sheep": 910, "rat": 1295, "chicken": 1063, "crow": 981, "archer": 1092}
+SYMBOLS = {"sheep": 910, "rat": 1295, "chicken": 1063, "crow": 981, "archer": 1092, "fly": 952}
 
 
 def matrix(tag):
@@ -89,30 +90,38 @@ def extract(xml_path=ROOT / ".build/reference/original.xml"):
 
 
 def write_display_widths(geometry, target=ROOT / "web/src/enemy-display-bounds.ts"):
-    """Сохраняет ширину display bounds лучника для исходного ограничения отбрасывания."""
-    enemy = geometry["enemies"]["archer"]
-    widths = [0]
-    for frame in range(1, enemy["count"] + 1):
-        edges = []
-        for placement in enemy["frames"][str(frame)]:
-            left, top, right, bottom = geometry["shapes"][placement["shape"]]["bounds"]
-            a, _, c, _, x, _ = placement["matrix"]
-            # Учитываем всю геометрию, включая прозрачные bitmap-fill и тень.
-            # У лучника вложенная тень имеет единичную матрицу: сохранённые
-            # матрицы точно представляют каждый прямоугольник в его родителе.
-            edges.extend(int(a * px + c * py + x) for px, py in
-                         [(left, top), (right, top), (left, bottom), (right, bottom)])
-        widths.append((max(edges) - min(edges)) / 20 if edges else 0)
-    # Индекс массива совпадает с исходным номером кадра; ноль не используется.
-    rows = [", ".join(json.dumps(value) for value in widths[start:start + 15])
-            for start in range(0, len(widths), 15)]
+    """Сохраняет display bounds лучника и мухи для исходного ограничения отбрасывания."""
+    tables, sections = {}, []
+    for kind in ("archer", "fly"):
+        enemy = geometry["enemies"][kind]
+        widths = [0]
+        for frame in range(1, enemy["count"] + 1):
+            edges = []
+            for placement in enemy["frames"][str(frame)]:
+                left, top, right, bottom = geometry["shapes"][placement["shape"]]["bounds"]
+                a, _, c, _, x, _ = placement["matrix"]
+                # Учитываем прозрачные bitmap-fill и тень. Вложенная тень обоих
+                # символов имеет единичную матрицу; внешняя матрица уже сохранена.
+                # Для Fly измеренный width округляет преобразованные границы до
+                # ближайшего twip: 14.25/16.75/16.65 вместо усечённых 14.2/16.7/16.6.
+                # Подтверждено всеми кадрами исходного Fly trace; ранее принятая
+                # таблица Archer сохраняется без изменения непроверенных промежутков.
+                quantize = (lambda value: math.floor(value + 0.5)) if kind == "fly" else int
+                edges.extend(quantize(a * px + c * py + x) for px, py in
+                             [(left, top), (right, top), (left, bottom), (right, bottom)])
+            widths.append((max(edges) - min(edges)) / 20 if edges else 0)
+        tables[kind] = widths
+        # Индекс массива совпадает с исходным номером кадра; ноль не используется.
+        rows = [", ".join(json.dumps(value) for value in widths[start:start + 15])
+                for start in range(0, len(widths), 15)]
+        sections.append(f"export const {kind.upper()}_DISPLAY_WIDTHS: readonly number[] = [\n  "
+                        + ",\n  ".join(rows) + ",\n];\n")
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text("// Создано tools/extract_collision_geometry.py из исходных shapeBounds и матриц.\n"
                       f"// SWF SHA-256: {geometry['sourceSha256']}\n"
                       "// Номера кадров начинаются с 1; нулевой элемент — заполнитель.\n"
-                      "export const ARCHER_DISPLAY_WIDTHS: readonly number[] = [\n  "
-                      + ",\n  ".join(rows) + ",\n];\n", encoding="utf-8")
-    return widths
+                      + "\n".join(sections), encoding="utf-8")
+    return tables["archer"]
 
 
 if __name__ == "__main__":

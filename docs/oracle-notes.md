@@ -1389,3 +1389,148 @@ integrated Day4 save tests. See `web/docs/fourth-town-source.md` for the source 
 Regenerate with `python tools/build_fourth_town_oracle.py`, capture
 `?suite=fourth-town`, then run `npm.cmd run test:fourth-town-reference` from `web/`.
 Focused checks: `node --experimental-strip-types --test tests/fourth-town.test.ts tests/fourth-town-reference.test.ts`.
+
+## Fifth-town ordinary stock and level-three recruits
+
+`tools/build_fifth_town_oracle.py` preserves the original frame71 preparation
+block on calendar day 5. Two identical Ruffle runs captured **17 observations**:
+six full towns (seeds 42/1/3735928559 with no medals or medals 60/61), plus eleven
+controlled `generateRecruit` probes. All 17 match production on their first
+comparison, including complete item/recruit/mission fields, retained metadata,
+cards, flags, search value, save-boundary RNG and final RNG state.
+
+The full-town seeds produce level 2/2/3 candidates and consume 244/112/204 draws
+respectively, with the same counts in both medal configurations. Day5 returns
+to ordinary stock after Day4's MOD sale. Its prepared mission adds Holy Grail
+1037 after the optional Ragnarok roll; Day5's active battle retains its earlier
+Archer statue mission. Default normal taxes/title income remain 0 through Day5,
+and current default upkeep remains 40.
+
+Recruit probes cover all nine classes at level 3, one reversed hidden-growth
+case and the level 2 minimum. Controlled prefixes advance the underlying RNG
+on every call. They prove one/two original `levelUp(false)` steps occur before
+nextTrait, portrait and equipment, leaving SP1/2 and costs450/500 with class
+rank matching level. Hidden traits can reach 12; prior Militia slots remain
+unless overwritten. These are explicit diagnostic inputs, not claims about
+the frequency of a seeded campaign's recruits.
+
+All 3491 tags and non-code payloads are preserved; only DoABC2782 changes.
+Earlier town fixtures remain unchanged. Five focused tests cover provenance and
+comparison, an extra-draw negative control, ordinary-stock/calendar behavior,
+all-class growth and calendar-dependent save validation. The fixture assumes
+the solo/default-castle scope and does not cover native town interaction,
+hiring or Day6 combat. See `web/docs/fifth-town-source.md` for the source map.
+
+- Accepted diagnostic SWF SHA-256: `8cea1f726e41cb74f33b11e7803aac566122d5d1e45c9019942251f2dba7989f`.
+- Accepted trace SHA-256: `d0637440d53ac962a24e219ec5b8fb7424dd34d2f46dcb8297816b447c72e2bb`.
+- Accepted fixture: `web/tests/fixtures/original-fifth-town-trace.json`.
+- Runtime capture: `.build/oracle/fifth-town-browser-report.json`, dated `2026-11-01T23:53:24.404Z`.
+
+Regenerate with `python tools/build_fifth_town_oracle.py`, capture `?suite=fifth-town`,
+then run `npm.cmd run test:fifth-town-reference` from `web/`. Focused checks:
+`node --experimental-strip-types --test tests/fifth-town.test.ts tests/fifth-town-reference.test.ts`.
+
+## Fifth-day AIR waves and Fly selection
+
+`tools/build_fifth_day_wave_oracle.py` observes the unchanged original
+`generateMission(4)` on calendar day 4 followed by `preGenerateWave()` on day 5.
+Two identical Ruffle runs captured nine cases; all nine match the production
+mission/wave generators exactly on first comparison. The comparison includes
+every enemy and delay, group counts, mission/loot state, RNG draw count and final
+RNG state. Mission preparation retains Archer statue 1102 from calendar day 4.
+
+Four seeded cases use 42, 1, 3735928559 and 2. Seed 2 produces 14 Flies through
+ordinary selection; seed 1 reaches BATCH1 naturally. Constant inputs 0 and
+0.099999 exercise AIR in all five waves, while 0.1 and 0.99 take the ordinary
+path. A separately labeled prefix `[0.5,0.5,0.5,0]` followed by constant zero
+exercises BATCH1 first, then AIR, with Fly present in both branches. The first
+selector starts after 5, 6 or 8 draws for AIR, BATCH1 or ordinary waves. These
+controlled inputs are legal diagnostic RNG sequences, not production-frequency
+claims. The source also proves AIR fallback can select a ground enemy and that
+fixed level 4 adds the third fallback draw, including the final Rat overwrite.
+
+The accepted cases consume 225, 217, 245, 260, 237, 237, 259, 257 and 230 draws
+and generate 62, 71, 59, 71, 80, 80, 82, 65 and 89 enemies respectively. All
+3491 tags and non-code payloads are preserved; only DoABC 2782 changes. The first
+eight-case capture was retained under `fifth-day-waves-before-seed2-*`; it was
+expanded before acceptance because the usual three seeds did not select Fly.
+Earlier Day1–4 fixtures remain unchanged.
+
+Two focused reference tests verify provenance and the observed branches, and
+reject removed Fly, changed spawn delays and omitted fallback RNG. This boundary
+does not establish Fly lifecycle, collision, native scheduling or whole-battle
+parity. Fifth-town mission 5 preparation is available separately; sixth-day
+combat remains unsupported.
+
+- Accepted diagnostic SWF SHA-256: `53cb6eeee5397f98697478c6dd970659fc444538b41c86cbeb9b4b720ff8f78f`.
+- Accepted trace SHA-256: `eb6444578107846ce26478be4d4d32cb428e7d164d1b43426d1a31ce495555f0`.
+- Accepted fixture: `web/tests/fixtures/original-fifth-day-wave-trace.json`.
+- Runtime capture: `.build/oracle/fifth-day-waves-browser-report.json`, dated `2026-11-01T23:55:30.544Z`.
+
+Regenerate with `python tools/build_fifth_day_wave_oracle.py`, capture
+`?suite=fifth-day-waves`, then run `npm.cmd run test:fifth-day-wave-reference`
+from `web/`. Focused checks:
+`node --experimental-strip-types --test tests/fifth-day-wave-reference.test.ts tests/missions.test.ts`.
+
+## Fly lifecycle, distant shadow and explicit pooled-state correction
+
+`tools/build_fly_oracle.py` executes original Fly initialization and AI followed
+by an explicit child-frame step. Read-only observers retain the original
+play/stop decisions; native display scheduling is not asserted. Two identical
+Ruffle 0.7.1 runs captured **576 state snapshots in 13 scenarios** and **eight
+64×160 geometry grids**. The production comparator matches **503/503** fresh
+or explicitly reset states, including exact RNG/draw counts, and **8/8 grids
+over 81,920 world points** for both whole-body and shadow-excluded predicates.
+The remaining **73 raw reused-object observations** are deliberately retained
+as defect evidence rather than claimed as port parity.
+
+Original Fly initialization does not reset the object's `dirCounter` or
+`resKnock`. A reused Fly retains counter 45 after the controlled prior flight;
+objects formerly used by Sheep, Rat or Boss retain resistance 0.9/1.1/0.
+Separate original runs set only `dirCounter=0; resKnock=1` before the original
+Fly initialization. Paired cases retain identical prior observations and reset
+to the same spawn RNG; the changed fields are explicit. Production creates
+fresh Fly state with counter 0/resistance 1. This intentional correction removes
+the observed pool-state leak without adding an object pool or deriving expected
+values from the port. It does not reproduce the veteran late-game hitbox report.
+
+Symbol 952's shadow lies about 104 pixels below the living body, so the grids
+cover the full body/shadow extent at actor `(200,220)`, world origin `(168,196)`.
+Frames 1/3/8/12/15/22/23/41 are sampled. Death probes enter 12→15→23 before later
+frames, preserving source shadow history: frame 22 excludes the shadow, frame 23
+enables it, and frame 41 stops. The corpse is still attached at death update 199;
+update 200 produces the original removed state, frame 126/HP −1/counter 201. The
+original atlas contains 126 frames/23 unique images with a 21×122 frame rectangle
+and `(9.6,7.65)` registration. See `web/docs/fly-source.md` for source anchors,
+the full state boundary and extraction commands.
+
+The first comparison matched 207/503 states. It found 296 width differences,
+16 consequent left-clamp differences and one JavaScript negative-zero result.
+Original measured widths 14.25/16.75/16.65 correspond to nearest-twip transformed
+shape bounds, where the earlier truncation produced 14.2/16.7/16.6. The generator
+now rounds Fly bounds only; the accepted Archer table remains unchanged.
+Actual display-coordinate assignments still truncate to integer twips and now
+canonicalize zero to positive 0 at that boundary. No comparison tolerance or
+signed-zero exemption was added. Before evidence is preserved in
+`.build/oracle/fly-before-width-rounding/`; the final comparison has no source
+errors. Four tests cover the accepted trace, pool distinction, lifecycle
+boundaries and a deliberate hover-counter regression.
+
+All 3491 tags, non-code payloads, order and frame header are preserved; only
+DoABC 2782 changes, with a version 10 diagnostic header. Original baselines and
+earlier fixtures remain unchanged. The builder's `runtime_validated:false`
+means compilation alone is insufficient; actual execution is recorded in the
+separate repeatable browser report.
+
+- Original SWF SHA-256: `4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663`.
+- Accepted diagnostic SWF SHA-256: `89246db4326950b6b55f5614c31b23b6b1ca5ee4b16c560d572a718e3c5041b9`.
+- Accepted trace SHA-256: `f613f617ed93c955f94b0059092cac7918f6adcf66f47c845464ca8a8ab00a08`.
+- Accepted fixture: `web/tests/fixtures/original-fly-trace.json`.
+- Runtime capture: `.build/oracle/fly-browser-report.json`, dated `2026-11-01T23:53:18.988Z`.
+- Detailed comparison: `.build/oracle/fly-comparison-report.json`.
+
+Regenerate with `python tools/build_fly_oracle.py`, capture `?suite=fly`, then
+run `npm.cmd run test:fly-reference` from `web/`. Focused checks:
+`node --experimental-strip-types --test tests/fly-reference.test.ts`.
+Integer grids and explicit AI→child stepping do not establish all fractional
+transforms, rendered pixels/audio, native scheduling or whole-battle parity.

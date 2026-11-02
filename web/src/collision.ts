@@ -24,6 +24,11 @@ export function shadowHitAtFrame(kind: EnemyKind, frame: number, previous?: bool
     if (frame === 69) return true;
     return previous ?? frame >= 69;
   }
+  if (kind === 'fly') {
+    if (frame === 1) return false;
+    if (frame === 23) return true;
+    return previous ?? frame >= 23;
+  }
   return previous ?? true;
 }
 

@@ -95,7 +95,7 @@ test('v2 battle migration preserves existing item metadata and its combat random
   const untouched = structuredClone(oldSave);
   const migrated = Simulation.fromSave(oldSave);
   assert.deepEqual(oldSave, untouched);
-  assert.equal(migrated.state.version, 11);
+  assert.equal(migrated.state.version, 12);
   assert.equal(migrated.state.rng, oldSave.rng);
   assert.deepEqual(migrated.state.inventory, oldSave.inventory);
   assert.deepEqual(migrated.state.waves, oldSave.waves);
