@@ -12,10 +12,12 @@ export interface GeneratedWave { enemies: EnemyKind[]; delays: number[]; initial
 export interface GeneratedWaves { waves: GeneratedWave[]; power: number; group: number[] }
 
 // Миссия готовится до Rest; календарный день определяет гарантированный предмет.
-export function generateLowLevelMission(level: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7, calendarDay: 1 | 2 | 3 | 4 | 5 | 6 | 7, random: () => number, options: { absorbFix?: number } = {}): LowLevelMission {
+export function generateLowLevelMission(level: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7, calendarDay: 1 | 2 | 3 | 4 | 5 | 6 | 7, random: () => number, options: { absorbFix?: number; negotiator?: number } = {}): LowLevelMission {
   if (![0, 1, 2, 3, 4, 5, 6, 7].includes(level) || ![1, 2, 3, 4, 5, 6, 7].includes(calendarDay)) throw new RangeError('Only mission preparation for the first seven towns is supported.');
   const absorbFix = options.absorbFix ?? 0;
   if (![0, 0.01, 0.02, 0.03, 0.04].includes(absorbFix)) throw new RangeError('Unsupported medal absorption.');
+  const negotiator = options.negotiator ?? 0;
+  if (!Number.isInteger(negotiator) || !(negotiator === 0 || negotiator >= 9 && negotiator <= 45 && (negotiator - 5) % 4 === 0)) throw new RangeError('Invalid original Negotiator effect.');
   const loot: number[] = [];
   if (random() > 0.97) loot.push(1038);
   if (calendarDay === 1) loot.push(1117);
@@ -27,7 +29,8 @@ export function generateLowLevelMission(level: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7, ca
   const rolledBossWave = 2 + Math.trunc(random() * 5 / 3);
   const power = 800 + level * 50 + level * 70;
   return {
-    level, fixedLv: level, strength: 0, power, powerOrg: power, reward: 600 + level * 20,
+    // generateMission обновляет PARTY перед расчётом; округление происходит после деления.
+    level, fixedLv: level, strength: 0, power, powerOrg: power, reward: Math.trunc((600 + level * 20) * (100 + negotiator) / 100),
     hire: false, ragnarok: false, wave: 5, spawnRate: 15 - level / 5, group: [], waveType: 0,
     loot, newWave: true, time: 30, bossDay: false, bossWave: level === 0 ? 2 : rolledBossWave,
     note: '', hpFix: 1, dmgFix: 1, expFix: 1, absorbFix, bossKilled: 0,

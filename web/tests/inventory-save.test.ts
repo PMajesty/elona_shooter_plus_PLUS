@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { ItemFactory, createStartingInventory, isOccupiedItem, type Item } from '../src/items.ts';
 import { Simulation } from '../src/simulation.ts';
-import { asLegacyV6Save, asLegacyV7Save } from './legacy-save-support.ts';
+import { asLegacyV6Save, asLegacyV7Save, withLegacyPartyDefaults } from './legacy-save-support.ts';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/original-item-trace.json', import.meta.url), 'utf8'));
 const snapshots = fixture.records.filter((row: { type: string }) => row.type === 'snapshot');
@@ -131,8 +131,9 @@ test('v1 battle migration is deterministic, preserves combat state and never mut
   const first = Simulation.fromSave(oldSave), second = Simulation.fromSave(oldSave);
   assert.deepEqual(oldSave, untouched);
   assert.deepEqual(first.state, second.state);
-  for (const [field, expected] of Object.entries(oldSave)) if (!['version', 'player', 'grenades', 'enemies'].includes(field)) assert.deepEqual(first.state[field as keyof typeof first.state], expected, field);
-  assert.deepEqual(first.state.enemies, oldSave.enemies.map((enemy: { kind: string }) => ({ ...enemy, appearance: enemy.kind === 'boss' ? 51 : 0 })));
+  const expectedMigration = withLegacyPartyDefaults(oldSave);
+  for (const [field, expected] of Object.entries(expectedMigration)) if (!['player', 'grenades', 'enemies'].includes(field)) assert.deepEqual(first.state[field as keyof typeof first.state], expected, field);
+  assert.deepEqual(first.state.enemies, expectedMigration.enemies.map((enemy: { kind: string }) => ({ ...enemy, appearance: enemy.kind === 'boss' ? 51 : 0 })));
   assert.deepEqual(asLegacyV7Save(first.state).grenades, oldSave.grenades.map((grenade: object) => ({ ...grenade, damage: 45 })));
   assert.deepEqual(first.state.protection, { counter: 0, blueMultiplierAdd: 0 });
   const { traits: _traits, selectedSlot, weaponExp, bowDrawing, ...restoredPlayer } = first.state.player;

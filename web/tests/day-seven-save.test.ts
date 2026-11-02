@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { withLegacyPartyDefaults } from './legacy-save-support.ts';
 import { Simulation } from '../src/simulation.ts';
 import { COMBAT_TRAIT } from '../src/combat-stats.ts';
 
@@ -39,12 +40,12 @@ function bossWindup() {
   return { simulation, boss };
 }
 
-test('v13 title-bearing town migrates to v14 without changing state, RNG or the supplied save', () => {
+test('v13 title-bearing town gains a candidate party without changing existing state, RNG or the supplied save', () => {
   const simulation = sixthTown(); assert.equal(simulation.claimTitle(), 'claimed');
   const legacy: Record<string, any> = simulation.toSave(); legacy.version = 13;
   const untouched = structuredClone(legacy);
   const migrated = Simulation.fromSave(legacy);
-  assert.deepEqual(migrated.toSave(), { ...legacy, version: 14 });
+  assert.deepEqual(migrated.toSave(), withLegacyPartyDefaults(legacy));
   assert.deepEqual(legacy, untouched); assert.equal(migrated.state.rng, legacy.rng);
   assert.deepEqual(restore(migrated).state, migrated.state);
 });

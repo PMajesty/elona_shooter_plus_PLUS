@@ -37,7 +37,7 @@ test('town entry transfers inactive reward history into the original preparation
   const result = simulation.toSave();
   assert.equal(result.lootOffers[7]!.num, 0);
   const control = Simulation.fromSave(result) as Simulation & { random(): number };
-  const expected = prepareFirstTown(() => control.random(), { priorOffers: result.lootOffers, absorbFix: 0.01 });
+  const expected = prepareFirstTown(() => control.random(), { priorOffers: result.lootOffers, absorbFix: 0.01, shopEngineer: 0, missionNegotiator: 0, recruitEngineer: 0 });
   assert.equal(simulation.enterTown(), true);
   assert.deepEqual(prepared(simulation), { ap: 4, preparation: 'ready', ...expected });
   assert.deepEqual(prepared(simulation).shop[7], result.lootOffers[7]);

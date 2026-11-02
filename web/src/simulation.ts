@@ -1,7 +1,7 @@
 import { ENEMIES, FIRST_DAY, GRENADE, SHOTGUN, SIMULATION_HZ, STARTING_CLASS, TIMER_HZ, WORLD, type EnemyKind, type Rect } from './content.ts';
 import { generateLowLevelMission, generateLowLevelWaves, type LowLevelMission } from './missions.ts';
 import { generateSheriffHero, isKnownHeroInitialization, levelUpHero, reconstructSheriffHero, type KnownHeroInitialization } from './hero.ts';
-import { advanceReload, autoReloadReady, COMBAT_TRAIT, combatTrait, criticalType, hitscanHit, livingWeaponKill, rampageDuration, recoverAccuracy, reloadTimer, shotDamage, shotSpread, weaponBehavior, weaponHitDamage, weaponHitEffects, weaponStats } from './combat-stats.ts';
+import { advanceReload, autoReloadReady, COMBAT_TRAIT, combatTrait, criticalType, hitscanHit, hitscanShotModifiers, criticalKillCooldown, duelistHitFrenzy, livingWeaponKill, rampageDuration, recoverAccuracy, reloadTimer, shotDamage, shotSpread, weaponBehavior, weaponHitDamage, weaponHitEffects, weaponStats } from './combat-stats.ts';
 import { BASE_ITEM_FIELDS, ITEM_TYPE, ItemFactory, collectLoot as collectLootItem, createStartingInventory, isOccupiedItem, itemPrice, swapInventorySlots, type Item } from './items.ts';
 import { prepareEarlyTown, type FirstTownPreparation } from './town-preparation.ts';
 import { validTownPreparation } from './town-save.ts';
@@ -12,6 +12,10 @@ import { advanceProjectile, createProjectile, type ExplosionKind, type Projectil
 import { createUpgradePreview, modMountFailure, upgradeCost, type TownEquipmentAction, type TownEquipmentOutcome } from './equipment.ts';
 import { advanceEnemyArrow, createEnemyArrow, type EnemyArrowState } from './enemy-arrows.ts';
 import { ARCHER_DISPLAY_WIDTHS, FLY_DISPLAY_WIDTHS, barbarianParentWidth } from './enemy-display-bounds.ts';
+import { createPartyState, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
+import { partySkills, gainCompanionTrait, levelUpCompanion, companionWage, type PartySkillState } from './party-progression.ts';
+import { createPartyAIShared, createPartyAIState, refreshPartyAI, partyActorPosition, registerPartyTarget, clearPartyTargetCache, clearPartyAITarget, stepPartyAIFrame, stepPartyAITimer, type PartyAIShared, type PartyAITarget, type PartyAIContext, type PartyAICallbacks } from './party-ai.ts';
+import { repairEarlyV15AirTargets, validatePartySave } from './party-save.ts';
 
 export interface EnemyState {
   uid: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number;
@@ -25,12 +29,13 @@ export interface EnemyState {
   rageEffectFrame?: number;
   hitEffects?: { frame: number; x: number; y: number }[];
   bossFacing?: 1 | -1;
+  type?: 0 | 1 | 2; tag?: number; onMark?: boolean;
 }
 export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCount: number }
 export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'>;
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
 export interface SimulationState {
-  version: 14; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1 | 2 | 3 | 4 | 5 | 6 | 7; tick: number; timerRemainder: number; rng: number; nextUid: number;
+  version: 15; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1 | 2 | 3 | 4 | 5 | 6 | 7; tick: number; timerRemainder: number; rng: number; nextUid: number;
   activeMission: ActiveMission; resultBefore: number; earnedMedals: number[]; perfectDays: number; bossesSpawned: number;
   hero: KnownHeroInitialization; title: 0 | 1;
   castleHp: number; castleMaxHp: number; gold: number; totalMoney: number; kills: number; criticalKills: number;
@@ -43,14 +48,16 @@ export interface SimulationState {
   inventory: (Item | null)[]; lootOffers: (Item | null)[]; postbattle: 'none' | 'loot' | 'boss-loot' | 'skill' | 'result';
   inventoryProvenance: 'original-generation' | 'legacy-v1-reconstructed'; legacyReconstructionSeed?: number;
   bossKilled: number; skillChoices: number[]; traitsProvenance: 'known-starting-traits' | 'legacy-reconstructed'; bossKilledProvenance: 'observed' | 'legacy-inferred';
-  result: { reward: number; perfectBonus: number; upkeep: number; tax: number; salary: number; netReward: number };
+  result: { reward: number; perfectBonus: number; upkeep: number; tax: number; salary: number; wages: number; netReward: number };
   town: null | { ap: number; preparation: 'pending' } | ReadyTown;
   previousTown: ReadyTown | null;
   upgradeReference: Item | null;
   pendingTownAction: TownEquipmentAction | null;
+  party: PartyState; partySkills: PartySkillState; partyAI: PartyAIShared; retainedAITargets: PartyAITarget[];
+  pendingPartyAction: PartyPendingAction | null;
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
-export interface SimulationEvent { type: 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
+export interface SimulationEvent { actorSlot?: number; type: 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
 export interface SimulationOptions { hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean }
 export type LootArea = 'offers' | 'inventory';
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
@@ -102,16 +109,17 @@ export class Simulation {
     this.pendingOpeningMission = generateLowLevelMission(0, 1, random);
     const generated = generateSheriffHero(random);
     this.state = {
-      version: 14, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
+      version: 15, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
       activeMission: this.missionParameters(this.pendingOpeningMission), resultBefore: STARTING_CLASS.money, earnedMedals: [40], perfectDays: 0, bossesSpawned: 0,
       castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, gold: STARTING_CLASS.money, totalMoney: 0, kills: 0, criticalKills: 0,
       aimX: 300, aimY: 240, fireHeld: false, pendingShot: false,
       player: { classId: 'sheriff', level: 1, exp: 0, skillPoints: 0, traits: generated.traits, weaponExp: [0, 0, 0, 0, 0], selectedSlot: 0, shootTimer: 0, accuracyFix: 0, rampageTicks: 0, bowDrawing: false },
       waveIndex: FIRST_DAY.waves, waves: [], bossWave: 2, newWave: true, spawnTimer: 30, noDamage: true,
-      enemies: [], projectiles: [], enemyArrows: [], loot: [], result: { reward: 0, perfectBonus: 0, upkeep: 0, tax: 0, salary: 0, netReward: 0 },
+      enemies: [], projectiles: [], enemyArrows: [], loot: [], result: { reward: 0, perfectBonus: 0, upkeep: 0, tax: 0, salary: 0, wages: 0, netReward: 0 },
       itemCooldowns: Array(5).fill(0), protection: { counter: 0, blueMultiplierAdd: 0 }, inventory: generated.inventory, lootOffers: Array(8).fill(null), postbattle: 'none', inventoryProvenance: 'original-generation',
       bossKilled: 0, skillChoices: [], traitsProvenance: 'known-starting-traits', bossKilledProvenance: 'observed',
       town: null, previousTown: null, upgradeReference: null, pendingTownAction: null,
+      party: createPartyState(), partySkills: partySkills([{ traits: generated.traits }]), partyAI: createPartyAIShared(), retainedAITargets: [], pendingPartyAction: null,
     };
     if (!options.deferOpeningWaves) this.startOpeningBattle();
   }
@@ -126,13 +134,144 @@ export class Simulation {
     return item?.type === ITEM_TYPE.gun ? item : null;
   }
 
+  actorWeapon(slot: number): Item | null {
+    const item = slot === 0 ? this.weapon : partySlot(this.state.party, slot)?.weapon;
+    return isOccupiedItem(item) && item.type === ITEM_TYPE.gun ? item : null;
+  }
+
+  private actor(slot: number): CombatActorState | undefined {
+    if (slot === 0) return this.state.player;
+    const entry = partySlot(this.state.party, slot);
+    return entry?.exists ? entry.member ?? undefined : undefined;
+  }
+
+  private refreshPartySkills(): void {
+    this.state.partySkills = partySkills([this.state.player, ...this.state.party.slots.slice(0, 4).map(slot => slot.member ? { exist: slot.exists, traits: slot.member.traits } : null)]);
+  }
+
+  private partyAIContext(): PartyAIContext {
+    return { shared: this.state.partyAI, random: () => this.random(), heroSlot: 0, fireAtWill: false,
+      getTarget: uid => this.state.enemies.find(enemy => enemy.uid === uid) as PartyAITarget | undefined
+        ?? this.state.retainedAITargets.find(enemy => enemy.uid === uid) };
+  }
+
+  private partyAICallbacks(): PartyAICallbacks {
+    return {
+      shoot: actor => {
+        const uid = actor.member?.aiState?.targetUid;
+        const target = uid ? this.partyAIContext().getTarget(uid) : undefined;
+        if (target && target.hp > 0 && target.x >= -10) this.fireActorAt(actor.slot, int(target.x), int(target.y));
+        else clearPartyAITarget(actor);
+      },
+      reload: actor => { this.requestActorReload(actor.slot); },
+      reloading: actor => { this.advanceActorReload(actor.slot); },
+      throwMilitiaGrenade: (actor, launch) => {
+        const position = partyActorPosition(actor.slot);
+        const uid = actor.member?.aiState?.targetUid;
+        const targetSpeed = uid ? this.partyAIContext().getTarget(uid)?.speed : undefined;
+        this.state.projectiles.push(createProjectile({ uid: this.state.nextUid++, kind: 'hand-grenade', weaponSlot: null, actorSlot: actor.slot,
+          startX: position.x, startY: position.y, targetX: launch.x, targetY: launch.y, speedBase: launch.speedBase, damage: launch.damage, targetSpeed }));
+        this.events.push({ type: 'grenade', actorSlot: actor.slot, x: position.x, y: position.y });
+      },
+    };
+  }
+
+  private initializePartyBattle(): void {
+    this.refreshPartySkills(); this.state.partyAI = createPartyAIShared(); this.state.retainedAITargets = [];
+    for (const slot of this.state.party.slots.slice(0, 4)) if (slot.member) {
+      slot.member.aiState = createPartyAIState(slot.slot);
+      slot.member.rampageTicks = 0;
+      refreshPartyAI(slot, this.state.partySkills.effects[116]);
+      if (slot.exists) {
+        Object.assign(slot.member, { shootTimer: 0, accuracyFix: 0, bowDrawing: false });
+        if (slot.weapon) { slot.weapon.ammo = slot.weapon.ammoMax; slot.weapon.reloadTime = 0; }
+      }
+    }
+  }
+
+  private retainAITargets(): void {
+    const references = new Set<number>();
+    for (const slot of this.state.party.slots.slice(0, 4)) if (slot.exists && slot.member?.aiState?.targetUid) references.add(slot.member.aiState.targetUid);
+    for (const row of this.state.partyAI.targets) for (const cell of row) if (cell.uid !== null) references.add(cell.uid);
+    if (this.state.partyAI.targetBossUid !== null) references.add(this.state.partyAI.targetBossUid);
+    if (this.state.partyAI.nextAlertUid !== null) references.add(this.state.partyAI.nextAlertUid);
+    for (const enemy of this.state.enemies) if (enemy.removed && references.has(enemy.uid)) {
+      this.state.retainedAITargets.push({ uid: enemy.uid, x: enemy.x, y: enemy.y, speed: enemy.speed, hp: -1,
+        removed: true, type: enemy.type ?? 0, tag: enemy.tag ?? 0, onMark: enemy.onMark ?? false });
+    }
+    this.state.retainedAITargets = this.state.retainedAITargets.filter(target => references.has(target.uid));
+  }
+
+  private partyMutationAvailable(): boolean {
+    return this.state.phase === 'town' && this.state.town?.preparation === 'ready' && !this.state.pendingTownAction && !this.state.pendingPartyAction;
+  }
+
+  requestRecruit(): string {
+    if (!this.partyMutationAvailable()) return 'unavailable';
+    const failure = hireFailure(this.state.party, this.state.gold);
+    if (failure) return failure;
+    this.state.pendingPartyAction = { kind: 'hire' };
+    return 'previewed';
+  }
+
+  requestDismiss(slot: number): boolean {
+    if (!this.partyMutationAvailable() || slot < 1 || slot > 3 || !partySlot(this.state.party, slot)?.exists) return false;
+    this.state.pendingPartyAction = { kind: 'dismiss', slot }; return true;
+  }
+
+  resolvePartyAction(confirm: boolean): string {
+    const pending = this.state.pendingPartyAction;
+    if (this.state.phase !== 'town' || !pending) return 'unavailable';
+    this.state.pendingPartyAction = null;
+    if (!confirm) return 'cancelled';
+    let outcome: string = 'unavailable';
+    if (pending.kind === 'hire') {
+      const result = hireCandidate(this.state.party, this.state.gold);
+      this.state.gold = result.gold; outcome = result.outcome;
+    } else if (pending.kind === 'dismiss') outcome = dismissCompanion(this.state.party, pending.slot) ? 'dismissed' : 'unavailable';
+    else outcome = resolvePartyMod(this.state.party, this.state.inventory, pending.inventorySlot, pending.partySlot, true, this.equipmentFactory());
+    this.refreshPartySkills();
+    return outcome;
+  }
+
+  movePartyEquipment(from: PartyEquipmentAddress, to: PartyEquipmentAddress): 'moved' | 'previewed' | 'unavailable' {
+    if (!this.partyMutationAvailable()) return 'unavailable';
+    const outcome = movePartyEquipment(this.state.party, this.state.inventory, from, to);
+    if (outcome === 'mod-confirmation') {
+      const owned = from.area === 'inventory' ? from : to, companion = from.area === 'party' ? from : to;
+      this.state.pendingPartyAction = { kind: 'party-mod', inventorySlot: owned.slot, partySlot: companion.slot };
+      return 'previewed';
+    }
+    return outcome;
+  }
+
+  setCompanionOrder(slot: number, order: number): boolean {
+    const member = partySlot(this.state.party, slot)?.member;
+    if (!this.partyMutationAvailable() || slot > 3 || !partySlot(this.state.party, slot)?.exists || !member || !Number.isInteger(order) || order < 0 || order > 6) return false;
+    member.ai = order; return true;
+  }
+
+  setCompanionPriorities(slot: number, value: { boss?: boolean; wall?: boolean }): boolean {
+    const member = partySlot(this.state.party, slot)?.member;
+    if (!this.partyMutationAvailable() || slot > 3 || !partySlot(this.state.party, slot)?.exists || !member) return false;
+    if (typeof value.boss === 'boolean') member.optBoss = value.boss;
+    if (typeof value.wall === 'boolean') member.optWall = value.wall;
+    return true;
+  }
+
+  setCompanionFocus(slot: number, id: number): boolean {
+    const member = partySlot(this.state.party, slot)?.member;
+    if (!this.partyMutationAvailable() || slot > 3 || !partySlot(this.state.party, slot)?.exists || !member || (id !== -1 && (!(member.traits[id] > 0) || id < 100 || id >= 900))) return false;
+    member.focus = id; return true;
+  }
+
   useSlot(slot: number): boolean {
     if (this.state.phase !== 'battle' || this.pendingOpeningMission || !Number.isInteger(slot) || slot < 0 || slot >= 5) return false;
     const item = this.state.inventory[slot];
     if (!isOccupiedItem(item)) { this.events.push({ type: 'beep' }); return false; }
     if (item.type === ITEM_TYPE.use) {
       if (item.id === 11) return this.throwGrenade(this.state.aimX, this.state.aimY, slot);
-      const plan = planConsumableUse(item, { castleHp: this.state.castleHp, castleMaxHp: this.state.castleMaxHp, slotCooling: this.state.itemCooldowns[slot] > 0 });
+      const plan = planConsumableUse(item, { castleHp: this.state.castleHp, castleMaxHp: this.state.castleMaxHp, slotCooling: this.state.itemCooldowns[slot] > 0, supplierEffect: this.state.partySkills.effects[139] });
       if (plan.status !== 'ready') { this.events.push({ type: 'beep' }); return false; }
       if (plan.effect.kind === 'repair') {
         this.state.castleHp = plan.effect.castleHp;
@@ -199,7 +338,7 @@ export class Simulation {
 
   startNextDay(): boolean {
     const town = this.state.town;
-    if (this.state.phase !== 'town' || this.state.pendingTownAction || this.state.day >= 7 || town?.preparation !== 'ready' || town.mission.level !== this.state.day) return false;
+    if (this.state.phase !== 'town' || (this.state.pendingTownAction || this.state.pendingPartyAction) || this.state.day >= 7 || town?.preparation !== 'ready' || town.mission.level !== this.state.day) return false;
     const state = this.state;
     state.day = (state.day + 1) as 2 | 3 | 4 | 5 | 6 | 7;
     state.previousTown = town;
@@ -220,7 +359,8 @@ export class Simulation {
       if (item.type !== ITEM_TYPE.use) item.ammo = item.ammoMax;
     }
     state.resultBefore = state.gold;
-    state.result = { reward: 0, perfectBonus: 0, upkeep: 0, tax: 0, salary: 0, netReward: 0 };
+    this.initializePartyBattle();
+    state.result = { reward: 0, perfectBonus: 0, upkeep: 0, tax: 0, salary: 0, wages: 0, netReward: 0 };
     this.events = [];
     return true;
   }
@@ -263,10 +403,14 @@ export class Simulation {
     if (player.rampageTicks > 0) player.rampageTicks--;
     this.state.itemCooldowns = this.state.itemCooldowns.map(time => Math.max(0, time - 1));
     if (this.state.pendingShot && !(weapon?.reloadTime && !weapon.autoReload) && this.fireAt(this.state.aimX, this.state.aimY) && !weapon?.automatic) this.state.pendingShot = false;
+    this.state.partyAI.sharedWeaponRange = weapon?.range ?? null;
+    const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
+    for (const slot of this.state.party.slots.slice(0, 4)) stepPartyAIFrame(slot, partyContext, partyCallbacks);
     for (const enemy of this.state.enemies) this.tickEnemy(enemy);
     this.tickProjectiles(projectileUidLimit);
     for (const arrow of this.state.enemyArrows) if (arrow.uid < projectileUidLimit) advanceEnemyArrow(arrow);
     this.state.enemyArrows = this.state.enemyArrows.filter(arrow => !arrow.removed);
+    this.retainAITargets();
     this.state.enemies = this.state.enemies.filter(enemy => !enemy.removed);
     // Целочисленный аккумулятор сохраняет исходный Timer(50) рядом с 30-герцовыми кадрами.
     this.state.timerRemainder += TIMER_HZ;
@@ -279,59 +423,94 @@ export class Simulation {
   fireAt(x: number, y: number): boolean {
     if (!finite(x) || !finite(y) || this.state.phase !== 'battle' || this.pendingOpeningMission) return false;
     this.state.aimX = x; this.state.aimY = y;
-    const player = this.state.player;
+    return this.fireActorAt(0, x, y);
+  }
+
+  private fireActorAt(actorSlot: number, x: number, y: number): boolean {
+    const player = this.actor(actorSlot);
+    if (!player) return false;
+    const manual = actorSlot === 0;
+    const member = actorSlot ? partySlot(this.state.party, actorSlot)!.member! : null;
+    const ai = member?.aiState;
+    const position = partyActorPosition(actorSlot);
+    const weaponSlot = manual ? this.state.player.selectedSlot : 0;
     if (player.shootTimer > 0) return false;
-    const item = this.weapon;
+    const item = this.actorWeapon(actorSlot);
     if (!item) {
-      this.state.pendingShot = false;
-      this.events.push({ type: 'beep', message: 'You need a gun to shoot!' });
+      if (manual) this.state.pendingShot = false;
+      if (manual) this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'beep', message: 'You need a gun to shoot!' });
       return false;
     }
-    const stats = weaponStats(item, player.traits);
+    const stats = weaponStats(item, player.traits, { manualControl: manual, partyLeadership: this.state.partySkills.effects[116] });
     if (!stats.canFire) {
-      this.state.pendingShot = false;
-      this.events.push({ type: 'beep', message: "You don't have the required weapon skill!" });
+      if (manual) this.state.pendingShot = false;
+      if (manual) this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'beep', message: "You don't have the required weapon skill!" });
       return false;
     }
     if (item.reloadTime > 0 && !item.autoReload) {
-      if (item.manualReload) { item.reloadTime = 0; this.events.push({ type: 'reloaded', weaponId: item.id }); }
+      if (manual && item.manualReload) { item.reloadTime = 0; this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'reloaded', weaponId: item.id }); }
       return false;
     }
-    if (item.ammo <= 0) { this.state.pendingShot = false; this.requestReload(false); return false; }
-    const spread = shotSpread(item, player.traits, player.accuracyFix);
+    if (item.ammo <= 0) {
+      if (manual) this.state.pendingShot = false;
+      else if (ai) { ai.shooting = false; ai.burst = 0; }
+      this.requestActorReload(actorSlot); return false;
+    }
+    const spread = shotSpread(item, player.traits, player.accuracyFix, { manualControl: manual, fireAtWill: member?.ai === 6 });
     player.shootTimer = stats.shootTimer;
+    if (!manual && !item.automatic) player.shootTimer += int(this.random() * (item.shootRate / 1.5 / ai!.workRate));
     const behavior = weaponBehavior(item);
+    if (ai && item.id === 16) {
+      if (ai.chainMode !== 3) {
+        ai.chainMode = 2;
+        if (ai.chainPos > 82) ai.chainMode = 3;
+        ai.chainPos += 2; return true;
+      }
+      ai.chainPos = 82;
+    }
     if (behavior.bowDraw) {
-      this.state.pendingShot = false;
+      if (manual) this.state.pendingShot = false;
       if (!player.bowDrawing) {
-        player.shootTimer = 0; player.bowDrawing = true; player.accuracyFix += stats.recoil;
-        this.events.push({ type: 'bow-draw', weaponId: item.id });
+        if (manual) player.shootTimer = 0; player.bowDrawing = true; player.accuracyFix += stats.recoil;
+        if (ai) ai.chainMode = 1;
+        this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'bow-draw', weaponId: item.id });
         return true;
       }
       player.bowDrawing = false;
+      if (ai) ai.chainMode = 0;
     } else player.accuracyFix += stats.recoil;
     if (stats.consumesAmmo) item.ammo--;
-    let damage = shotDamage(item, player.traits, { missionDamage: this.state.activeMission.dmgFix, rampage: player.rampageTicks > 0 });
+    let damage = shotDamage(item, player.traits, { missionDamage: this.state.activeMission.dmgFix, rampage: player.rampageTicks > 0, frenzy: ai?.frenzy, idleCount: ai?.idleCount });
     if (behavior.projectile) {
-      const hitX = int(x + this.random() * spread - this.random() * spread);
+      let hitX = int(x + this.random() * spread - this.random() * spread);
       const hitY = int(y + this.random() * spread - this.random() * spread);
+      if (ai && [23, 24, 25, 26].includes(item.id)) ai.idleCount *= 0.5;
+      if (!manual && item.id === 27) hitX -= 200;
+      const target = ai?.targetUid ? this.partyAIContext().getTarget(ai.targetUid) : undefined;
       const launch = (startOffset = 0, targetOffset = 0) => this.state.projectiles.push(createProjectile({
-        uid: this.state.nextUid++, kind: behavior.projectile!, weaponSlot: player.selectedSlot, damage,
-        startX: WORLD.playerX + startOffset, startY: WORLD.playerY, targetX: hitX + targetOffset, targetY: hitY,
+        uid: this.state.nextUid++, kind: behavior.projectile!, weaponSlot, damage, actorSlot, targetSpeed: target?.speed,
+        startX: position.x + startOffset, startY: position.y, targetX: hitX + targetOffset, targetY: hitY,
         speedBase: behavior.speedBase, penetrations: (player.traits[COMBAT_TRAIT.BOW_MASTER] ?? 0) + behavior.extraPenetrations,
         scale: ['gravity', 'flame'].includes(behavior.projectile!) ? (100 + combatTrait(COMBAT_TRAIT.DA_BOMB, player.traits)) / 100 : 1,
       }));
       if (item.id === 25) { launch(5, 20); launch(); launch(-5, -20); } else launch();
-      this.events.push({ type: 'shot', weaponId: item.id, x: WORLD.playerX, y: WORLD.playerY });
+      this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'shot', weaponId: item.id, x: position.x, y: position.y });
       if (behavior.immediateReload) {
         item.reloadTime = stats.reloadTime;
-        this.events.push({ type: 'reload', weaponId: item.id, automaticReload: item.autoReload > 0 });
+        this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'reload', weaponId: item.id, automaticReload: item.autoReload > 0 });
       }
       return true;
     }
+    if (ai) {
+      const modified = hitscanShotModifiers(item, player.traits, damage, { burst: ai.burst, ammoAfterShot: item.ammo,
+        accuracyFix: player.accuracyFix, powerShotRoll: !item.automatic && player.traits[COMBAT_TRAIT.POWER_SHOT] ? this.random() : undefined });
+      damage = modified.damage; ai.burst = modified.burst; player.accuracyFix = modified.accuracyFix;
+      if (modified.specialHitType === 2) { this.random(); this.random(); }
+    }
+    let hasHitAnything = false, hasHitAnyEnemy = false, hasKillAnyEnemy = false, hasCritHit = false;
     const pellets: { x: number; y: number }[] = [];
     for (let i = 0; i < stats.shells; i++) {
-      const hitX = int(x + this.random() * spread - this.random() * spread);
+      let hitX = int(x + this.random() * spread - this.random() * spread);
       const hitY = int(y + this.random() * spread - this.random() * spread);
       pellets.push({ x: hitX, y: hitY });
       for (const enemy of this.state.enemies) {
@@ -343,24 +522,40 @@ export class Simulation {
           alive: enemy.hp > 0, boss: enemy.kind === 'boss',
         });
         damage = hit.damage;
-        this.damageEnemy(enemy, damage, hit.critical, this.state.player.selectedSlot, hitX, hitY);
+        if (enemy.hp > 0) hasHitAnyEnemy = true;
+        if (hit.critical) hasCritHit = true;
+        if (ai) ai.frenzy = duelistHitFrenzy(item, player.traits, ai.frenzy, 'hitscan');
+        hasHitAnything = true;
+        this.damageEnemy(enemy, damage, hit.critical, weaponSlot, hitX, hitY, actorSlot);
+        if (hasHitAnyEnemy && enemy.hp <= 0) hasKillAnyEnemy = true;
       }
+      if (ai && !hasHitAnything) ai.idleCount = 0;
     }
-    this.events.push({ type: 'shot', weaponId: item.id, x: WORLD.playerX, y: WORLD.playerY, pellets });
+    if (ai) {
+      if (!hasHitAnything) ai.idleCount = 0;
+      if (hasCritHit && hasKillAnyEnemy) player.shootTimer = criticalKillCooldown(player.shootTimer, player.traits);
+      ai.idleCount *= 0.8;
+    }
+    this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'shot', weaponId: item.id, x: position.x, y: position.y, pellets });
     return true;
   }
 
-  private processPellet(x: number, y: number, damage: number, weaponSlot = this.state.player.selectedSlot): boolean {
+  private processPellet(x: number, y: number, damage: number, weaponSlot = this.state.player.selectedSlot, actorSlot = 0): boolean {
+    const actor = this.actor(actorSlot);
+    if (!actor) return false;
+    const member = actorSlot ? partySlot(this.state.party, actorSlot)!.member! : null;
     let hitLivingEnemy = false;
     for (const enemy of this.state.enemies) {
       if (enemy.removed) continue;
       const hit = this.hitEnemy(enemy, x, y);
       if (!hit) continue;
       // Исходный procHit проверяет SENSE даже у начального шерифа с нулевым навыком.
-      const critical = criticalType(this.state.player.traits, this.random(), inside(ENEMIES[enemy.kind].critical, x - enemy.x, y - enemy.y), enemy.hp > 0);
+      const critical = criticalType(actor.traits, this.random(), inside(ENEMIES[enemy.kind].critical, x - enemy.x, y - enemy.y), enemy.hp > 0);
       if (enemy.hp > 0) hitLivingEnemy = true;
-      enemy.knockBack = combatTrait(TRAIT.SHERIFF, this.state.player.traits);
-      this.damageEnemy(enemy, damage, critical, weaponSlot, int(x), int(y));
+      enemy.knockBack = combatTrait(TRAIT.SHERIFF, actor.traits);
+      const item = this.actorWeapon(actorSlot);
+      if (member?.aiState && item) member.aiState.frenzy = duelistHitFrenzy(item, actor.traits, member.aiState.frenzy, 'projectile');
+      this.damageEnemy(enemy, damage, critical, weaponSlot, int(x), int(y), actorSlot);
     }
     return hitLivingEnemy;
   }
@@ -372,15 +567,29 @@ export class Simulation {
   requestReload(manual = true): boolean {
     const item = this.weapon;
     if (this.state.phase !== 'battle' || !item || this.state.player.shootTimer > 0 || item.reloadTime > 0 || item.ammo >= item.ammoMax || (manual && item.autoReload > 0)) return false;
-    item.reloadTime = reloadTimer(item, this.state.player.traits);
-    this.events.push({ type: 'reload', weaponId: item.id, automaticReload: item.autoReload > 0 });
+    return this.requestActorReload(0);
+  }
+
+  private requestActorReload(actorSlot: number): boolean {
+    const actor = this.actor(actorSlot), item = this.actorWeapon(actorSlot);
+    if (this.state.phase !== 'battle' || !actor || !item || item.reloadTime > 0) return false;
+    item.reloadTime = reloadTimer(item, actor.traits);
+    this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'reload', weaponId: item.id, automaticReload: item.autoReload > 0 });
     return true;
+  }
+
+  private advanceActorReload(actorSlot: number): void {
+    const actor = this.actor(actorSlot), item = this.actorWeapon(actorSlot);
+    if (!actor || !item || item.reloadTime <= 0) return;
+    const loaded = advanceReload(item, actor.traits, actor.rampageTicks > 0);
+    item.ammo = loaded.ammo; item.reloadTime = loaded.reloadTime;
+    if (loaded.restarted || loaded.completion) this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: loaded.restarted ? 'reload' : 'reloaded', weaponId: item.id, automaticReload: item.autoReload > 0 });
   }
 
   throwGrenade(x: number, y: number, slot = 1): boolean {
     const item = this.state.inventory[slot];
     if (!finite(x) || !finite(y) || this.state.phase !== 'battle' || !Number.isInteger(slot) || slot < 0 || slot >= 5 || !isOccupiedItem(item) || item.id !== 11) return false;
-    const plan = planConsumableUse(item, { castleHp: this.state.castleHp, castleMaxHp: this.state.castleMaxHp, slotCooling: this.state.itemCooldowns[slot] > 0 });
+    const plan = planConsumableUse(item, { castleHp: this.state.castleHp, castleMaxHp: this.state.castleMaxHp, slotCooling: this.state.itemCooldowns[slot] > 0, supplierEffect: this.state.partySkills.effects[139] });
     if (plan.status !== 'ready' || plan.effect.kind !== 'grenade') { this.events.push({ type: 'beep' }); return false; }
     this.state.projectiles.push(createProjectile({ uid: this.state.nextUid++, kind: 'hand-grenade', weaponSlot: null, startX: WORLD.playerX, startY: WORLD.playerY, targetX: x, targetY: y, speedBase: GRENADE.speed, damage: plan.effect.damage }));
     Object.assign(item, plan.itemAfter);
@@ -391,15 +600,15 @@ export class Simulation {
 
   private tickProjectiles(uidLimit = Infinity): void {
     for (const projectile of this.state.projectiles) if (projectile.uid < uidLimit) advanceProjectile(projectile, {
-      hit: (x, y, damage, slot) => this.processPellet(x, y, damage, slot),
-      explode: (x, y, damage, slot, kind) => this.explodeProjectile(x, y, damage, slot, kind),
+      hit: (x, y, damage, slot) => this.processPellet(x, y, damage, slot, projectile.actorSlot ?? 0),
+      explode: (x, y, damage, slot, kind) => this.explodeProjectile(x, y, damage, slot, kind, projectile.actorSlot ?? 0),
     });
     this.state.projectiles = this.state.projectiles.filter(projectile => !projectile.removed);
   }
 
-  private explodeProjectile(x: number, y: number, damage: number, slot: number | null, kind: ExplosionKind): void {
+  private explodeProjectile(x: number, y: number, damage: number, slot: number | null, kind: ExplosionKind, actorSlot = 0): void {
     // У снаряда босса shooterIndex=-1: навык героя не увеличивает его визуальный взрыв.
-    const explosion = explosionStats(damage, damage === -1 ? 0 : combatTrait(COMBAT_TRAIT.DA_BOMB, this.state.player.traits), kind === 'rocket');
+    const explosion = explosionStats(damage, damage === -1 ? 0 : combatTrait(COMBAT_TRAIT.DA_BOMB, this.actor(actorSlot)?.traits ?? {}), kind === 'rocket');
     if (kind === 'flame') { explosion.radiusX *= 0.9; explosion.radiusY *= 0.9; }
     if (kind === 'grenade' || kind === 'rocket') {
       this.events.push({ type: 'explosion', x, y, explosionKind: kind, scale: explosion.visualScale });
@@ -408,7 +617,7 @@ export class Simulation {
     } else if (kind === 'gravity') this.events.push({ type: 'pulse', x, y });
     if (explosion.visualOnly) return;
     for (const enemy of this.state.enemies) {
-      if (!enemy.removed && explosionContains(explosion, x, y, enemy.x, enemy.y, enemy.hp >= 1)) this.damageEnemy(enemy, explosion.damage, false, slot, enemy.x, enemy.y);
+      if (!enemy.removed && explosionContains(explosion, x, y, enemy.x, enemy.y, enemy.hp >= 1)) this.damageEnemy(enemy, explosion.damage, false, slot, enemy.x, enemy.y, actorSlot);
     }
   }
 
@@ -418,11 +627,10 @@ export class Simulation {
     if (state.castleHp <= 0) { state.phase = 'defeat'; player.bowDrawing = false; this.events.push({ type: 'defeat' }); return; }
     const item = this.weapon;
     if (item && autoReloadReady(item, player.shootTimer)) this.requestReload(false);
-    if (item?.reloadTime) {
-      const loaded = advanceReload(item, player.traits, player.rampageTicks > 0);
-      item.ammo = loaded.ammo; item.reloadTime = loaded.reloadTime;
-      if (loaded.restarted || loaded.completion) this.events.push({ type: loaded.restarted ? 'reload' : 'reloaded', weaponId: item.id, automaticReload: item.autoReload > 0 });
-    }
+    if (item?.reloadTime) this.advanceActorReload(0);
+    this.state.partyAI.sharedWeaponRange = item?.range ?? null;
+    const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
+    for (const slot of this.state.party.slots.slice(0, 4)) stepPartyAITimer(slot, partyContext, partyCallbacks);
     if (state.newWave) {
       state.newWave = false;
       if (state.castleHp < state.castleMaxHp) state.noDamage = false;
@@ -454,24 +662,28 @@ export class Simulation {
     const bossWeapon = kind === 'boss' ? 1 + int(this.random() * 2) : 0;
     const bossCount = kind === 'boss' ? 100 + int(this.random() * 60) : 0;
     // Даже при нулевых strength/THREAT исходное умножение и деление влияют на последний бит Number.
-    const speed = (definition.speedBase + this.random() * definition.speedRandom) * 100 / 100;
+    const speed = (definition.speedBase + this.random() * definition.speedRandom) * 100 / (100 + this.state.partySkills.effects[112]);
     const yRoll = this.random();
     const y = int(kind === 'fly' ? yRoll * 70 / 1.5 + 80 : yRoll * (kind === 'boss' ? 105 : definition.airborne ? 70 : WORLD.groundWidth) + (kind === 'boss' ? 195 : definition.airborne ? 40 : WORLD.groundLine));
     const hp = kind === 'boss' ? 150 + this.state.activeMission.level * 25 : definition.hp;
     const ranged = kind === 'archer' ? { rangedCounter: 120 } : kind === 'fly' ? { flyCounter: 0 } : kind === 'barbarian' ? { rampage: 0 as const, rageEffectFrame: 0, hitEffects: [] } : {};
     const appearance = kind === 'boss' ? 51 + this.state.bossesSpawned++ % 15 : 0;
-    this.state.enemies.push({ uid: this.state.nextUid++, kind, x: -20, y, hp, maxHp: hp, speed, speedOrg: speed, attack: definition.attack, gold, exp: 1 + int(definition.power * 0.4), knockBack: 0, disarmed: 0, attacking: false, attacked: false, frame: kind === 'rat' ? 14 : 1, shadowHit: shadowHitAtFrame(kind, kind === 'rat' ? 14 : 1), deathTicks: 0, drop: 0, removed: false, bossAction: kind === 'boss' ? 3 : 0, bossCount, bossIdle: 0, bossFireNum: 0, bossWeapon, bossDamage: 0, appearance, ...(kind === 'boss' ? { bossFacing: -1 as const } : {}), ...ranged });
+    const uid = this.state.nextUid++;
+    this.state.enemies.push({ uid, kind, type: definition.airborne ? 1 : 0, tag: 0, onMark: false, x: -20, y, hp, maxHp: hp, speed, speedOrg: speed, attack: definition.attack, gold, exp: 1 + int(definition.power * 0.4), knockBack: 0, disarmed: 0, attacking: false, attacked: false, frame: kind === 'rat' ? 14 : 1, shadowHit: shadowHitAtFrame(kind, kind === 'rat' ? 14 : 1), deathTicks: 0, drop: 0, removed: false, bossAction: kind === 'boss' ? 3 : 0, bossCount, bossIdle: 0, bossFireNum: 0, bossWeapon, bossDamage: 0, appearance, ...(kind === 'boss' ? { bossFacing: -1 as const } : {}), ...ranged });
+    if (kind === 'boss') this.state.partyAI.targetBossUid = uid;
   }
 
-  private damageEnemy(enemy: EnemyState, raw: number, criticalValue: number | boolean, weaponSlot: number | null, x: number, y: number): void {
-    if (enemy.hp <= 0) return;
+  private damageEnemy(enemy: EnemyState, raw: number, criticalValue: number | boolean, weaponSlot: number | null, x: number, y: number, actorSlot = 0): void {
+    const player = this.actor(actorSlot);
+    if (enemy.hp <= 0 || !player) return;
+    const member = actorSlot ? partySlot(this.state.party, actorSlot)!.member! : null;
     const critical = Boolean(criticalValue);
     const definition = ENEMIES[enemy.kind];
-    const item = weaponSlot === null ? null : this.state.inventory[weaponSlot];
-    const hit = weaponHitDamage(item, this.state.player.traits, raw, { critical, target: definition.airborne ? 'air' : 'normal', bossGuard: enemy.kind === 'boss' && enemy.bossAction === 6 });
+    const item = weaponSlot === null ? null : actorSlot ? partySlot(this.state.party, actorSlot)!.weapon : this.state.inventory[weaponSlot];
+    const hit = weaponHitDamage(item, player.traits, raw, { critical, target: definition.airborne ? 'air' : 'normal', bossGuard: enemy.kind === 'boss' && enemy.bossAction === 6 });
     const damage = hit.damage;
     if (item) {
-      const effects = weaponHitEffects(item, this.state.player.traits, { ...enemy, resKnock: definition.knockResistance }, {
+      const effects = weaponHitEffects(item, player.traits, { ...enemy, resKnock: definition.knockResistance }, {
         damageBeforeGuard: hit.beforeGuard, castleHp: this.state.castleHp, castleMaxHp: this.state.castleMaxHp,
         leechRoll: item.leech && this.state.castleHp > 0 ? this.random() : undefined,
       });
@@ -485,7 +697,7 @@ export class Simulation {
       if (critical) enemy.hitEffects!.push({ frame: 70, ...local });
     }
     enemy.hp -= damage;
-    this.events.push({ type: 'hit', x, y, amount: damage, critical, criticalType: Number(criticalValue), enemyUid: enemy.uid, ...(enemy.kind === 'boss' && enemy.bossAction === 6 ? { bossGuard: true } : {}) });
+    this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'hit', x, y, amount: damage, critical, criticalType: Number(criticalValue), enemyUid: enemy.uid, ...(enemy.kind === 'boss' && enemy.bossAction === 6 ? { bossGuard: true } : {}) });
     if (enemy.hp > 0) {
       if (enemy.kind === 'barbarian' && enemy.rampage === 0 && this.random() > 0.75) {
         enemy.rampage = 100;
@@ -494,7 +706,7 @@ export class Simulation {
         enemy.speedOrg *= enemy.speedOrg * 1.5 + 1.7;
         enemy.attack = int(enemy.attack * 0.5) + 1;
         enemy.rageEffectFrame = 1;
-        this.events.push({ type: 'enemy-rage', x: enemy.x, y: enemy.y, enemyUid: enemy.uid });
+        this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'enemy-rage', x: enemy.x, y: enemy.y, enemyUid: enemy.uid });
       }
       if (enemy.kind === 'boss') {
         enemy.bossDamage += damage * (enemy.bossAction === 5 ? 2 : 1);
@@ -506,37 +718,63 @@ export class Simulation {
       }
       return;
     }
-    const player = this.state.player;
     this.state.kills++;
-    const skillIndex = WEAPON_SKILLS.indexOf(this.state.inventory[player.selectedSlot]?.reqTrait as typeof WEAPON_SKILLS[number]);
+    if (member) member.kills++;
+    clearPartyTargetCache(this.state.partyAI);
+    if (enemy.kind === 'boss') this.state.partyAI.targetBossUid = null;
+    const skillIndex = WEAPON_SKILLS.indexOf((actorSlot ? this.actorWeapon(actorSlot) : this.state.inventory[this.state.player.selectedSlot])?.reqTrait as typeof WEAPON_SKILLS[number]);
     player.weaponExp[skillIndex < 0 ? 4 : skillIndex]++;
-    const dropThreshold = player.rampageTicks > 0 ? 100 : 150;
-    if (item && item.livingWeapon > 0) {
-      Object.assign(item, livingWeaponKill(item, () => this.random(), { day: this.state.day }));
+    let dropThreshold = 150 * 100 / (100 + combatTrait(COMBAT_TRAIT.LUCK, player.traits));
+    if (player.rampageTicks > 0) dropThreshold /= 1.5;
+    if (member?.aiState && member.traits[COMBAT_TRAIT.RANGER]) {
+      member.aiState.frenzy += int(enemy.exp * 125 / (100 + member.level * 5));
+      if (member.aiState.frenzy >= 1000) {
+        member.aiState.frenzy = 0;
+        const duration = int(360 * (100 + combatTrait(COMBAT_TRAIT.RANGER, member.traits)) / 100);
+        this.startRampage(0, duration);
+        for (const slot of this.state.party.slots.slice(0, 4)) if (slot.exists) this.startRampage(slot.slot, duration);
+      }
     }
-    let experience = enemy.exp;
+    if (item && item.livingWeapon > 0) {
+      Object.assign(item, livingWeaponKill(item, () => this.random(), { day: this.state.day, engineer: this.state.partySkills.effects[120] }));
+    }
+    let experience = int(enemy.exp * this.state.activeMission.expFix);
+    if (actorSlot) {
+      if (this.state.day / 1.5 > player.level) { player.weaponExp[skillIndex < 0 ? 4 : skillIndex]++; experience = int(experience * 2); }
+      experience = int(experience * 1.5);
+    }
     const enemyLevel = enemy.kind === 'boss' ? this.state.activeMission.level : definition.level;
-    if (enemyLevel + 3 < player.level) experience *= 100 / (100 + (player.level - enemyLevel) * 75);
+    if (enemyLevel + 3 < player.level) experience = int(experience * 100 / (100 + (player.level - enemyLevel) * 75));
+    if (player.traits[COMBAT_TRAIT.NOBLE]) experience = int(experience * 1.4);
     enemy.exp = int(experience);
-    if (critical && player.rampageTicks <= 0 && --player.rampageTicks === -7) this.startRampage();
+    if (critical) {
+      if (player.traits[COMBAT_TRAIT.ROGUE]) dropThreshold = 1;
+      if (player.rampageTicks <= 0 && --player.rampageTicks === -7) this.startRampage(actorSlot);
+    }
     // В исходнике опыт приводится к int через trainerFix() для текущего героя.
     player.exp += int(experience);
-    if (player.exp >= 1000) this.levelUp();
+    if (player.exp >= 1000) this.levelUpActor(actorSlot);
     let goodShotIndex: number | undefined;
-    if (critical) {
+    if (critical && actorSlot === 0) {
       this.state.criticalKills++;
       [10, 30, 50].forEach((count, index) => { if (this.state.criticalKills >= count) this.awardMedal(70 + index); });
       // Здесь пока действует начальное условие sister.dead == false; повреждение сестры не реализовано.
       goodShotIndex = int(this.random() * 5);
     }
-    if (int(this.random() * dropThreshold) <= 10) enemy.drop = 1;
+    if (int(this.random() * dropThreshold) <= 10) {
+      enemy.drop = 1;
+      if (player.traits[COMBAT_TRAIT.ROGUE]) {
+        enemy.gold = int(enemy.gold * (100 + combatTrait(COMBAT_TRAIT.ROGUE, player.traits)) / 100);
+        if (int(this.random() * 100) < combatTrait(COMBAT_TRAIT.LUCK, player.traits)) enemy.gold *= 2;
+      }
+      if (member) member.earnedGold += enemy.gold;
+    }
     const groupSize = this.state.waves[Math.max(0, this.state.waveIndex)].initialCount;
-    if (int(this.random() * groupSize * 5) === 0) { enemy.drop = 2; this.state.loot.push(definition.loot); }
-    else this.random();
+    if (int(this.random() * groupSize * 5) === 0 || int(this.random() * 400 * groupSize) < this.state.partySkills.effects[109]) { enemy.drop = 2; this.state.loot.push(definition.loot); }
     if (enemy.kind === 'boss') { enemy.drop = 1; this.state.bossKilled++; }
     enemy.frame = enemy.kind === 'sheep' ? 107 : enemy.kind === 'rat' ? 93 : enemy.kind === 'chicken' ? 208 : enemy.kind === 'crow' ? 58 : enemy.kind === 'archer' ? 94 : enemy.kind === 'fly' ? 12 : enemy.kind === 'barbarian' ? 84 : enemy.kind === 'boss' ? 281 : 1;
     enemy.shadowHit = shadowHitAtFrame(enemy.kind, enemy.frame, enemy.shadowHit);
-    this.events.push({ type: 'kill', x: enemy.x, y: enemy.y, critical, enemyUid: enemy.uid, goodShotIndex });
+    this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'kill', x: enemy.x, y: enemy.y, critical, enemyUid: enemy.uid, goodShotIndex });
   }
 
   private levelUp(): void {
@@ -545,29 +783,44 @@ export class Simulation {
     this.events.push({ type: 'level-up', amount: growth.level });
   }
 
-  private damageCastle(amount: number): void {
+  private levelUpActor(actorSlot: number): void {
+    if (actorSlot === 0) { this.levelUp(); return; }
+    const member = partySlot(this.state.party, actorSlot)?.member;
+    if (!member) return;
+    levelUpCompanion(member, () => this.random());
+    this.events.push({ type: 'level-up', actorSlot, amount: member.level });
+  }
+
+  private damageCastle(amount: number, attacker?: EnemyState): void {
     if (this.state.protection.counter > 0) { this.events.push({ type: 'defend' }); return; }
-    const traits = this.state.player.traits;
-    const insurance = combatTrait(TRAIT.INSURANCE, traits);
+    const party = this.state.partySkills;
+    if (attacker && party.guardian) {
+      const slot = party.guardianSlots[int(this.random() * party.guardianSlots.length)];
+      this.damageEnemy(attacker, party.guardian, false, null, attacker.x, attacker.y, slot);
+    }
+    const insurance = party.effects[TRAIT.INSURANCE];
     this.state.gold += insurance; this.state.totalMoney += insurance;
-    if (this.random() * 100 < combatTrait(TRAIT.DEFENDER, traits)) { this.events.push({ type: 'defend' }); return; }
+    if (this.random() * 100 < party.effects[TRAIT.DEFENDER]) { this.events.push({ type: 'defend' }); return; }
     const damage = Math.max(1, int(int(amount) * (1 - this.state.activeMission.absorbFix)));
     this.state.castleHp -= damage;
     this.events.push({ type: 'castle-hit', amount: damage, x: 575, y: 220 });
     // Исходник выбирает союзника даже без Last Hope и проверяет порог в этом направлении.
     if (this.random() > 0.6) {
-      const ally = int(this.random() * 5), threshold = combatTrait(TRAIT.LAST_HOPE, traits);
-      if (ally === 0 && this.state.player.rampageTicks <= 0 && threshold !== 0 && threshold < this.state.castleHp / this.state.castleMaxHp * 100) {
-        this.startRampage();
+      const ally = int(this.random() * 5), actor = this.actor(ally);
+      const threshold = actor ? combatTrait(TRAIT.LAST_HOPE, actor.traits) : 0;
+      if (actor && actor.rampageTicks <= 0 && threshold !== 0 && threshold < this.state.castleHp / this.state.castleMaxHp * 100) {
+        this.startRampage(ally);
       }
     }
   }
 
-  private startRampage(): void {
+  private startRampage(actorSlot = 0, baseFrames = 300): void {
     // shake() исходного героя потребляет два броска до включения ярости.
-    this.random(); this.random();
-    this.state.player.rampageTicks = rampageDuration(this.state.player.traits);
-    this.events.push({ type: 'rampage' });
+    if (actorSlot === 0) { this.random(); this.random(); }
+    const actor = this.actor(actorSlot);
+    if (!actor) return;
+    actor.rampageTicks = rampageDuration(actor.traits, baseFrames);
+    this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'rampage' });
   }
 
   private tickEnemy(enemy: EnemyState): void {
@@ -597,6 +850,7 @@ export class Simulation {
       }
       return;
     }
+    registerPartyTarget(enemy as PartyAITarget, this.state.partyAI);
     if (enemy.knockBack > 0) {
       if (enemy.attacking) {
         enemy.attacking = false; enemy.speed = enemy.speedOrg; enemy.frame = enemy.kind === 'rat' ? 14 : enemy.kind === 'barbarian' ? 3 : 5;
@@ -688,11 +942,11 @@ export class Simulation {
     enemy.frame++;
     if (enemy.kind === 'sheep') {
       if (enemy.frame === 29) enemy.frame = 5;
-      if (enemy.frame === 44) this.damageCastle(enemy.attack);
+      if (enemy.frame === 44) this.damageCastle(enemy.attack, enemy);
       if (enemy.frame === 95) enemy.frame = 32;
     } else if (enemy.kind === 'rat') {
       if (enemy.frame === 38) enemy.frame = 14;
-      if (enemy.frame === 60) this.damageCastle(enemy.attack);
+      if (enemy.frame === 60) this.damageCastle(enemy.attack, enemy);
       if (enemy.frame === 81) enemy.frame = 41;
     } else if (enemy.kind === 'archer') {
       if (enemy.frame === 25) enemy.frame = 5;
@@ -700,7 +954,7 @@ export class Simulation {
         this.state.enemyArrows.push(createEnemyArrow(this.state.nextUid++, enemy.x, enemy.y));
         enemy.attacked = true;
         this.events.push({ type: 'enemy-arrow', x: enemy.x, y: enemy.y });
-        this.damageCastle(enemy.attack);
+        this.damageCastle(enemy.attack, enemy);
       }
       if (enemy.frame === 82) enemy.frame = 28;
     } else if (enemy.kind === 'fly') {
@@ -708,7 +962,7 @@ export class Simulation {
     } else if (enemy.kind === 'barbarian') {
       if (enemy.frame === 23) enemy.frame = 3;
       if (enemy.frame === 27 && enemy.rampage === 100) enemy.frame = 38;
-      if (enemy.frame === 45) this.damageCastle(enemy.attack);
+      if (enemy.frame === 45) this.damageCastle(enemy.attack, enemy);
       if (enemy.frame === 72 || (enemy.frame === 53 && enemy.rampage === 100)) enemy.frame = 26;
     } else if (enemy.kind === 'chicken') {
       if ([29, 32, 34].includes(enemy.frame)) enemy.speed *= 0.75;
@@ -717,7 +971,7 @@ export class Simulation {
       if (enemy.frame === 58 && this.random() > 0.5) enemy.frame = 50 + int(this.random() * 5);
       if (enemy.frame === 78) enemy.attacking = false;
       if (enemy.frame === 102) enemy.frame = 37;
-      if (enemy.frame === 136) this.damageCastle(enemy.attack);
+      if (enemy.frame === 136) this.damageCastle(enemy.attack, enemy);
       if (enemy.frame === 153) enemy.attacked = true;
       if (enemy.frame === 196) enemy.frame = 105;
     }
@@ -728,7 +982,7 @@ export class Simulation {
     if (enemy.bossIdle > 0) { enemy.bossIdle--; return; }
     if (enemy.bossAction === 1) {
       enemy.bossIdle = enemy.bossWeapon === 1 ? 90 : 5;
-      this.damageCastle(enemy.attack * (enemy.bossWeapon === 1 ? 4 : 1));
+      this.damageCastle(enemy.attack * (enemy.bossWeapon === 1 ? 4 : 1), enemy);
       enemy.bossFireNum--;
       enemy.frame = 10;
       this.events.push({ type: 'boss-shot', weaponId: enemy.bossWeapon, x: enemy.x, y: enemy.y });
@@ -769,7 +1023,7 @@ export class Simulation {
         startX: enemy.x, startY: enemy.y, targetX: WORLD.playerX + this.random() * 120 - 20,
         targetY: WORLD.playerY + this.random() * 100 - 50, speedBase: 12, damage: -1 }));
       // Урон замку наносится при броске. Взрыв с damage=-1 позднее только рисуется и трясёт экран.
-      this.damageCastle(enemy.attack * 3);
+      this.damageCastle(enemy.attack * 3, enemy);
       this.events.push({ type: 'boss-special', weaponId: 11, x: enemy.x, y: enemy.y, enemyUid: enemy.uid });
     } else if (enemy.bossAction === 6) {
       enemy.bossCount--; enemy.bossFacing = -1; enemy.speed = 0;
@@ -796,13 +1050,32 @@ export class Simulation {
     }
     player.rampageTicks = 0;
     player.bowDrawing = false;
+    // fillAmmo пополняет также неактивные слоты; endRampage удаляет лишь визуальный эффект.
+    for (const slot of this.state.party.slots.slice(0, 4)) {
+      if (slot.weapon && slot.weapon.type !== ITEM_TYPE.use) { slot.weapon.reloadTime = 0; slot.weapon.ammo = slot.weapon.ammoMax; }
+    }
     this.state.itemCooldowns.fill(0);
-    player.exp += 250;
-    if (player.exp >= 1000) this.levelUp();
+    for (let slot = 0; slot < 5; slot++) {
+      const actor = this.actor(slot);
+      if (!actor) continue;
+      actor.exp += 250;
+      if (actor.exp >= 1000) this.levelUpActor(slot);
+    }
     // wexpUp повышает навык один раз, затем обнуляет весь накопленный опыт оружия.
-    for (const [index, skill] of WEAPON_SKILLS.entries()) {
-      if (player.weaponExp[index] > (player.traits[skill] ?? 0) * 12 + 20) {
-        player.traits[skill] = (player.traits[skill] ?? 0) + 1; player.weaponExp[index] = 0;
+    for (let slot = 0; slot < 5; slot++) {
+      const actor = this.actor(slot);
+      if (!actor) continue;
+      for (const [index, skill] of WEAPON_SKILLS.entries()) {
+        if (actor.weaponExp[index] > int(((actor.traits[skill] ?? 0) * 12 + 20) * (slot === 0 ? 1 : 0.5))) {
+          actor.traits[skill] = (actor.traits[skill] ?? 0) + 1; actor.weaponExp[index] = 0;
+        }
+      }
+      if (slot) {
+        const member = partySlot(this.state.party, slot)!.member!;
+        while (member.skillPoints > 0) {
+          gainCompanionTrait(member, this.state.partySkills, () => this.random(), slot);
+          member.skillPoints--;
+        }
       }
     }
     this.state.pendingShot = false;
@@ -815,7 +1088,8 @@ export class Simulation {
     const perfectBonus = this.state.noDamage ? Math.trunc(reward * 1.3) - reward : 0;
     const tax = Math.max(0, this.state.day * 35 - 200);
     const salary = this.state.title === 1 ? 100 : 0;
-    this.state.result = { reward, perfectBonus, upkeep: FIRST_DAY.upkeep, tax, salary, netReward: reward + perfectBonus + salary - FIRST_DAY.upkeep - tax };
+    const wages = this.state.party.slots.slice(0, 4).reduce((total, slot) => total + (slot.exists && slot.member ? companionWage(slot.member, this.state.partySkills.effects[127], this.state.earnedMedals.includes(92)) : 0), 0);
+    this.state.result = { reward, perfectBonus, upkeep: FIRST_DAY.upkeep, tax, salary, wages, netReward: reward + perfectBonus + salary - FIRST_DAY.upkeep - tax - wages };
     this.state.phase = 'victory';
     this.prepareOrdinaryLoot(() => this.random());
     this.events.push({ type: 'victory' });
@@ -823,7 +1097,7 @@ export class Simulation {
 
   private prepareOrdinaryLoot(random: () => number): void {
     if (this.state.phase !== 'victory' || this.state.postbattle !== 'none') return;
-    const generated = new ItemFactory(random, { day: this.state.day }).ordinaryLoot(this.state.loot, this.state.previousTown?.shop ?? this.state.lootOffers);
+    const generated = new ItemFactory(random, { day: this.state.day, engineer: this.state.partySkills.effects[120] }).ordinaryLoot(this.state.loot, this.state.previousTown?.shop ?? this.state.lootOffers);
     this.state.lootOffers = generated.offers;
     this.state.loot = generated.queue;
     this.state.postbattle = 'loot';
@@ -848,7 +1122,7 @@ export class Simulation {
   finishLoot(): boolean {
     if (this.state.phase !== 'victory' || !['loot', 'boss-loot'].includes(this.state.postbattle)) return false;
     if (this.state.postbattle === 'loot' && this.state.bossKilled > 0) {
-      this.state.lootOffers = new ItemFactory(() => this.random(), { day: this.state.day }).bossLoot(this.state.bossKilled, false, this.state.lootOffers);
+      this.state.lootOffers = this.equipmentFactory().bossLoot(this.state.bossKilled, false, this.state.lootOffers);
       this.state.postbattle = 'boss-loot';
       return true;
     }
@@ -865,9 +1139,9 @@ export class Simulation {
 
   private prepareResult(): void {
     if (this.state.phase !== 'victory' || this.state.postbattle !== 'result' || this.state.town !== null) return;
-    // renewResult тратит бросок fame даже при fame=0; затем townEvent делает два броска ACTIVE=0.
+    // renewResult тратит бросок fame даже при fame=0; townEvent использует прежний кэш ACTIVE.
     this.random();
-    const extraAp = int(this.random() * this.random());
+    const extraAp = int(this.random() * this.random() * (this.state.partySkills.effects[123] + 1));
     this.state.gold += this.state.result.netReward;
     this.state.totalMoney += this.state.result.reward + this.state.result.perfectBonus + this.state.result.salary;
     this.state.town = { ap: 4 + extraAp, preparation: 'pending' };
@@ -883,15 +1157,22 @@ export class Simulation {
   private prepareTown(): void {
     if (this.state.town?.preparation !== 'pending') return;
     const previous = this.state.previousTown;
-    const prepared = prepareEarlyTown(() => this.random(), this.state.day, { priorOffers: this.state.lootOffers, recruitSlots: previous?.recruit.items, searched: previous?.searched, absorbFix: this.medalAbsorption() });
+    const recruitSlots = { ...previous?.recruit.items, 45: this.state.party.slots[4].weapon };
+    const shopEngineer = this.state.partySkills.effects[120];
+    this.refreshPartySkills();
+    // До generateMission лавка использует старого Engineer; миссия и кандидат — новый кэш.
+    const prepared = prepareEarlyTown(() => this.random(), this.state.day, { priorOffers: this.state.lootOffers, recruitSlots, searched: previous?.searched, absorbFix: this.medalAbsorption(),
+      shopEngineer, missionNegotiator: this.state.partySkills.effects[117], recruitEngineer: this.state.partySkills.effects[120] });
     this.state.town = { ap: this.state.town.ap, preparation: 'ready', ...prepared };
+    installCandidate(this.state.party, prepared.recruit);
+    this.refreshPartySkills();
     // Общие слоты 0–7 теперь принадлежат лавке; отдельной копии истории трофеев не остаётся.
     this.state.lootOffers = Array(8).fill(null);
   }
 
   buyStock(stock: number, slot: number): PurchaseOutcome {
     const town = this.state.town;
-    if (this.state.pendingTownAction || this.state.phase !== 'town' || town?.preparation !== 'ready' || !Number.isInteger(stock) || stock < 0 || stock >= 8 || !Number.isInteger(slot) || slot < 0 || slot >= 6 || !isOccupiedItem(town.shop[stock])) return 'unavailable';
+    if ((this.state.pendingTownAction || this.state.pendingPartyAction) || this.state.phase !== 'town' || town?.preparation !== 'ready' || !Number.isInteger(stock) || stock < 0 || stock >= 8 || !Number.isInteger(slot) || slot < 0 || slot >= 6 || !isOccupiedItem(town.shop[stock])) return 'unavailable';
     if (isOccupiedItem(this.state.inventory[slot])) return 'occupied';
     const price = Math.trunc(town.shop[stock]!.value);
     if (this.state.gold < price) return 'not-enough-gold';
@@ -901,11 +1182,11 @@ export class Simulation {
   }
 
   moveTownItem(from: number, to: number): boolean {
-    return !this.state.pendingTownAction && this.state.phase === 'town' && this.state.town?.preparation === 'ready' && swapInventorySlots(this.state.inventory, from, to);
+    return !this.state.pendingTownAction && !this.state.pendingPartyAction && this.state.phase === 'town' && this.state.town?.preparation === 'ready' && swapInventorySlots(this.state.inventory, from, to);
   }
 
   sellTownItem(slot: number): number | null {
-    if (this.state.pendingTownAction || this.state.phase !== 'town' || this.state.town?.preparation !== 'ready' || !Number.isInteger(slot) || slot < 0 || slot >= 6) return null;
+    if ((this.state.pendingTownAction || this.state.pendingPartyAction) || this.state.phase !== 'town' || this.state.town?.preparation !== 'ready' || !Number.isInteger(slot) || slot < 0 || slot >= 6) return null;
     const item = this.state.inventory[slot];
     if (!isOccupiedItem(item)) return null;
     const price = itemPrice(item);
@@ -916,7 +1197,7 @@ export class Simulation {
 
   applyShopToken(slot: number, stock: number): boolean {
     const town = this.state.town;
-    if (this.state.pendingTownAction || this.state.phase !== 'town' || town?.preparation !== 'ready' || !Number.isInteger(slot) || slot < 0 || slot >= 6 || !Number.isInteger(stock) || stock < 0 || stock >= 8) return false;
+    if ((this.state.pendingTownAction || this.state.pendingPartyAction) || this.state.phase !== 'town' || town?.preparation !== 'ready' || !Number.isInteger(slot) || slot < 0 || slot >= 6 || !Number.isInteger(stock) || stock < 0 || stock >= 8) return false;
     const token = this.state.inventory[slot], item = town.shop[stock];
     if (!isOccupiedItem(token) || token.id !== 35 || !finite(token.attack) || token.attack < 0 || !isOccupiedItem(item)) return false;
     item.value = Math.min(999999999, Math.max(0, item.value - token.attack!));
@@ -925,7 +1206,7 @@ export class Simulation {
   }
 
   freeRepair(): RepairOutcome {
-    if (this.state.pendingTownAction || this.state.phase !== 'town' || this.state.town === null) return 'unavailable';
+    if ((this.state.pendingTownAction || this.state.pendingPartyAction) || this.state.phase !== 'town' || this.state.town === null) return 'unavailable';
     if (this.state.castleHp === this.state.castleMaxHp) return 'not-damaged';
     if (this.state.town.ap < 2) return 'not-enough-ap';
     this.state.town.ap -= 2;
@@ -935,7 +1216,7 @@ export class Simulation {
 
   claimTitle(): 'claimed' | 'not-enough-ap' | 'unavailable' {
     const state = this.state;
-    if (state.phase !== 'town' || state.town?.preparation !== 'ready' || state.pendingTownAction || state.day < 6 || state.title !== 0) return 'unavailable';
+    if (state.phase !== 'town' || state.town?.preparation !== 'ready' || state.pendingTownAction || state.pendingPartyAction || state.day < 6 || state.title !== 0) return 'unavailable';
     if (state.town.ap < 4) return 'not-enough-ap';
     // Титул меняется после расчёта дня; первая зарплата входит только в следующий итог.
     state.town.ap -= 4;
@@ -944,13 +1225,12 @@ export class Simulation {
   }
 
   private equipmentFactory(): ItemFactory {
-    // У одиночного шерифа пока нет инженера в отряде или медали переработки.
-    return new ItemFactory(() => this.random(), { day: this.state.day });
+    return new ItemFactory(() => this.random(), { day: this.state.day, engineer: this.state.partySkills.effects[120] });
   }
 
   beginWeaponUpgrade(slot: number): TownEquipmentOutcome {
     const state = this.state, town = state.town;
-    if (state.phase !== 'town' || town?.preparation !== 'ready' || state.pendingTownAction || !Number.isInteger(slot) || slot < 0 || slot >= 6) return 'unavailable';
+    if (state.phase !== 'town' || town?.preparation !== 'ready' || state.pendingTownAction || state.pendingPartyAction || !Number.isInteger(slot) || slot < 0 || slot >= 6) return 'unavailable';
     if (town.ap < 4) return 'not-enough-ap';
     const source = state.inventory[slot];
     if (!isOccupiedItem(source) || source.type !== ITEM_TYPE.gun) return 'unavailable';
@@ -963,7 +1243,7 @@ export class Simulation {
 
   beginModMount(modSlot: number, gunSlot: number): TownEquipmentOutcome {
     const state = this.state;
-    if (state.phase !== 'town' || state.town?.preparation !== 'ready' || state.pendingTownAction || modSlot === gunSlot || [modSlot, gunSlot].some(slot => !Number.isInteger(slot) || slot < 0 || slot >= 6)) return 'unavailable';
+    if (state.phase !== 'town' || state.town?.preparation !== 'ready' || state.pendingTownAction || state.pendingPartyAction || modSlot === gunSlot || [modSlot, gunSlot].some(slot => !Number.isInteger(slot) || slot < 0 || slot >= 6)) return 'unavailable';
     const mod = state.inventory[modSlot], gun = state.inventory[gunSlot];
     if (!isOccupiedItem(mod) || mod.type !== ITEM_TYPE.mod || !isOccupiedItem(gun) || gun.type !== ITEM_TYPE.gun) return 'unavailable';
     state.pendingTownAction = { kind: 'mod', modSlot, gunSlot };
@@ -1008,7 +1288,7 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
-    if (!record(value) || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].includes(Number(value.version)) || typeof value.version !== 'number' || (![1, 2, 3, 4, 5, 6, 7].includes(Number(value.day)) || typeof value.day !== 'number' || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
+    if (!record(value) || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].includes(Number(value.version)) || typeof value.version !== 'number' || (![1, 2, 3, 4, 5, 6, 7].includes(Number(value.day)) || typeof value.day !== 'number' || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || ![2, ...(Number(value.day) >= 2 ? [3] : [])].includes(Number(value.bossWave)) || (value.waveIndex === 5 && value.newWave !== true)) throw new Error('Invalid counters.');
@@ -1029,8 +1309,8 @@ export class Simulation {
       if (!Array.isArray(value.itemCooldowns) || value.itemCooldowns.length !== 5 || value.itemCooldowns.some(time => !Number.isInteger(time) || time < 0 || time > 2001)) throw new Error('Invalid item cooldowns.');
       if (!record(value.protection) || !Number.isInteger(value.protection.counter) || Number(value.protection.counter) < -99 || Number(value.protection.counter) > 250 || !finite(value.protection.blueMultiplierAdd) || value.protection.blueMultiplierAdd < -0.2 || value.protection.blueMultiplierAdd > 1.4) throw new Error('Invalid protection effect.');
       const mission = value.activeMission, level = Number(value.day) - 1;
-      if (!record(mission) || Object.entries({ level, fixedLv: level, strength: 0, powerOrg: 800 + level * 120, reward: 600 + level * 20, spawnRate: 15 - level / 5, hpFix: 1, dmgFix: 1, expFix: 1, bossDay: false }).some(([key, expected]) => mission[key] !== expected) || (![0, 0.01, ...(Number(value.day) >= 5 ? [0.02] : [])].includes(Number(mission.absorbFix)) || typeof mission.absorbFix !== 'number') || (value.day === 1 && mission.absorbFix !== 0)) throw new Error('Invalid active mission.');
-      if (!finite(value.resultBefore) || value.resultBefore < 0 || !Number.isInteger(value.perfectDays) || Number(value.perfectDays) < 0 || Number(value.perfectDays) > Number(value.day) || !Number.isInteger(value.bossesSpawned) || Number(value.bossesSpawned) < 0 || Number(value.bossesSpawned) > Number(value.day)) throw new Error('Invalid campaign counters.');
+      if (!record(mission) || Object.entries({ level, fixedLv: level, strength: 0, powerOrg: 800 + level * 120, ...(value.version < 15 || value.day === 1 ? { reward: 600 + level * 20 } : {}), spawnRate: 15 - level / 5, hpFix: 1, dmgFix: 1, expFix: 1, bossDay: false }).some(([key, expected]) => mission[key] !== expected) || !Number.isInteger(mission.reward) || (![0, 0.01, ...(Number(value.day) >= 5 ? [0.02] : [])].includes(Number(mission.absorbFix)) || typeof mission.absorbFix !== 'number') || (value.day === 1 && mission.absorbFix !== 0)) throw new Error('Invalid active mission.');
+      if (!finite(value.resultBefore) || !Number.isInteger(value.perfectDays) || Number(value.perfectDays) < 0 || Number(value.perfectDays) > Number(value.day) || !Number.isInteger(value.bossesSpawned) || Number(value.bossesSpawned) < 0 || Number(value.bossesSpawned) > Number(value.day)) throw new Error('Invalid campaign counters.');
       if (!Array.isArray(value.earnedMedals) || new Set(value.earnedMedals).size !== value.earnedMedals.length || !value.earnedMedals.includes(40) || value.earnedMedals.some(id => ![40, 60, 61, 62, 67, 70, 71, 72, 92, 93].includes(id)) || (value.earnedMedals.includes(62) && (value.version < 14 || value.day !== 7 || value.perfectDays !== 7 || !['victory', 'town'].includes(String(value.phase))))) throw new Error('Invalid earned medals.');
     }
     if (!Array.isArray(value.waves) || value.waves.length !== 5 || value.waves.some(wave => !record(wave) || !Array.isArray(wave.enemies) || wave.enemies.length > 200 || wave.enemies.some(kind => typeof kind !== 'string' || !Object.hasOwn(ENEMIES, kind)) || !Array.isArray(wave.delays) || wave.delays.length !== wave.enemies.length || wave.delays.some(delay => !finite(delay) || delay < 0 || delay > 1000) || !finite(wave.initialCount) || wave.initialCount < wave.enemies.length)) throw new Error('Invalid wave state.');
@@ -1094,6 +1374,17 @@ export class Simulation {
     if (!Array.isArray(value.loot) || value.loot.length > 200 || value.loot.some(item => !Number.isInteger(item) || !Object.hasOwn(BASE_ITEM_FIELDS, item > 1000 ? item - 1000 : item)) || !record(value.result) || ['reward', 'perfectBonus', 'upkeep', 'netReward'].some(key => !finite((value.result as Record<string, unknown>)[key]))) throw new Error('Invalid results.');
     const simulation = new Simulation(1, { ...options, deferOpeningWaves: false });
     simulation.state = structuredClone(value) as unknown as SimulationState;
+    if (value.version < 15) {
+      const town = simulation.state.town?.preparation === 'ready' ? simulation.state.town : simulation.state.previousTown;
+      simulation.state.party = createPartyState(town?.recruit);
+      simulation.state.partySkills = partySkills([{ traits: simulation.state.player.traits ?? createSheriffTraits() }]);
+      simulation.state.partyAI = createPartyAIShared(); simulation.state.retainedAITargets = [];
+      simulation.state.pendingPartyAction = null; simulation.state.result.wages = 0;
+      for (const enemy of simulation.state.enemies) {
+        enemy.type = ENEMIES[enemy.kind].airborne ? 1 : 0; enemy.tag = 0; enemy.onMark = false;
+        if (enemy.kind === 'boss' && enemy.hp > 0) simulation.state.partyAI.targetBossUid = enemy.uid;
+      }
+    }
     // До v13 титулы и налог ещё недоступны: миграция не меняет уже оплаченные итоги.
     if (value.version < 13) {
       simulation.state.title = 0;
@@ -1173,7 +1464,7 @@ export class Simulation {
         reconstructionRng >>>= 0;
         return reconstructionRng / 4294967296;
       };
-      simulation.state.version = 14;
+      simulation.state.version = 15;
       simulation.state.inventory = createStartingInventory(reconstructionRandom);
       simulation.state.lootOffers = Array(8).fill(null);
       simulation.state.postbattle = 'none';
@@ -1211,10 +1502,10 @@ export class Simulation {
       if (!Number.isInteger(state.legacyReconstructionSeed) || state.legacyReconstructionSeed! < 1 || state.legacyReconstructionSeed! > 0xffffffff) throw new Error('Invalid legacy inventory provenance.');
     } else if (state.inventoryProvenance !== 'original-generation' || state.legacyReconstructionSeed !== undefined) throw new Error('Invalid inventory provenance.');
     if (state.day > 1) {
-      if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > 4 || !validTownPreparation(state.previousTown, validItem, (state.day - 1) as 1 | 2 | 3 | 4 | 5 | 6, state.activeMission.absorbFix)) throw new Error('Invalid previous town.');
+      if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > (value.version < 15 ? 4 : 14) || !validTownPreparation(state.previousTown, validItem, (state.day - 1) as 1 | 2 | 3 | 4 | 5 | 6, state.activeMission.absorbFix) || state.activeMission.reward !== state.previousTown.mission.reward) throw new Error('Invalid previous town.');
     } else if (state.previousTown !== null) throw new Error('Unexpected previous town.');
     if (Number(value.version) < 3) {
-      state.version = 14;
+      state.version = 15;
       if (state.phase === 'victory' && state.postbattle === 'result') {
         // Старый результат пропускал награды босса и навыки; новые награды расходуют основной поток.
         state.postbattle = 'loot';
@@ -1244,13 +1535,15 @@ export class Simulation {
     }
     if (state.phase === 'town' || (state.phase === 'victory' && state.postbattle === 'result')) {
       const town = state.town as unknown;
-      if (!record(town) || !Number.isInteger(town.ap) || Number(town.ap) < 0 || Number(town.ap) > 4 || (state.phase === 'victory' && (town.ap !== 4 || town.preparation !== 'pending')) || state.castleHp <= 0) throw new Error('Invalid first-town state.');
+      if (!record(town) || !Number.isInteger(town.ap) || Number(town.ap) < 0 || Number(town.ap) > (value.version < 15 ? 4 : 14) || (state.phase === 'victory' && (Number(town.ap) < 4 || town.preparation !== 'pending')) || state.castleHp <= 0) throw new Error('Invalid first-town state.');
       if (town.preparation === 'ready') {
         if (value.version < 5 || state.phase !== 'town' || !validTownPreparation(town, validItem, state.day, simulation.medalAbsorption()) || state.lootOffers.some(item => item !== null)) throw new Error('Invalid prepared town.');
       } else if (town.preparation !== 'pending' || (value.version >= 5 && state.phase === 'town')) throw new Error('Missing town preparation.');
     } else if (state.town !== null) throw new Error('Town preparation precedes completed rewards.');
     // После боя исходные слоты могут быть переставлены; замороженные снаряды не возобновляются.
-    if (state.phase === 'battle' && state.projectiles.some(actor => actor.weaponSlot !== null && state.inventory[actor.weaponSlot]?.type !== ITEM_TYPE.gun)) throw new Error('Projectile launch slot is not a gun.');
+    if (value.version === 15) repairEarlyV15AirTargets(state);
+    validatePartySave(state, validItem);
+    if (!Number.isInteger(state.result.wages) || state.result.wages < 0) throw new Error('Invalid settled wages.');
     // enchant сохраняет старый таймер при заполнении патронов и уменьшении максимума; Rest обнуляет его.
     if (state.phase === 'battle' && state.inventory.some(item => isOccupiedItem(item) && item.type === ITEM_TYPE.gun && (item.reloadTime > item.reloadTimeMax + 1 || item.ammo === item.ammoMax && item.reloadTime !== 0))) throw new Error('Invalid battle weapon reload state.');
     const drawnBow = state.inventory[state.player.selectedSlot];
@@ -1271,7 +1564,7 @@ export class Simulation {
         if (!isOccupiedItem(mod) || mod.type !== ITEM_TYPE.mod || !isOccupiedItem(gun) || gun.type !== ITEM_TYPE.gun) throw new Error('Invalid pending mod items.');
       } else throw new Error('Unknown pending town equipment action.');
     }
-    state.version = 14;
+    state.version = 15;
     // Уже оплаченный результат v4 не пересчитывается; недостающая первая лавка создаётся один раз.
     if (state.phase === 'town' && state.town?.preparation === 'pending') simulation.prepareTown();
     return simulation;

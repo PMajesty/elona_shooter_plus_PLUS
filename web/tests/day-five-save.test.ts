@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { withLegacyPartyDefaults } from './legacy-save-support.ts';
 import { Simulation, type EnemyState } from '../src/simulation.ts';
 
 interface Boundary {
@@ -55,11 +56,11 @@ test('a Fly crossing x640 damages the castle once and leaves no surviving actor 
   simulation.tick(); assert.equal(simulation.state.castleHp, 38);
 });
 
-test('v11 migration changes only the version; current Fly saves require valid counter and frame state', () => {
+test('v11 migration initializes party state without changing the saved battle; current Fly saves require valid counter and frame state', () => {
   const simulation = new Simulation(42);
   const legacy: Record<string, any> = simulation.toSave(); legacy.version = 11;
   const untouched = structuredClone(legacy);
-  assert.deepEqual(Simulation.fromSave(legacy).toSave(), {...legacy, version: 14});
+  assert.deepEqual(Simulation.fromSave(legacy).toSave(), withLegacyPartyDefaults(legacy));
   assert.deepEqual(legacy, untouched);
   const {simulation: flySimulation} = isolatedFly();
   for (const corrupt of [

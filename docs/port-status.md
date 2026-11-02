@@ -2,19 +2,20 @@
 
 Current implementation: **seven connected Sheriff days**, with owned firearms and
 consumables, ordinary/boss loot, earned skills, prepared towns, shop transactions,
-weapon Upgrade, MOD mounting, Free Repair, Rest, the first title claim and its salary.
+weapon Upgrade, MOD mounting, Free Repair, Rest, the first title claim and its salary,
+plus permanent recruitment, companion equipment, autonomous AI, growth and wages.
 This is not a complete remake.
 The TypeScript/Phaser client runs independently of Flash and Ruffle; the preserved
 game remains the reference for behavior, content and appearance.
 
-The **v14 seven-day release** is served at `http://127.0.0.1:5175/elona/` after
-automated checks, focused browser acceptance and production New Game smoke testing.
-All 267 tested files from `.build/browser-day7-final` match the published build
-and archive. The bundle is `assets/index-D24uJwik.js`; the deployable archive is
-`.build/elona-shooter-browser-day7-slice.zip` (7,906,878 bytes), SHA-256
-`8d65af22d9e2f2b41e64d483cf10172e874dcad30398ceb4a8eb8183e19d577f`.
-The verified v13 release remains in `.build/browser-before-day7` and
-`.build/elona-shooter-browser-day6-slice.zip` for rollback.
+The **v15 party release** is served at `http://127.0.0.1:5175/elona/` after
+automated checks, browser acceptance and production New Game/save migration checks.
+All 300 tested files from `.build/browser-party-final` match the published build
+and archive. The bundle is `assets/index-Do-bjyfx.js`; the deployable archive is
+`.build/elona-shooter-browser-party-slice.zip` (8,432,781 bytes), SHA-256
+`1a49d3530e19f2a8c31fcd3f167f128f5b33139735189489cdae34b38b1c99a7`.
+The verified v14 release remains in `.build/browser-before-party` and
+`.build/elona-shooter-browser-day7-slice.zip` for rollback.
 Browser boundaries and historical milestones are in
 [port verification](port-verification.json).
 
@@ -83,12 +84,25 @@ establish this late-game diagnosis.
   in town7 without changing its already settled result. Seven perfect completions
   add medal62's absorption to future preparation, preserving active mission history.
 - Pause, browser-local save, Continue and validated JSON import/export.
+- Characters supports permanent hiring/cancel/dismissal of all nine generated classes,
+  orders, Boss/Defend preferences and skill focus. Initial house capacity is one.
+  Equipment preserves whole records and checks both directions of companion swaps;
+  companion MOD No returns the MOD, unlike the owned-inventory swap behavior.
+  Rest connects autonomous targeting, reloads, class effects, owner-attributed
+  damage/projectiles and postbattle growth/wages. Pending confirmations and AI
+  history survive save/Continue. This is not a claim of complete class-mechanic parity.
+  Orders retain source quirks, including NoArmor falling through to Normal targeting.
+  See [party integration](../web/docs/party-integration-status.md).
 
-Other classes, Day 8+, Ragnarok, recruiting/party AI, other card/search actions, stock
-refresh, most castle/economy actions, complete global medals and original Flash
+Other playable hero classes, Day 8+, Ragnarok, temporary Mission Hire, recruit
+refresh, house upgrades, other card/search actions, stock refresh, most castle/economy
+actions, complete global medals and original Flash
 save conversion remain unfinished. Companion/town skills cannot exercise systems
 that are still absent. No completion percentage is inferred from extracted assets
 or test counts; see the [feature ledger](feature-ledger.json).
+Interrupted Chain Gun spin-up/down still uses the known counter fallback; the
+original audio-channel position and reverse-seek history are not yet persisted.
+Exact interrupted spin timing is not claimed.
 
 ## Architecture and persistence
 
@@ -103,9 +117,19 @@ Ordinary-enemy collision uses original filled contours and placement matrices,
 including persisted sheep shadow history. Bosses use rendered alpha geometry;
 the headless soak uses an explicitly documented boss rectangle fallback.
 
-Current saves use **version 14**, accepting port versions **1–13** through their
-existing migrations. Boss action5 windup and released grenades resume with their
-stored state. Only a Day7 v14 grenade with damage -1 and no owned weapon slot may
+Current saves use **version 15**, accepting port versions **1–14** through their
+existing migrations. Canonical party/candidate and inactive records, equipment,
+pending confirmations, cached party effects, AI/retained targets and projectile
+owners persist. Older saves install retained candidate history without RNG or
+a hiring charge, and do not invent an owned companion. Town generation records
+the skill effects used then, independently of later hiring/dismissal.
+The corrected v15 importer repairs only the recognizable early-v15 air-as-armor
+pattern, preserving target identities, cache coordinates/history and RNG. Mixed
+or ambiguous states are rejected. Current live Crow/Fly spawns use source Air type 1;
+Armor is type 2. This fixes port integration, not an original-game balance defect.
+
+Version **14** added boss action5 windup and released grenades that resume with their
+stored state. Only a Day7 v14-or-later grenade with damage -1 and no owned weapon slot may
 use the cosmetic sentinel; other negative damage and older/day-mismatched saves
 are rejected. Earned titles remain valid during Day7 battles and results, and
 seventh-town recruit growth/medal history are validated without rerolling.
@@ -161,8 +185,14 @@ no Flash plugin, Ruffle, external CDN or gameplay server.
 
 ## Evidence and intentional corrections
 
-The published v14 release passes **252 tests**, the release build, nine focused
-browser checks and production New Game smoke testing. Historical v11–v13 release checks below
+The published v15 release passes **288 tests**, TypeScript checking, the release
+build, focused party browser checks and production New Game/migration verification.
+Party references match **61 transaction observations from 79 captured snapshots**,
+**45 progression**, **75 AI** and **37 combat snapshots**, including source RNG and
+the declared method boundaries. The **20 integration tests** and connected soak
+exercise production hiring, equipment, Rest, owner credit, settlement and persistence.
+Details and limitations are in [party integration](../web/docs/party-integration-status.md).
+Historical v11–v14 release checks below
 retain their original scope.
 Original comparisons use controlled inputs/random draws and expected
 results captured from the original, never regenerated from the port.
@@ -177,8 +207,8 @@ exactly after retaining the source's arithmetic order in projectile speed; the
 initial one-ULP differences remain recorded. No comparison tolerance was widened.
 See [wave notes](../web/docs/seventh-day-wave-source.md),
 [town notes](../web/docs/seventh-town-source.md) and
-[boss-special notes](../web/docs/boss-special-source.md). Existing assets remain
-86 images, 40 clips, 89 sounds and five fonts.
+[boss-special notes](../web/docs/boss-special-source.md). That v14 slice reused
+86 images, 40 clips, 89 sounds and five fonts; v15 adds party UI assets.
 
 Day6 source captures match **nine wave cases**, **22 town/economy/title
 observations**, and **671 Barbarian states** plus **12 collision grids/76,800
@@ -250,7 +280,7 @@ town and six second-town snapshots; three final Rest transitions from 12 origina
 observations; 19 ordinary-enemy grids/77,824 points; and 14 projectile scenarios/
 650 source steps, with separate native-birth and vertical diagnostics.
 
-The latest seven-day campaign soak passed **96 scenarios across 32 seeds**, with
+The recorded v14 solo campaign soak passed **96 scenarios across 32 seeds**, with
 **412,874 frames, 4,501 JSON checkpoints, 699 reward transitions, 760 town actions
 and 162 Rest transitions**. It reached **32 Day2 victories, 32 Day3 victories,
 25 Day4 victories and 13 Day5 victories**. Thirteen scenarios entered Day6;
@@ -262,13 +292,26 @@ passed 27 configured cases/9,720 updates/1,080 checkpoints; 21 vertical regressi
 check finite completion. These are bounded replay/stability tests, not original
 parity, ordinary acquisition of every configured gun, or browser performance proof.
 
+The separate v15 party soak passed **32 natural campaigns, 482,844 frames and
+5,024 full JSON checkpoints**, with **192 Rest transitions and 810 reward actions**.
+All nine recruit classes were naturally hired and fought; every run reached Day7,
+with **30 victories and two castle defeats**. Companions produced **6,559 shots,
+5,658 hits, 3,174 kills, 2,583 reload starts and 1,386 projectiles**. Wages totaled
+15,311 across 190 settlements. Ordinary collisions use production filled contours;
+bosses retain the documented headless rectangle fallback. State and newly emitted
+events match restored execution; this is not original campaign or browser parity.
+The full run was repeated after correcting airborne target classification, with
+the same totals and hashes matching the corrected runtime. Reports, per-class
+activity and replay logs are in `.build/party-soak/`, with
+133 derived UI checkpoints indexed by `.build/browser-qa/party-soak-fixtures.json`.
+
 A separate connected campaign test reaches a Day7 victory with 10 HP using
 ordinary fifth-town Free Repair, boss-windup/Archer targeting priority, critical
 aim and an owned grenade. Rewards, title salary and seventh-town save/restore
 then complete. This test uses rectangular hit geometry and retains its pre-existing
 Day1 39-HP setup; it is not production-contour or original-balance proof. All
-recorded attempts from the earned 11-HP checkpoint using production ordinary
-contours failed. Both these failures and the successful rectangle-based test
+recorded pre-party attempts from the earned 11-HP checkpoint using production ordinary
+contours failed. Both these historical solo failures and the successful rectangle-based test
 remain recorded separately, including
 `.build/test-probes/day7-connected-campaign-report.json` and the Day7 provenance
 files under `.build/browser-qa/`. No full browser campaign victory is claimed.
@@ -378,16 +421,38 @@ with 40 HP, 200 gold and five shells. The prior live v13 save was restored throu
 the UI, paused at tick 674 with 40 HP, 209 gold, five shells, 10 kills and boss
 HP 75/150; no console errors were observed. The complete envelope matched the
 expected v13→v14 migration, preserving appearance, and the resulting v14 save
-restored exactly. Current publication and browser evidence are in
+restored exactly. Historical v14 publication and browser evidence are in
 `.build/day7-publication.json`, `.build/browser-qa/day7-ui-verification.json`
 and `.build/browser-qa/day7-production-verification.json`; the restored production screenshot
 is `.build/browser-qa/day7-production-restored.jpg`.
 
+The published v15 browser verified hiring for 400 gold with unchanged AP/RNG,
+pending-confirmation Continue, order 6, equipment removal/return, Rest and exact
+35-update combat state. An earned companion reload checkpoint advanced 13 updates,
+inserted one shell and matched the complete expected save. The observed result
+included wage 53; town entry and pending/cancelled/confirmed dismissal also matched
+full expected saves. These checkpoints are documented in
+`.build/browser-qa/party-ui-verification.json`; they do not assert a manually
+played full browser campaign. Production New Game reached tick 0, HP 40, gold 200,
+ammo 5. The old v14 save restored paused as v15 at tick 674, HP 40, gold 209, with
+unchanged RNG and exact full-envelope migration/restore equality. No console
+errors were observed. Publication hashes and production evidence are in
+`.build/party-publication.json` and `.build/browser-qa/party-production-verification.json`.
+All 14 existing party UI export checks were revalidated against the corrected
+runtime. A separate earned Day5 save at tick9770 repaired Crow type2→1 through
+browser import with complete expected-state/restore equality and unchanged RNG;
+`.build/browser-qa/party-air-verification.json` records this boundary. Actual
+Crow/Fly spawn and Air4/Armor5 selection have focused Simulation regressions.
+Import Save was also observed disabled during asset loading and enabled only after
+scene creation. The final published bundle passed a fresh New Game and actual v14
+backup restoration, with no console errors.
+
 ## Next integrated work and continuation
 
-The next integration priority is hiring and party AI,
-an original early-game feature, before indefinitely extending the solo campaign.
-Connect recruitment, party behavior and their costs to ordinary town/combat flow.
+The next integration priority is **house upgrades for companion capacity two/three
+and Castle wall upgrades**, before further campaign expansion. Audit original
+costs, eligibility, effects and timing before implementing those ordinary town actions;
+the [source audit](../web/docs/castle-upgrades-source.md) records the current findings.
 Later campaign work still includes Lava and further town thresholds; Day8 onward
 remains unavailable. The veteran late-game hitbox report is still unproven and
 requires its own failing original encounter before a correction is claimed.

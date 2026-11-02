@@ -36,6 +36,7 @@ export interface FirstTownRecruit {
 
 export interface RecruitGenerationOptions {
   previousSlots?: Readonly<Record<number, Readonly<Item> | null>>;
+  // Engineer передаётся после generatePlayer/initPartySkill, без включения самого кандидата5.
   itemContext?: Omit<Partial<ItemContext>, 'day'>;
 }
 

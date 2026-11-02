@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation } from '../src/simulation.ts';
 import { ItemFactory } from '../src/items.ts';
-import { asLegacyV8Save } from './legacy-save-support.ts';
+import { asLegacyV8Save, withLegacyPartyDefaults } from './legacy-save-support.ts';
 
 function town(): Simulation {
   const simulation = new Simulation(42);
@@ -33,7 +33,7 @@ test('v8 migration adds empty town-equipment state without consuming RNG or chan
   const legacy = asLegacyV8Save(simulation.toSave()), untouched = structuredClone(legacy);
   const restored = Simulation.fromSave(legacy);
   assert.deepEqual(legacy, untouched);
-  assert.deepEqual(restored.state, { ...legacy, version: 14, upgradeReference: null, pendingTownAction: null, enemyArrows: [] });
+  assert.deepEqual(restored.state, withLegacyPartyDefaults({ ...legacy, upgradeReference: null, pendingTownAction: null, enemyArrows: [] }));
   for (let frame = 0; frame < 35; frame++) {
     restored.tick(); simulation.tick();
     assert.deepEqual(restored.state, simulation.state);

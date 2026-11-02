@@ -2,32 +2,48 @@
   "schemaVersion": 1,
   "updated": "2026-11-02",
   "currentRelease": {
-    "saveVersion": 14,
-    "implementedCampaign": "Seven connected Sheriff days, missions0–6, rewards and seven prepared towns. Seventh town prepares mission7; Day8 combat remains disabled.",
-    "publication": "Published locally and browser-verified: candidate, live preview and ZIP contain the same 267 files; bundle assets/index-D24uJwik.js. Published New Game and exact v13→v14 restoration passed.",
+    "saveVersion": 15,
+    "verificationStatus": "passed",
+    "implementedCampaign": "Seven connected Sheriff days plus permanent hiring, equipment, autonomous companions, orders, progression, wages and party persistence. All nine generated classes can be hired and fight; one-companion house capacity remains. Day8 combat is disabled.",
+    "publication": "Corrected v15 published locally and browser-verified at http://127.0.0.1:5175/elona/: all300 candidate, live and archive files match; bundle assets/index-Do-bjyfx.js. Final production New Game and exact actual v14→v15 restoration passed without console errors.",
     "automatedVerification": {
-      "testsPassed": 252,
+      "status": "passed",
+      "testsPassed": 288,
+      "partyIntegrationTests": 20,
+      "acceptedPartyMethodComparisons": 218,
+      "typecheckPassed": true,
+      "releaseBuildPassed": true,
       "soak": {
         "seeds": 32,
-        "scenarios": 96,
-        "frames": 412874,
-        "saveReplayCheckpoints": 4501,
-        "day5Wins": 13,
-        "day6Wins": 1,
-        "day7Arrivals": 1,
-        "day7Wins": 0,
-        "titleClaims": 1
+        "scenarios": 32,
+        "frames": 482844,
+        "saveReplayCheckpoints": 5024,
+        "restTransitions": 192,
+        "rewardActions": 810,
+        "naturallyHiredClasses": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "day7Arrivals": 32,
+        "day7Wins": 30,
+        "castleDefeats": 2,
+        "rerunAfterAirClassificationCorrection": true
       },
-      "focusedCampaign": "Separate seed42 connected test wins Day7 at10HP and reaches seventh town; all-enemy rectangular collision and the pre-existing Day1 HP39 medal-history setup limit this evidence. Fifth-town Free Repair, Day7 critical aiming, visible-special/Archer priority and one owned grenade are ordinary actions.",
       "evidence": [
         "docs/port-verification.json",
-        ".build/day7-final-tests.txt",
-        ".build/day7-final-build.txt",
-        "web/tests/day-two.test.ts",
-        ".build/test-probes/day7-connected-campaign-report.json",
-        "web/scripts/soak.ts",
-        ".build/soak/report.json"
-      ]
+        "web/tests/party-integration.test.ts",
+        "web/scripts/party-soak.ts",
+        ".build/party-soak/report.json",
+        "web/docs/party-integration-status.md"
+      ],
+      "limits": "Exact state/new-event replay on the corrected runtime; production ordinary contours and a documented rectangular boss fallback. No complete original campaign or browser-performance parity claim."
     },
     "acceptedOriginalEvidence": [
       {
@@ -97,55 +113,202 @@
         "fixture": "web/tests/fixtures/original-boss-special-trace.json",
         "comparison": ".build/oracle/boss-special-comparison-report.json",
         "traceSha256": "370d1694b3fe8828bc8e3581a7d0127aabcbc7578eddd3253892af82612b5081"
+      },
+      {
+        "feature": "Party hiring and equipment",
+        "matchingSnapshots": 61,
+        "observedSnapshots": 79,
+        "capturedStartingStates": 18,
+        "fixture": "web/tests/fixtures/original-party-hiring-trace.json",
+        "comparison": ".build/oracle/party-hiring-comparison-report.json",
+        "traceSha256": "32b7b529b18a50b78055dd9ce85c41b26088a0aa05f843753bf390b4dbee0891"
+      },
+      {
+        "feature": "Party progression and cached effects",
+        "matchingSnapshots": 45,
+        "fixture": "web/tests/fixtures/original-party-progression-trace.json",
+        "comparison": ".build/oracle/party-progression-comparison-report.json",
+        "traceSha256": "3845a423d171b0002d71f0894e09e2931348bc65766a7cf5a169ebbbee560ed4"
+      },
+      {
+        "feature": "Party AI method boundaries",
+        "matchingSnapshots": 75,
+        "fixture": "web/tests/fixtures/original-party-ai-trace.json",
+        "comparison": ".build/oracle/party-ai-comparison-report.json",
+        "traceSha256": "d444714596d244b22b1e8b5e35bcb685d3deae4ad0492f149044f642ead69295"
+      },
+      {
+        "feature": "Party combat and postbattle growth",
+        "matchingSnapshots": 37,
+        "fixture": "web/tests/fixtures/original-party-combat-trace.json",
+        "comparison": ".build/oracle/party-combat-comparison-report.json",
+        "traceSha256": "03ac432e66b5a77445104a193d42c484520d7310da69fa3cf52e28814e78a2a0"
       }
     ],
     "browserVerification": [
-      "Earned sixth-town Rest into Day7 and Continue matched the full save envelope at tick12561, HP11, gold4596 and title1. The later ordinary-contour policy still lost; this is a transition/persistence check, not a Day7 victory.",
-      "A separate connected headless-test result displayed Reward720, Castle Income100, combined Tax/Upkeep−85 and settled gold5369. Proceed and town Continue matched the full save envelope. That winning test uses rectangles for every enemy and the pre-existing Day1 HP39 setup.",
-      "A controlled boss wind-up/flight fixture matched15 browser updates, Continue, then43 more updates including landing and a subsequent ordinary rat spawn. HP11→9 happened once on release; the cosmetic grenade landed with no further castle hit. Original grenade body/shadow were visible; audio was not verified.",
-      "Nine candidate checks cover exports64–72. Published New Game reached tick0 with HP40, gold200 and ammo5; actual backup export73 restored as v14 export74 with full-envelope migration equality at tick674, HP40, gold209, ammo5, kills10 and boss75/150. Candidate and production reported no browser errors. The observed6057ms New Game load is not a comparative performance measurement."
+      "Fourteen existing party UI export checks revalidated against the corrected runtime: actual400gold hire with unchangedAP/RNG, pending Continue, order6, equipment roundtrip, Rest,35 combat updates,13 updates inserting one companion shell, wage53, town entry and dismissal cancel/confirm. Full expected envelopes match.",
+      "An earned Day5 early-v15 save at tick9770 imported through the browser with Crow type2→1 repair, unchanged RNG and complete expected-envelope/restore equality. Focused Simulation tests separately cover real Crow/Fly spawns and Air4 versus Armor5 orders.",
+      "Import Save was observed disabled during asset loading and enabled after scene creation, preventing premature import before the scene exists.",
+      "Final production bundleDo-bjyfx NewGame export93 reached tick0, HP40, gold200, ammo5. Actual v14 backup import/export94 matched complete v15 migration at tick674, HP40, gold209 with unchanged RNG; paused and no console errors."
     ],
-    "evidence": "docs/port-verification.json:browser_checks.seventh_day",
-    "limits": "Bounded source-method comparisons and port replay tests do not establish a complete original seven-day replay or pixel parity. The unchanged soak reaches Day7 once and loses; its ordinary enemies use production contours and its boss uses a rectangle. The separate focused campaign win uses rectangular collision for every enemy and an existing Day1 HP39 setup. Recorded ordinary-contour policies from the earned Day6 title checkpoint also lose; neither result establishes balance parity. Other playable classes, hiring, many town actions and Day8 onward remain incomplete. The veteran late-game hitbox defect remains unreproduced.",
+    "evidence": "docs/port-verification.json:browser_checks.party,party_production,party_air_orders",
+    "limits": "Accepted method references do not establish live spawn classification or native full-battle scheduling. Actual-spawn regressions and the final rerun separately cover the corrected integration. The32natural-campaign soak uses production ordinary contours and a boss rectangle; no balance or pixel/audio parity claim. Chain Gun interrupted spin timing retains a counter fallback without source audio-position history. Other hero classes, house upgrades, temporary hiring, many town actions and Day8 onward remain unavailable. The veteran late-game hitbox report remains unreproduced.",
     "previousPublished": {
-      "saveVersion": 13,
-      "implementedCampaign": "Six connected Sheriff days, missions0–5, rewards and six prepared towns. Sixth town prepares mission6; Day7 combat remains disabled.",
-      "publication": "Published locally and browser-verified: candidate, live preview and ZIP contain the same267 files; bundle assets/index-Bilu_2M0.js. New Game and v12→v13 restoration passed.",
+      "saveVersion": 14,
+      "implementedCampaign": "Seven connected Sheriff days, missions0–6, rewards and seven prepared towns. Seventh town prepares mission7; Day8 combat remains disabled.",
+      "publication": "Published locally and browser-verified: candidate, live preview and ZIP contain the same 267 files; bundle assets/index-D24uJwik.js. Published New Game and exact v13→v14 restoration passed.",
       "automatedVerification": {
-        "testsPassed": 234,
+        "testsPassed": 252,
         "soak": {
           "seeds": 32,
           "scenarios": 96,
-          "frames": 411504,
-          "saveReplayCheckpoints": 4490,
+          "frames": 412874,
+          "saveReplayCheckpoints": 4501,
           "day5Wins": 13,
           "day6Wins": 1,
+          "day7Arrivals": 1,
+          "day7Wins": 0,
           "titleClaims": 1
         },
+        "focusedCampaign": "Separate seed42 connected test wins Day7 at10HP and reaches seventh town; all-enemy rectangular collision and the pre-existing Day1 HP39 medal-history setup limit this evidence. Fifth-town Free Repair, Day7 critical aiming, visible-special/Archer priority and one owned grenade are ordinary actions.",
         "evidence": [
           "docs/port-verification.json",
+          ".build/day7-final-tests.txt",
+          ".build/day7-final-build.txt",
+          "web/tests/day-two.test.ts",
+          ".build/test-probes/day7-connected-campaign-report.json",
           "web/scripts/soak.ts",
-          ".build/soak/day6-report.json"
+          ".build/soak/report.json"
         ]
       },
-      "browserVerification": [
-        "Earned fifth-town Rest into Day6 and Continue matched the full save envelope at tick9966, HP3 and gold3862. A separate ordinary-repair branch completed Day6 with HP11 and produced the tested650GP settlement.",
-        "Result Proceed matched production town preparation. Claim Title changed only title0→1 and AP4→0; gold4596, cumulative earnings, RNG and the settled result stayed unchanged. Continue and a disabled repeat retained the exact save envelope.",
-        "A controlled Barbarian fixture matched eight production updates, including rage and hit-effect frames, then restored exactly through Continue. This is a controlled presentation/replay check, not an ordinary acquisition or full-volley test.",
-        "Published New Game reached tick0 with HP40, gold200 and ammo5. The prior production v12 checkpoint restored to v13 with exact full-envelope equality at tick674; candidate and production browser observations reported no errors."
+      "acceptedOriginalEvidence": [
+        {
+          "feature": "Fifth-day waves",
+          "matchingSnapshots": 9,
+          "fixture": "web/tests/fixtures/original-fifth-day-wave-trace.json",
+          "comparison": ".build/oracle/fifth-day-waves-comparison-report.json",
+          "traceSha256": "eb6444578107846ce26478be4d4d32cb428e7d164d1b43426d1a31ce495555f0"
+        },
+        {
+          "feature": "Fifth-town preparation and recruit growth",
+          "matchingSnapshots": 17,
+          "fixture": "web/tests/fixtures/original-fifth-town-trace.json",
+          "comparison": ".build/oracle/fifth-town-comparison-report.json",
+          "traceSha256": "d0637440d53ac962a24e219ec5b8fb7424dd34d2f46dcb8297816b447c72e2bb"
+        },
+        {
+          "feature": "Fly lifecycle and geometry",
+          "matchingSnapshots": 503,
+          "rawPoolReuseSnapshotsRetainedSeparately": 73,
+          "matchingGeometryGrids": 8,
+          "geometryPoints": 81920,
+          "fixture": "web/tests/fixtures/original-fly-trace.json",
+          "comparison": ".build/oracle/fly-comparison-report.json",
+          "traceSha256": "f613f617ed93c955f94b0059092cac7918f6adcf66f47c845464ca8a8ab00a08"
+        },
+        {
+          "feature": "Sixth-day waves",
+          "matchingSnapshots": 9,
+          "fixture": "web/tests/fixtures/original-sixth-day-wave-trace.json",
+          "comparison": ".build/oracle/sixth-day-waves-comparison-report.json",
+          "traceSha256": "35288d4f556069e8a8af2fb7420ab6e913a31f5e289274327228d97a9930508a"
+        },
+        {
+          "feature": "Sixth-town preparation, title and economy",
+          "matchingSnapshots": 22,
+          "fixture": "web/tests/fixtures/original-sixth-town-trace.json",
+          "comparison": ".build/oracle/sixth-town-comparison-report.json",
+          "traceSha256": "f15e87bc77e3192311f02a90be509fcb39947801d56331e4b283d4b4c8fd2e25"
+        },
+        {
+          "feature": "Barbarian lifecycle, effects and geometry",
+          "matchingSnapshots": 671,
+          "fixture": "web/tests/fixtures/original-barbarian-trace.json",
+          "comparison": ".build/oracle/barbarian-comparison-report.json",
+          "traceSha256": "e011432fcfed517c1f62ab33bc30aa81988863ea2b7317276e06046ac007e38c",
+          "matchingGeometryGrids": 12,
+          "geometryPoints": 76800
+        },
+        {
+          "feature": "Seventh-day RANGED waves",
+          "matchingSnapshots": 10,
+          "fixture": "web/tests/fixtures/original-seventh-day-wave-trace.json",
+          "comparison": ".build/oracle/seventh-day-waves-comparison-report.json",
+          "traceSha256": "3c44ced37fae7098b420faeb8f68a736df20bf1d00425157f5cde067b411f6da"
+        },
+        {
+          "feature": "Seventh-town preparation, level-four recruits and title salary",
+          "matchingSnapshots": 38,
+          "fixture": "web/tests/fixtures/original-seventh-town-trace.json",
+          "comparison": ".build/oracle/seventh-town-comparison-report.json",
+          "traceSha256": "39dabd5c3cb8516c274afabccdd05f1ab0400e0324d4aa066070b93b212a8806"
+        },
+        {
+          "feature": "Day7 boss special attack and cosmetic grenade",
+          "matchingSnapshots": 337,
+          "fixture": "web/tests/fixtures/original-boss-special-trace.json",
+          "comparison": ".build/oracle/boss-special-comparison-report.json",
+          "traceSha256": "370d1694b3fe8828bc8e3581a7d0127aabcbc7578eddd3253892af82612b5081"
+        }
       ],
-      "evidence": "docs/port-verification.json:browser_checks.sixth_day",
+      "browserVerification": [
+        "Earned sixth-town Rest into Day7 and Continue matched the full save envelope at tick12561, HP11, gold4596 and title1. The later ordinary-contour policy still lost; this is a transition/persistence check, not a Day7 victory.",
+        "A separate connected headless-test result displayed Reward720, Castle Income100, combined Tax/Upkeep−85 and settled gold5369. Proceed and town Continue matched the full save envelope. That winning test uses rectangles for every enemy and the pre-existing Day1 HP39 setup.",
+        "A controlled boss wind-up/flight fixture matched15 browser updates, Continue, then43 more updates including landing and a subsequent ordinary rat spawn. HP11→9 happened once on release; the cosmetic grenade landed with no further castle hit. Original grenade body/shadow were visible; audio was not verified.",
+        "Nine candidate checks cover exports64–72. Published New Game reached tick0 with HP40, gold200 and ammo5; actual backup export73 restored as v14 export74 with full-envelope migration equality at tick674, HP40, gold209, ammo5, kills10 and boss75/150. Candidate and production reported no browser errors. The observed6057ms New Game load is not a comparative performance measurement."
+      ],
+      "evidence": "docs/port-verification.json:browser_checks.seventh_day",
+      "limits": "Bounded source-method comparisons and port replay tests do not establish a complete original seven-day replay or pixel parity. The unchanged soak reaches Day7 once and loses; its ordinary enemies use production contours and its boss uses a rectangle. The separate focused campaign win uses rectangular collision for every enemy and an existing Day1 HP39 setup. Recorded ordinary-contour policies from the earned Day6 title checkpoint also lose; neither result establishes balance parity. Other playable classes, hiring, many town actions and Day8 onward remain incomplete. The veteran late-game hitbox defect remains unreproduced.",
       "previousPublished": {
-        "saveVersion": 12,
-        "publication": "Published and browser-verified: candidate, live preview and ZIP contain the same254 files; bundle assets/index-DFJdBXM_.js.",
+        "saveVersion": 13,
+        "implementedCampaign": "Six connected Sheriff days, missions0–5, rewards and six prepared towns. Sixth town prepares mission6; Day7 combat remains disabled.",
+        "publication": "Published locally and browser-verified: candidate, live preview and ZIP contain the same267 files; bundle assets/index-Bilu_2M0.js. New Game and v12→v13 restoration passed.",
+        "automatedVerification": {
+          "testsPassed": 234,
+          "soak": {
+            "seeds": 32,
+            "scenarios": 96,
+            "frames": 411504,
+            "saveReplayCheckpoints": 4490,
+            "day5Wins": 13,
+            "day6Wins": 1,
+            "titleClaims": 1
+          },
+          "evidence": [
+            "docs/port-verification.json",
+            "web/scripts/soak.ts",
+            ".build/soak/day6-report.json"
+          ]
+        },
         "browserVerification": [
-          "Earned fourth-town Rest into Day5 and subsequent Continue matched the independently replayed full save envelope.",
-          "Controlled waiting-Fly state matched an independent seven-update replay; Continue retained the exact save envelope. A later observed shot consumed one round and missed; no successful Fly hit or exact browser shot-timing replay is claimed.",
-          "Production New Game reached tick0; prior production v11 restored to v12 with full migration equality at tick674. Candidate and production console checks reported no errors."
+          "Earned fifth-town Rest into Day6 and Continue matched the full save envelope at tick9966, HP3 and gold3862. A separate ordinary-repair branch completed Day6 with HP11 and produced the tested650GP settlement.",
+          "Result Proceed matched production town preparation. Claim Title changed only title0→1 and AP4→0; gold4596, cumulative earnings, RNG and the settled result stayed unchanged. Continue and a disabled repeat retained the exact save envelope.",
+          "A controlled Barbarian fixture matched eight production updates, including rage and hit-effect frames, then restored exactly through Continue. This is a controlled presentation/replay check, not an ordinary acquisition or full-volley test.",
+          "Published New Game reached tick0 with HP40, gold200 and ammo5. The prior production v12 checkpoint restored to v13 with exact full-envelope equality at tick674; candidate and production browser observations reported no errors."
         ],
-        "evidence": "docs/port-verification.json:browser_checks.fifth_day"
+        "evidence": "docs/port-verification.json:browser_checks.sixth_day",
+        "previousPublished": {
+          "saveVersion": 12,
+          "publication": "Published and browser-verified: candidate, live preview and ZIP contain the same254 files; bundle assets/index-DFJdBXM_.js.",
+          "browserVerification": [
+            "Earned fourth-town Rest into Day5 and subsequent Continue matched the independently replayed full save envelope.",
+            "Controlled waiting-Fly state matched an independent seven-update replay; Continue retained the exact save envelope. A later observed shot consumed one round and missed; no successful Fly hit or exact browser shot-timing replay is claimed.",
+            "Production New Game reached tick0; prior production v11 restored to v12 with full migration equality at tick674. Candidate and production console checks reported no errors."
+          ],
+          "evidence": "docs/port-verification.json:browser_checks.fifth_day"
+        }
       }
-    }
+    },
+    "package": {
+      "path": ".build/elona-shooter-browser-party-slice.zip",
+      "bytes": 8432781,
+      "sha256": "1a49d3530e19f2a8c31fcd3f167f128f5b33139735189489cdae34b38b1c99a7",
+      "bundle": "assets/index-Do-bjyfx.js",
+      "publishedMatchingFiles": 300,
+      "rollbackDirectory": ".build/browser-before-party",
+      "rollbackPackage": ".build/elona-shooter-browser-day7-slice.zip"
+    },
+    "nextWork": "House upgrades for companion capacity2/3 and Castle wall upgrades; source costs/effects and validation boundaries are documented in web/docs/castle-upgrades-source.md."
   },
   "purpose": "Track the original game's systems and content against implemented behavior and independent evidence. This is an expandable inventory, not an exhaustive specification or a completion percentage.",
   "reference": {
@@ -253,17 +416,19 @@
         "guardian_npc": 9
       },
       "status": "partial",
-      "implemented": "Sheriff with original generated base traits, starting Shotgun 2/Fury 1, all 15 earned Sheriff choice definitions and persistent selected levels across Days 1–7; selection explicitly limits other classes. Recruit records cover all nine original NPC class branches and level1–4 growth through the seventh town, without hiring or ally combat.",
+      "implemented": "Sheriff with original generated base traits, starting Shotgun 2/Fury 1, all 15 earned Sheriff choice definitions and persistent selected levels across Days 1–7; selection explicitly limits other classes. Recruit records cover all nine original NPC class branches and level1–4 growth through the seventh town, with permanent hiring, autonomous fighting, owner credit and class growth for all nine recruit classes. This does not establish every class mechanic.",
       "evidence": [
         "web/src/content.ts:STARTING_CLASS",
         "web/src/simulation.ts:constructor",
-        "web/tests/progression-reference.test.ts: nine original Sheriff choice/preview cases"
+        "web/tests/progression-reference.test.ts: nine original Sheriff choice/preview cases",
+        "web/tests/party-ai-reference.test.ts:75 original method snapshots",
+        "web/tests/party-combat-reference.test.ts:37 original damage/credit/growth snapshots",
+        "web/tests/party-integration.test.ts:production hire/combat/save boundaries across nine classes"
       ],
       "unverified": [
-        "Other seven playable classes",
-        "Guardian and starting companions",
-        "Class-specific mechanics beyond the enabled solo Sheriff scenario",
-        "Remaining party and town actions that use earned traits"
+        "Other seven playable hero classes and their starting companions",
+        "Complete class mechanics, including original interrupted Chain Gun spin timing",
+        "Remaining party/town actions and later class/trait combinations"
       ]
     },
     {
@@ -275,7 +440,7 @@
         "MainTimeline:4617 refreshPlayer"
       ],
       "status": "partial",
-      "implemented": "Owned inventory drives selection, ammunition, weapon-skill requirements, manual/automatic firing, damage, range, recoil and reloads across Days 1–7. Number keys 1–5 address five combat slots; the sixth is storage. Critical hits, knockback and original ordinary-enemy filled-contour hit testing preserve shadow history; bosses retain separate alpha geometry. Actual firing preserves both per-hit rolls, shell dilution, leech/slow/knockback, living-weapon evolution before growth and nonlethal boss accumulator RNG. All eight projectile guns now launch through the ordinary input and owned-item path; see original.combat.projectiles.",
+      "implemented": "Owned inventory drives selection, ammunition, weapon-skill requirements, manual/automatic firing, damage, range, recoil and reloads across Days 1–7. Number keys 1–5 address five combat slots; the sixth is storage. Critical hits, knockback and original ordinary-enemy filled-contour hit testing preserve shadow history; bosses retain separate alpha geometry. Actual firing preserves both per-hit rolls, shell dilution, leech/slow/knockback, living-weapon evolution before growth and nonlethal boss accumulator RNG. All eight projectile guns now launch through the ordinary input and owned-item path; see original.combat.projectiles. Companion shots use their actor weapon, traits and cached party effects; damage, kill credit and class-specific effects are routed to that actor.",
       "evidence": [
         "web/tests/simulation.test.ts:cooldown and queued-input tests",
         "docs/port-verification.json:browser_checks.shooting",
@@ -284,7 +449,8 @@
         "web/tests/enemy-shadow.test.ts: actual attack/knockback/alive/death, save restore and missing-history fallback",
         "web/tests/shoot-reference.test.ts: 22 actual original shoot snapshots, all random draws and original geometry as input",
         "web/tests/equipment-reference.test.ts: 56 original selection, held-input and reload snapshots; empty world, no hit-geometry claim",
-        "web/tests/combat-stats.test.ts: source-derived weapon, modifier, requirement and trait calculations"
+        "web/tests/combat-stats.test.ts: source-derived weapon, modifier, requirement and trait calculations",
+        "web/tests/party-combat-reference.test.ts:actual Sniper/Duelist/Noble shots and nine-class contact credit"
       ],
       "unverified": [
         "Unsampled frames/positions and other animation histories; boss and dropping-rat geometry",
@@ -308,17 +474,19 @@
         "Original bullet_grenade/grenade2/rocket/arrow2/arrow3/puls/fire classes"
       ],
       "status": "partial",
-      "implemented": "Seven actor families with original damage/ammo/reload, shared Wind Bow target roll, source per-assignment twip and alpha quantization, next-frame first motion, penetration/corpse handling, launch-slot effects/current-slot XP, original assets and persistent lifecycle state introduced in v8 and retained in v14. Explicit vertical motion fixes singular aims; crow death begins at frame58. Boss special grenades use an explicit cosmetic sentinel and still consume the original two landing shake draws. Nonvertical trajectory arithmetic preserves source operation order, including exact rotation.",
+      "implemented": "Seven actor families with original damage/ammo/reload, shared Wind Bow target roll, source per-assignment twip and alpha quantization, next-frame first motion, penetration/corpse handling, launch-slot effects/current-slot XP, original assets and persistent lifecycle state introduced in v8 and retained in v14. Explicit vertical motion fixes singular aims; crow death begins at frame58. Boss special grenades use an explicit cosmetic sentinel and still consume the original two landing shake draws. Nonvertical trajectory arithmetic preserves source operation order, including exact rotation. Version 15 persists companion projectile actor ownership independently of hero inventory and supports the three Wind Bow launch offsets.",
       "evidence": [
         "web/tests/projectile-reference.test.ts: 14 matching original scenarios, 650 manual source steps, actual native grenade birth timing, two original vertical diagnostics and negative controls",
         "web/tests/projectile-gameplay.test.ts: ordinary input and selected/launch weapon behavior",
         "web/tests/projectile-save.test.ts: v1–7 migration, current lifecycle validation, 21 vertical outcomes and JSON replays",
         "web/scripts/projectile-soak.ts: 27 configured cases, 9720 updates,1080 replay checkpoints",
         "docs/port-verification.json: browser_checks.projectiles",
-        "web/tests/boss-special-reference.test.ts:337 original observations including cosmetic flight/landing, exact numeric values and RNG"
+        "web/tests/boss-special-reference.test.ts:337 original observations including cosmetic flight/landing, exact numeric values and RNG",
+        "web/tests/party-integration.test.ts:owner-loss rejection, empty hero slot and all three Wind Bow arrows",
+        "web/tests/party-ai-reference.test.ts:actual original class-weapon launch observations"
       ],
       "unverified": [
-        "Later enemy species and chain reactions; all skill/item combinations and party shooting",
+        "Later enemy species and chain reactions; all skill/item combinations beyond sampled companion launches",
         "Whole native battle/event interleaving, postbattle effects and audible timing",
         "Original geometry is supplied to damage comparison; this does not prove additional collision contours",
         "Full raster parity; hard-light fractional placement differs",
@@ -415,7 +583,8 @@
         "web/tests/day-six-save.test.ts:Barbarian rage, effects, attack/death and v13 save validation",
         "web/docs/barbarian-source.md:original rage formulas, parent-versus-child geometry, transient-effect ordering and limits",
         "web/tests/boss-special-reference.test.ts:337 original snapshots across nine controlled scenarios",
-        "docs/port-verification.json:browser_checks.seventh_day;candidate exports64–72 match complete save replay with separate fixture provenance"
+        "docs/port-verification.json:browser_checks.seventh_day;candidate exports64–72 match complete save replay with separate fixture provenance",
+        "web/tests/party-integration.test.ts:real Crow/Fly spawns use source Air1 versus Armor2 targeting classification"
       ],
       "unverified": [
         "Later species and variants",
@@ -461,14 +630,15 @@
         "MainTimeline:12144 generateMission absorption"
       ],
       "status": "partial",
-      "implemented": "Solo Sheriff castle hits respect positive Grail protection before money or RNG. Unprotected hits credit Insurance before the Defender roll, then apply source integer absorption/minimum damage and Last Hope's ally-selection/threshold/randomness. The protection expiry update and visual fade are distinct from immunity. The source's reversed Last Hope threshold is preserved rather than silently corrected.",
+      "implemented": "Solo Sheriff castle hits respect positive Grail protection before money or RNG. Unprotected hits credit Insurance before the Defender roll, then apply source integer absorption/minimum damage and Last Hope's ally-selection/threshold/randomness. The protection expiry update and visual fade are distinct from immunity. The source's reversed Last Hope threshold is preserved rather than silently corrected. Guardian retaliation and party Defender/Insurance/Last Hope use the cached source party context with actor credit.",
       "evidence": [
         "web/tests/castle-reference.test.ts: 17 independently captured original states with exact RNG, Insurance before block, Last Hope branches, protection expiry/fade and absorption",
         "web/tests/consumables-save.test.ts: actual sheep attacks through Grail use, save/restore and expiry",
-        "web/tests/day-two.test.ts: earned absorption remains attached to the mission generated with it"
+        "web/tests/day-two.test.ts: earned absorption remains attached to the mission generated with it",
+        "web/tests/party-combat-reference.test.ts:original Guardian retaliation and actor credit"
       ],
       "unverified": [
-        "Sister damage, Guardian retaliation and hired-party interactions",
+        "Sister damage and hired-party combinations beyond sampled Guardian/defense cases",
         "All trait/upgrade combinations and native attack-event timing",
         "Full original-versus-port battle replay of castle attacks"
       ]
@@ -513,17 +683,30 @@
         "MainTimeline:12996 orderClick"
       ],
       "status": "partial",
-      "implemented": "The first seven towns generate and persist original recruit records, including all nine class branches, level1–4 growth and retained equipment metadata. Hiring, companions, orders and ally combat are unavailable; Sheriff does not require a starting companion.",
+      "implemented": "Characters supports actual candidate inspection, permanent hire/cancel/dismissal at house capacity 1, orders, Boss/Defend priorities and skill focus. Equipment swaps whole records with bidirectional guards and companion-specific MOD No behavior. Rest runs autonomous target acquisition, reload/fire/projectile actions, shared target caches and owner attribution. Whole inactive records, canonical candidate 5, pending dialogs, AI and retained target identities persist. Orders retain observed source quirks, including NoArmor falling through to Normal. Live Crow/Fly spawns and pre-party migration use source Air type1, not Armor type2. Real-spawn Air4/Armor5 regressions cover this port integration correction.",
       "evidence": [
         "web/tests/town-preparation-reference.test.ts: actual original first-town recruit fields across all nine classes",
         "web/tests/second-town-reference.test.ts: six original second-town preparations with retained recruit slots",
         "web/tests/fourth-town-reference.test.ts:original level2 recruit growth across all nine classes",
         "web/tests/fifth-town-reference.test.ts:17 original snapshots, including level2/3 growth and retained Militia equipment",
         "web/tests/sixth-town-reference.test.ts:original day6 recruit threshold and retained shared metadata within22 source observations",
-        "web/tests/seventh-town-reference.test.ts:all nine classes at level4 plus both sides of the day7 recruit thresholds"
+        "web/tests/seventh-town-reference.test.ts:all nine classes at level4 plus both sides of the day7 recruit thresholds",
+        "web/tests/party-hiring-reference.test.ts:61 transactions from 79 observations with 18 captured inputs",
+        "web/tests/party-progression-reference.test.ts:45 growth/party/wage observations",
+        "web/tests/party-ai-reference.test.ts:75 AI boundary observations",
+        "web/tests/party-combat-reference.test.ts:37 damage/credit/growth observations",
+        "web/tests/party-integration.test.ts",
+        "web/scripts/party-soak.ts:corrected32seed run passed482844frames/5024checkpoints;all9classes naturally hired;30Day7wins/2defeats",
+        "web/docs/party-integration-status.md",
+        "web/tests/party-integration.test.ts:actual Crow/Fly spawn, Air4/Armor5 selection, unambiguous early-v15 repair and mixed-state rejection",
+        ".build/browser-qa/party-air-verification.json:earnedDay5import and Import Save readiness"
       ],
       "unverified": [
-        "All party behavior and its effects on progression/economy"
+        "House upgrades and ordinary capacity 2/3 acquisition",
+        "Temporary Mission Hire and recruit refresh",
+        "Other hero starting companions",
+        "Exact interrupted Chain Gun audio-position/reversal timing",
+        "Native whole-battle scheduling and complete class/trait combinations"
       ]
     },
     {
@@ -579,7 +762,7 @@
         "MainTimeline:6646 day increment when leaving town"
       ],
       "status": "partial",
-      "implemented": "Completed results through Day7 enter town with four AP, retaining gold, HP, inventory and traits. Each town generates stock, cards, the next mission, a recruit and entry flags once in source order. First town initializes searched; later towns retain it and prior recruit/shared item-slot metadata. Prepared state persists without rerolling. Version4 town migration retains settled balances and performs only missing preparation. Third town prepares Shop Token1035 without a calendar statue and retains level1 recruits. Fourth town performs original MOD-sale overwrites, including guaranteed Auto Reload Mod, and level2 recruit growth. Fifth town returns to normal stock, prepares mission5 with Holy Grail1037 and generates level2/3 recruits with one/two unspent skill points. All nine NPC classes are covered by original traces. Sixth town retains normal stock and level2/3 recruitment, prepares Crow Statue1106, and exposes the first Claim Title action after the Day6 result has already settled. Seventh town retains the claimed title, prepares mission7 without guaranteed calendar loot and generates level2/3/4 recruits. Seven perfect days award medal62 before future mission preparation, giving0.03 absorption while the completed active mission retains its historical0.02.",
+      "implemented": "Completed results through Day7 enter town with source base AP plus applicable cached Active effects, retaining gold, HP, inventory and traits. Each town generates stock, cards, the next mission, a recruit and entry flags once in source order. First town initializes searched; later towns retain it and prior recruit/shared item-slot metadata. Prepared state persists without rerolling. Version4 town migration retains settled balances and performs only missing preparation. Third town prepares Shop Token1035 without a calendar statue and retains level1 recruits. Fourth town performs original MOD-sale overwrites, including guaranteed Auto Reload Mod, and level2 recruit growth. Fifth town returns to normal stock, prepares mission5 with Holy Grail1037 and generates level2/3 recruits with one/two unspent skill points. All nine NPC classes are covered by original traces. Sixth town retains normal stock and level2/3 recruitment, prepares Crow Statue1106, and exposes the first Claim Title action after the Day6 result has already settled. Seventh town retains the claimed title, prepares mission7 without guaranteed calendar loot and generates level2/3/4 recruits. Seven perfect days award medal62 before future mission preparation, giving0.03 absorption while the completed active mission retains its historical0.02. Shop generation receives cached pre-growth Engineer; the mission/recruit boundary refreshes party effects. Prepared mission reward retains its historical Negotiator value after later hire/dismissal.",
       "evidence": [
         "web/tests/town.test.ts: result settlement, town entry and state persistence",
         "web/tests/town-reference.test.ts: original result/AP boundary",
@@ -596,16 +779,18 @@
         "web/tests/fifth-town.test.ts:fifth-town history and preparation persistence",
         "web/tests/sixth-town-reference.test.ts:22 original preparations, recruit thresholds, settlement and title observations",
         "web/tests/sixth-town.test.ts:calendar6 generation and retained metadata",
-        "web/tests/seventh-town-reference.test.ts:38 original preparation/growth/result/title snapshots"
+        "web/tests/seventh-town-reference.test.ts:38 original preparation/growth/result/title snapshots",
+        "web/src/town-preparation.ts and town-save.ts:distinct saved generation effects",
+        "web/tests/party-integration.test.ts:canonical candidate and no-reroll persistence"
       ],
       "unverified": [
         "Town generation after Day7 and medal effects beyond the enabled early conditions",
-        "Recruit hiring, card/search actions and complete town management",
+        "Recruit refresh, card/search actions and complete town management",
         "Complete live visual/input comparison of all seven towns"
       ],
       "notes": [
         "The port saves the complete prepared state including searched, whose original initialization occurs after frame71 autosave. This intentional durability correction prevents partially initialized restores.",
-        "Prepared recruit and card records do not imply hiring or card/search actions. Prepared mission7 does not enable Day8 combat."
+        "Permanent recruitment is now connected; prepared card records still do not enable card/search actions. Prepared mission7 does not enable Day8 combat."
       ]
     },
     {
@@ -623,7 +808,7 @@
         "MainTimeline:11732 updateShopSlots"
       ],
       "status": "partial",
-      "implemented": "58 source item IDs with generation/modifier metadata and six persistent inventory slots. All seven enabled towns support purchases into empty slots, complete-record swaps, confirmed sales and Shop Token discounts. Upgrade previews spend source RNG immediately; Yes spends4 AP and the shown gold, while cancellation retains the preview and RNG. Owned MOD confirmation preserves original compatibility guards, fixed enchant, refill and No→swap behavior. Occupied stock purchase remains blocked. Upgrade intentionally retains every installed modifier and Living Weapon progress, correcting the original final-mod loss.",
+      "implemented": "58 source item IDs with generation/modifier metadata and six persistent inventory slots. All seven enabled towns support purchases into empty slots, complete-record swaps, confirmed sales and Shop Token discounts. Upgrade previews spend source RNG immediately; Yes spends4 AP and the shown gold, while cancellation retains the preview and RNG. Owned MOD confirmation preserves original compatibility guards, fixed enchant, refill and No→swap behavior. Occupied stock purchase remains blocked. Upgrade intentionally retains every installed modifier and Living Weapon progress, correcting the original final-mod loss. Companion Equipment supports empty/compatible transfers and rejects incompatible reverse swaps; MOD No returns the MOD without a gun swap. Ally upgrade selection remains excluded until the gun is moved into hero inventory.",
       "evidence": [
         "web/tests/item-reference.test.ts: 157 original snapshots including fields, ordinary/boss offers and RNG; prior 139 unchanged",
         "web/tests/inventory-save.test.ts: item persistence and swaps",
@@ -637,11 +822,13 @@
         "web/tests/modification-gameplay.test.ts:mounted Damage/AutoFire affect actual combat, higher upgrade requirement rejects under-skilled firing",
         "web/tests/modification-save.test.ts:v9 preview/confirmation persistence, legacy migration, guards and original reload metadata",
         "web/docs/town-equipment-source.md:source anchors, transaction semantics, intentional correction and limits",
-        "docs/port-verification.json:browser_checks.modifications"
+        "docs/port-verification.json:browser_checks.modifications",
+        "web/tests/party-hiring-reference.test.ts:source companion equipment/MOD transactions",
+        "web/tests/party-integration.test.ts:atomic guards and saved transactions"
       ],
       "unverified": [
         "Refresh Stock",
-        "Every modifier/weapon combination and ally equipment",
+        "Every modifier/weapon combination beyond sampled ally equipment",
         "Generation with nondefault party skills and contexts beyond the seven enabled days",
         "Unsampled weapon combat behavior; projectile-family evidence is recorded separately"
       ]
@@ -657,7 +844,7 @@
         "MainTimeline:9380 trait registrations"
       ],
       "status": "partial",
-      "implemented": "Kill/completion XP, levels and earned Sheriff choices persist across Days 1–7. All 15 original candidate definitions, eligibility/order/descriptions/previews, Capable options and duplicate retries feed the normal postbattle UI. Hidden potentials and base aiming/teamwork are saved; level-up consumes both original growth rolls. Five weapon-XP buckets follow the selected item's required trait at kill time, including grenade kills and the non-promoting other bucket. After completion XP, each of four weapon skills promotes at most once when XP is strictly above skillLevel*12+20, then clears that bucket. Earned non-Sheriff weapon skills remain valid without entering the Sheriff random-choice list.",
+      "implemented": "Kill/completion XP, levels and earned Sheriff choices persist across Days 1–7. All 15 original candidate definitions, eligibility/order/descriptions/previews, Capable options and duplicate retries feed the normal postbattle UI. Hidden potentials and base aiming/teamwork are saved; level-up consumes both original growth rolls. Five weapon-XP buckets follow the selected item's required trait at kill time, including grenade kills and the non-promoting other bucket. After completion XP, each of four weapon skills promotes at most once when XP is strictly above skillLevel*12+20, then clears that bucket. Earned non-Sheriff weapon skills remain valid without entering the Sheriff random-choice list. Active companions receive 250 completion XP, original per-class automatic growth/focus and all pending SP processing before loot. Cached party effects remain pre-growth until explicit source refresh boundaries; companion wages use settled level and cached Accountant.",
       "evidence": [
         "web/tests/simulation.test.ts:first-battle result",
         "docs/port-verification.json:browser_checks.victory_checkpoint",
@@ -670,12 +857,14 @@
         "web/tests/hero-save.test.ts: saved growth and legacy reconstruction",
         "web/tests/weapon-experience.test.ts: selected statue/unusable gun grenade kills, independent thresholds, inactive metadata, promotion and legacy migration",
         "web/tests/day-two.test.ts: saved rewards and chosen traits across both days",
-        "web/tests/castle-reference.test.ts: original Defender, Insurance and Last Hope behavior"
+        "web/tests/castle-reference.test.ts: original Defender, Insurance and Last Hope behavior",
+        "web/tests/party-progression-reference.test.ts:45 original observations",
+        "web/tests/party-combat-reference.test.ts:postbattle XP, weapon thresholds and cache-preserving growth"
       ],
       "unverified": [
-        "Independent original-runtime weapon-XP trace; current bucket/promotion tests are source-derived",
         "Remaining party and town actions that use chosen traits",
-        "Other classes, all 52 registered traits and later/exhausted-pool interactions"
+        "Other classes, all 52 registered traits and later/exhausted-pool interactions",
+        "Weapon-XP and growth combinations beyond the accepted controlled cases"
       ]
     },
     {
@@ -722,7 +911,7 @@
         "MainTimeline:10631 Claim Title dialog"
       ],
       "status": "partial",
-      "implemented": "All seven enabled battles settle rewards, perfect bonus, default upkeep, tax and available salary once after reward choices, with original fame/AP/AP draws. Base rewards are600/620/640/660/680/700/720 on Days1–7; perfect bonus is30% and default upkeep40. Tax is zero through Day5 and10 on Day6, giving normal/perfect Day6 net650/860 before other income. Claim Title in town6 spends4AP and grants Honorary Citizen with daily salary100; it spends no gold/RNG and does not alter the settled Day6 result. The claimed title carries into the Day7 result: tax45, salary100, default upkeep40 and base reward720 produce normal/perfect net735/951 (635/851 without a title). The original settlement-method comparison and the separate focused headless campaign cover these boundaries. Free Repair costs2AP, fully heals and spends no gold/RNG. Legacy early-paid results retain their final balance. Purchases deduct integer stored value; sale loot receives full value and other items one fifth. Sales, battle gold, Insurance and settlement update cumulative earned money; purchases do not reduce it. Rest spends no AP/gold and does not heal.",
+      "implemented": "All seven enabled battles settle rewards, perfect bonus, default upkeep, tax and available salary once after reward choices, with original fame/AP/AP draws. Base rewards are600/620/640/660/680/700/720 on Days1–7; perfect bonus is30% and default upkeep40. Tax is zero through Day5 and10 on Day6, giving normal/perfect Day6 net650/860 before other income. Claim Title in town6 spends4AP and grants Honorary Citizen with daily salary100; it spends no gold/RNG and does not alter the settled Day6 result. The claimed title carries into the Day7 result: tax45, salary100, default upkeep40 and base reward720 produce normal/perfect net735/951 (635/851 without a title). The original settlement-method comparison and the separate focused headless campaign cover these boundaries. Free Repair costs2AP, fully heals and spends no gold/RNG. Legacy early-paid results retain their final balance. Purchases deduct integer stored value; sale loot receives full value and other items one fifth. Sales, battle gold, Insurance and settlement update cumulative earned money; purchases do not reduce it. Rest spends no AP/gold and does not heal. These listed net figures are solo baselines. Active companions add positive wage deductions after growth; cached Accountant affects wages and refreshed Negotiator affects the next prepared mission, without retroactively changing settled rewards.",
       "evidence": [
         "web/tests/simulation.test.ts:first-battle reward plan",
         "web/tests/town.test.ts: delayed once-only settlement, legacy balances and repair guards/persistence",
@@ -736,12 +925,14 @@
         "web/tests/day-six-save.test.ts:title persistence, legacy migration and once-only settlement",
         "web/docs/sixth-town-source.md:tax/title/salary order and explicit Day7 boundary",
         "web/tests/seventh-town-reference.test.ts:12 original normal/perfect title0/1 settlements, tax45 and salary100",
-        "docs/port-verification.json:browser_checks.seventh_day;candidate exports64–72 match complete save replay with separate fixture provenance"
+        "docs/port-verification.json:browser_checks.seventh_day;candidate exports64–72 match complete save replay with separate fixture provenance",
+        "web/tests/party-progression-reference.test.ts:source wage/cache formulas",
+        "web/tests/party-integration.test.ts:once-only settlement and dismissal"
       ],
       "unverified": [
         "Upgrade purchases/effects",
         "Integrated economy after Day7, later title ranks and nondefault party/upgrade contexts",
-        "Party wages and town income beyond the implemented first-title salary formula"
+        "Wage/party combinations beyond sampled cases and town income beyond the first-title salary"
       ]
     },
     {
@@ -809,7 +1000,7 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot with JSON import/export and Continue. Version 7 stores canonical inventory equipment/ammunition/reload state, selected slot, five consumable cooldowns, in-flight grenade damage, protection, five weapon-XP buckets, hero potentials/traits, enemy shadow/boss-damage/disarmed state, rewards and cumulative earnings. Current seven-day saves retain active mission parameters, previous-town metadata, the current prepared town, AP, earned medals, perfect-day and boss-spawn counters. Versions 1–6 migrate without rerunning settled rewards or prepared towns; explicit provenance marks reconstructed data. Current saves require shadow history instead of silently deriving a replacement from the frame. Version8 adds full projectile/bow lifecycles. Version9 persists the upgrade reference and pending Upgrade/MOD confirmation; versions1–8 migrate, initializing these fields without RNG. Town reload metadata retained by enchant is accepted; active-battle timer validation remains strict. Version10 adds Archer counters and cosmetic arrow state, permits Day3 and validates previousTown against day−1. Versions1–9 migrate without creating arrows or consuming RNG. Version11 supports Day4 and boss facing; versions1–10 migrate without RNG, including normalization of legacy walkingframes212–219 into200–211. Shield countdown/animation and fourth-town grown recruits persist. Version12 enables Day5 and persists Fly hover counters, timeline/shadow state and fifth-town level2/3 recruits. Version11 migrates without rerolls or RNG changes; historical migrations retain their documented reconstruction behavior. Current saves validate campaign/previous-town bindings and reject missing or invalid Fly state. Version13 adds the persistent first title, explicit result tax/salary and Barbarian rage, child-rage frame and parent hit-effect records. Legacy versions1–12 initialize previously unavailable title/tax/salary without consuming RNG or changing paid balances. Barbarian requires v13 state with valid effect fields; unsupported prior Barbarian history is rejected rather than reconstructed. Version14 enables Day7 and seventh-town level4 recruits, preserves an already claimed title into salary settlement, and persists boss special action5 and cosmetic projectiles (null weaponSlot/damage−1). Legacy v13 state migrates without rerolling or replaying settlement; current validation rejects malformed cosmetic sentinels and invalid boss special state. Medal62 is accepted for earned seventh-perfect saves.",
+      "implemented": "One browser slot with JSON import/export and Continue. Version 7 stores canonical inventory equipment/ammunition/reload state, selected slot, five consumable cooldowns, in-flight grenade damage, protection, five weapon-XP buckets, hero potentials/traits, enemy shadow/boss-damage/disarmed state, rewards and cumulative earnings. Current seven-day saves retain active mission parameters, previous-town metadata, the current prepared town, AP, earned medals, perfect-day and boss-spawn counters. Versions 1–6 migrate without rerunning settled rewards or prepared towns; explicit provenance marks reconstructed data. Current saves require shadow history instead of silently deriving a replacement from the frame. Version8 adds full projectile/bow lifecycles. Version9 persists the upgrade reference and pending Upgrade/MOD confirmation; versions1–8 migrate, initializing these fields without RNG. Town reload metadata retained by enchant is accepted; active-battle timer validation remains strict. Version10 adds Archer counters and cosmetic arrow state, permits Day3 and validates previousTown against day−1. Versions1–9 migrate without creating arrows or consuming RNG. Version11 supports Day4 and boss facing; versions1–10 migrate without RNG, including normalization of legacy walkingframes212–219 into200–211. Shield countdown/animation and fourth-town grown recruits persist. Version12 enables Day5 and persists Fly hover counters, timeline/shadow state and fifth-town level2/3 recruits. Version11 migrates without rerolls or RNG changes; historical migrations retain their documented reconstruction behavior. Current saves validate campaign/previous-town bindings and reject missing or invalid Fly state. Version13 adds the persistent first title, explicit result tax/salary and Barbarian rage, child-rage frame and parent hit-effect records. Legacy versions1–12 initialize previously unavailable title/tax/salary without consuming RNG or changing paid balances. Barbarian requires v13 state with valid effect fields; unsupported prior Barbarian history is rejected rather than reconstructed. Version14 enables Day7 and seventh-town level4 recruits, preserves an already claimed title into salary settlement, and persists boss special action5 and cosmetic projectiles (null weaponSlot/damage−1). Legacy v13 state migrates without rerolling or replaying settlement; current validation rejects malformed cosmetic sentinels and invalid boss special state. Medal62 is accepted for earned seventh-perfect saves. Version 15 adds canonical party/candidate/inactive records, cached effects, owner-attributed projectiles, AI/retained targets and pending hire/dismiss/MOD dialogs. Legacy 1–14 migration uses retained candidate data without RNG or granting an owned companion. The initial v15 air-as-armor pattern is repaired only when unambiguous, preserving selected/retained target identities, cache history and RNG; mixed states are rejected. Earned Day5 browser import and current roundtrip match complete expected state.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",
@@ -842,7 +1033,11 @@
         "docs/port-verification.json:browser_checks.sixth_day; exact Rest/title/Barbarian Continue exports and published v12→v13 restoration",
         "web/tests/day-seven-save.test.ts:v13→v14 title carry, boss special/cosmetic state, legitimate medal62 and historical absorption",
         "docs/port-verification.json:automated;252tests and96scenario soak with explicitly separate Day7 arrivals/wins",
-        "docs/port-verification.json:browser_checks.seventh_day;candidate exports64–72 match complete save replay with separate fixture provenance"
+        "docs/port-verification.json:browser_checks.seventh_day;candidate exports64–72 match complete save replay with separate fixture provenance",
+        "web/tests/party-integration.test.ts:legacy/current migration, pending dialogs, projectile ownership and invalid-state rejection",
+        "web/docs/party-integration-status.md",
+        "docs/port-verification.json:browser_checks.party_production; final actual v14→v15 migration and restore",
+        "docs/port-verification.json:browser_checks.party_air_orders; early-v15 repair, RNG/history preservation and startup import guard"
       ],
       "unverified": [
         "Six-slot parity",
@@ -870,7 +1065,7 @@
         "ally1 and enemy_* frame scripts in original SWF"
       ],
       "status": "partial",
-      "implemented": "Selected original assets and reconstructed character timeline layers support the seven-day Sheriff slice, town mission/castle/shop menus, original item/coin art and Free Repair/sale/Rest dialogs. The battle hotbar renders owned equipment, ammo and per-slot cooldowns; selected weapon presentation, repair/prayer/defend effects and sounds use original assets. Original item popup, upgrade arrow and separate shop labels support before/after upgrade and MOD confirmations. Original Archer1092 and enemyarrow2282 body/shadow are rendered, including stage overlay order and source registration; generated bounds drive the Archer clamp. Original Fly952 retains all126 frames, its distant shadow and falling corpse, death sound, filled-contour collision and independently measured per-frame bounds; source geometry includes the shadow approximately104pixels below the living body. Original Barbarian1340, rage2385 and hit/critical1459 artwork render saved frame/offset/alpha state. Rage child contours and parent-only particle bounds remain distinct, preserving the original targeting and knockback behavior. The city title action uses the original New Title! dialog/card and Honorary Citizen text. Day7 boss wind-up and the existing grenade2 body/shadow assets render the saved special attack and cosmetic flight; candidate browser export/replay confirms the controlled flight and landing, with body/shadow observed and audio still unverified.",
+      "implemented": "Selected original assets and reconstructed character timeline layers support the seven-day Sheriff slice, town mission/castle/shop menus, original item/coin art and Free Repair/sale/Rest dialogs. The battle hotbar renders owned equipment, ammo and per-slot cooldowns; selected weapon presentation, repair/prayer/defend effects and sounds use original assets. Original item popup, upgrade arrow and separate shop labels support before/after upgrade and MOD confirmations. Original Archer1092 and enemyarrow2282 body/shadow are rendered, including stage overlay order and source registration; generated bounds drive the Archer clamp. Original Fly952 retains all126 frames, its distant shadow and falling corpse, death sound, filled-contour collision and independently measured per-frame bounds; source geometry includes the shadow approximately104pixels below the living body. Original Barbarian1340, rage2385 and hit/critical1459 artwork render saved frame/offset/alpha state. Rage child contours and parent-only particle bounds remain distinct, preserving the original targeting and knockback behavior. The city title action uses the original New Title! dialog/card and Honorary Citizen text. Day7 boss wind-up and the existing grenade2 body/shadow assets render the saved special attack and cosmetic flight; candidate browser export/replay confirms the controlled flight and landing, with body/shadow observed and audio still unverified. Original Characters/Equipment shells, controls, portrait placement/alpha/filter and Impact font support party menus; OriginalAlly layers render companions with actor-specific weapon/reload events and targeting cursors. Visual and audio parity remains bounded by the actual observed screens.",
       "evidence": [
         "docs/asset-manifest.json",
         "docs/ui-reference.md",
@@ -881,7 +1076,10 @@
         "web/docs/fly-source.md:126-frame atlas, original distant shadow, death timeline and eight source geometry grids",
         "web/tests/fly-reference.test.ts:81920 sampled source points, body and shadow-exclusion predicates",
         "web/docs/barbarian-source.md:266-frame enemy atlas,12 active rage frames,parent blood/critical fields and original alpha",
-        "web/tests/barbarian-reference.test.ts:effect geometry/bounds and76800 source-grid points"
+        "web/tests/barbarian-reference.test.ts:effect geometry/bounds and76800 source-grid points",
+        "web/docs/party-ui-source.md",
+        "web/src/party-view.ts",
+        "web/docs/party-integration-status.md:published UI checkpoints and remaining visual/audio limits"
       ],
       "unverified": [
         "Complete scene/state visual comparison",

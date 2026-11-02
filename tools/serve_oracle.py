@@ -9,6 +9,11 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / ".build/oracle/browser-report.json"
 REPORTS = {
+    "/api/party-progression-report": ROOT / ".build/oracle/party-progression-browser-report.json",
+    "/api/party-hiring-report": ROOT / ".build/oracle/party-hiring-browser-report.json",
+    "/api/party-ai-report": ROOT / ".build/oracle/party-ai-browser-report.json",
+    "/api/party-combat-report": ROOT / ".build/oracle/party-combat-browser-report.json",
+
     "/api/seventh-day-waves-report": ROOT / ".build/oracle/seventh-day-waves-browser-report.json",
     "/api/seventh-town-report": ROOT / ".build/oracle/seventh-town-browser-report.json",
     "/api/boss-special-report": ROOT / ".build/oracle/boss-special-browser-report.json",
@@ -43,6 +48,15 @@ REPORTS = {
     "/api/town-preparation-report": ROOT / ".build/oracle/town-preparation-browser-report.json",
 }
 ROUTES = {
+    "/party-progression-reference.swf": ROOT / ".build/oracle/party-progression-reference.swf",
+    "/party-progression-build-report.json": ROOT / ".build/oracle/party-progression-build-report.json",
+    "/party-hiring-reference.swf": ROOT / ".build/oracle/party-hiring-reference.swf",
+    "/party-hiring-build-report.json": ROOT / ".build/oracle/party-hiring-build-report.json",
+    "/party-ai-reference.swf": ROOT / ".build/oracle/party-ai-reference.swf",
+    "/party-combat-reference.swf": ROOT / ".build/oracle/party-combat-reference.swf",
+    "/party-combat-build-report.json": ROOT / ".build/oracle/party-combat-build-report.json",
+    "/party-ai-build-report.json": ROOT / ".build/oracle/party-ai-build-report.json",
+
     "/seventh-day-waves-reference.swf": ROOT / ".build/oracle/seventh-day-waves-reference.swf",
     "/seventh-day-waves-build-report.json": ROOT / ".build/oracle/seventh-day-waves-build-report.json",
     "/seventh-town-reference.swf": ROOT / ".build/oracle/seventh-town-reference.swf",

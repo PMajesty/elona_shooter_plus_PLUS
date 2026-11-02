@@ -1,6 +1,6 @@
 import { RECRUIT_NAMES } from './recruits.ts';
 import type { Item } from './items.ts';
-import type { FirstTownPreparation } from './town-preparation.ts';
+import { validTownPreparationEffects, type FirstTownPreparation } from './town-preparation.ts';
 
 const record = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
 const integer = (value: unknown, low: number, high: number): value is number => Number.isInteger(value) && Number(value) >= low && Number(value) <= high;
@@ -13,10 +13,13 @@ export function validTownPreparation(value: unknown, validItem: (item: unknown) 
   if (!Array.isArray(value.cards) || value.cards.length !== 5 || value.cards.some(id => !integer(id, -7, -1))) return false;
   for (let id = -7; id <= -1; id++) if (value.cards.filter(card => card === id).length > (id === -1 ? 3 : 1)) return false;
   if (!integer(value.searched, 0, 999) || !record(value.flags) || !fieldsEqual(value.flags, { specialSale: 0, egg: true, partyHeld: false, prayed: false, robbed: 0, taunted: 0 })) return false;
+  // Снимок принадлежит моменту подготовки: найм/увольнение позднее не меняют готовую награду.
+  if (value.preparationEffects !== undefined && !validTownPreparationEffects(value.preparationEffects)) return false;
+  const negotiator = value.preparationEffects?.missionNegotiator ?? 0;
   const mission = value.mission;
   const power = 800 + day * 50 + day * 70;
   if (!record(mission) || !fieldsEqual(mission, {
-    level: day, fixedLv: day, strength: 0, power, powerOrg: power, reward: 600 + day * 20,
+    level: day, fixedLv: day, strength: 0, power, powerOrg: power, reward: Math.trunc((600 + day * 20) * (100 + negotiator) / 100),
     hire: false, ragnarok: false, wave: 5, spawnRate: 15 - day / 5, waveType: 0,
     newWave: true, time: 30, bossDay: false, note: '', hpFix: 1, dmgFix: 1,
     expFix: 1, bossKilled: 0, noDamage: true, criticalCount: 0, resultOther: 0,

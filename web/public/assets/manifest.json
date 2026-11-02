@@ -51,6 +51,20 @@
       "originX": 0,
       "originY": 0
     },
+    "townCharacters": {
+      "file": "screens/townCharacters.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "townEquipment": {
+      "file": "screens/townEquipment.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
     "gene": {
       "file": "screens/gene.png",
       "width": 620,
@@ -109,6 +123,20 @@
     },
     "townShopUpgradeLabel": {
       "file": "screens/townShopUpgradeLabel.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "townCharactersLabels": {
+      "file": "screens/townCharactersLabels.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "townEquipmentLabels": {
+      "file": "screens/townEquipmentLabels.png",
       "width": 620,
       "height": 380,
       "originX": 0,
@@ -650,6 +678,102 @@
       "originY": 13.45,
       "characterId": 1497
     },
+    "button_partyPortrait": {
+      "file": "buttons/button_partyPortrait.png",
+      "width": 125,
+      "height": 82,
+      "originX": 67.0,
+      "originY": 41.0,
+      "characterId": 130
+    },
+    "button_partyPortrait_over": {
+      "file": "buttons/button_partyPortrait_over.png",
+      "width": 125,
+      "height": 82,
+      "originX": 67.0,
+      "originY": 41.0,
+      "characterId": 130
+    },
+    "button_partyPortrait_down": {
+      "file": "buttons/button_partyPortrait_down.png",
+      "width": 125,
+      "height": 82,
+      "originX": 67.0,
+      "originY": 41.0,
+      "characterId": 130
+    },
+    "button_partyDismiss": {
+      "file": "buttons/button_partyDismiss.png",
+      "width": 21,
+      "height": 23,
+      "originX": 9.1,
+      "originY": 12.35,
+      "characterId": 1696
+    },
+    "button_partyDismiss_over": {
+      "file": "buttons/button_partyDismiss_over.png",
+      "width": 21,
+      "height": 23,
+      "originX": 9.1,
+      "originY": 12.35,
+      "characterId": 1696
+    },
+    "button_partyDismiss_down": {
+      "file": "buttons/button_partyDismiss_down.png",
+      "width": 21,
+      "height": 23,
+      "originX": 9.1,
+      "originY": 12.35,
+      "characterId": 1696
+    },
+    "button_partyRecycle": {
+      "file": "buttons/button_partyRecycle.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1758
+    },
+    "button_partyRecycle_over": {
+      "file": "buttons/button_partyRecycle_over.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1758
+    },
+    "button_partyRecycle_down": {
+      "file": "buttons/button_partyRecycle_down.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1758
+    },
+    "button_partyRestock": {
+      "file": "buttons/button_partyRestock.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1762
+    },
+    "button_partyRestock_over": {
+      "file": "buttons/button_partyRestock_over.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1762
+    },
+    "button_partyRestock_down": {
+      "file": "buttons/button_partyRestock_down.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1762
+    },
     "gameOver": {
       "file": "images/gameOver.png",
       "width": 561,
@@ -1046,6 +1170,90 @@
       "uniqueFrames": 1,
       "characterId": 2430
     },
+    "partyShadow": {
+      "image": "sprites/partyShadow.png",
+      "json": "sprites/partyShadow.json",
+      "originX": 0.0,
+      "originY": -1.6,
+      "frameWidth": 20,
+      "frameHeight": 11,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 680
+    },
+    "partyTraitIcon": {
+      "image": "sprites/partyTraitIcon.png",
+      "json": "sprites/partyTraitIcon.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 18,
+      "frameHeight": 18,
+      "labels": {},
+      "count": 3,
+      "uniqueFrames": 3,
+      "characterId": 2142
+    },
+    "partyAimCursor": {
+      "image": "sprites/partyAimCursor.png",
+      "json": "sprites/partyAimCursor.json",
+      "originX": 4.0,
+      "originY": 9.0,
+      "frameWidth": 14,
+      "frameHeight": 14,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2340
+    },
+    "partyCheckOff": {
+      "image": "sprites/partyCheckOff.png",
+      "json": "sprites/partyCheckOff.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 14,
+      "frameHeight": 14,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 1474
+    },
+    "partyCheckOn": {
+      "image": "sprites/partyCheckOn.png",
+      "json": "sprites/partyCheckOn.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 14,
+      "frameHeight": 14,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 1469
+    },
+    "partyOrderSkin": {
+      "image": "sprites/partyOrderSkin.png",
+      "json": "sprites/partyOrderSkin.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 148,
+      "frameHeight": 22,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 1713
+    },
+    "partyOrderListSkin": {
+      "image": "sprites/partyOrderListSkin.png",
+      "json": "sprites/partyOrderListSkin.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 273,
+      "frameHeight": 192,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 1721
+    },
     "itemPopup": {
       "image": "sprites/itemPopup.png",
       "json": "sprites/itemPopup.json",
@@ -1057,6 +1265,28 @@
       "count": 1,
       "uniqueFrames": 1,
       "characterId": 1791
+    },
+    "partyPortraitBackground": {
+      "image": "sprites/partyPortraitBackground.png",
+      "json": "sprites/partyPortraitBackground.json",
+      "originX": 29.45,
+      "originY": 27.35,
+      "frameWidth": 84,
+      "frameHeight": 73,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 685,
+      "coordinateSpace": "ally3-parent",
+      "sourceFrame": 8,
+      "sourceChild": "bg",
+      "placementBaked": true,
+      "sourceAlpha": 0.16015625,
+      "sourceBlur": {
+        "x": 11,
+        "y": 11,
+        "passes": 1
+      }
     },
     "shieldHit": {
       "image": "sprites/shieldHit.png",
@@ -1347,7 +1577,8 @@
     "menuBold": "fonts/menuBold.ttf",
     "hud": "fonts/hud.ttf",
     "small": "fonts/small.ttf",
-    "ui": "fonts/ui.ttf"
+    "ui": "fonts/ui.ttf",
+    "impact": "fonts/impact.ttf"
   },
   "enemyArrowVisual": {
     "characterId": 2282,

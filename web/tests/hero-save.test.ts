@@ -26,7 +26,7 @@ test('New Game integrates mission then hero then waves without mixing their RNG 
     assert.deepEqual(simulation.state.loot, mission.loot);
     assert.deepEqual(simulation.state.waves, waves.waves);
     assert.equal(simulation.state.rng, reference.state());
-    assert.equal(simulation.state.version, 14);
+    assert.equal(simulation.state.version, 15);
     assert.deepEqual(Simulation.fromSave(simulation.toSave()).state, simulation.state);
   }
 });

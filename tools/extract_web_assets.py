@@ -26,7 +26,10 @@ CLIPS = {"charaPic": 677, "enemy_sheep": 910,
          "layhand": 2226, "itemTimer": 2370, "launcherGrenadeBody": 2238,
          "rocketBody": 2246, "arrowBody": 2263, "flameBody": 2195, "explosionLarge": 2403,
          "shopUpgradeArrow": 2129, "enemyArrowBody": 2281,
-         "townActionCard": 2426, "townActionPin": 2430}
+         "townActionCard": 2426, "townActionPin": 2430,
+         "partyShadow": 680, "partyTraitIcon": 2142, "partyAimCursor": 2340,
+         "partyCheckOff": 1474, "partyCheckOn": 1469,
+         "partyOrderSkin": 1713, "partyOrderListSkin": 1721}
 PROJECTILES = {"hand-grenade": (2276, "grenadeBody"), "grenade": (2239, "launcherGrenadeBody"),
                "rocket": (2247, "rocketBody"), "bolt": (2264, "arrowBody"),
                "arrow": (2265, "arrowBody"), "gravity": (2260, "gravityBody"),
@@ -39,7 +42,9 @@ BUTTONS = {"button_newGame": 2521, "button_continue": 2542, "button_help": 2579,
            "button_townRest": 1601, "button_townHire": 1605,
            "button_shopRefresh": 1807, "button_shopUpgrade": 1815,
            "button_dialogYes": 2128, "button_dialogNo": 2126,
-           "button_freeRepair": 1642, "button_eventOk": 2434, "button_windowClose": 1497}
+           "button_freeRepair": 1642, "button_eventOk": 2434, "button_windowClose": 1497,
+           "button_partyPortrait": 130, "button_partyDismiss": 1696,
+           "button_partyRecycle": 1758, "button_partyRestock": 1762}
 FORCE = False
 
 
@@ -325,6 +330,34 @@ def item_popup_asset(xml, sprite):
     return atlas("itemPopup", 1791, sprite, directory, svg_directory)
 
 
+def party_portrait_background(xml, sprite):
+    """Запекает bg вместе с исходными матрицей, alpha и blur в координатах ally3."""
+    directory, svg_directory = WORK / "party-portrait-background", WORK / "party-portrait-background-svg"
+    isolated = copy.deepcopy(sprite)
+    timeline = isolated.find("subTags")
+    background = next(tag for tag in placed_frame(timeline, 8) if tag.get("name") == "bg")
+    timeline.clear()
+    timeline.append(background)
+    timeline.append(ET.Element("item", type="ShowFrameTag", forceWriteAsLong="false"))
+    timeline.append(ET.Element("item", type="EndTag", forceWriteAsLong="false"))
+    isolated.set("frameCount", "1")
+    if FORCE or not list(directory.glob("DefineSprite_685*")):
+        derived = copy.deepcopy(xml)
+        tags = derived.find("tags")
+        original = next(tag for tag in tags if tag.get("spriteId") == "685")
+        index = list(tags).index(original)
+        tags.remove(original)
+        tags.insert(index, copy.deepcopy(isolated))
+        path, swf_path = WORK / "party-portrait-background.xml", WORK / "party-portrait-background.swf"
+        ET.ElementTree(derived).write(path, encoding="utf-8", xml_declaration=True)
+        ffdec(["-xml2swf", path, swf_path], "party-portrait-background-swf")
+        ffdec(["-ignorebackground", "-selectid", "685", "-export", "sprite", directory, swf_path], "party-portrait-background-png")
+        ffdec(["-ignorebackground", "-selectid", "685", "-format", "sprite:svg", "-export", "sprite", svg_directory, swf_path], "party-portrait-background-svg")
+    return {**atlas("partyPortraitBackground", 685, isolated, directory, svg_directory),
+            "coordinateSpace": "ally3-parent", "sourceFrame": 8, "sourceChild": "bg",
+            "placementBaked": True, "sourceAlpha": 41 / 256, "sourceBlur": {"x": 11, "y": 11, "passes": 1}}
+
+
 def effect_segment_asset(xml, sprite, name, cache_name, start, end, alpha):
     """Извлекает исходный диапазон эффекта без кадров других его анимаций."""
     directory, svg_directory = WORK / cache_name, WORK / (cache_name + "-svg")
@@ -447,6 +480,11 @@ def town_layout(xml, sprites):
         return output
 
     root = placements(tags, 71)
+    grids = {}
+    for tag in tags:
+        if tag.get("type") == "DefineScalingGridTag" and tag.get("characterId") in {"1713", "1721"}:
+            grid = tag.find("splitter")
+            grids[tag.get("characterId")] = [int(grid.get(key)) / 20 for key in ("Xmin", "Ymin", "Xmax", "Ymax")]
     navigation = {}
     for name, key in {"mission": "Mission", "castle": "Castle", "chara": "Chara",
                       "equip": "Equip", "shop": "Shop", "medal": "Medal"}.items():
@@ -459,6 +497,28 @@ def town_layout(xml, sprites):
                         "children": placements(sprites[1995].find("subTags"), 40)},
             "castle": {"characterId": 1995, "frame": 54, "image": "townCastle", "labelsImage": "townCastleLabels",
                        "children": placements(sprites[1995].find("subTags"), 54)},
+            "characters": {"characterId": 1995, "frame": 63, "image": "townCharacters", "labelsImage": "townCharactersLabels",
+                           "children": placements(sprites[1995].find("subTags"), 63),
+                           "portraits": {"x": 160, "y": 146, "stepX": 62, "candidateIndex": 5, "candidateExtraX": 10}},
+            "equipment": {"characterId": 1995, "frame": 71, "image": "townEquipment", "labelsImage": "townEquipmentLabels",
+                          "children": placements(sprites[1995].find("subTags"), 71),
+                          "portraits": {"x": 155, "y": 195, "stepX": 80},
+                          "slots": {"inventory": {"x": 140, "y": 250, "columns": 8, "stepX": 50, "stepY": 48},
+                                    "companions": {"sourceStart": 40, "x": 166, "y": 160, "stepX": 80},
+                                    "heroPlaceholder": {"sourceId": 46, "op": -1}}},
+            "partyPortrait": {"characterId": 685, "frame": 8, "children": placements(sprites[685].find("subTags"), 8),
+                              "shadow": {"clip": "partyShadow", "x": -9.25, "y": 7, "scaleX": 0.9024353, "scaleY": 1},
+                              "poseFrames": [5, 6], "poseDuration": 4},
+            "equipmentPortrait": {"characterId": 687, "frame": 8, "children": placements(sprites[687].find("subTags"), 8),
+                                  "shadow": {"clip": "partyShadow", "x": -9.25, "y": 3, "scaleX": 0.9024353, "scaleY": 1}},
+            "partyTrait": {"characterId": 2143, "children": placements(sprites[2143].find("subTags"), 1),
+                           "x": 150, "y": 232, "rows": 6, "stepX": 130, "stepY": 18},
+            "partyControls": {"orderGrid": grids["1713"], "orderListGrid": grids["1721"],
+                              "componentBaseWidth": 100, "componentBaseHeight": 22,
+                              "checkIconX": 5, "checkIconY": 4, "checkLabelX": 24},
+            "battleParty": {"actorClip": "ally1", "cursorClip": "partyAimCursor",
+                            "slots": [{"slot": i, "x": 510 + i * 2 - (8 if i == 3 else 0),
+                                       "y": [245, 215, 275, 185, 305][i], "cursorX": 480 + i * 2} for i in range(5)]},
             "shop": {"characterId": 1995, "frame": 80, "image": "townShop",
                      "refreshLabelsImage": "townShopRefreshLabel", "upgradeLabelsImage": "townShopUpgradeLabel",
                      "children": placements(sprites[1995].find("subTags"), 80),
@@ -511,6 +571,7 @@ def main():
     for name, i in CLIPS.items():
         manifest["clips"][name] = atlas(name, i, sprites[i])
     manifest["clips"]["itemPopup"] = item_popup_asset(xml, sprites[1791])
+    manifest["clips"]["partyPortraitBackground"] = party_portrait_background(xml, sprites[685])
     manifest["clips"]["shieldHit"] = effect_segment_asset(xml, sprites[1459], "shieldHit", "shield-hit", 140, 146, [0.7, 0.7, 0.5, 0.5, 0.2, 0.2])
     # Наблюдаемые значения alpha хранятся Flash с точностью 1/256.
     manifest["clips"]["bloodHit"] = effect_segment_asset(xml, sprites[1459], "bloodHit", "enemy-hit-blood", 50, 63, [1, 1, 1, 1, 204/256, 204/256, 153/256, 153/256, 102/256, 102/256, 25/256, 25/256, 25/256])
@@ -539,6 +600,11 @@ def main():
          {"closeButton", "hint2", "hint", "unkeep", "locker", "act1", "actRef1"}, (0, -22)),
         ("townShop", sprites[1995].find("subTags"), 80,
          {"closeButton", "hint2", "warning", "popup", "actHelp", "act1", "act2", "actRef1", "actRef2"}, (0, -22)),
+        ("townCharacters", sprites[1995].find("subTags"), 63,
+         {"closeButton", "hint2", "hint", "dismissButton", "classText", "wage", "titleText", "wageText", "earnText", "killText",
+          "orderText", "recruitText", "dismissText", "costText", "order", "fo", "act1", "actRef1", "optHint", "optBoss", "optWall"}, (0, -22)),
+        ("townEquipment", sprites[1995].find("subTags"), 71,
+         {"closeButton", "hint2", "popup", "warning", "actHelp", "act1", "act2", "actRef1", "actRef2"}, (0, -22)),
         ("gene", sprites[1995].find("subTags"), 125, omit_gene, (0, -26)),
         ("result", sprites[1995].find("subTags"), 14, omit_result, (0, -26)),
         ("loot", sprites[1995].find("subTags"), 89, omit_loot, (0, -26)),
@@ -549,7 +615,9 @@ def main():
     for name, frame, labels in [("townMissionLabels", 40, {"actRef1", "actRef2"}),
                                 ("townCastleLabels", 54, {"actRef1"}),
                                 ("townShopRefreshLabel", 80, {"actRef1"}),
-                                ("townShopUpgradeLabel", 80, {"actRef2"})]:
+                                ("townShopUpgradeLabel", 80, {"actRef2"}),
+                                ("townCharactersLabels", 63, {"actRef1"}),
+                                ("townEquipmentLabels", 71, {"actRef1", "actRef2"})]:
         selected = [tag for tag in placed_frame(sprites[1995].find("subTags"), frame)
                     if tag.get("name") in labels]
         manifest["images"][name] = static_screen(xml, name, selected, offset=(0, -22))
@@ -570,7 +638,7 @@ def main():
         im = Image.open(dest)
         manifest["images"][name] = {"file": f"images/{name}.png", "width": im.width,
                                     "height": im.height, "originX": 0, "originY": 0}
-    for name, font_id in {"menu": 682, "menuBold": 1608, "hud": 2681, "small": 1392, "ui": 1535}.items():
+    for name, font_id in {"menu": 682, "menuBold": 1608, "hud": 2681, "small": 1392, "ui": 1535, "impact": 1653}.items():
         source = next((CACHE / "fonts").glob(f"{font_id}_*"))
         dest = DEST / "fonts" / (name + ".ttf")
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -618,6 +686,8 @@ def main():
             "townHud applies the original eventGene bgAlpha.alpha=1",
             "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",
             "Town action labels are separate original foreground layers above their card buttons",
+            "Characters/Equipment panels retain original labels, portraits, slot placements and separately rendered controls; permanent recruitment is separate from the Mission henchman action",
+            "partyPortraitBackground bakes ally3 bg placement, alpha41/256 and blur11 in parent portrait coordinates; selection opacity applies to the whole portrait",
             "Shop Upgrade and Refresh labels are separate so each retains its own enabled state",
             "Item comparison popup retains original static labels and renders saved before/after values separately",
             "Town scene and panels omit runtime HUD fields; Free Repair/Rest use original event card frames 2/11",

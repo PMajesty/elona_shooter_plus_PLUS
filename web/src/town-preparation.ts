@@ -3,7 +3,7 @@ import { generateLowLevelMission } from './missions.ts';
 import { generateEarlyTownRecruit, type FirstTownRecruit } from './recruits.ts';
 
 export interface FirstTownMission {
-  level: 1 | 2 | 3 | 4 | 5 | 6 | 7; fixedLv: 1 | 2 | 3 | 4 | 5 | 6 | 7; strength: 0; power: 920 | 1040 | 1160 | 1280 | 1400 | 1520 | 1640; powerOrg: 920 | 1040 | 1160 | 1280 | 1400 | 1520 | 1640; reward: 620 | 640 | 660 | 680 | 700 | 720 | 740;
+  level: 1 | 2 | 3 | 4 | 5 | 6 | 7; fixedLv: 1 | 2 | 3 | 4 | 5 | 6 | 7; strength: 0; power: 920 | 1040 | 1160 | 1280 | 1400 | 1520 | 1640; powerOrg: 920 | 1040 | 1160 | 1280 | 1400 | 1520 | 1640; reward: number;
   hire: false; ragnarok: false; wave: 5; spawnRate: number; group: number[];
   waveType: 0; loot: number[]; newWave: true; time: 30; bossDay: false; bossWave: number;
   note: ''; hpFix: 1; dmgFix: 1; expFix: 1; absorbFix: number; bossKilled: 0;
@@ -15,6 +15,21 @@ export interface FirstTownPreparationInput {
   recruitSlots?: Readonly<Record<number, Item | null>>;
   searched?: number;
   absorbFix?: number;
+  shopEngineer?: number;
+  missionNegotiator?: number;
+  recruitEngineer?: number;
+}
+
+export interface TownPreparationEffects { shopEngineer: number; missionNegotiator: number; recruitEngineer: number }
+export function validTownPreparationEffects(value: unknown): value is TownPreparationEffects {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const effects = value as Record<string, unknown>;
+  const engineer = (amount: unknown) => typeof amount === 'number' && Number.isInteger(amount)
+    && (amount === 0 || amount >= 7 && amount <= 52 && (amount - 2) % 5 === 0);
+  const negotiator = effects.missionNegotiator;
+  return Object.keys(effects).length === 3 && engineer(effects.shopEngineer) && engineer(effects.recruitEngineer)
+    && typeof negotiator === 'number' && Number.isInteger(negotiator)
+    && (negotiator === 0 || negotiator >= 9 && negotiator <= 45 && (negotiator - 5) % 4 === 0);
 }
 
 export interface FirstTownPreparation {
@@ -24,6 +39,7 @@ export interface FirstTownPreparation {
   recruit: FirstTownRecruit;
   flags: { specialSale: 0; egg: true; partyHeld: false; prayed: false; robbed: 0; taunted: 0 };
   searched: number;
+  preparationEffects?: TownPreparationEffects;
 }
 
 export function prepareFirstTown(random: () => number, input: FirstTownPreparationInput = {}): FirstTownPreparation {
@@ -32,7 +48,11 @@ export function prepareFirstTown(random: () => number, input: FirstTownPreparati
 
 export function prepareEarlyTown(random: () => number, day: 1 | 2 | 3 | 4 | 5 | 6 | 7, input: FirstTownPreparationInput = {}): FirstTownPreparation {
   if (![1, 2, 3, 4, 5, 6, 7].includes(day)) throw new RangeError('Town preparation is limited to days 1 through 7.');
-  const factory = new ItemFactory(random, { day });
+  const effects: TownPreparationEffects = { shopEngineer: input.shopEngineer ?? 0,
+    missionNegotiator: input.missionNegotiator ?? 0, recruitEngineer: input.recruitEngineer ?? 0 };
+  if (!validTownPreparationEffects(effects)) throw new RangeError('Invalid original town preparation effects.');
+  // frame71 генерирует лавку до generateMission/initPartySkill: здесь действует прежний кэш.
+  const factory = new ItemFactory(random, { day, engineer: effects.shopEngineer });
   // clearGameInv сохраняет поля даже у пустых слотов; первая лавка использует только 0 и 1.
   const shop = Array.from({ length: 8 }, (_, index) => input.priorOffers?.[index] ? { ...input.priorOffers[index], num: 0 } as Item : null);
   for (let index = 0; index < 2; index++) {
@@ -59,8 +79,9 @@ export function prepareEarlyTown(random: () => number, day: 1 | 2 | 3 | 4 | 5 | 
   }
 
   // Уровень следующей миссии равен текущему дню; календарная добыча определяется до Rest.
-  const mission = generateLowLevelMission(day, day, random, { absorbFix: input.absorbFix }) as FirstTownMission;
-  const recruit = generateEarlyTownRecruit(random, day, { previousSlots: input.recruitSlots });
+  const mission = generateLowLevelMission(day, day, random, { absorbFix: input.absorbFix, negotiator: effects.missionNegotiator }) as FirstTownMission;
+  // generatePlayer вызывает initPartySkill до выдачи оружия; кандидат5 не входит в активные0–4.
+  const recruit = generateEarlyTownRecruit(random, day, { previousSlots: input.recruitSlots, itemContext: { engineer: effects.recruitEngineer } });
   // Смена кандидата не стирает неиспользованные слоты прежнего ополченца.
   const retainedRecruitItems: Record<number, Item> = {};
   for (const [slot, item] of Object.entries(input.recruitSlots ?? {})) if (item) retainedRecruitItems[Number(slot)] = { ...item };
@@ -69,5 +90,7 @@ export function prepareEarlyTown(random: () => number, day: 1 | 2 | 3 | 4 | 5 | 
   const flags = { specialSale: 0, egg: true, partyHeld: false, prayed: false, robbed: 0, taunted: 0 } as const;
   // В оригинале этот бросок идёт после автоматического сохранения frame71; вызывающий код сохраняет весь готовый результат.
   const searched = input.searched ?? Math.trunc(random() * 1000);
-  return { shop, cards, mission, recruit, flags, searched };
+  const explicitEffects = input.shopEngineer !== undefined || input.missionNegotiator !== undefined || input.recruitEngineer !== undefined;
+  return { shop, cards, mission, recruit, flags, searched,
+    ...(explicitEffects ? { preparationEffects: effects } : {}) };
 }

@@ -8,6 +8,9 @@ import { createLootView } from './loot-view.ts';
 import { createSkillView } from './skill-view.ts';
 import { createTownView, type TownLayout, type TownTab, type TownDialog } from './town-view.ts';
 import { createShopView, type ShopLayout } from './shop-view.ts';
+import { createPartyView, type PartyLayout, type PartyViewMember, type PartyViewTrait, type PartyEquipmentSlot } from './party-view.ts';
+import { ALL_TRAITS, companionWage } from './party-progression.ts';
+import { partyActorPosition } from './party-ai.ts';
 import { ITEM_TYPE, isOccupiedItem } from './items.ts';
 import { alphaMaskHit, ordinaryEnemyHit, type CollisionGeometry } from './collision.ts';
 import type { ProjectileKind } from './projectiles.ts';
@@ -17,7 +20,7 @@ interface ImageAsset { file: string; width: number; height: number; originX: num
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number; frameAlpha?: number[] }
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual }
-interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14; appearance: number; simulation: unknown }
+interface PortSave { format: 'elona-shooter-browser'; version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15; appearance: number; simulation: unknown }
 type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
@@ -53,6 +56,10 @@ class ElonaScene extends Phaser.Scene {
   private projectileSprites = new Map<number, { container: Phaser.GameObjects.Container; body: Phaser.GameObjects.Container; images: Phaser.GameObjects.Image[]; shadow?: Phaser.GameObjects.Image }>();
   private enemyArrowSprites = new Map<number, { container: Phaser.GameObjects.Container; body: Phaser.GameObjects.Image; shadow: Phaser.GameObjects.Image }>();
   private playerSprite?: OriginalAlly;
+  private companionSprites = new Map<number, OriginalAlly>();
+  private companionCursors = new Map<number, Phaser.GameObjects.Image>();
+  private companionBowSounds = new Map<number, Phaser.Sound.BaseSound>();
+  private selectedCharacter = 0;
   private ammoFill?: Phaser.GameObjects.Image;
   private selection?: Phaser.GameObjects.Rectangle;
   private cursor?: Phaser.GameObjects.Graphics;
@@ -125,8 +132,9 @@ class ElonaScene extends Phaser.Scene {
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Sheriff Days 1–7, rewards, the shop, weapon upgrades, MOD mounting, Free Repair, Claim Title and Rest are playable. Number keys 1–5 use owned equipment and consumables; hold and release the mouse to draw and fire a bow. Ragnarok, other town actions, Day 8 onward and other classes are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Sheriff Days 1–7, companion recruitment, party equipment and orders, rewards, the shop, weapon upgrades, MOD mounting, Free Repair, Claim Title and Rest are playable. Number keys 1–5 use owned equipment and consumables; hold and release the mouse to draw and fire a bow. Ragnarok, remaining town actions, Day 8 onward and other playable classes are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
+    document.querySelector<HTMLButtonElement>('#import-save')!.disabled = false;
   }
 
   private reset(screen: Screen): void {
@@ -142,6 +150,8 @@ class ElonaScene extends Phaser.Scene {
     this.enemyArrowSprites.clear();
     this.enemySprites.clear(); this.enemyRageSprites.clear(); this.enemyHitSprites.clear(); this.bossFrames.clear(); this.bossBars.clear(); this.projectileSprites.clear(); this.hud.clear(); this.effects = []; this.hotbar = [];
     this.bowSound?.destroy(); this.bowSound = undefined;
+    for (const sound of this.companionBowSounds.values()) sound.destroy();
+    this.companionBowSounds.clear(); this.companionSprites.clear(); this.companionCursors.clear();
     this.reloadAnimations = 0;
     this.pauseLayer = undefined; this.playerSprite = undefined; this.cursor = undefined; this.selection = undefined; this.ammoFill = undefined;
     if (!keepTownAmbience) { this.ambient?.destroy(); this.ambient = undefined; }
@@ -156,6 +166,7 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.actionPoints; delete container.dataset.townTab; delete container.dataset.repairDialog; delete container.dataset.townDialog;
     delete container.dataset.shopStock; delete container.dataset.saleSlot; delete container.dataset.upgradeSelecting;
     delete container.dataset.pendingTownAction; delete container.dataset.upgradePreview;
+    delete container.dataset.party; delete container.dataset.partySelection; delete container.dataset.pendingPartyAction; delete container.dataset.companionVisuals;
   }
 
   private image(key: string, x = 0, y = 0): Phaser.GameObjects.Image | undefined {
@@ -297,6 +308,7 @@ class ElonaScene extends Phaser.Scene {
     this.playerSprite.setOriginalFrame(weaponPresentation(this.sim?.selectedItem?.id ?? 0).idleFrame);
     if (this.sim?.state.player.bowDrawing) this.playerSprite.playOriginal(86);
     if (this.sim?.weapon?.reloadTime && !this.sim.weapon.autoReload) this.playerSprite.playOriginal('reload');
+    this.syncCompanionActors();
     this.drawHud();
     this.cursor = this.add.graphics(); this.root.add(this.cursor);
     this.input.setDefaultCursor('crosshair');
@@ -345,6 +357,11 @@ class ElonaScene extends Phaser.Scene {
       this.accumulator -= 1000 / 30;
       this.playerSprite?.stepOriginal();
       if (!this.sim.weapon?.reloadTime && this.playerSprite && this.playerSprite.currentOriginalFrame >= 30 && this.playerSprite.currentOriginalFrame <= 41) this.playerSprite.stopOriginal(weaponPresentation(this.sim.selectedItem?.id ?? 0).idleFrame);
+      for (const [slot, actor] of this.companionSprites) {
+        actor.stepOriginal();
+        const weapon = this.sim.actorWeapon(slot);
+        if (!weapon?.reloadTime && actor.currentOriginalFrame >= 30 && actor.currentOriginalFrame <= 41) actor.stopOriginal(weaponPresentation(weapon?.id ?? 0).idleFrame);
+      }
       this.animateEffects();
       for (const event of this.sim.events) this.renderEvent(event);
       if (this.sim.state.tick % 150 === 0) this.saveGame(false);
@@ -380,6 +397,41 @@ class ElonaScene extends Phaser.Scene {
       this.bossFrames.set(enemy.uid, enemy.frame);
     }
     return actor;
+  }
+
+  private syncCompanionActors(): void {
+    if (!this.sim) return;
+    const active = this.sim.state.party.slots.filter(slot => slot.slot < 5 && slot.exists && slot.member);
+    const present = new Set<number>(active.map(slot => slot.slot));
+    for (const [slot, actor] of this.companionSprites) if (!present.has(slot)) {
+      actor.destroy(); this.companionSprites.delete(slot);
+      this.companionCursors.get(slot)?.destroy(); this.companionCursors.delete(slot);
+      this.companionBowSounds.get(slot)?.destroy(); this.companionBowSounds.delete(slot);
+    }
+    for (const slot of active) {
+      const member = slot.member!, position = partyActorPosition(slot.slot);
+      let actor = this.companionSprites.get(slot.slot), cursor = this.companionCursors.get(slot.slot);
+      if (!actor) {
+        const asset = manifest.clips.partyAimCursor;
+        cursor = this.add.image(480 + slot.slot * 2, position.y, 'partyAimCursor', '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
+        this.root.add(cursor); this.companionCursors.set(slot.slot, cursor);
+        actor = new OriginalAlly(this, this.cache.json.get('ally-animation') as OriginalAllyMetadata, manifest.clips, member.appearance, position.x, position.y);
+        actor.stopOriginal(weaponPresentation(slot.weapon?.id ?? 0).idleFrame);
+        if (member.bowDrawing) actor.playOriginal(86);
+        else if (slot.weapon?.reloadTime && !slot.weapon.autoReload) actor.playOriginal('reload');
+        this.root.add(actor); this.companionSprites.set(slot.slot, actor);
+      }
+      actor.setPosition(position.x, position.y);
+      if (cursor && member.aiState) cursor.setPosition(member.aiState.cursorX, member.aiState.cursorY).setVisible(this.screen === 'battle');
+      else cursor?.setVisible(false);
+      if (!member.bowDrawing) { this.companionBowSounds.get(slot.slot)?.destroy(); this.companionBowSounds.delete(slot.slot); }
+      // updateAlly добавляет курсор перед телом каждого союзника, в порядке индексов.
+      if (cursor) this.root.bringToTop(cursor);
+      this.root.bringToTop(actor);
+    }
+    container.dataset.companionVisuals = JSON.stringify(active.map(slot => ({ slot: slot.slot, name: slot.member!.name, appearance: slot.member!.appearance,
+      frame: this.companionSprites.get(slot.slot)?.currentOriginalFrame, ...partyActorPosition(slot.slot), ammo: slot.weapon?.ammo ?? null,
+      reloadTime: slot.weapon?.reloadTime ?? 0, bowDrawing: slot.member!.bowDrawing, cursorX: slot.member!.aiState?.cursorX, cursorY: slot.member!.aiState?.cursorY })));
   }
 
   private paintBattle(): void {
@@ -438,6 +490,7 @@ class ElonaScene extends Phaser.Scene {
     if (this.playerSprite) {
       this.root.bringToTop(this.playerSprite);
     }
+    this.syncCompanionActors();
     this.paintProjectiles();
     this.updateHud();
     for (const text of this.hud.values()) this.root.bringToTop(text);
@@ -584,11 +637,17 @@ class ElonaScene extends Phaser.Scene {
       this.playSound(event.type === 'boss-special' ? 'soundGun11' : event.weaponId === 1 ? 'soundGun6' : 'soundGun2', 0.9, pan);
       return;
     }
+    const actorSlot = event.actorSlot ?? 0;
+    const actor = actorSlot === 0 ? this.playerSprite : this.companionSprites.get(actorSlot);
+    const actorWeapon = this.sim?.actorWeapon(actorSlot);
+    // Исходный trans задаёт союзникам разные громкость и панораму, независимо от цели.
+    const actorAudio = [{ volume: 0.65, pan: 0 }, { volume: 0.2, pan: 0.8 }, { volume: 0.3, pan: 0.7 }, { volume: 0.1, pan: 0.9 }, { volume: 0.2, pan: 0.85 }][actorSlot] ?? { volume: 0.65, pan: 0 };
+    const actorSound = ['shot', 'bow-draw', 'reload', 'reloaded', 'level-up', 'rampage'].includes(event.type);
     const sound: Partial<Record<SimulationEvent['type'], string>> = { shot: 'soundGun3', reload: 'soundReloading2', reloaded: 'soundReloaded2', grenade: 'soundThrow1', explosion: 'soundExp1', kill: 'soundDead1', 'castle-hit': 'soundDamage1', wave: 'soundPop1', victory: 'soundBattleEnd', defeat: 'soundKilled', rampage: 'soundRampage', 'level-up': 'soundComplete', gold: 'soundGold1' };
     if (event.weaponId !== undefined) {
       const presentation = weaponPresentation(event.weaponId);
       sound.shot = `sound${presentation.sound[0].toUpperCase()}${presentation.sound.slice(1)}`;
-      const manual = this.sim?.weapon?.manualReload;
+      const manual = actorWeapon?.manualReload;
       const reloadVariant = event.weaponId === 14 || event.weaponId === 15 ? 3 : 2;
       sound.reload = manual ? `soundReloading${reloadVariant}` : 'soundReloading1';
       sound.reloaded = manual ? `soundReloaded${reloadVariant}` : 'soundReloaded1';
@@ -604,22 +663,29 @@ class ElonaScene extends Phaser.Scene {
       // Выбор реплики уже сделан симуляцией в исходном порядке случайных вызовов.
       if (event.goodShotIndex !== undefined) this.playSound(`soundGoodshot${event.goodShotIndex}`, 0.65);
     }
-    if (sound[event.type]) this.playSound(sound[event.type]!, event.type === 'kill' ? 0.4 : 0.65);
+    if (sound[event.type]) this.playSound(sound[event.type]!, event.type === 'kill' ? 0.4 : actorSound ? actorAudio.volume : 0.65, actorSound ? actorAudio.pan : 0);
     if (event.type === 'shot') {
-      this.playerSprite?.playOriginal(weaponPresentation(event.weaponId ?? 0).shootFrame);
+      actor?.playOriginal(weaponPresentation(event.weaponId ?? 0).shootFrame);
     }
     if (event.type === 'bow-draw') {
-      this.playerSprite?.playOriginal(86);
-      this.bowSound?.destroy();
-      if (this.cache.audio.exists('soundBow2')) { this.bowSound = this.sound.add('soundBow2', { volume: 0.65 }); this.bowSound.play(); }
+      actor?.playOriginal(86);
+      if (actorSlot === 0) { this.bowSound?.destroy(); this.bowSound = undefined; }
+      else { this.companionBowSounds.get(actorSlot)?.destroy(); this.companionBowSounds.delete(actorSlot); }
+      if (this.cache.audio.exists('soundBow2')) {
+        const sound = this.sound.add('soundBow2', actorAudio); sound.play();
+        if (actorSlot === 0) this.bowSound = sound; else this.companionBowSounds.set(actorSlot, sound);
+      }
     }
-    if (event.type === 'select' || event.type === 'shot') { this.bowSound?.destroy(); this.bowSound = undefined; }
-    if (event.type === 'select' || (event.type === 'reloaded' && (!event.automaticReload || !this.sim?.weapon?.manualReload))) {
-      this.playerSprite?.stopOriginal(weaponPresentation(event.weaponId ?? 0).idleFrame);
+    if (event.type === 'select' || event.type === 'shot') {
+      if (actorSlot === 0) { this.bowSound?.destroy(); this.bowSound = undefined; }
+      else { this.companionBowSounds.get(actorSlot)?.destroy(); this.companionBowSounds.delete(actorSlot); }
+    }
+    if (event.type === 'select' || (event.type === 'reloaded' && (!event.automaticReload || !actorWeapon?.manualReload))) {
+      actor?.stopOriginal(weaponPresentation(event.weaponId ?? 0).idleFrame);
     }
     if (event.type === 'reload' && !event.automaticReload) {
       // Каждый следующий патрон заново запускает исходную анимацию перезарядки.
-      this.playerSprite?.playOriginal('reload'); this.reloadAnimations++;
+      actor?.playOriginal('reload'); if (actorSlot === 0) this.reloadAnimations++;
     }
     if (event.type === 'hit') {
       if (event.bossGuard) {
@@ -651,7 +717,8 @@ class ElonaScene extends Phaser.Scene {
       if (effect) this.effects.push({ object: effect, ticks: manifest.clips.layhand.count, clip: 'layhand', frame: 1 });
     }
     if (event.type === 'wave' || event.type === 'rampage' || event.type === 'level-up') {
-      const message = this.text(310, 90, event.type === 'wave' ? `Wave ${event.amount}` : event.type === 'rampage' ? 'RAMPAGE!' : 'Level Up!', 27, '#ffefb0').setOrigin(0.5).setShadow(2, 2, '#000000', 3);
+      const position = actorSlot === 0 ? { x: 310, y: 90 } : partyActorPosition(actorSlot);
+      const message = this.text(position.x, position.y - (actorSlot ? 35 : 0), event.type === 'wave' ? `Wave ${event.amount}` : event.type === 'rampage' ? 'RAMPAGE!' : 'Level Up!', actorSlot ? 14 : 27, '#ffefb0').setOrigin(0.5).setShadow(2, 2, '#000000', 3);
       this.effects.push({ object: message, ticks: 45 });
     }
   }
@@ -687,7 +754,7 @@ class ElonaScene extends Phaser.Scene {
     if (state.phase === 'victory') {
       const background = new Set(this.root.list);
       this.image('result');
-      const values = [state.resultBefore, state.gold - state.resultBefore - state.result.netReward, state.result.reward + state.result.perfectBonus, state.result.salary, 0, 0, -(state.result.upkeep + state.result.tax), state.gold];
+      const values = [state.resultBefore, state.gold - state.resultBefore - state.result.netReward, state.result.reward + state.result.perfectBonus, state.result.salary, 0, -state.result.wages, -(state.result.upkeep + state.result.tax), state.gold];
       values.forEach((value, index) => this.text(252, 128 + index * 20 + (index === 7 ? 10 : 0), String(value), 12, value < 0 ? '#b02020' : '#14248d', 'Arial'));
       this.text(335, 145, `Day ${state.day} completed.\n\nEnemies defeated: ${state.kills}\nCritical kills: ${state.criticalKills}\nCastle: ${state.castleHp}/${state.castleMaxHp}`, 13).setWordWrapWidth(185);
       this.originalButton('button_proceed', 160, 301, () => {
@@ -778,8 +845,14 @@ class ElonaScene extends Phaser.Scene {
   private showTown(tab: TownTab = 'mission', dialog: TownDialog = null, saleSlot: number | null = null, upgradeSelecting = false): void {
     if (!this.sim || this.sim.state.phase !== 'town' || !this.sim.state.town) return;
     const pending = this.sim.state.pendingTownAction;
+    const pendingParty = this.sim.state.pendingPartyAction;
     // Восстановление открывает то же подтверждение, не вызывая генерацию повторно.
     if (pending) { tab = 'shop'; dialog = null; saleSlot = null; upgradeSelecting = false; }
+    if (pendingParty) {
+      tab = pendingParty.kind === 'party-mod' ? 'equipment' : 'characters'; dialog = null; saleSlot = null; upgradeSelecting = false;
+      if (pendingParty.kind === 'hire') this.selectedCharacter = 5;
+      else if (pendingParty.kind === 'dismiss') this.selectedCharacter = pendingParty.slot;
+    }
     this.reset('town');
     this.root.add(createTownView(this, this.sim.state, manifest, this.cache.json.get('town-layout') as TownLayout, {
       select: next => { this.playSound('soundScroll1'); this.showTown(next); },
@@ -815,6 +888,7 @@ class ElonaScene extends Phaser.Scene {
         } else this.showTown(dialog === 'title' ? 'mission' : 'castle');
       },
     }, tab, dialog));
+    if (tab === 'characters' || tab === 'equipment') this.showPartyPanel(tab);
     if (tab === 'shop' && this.sim.state.town.preparation === 'ready') {
       const changed = (sound = 'soundPay1') => { this.playSound(sound); this.saveGame(false); this.showTown('shop'); };
       this.root.add(createShopView(this, { inventory: this.sim.state.inventory, shop: this.sim.state.town.shop, gold: this.sim.state.gold, traits: this.sim.state.player.traits,
@@ -873,6 +947,10 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.repairDialog = String(dialog === 'repair');
     container.dataset.townDialog = dialog ?? 'none';
     container.dataset.inventory = JSON.stringify(this.sim.state.inventory.map(item => isOccupiedItem(item) ? item.id : null));
+    container.dataset.party = JSON.stringify(this.sim.state.party.slots.map(slot => ({ slot: slot.slot, exists: slot.exists,
+      name: slot.member?.name ?? null, appearance: slot.member?.appearance ?? null, weapon: isOccupiedItem(slot.weapon) ? slot.weapon.id : null,
+      ai: slot.member?.ai ?? null, focus: slot.member?.focus ?? null, boss: slot.member?.optBoss, wall: slot.member?.optWall })));
+    container.dataset.pendingPartyAction = JSON.stringify(pendingParty);
     if (!this.ambient && this.cache.audio.exists('soundBgTown')) {
       this.ambient = this.sound.add('soundBgTown', { volume: 0.3, loop: true }); this.ambient.play();
     }
@@ -882,15 +960,89 @@ class ElonaScene extends Phaser.Scene {
       : dialog === 'repair' ? 'The castle walls are repaired. Click to continue.'
       : dialog === 'title' ? 'Honorary Citizen — daily salary: 100 GP, beginning with the next completed day. Click to continue.'
       : dialog === 'rest' ? `Click to finish resting and begin Day ${this.sim.state.day + 1}.`
+      : pendingParty?.kind === 'hire' ? 'Yes pays the displayed cost and recruits this character. Any other click cancels.'
+      : pendingParty?.kind === 'dismiss' ? 'Yes dismisses this companion. Any other click keeps them.'
+      : pendingParty?.kind === 'party-mod' ? 'Yes mounts the MOD on the companion’s weapon. No or clicking elsewhere keeps both items unchanged.'
+      : tab === 'characters' ? 'Select a portrait to inspect skills, wages and orders. Select the available candidate, then Recruit, to hire a companion.'
+      : tab === 'equipment' ? 'Click an item, then a destination slot. Companions need the weapon’s required skill. Dropping outside cancels the move.'
       : tab === 'shop' ? (saleSlot === null ? 'Click stock, then an empty owned slot to buy. Drop an owned item outside its slots to sell; confirmation is required.' : 'Confirm the sale with Yes, or click elsewhere to keep the item.')
       : `Shop buys and sells items. Castle → Free Repair restores the walls for 2 AP. ${this.sim.state.day < 7 ? `Mission → Rest begins Day ${this.sim.state.day + 1}.` : 'Day 8 is not available yet.'}`;
+  }
+
+  private showPartyPanel(tab: 'characters' | 'equipment'): void {
+    if (!this.sim) return;
+    const state = this.sim.state;
+    const traits = (levels: Readonly<Record<number, number>>): PartyViewTrait[] => Object.entries(levels).filter(([, level]) => level > 0).map(([key, level]) => {
+      const id = Number(key), definition = ALL_TRAITS[id];
+      return { id, name: `${definition?.name ?? `Skill ${id}`} ${level}`, description: definition?.description ?? '',
+        kind: id < 100 ? 'class' : id >= 900 ? 'base' : definition?.party ? 'party' : 'normal' };
+    });
+    const members: PartyViewMember[] = [{ slot: 0, name: 'You', appearance: this.appearance, level: state.player.level, exp: state.player.exp,
+      className: 'Sheriff', wageLabel: state.title ? 'Honorary Citizen' : 'Newcomer', kill: null, earn: null, weapon: this.sim.weapon,
+      traits: traits(state.player.traits), traitLevels: state.player.traits, focusedTrait: -1, order: -1, prioritizeBoss: false, prioritizeWall: false, controlsEnabled: false }];
+    for (const slot of state.party.slots) {
+      if (!slot.exists || !slot.member) continue;
+      const member = slot.member;
+      const wage = companionWage(member, state.partySkills.effects[127] ?? 0, state.earnedMedals.includes(92));
+      members.push({ slot: slot.slot, name: member.name, appearance: member.appearance, level: member.level, exp: member.exp,
+        className: ALL_TRAITS[member.devType].name, wageLabel: wage === 0 ? 'Free' : `${wage} GP`, kill: member.kills, earn: member.earnedGold,
+        cost: member.cost, weapon: slot.weapon, traits: traits(member.traits), traitLevels: member.traits, focusedTrait: member.focus,
+        order: member.ai, prioritizeBoss: member.optBoss, prioritizeWall: member.optWall });
+    }
+    if (!members.some(member => member.slot === this.selectedCharacter)) this.selectedCharacter = 0;
+    const pending = state.pendingPartyAction;
+    const changed = (sound = 'soundClick1') => { this.playSound(sound); this.saveGame(false); this.showTown(tab); };
+    const failure = (outcome: string) => {
+      const errors: Record<string, string> = { 'party-full': 'You have reached the limit of recruits.', 'house-full': 'You need to upgrade the house!',
+        'not-enough-gold': "You don't have enough money!", 'no-candidate': 'No recruit is available.', 'no-mod-slot': "There's no available mod slot on this weapon!",
+        'incompatible-ammo-mod': "This weapon can't use ammo/reloading mods.", 'incompatible-auto-reload': "This weapon can't use Auto Reload mod.",
+        'already-living': 'This weapon is already alive.', unavailable: 'This action is unavailable for the selected character or equipment.' };
+      this.playSound('soundBeep'); status.textContent = errors[outcome] ?? 'This action is unavailable.';
+    };
+    const address = (value: PartyEquipmentSlot) => ({ area: value.kind === 'inventory' ? 'inventory' as const : 'party' as const, slot: value.slot });
+    const move = (from: PartyEquipmentSlot, to: PartyEquipmentSlot): boolean => {
+      if (from.kind === 'inventory' && to.kind === 'inventory') {
+        if (!this.sim!.moveTownItem(from.slot, to.slot)) { failure('unavailable'); return false; }
+        changed(); return true;
+      }
+      const result = this.sim!.movePartyEquipment(address(from), address(to));
+      if (result === 'moved' || result === 'previewed') { changed(result === 'previewed' ? 'soundScroll1' : 'soundClick1'); return true; }
+      failure(result); return false;
+    };
+    this.root.add(createPartyView(this, { selectedSlot: this.selectedCharacter, members, inventory: state.inventory, gold: state.gold, capacity: state.party.capacity,
+      dialog: pending?.kind === 'hire' ? 'recruit' : pending?.kind === 'dismiss' ? 'dismiss' : pending ? 'mod' : null }, manifest, this.cache.json.get('town-layout') as PartyLayout, {
+      selectCharacter: slot => { this.selectedCharacter = slot; this.playSound('soundClick1'); this.showTown('characters'); },
+      recruit: () => { const result = this.sim!.requestRecruit(); if (result === 'previewed') changed('soundScroll1'); else failure(result); },
+      dismiss: () => { if (this.sim!.requestDismiss(this.selectedCharacter)) changed('soundScroll1'); else failure('unavailable'); },
+      confirm: answer => {
+        const result = this.sim!.resolvePartyAction(answer);
+        if (result === 'hired') this.selectedCharacter = state.party.slots.find(slot => slot.exists && slot.slot < 4)?.slot ?? 0;
+        if (result === 'dismissed') this.selectedCharacter = Math.max(0, this.selectedCharacter - 1);
+        changed(result === 'hired' ? 'soundPay1' : result === 'mounted' ? 'soundMod' : 'soundClick1');
+        if (!['hired', 'dismissed', 'mounted', 'cancelled'].includes(result)) failure(result);
+      },
+      cancel: () => {}, close: () => this.showTown(null),
+      focus: id => { if (this.sim!.setCompanionFocus(this.selectedCharacter, id)) changed(); else failure('unavailable'); },
+      order: order => { if (this.sim!.setCompanionOrder(this.selectedCharacter, order)) changed(); else failure('unavailable'); },
+      prioritizeBoss: boss => { if (this.sim!.setCompanionPriorities(this.selectedCharacter, { boss })) changed(); else failure('unavailable'); },
+      prioritizeWall: wall => { if (this.sim!.setCompanionPriorities(this.selectedCharacter, { wall })) changed(); else failure('unavailable'); },
+      swapEquipment: move,
+      requestModMount: (from, to) => {
+        if (from.kind === 'inventory' && to.kind === 'inventory') {
+          if (this.sim!.beginModMount(from.slot, to.slot) === 'previewed') changed('soundScroll1'); else failure('unavailable');
+        } else move(from, to);
+      },
+      message: value => { status.textContent = value; },
+    }, tab));
+    container.dataset.partySelection = String(this.selectedCharacter);
   }
 
   togglePause(): void {
     if (this.screen !== 'battle') return;
     this.paused = !this.paused; this.accumulator = 0; this.firePressed = this.fireReleased = false; this.firingGesture = this.firingReleaseOwned = false;
     container.dataset.paused = String(this.paused);
-    if (!this.paused) { this.pauseLayer?.destroy(true); this.pauseLayer = undefined; this.ambient?.resume(); this.bowSound?.resume(); return; }
+    if (!this.paused) { this.pauseLayer?.destroy(true); this.pauseLayer = undefined; this.ambient?.resume(); this.bowSound?.resume(); for (const sound of this.companionBowSounds.values()) sound.resume(); return; }
+    for (const sound of this.companionBowSounds.values()) sound.pause();
     this.ambient?.pause(); this.bowSound?.pause(); this.saveGame(false);
     const existing = new Set(this.root.list);
     this.root.add(this.add.rectangle(0, 0, 620, 380, 0x000000, 0.45).setOrigin(0));
@@ -904,7 +1056,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   makeSave(): PortSave | undefined {
-    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 14, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
+    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: 15, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
   }
 
   saveGame(notify = true): boolean {
@@ -917,7 +1069,7 @@ class ElonaScene extends Phaser.Scene {
 
   private parseSave(raw: unknown): { simulation: Simulation; appearance: number } {
     const save = raw as Partial<PortSave> | null;
-    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
+    if (!save || save.format !== 'elona-shooter-browser' || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].includes(save.version!) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
     return { simulation: Simulation.fromSave(save.simulation, this.simulationOptions()), appearance: save.appearance! };
   }
 
@@ -945,7 +1097,7 @@ async function boot(): Promise<void> {
   const response = await fetch(assetUrl('manifest.json'));
   if (!response.ok) throw new Error('Original assets are missing. Run python tools/extract_web_assets.py from the project folder.');
   manifest = await response.json() as Manifest;
-  const families: Record<string, string> = { menu: 'ElonaMenu', menuBold: 'ElonaMenuBold', hud: 'ElonaHud', small: 'ElonaSmall' };
+  const families: Record<string, string> = { menu: 'ElonaMenu', menuBold: 'ElonaMenuBold', hud: 'ElonaHud', small: 'ElonaSmall', impact: 'ElonaImpact' };
   await Promise.all(Object.entries(manifest.fonts).map(async ([key, file]) => {
     const font = new FontFace(families[key] ?? key, `url("${assetUrl(file)}")`);
     await font.load(); document.fonts.add(font);

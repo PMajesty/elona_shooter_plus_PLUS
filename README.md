@@ -3,18 +3,20 @@
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
 Phaser 4. The current implementation covers **seven connected Sheriff days**:
 choose one of 22 appearances, fight, collect ordinary and boss loot, choose earned
-skills, enter town, buy/sell and upgrade weapons, mount MODs, use Free Repair,
-then Rest into Days 2–7 with your retained equipment. Victory, defeat,
+skills, enter town, hire a permanent companion, exchange equipment, buy/sell and
+upgrade weapons, mount MODs, use Free Repair, then Rest into Days 2–7 with your
+retained party and equipment. Victory, defeat,
 rewards, town entry and save/restore work across these stages. Original English
 artwork, fonts, audio and credits are retained.
 
-The seven-day **v14 release** has passed the automated checks below, focused
-browser acceptance and production New Game smoke testing. Its deployable archive
-is `.build/elona-shooter-browser-day7-slice.zip`; the previous six-day v13 release
-is retained for rollback.
+The seven-day **v15 party release** is published at
+[the local release](http://127.0.0.1:5175/elona/) after automated checks,
+browser acceptance and production New Game/save-migration verification. Its
+deployable archive is `.build/elona-shooter-browser-party-slice.zip`; the previous
+v14 release is retained in `.build/browser-before-party` and the Day 7 archive.
 
-This is not yet the complete game. Day 8 onward, other classes, full town
-management, recruiting and other card actions, Ragnarok and
+This is not yet the complete game. Day 8 onward, other playable hero classes, full town
+management, house upgrades, temporary henchmen, recruit refresh, other card actions, Ragnarok and
 original Flash save conversion remain to be ported. Ordinary firearms use owned
 item statistics and weapon-skill requirements; the covered Sheriff combat skills
 affect play. Unsupported actions remain unavailable. See
@@ -113,7 +115,22 @@ the boss's damage accumulator; a lethal hit prevents an unreleased grenade.
 Day 7 settlement includes 45 GP tax, default upkeep of 40 GP and any earned title
 salary. Its town can generate level-4 recruits; seven perfect days grant the next
 absorption medal for future mission preparation. Rest beyond Day 7 remains unavailable.
-Recruiting, other card actions and Refresh Stock remain unavailable.
+Recruit refresh, temporary Mission Hire, other card actions and Refresh Stock remain unavailable.
+
+Open **Characters**, select the candidate and choose **Recruit** to hire one of
+the nine generated classes. All nine can be hired and fight; this does not claim
+every class mechanic is complete. The initial house allows **one permanent companion**.
+Yes pays the displayed gold without spending AP or rerolling the prepared mission;
+No cancels. Set the companion's order, Boss/Defend preferences and eligible skill
+focus there. Orders retain observed source quirks, including NoArmor falling
+through to Normal targeting. **Equipment** exchanges its gun with hero inventory while checking
+both sides' skill requirements. MOD No on a companion returns the MOD without
+swapping the gun. The companion fights autonomously after Rest, earns its own
+combat credit and growth, and incurs a daily wage in results. Dismissal does not
+refund hiring or return the gun to inventory; the original inactive record remains
+saved. See [party integration](web/docs/party-integration-status.md) for behavior
+and evidence. Interrupted Chain Gun spin timing still uses a counter fallback;
+its original audio-position history is not yet reproduced.
 
 In the shop, **Upgrade Weapon** requires **4 AP** to enter selection mode.
 Choose an owned gun to see its before/after comparison and gold cost;
@@ -132,7 +149,10 @@ Rejected mounting keeps both items. **No or clicking outside this confirmation
 swaps the MOD and gun**, matching the original owned-inventory behavior; it does
 not cancel like a sale. Stock MODs must first be bought into an empty owned slot.
 
-Saves now use **version 14**; versions **1–13** are accepted. Day 7 boss windup,
+Saves now use **version 15**; versions **1–14** are accepted. Party records,
+candidate history, equipment, pending confirmations, AI targets, cached bonuses
+and projectile owners persist. Older saves migrate without a hiring charge or
+RNG draw and do not gain an owned companion. Day 7 boss windup,
 released cosmetic grenades and the active title persist without relaunching or
 rerolling. Barbarian rage and temporary effect frames/offsets remain saved.
 Pre-v13 saves begin without a title and retain their RNG and inventory; v13
@@ -257,10 +277,28 @@ grenade flight, shake RNG and death before/after release. See
 [seventh-day wave notes](web/docs/seventh-day-wave-source.md) and
 [seventh-town notes](web/docs/seventh-town-source.md).
 
-The current **v14 release passes 252 tests** and the release build. Nine focused
+The current **v15 release passes 288 tests**, TypeScript checking and the release
+build. Original party comparisons cover 61 transactions from 79 captured states,
+45 progression states, 75 AI states and 37 combat states. Browser checks verified
+actual hiring for 400 gold with unchanged AP/RNG, pending-confirmation Continue,
+orders, equipment round trips, Rest, exact combat/reload checkpoints, wages and
+cancelled/confirmed dismissal. All 300 tested files match publication and the ZIP.
+Production New Game reached tick 0 with 40 HP, 200 gold and five shells; the prior
+v14 save migrated exactly to v15 at tick 674 with 40 HP, 209 gold and unchanged RNG.
+No console errors were observed. These checks do not claim a complete manually
+played browser campaign; see the [party evidence](web/docs/party-integration-status.md).
+
+The final v15 build corrects a port-only targeting error: Crow and Fly belong to
+Air type 1, not Armor type 2. Actual-spawn/order regressions cover the distinction.
+Only unambiguous early-v15 saves are repaired, preserving targets, cache history
+and RNG; mixed states are rejected. An earned Day 5 save repaired its Crow through
+browser import with exact expected state. Import Save remains disabled until the
+scene is ready. The full party soak was rerun on this corrected runtime.
+
+The historical **v14 release passed 252 tests** and the release build. Nine focused
 browser checks verified Rest into Day7, Continue, result-to-town progression and
 a controlled boss's windup, grenade flight and cosmetic landing against full
-expected saves. All 267 tested files match the published build and archive.
+expected saves. All 267 tested files matched that published build and archive.
 Production New Game reached tick 0 with 40 HP, 200 gold and five shells; the prior
 v13 save was restored through the UI at tick 674 with exact full-envelope migration
 equality, including appearance. No console errors were observed. These checkpoint
@@ -269,7 +307,7 @@ checks do not claim a complete manually played browser campaign.
 The previous v13 release passed browser checks for Rest into
 Day 6, settlement, Claim title and a controlled Barbarian's rage/hit effects
 against complete expected saves, with unchanged Continue exports. All 267 tested
-release files match the published build and archive. Production New Game reached
+release files matched that published build and archive. Production New Game reached
 tick 0 with 40 HP, 200 gold and five shells; the previous live v12 save restored as
 v13 with exact full-save migration equality and no observed console errors.
 The previous v12 release's Rest/Fly checks remain historical evidence. Details
@@ -280,7 +318,7 @@ and limits are recorded in
 interrupted-input policies. It checks finite state, battle completion and exact
 JSON save/replay state and event equality across the supported campaign, earned rewards,
 town preparation, repair, shop transactions, weapon modifications and Rest.
-The latest run passed **96 scenarios, 412,874 frames and 4,501 checkpoints**,
+The recorded v14 solo run passed **96 scenarios, 412,874 frames and 4,501 checkpoints**,
 including **699 reward transitions, 760 town actions and 162 Rest transitions**.
 It reached **32 Day2 wins, 32 Day3 wins, 25 Day4 wins and 13 Day5 wins**. Thirteen
 scenarios entered Day6; one won, claimed the title and entered Day7. **None won
@@ -296,9 +334,18 @@ priority and an owned grenade, then checks rewards, salary and town save/restore
 It uses rectangular hit geometry and retains its existing Day1 setup of 39 HP;
 it does not establish production collision or original balance parity. All
 recorded attempts from the earned 11-HP Day7 checkpoint using production ordinary
-contours failed and are preserved. Hiring and party AI are the next integration
-priority before further campaign expansion; they are original early-game systems
-that remain absent here.
+contours failed and are preserved as historical solo evidence.
+
+The v15 party soak separately passed **32 natural campaigns, 482,844 frames and
+5,024 checkpoints**. All nine classes were naturally hired; all runs reached
+Day 7, with **30 victories and two castle defeats**. Companions produced 6,559
+shots, 5,658 hits, 3,174 kills and 1,386 projectiles, with exact state/event replay.
+It uses original ordinary-enemy contours and a documented boss rectangle fallback;
+these are port consistency results, not original balance or browser performance
+proof. Run `node --experimental-strip-types scripts/party-soak.ts 32` from `web`.
+House upgrades for capacity two/three and Castle wall upgrades are the next
+integration priority; the [source audit](web/docs/castle-upgrades-source.md)
+records their costs, effects and proposed validation boundaries.
 
 `npm.cmd run test:projectile-soak` separately exercises eight projectile guns
 and hand grenades under three seeds: **27 scenarios, 9,720 frames and 1,080
@@ -391,10 +438,11 @@ for controlled state, source preservation and limitations, and the
 The runtime assets are included under `web/public/assets/`, so ordinary browser
 development does not require Java or Flash tooling. Their manifest records
 original symbol IDs, frame numbers and registration offsets.
-The selected package contains **86 images, 40 clips, 89 sounds and five fonts**,
+The selected package contains **102 images, 48 clips, 89 sounds and six fonts**,
 including Archer, Fly and Barbarian timelines, the separate Archer arrow,
 boss guard and Barbarian hit/rage effects, title-action artwork and original
-collision contours. Generated display-width data keeps the covered knockback
+collision contours, plus Characters/Equipment panels, portraits and controls.
+Generated display-width data keeps the covered knockback
 clamps independent of raster transparency or Phaser.
 
 To regenerate assets from the preserved SWF, use Python 3 with Pillow, Java 21

@@ -128,7 +128,7 @@ test('version 1–3 pending reward migration reverses early payment and restores
     const untouched = structuredClone(oldSave);
     let migrated = Simulation.fromSave(oldSave);
     assert.deepEqual(oldSave, untouched);
-    assert.equal(migrated.state.version, 14);
+    assert.equal(migrated.state.version, 15);
     assert.equal(migrated.state.gold, oldSave.gold - oldSave.result.netReward);
     assert.equal(migrated.state.rng, oldSave.rng);
     assert.equal(migrated.state.town, null);
@@ -173,7 +173,7 @@ test('version 4 town migration prepares its missing stock once without repeating
   const untouched = structuredClone(oldSave);
   const migrated = Simulation.fromSave(oldSave);
   assert.deepEqual(oldSave, untouched);
-  assert.equal(migrated.state.version, 14);
+  assert.equal(migrated.state.version, 15);
   assert.equal(migrated.state.phase, 'town');
   assert.equal(migrated.state.town?.preparation, 'ready');
   assert.equal(migrated.state.town?.ap, 2);
@@ -198,7 +198,7 @@ test('town save validation rejects impossible phases, missing preparation and in
   const saved = simulation.toSave();
   for (const change of [
     { town: null }, { town: undefined }, { town: { ...saved.town, ap: -1 } },
-    { town: { ...saved.town, ap: 5 } }, { town: { ...saved.town, ap: 1.5 } },
+    { town: { ...saved.town, ap: 15 } }, { town: { ...saved.town, ap: 1.5 } },
     { town: { ap: 4, preparation: 'pending' } },
     { town: { ap: 4, preparation: 'complete' } }, { postbattle: 'loot' },
     { castleHp: 0 }, { day: 2 }, { version: 3 }, { phase: 'battle' },

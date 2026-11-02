@@ -1,5 +1,6 @@
 import { ITEM_TYPE, ItemFactory, isOccupiedItem, type Item, type ItemContext } from './items.ts';
-import { TRAIT, SHERIFF_TRAITS, calcTrait, type TraitLevels } from './progression.ts';
+import { TRAIT, type TraitLevels } from './progression.ts';
+import { calculateAnyTrait } from './party-progression.ts';
 
 export const COMBAT_TRAIT = {
   ...TRAIT, HUNTER: 1, SNIPER: 2, ROGUE: 3, MILITIA: 4, RANGER: 5, DUELIST: 7, NOBLE: 8, GUARDIAN: 9,
@@ -13,32 +14,7 @@ const level = (traits: CombatTraits, id: number) => traits[id] ?? 0;
 
 export function combatTrait(id: number, traits: CombatTraits): number {
   const value = level(traits, id);
-  if (value <= 0) return 0;
-  if (Object.hasOwn(SHERIFF_TRAITS, id)) return calcTrait(id, value);
-  switch (id) {
-    case 1: return 25 + value + Math.sqrt(value) * 5;
-    case 2: return Math.sqrt(value) * 3 + 4;
-    case 3: return 20 + value + Math.sqrt(value) * 15;
-    case 4: return 25 + value * 2;
-    case 5: return 7 + Math.sqrt(value) * 5;
-    case 7: return 7;
-    case 8: return 5 + value / 2 + Math.sqrt(value) * 2;
-    case 9: return 4 + int(value / 2);
-    case 103: case 104: case 106: case 128: return value;
-    case 108: return value * 2 + Math.sqrt(value) * 12;
-    case 111: return value + Math.sqrt(value) * 6;
-    case 112: return value * 2 + 1;
-    case 114: return value * 3 + 2;
-    case 115: return value * 7;
-    case 119: return value + Math.sqrt(value) * 20;
-    case 130: return value * 20;
-    case 131: return 2 + value * 7;
-    case 133: return 3 + value * 3;
-    case 135: return int(1 + value);
-    case 136: return 300 + value * 70;
-    case 140: return value * 10;
-    default: throw new Error(`Unsupported combat trait ${id}.`);
-  }
+  return value <= 0 ? 0 : calculateAnyTrait(id, value);
 }
 
 export interface WeaponContext { manualControl?: boolean; tight?: boolean; partyLeadership?: number }

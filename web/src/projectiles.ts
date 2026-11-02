@@ -2,6 +2,7 @@ export type ProjectileKind = 'hand-grenade' | 'grenade' | 'rocket' | 'bolt' | 'a
 export type ExplosionKind = 'grenade' | 'rocket' | 'gravity' | 'flame';
 
 export interface ProjectileState {
+  actorSlot?: number;
   uid: number; kind: ProjectileKind; weaponSlot: number | null; damage: number;
   x: number; y: number; startX: number; startY: number; targetX: number; targetY: number;
   speed: number; count: number; curve: number; penetrations: number;
@@ -12,6 +13,7 @@ export interface ProjectileState {
 }
 
 export interface ProjectileLaunch {
+  actorSlot?: number; targetSpeed?: number;
   uid: number; kind: ProjectileKind; weaponSlot: number | null; damage: number;
   startX: number; startY: number; targetX: number; targetY: number; speedBase: number;
   penetrations?: number; scale?: number;
@@ -42,7 +44,10 @@ export function createProjectile(input: ProjectileLaunch): ProjectileState {
   if (kind === 'bolt') targetY += 4;
   if (kind === 'gravity') speed /= 4;
   if (kind === 'flame') speed *= 0.75;
+  // Упреждение союзника применяется после вычисления скорости и до создания траектории.
+  if (input.targetSpeed !== undefined && kind !== 'gravity') targetX += input.targetSpeed * ((startX - targetX) / (speed * (kind === 'rocket' ? 0.9 : 1.1)));
   const state: ProjectileState = {
+    ...(input.actorSlot ? { actorSlot: input.actorSlot } : {}),
     uid: input.uid, kind, weaponSlot: input.weaponSlot, damage: Math.trunc(input.damage),
     x: startX, y: { 'hand-grenade': -96.75, grenade: -79.85, rocket: -114.25, arrow: -45, bolt: -45, gravity: -47.95, flame: -34.5 }[kind], startX, startY, targetX, targetY,
     speed, count: Math.trunc(Math.abs(vertical ? targetY - startY : targetX - startX) / speed) + 1, curve: 0.003, penetrations: input.penetrations ?? 0,

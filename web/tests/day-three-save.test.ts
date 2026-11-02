@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation } from '../src/simulation.ts';
-import { asLegacyV9Save } from './legacy-save-support.ts';
+import { asLegacyV9Save, withLegacyPartyDefaults } from './legacy-save-support.ts';
 
 function attackingArcher(): Simulation {
   const simulation = new Simulation(42);
@@ -19,7 +19,7 @@ test('v9 migration initializes enemy arrows without changing the saved battle or
   const legacy = asLegacyV9Save(simulation.toSave());
   const untouched = structuredClone(legacy);
   const restored = Simulation.fromSave(legacy);
-  assert.deepEqual(restored.toSave(), { ...legacy, version: 14, enemyArrows: [] });
+  assert.deepEqual(restored.toSave(), withLegacyPartyDefaults({ ...legacy, enemyArrows: [] }));
   assert.deepEqual(legacy, untouched);
 });
 

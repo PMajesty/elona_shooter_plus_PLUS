@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { withLegacyPartyDefaults } from './legacy-save-support.ts';
 import { Simulation, type EnemyState } from '../src/simulation.ts';
 
 function fourthDay(): Simulation {
@@ -80,7 +81,7 @@ test('v10 boss facing migrates without RNG or input mutation; current saves reje
   const untouched = structuredClone(legacy);
   const migrated = Simulation.fromSave(legacy);
   assert.deepEqual(legacy, untouched);
-  assert.deepEqual(migrated.toSave(), { ...legacy, version: 14, enemies: legacy.enemies.map((enemy: EnemyState) => ({ ...enemy, bossFacing: -1 })) });
+  assert.deepEqual(migrated.toSave(), withLegacyPartyDefaults({ ...legacy, enemies: legacy.enemies.map((enemy: EnemyState) => ({ ...enemy, bossFacing: -1 })) }));
   for (const change of [
     (value: any) => { delete value.enemies[0].bossFacing; },
     (value: any) => { value.enemies[0].bossFacing = 0; },

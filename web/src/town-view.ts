@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
 
-export type TownTab = 'mission' | 'castle' | 'shop' | null;
+export type TownTab = 'mission' | 'castle' | 'shop' | 'characters' | 'equipment' | null;
 export type TownDialog = 'repair' | 'rest' | 'title' | null;
 interface Placement {
   x: number; y: number; scaleX: number; scaleY: number; rotationDegrees: number;
@@ -68,10 +68,11 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     if (item.type === ITEM_TYPE.use) root.add(scene.add.text(50 + index * 90, 366, `x${item.ammo}`, { fontFamily: 'Arial', fontSize: '11px', color: '#ffffff' }));
   });
   for (const [name, placement] of Object.entries(layout.navigation)) {
-    const enabled = name === 'mission' || name === 'castle' || name === 'shop';
-    button(placement.image, placement, () => enabled ? callbacks.select(name as TownTab) : callbacks.message('This town menu is not available in the current port yet.'), 0, 0, enabled);
+    const enabled = ['mission', 'castle', 'shop', 'chara', 'equip'].includes(name);
+    const tab = name === 'chara' ? 'characters' : name === 'equip' ? 'equipment' : name as TownTab;
+    button(placement.image, placement, () => enabled ? callbacks.select(tab) : callbacks.message('This town menu is not available in the current port yet.'), 0, 0, enabled);
   }
-  if (tab && tab !== 'shop') {
+  if (tab === 'mission' || tab === 'castle') {
     const panel = layout[tab], { x, y } = layout.menuPosition;
     const canRest = state.day < 7 && state.town?.preparation === 'ready';
     // Вертикальный сдвиг уже запечён в статическую панель; её кнопкам он нужен отдельно.
@@ -82,7 +83,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
       button('button_freeRepair', panel.children.act1, callbacks.repair, x, y);
     } else {
       button('button_townRest', panel.children.act1, () => canRest ? callbacks.rest() : callbacks.message('Day 8 is not available yet.'), x, y, canRest);
-      button('button_townHire', panel.children.act2, () => callbacks.message('Hiring companions is not available yet.'), x, y, false);
+      button('button_townHire', panel.children.act2, () => callbacks.message('Temporary henchmen are not available yet. Recruit permanent companions in Characters.'), x, y, false);
     }
     image(panel.labelsImage, x, 0).setAlpha(tab === 'mission' && !canRest ? 0.35 : 1);
     if (tab === 'mission') {

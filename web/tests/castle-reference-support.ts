@@ -46,7 +46,8 @@ export function compareCastleTrace(records: CastleRecord[]) {
     state.enemies = []; state.projectiles = []; state.newWave = false; state.spawnTimer = 100000;
     state.waveIndex = 4; state.fireHeld = false; state.pendingShot = false;
     state.rng = config.seed;
-    const boundary = simulation as unknown as { random(): number; damageCastle(amount: number): void };
+    const boundary = simulation as unknown as { random(): number; damageCastle(amount: number): void; refreshPartySkills(): void };
+    boundary.refreshPartySkills();
     const random = boundary.random.bind(simulation), draws: RandomDraw[] = [];
     boundary.random = () => {
       const value = random(); draws.push({ index: draws.length + 1, state: state.rng, value }); return value;

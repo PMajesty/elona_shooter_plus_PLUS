@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Simulation, type SimulationState } from '../src/simulation.ts';
 import { isOccupiedItem } from '../src/items.ts';
 import { TRAIT, SHERIFF_TRAITS, SHERIFF_CHOICE_ORDER } from '../src/progression.ts';
-import { asLegacyV6Save } from './legacy-save-support.ts';
+import { asLegacyV6Save, withLegacyPartyDefaults } from './legacy-save-support.ts';
 
 function completeOpeningBattle(): Simulation {
   const simulation = new Simulation(42);
@@ -95,11 +95,11 @@ test('v2 battle migration preserves existing item metadata and its combat random
   const untouched = structuredClone(oldSave);
   const migrated = Simulation.fromSave(oldSave);
   assert.deepEqual(oldSave, untouched);
-  assert.equal(migrated.state.version, 14);
+  assert.equal(migrated.state.version, 15);
   assert.equal(migrated.state.rng, oldSave.rng);
   assert.deepEqual(migrated.state.inventory, oldSave.inventory);
   assert.deepEqual(migrated.state.waves, oldSave.waves);
-  assert.deepEqual(migrated.state.enemies, oldSave.enemies.map((enemy: { kind: string }) => ({ ...enemy, appearance: enemy.kind === 'boss' ? 51 : 0 })));
+  assert.deepEqual(migrated.state.enemies, withLegacyPartyDefaults(oldSave).enemies.map((enemy: { kind: string }) => ({ ...enemy, appearance: enemy.kind === 'boss' ? 51 : 0 })));
   assert.equal(migrated.state.traitsProvenance, 'legacy-reconstructed');
   assert.equal(migrated.state.hero.provenance, 'legacy-reconstructed');
   assert.ok(migrated.state.player.traits[TRAIT.BASE_AIMING] >= 1);

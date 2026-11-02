@@ -1,8 +1,43 @@
 import assert from 'node:assert/strict';
 import type { SimulationState } from '../src/simulation.ts';
+import { createPartyState } from '../src/party.ts';
+import { createPartyAIShared } from '../src/party-ai.ts';
+import { partySkills } from '../src/party-progression.ts';
+import { createSheriffTraits } from '../src/progression.ts';
+import { ENEMIES } from '../src/content.ts';
+
+/** Старые форматы не содержали ни спутников, ни кеша целей; новые поля не берём из пониженной копии v15. */
+export function withLegacyPartyDefaults(value: Record<string, any>): Record<string, any> {
+  const expected = structuredClone(value);
+  const town = expected.town?.preparation === 'ready' ? expected.town : expected.previousTown;
+  expected.version = 15;
+  expected.party = createPartyState(town?.recruit);
+  expected.partySkills = partySkills([{ traits: expected.player.traits ?? createSheriffTraits() }]);
+  expected.partyAI = createPartyAIShared();
+  expected.retainedAITargets = [];
+  expected.pendingPartyAction = null;
+  expected.result.wages = 0;
+  for (const enemy of expected.enemies) {
+    enemy.type = ENEMIES[enemy.kind as keyof typeof ENEMIES].airborne ? 1 : 0;
+    enemy.tag = 0; enemy.onMark = false;
+    if (enemy.kind === 'boss' && enemy.hp > 0) expected.partyAI.targetBossUid = enemy.uid;
+  }
+  return expected;
+}
+
+export function asLegacyV14Save(state: SimulationState): Record<string, any> {
+  const value: Record<string, any> = structuredClone(state);
+  assert.ok(value.party.slots.slice(0, 4).every((slot: {exists: boolean}) => !slot.exists));
+  assert.equal(value.pendingPartyAction, null);
+  for (const field of ['party', 'partySkills', 'partyAI', 'retainedAITargets', 'pendingPartyAction']) delete value[field];
+  delete value.result.wages;
+  for (const enemy of value.enemies) { delete enemy.type; delete enemy.tag; delete enemy.onMark; }
+  value.version = 14;
+  return value;
+}
 
 export function asLegacyV9Save(state: SimulationState): Record<string, any> {
-  const value: Record<string, any> = structuredClone(state);
+  const value = asLegacyV14Save(state);
   assert.ok(value.day <= 2);
   assert.equal(value.enemyArrows.length, 0);
   assert.ok(value.enemies.every((enemy: {kind: string}) => enemy.kind !== 'archer'));
