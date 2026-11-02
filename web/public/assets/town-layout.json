@@ -1839,5 +1839,178 @@
         }
       }
     }
+  },
+  "claimTitleAction": {
+    "characterId": 2431,
+    "sourceIndex": 9,
+    "x": 465,
+    "y": 255,
+    "cardClip": "townActionCard",
+    "cardFrame": 3,
+    "cardRotation": -9,
+    "hoverScale": 1.04,
+    "pinClip": "townActionPin",
+    "text": "4 AP\nClaim title",
+    "children": {
+      "card": {
+        "characterId": 2426,
+        "x": 29.9,
+        "y": 11.35,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          29.9,
+          11.35
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "text": {
+        "characterId": 2427,
+        "x": 6.0,
+        "y": 64.45,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          6.0,
+          64.45
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 1608,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            87.0,
+            29.1
+          ],
+          "align": 0,
+          "color": "#ffffff",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#ffffff\" letterSpacing=\"0.000000\" kerning=\"1\"><b>3 AP</b></font></p><p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#ffffff\" letterSpacing=\"0.000000\" kerning=\"1\"><b>Charge Item</b></font></p>"
+        }
+      },
+      "pin": {
+        "characterId": 2430,
+        "x": 23.5,
+        "y": 6.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          23.5,
+          6.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      }
+    }
+  },
+  "newTitleDialog": {
+    "characterId": 2437,
+    "frame": 1,
+    "image": "eventNewTitle",
+    "cardFrame": 3,
+    "children": {
+      "okButton": {
+        "characterId": 2434,
+        "x": 294.35,
+        "y": 266.1,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          294.35,
+          266.1
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "card": {
+        "characterId": 2336,
+        "x": 255.0,
+        "y": 198.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          255.0,
+          198.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "text": {
+        "characterId": 2435,
+        "x": 300.05,
+        "y": 145.6,
+        "matrix": [
+          1.0006104,
+          0.0,
+          0.0,
+          1.0035248,
+          300.05,
+          145.6
+        ],
+        "scaleX": 1.0006104,
+        "scaleY": 1.0035248,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 12.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            201.85,
+            111.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">Victory! Town falks are overjoyed by the deed you have brought today.</font></p>"
+        }
+      },
+      "title": {
+        "characterId": 2436,
+        "x": 225.7,
+        "y": 115.7,
+        "matrix": [
+          1.0009918,
+          0.0,
+          0.0,
+          1.0018616,
+          225.7,
+          115.7
+        ],
+        "scaleX": 1.0009918,
+        "scaleY": 1.0018616,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 1608,
+          "fontSize": 20.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            254.35,
+            22.0
+          ],
+          "align": 2,
+          "color": "#330000",
+          "initialHtml": "<p align=\"center\"><font face=\"HGPGyoshotai\" size=\"20\" color=\"#330000\" letterSpacing=\"0.000000\" kerning=\"1\"><b>Result</b></font></p>"
+        }
+      }
+    }
   }
 }

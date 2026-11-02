@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from extract_web_assets import placed_frame
 
 ROOT = Path(__file__).resolve().parents[1]
-SYMBOLS = {"sheep": 910, "rat": 1295, "chicken": 1063, "crow": 981, "archer": 1092, "fly": 952}
+SYMBOLS = {"sheep": 910, "rat": 1295, "chicken": 1063, "crow": 981, "archer": 1092, "fly": 952, "barbarian": 1340}
 
 
 def matrix(tag):
@@ -85,16 +85,33 @@ def extract(xml_path=ROOT / ".build/reference/original.xml"):
         count = int(definitions[symbol].get("frameCount"))
         enemies[kind] = {"symbol": symbol, "count": count,
                          "frames": {str(frame): placements(symbol, frame) for frame in range(1, count + 1)}}
+    effects = {"enemyRage": {"symbol": 2385, "count": 14,
+               "frames": {str(frame): placements(2385, frame) for frame in range(1, 15)}}}
+    def display_edges(symbol, frame=1, transform=(1, 0, 0, 1, 0, 0)):
+        definition = definitions[symbol]
+        if definition.get("shapeId"):
+            bounds = definition.find("shapeBounds")
+            left, top, right, bottom = [int(bounds.get(key)) for key in ("Xmin", "Ymin", "Xmax", "Ymax")]
+            a, _, c, _, x, _ = transform
+            return [math.floor(a * px + c * py + x + 0.5) for px, py in [(left, top), (right, top), (left, bottom), (right, bottom)]]
+        found = []
+        for item in placed_frame(definition.find("subTags"), frame):
+            found.extend(display_edges(int(item.get("characterId")), 1, combine(transform, matrix(item))))
+        return found
+    hit_bounds = {}
+    for frame in [*range(50, 63), *range(70, 76)]:
+        edges = display_edges(1459, frame)
+        hit_bounds[str(frame)] = [min(edges) / 20, max(edges) / 20]
     return {"version": 1, "units": "twips", "sourceSha256": hashlib.sha256((ROOT / "original/elonashooter1.3.swf").read_bytes()).hexdigest(),
-            "shapes": shapes, "enemies": enemies}
+            "shapes": shapes, "enemies": enemies, "effects": effects, "effectDisplayBounds": {"enemyHit": hit_bounds}}
 
 
 def write_display_widths(geometry, target=ROOT / "web/src/enemy-display-bounds.ts"):
     """Сохраняет display bounds лучника и мухи для исходного ограничения отбрасывания."""
-    tables, sections = {}, []
-    for kind in ("archer", "fly"):
+    tables, sections, bound_tables = {}, [], {}
+    for kind in ("archer", "fly", "barbarian"):
         enemy = geometry["enemies"][kind]
-        widths = [0]
+        widths, bounds = [0], [[0, 0]]
         for frame in range(1, enemy["count"] + 1):
             edges = []
             for placement in enemy["frames"][str(frame)]:
@@ -106,16 +123,50 @@ def write_display_widths(geometry, target=ROOT / "web/src/enemy-display-bounds.t
                 # ближайшего twip: 14.25/16.75/16.65 вместо усечённых 14.2/16.7/16.6.
                 # Подтверждено всеми кадрами исходного Fly trace; ранее принятая
                 # таблица Archer сохраняется без изменения непроверенных промежутков.
-                quantize = (lambda value: math.floor(value + 0.5)) if kind == "fly" else int
+                # Barbarian trace подтвердил то же округление: 16.25 вместо 16.2;
+                # исправляем только новый символ, не меняя принятые старые таблицы.
+                quantize = (lambda value: math.floor(value + 0.5)) if kind in ("fly", "barbarian") else int
                 edges.extend(quantize(a * px + c * py + x) for px, py in
                              [(left, top), (right, top), (left, bottom), (right, bottom)])
             widths.append((max(edges) - min(edges)) / 20 if edges else 0)
+            bounds.append([min(edges) / 20, max(edges) / 20] if edges else [0, 0])
         tables[kind] = widths
+        bound_tables[kind] = bounds
         # Индекс массива совпадает с исходным номером кадра; ноль не используется.
         rows = [", ".join(json.dumps(value) for value in widths[start:start + 15])
                 for start in range(0, len(widths), 15)]
         sections.append(f"export const {kind.upper()}_DISPLAY_WIDTHS: readonly number[] = [\n  "
                         + ",\n  ".join(rows) + ",\n];\n")
+    rage_bounds = [[0, 0]]
+    for frame in range(1, 13):
+        edges = []
+        for placement in geometry["effects"]["enemyRage"]["frames"][str(frame)]:
+            left, top, right, bottom = geometry["shapes"][placement["shape"]]["bounds"]
+            a, _, c, _, x, _ = placement["matrix"]
+            edges.extend(int(a * px + c * py + x) for px, py in
+                         [(left, top), (right, top), (left, bottom), (right, bottom)])
+        rage_bounds.append([min(edges) / 20, max(edges) / 20] if edges else [0, 0])
+    for name, bounds in [("BARBARIAN_DISPLAY_X_BOUNDS", bound_tables["barbarian"]), ("ENEMY_RAGE_DISPLAY_X_BOUNDS", rage_bounds)]:
+        sections.append(f"export const {name}: readonly (readonly [number, number])[] = " + json.dumps(bounds) + ";\n")
+    sections.append("/** Исходная ширина mc с временным дочерним эффектом ярости. */\n"
+                    "export function barbarianDisplayWidth(frame: number, rageEffectFrame = 0): number {\n"
+                    "  const body = BARBARIAN_DISPLAY_X_BOUNDS[frame];\n"
+                    "  const rage = ENEMY_RAGE_DISPLAY_X_BOUNDS[rageEffectFrame];\n"
+                    "  return rageEffectFrame > 0 && rage\n"
+                    "    ? Math.round((Math.max(body[1], rage[1]) - Math.min(body[0], rage[0])) * 20) / 20\n"
+                    "    : BARBARIAN_DISPLAY_WIDTHS[frame];\n}\n")
+    sections.append("export const ENEMY_HIT_DISPLAY_X_BOUNDS: Readonly<Record<number, readonly [number, number]>> = "
+                    + json.dumps(geometry["effectDisplayBounds"]["enemyHit"]) + ";\n")
+    sections.append("/** Ширина родителя включает частицы попадания, хотя его mc.hitTestPoint их не проверяет. */\n"
+                    "export function barbarianParentWidth(frame: number, rageEffectFrame = 0, hitEffects: readonly { frame: number; x: number }[] = []): number {\n"
+                    "  const body = BARBARIAN_DISPLAY_X_BOUNDS[frame], rage = ENEMY_RAGE_DISPLAY_X_BOUNDS[rageEffectFrame];\n"
+                    "  let left = Math.round(body[0] * 20), right = Math.round(body[1] * 20);\n"
+                    "  if (rageEffectFrame > 0 && rage) { left = Math.min(left, Math.round(rage[0] * 20)); right = Math.max(right, Math.round(rage[1] * 20)); }\n"
+                    "  for (const effect of hitEffects) {\n"
+                    "    const bounds = ENEMY_HIT_DISPLAY_X_BOUNDS[effect.frame], x = Math.round(effect.x * 20);\n"
+                    "    left = Math.min(left, Math.round(bounds[0] * 20) + x); right = Math.max(right, Math.round(bounds[1] * 20) + x);\n"
+                    "  }\n"
+                    "  return (right - left) / 20;\n}\n")
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text("// Создано tools/extract_collision_geometry.py из исходных shapeBounds и матриц.\n"
                       f"// SWF SHA-256: {geometry['sourceSha256']}\n"

@@ -1,7 +1,7 @@
 import type { EnemyKind } from './content.ts';
 
 export type OrdinaryEnemyKind = Exclude<EnemyKind, 'boss'>;
-export interface OrdinaryEnemyGeometry { kind: OrdinaryEnemyKind; x: number; y: number; frame: number; shadowHit: boolean }
+export interface OrdinaryEnemyGeometry { kind: OrdinaryEnemyKind; x: number; y: number; frame: number; shadowHit: boolean; rageEffectFrame?: number }
 export interface RgbaMask { width: number; height: number; data: ArrayLike<number> }
 interface OriginalShape { bounds: [number, number, number, number]; fills: number[][][] }
 interface OriginalPlacement { shape: string; matrix: [number, number, number, number, number, number]; shadow: boolean }
@@ -9,10 +9,12 @@ export interface CollisionGeometry {
   version: 1; units: 'twips'; sourceSha256: string;
   shapes: Record<string, OriginalShape>;
   enemies: Record<OrdinaryEnemyKind, { symbol: number; count: number; frames: Record<string, OriginalPlacement[]> }>;
+  effects?: Record<string, { symbol: number; count: number; frames: Record<string, OriginalPlacement[]> }>;
 }
 
 /** Флаг задают только скрипты определённых кадров; возврат sheep 32→5 его не восстанавливает. */
 export function shadowHitAtFrame(kind: EnemyKind, frame: number, previous?: boolean): boolean {
+  if (kind === 'barbarian' && frame === 1) return true;
   if (kind === 'sheep') {
     if (frame === 1 || frame === 107) return true;
     if (frame === 32) return false;
@@ -85,6 +87,12 @@ export function ordinaryEnemyHit(
     if (!placedShapeHit(geometry.shapes[placement.shape], placement, localX, localY)) continue;
     if (excludeShadow && placement.shadow) return false;
     bodyHit = true;
+  }
+  // Исходная вспышка ярости — дочерний объект mc и участвует в его hitTestPoint.
+  if (enemy.kind === 'barbarian' && enemy.rageEffectFrame && enemy.rageEffectFrame < 13) {
+    for (const placement of geometry.effects?.enemyRage.frames[String(enemy.rageEffectFrame)] ?? []) {
+      if (placedShapeHit(geometry.shapes[placement.shape], placement, localX, localY - 400)) bodyHit = true;
+    }
   }
   return bodyHit;
 }

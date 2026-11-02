@@ -19,7 +19,7 @@ test('v9 migration initializes enemy arrows without changing the saved battle or
   const legacy = asLegacyV9Save(simulation.toSave());
   const untouched = structuredClone(legacy);
   const restored = Simulation.fromSave(legacy);
-  assert.deepEqual(restored.toSave(), { ...legacy, version: 12, enemyArrows: [] });
+  assert.deepEqual(restored.toSave(), { ...legacy, version: 13, enemyArrows: [] });
   assert.deepEqual(legacy, untouched);
 });
 

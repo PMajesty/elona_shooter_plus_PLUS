@@ -80,7 +80,7 @@ test('v10 boss facing migrates without RNG or input mutation; current saves reje
   const untouched = structuredClone(legacy);
   const migrated = Simulation.fromSave(legacy);
   assert.deepEqual(legacy, untouched);
-  assert.deepEqual(migrated.toSave(), { ...legacy, version: 12, enemies: legacy.enemies.map((enemy: EnemyState) => ({ ...enemy, bossFacing: -1 })) });
+  assert.deepEqual(migrated.toSave(), { ...legacy, version: 13, enemies: legacy.enemies.map((enemy: EnemyState) => ({ ...enemy, bossFacing: -1 })) });
   for (const change of [
     (value: any) => { delete value.enemies[0].bossFacing; },
     (value: any) => { value.enemies[0].bossFacing = 0; },

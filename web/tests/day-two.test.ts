@@ -12,6 +12,8 @@ function restore(simulation: Simulation): Simulation {
 }
 
 function playBattle(simulation: Simulation, observe: () => void = () => {}): void {
+  // Это проверка связного состояния: стандартный hitTest использует прямоугольники,
+  // а независимые исходные контуры и браузерная проводка проверяются отдельно.
   for (let frame = 0; frame < 6000 && simulation.state.phase === 'battle'; frame++) {
     const target = simulation.state.enemies.filter(enemy => enemy.hp > 0 && enemy.x > 20).sort((a, b) => b.x - a.x)[0];
     const weapon = simulation.weapon!;
@@ -90,7 +92,7 @@ test('normal first battle, rewards and town lead to a saved Day 2 with the prepa
   }
 });
 
-test('a perfect second day earns absorption for the next town mission without rewriting historical Day 2 state', () => {
+test('six connected days preserve historical absorption, boss progression, Day6 tax and the final town boundary', () => {
   let simulation = firstTown();
   assert.equal(simulation.state.earnedMedals.includes(60), false);
   assert.equal(simulation.freeRepair(), 'repaired');
@@ -174,8 +176,34 @@ test('a perfect second day earns absorption for the next town mission without re
   assert.equal(simulation.state.town.mission.loot.at(-1), 1037);
   simulation = restore(simulation);
   const fifthTown = simulation.toSave();
+  assert.equal(simulation.startNextDay(), true);
+  assert.equal(simulation.state.day, 6);
+  assert.deepEqual(simulation.state.previousTown, fifthTown.town);
+  assert.equal(simulation.state.activeMission.level, 5);
+  assert.equal(simulation.state.activeMission.reward, 700);
+  assert.deepEqual(simulation.state.loot, fifthTown.town!.preparation === 'ready' ? fifthTown.town!.mission.loot : []);
+  simulation = restore(simulation);
+  let sixthBossSeen = false;
+  playBattle(simulation, () => {
+    const boss = simulation.state.enemies.find(enemy => enemy.kind === 'boss');
+    if (boss) { sixthBossSeen = true; assert.equal(boss.maxHp, 275); assert.equal(boss.appearance, 56); }
+  });
+  assert.equal(sixthBossSeen, true);
+  assert.equal(simulation.state.result.reward, 700);
+  assert.equal(simulation.state.result.perfectBonus, simulation.state.noDamage ? 210 : 0);
+  assert.equal(simulation.state.result.upkeep, 40);
+  assert.equal(simulation.state.result.tax, 10);
+  assert.equal(simulation.state.result.salary, 0);
+  assert.equal(simulation.state.result.netReward, 650 + simulation.state.result.perfectBonus);
+  simulation = claimRewards(simulation);
+  assert.equal(simulation.enterTown(), true);
+  assert.ok(simulation.state.town?.preparation === 'ready');
+  assert.equal(simulation.state.town.mission.level, 6);
+  assert.equal(simulation.state.town.mission.loot.at(-1), 1106);
+  simulation = restore(simulation);
+  const sixthTown = simulation.toSave();
   assert.equal(simulation.startNextDay(), false);
-  assert.deepEqual(simulation.toSave(), fifthTown);
+  assert.deepEqual(simulation.toSave(), sixthTown);
 });
 
 test('weapon experience requires strictly more than 44 at Shotgun level 2 and discards excess after one increase', () => {

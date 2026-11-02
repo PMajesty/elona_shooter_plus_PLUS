@@ -20,11 +20,13 @@ WORK = ROOT / ".build/web-assets"
 DEST = ROOT / "web/public/assets"
 CLIPS = {"charaPic": 677, "enemy_sheep": 910,
          "enemy_chicken": 1063, "enemy_rat": 1295, "enemy_crow": 981, "enemy_archer": 1092, "enemy_fly": 952,
+         "enemy_barbarian": 1340, "enemyRage": 2385,
          "explosion": 2235, "itemPicture": 2113, "ammoBar": 2698, "radioButton": 2312,
          "grenadeBody": 2275, "grenadeShadow": 2199, "bossHealthFill": 2411, "shopCoin": 1442,
          "layhand": 2226, "itemTimer": 2370, "launcherGrenadeBody": 2238,
          "rocketBody": 2246, "arrowBody": 2263, "flameBody": 2195, "explosionLarge": 2403,
-         "shopUpgradeArrow": 2129, "enemyArrowBody": 2281}
+         "shopUpgradeArrow": 2129, "enemyArrowBody": 2281,
+         "townActionCard": 2426, "townActionPin": 2430}
 PROJECTILES = {"hand-grenade": (2276, "grenadeBody"), "grenade": (2239, "launcherGrenadeBody"),
                "rocket": (2247, "rocketBody"), "bolt": (2264, "arrowBody"),
                "arrow": (2265, "arrowBody"), "gravity": (2260, "gravityBody"),
@@ -323,15 +325,15 @@ def item_popup_asset(xml, sprite):
     return atlas("itemPopup", 1791, sprite, directory, svg_directory)
 
 
-def shield_hit_asset(xml, sprite):
-    """Извлекает только исходные кадры 140–145 эффекта защищённого попадания."""
-    directory, svg_directory = WORK / "shield-hit", WORK / "shield-hit-svg"
+def effect_segment_asset(xml, sprite, name, cache_name, start, end, alpha):
+    """Извлекает исходный диапазон эффекта без кадров других его анимаций."""
+    directory, svg_directory = WORK / cache_name, WORK / (cache_name + "-svg")
     segment = copy.deepcopy(sprite)
-    segment.set("frameCount", "6")
+    segment.set("frameCount", str(end - start))
     timeline = segment.find("subTags")
     timeline.clear()
     depths = []
-    for frame in range(140, 146):
+    for frame in range(start, end):
         for depth in depths:
             timeline.append(ET.Element("item", type="RemoveObject2Tag", depth=depth, forceWriteAsLong="false"))
         selected = placed_frame(sprite.find("subTags"), frame)
@@ -342,16 +344,16 @@ def shield_hit_asset(xml, sprite):
     if FORCE or not list(directory.glob("DefineSprite_1459*")):
         derived = copy.deepcopy(xml)
         target = next(tag for tag in derived.find("tags") if tag.get("spriteId") == "1459")
-        target.set("frameCount", "6")
+        target.set("frameCount", str(end - start))
         target.remove(target.find("subTags"))
         target.append(copy.deepcopy(timeline))
-        path, swf_path = WORK / "shield-hit.xml", WORK / "shield-hit.swf"
+        path, swf_path = WORK / (cache_name + ".xml"), WORK / (cache_name + ".swf")
         ET.ElementTree(derived).write(path, encoding="utf-8", xml_declaration=True)
-        ffdec(["-xml2swf", path, swf_path], "shield-hit-swf")
-        ffdec(["-ignorebackground", "-selectid", "1459", "-export", "sprite", directory, swf_path], "shield-hit-png")
-        ffdec(["-ignorebackground", "-selectid", "1459", "-format", "sprite:svg", "-export", "sprite", svg_directory, swf_path], "shield-hit-svg")
-    return {**atlas("shieldHit", 1459, segment, directory, svg_directory),
-            "sourceFrameStart": 140, "frameAlpha": [0.7, 0.7, 0.5, 0.5, 0.2, 0.2]}
+        ffdec(["-xml2swf", path, swf_path], cache_name + "-swf")
+        ffdec(["-ignorebackground", "-selectid", "1459", "-export", "sprite", directory, swf_path], cache_name + "-png")
+        ffdec(["-ignorebackground", "-selectid", "1459", "-format", "sprite:svg", "-export", "sprite", svg_directory, swf_path], cache_name + "-svg")
+    return {**atlas(name, 1459, segment, directory, svg_directory),
+            "sourceFrameStart": start, "frameAlpha": alpha}
 
 
 def buttons(manifest):
@@ -467,7 +469,13 @@ def town_layout(xml, sprites):
                            "children": placements(sprites[2131].find("subTags"), 1)},
             "itemPopup": {"characterId": 1791, "clip": "itemPopup", "children": placements(sprites[1791].find("subTags"), 1)},
             "repairDialog": {"characterId": 2437, "frame": 1, "image": "eventRepair",
-                             "cardFrame": 2, "children": placements(sprites[2437].find("subTags"), 1)}}
+                             "cardFrame": 2, "children": placements(sprites[2437].find("subTags"), 1)},
+            "claimTitleAction": {"characterId": 2431, "sourceIndex": 9, "x": 465, "y": 255,
+                                 "cardClip": "townActionCard", "cardFrame": 3, "cardRotation": -9,
+                                 "hoverScale": 1.04, "pinClip": "townActionPin", "text": "4 AP\nClaim title",
+                                 "children": placements(sprites[2431].find("subTags"), 1)},
+            "newTitleDialog": {"characterId": 2437, "frame": 1, "image": "eventNewTitle",
+                               "cardFrame": 3, "children": placements(sprites[2437].find("subTags"), 1)}}
 
 
 def main():
@@ -503,7 +511,10 @@ def main():
     for name, i in CLIPS.items():
         manifest["clips"][name] = atlas(name, i, sprites[i])
     manifest["clips"]["itemPopup"] = item_popup_asset(xml, sprites[1791])
-    manifest["clips"]["shieldHit"] = shield_hit_asset(xml, sprites[1459])
+    manifest["clips"]["shieldHit"] = effect_segment_asset(xml, sprites[1459], "shieldHit", "shield-hit", 140, 146, [0.7, 0.7, 0.5, 0.5, 0.2, 0.2])
+    # Наблюдаемые значения alpha хранятся Flash с точностью 1/256.
+    manifest["clips"]["bloodHit"] = effect_segment_asset(xml, sprites[1459], "bloodHit", "enemy-hit-blood", 50, 63, [1, 1, 1, 1, 204/256, 204/256, 153/256, 153/256, 102/256, 102/256, 25/256, 25/256, 25/256])
+    manifest["clips"]["criticalHit"] = effect_segment_asset(xml, sprites[1459], "criticalHit", "enemy-hit-critical", 70, 76, [1] * 6)
     projectile_assets(xml, sprites, manifest)
     for layer in ["back", "front"]:
         manifest["clips"]["ally" + layer.capitalize()] = ally_effects(xml, sprites[838], layer)
@@ -547,6 +558,8 @@ def main():
         placed_frame(sprites[2437].find("subTags"), 1), {"title", "text", "okButton"}, sprite_frames={2336: 2})
     manifest["images"]["eventRest"] = static_screen(xml, "eventRest",
         placed_frame(sprites[2437].find("subTags"), 1), {"title", "text", "okButton"}, sprite_frames={2336: 11})
+    manifest["images"]["eventNewTitle"] = static_screen(xml, "eventNewTitle",
+        placed_frame(sprites[2437].find("subTags"), 1), {"title", "text", "okButton"}, sprite_frames={2336: 3})
     manifest["images"]["shopSaleDialog"] = static_screen(xml, "shopSaleDialog",
         placed_frame(sprites[2131].find("subTags"), 1), {"question", "yes", "no", "pop1", "pop2", "poparrow"})
     for name, image_id in {"background": 2491, "clouds": 2494, "town": 2743, "parchment": 1477}.items():
@@ -614,6 +627,8 @@ def main():
             "Projectile metadata preserves original mc/shadow registration and layer order",
             "Archer retains all 210 original frames and filled collision contours; its separate enemy arrow retains stage-overlay registration",
             "Fly retains all 126 original frames, including the shadow and falling corpse about104 pixels below its root; collision and display widths use source geometric bounds",
+            "Barbarian retains symbol1340 and its temporary rage effect2385; source effect frames1-12 are drawn at local y20 and removed on13",
+            "Claim title uses the original Mission action card2426 frame3, pin2430 and action2431 placement; New Title dialog uses event card2336 frame3",
             "shieldHit contains original effect1459 frames140-145 with frame-script alpha metadata; source frame146 removes it",
             "gravityBody flattens original nested pulse frames 1-13 with the inherited mc color transform",
             "Gravity hard-light is decomposed into original-alpha multiply/add textures for the WebGL renderer",

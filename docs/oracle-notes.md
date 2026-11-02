@@ -1534,3 +1534,47 @@ run `npm.cmd run test:fly-reference` from `web/`. Focused checks:
 `node --experimental-strip-types --test tests/fly-reference.test.ts`.
 Integer grids and explicit AI→child stepping do not establish all fractional
 transforms, rendered pixels/audio, native scheduling or whole-battle parity.
+
+## Sixth-town preparation, tax and Claim Title
+
+`tools/build_sixth_town_oracle.py` retains the original preparation statement
+order and unchanged `generateRecruit`, `calcTax`, `calcUnkeep`, `renewResult`,
+`newTitle`, `showEventDialog` and `procEventDialog` bodies. The established
+diagnostic startup skips only the intro; actual Sheriff initialization still
+precedes the controlled cases. The `frame71` save call is replaced by an RNG
+observation, as in the earlier town fixtures.
+
+Two identical Ruffle 0.7.1 runs captured **22 observations**: six full Day 6 towns,
+two recruit rolls around the 5/9 level threshold, six Day6 normal/perfect
+settlements, two controlled Day 7 salary settlements, and six title
+eligibility/claim/acknowledgment/rejection states. All **22/22** match production,
+including item metadata, recruit fields, RNG counts/state, money and AP. Full
+town seeds 42/1/3735928559 consume 94/112/204 draws and yield recruit levels 2/2/3.
+Calendar day 6 prepares Crow Statue 1106; previous shared item and recruit slots remain
+observable. Earlier fixtures are unchanged.
+
+The source confirms tax 10 plus upkeep 40 on Day 6, net rewards 650/860, and three
+settlement draws. Claim Title spends 4 AP, grants Honorary Citizen/salary 100 and
+adds no immediate money or RNG draws. The original UI's `newTitle(0)` condition
+guards repeat claims. The observed event title is `New Title!`, card3; closing
+it changes no game values. Day 7 salary probes yield net 735/951, including tax 45.
+Those probes call settlement only: they do not enable or verify Day 7 combat or
+town generation. The port stores one title field and derives original
+`titleMoney`; browser dialog rendering remains separate evidence. See
+[the bounded source map](../web/docs/sixth-town-source.md).
+
+All 3491 tags, non-code payloads, tag order and frame header are preserved; only
+DoABC 2782 changes, with the diagnostic version 10 header. Four focused tests
+include an extra-RNG negative control and recruit/save boundary checks.
+
+- Original SWF SHA-256: `4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663`.
+- Diagnostic SWF SHA-256: `c16b2cc781301bd5e8c8454521e0d981e5a1daa192a08c1cf670462dfec79201`.
+- Canonical trace SHA-256: `f15e87bc77e3192311f02a90be509fcb39947801d56331e4b283d4b4c8fd2e25`.
+- Accepted fixture: `web/tests/fixtures/original-sixth-town-trace.json`.
+- Runtime capture: `.build/oracle/sixth-town-browser-report.json`, dated `2026-11-02T00:13:57.784Z`.
+- Comparison: `.build/oracle/sixth-town-comparison-report.json`.
+
+Regenerate with `python tools/build_sixth_town_oracle.py`, capture
+`?suite=sixth-town` twice, then run `npm.cmd run test:sixth-town-reference` from
+`web/`. Focused checks:
+`node --experimental-strip-types --test tests/sixth-town.test.ts tests/sixth-town-reference.test.ts`.

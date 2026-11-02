@@ -9,6 +9,9 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / ".build/oracle/browser-report.json"
 REPORTS = {
+    "/api/sixth-day-waves-report": ROOT / ".build/oracle/sixth-day-waves-browser-report.json",
+    "/api/sixth-town-report": ROOT / ".build/oracle/sixth-town-browser-report.json",
+    "/api/barbarian-report": ROOT / ".build/oracle/barbarian-browser-report.json",
     "/api/fly-report": ROOT / ".build/oracle/fly-browser-report.json",
     "/api/fifth-town-report": ROOT / ".build/oracle/fifth-town-browser-report.json",
     "/api/fifth-day-waves-report": ROOT / ".build/oracle/fifth-day-waves-browser-report.json",
@@ -37,6 +40,12 @@ REPORTS = {
     "/api/town-preparation-report": ROOT / ".build/oracle/town-preparation-browser-report.json",
 }
 ROUTES = {
+    "/sixth-day-waves-reference.swf": ROOT / ".build/oracle/sixth-day-waves-reference.swf",
+    "/sixth-day-waves-build-report.json": ROOT / ".build/oracle/sixth-day-waves-build-report.json",
+    "/sixth-town-reference.swf": ROOT / ".build/oracle/sixth-town-reference.swf",
+    "/sixth-town-build-report.json": ROOT / ".build/oracle/sixth-town-build-report.json",
+    "/barbarian-reference.swf": ROOT / ".build/oracle/barbarian-reference.swf",
+    "/barbarian-build-report.json": ROOT / ".build/oracle/barbarian-build-report.json",
     "/fly-reference.swf": ROOT / ".build/oracle/fly-reference.swf",
     "/fly-build-report.json": ROOT / ".build/oracle/fly-build-report.json",
     "/fifth-town-reference.swf": ROOT / ".build/oracle/fifth-town-reference.swf",

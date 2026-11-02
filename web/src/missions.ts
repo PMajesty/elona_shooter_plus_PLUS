@@ -1,7 +1,7 @@
 import { ENEMIES, type EnemyKind } from './content.ts';
 
 export interface LowLevelMission {
-  level: 0 | 1 | 2 | 3 | 4 | 5; fixedLv: number; strength: 0; power: number; powerOrg: number; reward: number;
+  level: 0 | 1 | 2 | 3 | 4 | 5 | 6; fixedLv: number; strength: 0; power: number; powerOrg: number; reward: number;
   hire: false; ragnarok: false; wave: 5; spawnRate: number; group: number[];
   waveType: 0; loot: number[]; newWave: true; time: 30; bossDay: false; bossWave: number;
   note: ''; hpFix: 1; dmgFix: 1; expFix: 1; absorbFix: number; bossKilled: 0;
@@ -12,8 +12,8 @@ export interface GeneratedWave { enemies: EnemyKind[]; delays: number[]; initial
 export interface GeneratedWaves { waves: GeneratedWave[]; power: number; group: number[] }
 
 // Миссия готовится до Rest; календарный день определяет гарантированный предмет.
-export function generateLowLevelMission(level: 0 | 1 | 2 | 3 | 4 | 5, calendarDay: 1 | 2 | 3 | 4 | 5, random: () => number, options: { absorbFix?: number } = {}): LowLevelMission {
-  if (![0, 1, 2, 3, 4, 5].includes(level) || ![1, 2, 3, 4, 5].includes(calendarDay)) throw new RangeError('Only mission preparation for the first five towns is supported.');
+export function generateLowLevelMission(level: 0 | 1 | 2 | 3 | 4 | 5 | 6, calendarDay: 1 | 2 | 3 | 4 | 5 | 6, random: () => number, options: { absorbFix?: number } = {}): LowLevelMission {
+  if (![0, 1, 2, 3, 4, 5, 6].includes(level) || ![1, 2, 3, 4, 5, 6].includes(calendarDay)) throw new RangeError('Only mission preparation for the first six towns is supported.');
   const absorbFix = options.absorbFix ?? 0;
   if (![0, 0.01, 0.02, 0.03, 0.04].includes(absorbFix)) throw new RangeError('Unsupported medal absorption.');
   const loot: number[] = [];
@@ -23,6 +23,7 @@ export function generateLowLevelMission(level: 0 | 1 | 2 | 3 | 4 | 5, calendarDa
   if (calendarDay === 3) loot.push(1035);
   if (calendarDay === 4) loot.push(1102);
   if (calendarDay === 5) loot.push(1037);
+  if (calendarDay === 6) loot.push(1106);
   const rolledBossWave = 2 + Math.trunc(random() * 5 / 3);
   const power = 800 + level * 50 + level * 70;
   return {
@@ -61,8 +62,8 @@ const SELECTION_ENEMIES: readonly SelectionEnemy[] = [
 
 // Источник: generateWave/selectEnemy/randLv/preGenerateWave. Миссия готовится до Rest,
 // а календарный день меняется до генерации волн; переданную миссию не создаём заново.
-export function generateLowLevelWaves(mission: Readonly<LowLevelMission>, calendarDay: 1 | 2 | 3 | 4 | 5, random: () => number): GeneratedWaves {
-  if (![0, 1, 2, 3, 4].includes(mission.level) || mission.fixedLv !== mission.level || mission.wave !== 5 || mission.bossDay || ![1, 2, 3, 4, 5].includes(calendarDay)) throw new RangeError('Unsupported low-level wave configuration.');
+export function generateLowLevelWaves(mission: Readonly<LowLevelMission>, calendarDay: 1 | 2 | 3 | 4 | 5 | 6, random: () => number): GeneratedWaves {
+  if (![0, 1, 2, 3, 4, 5].includes(mission.level) || mission.fixedLv !== mission.level || mission.wave !== 5 || mission.bossDay || ![1, 2, 3, 4, 5, 6].includes(calendarDay)) throw new RangeError('Unsupported low-level wave configuration.');
   const waves: GeneratedWave[] = [];
   let power = mission.powerOrg;
   for (let index = 0; index < mission.wave; index++) {

@@ -3,7 +3,7 @@ import { generateLowLevelMission } from './missions.ts';
 import { generateEarlyTownRecruit, type FirstTownRecruit } from './recruits.ts';
 
 export interface FirstTownMission {
-  level: 1 | 2 | 3 | 4 | 5; fixedLv: 1 | 2 | 3 | 4 | 5; strength: 0; power: 920 | 1040 | 1160 | 1280 | 1400; powerOrg: 920 | 1040 | 1160 | 1280 | 1400; reward: 620 | 640 | 660 | 680 | 700;
+  level: 1 | 2 | 3 | 4 | 5 | 6; fixedLv: 1 | 2 | 3 | 4 | 5 | 6; strength: 0; power: 920 | 1040 | 1160 | 1280 | 1400 | 1520; powerOrg: 920 | 1040 | 1160 | 1280 | 1400 | 1520; reward: 620 | 640 | 660 | 680 | 700 | 720;
   hire: false; ragnarok: false; wave: 5; spawnRate: number; group: number[];
   waveType: 0; loot: number[]; newWave: true; time: 30; bossDay: false; bossWave: number;
   note: ''; hpFix: 1; dmgFix: 1; expFix: 1; absorbFix: number; bossKilled: 0;
@@ -30,8 +30,8 @@ export function prepareFirstTown(random: () => number, input: FirstTownPreparati
   return prepareEarlyTown(random, 1, input);
 }
 
-export function prepareEarlyTown(random: () => number, day: 1 | 2 | 3 | 4 | 5, input: FirstTownPreparationInput = {}): FirstTownPreparation {
-  if (![1, 2, 3, 4, 5].includes(day)) throw new RangeError('Town preparation is limited to days 1 through 5.');
+export function prepareEarlyTown(random: () => number, day: 1 | 2 | 3 | 4 | 5 | 6, input: FirstTownPreparationInput = {}): FirstTownPreparation {
+  if (![1, 2, 3, 4, 5, 6].includes(day)) throw new RangeError('Town preparation is limited to days 1 through 6.');
   const factory = new ItemFactory(random, { day });
   // clearGameInv сохраняет поля даже у пустых слотов; первая лавка использует только 0 и 1.
   const shop = Array.from({ length: 8 }, (_, index) => input.priorOffers?.[index] ? { ...input.priorOffers[index], num: 0 } as Item : null);

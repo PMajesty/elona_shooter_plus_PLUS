@@ -128,6 +128,13 @@
       "originX": 0,
       "originY": 0
     },
+    "eventNewTitle": {
+      "file": "screens/eventNewTitle.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
     "shopSaleDialog": {
       "file": "screens/shopSaleDialog.png",
       "width": 620,
@@ -780,6 +787,37 @@
       "uniqueFrames": 23,
       "characterId": 952
     },
+    "enemy_barbarian": {
+      "image": "sprites/enemy_barbarian.png",
+      "json": "sprites/enemy_barbarian.json",
+      "originX": 17.75,
+      "originY": 16.5,
+      "frameWidth": 35,
+      "frameHeight": 40,
+      "labels": {
+        "init": 1,
+        "alive": 3,
+        "attack": 26,
+        "attack2": 38,
+        "dead": 84,
+        "null": 252
+      },
+      "count": 266,
+      "uniqueFrames": 31,
+      "characterId": 1340
+    },
+    "enemyRage": {
+      "image": "sprites/enemyRage.png",
+      "json": "sprites/enemyRage.json",
+      "originX": 21.75,
+      "originY": 48.0,
+      "frameWidth": 43,
+      "frameHeight": 49,
+      "labels": {},
+      "count": 14,
+      "uniqueFrames": 7,
+      "characterId": 2385
+    },
     "explosion": {
       "image": "sprites/explosion.png",
       "json": "sprites/explosion.json",
@@ -984,6 +1022,30 @@
       "uniqueFrames": 1,
       "characterId": 2281
     },
+    "townActionCard": {
+      "image": "sprites/townActionCard.png",
+      "json": "sprites/townActionCard.json",
+      "originX": 29.9,
+      "originY": 10.0,
+      "frameWidth": 60,
+      "frameHeight": 80,
+      "labels": {},
+      "count": 20,
+      "uniqueFrames": 13,
+      "characterId": 2426
+    },
+    "townActionPin": {
+      "image": "sprites/townActionPin.png",
+      "json": "sprites/townActionPin.json",
+      "originX": 9.95,
+      "originY": 8.0,
+      "frameWidth": 20,
+      "frameHeight": 16,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2430
+    },
     "itemPopup": {
       "image": "sprites/itemPopup.png",
       "json": "sprites/itemPopup.json",
@@ -1015,6 +1077,55 @@
         0.5,
         0.2,
         0.2
+      ]
+    },
+    "bloodHit": {
+      "image": "sprites/bloodHit.png",
+      "json": "sprites/bloodHit.json",
+      "originX": 23.85,
+      "originY": 26.35,
+      "frameWidth": 48,
+      "frameHeight": 41,
+      "labels": {},
+      "count": 13,
+      "uniqueFrames": 8,
+      "characterId": 1459,
+      "sourceFrameStart": 50,
+      "frameAlpha": [
+        1,
+        1,
+        1,
+        1,
+        0.796875,
+        0.796875,
+        0.59765625,
+        0.59765625,
+        0.3984375,
+        0.3984375,
+        0.09765625,
+        0.09765625,
+        0.09765625
+      ]
+    },
+    "criticalHit": {
+      "image": "sprites/criticalHit.png",
+      "json": "sprites/criticalHit.json",
+      "originX": 10.0,
+      "originY": 10.0,
+      "frameWidth": 20,
+      "frameHeight": 20,
+      "labels": {},
+      "count": 6,
+      "uniqueFrames": 5,
+      "characterId": 1459,
+      "sourceFrameStart": 70,
+      "frameAlpha": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
       ]
     },
     "gravityBody": {
