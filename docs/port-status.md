@@ -4,18 +4,25 @@ Current implementation: **seven connected Sheriff days**, with owned firearms an
 consumables, ordinary/boss loot, earned skills, prepared towns, shop transactions,
 weapon Upgrade, MOD mounting, Free Repair, Rest, the first title claim and its salary,
 plus permanent recruitment, companion equipment, autonomous AI, growth and wages,
-and Castle House capacity two/three, Wall, Sandbag, expanded Storage, paid Fix Wall and Repairman purchases.
+and Castle House capacity two/three, Wall, Sandbag, expanded Storage, Looter,
+paid Fix Wall and Repairman purchases.
 This is not a complete remake.
 The TypeScript/Phaser client runs independently of Flash and Ruffle; the preserved
 game remains the reference for behavior, content and appearance.
 
-The **v20 loot MOD release** is served at `http://127.0.0.1:5175/elona/` after
-automated/source checks, eleven complete-save UI checks and final production
-New Game/exact v19-save migration and restore checks. All 308 files from
-`.build/browser-loot-mod-final` match the live build and ZIP; all 305 public assets
-are unchanged. The bundle is `assets/index-BJh2mRko.js`; the deployable archive is
-`.build/elona-shooter-browser-loot-mod-slice.zip` (8,575,802 bytes), SHA-256
+The **v21 Looter release** is served at `http://127.0.0.1:5175/elona/` after
+351 passing tests, 26 accepted original observations, seven complete-save UI checks
+and final production New Game/exact v20-save migration and restore checks. All 308
+files from `.build/browser-looter-final` match the live build and ZIP; all 305 public
+assets are unchanged. The bundle is `assets/index-CH4ZkfIi.js`; the archive is
+`.build/elona-shooter-browser-looter-slice.zip` (8,576,060 bytes), SHA-256
+`172fdfbfb83e22b54d004df0611a1594ff578f4524244484bcdaedd38a9a16c2`.
+
+The verified v20 release remains in `.build/browser-before-looter` (all 308 files)
+and `.build/elona-shooter-browser-loot-mod-slice.zip` (8,575,802 bytes), SHA-256
 `ec60bddb523cbc6c7f53c03608670256bba994669e94f23f0c4da50f5ad20e15`.
+Its bundle is `assets/index-BJh2mRko.js`; the eleven UI checks and production
+v19-save migration/restore evidence remain recorded below.
 
 The verified v19 release remains in `.build/browser-before-loot-mod` (all 308
 files) and `.build/elona-shooter-browser-storage-slice.zip` (8,574,659 bytes),
@@ -102,7 +109,7 @@ establish this late-game diagnosis.
   the damage deficit; its price is derived from maxHP (first 240 GP). House adds 50
   upkeep per level and Wall adds 10 per purchase. Existing settled results remain
   historical. The original tiles, prices, levels and affordability are displayed;
-  Looter, Trainer and page2 remain disabled.
+  Trainer and page2 remain disabled.
 - Paid **Fix Wall** costs 8 GP per missing HP, heals fully and increments its
   retained purchase count, without AP/RNG/dialog. Full HP cost 0 disables it.
   **Repairman** costs `250 × level² + 700` before purchase and adds 60 GP upkeep
@@ -130,6 +137,15 @@ establish this late-game diagnosis.
   does not collect it. A pending modal blocks item movement and Proceed, saves
   both endpoints and reconstructs the original dialog/icon placement on Continue.
   Incompatible confirmation closes the dialog without changing either item.
+- **Looter** is available at `125 × level² + 300` before purchase,
+  with no source cap and 5 GP recurring upkeep per level. Purchase spends only
+  gold, changes no existing items and leaves paid results intact. Future random
+  ordinary replacements and boss prizes use multiplier 1 at zero levels, otherwise
+  `1.05 + level × 0.08`. This raises the generation budget; guaranteed drops,
+  existing offers and sale formulas are unchanged. A 500 minimum and source
+  acceptance rules can leave generated outcomes unchanged. Higher budgets do not
+  guarantee a higher value for each individual drop. The original tile/hint uses
+  source Number arithmetic and truncation, including the level-zero unacquired text.
 - Day6 settlement deducts the first 10 GP tax separately from default upkeep 40.
   Mission → Claim title costs 4 AP and grants Honorary Citizen, once eligible.
   It consumes no RNG and pays no immediate gold. Its 100 GP salary begins at the
@@ -172,7 +188,11 @@ Ordinary-enemy collision uses original filled contours and placement matrices,
 including persisted sheep shadow history. Bosses use rendered alpha geometry;
 the headless soak uses an explicitly documented boss rectangle fallback.
 
-Current saves use **version 20**, accepting port versions **1–19**.
+Current saves use **version 21**, accepting port versions **1–20**.
+`looterLevel` is canonical and validated as a nonnegative integer. Older saves
+initialize it to zero without purchases, RNG changes or altered items/results.
+The level reaches future ordinary and boss generation while already-generated
+offers remain stored exactly across reload.
 The pending loot MOD action stores distinct offer/owned endpoints, validates them
 against the current reward phase and occupied item types, and restores without
 replaying the transaction. Incompatible pairs remain valid pending saves because
@@ -260,7 +280,44 @@ no Flash plugin, Ruffle, external CDN or gameplay server.
 
 ## Evidence and intentional corrections
 
-The v20 loot MOD release passes **341 tests**, TypeScript checking and its
+The v21 release passes **351 tests**, TypeScript checking and its build.
+**All 26 original observations are accepted**, covering purchase/denial, upkeep,
+live ordinary/boss generation, exact budgets/RNG/item records, unchanged guaranteed
+drops and shop generation. Four focused reference tests include negative controls
+for omitting the current level, rounding instead of truncating budgets and
+multiplying guaranteed items' final values. Actual capture confirms the source
+hint displays 100% at level 12 and 109% at level 13. No runtime correction or
+expected-value adjustment was required. These source-method comparisons remain
+separate from native scheduling and the actual browser checks below.
+
+Four natural campaigns pass **61,187 frames and 703 save/replay checkpoints**,
+with 16 Looter purchases, 24 Rest transitions and 101 reward actions. All four
+finish Day 7. At 48 actual ordinary/boss generation boundaries, a separate replay
+changes only Looter to zero: **11 generated outcomes differ, all boss rewards;
+37 remain unchanged**. Unchanged ordinary rewards do not prove every case hit
+the 500-budget minimum: fixed drops and the same accepted random item also leave
+outcomes unchanged. Targeted original cases establish the minimum separately.
+No gold, items, HP or RNG are granted, and this evidence does not imply every individual
+drop is more valuable. The test policy targets level four by town four when
+affordable; that is not a game cap. The runner uses production ordinary contours
+and the documented boss rectangle fallback. Reports:
+`.build/looter-party-soak/report.json`, `.build/looter-tests-output.txt` and
+`.build/oracle/castle-looter-comparison-report.json`. The accepted fixture is
+`web/tests/fixtures/original-castle-looter-trace.json`. The independent audit in
+`.build/browser-qa/looter-scenario-audit.json` confirms all 168 saved fixtures,
+16 purchases and 48 paired generation boundaries.
+
+Seven full-envelope UI checks pass: Looter levels 1/2, unaffordable rejection,
+Continue, actual boss reward generation, Rest and earned result/town entry.
+All 308 candidate/live/ZIP files match, and all 305 public assets are unchanged.
+Production New Game starts at tick 0, HP 40, gold 200, ammo 5, six inventory slots
+and Looter 0. The actual v20 backup migrates and restores with complete-envelope
+equality at tick 674, HP 40, gold 209 and unchanged RNG; paused and with no console
+errors. Evidence: `.build/browser-qa/looter-ui-verification.json`,
+`.build/browser-qa/looter-production-verification.json` and
+`.build/looter-publication.json`; screenshot `looter-production-restored.jpg`.
+
+The historical v20 loot MOD release passes **341 tests**, TypeScript checking and its
 build (`assets/index-BJh2mRko.js`). **All 53 original observations across 18 cases
 match**, covering ordinary/boss rewards, all offer/owned directions, Yes,
 No/outside swaps, rejection, consumed metadata, new Living Weapon and cached
@@ -713,10 +770,10 @@ reports are in `.build/repair-party-soak/`.
 
 ## Next integrated work and continuation
 
-Connect the **Looter Castle upgrade to actual reward valuation**, followed by
-Trainer before broader campaign expansion. Loot MOD mounting now covers the
-previously missing reward interaction, with separate original-method, natural
-integration and accepted browser evidence.
+Connect **Trainer to actual
+companion experience and postbattle progression** before broader campaign
+expansion. The existing source audit supplies the starting point; price, timing,
+cache behavior and growth effects need their own integrated verification.
 The [Castle source audit](../web/docs/castle-upgrades-source.md) and
 [UI notes](../web/docs/castle-upgrades-ui-source.md) retain the current boundaries.
 Later campaign work still includes Lava and further town thresholds; Day8 onward

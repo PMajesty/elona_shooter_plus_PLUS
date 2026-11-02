@@ -1,8 +1,8 @@
 # Castle purchase UI
 
 The Castle panel presents the original eight first-page tiles. Fix Wall, Wall,
-Sandbag, Storage, House and Repairman use the production immediate-purchase API;
-Looter, Trainer and page2 are visibly disabled and explain their unavailable scope. This note covers the
+Sandbag, Storage, House, Looter and Repairman use the production immediate-purchase API;
+Trainer and page2 are visibly disabled and explain their unavailable scope. This note covers the
 UI and asset boundary. Transaction evidence is in
 [castle-upgrades-source.md](castle-upgrades-source.md); browser acceptance is
 recorded separately by the integration owner.
@@ -43,9 +43,9 @@ in a browser.
 
 `MainTimeline.as:1322–1356` appends positive current levels, displays the cost,
 uses blue `#0000cc` when available and red `#cc0000` otherwise, and dims an
-unavailable tile to0.3. The port follows those values. The two unimplemented
-tiles display their default source levels/prices but remain disabled regardless
-of gold. Page2 is unavailable. No other Castle purchase is exposed by this UI.
+unavailable tile to0.3. The port follows those values. Trainer displays its default
+source level/price but remains disabled regardless of gold. Page2 is unavailable.
+No other Castle purchase is exposed by this UI.
 
 `MainTimeline.as:13526–13555` purchases immediately: payment sound, current
 price deduction, upgrade, tile rebuild and interface refresh. There is no
@@ -55,12 +55,13 @@ Failure beeps; the small explanatory status messages are port UI rather than
 quotes from the original game. Affordability is recomputed by the transaction
 API, so rendered prices never authorize a stale purchase.
 
-Upkeep comes from `castleUpkeep(state)` and all six prices from
+Upkeep comes from `castleUpkeep(state)` and all seven enabled prices from
 `castleUpgradeCost`. Free Repair continues to rebuild the panel after healing.
-Main accepts save envelopes1–19 and emits19. The town DOM diagnostic
+Main accepts save envelopes 1–21 and emits 21. The town DOM diagnostic
 `data-castle-upgrades` exposes House, Wall, maxHP, upkeep, the Fix Wall purchase
 counter, Repairman level/repair amount, Sandbag level/damage multiplier/absorption
-percentage, derived Storage level/capacity and the six current costs for ordinary
+percentage, derived Storage level/capacity, Looter level/value multiplier and
+the seven current costs for ordinary
 browser checks; it is not an alternate action interface.
 
 ## Paid repair and Repairman extension
@@ -159,17 +160,50 @@ battle/reward/town states, and Castle diagnostics include derived level/cost.
 Only the first five owned slots show hotkey numbers and are available to battle
 selection/cooldowns, as in `createInvSlot`,3553–3556. Storage is not extra hotkeys.
 
-There is an existing scoped difference: the original common `invDrag` route
-at2990–2996 allows MOD→gun confirmation during loot as well as town. The port
-still allows mounting in town only. Its loot message explicitly directs the
-player to town and preserves both items; adding reward-phase confirmation and
-persistence is separate work. Expanded-slot loot transfer coverage must not be
-reported as loot-MOD parity.
+The original common `invDrag` route at2990–2996 also allows MOD→gun confirmation
+during loot. This was outside the v19 Storage slice and was connected separately
+in v20, including pending save/Continue, original No/outside swaps and carried-icon
+placement. See [loot MOD UI notes](loot-mod-ui-source.md). Storage transfer evidence
+alone is not the evidence for that later confirmation implementation.
 
 The v19 wrapper accepts versions1–19 and the runtime owns canonical length6–16
 validation/migration. No sprite, font, sound, extractor or layout file changes
 are needed for this extension. Source placement inspection and shared typecheck
 are separate from the root's browser checks of second-row actions and persistence.
+
+## Looter extension
+
+Looter is tile 5, with parent origin `(274.41238023502831,228)`. Existing atlas
+frames 11/12 supply the unchanged normal/hover art, with the same registration,
+source button rectangle and embedded label/cost fonts as the other Castle tiles.
+The name is `Looter` at level zero and `Looter Lv N` for a positive current level.
+No sprite, font, sound, extractor or layout changes are required.
+
+`MainTimeline.as:12614–12616` prices it at `level² * 125 + 300` before purchase;
+the following source cap checks do not cap Looter. `calcUnkeep` at 1672 adds
+`level * 5` to daily upkeep. The production UI reads those values from
+`castleUpgradeCost('looter', state)` and `castleUpkeep(state)`, so purchase and
+affordability use the same state as the runtime. Immediate purchase uses the
+existing payment sound and Castle rebuild, with no confirmation, AP or RNG.
+An unaffordable click uses the existing denial path and leaves state intact.
+
+The hint at 11879 retains the original wording:
+“The more looters you have the, the more valuable stuff you find will be.”
+At level zero, the shared source tail at 11892–11902 replaces the detail with
+`[ You haven't acquired this upgrade yet ]`. Positive levels show
+`(Currently, looted items's value will be N% higher)`, where
+`N = Math.trunc(castleLootMultiplier(state) * 100 - 100)`. This preserves source
+Number arithmetic and integer truncation; the UI does not replace the calculation
+with an algebraically simplified percentage. `looterFix` at 12321–12324 returns
+1 for zero levels, otherwise `1.05 + level * 0.08`.
+
+The canonical field is `looterLevel`, and the wrapper emits version 21 while
+accepting versions 1–21. The runtime owns legacy initialization and valuation
+of future ordinary/boss rewards; the UI does not reprice existing items or
+settled results. `data-castle-upgrades` adds `looter`, `looterCost`,
+`lootMultiplier` and `lootValueIncreasePercent` for inspecting ordinary UI state.
+Trainer and page 2 remain explicitly unavailable. Original-method comparisons
+and actual browser purchase/Continue/reward checks are separate acceptance evidence.
 
 ## Preservation and reproduction
 

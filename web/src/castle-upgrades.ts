@@ -1,4 +1,6 @@
-export type CastleUpgradeKind = 'house' | 'wall' | 'fix-wall' | 'repairman' | 'sandbag' | 'storage';
+import { lootValueMultiplier } from './items.ts';
+
+export type CastleUpgradeKind = 'house' | 'wall' | 'fix-wall' | 'repairman' | 'sandbag' | 'storage' | 'looter';
 export type CastleUpgradeOutcome = 'purchased' | 'not-enough-gold' | 'capped' | 'unavailable';
 export interface CastleUpgradeState {
   party: { capacity: 1 | 2 | 3 };
@@ -6,6 +8,7 @@ export interface CastleUpgradeState {
   castleMaxHp: number;
   repairmanLevel: number;
   sandbagLevel: number;
+  looterLevel: number;
   inventory: readonly unknown[];
 }
 
@@ -16,12 +19,17 @@ export function castleUpgradeCost(kind: CastleUpgradeKind, state: CastleUpgradeS
   if (kind === 'repairman') return state.repairmanLevel * state.repairmanLevel * 250 + 700;
   if (kind === 'sandbag') return state.sandbagLevel >= 10 ? 0 : state.sandbagLevel * state.sandbagLevel * 240 + 1000;
   if (kind === 'storage') return state.inventory.length >= 16 ? 0 : (state.inventory.length - 4) ** 2 * 30 + 250;
+  if (kind === 'looter') return state.looterLevel * state.looterLevel * 125 + 300;
   return Math.trunc(state.castleMaxHp * state.castleMaxHp / 2.5 - 400);
 }
 
 export function castleUpkeep(state: CastleUpgradeState): number {
   // Main.calcUnkeep: не перенесённые улучшения исходные; Hard Badge пока отсутствует.
-  return Math.max(0, (state.party.capacity - 1) * 50 + state.repairmanLevel * 60 + (state.castleMaxHp - 40) * 2 + state.sandbagLevel * 40 + castleStorageLevel(state) * 40);
+  return Math.max(0, (state.party.capacity - 1) * 50 + state.repairmanLevel * 60 + (state.castleMaxHp - 40) * 2 + state.sandbagLevel * 40 + castleStorageLevel(state) * 40 + state.looterLevel * 5);
+}
+
+export function castleLootMultiplier(state: Pick<CastleUpgradeState, 'looterLevel'>): number {
+  return lootValueMultiplier(state.looterLevel);
 }
 
 export function castleStorageLevel(state: Pick<CastleUpgradeState, 'inventory'>): number {

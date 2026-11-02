@@ -55,7 +55,9 @@
     "test:town-reference": "node --experimental-strip-types scripts/compare-town-reference.ts",
     "test:town-preparation-reference": "node --experimental-strip-types scripts/compare-town-preparation-reference.ts",
     "test:soak": "node --experimental-strip-types scripts/soak.ts",
-    "test:projectile-soak": "node --experimental-strip-types scripts/projectile-soak.ts"
+    "test:projectile-soak": "node --experimental-strip-types scripts/projectile-soak.ts",
+    "test:castle-looter-reference": "node --experimental-strip-types scripts/compare-castle-looter-reference.ts",
+    "test:looter-party-soak": "node --experimental-strip-types scripts/party-soak.ts 4 looter"
   },
   "dependencies": {
     "phaser": "4.2.1"

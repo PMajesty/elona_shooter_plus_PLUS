@@ -36,10 +36,10 @@ export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCoun
 export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'>;
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
 export interface SimulationState {
-  version: 20; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1 | 2 | 3 | 4 | 5 | 6 | 7; tick: number; timerRemainder: number; rng: number; nextUid: number;
+  version: 21; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1 | 2 | 3 | 4 | 5 | 6 | 7; tick: number; timerRemainder: number; rng: number; nextUid: number;
   activeMission: ActiveMission; resultBefore: number; earnedMedals: number[]; perfectDays: number; bossesSpawned: number;
   hero: KnownHeroInitialization; title: 0 | 1;
-  castleHp: number; castleMaxHp: number; wallLevel: number; wallFixCount: number; repairmanLevel: number; sandbagLevel: number; gold: number; totalMoney: number; kills: number; criticalKills: number;
+  castleHp: number; castleMaxHp: number; wallLevel: number; wallFixCount: number; repairmanLevel: number; sandbagLevel: number; looterLevel: number; gold: number; totalMoney: number; kills: number; criticalKills: number;
   aimX: number; aimY: number; fireHeld: boolean; pendingShot: boolean;
   player: { classId: 'sheriff'; level: number; exp: number; skillPoints: number; traits: TraitLevels; weaponExp: number[]; selectedSlot: number; shootTimer: number; accuracyFix: number; rampageTicks: number; bowDrawing: boolean };
   waveIndex: number; waves: WaveState[]; bossWave: number; newWave: boolean; spawnTimer: number; noDamage: boolean;
@@ -111,9 +111,9 @@ export class Simulation {
     this.pendingOpeningMission = generateLowLevelMission(0, 1, random);
     const generated = generateSheriffHero(random);
     this.state = {
-      version: 20, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
+      version: 21, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
       activeMission: this.missionParameters(this.pendingOpeningMission), resultBefore: STARTING_CLASS.money, earnedMedals: [40], perfectDays: 0, bossesSpawned: 0,
-      castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, wallLevel: 1, wallFixCount: 0, repairmanLevel: 0, sandbagLevel: 0, gold: STARTING_CLASS.money, totalMoney: 0, kills: 0, criticalKills: 0,
+      castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, wallLevel: 1, wallFixCount: 0, repairmanLevel: 0, sandbagLevel: 0, looterLevel: 0, gold: STARTING_CLASS.money, totalMoney: 0, kills: 0, criticalKills: 0,
       aimX: 300, aimY: 240, fireHeld: false, pendingShot: false,
       player: { classId: 'sheriff', level: 1, exp: 0, skillPoints: 0, traits: generated.traits, weaponExp: [0, 0, 0, 0, 0], selectedSlot: 0, shootTimer: 0, accuracyFix: 0, rampageTicks: 0, bowDrawing: false },
       waveIndex: FIRST_DAY.waves, waves: [], bossWave: 2, newWave: true, spawnTimer: 30, noDamage: true,
@@ -1108,7 +1108,7 @@ export class Simulation {
 
   private prepareOrdinaryLoot(random: () => number): void {
     if (this.state.phase !== 'victory' || this.state.postbattle !== 'none') return;
-    const generated = new ItemFactory(random, { day: this.state.day, engineer: this.state.partySkills.effects[120] }).ordinaryLoot(this.state.loot, this.state.previousTown?.shop ?? this.state.lootOffers);
+    const generated = new ItemFactory(random, { day: this.state.day, engineer: this.state.partySkills.effects[120], looter: this.state.looterLevel }).ordinaryLoot(this.state.loot, this.state.previousTown?.shop ?? this.state.lootOffers);
     this.state.lootOffers = generated.offers;
     this.state.loot = generated.queue;
     this.state.postbattle = 'loot';
@@ -1253,7 +1253,7 @@ export class Simulation {
   }
 
   buyCastleUpgrade(kind: CastleUpgradeKind): CastleUpgradeOutcome {
-    if (!this.partyMutationAvailable() || !['house', 'wall', 'fix-wall', 'repairman', 'sandbag', 'storage'].includes(kind)) return 'unavailable';
+    if (!this.partyMutationAvailable() || !['house', 'wall', 'fix-wall', 'repairman', 'sandbag', 'storage', 'looter'].includes(kind)) return 'unavailable';
     const state = this.state, cost = castleUpgradeCost(kind, state);
     if (cost === 0) return 'capped';
     if (state.gold < cost) return 'not-enough-gold';
@@ -1267,6 +1267,7 @@ export class Simulation {
     else if (kind === 'fix-wall') { state.wallFixCount++; state.castleHp = state.castleMaxHp; }
     else if (kind === 'repairman') state.repairmanLevel++;
     else if (kind === 'sandbag') state.sandbagLevel++;
+    else if (kind === 'looter') state.looterLevel++;
     else state.inventory.push(null);
     // Исходный одиночный щелчок не тратит AP, не обновляет кеш навыков и уже оплаченный итог.
     return 'purchased';
@@ -1292,7 +1293,7 @@ export class Simulation {
   }
 
   private equipmentFactory(): ItemFactory {
-    return new ItemFactory(() => this.random(), { day: this.state.day, engineer: this.state.partySkills.effects[120] });
+    return new ItemFactory(() => this.random(), { day: this.state.day, engineer: this.state.partySkills.effects[120], looter: this.state.looterLevel });
   }
 
   beginWeaponUpgrade(slot: number): TownEquipmentOutcome {
@@ -1355,7 +1356,7 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
-    if (!record(value) || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].includes(Number(value.version)) || typeof value.version !== 'number' || (![1, 2, 3, 4, 5, 6, 7].includes(Number(value.day)) || typeof value.day !== 'number' || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
+    if (!record(value) || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21].includes(Number(value.version)) || typeof value.version !== 'number' || (![1, 2, 3, 4, 5, 6, 7].includes(Number(value.day)) || typeof value.day !== 'number' || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || ![2, ...(Number(value.day) >= 2 ? [3] : [])].includes(Number(value.bossWave)) || (value.waveIndex === 5 && value.newWave !== true)) throw new Error('Invalid counters.');
@@ -1363,6 +1364,7 @@ export class Simulation {
     if (value.version < 16 ? value.castleMaxHp !== FIRST_DAY.castleHp
       : !finite(value.wallLevel) || !Number.isInteger(value.wallLevel) || value.wallLevel < 1 || !Number.isInteger(value.castleMaxHp) || Number(value.castleMaxHp) < FIRST_DAY.castleHp + (value.wallLevel - 1) * 5) throw new Error('Invalid castle upgrades.');
     if (value.version >= 17 && ['wallFixCount', 'repairmanLevel'].some(key => !finite(value[key]) || !Number.isInteger(value[key]) || Number(value[key]) < 0)) throw new Error('Invalid castle repair upgrades.');
+    if (value.version >= 21 && (!finite(value.looterLevel) || !Number.isInteger(value.looterLevel) || value.looterLevel < 0)) throw new Error('Invalid Looter level.');
     if (value.version >= 18 && (!Number.isInteger(value.sandbagLevel) || typeof value.sandbagLevel !== 'number' || value.sandbagLevel < 0 || value.sandbagLevel > 10)) throw new Error('Invalid Sandbag level.');
     if (Number(value.castleHp) > Number(value.castleMaxHp) || Number(value.waveIndex) < 0 || Number(value.waveIndex) > 5 || !Number.isInteger(value.waveIndex) || Number(value.timerRemainder) < 0 || Number(value.timerRemainder) >= 30 || typeof value.fireHeld !== 'boolean' || typeof value.pendingShot !== 'boolean' || typeof value.newWave !== 'boolean' || typeof value.noDamage !== 'boolean' || !Number.isInteger(value.rng) || Number(value.rng) < 1 || Number(value.rng) > 4294967295) throw new Error('Invalid mission state.');
     const player = value.player;
@@ -1451,6 +1453,7 @@ export class Simulation {
     if (value.version < 17) { simulation.state.wallFixCount = 0; simulation.state.repairmanLevel = 0; }
     if (value.version < 18) simulation.state.sandbagLevel = 0;
     if (value.version < 20) simulation.state.pendingLootAction = null;
+    if (value.version < 21) simulation.state.looterLevel = 0;
     if (value.version < 15) {
       const town = simulation.state.town?.preparation === 'ready' ? simulation.state.town : simulation.state.previousTown;
       simulation.state.party = createPartyState(town?.recruit);
@@ -1541,7 +1544,7 @@ export class Simulation {
         reconstructionRng >>>= 0;
         return reconstructionRng / 4294967296;
       };
-      simulation.state.version = 20;
+      simulation.state.version = 21;
       simulation.state.inventory = createStartingInventory(reconstructionRandom);
       simulation.state.lootOffers = Array(8).fill(null);
       simulation.state.postbattle = 'none';
@@ -1582,7 +1585,7 @@ export class Simulation {
       if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > (value.version < 15 ? 4 : 14) || !validTownPreparation(state.previousTown, validItem, (state.day - 1) as 1 | 2 | 3 | 4 | 5 | 6, state.activeMission.absorbFix) || state.activeMission.reward !== state.previousTown.mission.reward) throw new Error('Invalid previous town.');
     } else if (state.previousTown !== null) throw new Error('Unexpected previous town.');
     if (Number(value.version) < 3) {
-      state.version = 20;
+      state.version = 21;
       if (state.phase === 'victory' && state.postbattle === 'result') {
         // Старый результат пропускал награды босса и навыки; новые награды расходуют основной поток.
         state.postbattle = 'loot';
@@ -1651,7 +1654,7 @@ export class Simulation {
         if (!isOccupiedItem(mod) || mod.type !== ITEM_TYPE.mod || !isOccupiedItem(gun) || gun.type !== ITEM_TYPE.gun) throw new Error('Invalid pending mod items.');
       } else throw new Error('Unknown pending town equipment action.');
     }
-    state.version = 20;
+    state.version = 21;
     // Уже оплаченный результат v4 не пересчитывается; недостающая первая лавка создаётся один раз.
     if (state.phase === 'town' && state.town?.preparation === 'pending') simulation.prepareTown();
     return simulation;

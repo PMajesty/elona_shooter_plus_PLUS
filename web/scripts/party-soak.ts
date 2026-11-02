@@ -10,19 +10,20 @@ import { ENEMIES } from '../src/content.ts';
 import { isOccupiedItem } from '../src/items.ts';
 import { generateEarlyTownRecruit } from '../src/recruits.ts';
 import { installCandidate } from '../src/party.ts';
-import { castleUpgradeCost, castleUpkeep } from '../src/castle-upgrades.ts';
+import { castleUpgradeCost, castleUpkeep, castleLootMultiplier } from '../src/castle-upgrades.ts';
 
 const sandbagMode = process.argv[3] === 'sandbag';
 const storageMode = process.argv[3] === 'storage';
+const looterMode = process.argv[3] === 'looter';
 const repairMode = sandbagMode || process.argv[3] === 'repair';
-const castleMode = storageMode || repairMode || process.argv[3] === 'castle';
-const fixturePrefix = storageMode ? 'storage-party' : sandbagMode ? 'sandbag-party' : repairMode ? 'repair-party' : castleMode ? 'castle-party' : 'party';
+const castleMode = looterMode || storageMode || repairMode || process.argv[3] === 'castle';
+const fixturePrefix = looterMode ? 'looter-party' : storageMode ? 'storage-party' : sandbagMode ? 'sandbag-party' : repairMode ? 'repair-party' : castleMode ? 'castle-party' : 'party';
 const output = fileURLToPath(new URL(`../../.build/${fixturePrefix}-soak`, import.meta.url));
 const browserOutput = fileURLToPath(new URL('../../.build/browser-qa', import.meta.url));
 mkdirSync(output, { recursive: true }); mkdirSync(browserOutput, { recursive: true });
 const seedCount = Number(process.argv[2] ?? 32);
 assert.ok(Number.isInteger(seedCount) && seedCount >= 1 && seedCount <= 32, 'Use 1–32 natural seeds.');
-const sourceHashes = Object.fromEntries(['simulation.ts', 'party.ts', 'party-ai.ts', 'party-progression.ts', 'party-save.ts', 'projectiles.ts', 'collision.ts', 'town-preparation.ts', 'town-save.ts', 'castle-upgrades.ts']
+const sourceHashes = Object.fromEntries(['simulation.ts', 'items.ts', 'party.ts', 'party-ai.ts', 'party-progression.ts', 'party-save.ts', 'projectiles.ts', 'collision.ts', 'town-preparation.ts', 'town-save.ts', 'castle-upgrades.ts']
   .map(file => [file, createHash('sha256').update(readFileSync(new URL(`../src/${file}`, import.meta.url))).digest('hex')]));
 const geometrySha256 = createHash('sha256').update(readFileSync(new URL('../public/assets/collision-geometry.json', import.meta.url))).digest('hex');
 const geometry = JSON.parse(readFileSync(new URL('../public/assets/collision-geometry.json', import.meta.url), 'utf8')) as CollisionGeometry;
@@ -55,6 +56,8 @@ let housePurchases = 0, wallPurchases = 0, maximumCompanions = 0;
 let fixWallPurchases = 0, repairmanPurchases = 0;
 let sandbagPurchases = 0, ambiguousSandbagFrames = 0;
 let storagePurchases = 0, maximumInventorySlots = 6, expandedLootTransfers = 0;
+let looterPurchases = 0;
+const looterObservations: object[] = [];
 const storageRestObservations: { scenario: string; day: number; capacity: number; occupiedExtraSlots: number }[] = [];
 const sandbagObservations: { scenario: string; tick: number; day: number; level: number; damageWith: number; damageWithout: number; avoided: number; rng: number }[] = [];
 const repairObservations: { scenario: string; tick: number; day: number; level: number; waveBefore: number; hpBefore: number; damage: number; hpAfter: number; restoredHp: number }[] = [];
@@ -105,7 +108,7 @@ function run(current: Scenario, initial?: Save): void {
   const activeClass = () => simulation.state.party.slots.find(slot => slot.slot <= 3 && slot.exists)?.member?.devType;
   const activeCount = () => simulation.state.party.slots.filter(slot => slot.slot <= 3 && slot.exists).length;
   const recordFixture = (reason: string, state = simulation.toSave()) => {
-    const classId = activeClass() ?? (storageMode ? 0 : undefined);
+    const classId = activeClass() ?? (storageMode || looterMode ? 0 : undefined);
     if (classId === undefined || recorded.has(reason)) return;
     recorded.add(reason);
     const version = state.version;
@@ -113,6 +116,23 @@ function run(current: Scenario, initial?: Save): void {
     const encoded = JSON.stringify(value, null, 2) + '\n';
     writeFileSync(resolve(browserOutput, file), encoded);
     snapshots.push({ scenario: current.id, classId, reason, file, sha256: hash(encoded), operation: operations.length - (state.tick < simulation.state.tick ? 1 : 0), day: state.day, tick: state.tick });
+  };
+  const observeLooter = (stage: 'ordinary' | 'boss', before: Save, input?: Input) => {
+    // Меняется только уровень на одной границе награды; контроль не заменяет исходный oracle.
+    const control = Simulation.fromSave({ ...before, looterLevel: 0 }, options);
+    if (stage === 'ordinary') control.tick(input!); else assert.equal(control.finishLoot(), true);
+    assert.equal(control.state.postbattle, simulation.state.postbattle);
+    const full = simulation.state.lootOffers, without = control.state.lootOffers;
+    const changed = JSON.stringify(full) !== JSON.stringify(without);
+    const summary = (items: Save['lootOffers']) => items.map(item => isOccupiedItem(item)
+      ? { id: item.id, name: item.name, value: item.value, level: item.lv, mods: item.mod } : null);
+    const baseBudget = before.day * (stage === 'ordinary' ? 40 : 60) + (stage === 'ordinary' ? 250 : 500);
+    if (stage === 'ordinary') assert.equal(control.state.result.upkeep + before.looterLevel * 5, simulation.state.result.upkeep);
+    looterObservations.push({ scenario: current.id, day: before.day, stage, level: before.looterLevel, changed,
+      baseBudget, targetBudget: Math.trunc(baseBudget * castleLootMultiplier(before)), minimumBudget: 500,
+      beforeRng: before.rng, withRng: simulation.state.rng, withoutRng: control.state.rng,
+      withItems: summary(full), withoutItems: summary(without), withSha256: hash(JSON.stringify(full)), withoutSha256: hash(JSON.stringify(without)) });
+    recordFixture(`looter-${stage}-day${before.day}`); save();
   };
   const countEvent = (event: SimulationEvent) => {
     if (!event.actorSlot) return;
@@ -140,7 +160,11 @@ function run(current: Scenario, initial?: Save): void {
         const beforeSandbag = sandbagMode && simulation.state.sandbagLevel > 0 ? clone(simulation.toSave()) : undefined;
         const beforeRepair = repairMode && simulation.state.repairmanLevel > 0 && simulation.state.newWave && simulation.state.waveIndex > 0
           && simulation.state.timerRemainder + 20 >= 30 ? clone(simulation.toSave()) : undefined;
+        const beforeLooter = looterMode && simulation.state.looterLevel > 0 && simulation.state.newWave && simulation.state.waveIndex === 0
+          && simulation.state.timerRemainder + 20 >= 30 ? clone(simulation.toSave()) : undefined;
+        if (beforeLooter) recordFixture(`before-looter-ordinary-day${beforeLooter.day}`);
         act('tick', [input], sim => sim.tick(input)); totalFrames++;
+        if (beforeLooter && simulation.state.phase === 'victory') observeLooter('ordinary', beforeLooter, input);
         if (beforeSandbag) {
           const hits = simulation.events.filter(event => event.type === 'castle-hit');
           if (hits.length) {
@@ -203,13 +227,19 @@ function run(current: Scenario, initial?: Save): void {
             assert.equal(act('collectLoot', [offer, slot], sim => sim.collectLoot(offer, slot)), true);
             if (storageMode && slot >= 6) { expandedLootTransfers++; recordFixture(`loot-slot${slot + 1}`); }
           }
-          else assert.equal(act('finishLoot', [], sim => sim.finishLoot()), true);
+          else {
+            const beforeLooter = looterMode && state.looterLevel > 0 && state.postbattle === 'loot' && state.bossKilled > 0 ? clone(simulation.toSave()) : undefined;
+            if (beforeLooter) recordFixture(`before-looter-boss-day${day}`);
+            assert.equal(act('finishLoot', [], sim => sim.finishLoot()), true);
+            if (beforeLooter) observeLooter('boss', beforeLooter);
+          }
         }
         totalRewards++; save();
       }
       if (castleMode) assert.equal(simulation.state.result.upkeep, castleUpkeep(simulation.state));
       if (sandbagMode && simulation.state.sandbagLevel > 0) recordFixture('sandbag-result');
       if (storageMode && simulation.state.inventory.length > 6) recordFixture('storage-result');
+      if (looterMode && simulation.state.looterLevel > 0) recordFixture('looter-result');
       if (activeClass()) { activity.wages += simulation.state.result.wages; activity.wageSettlements++; recordFixture('result'); if (castleMode) recordFixture(`result-party${activeCount()}`); }
       assert.equal(act('enterTown', [], sim => sim.enterTown()), true); save();
     }
@@ -221,6 +251,15 @@ function run(current: Scenario, initial?: Save): void {
     if (castleMode) {
       const state = simulation.state;
       const candidateCost = state.party.slots[4].member?.cost ?? 0;
+      while (looterMode && state.looterLevel < Math.min(4, day)
+        && state.gold >= castleUpgradeCost('looter', state) + (activeCount() === 0 ? candidateCost : 0)) {
+        recordFixture(`before-looter${state.looterLevel + 1}`);
+        const before = clone(state), cost = castleUpgradeCost('looter', state);
+        assert.equal(act('buyCastleUpgrade', ['looter'], sim => sim.buyCastleUpgrade('looter')), 'purchased');
+        looterPurchases++;
+        assert.deepEqual(state, { ...before, gold: before.gold - cost, looterLevel: before.looterLevel + 1 }, 'Looter repriced existing state');
+        recordFixture(`looter${state.looterLevel}`); save();
+      }
       while (storageMode && state.inventory.length < (current.kind === 'capital-start' ? 16 : Math.min(9, 6 + day))
         && state.gold >= castleUpgradeCost('storage', state) + (activeCount() === 0 ? candidateCost : 0)) {
         recordFixture(`before-storage${state.inventory.length + 1}`);
@@ -343,7 +382,7 @@ try {
     run({ id: `controlled-class-${classId}`, seed: firstTown.seed, kind: 'controlled-start', classId,
       origin: `${firstTown.scenario} at operation${firstTown.operations}; candidate generation prefix [0.5,0.5,0.5,${(classId - 0.5) / 9}], remaining draws0.5; campaign RNG unchanged` }, value);
   }
-  if (castleMode) {
+  if (castleMode && !looterMode) {
     const value = clone(firstTown.save);
     // Явный капитал — единственный контролируемый вход; кандидаты и бои затем идут обычным путём.
     const capital = storageMode ? 20000 : 12000;
@@ -355,7 +394,7 @@ try {
       assert.ok(actorActivity[2].shots > 0 && actorActivity[3].shots > 0, 'Additional companion slots never fired');
     }
     if (!sandbagMode && !storageMode) assert.ok(expandedNaturalScenarios.size > 0, 'No natural campaign earned an expanded party');
-  } else assert.ok(Object.values(classes).every(row => row.natural.battles + row.controlled.battles > 0), 'One or more classes never entered battle');
+  } else if (!castleMode) assert.ok(Object.values(classes).every(row => row.natural.battles + row.controlled.battles > 0), 'One or more classes never entered battle');
   if (repairMode) {
     assert.ok(fixWallPurchases > 0 && repairmanPurchases > 0, 'Campaigns did not exercise both repair purchases');
     assert.ok(repairObservations.some(row => row.scenario.startsWith('natural-') && row.restoredHp > 0), 'No natural campaign actually healed at a wave boundary');
@@ -369,9 +408,14 @@ try {
     assert.ok(expandedLootTransfers > 0, 'No loot reached an expanded slot');
     assert.ok(storageRestObservations.some(row => row.occupiedExtraSlots > 0), 'No expanded item survived Rest');
   }
+  if (looterMode) {
+    assert.ok(looterPurchases > 0, 'Natural campaigns never bought Looter');
+    assert.ok(looterObservations.some(row => (row as { changed: boolean }).changed), 'No generated reward differed at an observed boundary');
+  }
   const report = { status: 'passed', seedCount, sourceHashes, geometrySha256, scenarios: results.length, frames: totalFrames, checkpoints: totalCheckpoints, restTransitions: totalRest,
     rewardActions: totalRewards, reachedDays, wonDays, naturallyHiredClasses: [...naturalHired].sort(), classes: castleMode ? undefined : classes,
     ...(storageMode ? { storagePurchases, maximumInventorySlots, expandedLootTransfers, storageRestObservations } : {}),
+    ...(looterMode ? { looterPurchases, looterObservations } : {}),
     ...(sandbagMode ? { sandbagPurchases, sandbagObservations, ambiguousSandbagFrames,
       positiveDamageReductions: sandbagObservations.filter(row => row.avoided > 0).length,
       avoidedDamage: sandbagObservations.reduce((sum, row) => sum + row.avoided, 0) } : {}),
@@ -382,13 +426,15 @@ try {
         ['shots', 'hits', 'damage', 'kills', 'reloads', 'reloadCompletions', 'bowDraws', 'levelUps'].map(key => [key, value[key as keyof Activity]]))])) } : {}),
     elapsedMs: Math.round(performance.now() - started),
     collision: 'Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts',
-    policy: storageMode ? 'Aimed Sheriff and autonomous companions; buy capacity7/8/9 from town1/2/3 when affordable, reserve first hire cost, then existing House/Wall/hiring policy. Collect actual loot into first available slot including expanded backpack. Check every extra item across Rest and full-state/event replay. Natural starts have no grants; separate capital-start adds20000gold only at earned first town and buys all16slots through ordinary transactions. No granted items, forced kills or private battle completion.'
+    policy: looterMode ? 'Natural starts only; prioritize Looter toward level4 by town4 when affordable, reserve first hire cost, then existing House/Wall/hiring/repair policy. This target is a test purchase policy, not a game cap. No gold, item, HP or RNG grants, private completion or forced kills. Observe actual ordinary/boss generation boundaries; a one-boundary control changes only Looter to0. Generated item records and final random state may differ; no per-drop value increase is assumed. Purchase must preserve every existing item, prepared town and paid result.'
+      : storageMode ? 'Aimed Sheriff and autonomous companions; buy capacity7/8/9 from town1/2/3 when affordable, reserve first hire cost, then existing House/Wall/hiring policy. Collect actual loot into first available slot including expanded backpack. Check every extra item across Rest and full-state/event replay. Natural starts have no grants; separate capital-start adds20000gold only at earned first town and buys all16slots through ordinary transactions. No granted items, forced kills or private battle completion.'
       : sandbagMode ? 'Aimed Sheriff and autonomous companions; prioritize Sandbag1, Sandbag2 from town4, then Repairman/House/Wall/hiring and paid/free repair policy. Reserve first hire cost. Natural runs have no grants. Separate capital-start grants12000gold only at earned first town, buys Sandbag4 normally, sets companions to armor-only/no priorities through normal town actions and avoids aiming at Crows until one positive reduction occurs. This input exposure addresses integer rounding that masks low-level Sandbags against small early-game hits. Measured damage pairs replay a single actual frame with only Sandbag level set to0; accept single-hit, same-final-RNG, surviving-wall pairs. This counterfactual is port integration evidence, separate from original damage reference.'
       : repairMode ? 'Aimed Sheriff and autonomous companions; prioritize Repairman1 when affordable (reserve first hire cost), Repairman2 from town4, then existing House/Wall/hiring policy. Pay Fix Wall on damaged even days when affordable; otherwise Free Repair. Separate capital-start grants12000gold only at an earned first town. No forced kills, HP grants or battle completion. Wave observations exclude leech weapons and item repair and account for same-frame castle-hit events.'
       : castleMode ? 'Aimed Sheriff plus autonomous permanent companions; buy House with enough gold for the next generated candidate, buy one Wall from town2 onward when affordable, then hire through ordinary confirmation; Free Repair and Day6 title before Rest; natural runs have no grants. Separate capital-start adds12000gold at an earned first town to exercise the three-slot party before the current Day7 boundary.'
       : 'Aimed Sheriff plus autonomous companion; generated equipment and skills retained; collect available loot; source skill choice indexed by seed/day; hire when affordable; Free Repair and Day6 title before Rest; no grants, invincibility, private battle completion or forced kills',
     limits: ['Port full-state/event replay and finite-state checks, not independent original parity or browser validation', 'Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred',
-      storageMode ? 'Capital capacity16 evidence grants20000gold only at earned first town; it does not establish natural full Storage affordability within seven days'
+      looterMode ? 'Counterfactual reward boundaries are port integration evidence; independent original generation traces establish source fidelity. Unchanged low-budget outcomes are retained, and higher budgets do not guarantee a more valuable individual drop.'
+      : storageMode ? 'Capital capacity16 evidence grants20000gold only at earned first town; it does not establish natural full Storage affordability within seven days'
       : castleMode ? 'Natural scenarios and the one capital-start are separate: the latter grants12000gold only at an earned first town; it does not establish natural three-companion affordability within seven days'
         : 'Controlled starts replace only the candidate generated at an actually earned first town, with provenance recorded separately',
       'Deaths count castle defeats; companions have no separate HP/death model in the source combat actor'], snapshots, results };
@@ -397,7 +443,7 @@ try {
   console.log(JSON.stringify({ ...report, classes: undefined, snapshots: undefined, results: undefined }, null, 2));
 } catch (error) {
   writeFileSync(resolve(output, 'failure.json'), JSON.stringify({ scenario, sourceHashes, geometrySha256, checkpoint, operationsSinceCheckpoint: sinceCheckpoint,
-    completedResults: results, sandbagObservations, ambiguousSandbagFrames, repairObservations,
+    completedResults: results, sandbagObservations, ambiguousSandbagFrames, repairObservations, looterObservations,
     error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) }, null, 2) + '\n');
   throw error;
 }

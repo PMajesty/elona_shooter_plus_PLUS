@@ -10,14 +10,14 @@ retained party and equipment. Victory, defeat,
 rewards, town entry and save/restore work across these stages. Original English
 artwork, fonts, audio and credits are retained.
 
-The **v20 loot MOD release** is published at
-[the local release](http://127.0.0.1:5175/elona/) after automated/source checks,
-eleven complete-save UI checks and successful production New Game and exact
-v19-save migration/restore checks. Ordinary loot and boss prizes now support
-mounting confirmation, saved pending dialogs and the original No/outside swap.
-Its deployable archive is `.build/elona-shooter-browser-loot-mod-slice.zip`;
-the verified v19 release remains in `.build/browser-before-loot-mod` and the
-prior Storage archive.
+The **v21 Looter release** is published at
+[the local release](http://127.0.0.1:5175/elona/) after 351 passing tests,
+26 accepted original observations, seven complete-save UI checks and successful
+production New Game/exact v20-save migration and restore checks. Looter now
+connects the original Castle purchase to future ordinary/boss generation budgets.
+Its deployable archive is `.build/elona-shooter-browser-looter-slice.zip`;
+the verified v20 release remains in `.build/browser-before-looter` and the prior
+loot MOD archive. Earlier recovery and verification evidence is retained below.
 
 This is not yet the complete game. Day 8 onward, other playable hero classes, full town
 management, the other Castle upgrades, temporary henchmen, recruit refresh, other card actions, Ragnarok and
@@ -114,8 +114,17 @@ slot adds **40 GP daily upkeep**. Shop, Equipment and ordinary/boss loot show ei
 columns and a second row when needed. Purchases, sales, swaps, town Upgrade/MODs,
 Shop Tokens and companion equipment use the expanded slots; only the **first five**
 remain battle hotkeys. At16 slots, further purchases cost nothing and are blocked.
-Looter, Trainer and Castle page2 remain unavailable. Version 20 adds MOD
-mounting during ordinary and boss loot, using these same expanded slots.
+Trainer and Castle page2 remain unavailable. MOD mounting during ordinary and
+boss loot uses these same expanded slots.
+
+**Looter** is available in Castle. Its first level costs **300 GP**;
+subsequent prices are `125 × current level² + 300`, with no source level cap.
+Each level adds **5 GP daily upkeep**. Level zero has multiplier 1; positive
+levels use `1.05 + level × 0.08` when generating random ordinary replacements
+and boss prizes. This raises the generation budget, not every item's sale value:
+guaranteed drops and already-owned/offered items are unchanged, the minimum
+budget remains 500, and individual outcomes can stay the same. Purchase consumes
+no AP or RNG and does not alter a settled result.
 Town preparation generates stock, cards, next-mission data and a
 recruit once. Open the Shop tab, click stock to pick it up, then click an empty
 owned slot to buy it. Owned items can be moved or swapped; dropping one outside
@@ -190,7 +199,9 @@ gun does not collect it automatically. While confirmation is open, clicks cannot
 also move another item or advance rewards. Stock MODs must first be bought into
 an empty owned slot.
 
-Saves now use **version 20**; versions **1–19** are accepted. Pending
+Saves now use **version 21**; versions **1–20** are accepted. The canonical
+`looterLevel` is a nonnegative integer; older saves initialize it to zero without
+purchase, RNG changes or repricing stored items or results. Pending
 loot MOD confirmation retains both area/index endpoints and resumes on the same
 reward screen without repeating a move or enchant. Older versions initialize it
 to null without consuming RNG. Capacity is the owned inventory length 6–16;
@@ -331,7 +342,44 @@ grenade flight, shake RNG and death before/after release. See
 [seventh-day wave notes](web/docs/seventh-day-wave-source.md) and
 [seventh-town notes](web/docs/seventh-town-source.md).
 
-The v20 loot MOD release passes **341 tests**, TypeScript checking and its
+The v21 release passes **351 tests**, TypeScript checking and its build.
+**All 26 original observations are accepted**, covering purchase/denial, upkeep,
+live ordinary/boss generation, exact budgets/RNG/item records, unchanged guaranteed
+drops and shop generation. Four focused reference tests include negative controls
+for omitting the current level, rounding instead of truncating budgets and
+multiplying guaranteed items' final values. Actual capture confirms the source
+hint displays 100% at level 12 and 109% at level 13. No runtime correction or
+expected-value adjustment was required. These source-method comparisons remain
+separate from native scheduling and the actual browser checks below.
+
+Four natural campaigns pass **61,187 frames and 703 save/replay checkpoints**,
+with 16 Looter purchases, 24 Rest transitions and 101 reward actions. All four
+finish Day 7. At 48 actual ordinary/boss generation boundaries, a separate replay
+changes only Looter to zero: **11 generated outcomes differ, all boss rewards;
+37 remain unchanged**. Unchanged ordinary rewards do not prove every case hit
+the 500-budget minimum: fixed drops and the same accepted random item also leave
+outcomes unchanged. Targeted original cases establish the minimum separately.
+No gold, items, HP or RNG are granted, and this evidence does not imply every individual
+drop is more valuable. The test policy targets level four by town four when
+affordable; that is not a game cap. The runner uses production ordinary contours
+and the documented boss rectangle fallback. Reports:
+`.build/looter-party-soak/report.json`, `.build/looter-tests-output.txt` and
+`.build/oracle/castle-looter-comparison-report.json`. The accepted fixture is
+`web/tests/fixtures/original-castle-looter-trace.json`. The independent audit in
+`.build/browser-qa/looter-scenario-audit.json` confirms all 168 saved fixtures,
+16 purchases and 48 paired generation boundaries.
+
+Seven full-envelope UI checks pass: Looter levels 1/2, unaffordable rejection,
+Continue, actual boss reward generation, Rest and earned result/town entry.
+All 308 candidate/live/ZIP files match, and all 305 public assets are unchanged.
+Production New Game starts at tick 0, HP 40, gold 200, ammo 5, six inventory slots
+and Looter 0. The actual v20 backup migrates and restores with complete-envelope
+equality at tick 674, HP 40, gold 209 and unchanged RNG; paused and with no console
+errors. Evidence: `.build/browser-qa/looter-ui-verification.json`,
+`.build/browser-qa/looter-production-verification.json` and
+`.build/looter-publication.json`; screenshot `looter-production-restored.jpg`.
+
+The historical v20 loot MOD release passes **341 tests**, TypeScript checking and its
 build (`assets/index-BJh2mRko.js`). **All 53 original observations across 18 cases
 match**, covering ordinary/boss rewards, all offer/owned directions, Yes,
 No/outside swaps, rejection, consumed metadata, new Living Weapon and cached
@@ -566,8 +614,8 @@ or native browser scheduling parity. Run
 `node --experimental-strip-types scripts/party-soak.ts 8 repair` from `web`;
 reports are in `.build/repair-party-soak/`.
 
-The next useful slice is the **Looter Castle upgrade tied to actual reward
-valuation**, followed by Trainer.
+The next useful slice is **Trainer tied to
+actual companion experience and postbattle progression**.
 Day8/Lava, broader campaign expansion and the unproven veteran late-game hitbox
 complaint remain later work.
 
@@ -617,6 +665,7 @@ python tools/build_castle_repair_oracle.py
 python tools/build_castle_sandbag_oracle.py
 python tools/build_castle_storage_oracle.py
 python tools/build_loot_mod_oracle.py
+python tools/build_castle_looter_oracle.py
 python tools/serve_oracle.py
 ```
 
@@ -654,6 +703,8 @@ and `npm.cmd run test:castle-sandbag-reference`. Storage uses `?suite=castle-sto
 and `npm.cmd run test:castle-storage-reference`. Reward MOD mounting uses
 `?suite=loot-mod` and `npm.cmd run test:loot-mod-reference`; run
 `npm.cmd run test:loot-mod-scenarios` for the earned-checkpoint integration branches.
+Looter uses `?suite=castle-looter` and `npm.cmd run test:castle-looter-reference`;
+`npm.cmd run test:looter-party-soak` runs the four natural purchase/reward campaigns.
 Run these scripts with `npm.cmd run` from `web/`. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, use the matching comparison command: `npm.cmd run test:reference`,

@@ -21,6 +21,10 @@ export function isOccupiedItem(item: Item | null | undefined): item is Item {
   return item !== null && item !== undefined && item.num > 0;
 }
 
+export function lootValueMultiplier(looter: number): number {
+  return looter === 0 ? 1 : 1.05 + looter * 0.08;
+}
+
 // Статические присваивания generateStuff; исходные числовые ID и названия сохранены.
 export const BASE_ITEM_FIELDS: Readonly<Record<number, Readonly<Partial<Item>>>> = {
   1: {"name": "Pistol", "reloadTimeMax": 20, "ammoMax": 10, "shootRate": 100, "automatic": false, "baseAccuracy": 150, "accuracyDec": 0.1, "attack": 20, "dmgAir": 75, "dmgArmor": 35, "reqTrait": 103, "reqLv": 1, "range": 1, "value": 300},
@@ -233,7 +237,7 @@ export class ItemFactory {
         if (queue[index] > 1000) queue[index] -= 1000;
         offers[index] = this.generate(queue[index], offers[index] ?? undefined);
       } else {
-        const looterFix = this.context.looter === 0 ? 1 : 1.05 + this.context.looter * 0.08;
+        const looterFix = lootValueMultiplier(this.context.looter);
         offers[index] = this.randomItem(int((this.context.day * 40 + 250) * looterFix), 1, offers[index] ?? undefined);
       }
     }
@@ -242,7 +246,7 @@ export class ItemFactory {
 
   bossLoot(bossKilled: number, modifiersOnly = false, previousOffers: readonly (Item | null)[] = []): (Item | null)[] {
     const offers = Array.from({ length: 8 }, (_, index) => previousOffers[index] ? { ...previousOffers[index], num: 0 } : null);
-    const looterFix = this.context.looter === 0 ? 1 : 1.05 + this.context.looter * 0.08;
+    const looterFix = lootValueMultiplier(this.context.looter);
     const targetValue = int((this.context.day * 60 + 500) * looterFix);
     for (let index = 0; index < Math.min(int(bossKilled / 2) + 1, 8); index++) {
       // clearGameInv обнуляет num, но не остальные поля; опция модов пропускает случайный выбор режима.
