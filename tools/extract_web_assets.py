@@ -53,6 +53,11 @@ BUTTONS = {"button_newGame": 2521, "button_continue": 2542, "button_help": 2579,
 BUTTONS["button_robVisitors"] = 1831
 BUTTONS["button_modBack"] = 1893
 BUTTONS["button_deleteSave"] = 2644
+BUTTONS.update({"button_helpBattle": 1936, "button_helpTown": 1938,
+                "button_helpCredits": 1941, "button_helpTips": 1943,
+                "button_helpLink": 1978, "button_pauseHelp": 1493})
+CLIPS.update({"helpTextAreaSkin": 1504, "helpScrollUp": 1519,
+              "helpScrollDown": 1522, "helpScrollThumb": 1521})
 FORCE = False
 
 
@@ -78,6 +83,9 @@ def placed_frame(tags, frame):
             if tag.get("placeFlagMove") == "true" and depth in display:
                 merged = copy.deepcopy(display[depth])
                 for key, value in tag.attrib.items():
+                    # MoveObject2 меняет матрицу PlaceObject3, но не отменяет его фильтры и формат.
+                    if key == "type" and merged.get("type") == "PlaceObject3Tag" and kind == "PlaceObject2Tag":
+                        continue
                     if value != "false":
                         merged.set(key, value)
                 for child in tag:
@@ -576,8 +584,18 @@ def town_layout(xml, sprites):
                 (int(hit_bounds.get("Xmax")) - int(hit_bounds.get("Xmin"))) / 20,
                 (int(hit_bounds.get("Ymax")) - int(hit_bounds.get("Ymin"))) / 20]
     # В городе окно стартует с 630; после боя та же анимация стартовала с 590.
+    source = (ROOT / "src/original/MainTimeline.as").read_text(encoding="utf-8")
+    tips_body = source.split("public function insertHelp()", 1)[1].split("public function refreshPlayer", 1)[0]
+    tips = [json.loads('"' + line.replace("\\'", "'") + '"')
+            for line in re.findall(r'window4_mc\.help\.text \+= "(.*?)";', tips_body)]
+    links_body = source.split("public function procLink(", 1)[1].split("internal function frame7", 1)[0]
+    links = {index: url for index, url in re.findall(r'url\[(\d+)\] = "(.*?)";', links_body) if url}
     return {"version": 1, "sourceSha256": ORIGINAL_SHA256, "rootFrame": 71,
             "titleSaves": {"children": {name: value for name, value in placements(tags, 22).items() if name in {"saveBox", "trash"}}},
+            "help": {"position": {"x": 600 - sum(i ** 1.7 for i in range(16)), "y": -20},
+                     "pages": [{"image": f"help{page}", "children": placements(sprites[1995].find("subTags"), 161 + page)}
+                               for page in range(1, 5)], "tips": tips, "links": links,
+                     "textAreaBase": {"width": 100, "height": 44}},
             "menuPosition": {"x": 630 - sum(i ** 1.7 for i in range(16)), "y": -22},
             "panelImageOffset": {"x": 0, "y": -22}, "navigation": navigation, "rootChildren": root,
             "mission": {"characterId": 1995, "frame": 40, "image": "townMission", "labelsImage": "townMissionLabels",
@@ -773,6 +791,10 @@ def main():
         shutil.copyfile(source, dest)
         manifest["sounds"][name] = f"sounds/{dest.name}"
     buttons(manifest)
+    for page in range(1, 5):
+        manifest["images"][f"help{page}"] = static_screen(xml, f"help{page}",
+            placed_frame(sprites[1995].find("subTags"), 161 + page),
+            {"closeButton", "help1", "help2", "help3", "help4", "help"} | {f"link{i}" for i in range(1, 11)})
     runtime_clips(xml, sprites, manifest)
     ammo = manifest["clips"]["ammoBar"]
     source = next(CACHE.glob("DefineSprite_2698*/1.png"))

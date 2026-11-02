@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v37, eight independent save slots**.
+Updated 2026-11-02. Current local build: **v37, original four-page help**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -91,16 +91,28 @@ tooltips remain. Ctrl+S saves; Ctrl+Shift+S/O exports/imports JSON; Ctrl+Shift+M
 toggles mute. Desktop keeps native620×380 size; smaller windows shrink proportionally.
 Never activate native fullscreen in testing: it takes over the user's desktop.
 
+Help now opens over the title or paused battle without creating a new simulation.
+All four original pages (Basic, Battle, Town, Credits),13 English tips and9 credits
+links are extracted from the source. Tips support wheel/keyboard scrolling,
+arrow buttons, track clicks and thumb dragging with the original component skins.
+Esc/outside click returns to the underlying screen; Space cannot resume combat
+under help. The remaining pause panel is still a browser approximation.
+Source: window frames162–165; insertHelp (4598), procHelp (7482), procLink (8698).
+
 ## Validation and limits
 
-- **501 tests passed**, with typechecking and production build passing. Latest
-  bundle: assets/index-BadSh2EE.js. Slot checks cover unchanged legacy storage,
+- **502 tests passed**, with typechecking and production build passing. Latest
+  bundle: assets/index-wJAPgtAu.js. Slot checks cover unchanged legacy storage,
   eight independent adventures, selection persistence, shared medals/mute,
   deletion/tombstones, Hardcore isolation, corrupt data and failed writes.
   Existing deterministic checks cover classes, campaign, equipment services,
   medal efficiency, modes/MODs, town economy, titles, Carry Over and JSON replay.
   Legacy loot generation treats a not-yet-initialized medal collection as empty
   during migration; it does not consume extra RNG to reconstruct that field.
+  The new help-content check compares every tip/link with the preserved source.
+  Two Python extraction regressions also pass: matrix-only PlaceObject2 moves must
+  retain the earlier PlaceObject3 format/filters. Losing that format broke credits
+  artwork extraction; the corrected exporter produces the original page.
 - The controlled full40-day campaign completed in96494 simulation frames, with
   all19 enemy kinds, rewards, towns and save boundaries. Its changed frame count
   follows the repeating MOD-sale correction and resulting generation RNG. Strong
@@ -140,6 +152,11 @@ Never activate native fullscreen in testing: it takes over the user's desktop.
   Both continued exports matched their complete saved envelopes. No console
   errors/fullscreen activation. Evidence: .build/browser-qa/save-slots-verification.json,
   save-slots-dropdown.png and save-slot-delete-confirmation.png.
+- The muted help browser check opened all four pages from the title, reached the
+  final tip, used wheel/arrows/thumb dragging, then opened help from paused Continue.
+  Space left combat paused at tick674; Esc returned to pause. Full exported
+  envelopes before/after both flows matched exactly. No console errors/fullscreen.
+  Evidence: .build/browser-qa/help-verification.json and original-help-basic.png.
 - Earlier browser evidence covers reload/combat/results/town, activities, hires,
   Museum, class unlocks, Ragnarok and both difficulty modes. Hardcore battle export
   is refused and Continue has no battle save; its town checkpoint loads and Rest
@@ -165,7 +182,10 @@ that the app's crash cause was fixed.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
    camera shake, decorative boss reticle, some ranged spell effects/frame sounds,
    rage art, Chain Gun interruption timing and raster/filter/subpixel differences.
-   Original pause/settings/help screens and controls also need completion.
+   Original pause/settings controls also need completion, including the original
+   F "Fire at will" control described in the restored help (currently unconnected).
+   Help's dynamic TextArea uses canvas cropping/scrolling in place of Flash's native
+   component; external credits retain their original URLs, whose availability is unverified.
 5. Separate static castle Sister damage/death interactions. Bird-rat falling
    motion is approximate; later enemy hit regions use rendered alpha. Town/search/
    robbery outcomes use concise English messages rather than all original modals.

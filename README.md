@@ -7,7 +7,7 @@ incomplete remake; remaining medal effects, Flash-save conversion and other syst
 
 Open [the local game](http://127.0.0.1:5175/elona/).
 Original artwork, English text, audio and credits are retained. Sound starts muted
-unless you previously enabled it; its button explicitly displays the current state.
+unless you previously enabled it; the mute preference persists between visits.
 
 ## Current capabilities
 
@@ -43,13 +43,16 @@ unless you previously enabled it; its button explicitly displays the current sta
 - A persistent browser medal collection with class unlocks and original New Game
   starting bonuses. Eight browser save slots with the original title dropdown,
   trash icon and deletion confirmation, plus Continue and JSON import/export.
-  Version35 accepts prior browser saves; original Flash saves require a future converter.
+  Version37 accepts prior browser saves; original Flash saves require a future converter.
 - Casual lowers encounter power/taxes and grants35% more kill XP. Hardcore uses
   normal combat, deletes the resumable save when a battle starts and permits
   saving/export only in town. Each mode has a separate best-day record.
 - All seven original Game MODs: boss MOD drops, Intense Start, weapon-level limits,
   Skip hard waves, Tighter crosshair, Laptop difficulty and Community Compilation.
   New Game opens the original options panel; selected MODs persist per adventure.
+- Original Basic, Battle, Town and Credits help pages, with all13 English tips,
+  original navigation and credits links. Open Help from the title or pause menu;
+  scroll tips with the wheel, scrollbar or keyboard. Esc/outside click closes help.
 
 Remaining work and validation limits are in [port status](docs/port-status.md).
 The [process review](docs/development-process-review.md) records the correction

@@ -38,6 +38,544 @@
       }
     }
   },
+  "help": {
+    "position": {
+      "x": -5.587619764971691,
+      "y": -20
+    },
+    "pages": [
+      {
+        "image": "help1",
+        "children": {
+          "closeButton": {
+            "characterId": 1497,
+            "x": 528.0,
+            "y": 82.95,
+            "matrix": [
+              0.99790955,
+              0.0,
+              0.0,
+              0.99790955,
+              528.0,
+              82.95
+            ],
+            "scaleX": 0.99790955,
+            "scaleY": 0.99790955,
+            "rotationDegrees": 0.0
+          },
+          "help1": {
+            "characterId": 1936,
+            "x": 239.55,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              239.55,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          },
+          "help2": {
+            "characterId": 1938,
+            "x": 336.35,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              336.35,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          },
+          "help3": {
+            "characterId": 1941,
+            "x": 432.35,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              432.35,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          },
+          "help4": {
+            "characterId": 1943,
+            "x": 141.9,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              141.9,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          }
+        }
+      },
+      {
+        "image": "help2",
+        "children": {
+          "closeButton": {
+            "characterId": 1497,
+            "x": 528.0,
+            "y": 82.95,
+            "matrix": [
+              0.99790955,
+              0.0,
+              0.0,
+              0.99790955,
+              528.0,
+              82.95
+            ],
+            "scaleX": 0.99790955,
+            "scaleY": 0.99790955,
+            "rotationDegrees": 0.0
+          },
+          "help1": {
+            "characterId": 1936,
+            "x": 239.55,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              239.55,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          },
+          "help2": {
+            "characterId": 1938,
+            "x": 336.35,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              336.35,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          },
+          "help3": {
+            "characterId": 1941,
+            "x": 432.35,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              432.35,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          },
+          "help4": {
+            "characterId": 1943,
+            "x": 141.9,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              141.9,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          }
+        }
+      },
+      {
+        "image": "help3",
+        "children": {
+          "link1": {
+            "characterId": 1978,
+            "x": 156.0,
+            "y": 285.55,
+            "matrix": [
+              0.9958191,
+              0.0,
+              0.0,
+              0.99497986,
+              156.0,
+              285.55
+            ],
+            "scaleX": 0.9958191,
+            "scaleY": 0.99497986,
+            "rotationDegrees": 0.0
+          },
+          "link2": {
+            "characterId": 1978,
+            "x": 156.0,
+            "y": 231.0,
+            "matrix": [
+              0.9958191,
+              0.0,
+              0.0,
+              0.99497986,
+              156.0,
+              231.0
+            ],
+            "scaleX": 0.9958191,
+            "scaleY": 0.99497986,
+            "rotationDegrees": 0.0
+          },
+          "link3": {
+            "characterId": 1978,
+            "x": 156.0,
+            "y": 187.95,
+            "matrix": [
+              0.9958191,
+              0.0,
+              0.0,
+              0.99497986,
+              156.0,
+              187.95
+            ],
+            "scaleX": 0.9958191,
+            "scaleY": 0.99497986,
+            "rotationDegrees": 0.0
+          },
+          "link4": {
+            "characterId": 1978,
+            "x": 156.0,
+            "y": 217.05,
+            "matrix": [
+              0.9958191,
+              0.0,
+              0.0,
+              0.99497986,
+              156.0,
+              217.05
+            ],
+            "scaleX": 0.9958191,
+            "scaleY": 0.99497986,
+            "rotationDegrees": 0.0
+          },
+          "link6": {
+            "characterId": 1978,
+            "x": 156.0,
+            "y": 174.05,
+            "matrix": [
+              0.9958191,
+              0.0,
+              0.0,
+              0.99497986,
+              156.0,
+              174.05
+            ],
+            "scaleX": 0.9958191,
+            "scaleY": 0.99497986,
+            "rotationDegrees": 0.0
+          },
+          "link5": {
+            "characterId": 1978,
+            "x": 156.0,
+            "y": 202.0,
+            "matrix": [
+              0.9958191,
+              0.0,
+              0.0,
+              0.99497986,
+              156.0,
+              202.0
+            ],
+            "scaleX": 0.9958191,
+            "scaleY": 0.99497986,
+            "rotationDegrees": 0.0
+          },
+          "link7": {
+            "characterId": 1978,
+            "x": 287.0,
+            "y": 141.25,
+            "matrix": [
+              0.9958191,
+              0.0,
+              0.0,
+              0.99497986,
+              287.0,
+              141.25
+            ],
+            "scaleX": 0.9958191,
+            "scaleY": 0.99497986,
+            "rotationDegrees": 0.0
+          },
+          "link8": {
+            "characterId": 1978,
+            "x": 156.0,
+            "y": 301.55,
+            "matrix": [
+              0.9958191,
+              0.0,
+              0.0,
+              0.99497986,
+              156.0,
+              301.55
+            ],
+            "scaleX": 0.9958191,
+            "scaleY": 0.99497986,
+            "rotationDegrees": 0.0
+          },
+          "link10": {
+            "characterId": 1978,
+            "x": 156.0,
+            "y": 246.45,
+            "matrix": [
+              0.9958191,
+              0.0,
+              0.0,
+              0.99497986,
+              156.0,
+              246.45
+            ],
+            "scaleX": 0.9958191,
+            "scaleY": 0.99497986,
+            "rotationDegrees": 0.0
+          },
+          "closeButton": {
+            "characterId": 1497,
+            "x": 528.0,
+            "y": 82.95,
+            "matrix": [
+              0.99790955,
+              0.0,
+              0.0,
+              0.99790955,
+              528.0,
+              82.95
+            ],
+            "scaleX": 0.99790955,
+            "scaleY": 0.99790955,
+            "rotationDegrees": 0.0
+          },
+          "help1": {
+            "characterId": 1936,
+            "x": 239.55,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              239.55,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          },
+          "help2": {
+            "characterId": 1938,
+            "x": 336.35,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              336.35,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          },
+          "help3": {
+            "characterId": 1941,
+            "x": 432.35,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              432.35,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          },
+          "help4": {
+            "characterId": 1943,
+            "x": 141.9,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              141.9,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          }
+        }
+      },
+      {
+        "image": "help4",
+        "children": {
+          "help": {
+            "characterId": 1530,
+            "x": 148.3,
+            "y": 200.9,
+            "matrix": [
+              3.7999878,
+              0.0,
+              0.0,
+              2.613617,
+              148.3,
+              200.9
+            ],
+            "scaleX": 3.7999878,
+            "scaleY": 2.613617,
+            "rotationDegrees": 0.0
+          },
+          "closeButton": {
+            "characterId": 1497,
+            "x": 528.0,
+            "y": 82.95,
+            "matrix": [
+              0.99790955,
+              0.0,
+              0.0,
+              0.99790955,
+              528.0,
+              82.95
+            ],
+            "scaleX": 0.99790955,
+            "scaleY": 0.99790955,
+            "rotationDegrees": 0.0
+          },
+          "help1": {
+            "characterId": 1936,
+            "x": 239.55,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              239.55,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          },
+          "help2": {
+            "characterId": 1938,
+            "x": 336.35,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              336.35,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          },
+          "help3": {
+            "characterId": 1941,
+            "x": 432.35,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              432.35,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          },
+          "help4": {
+            "characterId": 1943,
+            "x": 141.9,
+            "y": 327.0,
+            "matrix": [
+              1.0,
+              0.0,
+              0.0,
+              1.0016785,
+              141.9,
+              327.0
+            ],
+            "scaleX": 1.0,
+            "scaleY": 1.0016785,
+            "rotationDegrees": 0.0
+          }
+        }
+      }
+    ],
+    "tips": [
+      "-If you're dying playing Sheriff or Militia, try to manually reload your gun after EACH TIME you shoot.\n\n",
+      "-Aim for head shots if you can. You will deal double damage.\n\n",
+      "-Tax will become extremely high at later days. Invest in some economic skills early to secure your finance!\n\n",
+      "-When in the \"Fire at will\" mode, your troops can attack enemies beyond their effective weapon ranges, but they will suffer significant accuracy penalties.\n\n",
+      "-If you tag an ally's skills as \"Focused\" there will be a big chance that the ally will develop the skill when he levels.\n\n",
+      "-\"Party\" skills affect all of your troops. It's a good idea to have your allies specialize in party skills that will help your team.\n\n",
+      "-If more than two characters have the same party skill, only the character with the highest skill level will be used.\n\n",
+      "-Weapons that have \"Mod\" slots can be modded. Drag a weapon-mod item onto the weapon you want to modify. Be careful, weapon-mod items can only be used once and cannot be removed once applied.\n\n",
+      "-If you score 7 critical kills, you go on a rampage. While you are on a rampage, the damage you deal and the chance that enemies drop money increases.\n\n",
+      "-Weapons have effective range. For instance, shotguns are powerful guns but the accuracy of the gun drastically decreases when you aim at distant targets.\n\n",
+      "-You gain experience in the skill of the weapon you are using every time you kill an enemy. When your weapon experience reaches the amount needed for a level you will gain a weapon skill level.\n\n",
+      "-Weapons have anti-armor/air rating. For instance, shotguns are effective against air creatures and non-armored creatures but not effective against armored creatures.\n\n",
+      "-When a battle ends and if your wall HP was full at the beginning of every wave, you get a perfect game and its bonus! Easier to score with the repair upgrade.\n\n"
+    ],
+    "links": {
+      "1": "http://www.s-t-t.com/wwl/",
+      "2": "http://zodiacfragment.sakura.ne.jp/hp_00_mainpage_f.html",
+      "3": "http://www.tekepon.net/fsm/",
+      "4": "http://reinerstileset.4players.de/englisch.html",
+      "5": "http://lostgarden.com/",
+      "6": "http://shass.sakura.ne.jp/",
+      "7": "http://www.freesound.org/",
+      "8": "http://www14.big.or.jp/~amiami/happy/",
+      "10": "http://www.freedigitalphotos.net/"
+    },
+    "textAreaBase": {
+      "width": 100,
+      "height": 44
+    }
+  },
   "menuPosition": {
     "x": 24.41238023502831,
     "y": -22

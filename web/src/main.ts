@@ -12,6 +12,7 @@ import { weaponPresentation } from './combat-stats.ts';
 import { SAVE_SLOTS, readSelectedSlot, selectSaveSlot, deleteSaveSlot, exportSave, readMute, readSave, readProfile, storeProfile, canSaveAdventure, clearSave, storeMute, storeSave } from './storage.ts';
 import { saveSlotLabel } from './save-slots.ts';
 import { createTitleSavesView, type TitleSavesLayout } from './title-saves-view.ts';
+import { createHelpView, type HelpLayout } from './help-view.ts';
 import { createModConfirmation, type ModConfirmationLayout } from './mod-confirmation-view.ts';
 import { OriginalAlly, type OriginalAllyMetadata } from './original-animation.ts';
 import { createLootView } from './loot-view.ts';
@@ -92,6 +93,7 @@ class ElonaScene extends Phaser.Scene {
   private selection?: Phaser.GameObjects.Rectangle;
   private cursor?: Phaser.GameObjects.Graphics;
   private pauseLayer?: Phaser.GameObjects.Container;
+  private helpLayer?: Phaser.GameObjects.Container;
   private firePressed = false;
   private fireReleased = false;
   private firingGesture = false;
@@ -151,12 +153,14 @@ class ElonaScene extends Phaser.Scene {
     });
     this.input.keyboard?.on('keydown-SPACE', (event: KeyboardEvent) => {
       event.preventDefault();
+      if (this.helpLayer) return;
       if (this.screen !== 'battle') return;
       if (this.paused) this.togglePause();
       else this.reloadRequested = true;
     });
     this.input.keyboard?.on('keydown-ESC', () => {
-      if (this.screen === 'battle') this.togglePause();
+      if (this.helpLayer) this.closeHelp();
+      else if (this.screen === 'battle') this.togglePause();
       else if (this.screen === 'gene') this.showTitle();
       else if (this.screen === 'mods') this.leaveGameMods();
     });
@@ -176,6 +180,7 @@ class ElonaScene extends Phaser.Scene {
     this.firingGesture = this.firingReleaseOwned = false;
     this.input.setDefaultCursor('default');
     this.root.removeAll(true);
+    this.helpLayer = undefined; delete container.dataset.helpPage; delete container.dataset.helpScroll;
     for (const arrow of this.enemyArrowSprites.values()) arrow.container.destroy(true);
     this.enemyArrowSprites.clear();
     this.enemySprites.clear(); this.enemyRageSprites.clear(); this.enemyHitSprites.clear(); this.bossFrames.clear(); this.bossBars.clear(); this.projectileSprites.clear(); this.hud.clear(); this.effects = []; this.hotbar = [];
@@ -312,14 +317,17 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private showHelp(): void {
-    this.showGene();
-    this.root.removeAll(true);
-    this.image(manifest.images.townHud ? 'townHud' : 'town', -5, -15);
-    this.root.add(this.add.rectangle(0, 0, 620, 380, 0x000000, 0.45).setOrigin(0));
-    this.root.add(this.add.rectangle(90, 50, 440, 280, 0xe0d1ae).setOrigin(0).setStrokeStyle(2, 0x9e8c61));
-    this.text(123, 73, 'How to Play', 26);
-    this.text(123, 121, 'Mouse: aim and fire; bows hold/release.\n1–5 select or use an inventory slot.\nSpace reloads; click cancels manual reload.\nEsc pauses; Space also resumes.\n\nDefend the castle until the day ends.\nMission → Rest starts the next day\nwithout repairing the castle.', 16).setLineSpacing(3);
-    this.labelButton(245, 288, 'Return to Title', () => this.showTitle(), 145);
+    if (this.helpLayer || (this.screen !== 'title' && !this.paused)) return;
+    const layout = this.cache.json.get('town-layout') as { help: HelpLayout };
+    this.helpLayer = createHelpView(this, manifest, layout.help, () => this.closeHelp(), (page, scroll) => {
+      container.dataset.helpPage = String(page); container.dataset.helpScroll = String(Math.round(scroll));
+    }, () => this.playSound('soundClick1'));
+    this.root.add(this.helpLayer);
+  }
+
+  private closeHelp(): void {
+    this.helpLayer?.destroy(true); this.helpLayer = undefined;
+    delete container.dataset.helpPage; delete container.dataset.helpScroll;
   }
 
   showGene(page: 0 | 1 = 0, keepHero = false): void {
@@ -1332,11 +1340,12 @@ class ElonaScene extends Phaser.Scene {
     this.ambient?.pause(); this.bowSound?.pause(); this.saveGame(false);
     const existing = new Set(this.root.list);
     this.root.add(this.add.rectangle(0, 0, 620, 380, 0x000000, 0.45).setOrigin(0));
-    this.root.add(this.add.rectangle(199, 105, 222, 180, 0xdfcfac).setOrigin(0).setStrokeStyle(2, 0x8c7b53));
+    this.root.add(this.add.rectangle(199, 85, 222, 230, 0xdfcfac).setOrigin(0).setStrokeStyle(2, 0x8c7b53));
     this.text(310, 123, 'Paused', 26).setOrigin(0.5, 0);
     this.labelButton(245, 163, 'Resume', () => this.togglePause());
     this.labelButton(245, 199, 'Save Game', () => this.saveGame());
     this.labelButton(233, 235, 'Return to Title', () => { this.saveGame(false); this.showTitle(); }, 154);
+    this.originalButton('button_pauseHelp', 233, 273, () => this.showHelp());
     const members = this.root.list.filter(object => !existing.has(object));
     this.pauseLayer = this.add.container(0, 0, members); this.root.add(this.pauseLayer);
   }

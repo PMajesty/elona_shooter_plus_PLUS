@@ -935,6 +935,178 @@
       "originX": 8.0,
       "originY": 8.0,
       "characterId": 2644
+    },
+    "button_helpBattle": {
+      "file": "buttons/button_helpBattle.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1936
+    },
+    "button_helpBattle_over": {
+      "file": "buttons/button_helpBattle_over.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1936
+    },
+    "button_helpBattle_down": {
+      "file": "buttons/button_helpBattle_down.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1936
+    },
+    "button_helpTown": {
+      "file": "buttons/button_helpTown.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1938
+    },
+    "button_helpTown_over": {
+      "file": "buttons/button_helpTown_over.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1938
+    },
+    "button_helpTown_down": {
+      "file": "buttons/button_helpTown_down.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1938
+    },
+    "button_helpCredits": {
+      "file": "buttons/button_helpCredits.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1941
+    },
+    "button_helpCredits_over": {
+      "file": "buttons/button_helpCredits_over.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1941
+    },
+    "button_helpCredits_down": {
+      "file": "buttons/button_helpCredits_down.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1941
+    },
+    "button_helpTips": {
+      "file": "buttons/button_helpTips.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1943
+    },
+    "button_helpTips_over": {
+      "file": "buttons/button_helpTips_over.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1943
+    },
+    "button_helpTips_down": {
+      "file": "buttons/button_helpTips_down.png",
+      "width": 144,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1943
+    },
+    "button_helpLink": {
+      "file": "buttons/button_helpLink.png",
+      "width": 24,
+      "height": 22,
+      "originX": 11.95,
+      "originY": 10.95,
+      "characterId": 1978
+    },
+    "button_helpLink_over": {
+      "file": "buttons/button_helpLink_over.png",
+      "width": 24,
+      "height": 22,
+      "originX": 11.95,
+      "originY": 10.95,
+      "characterId": 1978
+    },
+    "button_helpLink_down": {
+      "file": "buttons/button_helpLink_down.png",
+      "width": 24,
+      "height": 22,
+      "originX": 11.95,
+      "originY": 10.95,
+      "characterId": 1978
+    },
+    "button_pauseHelp": {
+      "file": "buttons/button_pauseHelp.png",
+      "width": 208,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1493
+    },
+    "button_pauseHelp_over": {
+      "file": "buttons/button_pauseHelp_over.png",
+      "width": 208,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1493
+    },
+    "button_pauseHelp_down": {
+      "file": "buttons/button_pauseHelp_down.png",
+      "width": 208,
+      "height": 78,
+      "originX": 24.0,
+      "originY": 24.0,
+      "characterId": 1493
+    },
+    "help1": {
+      "file": "screens/help1.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "help2": {
+      "file": "screens/help2.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "help3": {
+      "file": "screens/help3.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "help4": {
+      "file": "screens/help4.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
     }
   },
   "clips": {
@@ -1884,6 +2056,54 @@
       "count": 189,
       "uniqueFrames": 9,
       "characterId": 981
+    },
+    "helpTextAreaSkin": {
+      "image": "sprites/helpTextAreaSkin.png",
+      "json": "sprites/helpTextAreaSkin.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 152,
+      "frameHeight": 22,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 1504
+    },
+    "helpScrollUp": {
+      "image": "sprites/helpScrollUp.png",
+      "json": "sprites/helpScrollUp.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 15,
+      "frameHeight": 14,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 1519
+    },
+    "helpScrollDown": {
+      "image": "sprites/helpScrollDown.png",
+      "json": "sprites/helpScrollDown.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 15,
+      "frameHeight": 14,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 1522
+    },
+    "helpScrollThumb": {
+      "image": "sprites/helpScrollThumb.png",
+      "json": "sprites/helpScrollThumb.json",
+      "originX": -1.0,
+      "originY": 0.0,
+      "frameWidth": 15,
+      "frameHeight": 52,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 1521
     }
   },
   "sounds": {
