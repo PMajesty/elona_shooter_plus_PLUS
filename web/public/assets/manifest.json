@@ -1186,6 +1186,13 @@
       "height": 380,
       "originX": 0,
       "originY": 0
+    },
+    "medalHint": {
+      "file": "screens/medalHint.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
     }
   },
   "clips": {
@@ -2267,6 +2274,18 @@
       "count": 216,
       "uniqueFrames": 25,
       "characterId": 91
+    },
+    "museumKongregate": {
+      "image": "sprites/museumKongregate.png",
+      "json": "sprites/museumKongregate.json",
+      "originX": 68.0,
+      "originY": 36.95,
+      "frameWidth": 136,
+      "frameHeight": 74,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 1835
     }
   },
   "sounds": {

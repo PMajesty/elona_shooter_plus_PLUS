@@ -230,6 +230,7 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.party; delete container.dataset.partySelection; delete container.dataset.pendingPartyAction; delete container.dataset.companionVisuals;
     delete container.dataset.castleUpgrades;
     delete container.dataset.titleName; delete container.dataset.titleSalary; delete container.dataset.claimTitleAvailable;
+    delete container.dataset.medalHint;
     delete container.dataset.carryOverAvailable; delete container.dataset.carryOverConfirmation;
     container.dataset.carryOver = String(Boolean(this.sim?.state.carryOver));
   }
@@ -1171,6 +1172,11 @@ class ElonaScene extends Phaser.Scene {
     this.reset('town');
     this.root.add(createTownView(this, this.sim.state, manifest, this.cache.json.get('town-layout') as TownLayout, {
       medalPage: page => { this.medalPage = page; this.playSound('soundClick1'); this.showTown('medals'); },
+      medalHint: hint => { if (hint) container.dataset.medalHint = JSON.stringify(hint); else delete container.dataset.medalHint; },
+      visitKongregate: () => {
+        this.sim!.visitKongregate(); this.saveGame(false); this.showTown('medals');
+        window.open('http://www.kongregate.com/?gamereferral=elonashooter', '_blank', 'noopener,noreferrer');
+      },
       robVisitors: () => {
         const result = this.sim!.robMuseumVisitors();
         if (result.outcome === 'done') { this.playSound('soundGun2'); this.saveGame(false); this.showTown('medals'); }
@@ -1186,7 +1192,7 @@ class ElonaScene extends Phaser.Scene {
         this.playSound(outcome === 'contracted' ? 'soundComplete' : 'soundClick1'); this.saveGame(false); this.showTown('mission');
         status.textContent = outcome === 'contracted' ? "Hired Gun: You've hired a henchman for this mission. He will join when you rest." : 'Henchman contract cancelled.';
       },
-      select: next => { if (next === 'medals' && this.sim!.visitMuseum()) this.saveGame(false); this.playSound('soundScroll1'); this.showTown(next); },
+      select: next => { if (next === 'medals' && this.sim!.visitMuseum(this.profile.bestHardcoreDay ?? 0)) this.saveGame(false); this.playSound('soundScroll1'); this.showTown(next); },
       actionHover: () => this.playSound('soundCard1'),
       message: value => { status.textContent = value; },
       castlePage: page => { this.castlePage = page; this.showTown('castle'); },

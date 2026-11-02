@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v38, original pause/options and fireworks**.
+Updated 2026-11-02. Current local build: **v38, remaining medal milestones and Museum hints**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -67,6 +67,15 @@ Sp.Trainer training. Prayer, Dinner, Taunt, searches and paid shop/recruit refre
 apply their source effects. Searches retain their own saved random sequence.
 Both original Museum medal pages show all38 English descriptions and earned states;
 visitor robbery, action-medal AP bonuses and class/day/perfect-day medals work.
+Survival medals now cover all six source boundaries: days10/20/35/50/80/150.
+Museum visits check both Hard Badge (25 medals) and Impossible Badge (current
+Hardcore Day100 or a saved Hardcore record of100), including cross-slot records.
+The collection supplies all cumulative starting-gold bonuses and Impossible
+Badge's20 starting Fame. The original Kongregate banner awards medal91 on a user
+click. Museum descriptions now use the original fixed hint1657 artwork/fields;
+locked medals show the original requirement and ???? bonus. This corrects descriptions
+being sent only to the hidden page status. No save format or RNG changes were needed.
+Source: startBattleMedal6732, museumMedal1101, kongregateLink1623, updateMedals5635.
 Equipment's original Recycle Gun and Charge Item buttons are connected with their
 selection prompt, eligible-slot dimming and cancellation. Recycle costs5 AP and
 replaces an owned gun with a random MOD using value/2+250; Charge Item costs3 AP
@@ -120,8 +129,8 @@ Source: pauseMenu/endPauseMenu, optionwindow_222, enemy.damage, startFire/fireWo
 
 ## Validation and limits
 
-- **514 tests passed**, with typechecking and production build passing. Latest
-  bundle: assets/index-B26_cPpi.js. Slot checks cover unchanged legacy storage,
+- **520 tests passed**, with typechecking and production build passing. Latest
+  bundle: assets/index-Dd2iyTt7.js. Slot checks cover unchanged legacy storage,
   eight independent adventures, selection persistence, shared medals/mute,
   deletion/tombstones, Hardcore isolation, corrupt data and failed writes.
   Existing deterministic checks cover classes, campaign, equipment services,
@@ -138,6 +147,9 @@ Source: pauseMenu/endPauseMenu, optionwindow_222, enemy.damage, startFire/fireWo
   Five presentation checks cover defaults/JSON validation, independent damage
   channels, original statistics, deterministic48/60-burst plans and Ha-na-bi
   eligibility/persistence, including Carry Over. Presentation does not draw combat RNG.
+  Six further medal checks cover every survival threshold, ordinary Rest into
+  Day150 with JSON replay, cumulative starting gold, both Impossible Badge paths,
+  starting Fame, invalid records, Carry Over and the idempotent website medal.
 - The controlled full40-day campaign completed in96494 simulation frames, with
   all19 enemy kinds, rewards, towns and save boundaries. Its changed frame count
   follows the repeating MOD-sale correction and resulting generation RNG. Strong
@@ -208,6 +220,13 @@ Source: pauseMenu/endPauseMenu, optionwindow_222, enemy.damage, startFire/fireWo
 - The user's original Sheriff adventure and collection were restored with full
   exported-envelope equality after migration: day1, tick674, RNG1744019180, HP40,
   gold209, paused/muted. No test MODs, unlocks or records remain.
+- The muted medal check used slot8 and a controlled Normal-mode town with a saved
+  Hardcore record of100. A Museum visit changed only medal87 in the adventure and
+  collection, Continue retained the whole envelope, and a real New Game started
+  with20 Fame. Original earned/locked hint panels were visibly checked; no external
+  link was opened. The test slot was deleted and the user's whole envelope restored
+  exactly, with no test medals or records left. No console errors/fullscreen.
+  Evidence: .build/browser-qa/medal-completion-verification.json and original-medal-hint.png.
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. Historical details are
@@ -219,7 +238,10 @@ that the app's crash cause was fixed.
 
 1. Long-session stability/performance and difficulty evidence beyond the first
    cycle; the current Day1000 save safety boundary remains an intentional limit.
-2. Remaining medal effects/triggers beyond those documented above.
+2. All38 defined medal award paths are connected; award-notification presentation
+   remains partial. Preserve source bonus discrepancies: Kongregate advertises a
+   wage discount, but wage3610 checks Ragnarok92; medal91 does not add another
+   discount. Ha-na-bi's advertised firework bonus likewise differs from startFire.
 3. Flash save conversion. The browser dropdown displays all eight choices at once,
    rather than the original ComboBox's five-row scrolling list.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
@@ -234,6 +256,8 @@ that the app's crash cause was fixed.
    button was town-only. The medal93 bonus text/source-count discrepancy is preserved.
    Help's dynamic TextArea uses canvas cropping/scrolling in place of Flash's native
    component; external credits retain their original URLs, whose availability is unverified.
+   The pause statistics' total-kill label still uses the current battle counter;
+   a lifetime counter is not yet recorded. External Museum link availability is unverified.
 5. Separate static castle Sister damage/death interactions. Bird-rat falling
    motion is approximate; later enemy hit regions use rendered alpha. Town/search/
    robbery outcomes use concise English messages rather than all original modals.

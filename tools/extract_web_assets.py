@@ -61,6 +61,7 @@ CLIPS.update({"helpTextAreaSkin": 1504, "helpScrollUp": 1519,
 CLIPS.update({"sisterFireAtWill": 2593, "fireAtWillRage": 2386})
 CLIPS.update({"gameVolume": 2671, "originalCrosshair": 2689, "fireworkLaunch": 96,
               "fireworkBit1": 101, "fireworkBit2": 91})
+CLIPS["museumKongregate"] = 1835
 BUTTONS.update({"button_pauseTitle": 1487, "button_pauseSave": 1490, "button_gameMenu": 2703})
 FORCE = False
 
@@ -629,7 +630,8 @@ def town_layout(xml, sprites):
                        "children": placements(sprites[1995].find("subTags"), 54)},
             "medals": {"characterId": 1995, "frame": 85, "image": "townMedals", "labelsImage": "townMedalsLabels",
                        "children": placements(sprites[1995].find("subTags"), 85),
-                       "rowChildren": placements(sprites[2151].find("subTags"), 1)},
+                       "rowChildren": placements(sprites[2151].find("subTags"), 1),
+                       "hintImage": "medalHint", "hintChildren": placements(sprites[1657].find("subTags"), 1)},
             "castleUpgrades": {"characterId": 2192, "clip": "castleUpgradeTiles", "children": upgrade_children,
                                "x": 150, "y": 140, "columns": 4, "stepX": 100, "stepY": 110,
                                "names": ["Fix Wall", "Wall", "Sandbag", "Storage", "House", "Looter", "Repairman", "Trainer", "Smith", "Museum", "Chicken", "Sister", "Villa", "Sp.Trainer", "N/A", "N/A"],
@@ -830,6 +832,8 @@ def main():
         manifest["sounds"][name] = f"sounds/{dest.name}"
     buttons(manifest)
     manifest["images"]["pauseMenu"] = pause_screen(xml, sprites)
+    manifest["images"]["medalHint"] = static_screen(xml, "medalHint", placed_frame(sprites[1657].find("subTags"), 1),
+        {"itemName", "itemDesc", "itemDesc2", "maxText", "typeText"})
     for page in range(1, 5):
         manifest["images"][f"help{page}"] = static_screen(xml, f"help{page}",
             placed_frame(sprites[1995].find("subTags"), 161 + page),

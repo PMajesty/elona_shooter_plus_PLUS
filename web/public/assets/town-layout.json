@@ -1995,6 +1995,154 @@
           "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">Reloading</font></p>"
         }
       }
+    },
+    "hintImage": "medalHint",
+    "hintChildren": {
+      "itemName": {
+        "characterId": 1651,
+        "x": 37.0,
+        "y": 10.15,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          37.0,
+          10.15
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 16.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            191.95,
+            19.85
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"16\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">Item Name</font></p>"
+        }
+      },
+      "itemDesc2": {
+        "characterId": 1652,
+        "x": 16.0,
+        "y": 81.5,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          16.0,
+          81.5
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            344.95,
+            28.5
+          ],
+          "align": 0,
+          "color": "#000099",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000099\" letterSpacing=\"0.000000\" kerning=\"1\">Item Name</font></p>"
+        }
+      },
+      "maxText": {
+        "characterId": 1654,
+        "x": 238.05,
+        "y": 14.15,
+        "matrix": [
+          1.000412,
+          0.0,
+          0.0,
+          1.0,
+          238.05,
+          14.15
+        ],
+        "scaleX": 1.000412,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 1653,
+          "fontSize": 11.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            61.9,
+            15.45
+          ],
+          "align": 0,
+          "color": "#330000",
+          "initialHtml": "<p align=\"left\"><font face=\"Impact\" size=\"11\" color=\"#330000\" letterSpacing=\"0.000000\" kerning=\"1\"><b>Maxed at 1</b></font></p>"
+        }
+      },
+      "typeText": {
+        "characterId": 1655,
+        "x": 168.1,
+        "y": 14.15,
+        "matrix": [
+          1.000412,
+          0.0,
+          0.0,
+          1.0,
+          168.1,
+          14.15
+        ],
+        "scaleX": 1.000412,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 1653,
+          "fontSize": 11.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            67.9,
+            15.45
+          ],
+          "align": 0,
+          "color": "#330000",
+          "initialHtml": "<p align=\"left\"><font face=\"Impact\" size=\"11\" color=\"#330000\" letterSpacing=\"0.000000\" kerning=\"1\"><b>Party Skill</b></font></p>"
+        }
+      },
+      "itemDesc": {
+        "characterId": 1656,
+        "x": 16.0,
+        "y": 32.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          16.0,
+          32.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            279.95,
+            75.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">Item Name</font></p>"
+        }
+      }
     }
   },
   "castleUpgrades": {

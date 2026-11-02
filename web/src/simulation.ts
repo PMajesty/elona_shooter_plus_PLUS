@@ -236,7 +236,7 @@ export class Simulation {
       if (['sniper', 'ranger', 'duelist', 'noble'].includes(this.state.player.classId)) this.state.player.classState = { frenzy: 0, idleCount: 0, burst: 0 };
     }
     if (this.state.player.classState) Object.assign(this.state.player.classState, { frenzy: 0, idleCount: 0, burst: 0 });
-    [10, 20, 35].forEach((day, index) => { if (this.state.day >= day) this.awardMedal(41 + index); });
+    [10, 20, 35, 50, 80, 150].forEach((day, index) => { if (this.state.day >= day) this.awardMedal(41 + index); });
     const e = this.state.economy;
     e.sisterWaves = e.sisters ? Array(this.state.waves.length + 1).fill(0) : [];
     for (let i = 0; i < e.sisters; i++) e.sisterWaves[1 + int(this.random() * this.state.waves.length)]++;
@@ -1771,9 +1771,18 @@ export class Simulation {
     return { outcome: 'done', message: `Slaughter! ${town.flags.robbed > 1 ? "There're only few people left in the museum, but you manage to collect" : 'You collect'} ${gold} gold pieces.` };
   }
 
-  visitMuseum(): boolean {
-    if (!this.partyMutationAvailable() || this.state.earnedMedals.length < 25 || this.state.earnedMedals.includes(86)) return false;
-    this.awardMedal(86); return true;
+  visitMuseum(bestHardcoreDay = 0): boolean {
+    if (!this.partyMutationAvailable() || !Number.isSafeInteger(bestHardcoreDay) || bestHardcoreDay < 0 || bestHardcoreDay > 1000000) return false;
+    const count = this.state.earnedMedals.length;
+    if (count >= 25) this.awardMedal(86);
+    if (this.state.mode === 'hardcore' && this.state.day >= 100 || bestHardcoreDay >= 100) this.awardMedal(87);
+    return this.state.earnedMedals.length !== count;
+  }
+
+  visitKongregate(): boolean {
+    if (!this.partyMutationAvailable()) return false;
+    const count = this.state.earnedMedals.length;
+    this.awardMedal(91); return this.state.earnedMedals.length !== count;
   }
 
   private searchTown(): string {

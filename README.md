@@ -3,7 +3,7 @@
 A TypeScript/Phaser browser remake of Elona Shooter Plus 1.3.0.4.
 The current local build supports **all eight original hero classes** and
 **repeating campaign cycles**, including Casual and Hardcore modes. This is an
-incomplete remake; remaining medal effects, Flash-save conversion and other systems are still being ported.
+incomplete remake; Flash-save conversion, remaining interactions and presentation details are still being ported.
 
 Open [the local game](http://127.0.0.1:5175/elona/).
 Original artwork, English text, audio and credits are retained. Sound starts muted
@@ -43,6 +43,10 @@ unless you previously enabled it; the mute preference persists between visits.
 - Museum/Medals navigation, both original medal pages and English descriptions;
   robbery for 2 AP with daily diminishing payouts, Robber skill/medal bonuses,
   saved counters and action medals with their next-town AP chances.
+  The original medal hint panel shows earned bonuses and locked requirements.
+  All six survival milestones through Day150 and the Day100 Hardcore Museum badge
+  are connected to the shared collection and future-start gold/Fame bonuses.
+  The original Kongregate link and its visit medal are available in the Museum.
 - A persistent browser medal collection with class unlocks and original New Game
   starting bonuses. Eight browser save slots with the original title dropdown,
   trash icon and deletion confirmation, plus Continue and JSON import/export.
