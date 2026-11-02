@@ -4,20 +4,23 @@ Current implementation: **seven connected Sheriff days**, with owned firearms an
 consumables, ordinary/boss loot, earned skills, prepared towns, shop transactions,
 weapon Upgrade, MOD mounting, Free Repair, Rest, the first title claim and its salary,
 plus permanent recruitment, companion equipment, autonomous AI, growth and wages,
-and Castle House capacity two/three and Wall purchases.
+and Castle House capacity two/three, Wall, paid Fix Wall and Repairman purchases.
 This is not a complete remake.
 The TypeScript/Phaser client runs independently of Flash and Ruffle; the preserved
 game remains the reference for behavior, content and appearance.
 
-The **v16 Castle release** is served at `http://127.0.0.1:5175/elona/` after
-automated/source checks and eleven complete-save browser checks. All 308 files
-from `.build/browser-castle-final` match publication and the archive. The bundle
-is `assets/index-s1hKilh5.js`; the deployable archive is
-`.build/elona-shooter-browser-castle-slice.zip` (8,573,679 bytes), SHA-256
-`510b912aa4da55f270d4b1b9afa28b86f3ddde7e351f6fcf7ea101ac303988b4`.
-Final production New Game and exact actual v15-save migration/restore checks pass.
-The verified v15 release is retained in `.build/browser-before-castle` (all 300
-files match that release) and `.build/elona-shooter-browser-party-slice.zip`
+The **v17 repair release** is served at `http://127.0.0.1:5175/elona/` after
+automated/source checks, eight complete-save browser checks and final production
+New Game/exact v16-save migration and restore checks. All 308 files from
+`.build/browser-repair-final` match publication and the archive. The bundle is
+`assets/index-XNVk3crn.js`; the deployable archive is
+`.build/elona-shooter-browser-repair-slice.zip` (8,574,119 bytes), SHA-256
+`5c19dbe91bc98155ce4886a619becbf36af285c13234ce57da33c9e7c3594988`.
+
+The verified v16 release remains in `.build/browser-before-repair` (all 308 files)
+and `.build/elona-shooter-browser-castle-slice.zip` (8,573,679 bytes, SHA-256
+`510b912aa4da55f270d4b1b9afa28b86f3ddde7e351f6fcf7ea101ac303988b4`).
+Historical v15 recovery remains `.build/browser-before-castle` and the party ZIP
 (8,432,781 bytes, SHA-256
 `1a49d3530e19f2a8c31fcd3f167f128f5b33139735189489cdae34b38b1c99a7`).
 Historical v14 recovery remains `.build/browser-before-party` and the Day7 archive.
@@ -87,7 +90,15 @@ establish this late-game diagnosis.
   the damage deficit; its price is derived from maxHP (first 240 GP). House adds 50
   upkeep per level and Wall adds 10 per purchase. Existing settled results remain
   historical. The original tiles, prices, levels and affordability are displayed;
-  other Castle purchases and page2 remain disabled.
+  Sandbag, Storage, Looter, Trainer and page2 remain disabled.
+- Paid **Fix Wall** costs 8 GP per missing HP, heals fully and increments its
+  retained purchase count, without AP/RNG/dialog. Full HP cost 0 disables it.
+  **Repairman** costs `250 × level² + 700` before purchase and adds 60 GP upkeep
+  per level. It does not heal on purchase or Rest acknowledgment. Each opening
+  or ordinary new-wave boundary heals 2 HP per level, clamped to maxHP, before
+  the perfect-wave check. A previously false perfect flag remains false, and
+  the final battle-completion boundary performs no repair. Automatic repair
+  refreshes the HP HUD silently, matching the source; no new flash or sound.
 - Day6 settlement deducts the first 10 GP tax separately from default upkeep 40.
   Mission → Claim title costs 4 AP and grants Honorary Citizen, once eligible.
   It consumes no RNG and pays no immediate gold. Its 100 GP salary begins at the
@@ -130,8 +141,12 @@ Ordinary-enemy collision uses original filled contours and placement matrices,
 including persisted sheep shadow history. Bosses use rendered alpha geometry;
 the headless soak uses an explicitly documented boss rectangle fallback.
 
-Current saves use **version 16**, accepting port versions **1–15** through
-their existing migrations. House capacity, Wall level and maxHP persist separately;
+Current saves use **version 17**, accepting port versions **1–16**.
+Repairman level and paid Fix Wall count are canonical nonnegative integers;
+legacy saves initialize them to zero without repairs, costs, RNG changes or
+repricing settlement. Existing wave-boundary state prevents repeated repair on
+restore; no separate repair timer is invented. Version 16 introduced separate
+House capacity, Wall level and maxHP fields;
 older saves initialize Wall level 1 without changing HP, RNG, owned party state
 or settled results. Unsupported legacy expanded capacity is not retroactively
 invented. Version 15 introduced the party state below. Canonical party/candidate and inactive records, equipment,
@@ -201,7 +216,34 @@ no Flash plugin, Ruffle, external CDN or gameplay server.
 
 ## Evidence and intentional corrections
 
-The v16 Castle release passes **298 tests**, TypeScript checking and its build.
+The v17 repair release passes **309 tests**, TypeScript checking and its build
+(`assets/index-XNVk3crn.js`). Two identical original runs match **37 observations**:
+17 controlled starting states, eleven tile transactions and nine timer outcomes.
+These include repair eligibility/payment, wave heal/clamp order, perfect-state
+history and the terminal no-heal boundary. Actor activity and decorative
+fireworks are excluded from that source timer diagnostic; connected play is
+checked separately.
+
+Eight browser checks match complete expected save envelopes: Repairman purchases
+for 700/950 gold, an unaffordable upgrade, paid Fix Wall, repeated full-HP rejection,
+Continue, six actual combat updates from tick 10795→10801 with HP 43→45, and earned
+Day5 results/town entry with 170 upkeep and 74 wages. No console errors were observed.
+All 305 public asset files are unchanged; all 308 candidate/live/archive files
+match. Production loaded `XNVk3crn`. New Game exported v17 at tick 0, HP 40,
+gold 200, ammo 5, Wall 1/capacity 1 and both new repair fields at zero. The actual
+live v16 backup migrated and restored with complete-envelope equality at tick 674,
+HP 40 and gold 209, preserving RNG; paused with no console errors. Evidence:
+`.build/browser-qa/repair-production-verification.json` and
+`.build/repair-publication.json`; screenshot `repair-production-restored.jpg`.
+
+Repair evidence: `.build/repair-tests-output.txt`,
+`.build/oracle/castle-repair-comparison-report.json`,
+`.build/browser-qa/repair-ui-verification.json` and
+`.build/repair-asset-preservation.json`. The source diagnostic's terminal observer
+stops at `exitBattle2` entry; rewards/cleanup and active-actor scheduling are
+separate integration evidence, not implied by its 37 comparisons.
+
+The historical v16 Castle release passed **298 tests**, TypeScript checking and its build.
 Two identical original runs match **23 House/Wall observations**: ten controlled
 starting states plus thirteen transactions covering payment, denied actions,
 House3 cap, damaged walls, nonstandard maxHP and upkeep. These controlled source
@@ -501,15 +543,27 @@ boss collision retains the documented rectangular fallback. Evidence:
 `.build/castle-party-soak/report.json`; command from `web`:
 `node --experimental-strip-types scripts/party-soak.ts 8 castle`.
 
+The separate repair soak passes **nine campaigns, 135,549 frames and 1,487
+checkpoints**, with 54 Rest transitions, 223 reward actions, 18 Repairman purchases
+and 10 paid Fix Wall purchases. Of 205 observed wave boundaries, 29 restore positive
+HP—64 HP total across five natural campaigns. All eight natural campaigns and the
+separate 12,000-gold capital-start finish Day7. Prioritizing repairs delays six
+natural second hires until Day7 town; expanded-party battles in this run occur
+only in the capital-start. The earlier Castle soak remains the natural
+multiple-companion battle evidence. This is state/event replay under production
+ordinary contours with the documented boss rectangle, not full original balance
+or native browser scheduling parity. Run
+`node --experimental-strip-types scripts/party-soak.ts 8 repair` from `web`;
+reports are in `.build/repair-party-soak/`.
+
 ## Next integrated work and continuation
 
-The next useful slice is **remaining Castle page0 actions**, starting with paid
-Fix Wall and Repairman after a fresh source audit of costs, repair timing and
-upkeep. This connects early-town spending and repeated battles before extending
-the campaign again. Storage, Looter, Trainer and Sandbag should follow in bounded
-integrated slices, rather than be treated as one large prerequisite. The
-[House/Wall source audit](../web/docs/castle-upgrades-source.md) and
-[UI notes](../web/docs/castle-upgrades-ui-source.md) preserve this milestone's boundary.
+The next useful slice is **Castle Sandbags**: audit original absorption, price,
+cap and upkeep, then connect the ordinary tile purchase to battle damage and
+save/restore. Storage, Looter and Trainer remain separate bounded Castle slices.
+This fills early town/combat interactions before extending the campaign again.
+The [Castle source audit](../web/docs/castle-upgrades-source.md) and
+[UI notes](../web/docs/castle-upgrades-ui-source.md) retain the current boundaries.
 Later campaign work still includes Lava and further town thresholds; Day8 onward
 remains unavailable. The veteran late-game hitbox report is still unproven and
 requires its own failing original encounter before a correction is claimed.

@@ -1,6 +1,6 @@
 {
   "date": "2026-11-02",
-  "milestone": "Castle House/Wall purchases, original pricing and future upkeep, two/three permanent companions, v16 persistence; published locally and browser-verified",
+  "milestone": "Paid Fix Wall and Repairman purchases, source-ordered wave healing, future upkeep and v17 persistence; published locally and browser-verified",
   "complete_port": false,
   "environment": {
     "os": "Windows",
@@ -10,19 +10,19 @@
     "vite": "8.3.5"
   },
   "automated": {
-    "simulation_tests_passed": 298,
+    "simulation_tests_passed": 309,
     "simulation_tests_failed": 0,
     "typescript": "passed",
     "candidate_build": "passed",
-    "production_build": "passed",
-    "test_output": ".build/castle-tests.txt",
-    "build_output": ".build/castle-build.txt",
-    "python_tools_compile": "passed: Castle upgrades diagnostic builder, asset extractor and oracle server",
-    "castle_party_soak": {
+    "production_build": "identical to verified candidate",
+    "test_output": ".build/repair-tests-output.txt",
+    "build_output": ".build/repair-build-output.txt",
+    "python_tools_compile": "passed: Castle repair diagnostic builder and oracle server",
+    "repair_party_soak": {
       "status": "passed",
       "seedCount": 8,
       "sourceHashes": {
-        "simulation.ts": "276eb07c77c5537a607a5822b364ac12b13c3f382172502c0957c16dcf92b784",
+        "simulation.ts": "3ff31a259e93715f45530956fc36cbe80960a1ad502d29dd701cb3f554a649d3",
         "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
         "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
         "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
@@ -31,12 +31,12 @@
         "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
         "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
         "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
-        "castle-upgrades.ts": "67dabea02711b7712ce3f3ed317c3c4ba4b43ff1e9be3c2bc0056ef4982da09b"
+        "castle-upgrades.ts": "eecc52653b69a25df279c9384b05879c9f6468a0a8a7f7ed02985ed35c633503"
       },
       "geometrySha256": "505b48ffe234d7187db5445bd4306f0d104648985d18a0719e7c47605fec3ad2",
       "scenarios": 9,
-      "frames": 135297,
-      "checkpoints": 1450,
+      "frames": 135549,
+      "checkpoints": 1487,
       "restTransitions": 54,
       "rewardActions": 223,
       "reachedDays": {
@@ -58,53 +58,55 @@
         "7": 9
       },
       "naturallyHiredClasses": [
-        1,
         2,
         3,
         4,
         5,
+        6,
+        7,
         8,
         9
       ],
-      "housePurchases": 10,
+      "fixWallPurchases": 10,
+      "repairmanPurchases": 18,
+      "positiveRepairObservations": 29,
+      "housePurchases": 8,
       "wallPurchases": 9,
       "maximumCompanions": 3,
       "partyBattleCounts": {
         "0": 8,
-        "1": 27,
-        "2": 23,
+        "1": 49,
+        "2": 1,
         "3": 4
       },
       "expandedNaturalScenarios": [
         "natural-0",
         "natural-1",
-        "natural-2",
         "natural-3",
-        "natural-4",
         "natural-5",
         "natural-6",
         "natural-7"
       ],
       "actorActivity": {
         "1": {
-          "shots": 1569,
-          "hits": 1245,
-          "damage": 71515,
-          "kills": 816,
-          "reloads": 807,
-          "reloadCompletions": 151,
-          "bowDraws": 405,
-          "levelUps": 49
+          "shots": 1853,
+          "hits": 1547,
+          "damage": 81550,
+          "kills": 940,
+          "reloads": 879,
+          "reloadCompletions": 153,
+          "bowDraws": 428,
+          "levelUps": 52
         },
         "2": {
-          "shots": 711,
-          "hits": 488,
-          "damage": 18584,
-          "kills": 260,
-          "reloads": 155,
-          "reloadCompletions": 32,
-          "bowDraws": 192,
-          "levelUps": 26
+          "shots": 77,
+          "hits": 68,
+          "damage": 4258,
+          "kills": 54,
+          "reloads": 69,
+          "reloadCompletions": 16,
+          "bowDraws": 0,
+          "levelUps": 4
         },
         "3": {
           "shots": 67,
@@ -117,21 +119,46 @@
           "levelUps": 5
         }
       },
-      "elapsedMs": 30434,
+      "elapsedMs": 27290,
       "collision": "Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts",
-      "policy": "Aimed Sheriff plus autonomous permanent companions; buy House with enough gold for the next generated candidate, buy one Wall from town2 onward when affordable, then hire through ordinary confirmation; Free Repair and Day6 title before Rest; natural runs have no grants. Separate capital-start adds12000gold at an earned first town to exercise the three-slot party before the current Day7 boundary.",
+      "policy": "Aimed Sheriff and autonomous companions; prioritize Repairman1 when affordable (reserve first hire cost), Repairman2 from town4, then existing House/Wall/hiring policy. Pay Fix Wall on damaged even days when affordable; otherwise Free Repair. Separate capital-start grants12000gold only at an earned first town. No forced kills, HP grants or battle completion. Wave observations exclude leech weapons and item repair and account for same-frame castle-hit events.",
       "limits": [
         "Port full-state/event replay and finite-state checks, not independent original parity or browser validation",
         "Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred",
         "Natural scenarios and the one capital-start are separate: the latter grants12000gold only at an earned first town; it does not establish natural three-companion affordability within seven days",
         "Deaths count castle defeats; companions have no separate HP/death model in the source combat actor"
-      ]
+      ],
+      "eligibleWaveObservations": 205,
+      "observedRestoredHp": 64,
+      "positiveNaturalScenarios": [
+        "natural-1",
+        "natural-2",
+        "natural-3",
+        "natural-4",
+        "natural-7"
+      ],
+      "partyBattleCoverage": "Expanded two/three-companion battles in this repair-priority run are capital-start only; natural second hires occurred at Day7 town. Prior Castle soak independently retains natural two-companion battle evidence."
     },
-    "castle_party_soak_report": ".build/castle-party-soak/report.json",
-    "castle_party_soak_report_sha256": "2735f7cd8d7ddff176c725922b331495315025706046bdddce721d36d8bd0b6b",
-    "castle_party_soak_fixtures": ".build/browser-qa/castle-party-soak-fixtures.json",
-    "asset_preservation": ".build/web-assets/castle-assets-verification.json",
-    "prior_evidence": "Earlier solo and one-companion soaks remain historical in milestone_history and their reports; the current expanded-party run is separate."
+    "repair_party_soak_report": ".build/repair-party-soak/report.json",
+    "repair_party_soak_report_sha256": "e909b1ca4a2b147d82147bbc018d2f0ae3d24fe78c8ca635a23ef5087802775e",
+    "repair_party_soak_fixtures": ".build/browser-qa/repair-party-soak-fixtures.json",
+    "asset_preservation": {
+      "status": "passed",
+      "oldReleaseFiles": 308,
+      "newReleaseFiles": 308,
+      "changed": [
+        "index.html"
+      ],
+      "added": [
+        "assets/index-XNVk3crn.js"
+      ],
+      "removed": [
+        "assets/index-s1hKilh5.js"
+      ],
+      "unchangedPublicAssetFiles": 305,
+      "allAssetsPreserved": true
+    },
+    "prior_evidence": "Prior Castle, party and solo campaign evidence remains historical in milestone_history; it is not recast as a new v17 run."
   },
   "browser_checks": {
     "new_game": {
@@ -808,7 +835,7 @@
         "Owned MOD Yes consumes the MOD, refills ammo and preserves gold/AP/RNG",
         "Upgrade preview costs no gold/AP before Yes, shows retained Damage MOD and red Shotgun6 requirement",
         "Reload and Continue restore the exact pending preview without rerolling",
-        "Upgrade Yes spends1179 gold and4 AP once:1817→638 and4→0",
+        "Upgrade Yes spends1179 gold and4 AP once:1817\u2192638 and4\u21920",
         "Further Upgrade is rejected for insufficient AP"
       ],
       "full_simulation_comparison": ".build/browser-qa/modification-ui-comparison.json",
@@ -963,7 +990,7 @@
       },
       "arrowContinue": "Full exported file equality after reload/Continue",
       "production_observed_console_errors": [],
-      "final_title_badge": "Observed Sheriff · Day 3 after importing the ordinary Day3 checkpoint and reloading"
+      "final_title_badge": "Observed Sheriff \u00b7 Day 3 after importing the ordinary Day3 checkpoint and reloading"
     },
     "fourth_day": {
       "status": "passed",
@@ -1209,7 +1236,7 @@
       "bundle": "assets/index-Bilu_2M0.js",
       "report": ".build/browser-qa/day6-ui-verification.json",
       "report_sha256": "18c5fc6c233899a41141c1a18ca590c4b295f5e6860e36c4c6c85a5c259e9a48",
-      "stage": "Browser exports53–61",
+      "stage": "Browser exports53\u201361",
       "updatedAt": "2026-11-02T00:33:38.530Z",
       "checks": {
         "rest": {
@@ -2282,9 +2309,243 @@
       "browserPaused": true,
       "consoleErrors": [],
       "screenshot": "castle-production-restored.jpg"
+    },
+    "castle_repair": {
+      "status": "passed",
+      "report": ".build/browser-qa/repair-ui-verification.json",
+      "checks": {
+        "repairman1": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "repair-ui-repairman1-v17.json",
+          "expectedFrom": "repair-party-natural-0-before-repairman1-v17.json",
+          "day": 2,
+          "tick": 3275,
+          "gold": 658,
+          "rng": 423535753,
+          "ap": 4,
+          "hp": 40,
+          "maxHp": 40,
+          "wallLevel": 1,
+          "capacity": 1,
+          "repairmanLevel": 1,
+          "wallFixCount": 0,
+          "companions": 1,
+          "futureUpkeep": 100,
+          "settledUpkeep": 40,
+          "settledWages": 53
+        },
+        "blocked-repairman": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "repair-ui-blocked-repairman-v17.json",
+          "expectedFrom": "repair-ui-repairman1-v17.json",
+          "day": 2,
+          "tick": 3275,
+          "gold": 658,
+          "rng": 423535753,
+          "ap": 4,
+          "hp": 40,
+          "maxHp": 40,
+          "wallLevel": 1,
+          "capacity": 1,
+          "repairmanLevel": 1,
+          "wallFixCount": 0,
+          "companions": 1,
+          "futureUpkeep": 100,
+          "settledUpkeep": 40,
+          "settledWages": 53
+        },
+        "fix-wall": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "repair-ui-fix-wall-v17.json",
+          "expectedFrom": "repair-party-natural-2-before-fix-wall-v17.json",
+          "day": 2,
+          "tick": 3287,
+          "gold": 406,
+          "rng": 329904393,
+          "ap": 4,
+          "hp": 40,
+          "maxHp": 40,
+          "wallLevel": 1,
+          "capacity": 1,
+          "repairmanLevel": 1,
+          "wallFixCount": 1,
+          "companions": 1,
+          "futureUpkeep": 100,
+          "settledUpkeep": 40,
+          "settledWages": 73
+        },
+        "full-fix-wall": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "repair-ui-full-fix-wall-v17.json",
+          "expectedFrom": "repair-ui-fix-wall-v17.json",
+          "day": 2,
+          "tick": 3287,
+          "gold": 406,
+          "rng": 329904393,
+          "ap": 4,
+          "hp": 40,
+          "maxHp": 40,
+          "wallLevel": 1,
+          "capacity": 1,
+          "repairmanLevel": 1,
+          "wallFixCount": 1,
+          "companions": 1,
+          "futureUpkeep": 100,
+          "settledUpkeep": 40,
+          "settledWages": 73
+        },
+        "repairman2": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "repair-ui-repairman2-v17.json",
+          "expectedFrom": "repair-party-natural-0-before-repairman2-v17.json",
+          "day": 4,
+          "tick": 7470,
+          "gold": 965,
+          "rng": 2441273808,
+          "ap": 4,
+          "hp": 45,
+          "maxHp": 45,
+          "wallLevel": 2,
+          "capacity": 1,
+          "repairmanLevel": 2,
+          "wallFixCount": 0,
+          "companions": 1,
+          "futureUpkeep": 170,
+          "settledUpkeep": 110,
+          "settledWages": 69
+        },
+        "restore": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "repair-ui-restore-v17.json",
+          "expectedFrom": "repair-ui-repairman2-v17.json",
+          "day": 4,
+          "tick": 7470,
+          "gold": 965,
+          "rng": 2441273808,
+          "ap": 4,
+          "hp": 45,
+          "maxHp": 45,
+          "wallLevel": 2,
+          "capacity": 1,
+          "repairmanLevel": 2,
+          "wallFixCount": 0,
+          "companions": 1,
+          "futureUpkeep": 170,
+          "settledUpkeep": 110,
+          "settledWages": 69
+        },
+        "wave-heal": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "repair-ui-wave-heal-v17.json",
+          "expectedFrom": "repair-party-natural-1-before-wave-repair-v17.json",
+          "day": 6,
+          "tick": 10801,
+          "gold": 1601,
+          "rng": 609632831,
+          "ap": null,
+          "hp": 45,
+          "maxHp": 45,
+          "wallLevel": 2,
+          "capacity": 1,
+          "repairmanLevel": 2,
+          "wallFixCount": 0,
+          "companions": 1,
+          "futureUpkeep": 170,
+          "settledUpkeep": 0,
+          "settledWages": 0
+        },
+        "result-town": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "repair-ui-result-town-v17.json",
+          "expectedFrom": "repair-earned-day5-result-v17.json",
+          "day": 5,
+          "tick": 10005,
+          "gold": 1691,
+          "rng": 2393373146,
+          "ap": 4,
+          "hp": 45,
+          "maxHp": 45,
+          "wallLevel": 2,
+          "capacity": 1,
+          "repairmanLevel": 2,
+          "wallFixCount": 0,
+          "companions": 1,
+          "futureUpkeep": 170,
+          "settledUpkeep": 170,
+          "settledWages": 74
+        }
+      },
+      "source": "Actual CUA import, Castle clicks, Continue, six normal browser updates and result Proceed; exports compared in full.",
+      "waveHealing": {
+        "input": ".build/browser-qa/repair-party-natural-1-before-wave-repair-v17.json",
+        "fromTick": 10795,
+        "toTick": 10801,
+        "fromHp": 43,
+        "toHp": 45,
+        "maxHp": 45,
+        "repairmanLevel": 2
+      },
+      "result": {
+        "input": ".build/browser-qa/repair-earned-day5-result-v17.json",
+        "provenance": ".build/browser-qa/repair-earned-day5-result-provenance.json",
+        "day": 5,
+        "upkeep": 170,
+        "wages": 74,
+        "gold": 1691
+      },
+      "consoleErrors": [],
+      "limits": [
+        "Earned imported checkpoints, not a fully manually played browser campaign.",
+        "The first healing candidate contained a dead boss and a moving arrow; the headless comparison correctly refused to substitute rectangular boss geometry. The accepted complete-state browser comparison uses an earned ordinary-enemy-only checkpoint instead.",
+        "No new pixel/audio or wall-clock performance equivalence claim."
+      ]
+    },
+    "repair_production": {
+      "status": "passed",
+      "bundle": "assets/index-XNVk3crn.js",
+      "newGame": {
+        "tick": 0,
+        "hp": 40,
+        "gold": 200,
+        "ammo": 5,
+        "wallLevel": 1,
+        "capacity": 1,
+        "repairmanLevel": 0,
+        "wallFixCount": 0
+      },
+      "migration": {
+        "from": 16,
+        "to": 17,
+        "fullEnvelopeEquality": true,
+        "exactCurrentRestore": true,
+        "tick": 674,
+        "hp": 40,
+        "gold": 209,
+        "wallLevel": 1,
+        "rngUnchanged": true
+      },
+      "browserPaused": true,
+      "consoleErrors": [],
+      "screenshot": "repair-production-restored.jpg"
     }
   },
-  "checkpoint_provenance": "Current Castle fixtures have operation-index and file-byte hashes in castle-party-soak-fixtures.json. Eight natural campaigns earned two companions. The separate three-companion experiment adds only12000gold to an actually earned first-town save; subsequent candidates, purchases, battles and rewards use ordinary Simulation actions. It does not establish natural three-companion affordability within seven days. Historical fixtures retain their recorded limitations.",
+  "checkpoint_provenance": "Current repair campaign fixtures carry operation indexes and byte hashes in repair-party-soak-fixtures.json. Eight natural seeded campaigns have no grants. The one capital-start differs from an earned first-town save only by12000gold. Five natural campaigns supply29positive healing observations totaling64HP. The browser result checkpoint is replayed from natural-0 ordinary recorded operations; its provenance is saved separately. Historical fixtures retain their original limits.",
   "performance": {
     "comparison_with_flash_or_ruffle": "not measured",
     "sample": {
@@ -2300,7 +2561,8 @@
       "scope": "One recorded published-page New Game DOM observation. Cache/network and reference-runtime conditions are uncontrolled; no Flash/Ruffle speedup or latency comparison is claimed."
     },
     "party_release": "No new wall-clock browser/Flash comparison. Headless throughput and background-tab update counts are not performance parity evidence.",
-    "castle_release": "No new Flash/browser performance comparison. Headless simulation throughput and the background-browser ten-update check are not latency or rendering performance evidence."
+    "castle_release": "No new Flash/browser performance comparison. Headless simulation throughput and the background-browser ten-update check are not latency or rendering performance evidence.",
+    "repair_release": "No new Flash/browser performance comparison. The six-update hidden-browser healing check establishes state behavior only."
   },
   "screenshots": [
     ".build/browser-qa/character-creation.jpg",
@@ -2346,7 +2608,12 @@
     ".build/browser-qa/castle-house3.jpg",
     ".build/browser-qa/castle-three-companions.jpg",
     ".build/browser-qa/castle-party-result.jpg",
-    ".build/browser-qa/castle-production-restored.jpg"
+    ".build/browser-qa/castle-production-restored.jpg",
+    ".build/browser-qa/repair-fix-wall.jpg",
+    ".build/browser-qa/repairman-level2.jpg",
+    ".build/browser-qa/repair-wave-heal.jpg",
+    ".build/browser-qa/repair-result-upkeep.jpg",
+    ".build/browser-qa/repair-production-restored.jpg"
   ],
   "preserved_baselines": {
     "original/elonashooter1.3.swf": {
@@ -9011,32 +9278,358 @@
       "report": ".build/oracle/castle-upgrades-comparison-report.json",
       "fixture": "web/tests/fixtures/original-castle-upgrades-trace.json",
       "negative_controls": "Incorrect full healing and Wall-level-based pricing produce comparison failures."
+    },
+    "castle_repair": {
+      "status": "passed",
+      "observedSnapshots": 37,
+      "inputSnapshots": 17,
+      "timerOutcomes": 9,
+      "transactionOutcomes": 11,
+      "matchedSnapshots": 37,
+      "comparisons": [
+        {
+          "scenario": "opening-restore",
+          "boundary": "timer",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "opening-restore",
+          "boundary": "timer",
+          "op": "timer",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "ordinary-partial",
+          "boundary": "timer",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "ordinary-partial",
+          "boundary": "timer",
+          "op": "timer",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "ordinary-clamp",
+          "boundary": "timer",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "ordinary-clamp",
+          "boundary": "timer",
+          "op": "timer",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "no-repairman",
+          "boundary": "timer",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "no-repairman",
+          "boundary": "timer",
+          "op": "timer",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "already-failed",
+          "boundary": "timer",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "already-failed",
+          "boundary": "timer",
+          "op": "timer",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "between-transitions",
+          "boundary": "timer",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "between-transitions",
+          "boundary": "timer",
+          "op": "timer",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "terminal-damaged",
+          "boundary": "timer",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "terminal-damaged",
+          "boundary": "timer",
+          "op": "timer",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "terminal-full",
+          "boundary": "timer",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "terminal-full",
+          "boundary": "timer",
+          "op": "timer",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "lethal-gate",
+          "boundary": "timer",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "lethal-gate",
+          "boundary": "timer",
+          "op": "timer",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "fix-insufficient",
+          "boundary": "town",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "fix-insufficient",
+          "boundary": "town",
+          "op": "click",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "fix-exact",
+          "boundary": "town",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "fix-exact",
+          "boundary": "town",
+          "op": "click",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "fix-repeat-full",
+          "boundary": "town",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "fix-repeat-full",
+          "boundary": "town",
+          "op": "click",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "fix-repeat-full",
+          "boundary": "town",
+          "op": "click",
+          "step": 2,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "fix-upgraded-counter",
+          "boundary": "town",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "fix-upgraded-counter",
+          "boundary": "town",
+          "op": "click",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "repairman-insufficient",
+          "boundary": "town",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "repairman-insufficient",
+          "boundary": "town",
+          "op": "click",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "repairman-first",
+          "boundary": "town",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "repairman-first",
+          "boundary": "town",
+          "op": "click",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "repairman-second",
+          "boundary": "town",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "repairman-second",
+          "boundary": "town",
+          "op": "click",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "repairman-sequence",
+          "boundary": "town",
+          "op": "before",
+          "step": 0,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "repairman-sequence",
+          "boundary": "town",
+          "op": "click",
+          "step": 1,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "repairman-sequence",
+          "boundary": "town",
+          "op": "click",
+          "step": 2,
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "repairman-sequence",
+          "boundary": "town",
+          "op": "click",
+          "step": 3,
+          "matched": true,
+          "differences": []
+        }
+      ],
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "705174478b6dd117b143bcb9344f555930b83673ba15abaf03012e9e111e7e82",
+      "traceSha256": "5c8791dec9d2e543bb6f92cbf4aa246b1a738cefedd3162640a125043c223a8e",
+      "checks": [
+        "Original Fix Wall/Repairman Castle tile shape hits, payment, repeat and affordability guards",
+        "Paid repair counter, AP0, totalMoney, zero RNG, independent maximumHP, unchanged past-perfect flag",
+        "Repairman700/950/1700 purchases do not heal immediately; upkeep adds60 per level",
+        "Original onTick opening/ordinary wave healing before noDamage test, clamp and persistent false flag",
+        "No continuous healing, no terminal-wave healing, and lethal guard before all healing",
+        "Production purchases preserve prepared town, party records/cache and already-settled result"
+      ],
+      "limits": [
+        "Explicit original timer calls with inactive actors; this does not prove full native scheduler or active companion/attack timing",
+        "Terminal source observer stops at exitBattle2 entry after original wave/noDamage/pause/immune changes; cleanup/rewards/event transition are excluded",
+        "Decorative fireworks disabled by the original option to isolate healing RNG",
+        "Town uses actual continued frame71 and controlled inputs; fresh town generation and gameplay earnings are excluded",
+        "UI descriptions and source pause/immune flags are captured, but their browser rendering/pause ownership are separate from the state comparison",
+        "Save migration, actual clicks and connected battles require separate integration checks"
+      ]
     }
   },
   "production_recovery": {
     "status": "passed",
-    "release_directory": ".build/browser-castle-final",
-    "previous_directory": ".build/browser-before-castle",
-    "current_bundle": "assets/index-s1hKilh5.js",
+    "release_directory": ".build/browser-repair-final",
+    "previous_directory": ".build/browser-before-repair",
+    "current_bundle": "assets/index-XNVk3crn.js",
     "candidate_build_matches_production": true,
     "copied_release_files_hash_checked": 308,
     "archive_files_hash_checked": 308,
-    "current_package": ".build/elona-shooter-browser-castle-slice.zip",
-    "current_package_bytes": 8573679,
-    "current_package_sha256": "510b912aa4da55f270d4b1b9afa28b86f3ddde7e351f6fcf7ea101ac303988b4",
-    "previous_package": ".build/elona-shooter-browser-party-slice.zip",
-    "previous_bundle": "assets/index-Do-bjyfx.js",
-    "candidate_browser_verification": ".build/browser-qa/castle-ui-verification.json",
-    "production_backup": ".build/browser-qa/castle-production-before-v15.json",
-    "production_browser_verification": ".build/browser-qa/castle-production-verification.json",
-    "production_restored_screenshot": ".build/browser-qa/castle-production-restored.jpg",
+    "current_package": ".build/elona-shooter-browser-repair-slice.zip",
+    "current_package_bytes": 8574119,
+    "current_package_sha256": "5c19dbe91bc98155ce4886a619becbf36af285c13234ce57da33c9e7c3594988",
+    "previous_package": ".build/elona-shooter-browser-castle-slice.zip",
+    "previous_bundle": "assets/index-s1hKilh5.js",
+    "candidate_browser_verification": ".build/browser-qa/repair-ui-verification.json",
+    "production_backup": ".build/browser-qa/repair-production-before-v16.json",
+    "production_browser_verification": ".build/browser-qa/repair-production-verification.json",
+    "production_restored_screenshot": ".build/browser-qa/repair-production-restored.jpg",
     "production_console_errors": [],
-    "publication_report": ".build/castle-publication.json",
-    "current_save_version": 16,
+    "publication_report": ".build/repair-publication.json",
+    "current_save_version": 17,
     "production_browser_smoke": "passed",
     "restored_battle": {
-      "from": 15,
-      "to": 16,
+      "from": 16,
+      "to": 17,
       "fullEnvelopeEquality": true,
       "exactCurrentRestore": true,
       "tick": 674,
@@ -9048,7 +9641,7 @@
   },
   "milestone_history": [
     {
-      "milestone": "Connected Sheriff Days1–5, original AIR waves and Fly, fifth-town recruit growth and preparation, explicit stale Fly pool-state correction, v12 persistence",
+      "milestone": "Connected Sheriff Days1\u20135, original AIR waves and Fly, fifth-town recruit growth and preparation, explicit stale Fly pool-state correction, v12 persistence",
       "saveVersion": 12,
       "tests_passed": 214,
       "test_output": ".build/day5-final-tests.txt",
@@ -9080,7 +9673,7 @@
         "collision": "Production ordinary-enemy contours; boss uses the documented rectangular headless fallback",
         "limits": [
           "Port self-consistency, finite state and JSON replay only; not an original-game parity proof",
-          "Sheriff Days 1–5 only; boss shape geometry not exercised",
+          "Sheriff Days 1\u20135 only; boss shape geometry not exercised",
           "No browser rendering, input latency, audio or wall-clock performance comparison"
         ]
       },
@@ -9114,7 +9707,7 @@
       }
     },
     {
-      "milestone": "Connected Sheriff Days1–6, original Barbarian movement/rage/effect geometry, sixth-town preparation, Day6 tax and Claim Title, v13 persistence",
+      "milestone": "Connected Sheriff Days1\u20136, original Barbarian movement/rage/effect geometry, sixth-town preparation, Day6 tax and Claim Title, v13 persistence",
       "saveVersion": 13,
       "tests_passed": 234,
       "test_output": ".build/day6-final-tests.txt",
@@ -9148,7 +9741,7 @@
         "collision": "Production ordinary-enemy contours; boss uses the documented rectangular headless fallback",
         "limits": [
           "Port self-consistency, finite state and JSON replay only; not an original-game parity proof",
-          "Sheriff Days 1–6 only; boss shape geometry not exercised",
+          "Sheriff Days 1\u20136 only; boss shape geometry not exercised",
           "No browser rendering, input latency, audio or wall-clock performance comparison"
         ]
       },
@@ -9192,7 +9785,7 @@
       "browser_checks": "docs/port-verification.json:browser_checks.sixth_day"
     },
     {
-      "milestone": "Connected Sheriff Days1–7, original RANGED waves and boss special attack, seventh-town preparation/recruit growth, title salary and medal62, v14 persistence; published locally and browser-verified",
+      "milestone": "Connected Sheriff Days1\u20137, original RANGED waves and boss special attack, seventh-town preparation/recruit growth, title salary and medal62, v14 persistence; published locally and browser-verified",
       "saveVersion": 14,
       "automated": {
         "simulation_tests_passed": 252,
@@ -9231,7 +9824,7 @@
           "collision": "Production ordinary-enemy contours; boss uses the documented rectangular headless fallback",
           "limits": [
             "Port self-consistency, finite state and JSON replay only; not an original-game parity proof",
-            "Sheriff Days 1–7 only; boss shape geometry not exercised",
+            "Sheriff Days 1\u20137 only; boss shape geometry not exercised",
             "Day7 arrivals and victories are separate observed counts; this policy does not guarantee a win",
             "No browser rendering, input latency, audio or wall-clock performance comparison"
           ],
@@ -11305,7 +11898,7 @@
       }
     },
     {
-      "milestone": "Connected Sheriff Days1–7 with permanent companions, source hiring/equipment/orders/AI/combat/progression/wages, v15 persistence and corrected live airborne targeting; published locally and browser-verified",
+      "milestone": "Connected Sheriff Days1\u20137 with permanent companions, source hiring/equipment/orders/AI/combat/progression/wages, v15 persistence and corrected live airborne targeting; published locally and browser-verified",
       "saveVersion": 15,
       "automated": {
         "simulation_tests_passed": 288,
@@ -11642,6 +12235,427 @@
             "enabledAfterSceneCreation": true
           },
           "limitation": "Earned encounter import validates the browser migration path; real spawn/order selection is covered by focused Simulation tests, not an extra manually played campaign."
+        }
+      }
+    },
+    {
+      "milestone": "Castle House/Wall purchases, original pricing and future upkeep, two/three permanent companions, v16 persistence; published locally and browser-verified",
+      "saveVersion": 16,
+      "automated": {
+        "simulation_tests_passed": 298,
+        "simulation_tests_failed": 0,
+        "typescript": "passed",
+        "candidate_build": "passed",
+        "production_build": "passed",
+        "test_output": ".build/castle-tests.txt",
+        "build_output": ".build/castle-build.txt",
+        "python_tools_compile": "passed: Castle upgrades diagnostic builder, asset extractor and oracle server",
+        "castle_party_soak": {
+          "status": "passed",
+          "seedCount": 8,
+          "sourceHashes": {
+            "simulation.ts": "276eb07c77c5537a607a5822b364ac12b13c3f382172502c0957c16dcf92b784",
+            "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
+            "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
+            "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
+            "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
+            "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
+            "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
+            "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
+            "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
+            "castle-upgrades.ts": "67dabea02711b7712ce3f3ed317c3c4ba4b43ff1e9be3c2bc0056ef4982da09b"
+          },
+          "geometrySha256": "505b48ffe234d7187db5445bd4306f0d104648985d18a0719e7c47605fec3ad2",
+          "scenarios": 9,
+          "frames": 135297,
+          "checkpoints": 1450,
+          "restTransitions": 54,
+          "rewardActions": 223,
+          "reachedDays": {
+            "1": 8,
+            "2": 9,
+            "3": 9,
+            "4": 9,
+            "5": 9,
+            "6": 9,
+            "7": 9
+          },
+          "wonDays": {
+            "1": 8,
+            "2": 9,
+            "3": 9,
+            "4": 9,
+            "5": 9,
+            "6": 9,
+            "7": 9
+          },
+          "naturallyHiredClasses": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            8,
+            9
+          ],
+          "housePurchases": 10,
+          "wallPurchases": 9,
+          "maximumCompanions": 3,
+          "partyBattleCounts": {
+            "0": 8,
+            "1": 27,
+            "2": 23,
+            "3": 4
+          },
+          "expandedNaturalScenarios": [
+            "natural-0",
+            "natural-1",
+            "natural-2",
+            "natural-3",
+            "natural-4",
+            "natural-5",
+            "natural-6",
+            "natural-7"
+          ],
+          "actorActivity": {
+            "1": {
+              "shots": 1569,
+              "hits": 1245,
+              "damage": 71515,
+              "kills": 816,
+              "reloads": 807,
+              "reloadCompletions": 151,
+              "bowDraws": 405,
+              "levelUps": 49
+            },
+            "2": {
+              "shots": 711,
+              "hits": 488,
+              "damage": 18584,
+              "kills": 260,
+              "reloads": 155,
+              "reloadCompletions": 32,
+              "bowDraws": 192,
+              "levelUps": 26
+            },
+            "3": {
+              "shots": 67,
+              "hits": 57,
+              "damage": 3837,
+              "kills": 48,
+              "reloads": 61,
+              "reloadCompletions": 14,
+              "bowDraws": 0,
+              "levelUps": 5
+            }
+          },
+          "elapsedMs": 30434,
+          "collision": "Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts",
+          "policy": "Aimed Sheriff plus autonomous permanent companions; buy House with enough gold for the next generated candidate, buy one Wall from town2 onward when affordable, then hire through ordinary confirmation; Free Repair and Day6 title before Rest; natural runs have no grants. Separate capital-start adds12000gold at an earned first town to exercise the three-slot party before the current Day7 boundary.",
+          "limits": [
+            "Port full-state/event replay and finite-state checks, not independent original parity or browser validation",
+            "Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred",
+            "Natural scenarios and the one capital-start are separate: the latter grants12000gold only at an earned first town; it does not establish natural three-companion affordability within seven days",
+            "Deaths count castle defeats; companions have no separate HP/death model in the source combat actor"
+          ]
+        },
+        "castle_party_soak_report": ".build/castle-party-soak/report.json",
+        "castle_party_soak_report_sha256": "2735f7cd8d7ddff176c725922b331495315025706046bdddce721d36d8bd0b6b",
+        "castle_party_soak_fixtures": ".build/browser-qa/castle-party-soak-fixtures.json",
+        "asset_preservation": ".build/web-assets/castle-assets-verification.json",
+        "prior_evidence": "Earlier solo and one-companion soaks remain historical in milestone_history and their reports; the current expanded-party run is separate."
+      },
+      "production_recovery": {
+        "status": "passed",
+        "release_directory": ".build/browser-castle-final",
+        "previous_directory": ".build/browser-before-castle",
+        "current_bundle": "assets/index-s1hKilh5.js",
+        "candidate_build_matches_production": true,
+        "copied_release_files_hash_checked": 308,
+        "archive_files_hash_checked": 308,
+        "current_package": ".build/elona-shooter-browser-castle-slice.zip",
+        "current_package_bytes": 8573679,
+        "current_package_sha256": "510b912aa4da55f270d4b1b9afa28b86f3ddde7e351f6fcf7ea101ac303988b4",
+        "previous_package": ".build/elona-shooter-browser-party-slice.zip",
+        "previous_bundle": "assets/index-Do-bjyfx.js",
+        "candidate_browser_verification": ".build/browser-qa/castle-ui-verification.json",
+        "production_backup": ".build/browser-qa/castle-production-before-v15.json",
+        "production_browser_verification": ".build/browser-qa/castle-production-verification.json",
+        "production_restored_screenshot": ".build/browser-qa/castle-production-restored.jpg",
+        "production_console_errors": [],
+        "publication_report": ".build/castle-publication.json",
+        "current_save_version": 16,
+        "production_browser_smoke": "passed",
+        "restored_battle": {
+          "from": 15,
+          "to": 16,
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "tick": 674,
+          "hp": 40,
+          "gold": 209,
+          "wallLevel": 1,
+          "rngUnchanged": true
+        }
+      },
+      "browser_checks": {
+        "castle_upgrades": {
+          "status": "passed",
+          "report": ".build/browser-qa/castle-ui-verification.json",
+          "checks": {
+            "blocked-house": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "castle-ui-blocked-house-v16.json",
+              "expectedFrom": "castle-party-natural-0-before-wall-v16.json",
+              "day": 2,
+              "tick": 3275,
+              "gold": 1358,
+              "rng": 423535753,
+              "ap": 4,
+              "hp": 40,
+              "maxHp": 40,
+              "wallLevel": 1,
+              "capacity": 1,
+              "companions": 1,
+              "futureUpkeep": 40,
+              "settledUpkeep": 40,
+              "settledWages": 53
+            },
+            "wall": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "castle-ui-wall-v16.json",
+              "expectedFrom": "castle-ui-blocked-house-v16.json",
+              "day": 2,
+              "tick": 3275,
+              "gold": 1118,
+              "rng": 423535753,
+              "ap": 4,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 1,
+              "companions": 1,
+              "futureUpkeep": 50,
+              "settledUpkeep": 40,
+              "settledWages": 53
+            },
+            "restore": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "castle-ui-restore-v16.json",
+              "expectedFrom": "castle-ui-wall-v16.json",
+              "day": 2,
+              "tick": 3275,
+              "gold": 1118,
+              "rng": 423535753,
+              "ap": 4,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 1,
+              "companions": 1,
+              "futureUpkeep": 50,
+              "settledUpkeep": 40,
+              "settledWages": 53
+            },
+            "house2": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "castle-ui-house2-v16.json",
+              "expectedFrom": "castle-party-natural-0-before-house2-v16.json",
+              "day": 4,
+              "tick": 7470,
+              "gold": 735,
+              "rng": 2441273808,
+              "ap": 4,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 2,
+              "companions": 1,
+              "futureUpkeep": 100,
+              "settledUpkeep": 50,
+              "settledWages": 69
+            },
+            "hire2": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "castle-ui-hire2-v16.json",
+              "expectedFrom": "castle-ui-house2-v16.json",
+              "day": 4,
+              "tick": 7470,
+              "gold": 335,
+              "rng": 2441273808,
+              "ap": 4,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 2,
+              "companions": 2,
+              "futureUpkeep": 100,
+              "settledUpkeep": 50,
+              "settledWages": 69
+            },
+            "house3": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "castle-ui-house3-v16.json",
+              "expectedFrom": "castle-party-capital-three-companions-before-house3-v16.json",
+              "day": 3,
+              "tick": 5387,
+              "gold": 6372,
+              "rng": 3200402021,
+              "ap": 4,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 3,
+              "companions": 2,
+              "futureUpkeep": 150,
+              "settledUpkeep": 100,
+              "settledWages": 124
+            },
+            "house-capped": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "castle-ui-house-capped-v16.json",
+              "expectedFrom": "castle-ui-house3-v16.json",
+              "day": 3,
+              "tick": 5387,
+              "gold": 6372,
+              "rng": 3200402021,
+              "ap": 4,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 3,
+              "companions": 2,
+              "futureUpkeep": 150,
+              "settledUpkeep": 100,
+              "settledWages": 124
+            },
+            "hire3": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "castle-ui-hire3-v16.json",
+              "expectedFrom": "castle-ui-house-capped-v16.json",
+              "day": 3,
+              "tick": 5387,
+              "gold": 5972,
+              "rng": 3200402021,
+              "ap": 4,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 3,
+              "companions": 3,
+              "futureUpkeep": 150,
+              "settledUpkeep": 100,
+              "settledWages": 124
+            },
+            "rest3": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "castle-ui-rest3-v16.json",
+              "expectedFrom": "castle-ui-hire3-v16.json",
+              "day": 4,
+              "tick": 5387,
+              "gold": 5972,
+              "rng": 3537529806,
+              "ap": null,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 3,
+              "companions": 3,
+              "futureUpkeep": 150,
+              "settledUpkeep": 0,
+              "settledWages": 0
+            },
+            "combat3": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "castle-ui-combat3-v16.json",
+              "expectedFrom": "castle-ui-rest3-v16.json",
+              "day": 4,
+              "tick": 5397,
+              "gold": 5972,
+              "rng": 3722923859,
+              "ap": null,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 3,
+              "companions": 3,
+              "futureUpkeep": 150,
+              "settledUpkeep": 0,
+              "settledWages": 0
+            },
+            "result-town": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "castle-ui-result-town-v16.json",
+              "expectedFrom": "castle-party-capital-three-companions-result-party3-v16.json",
+              "day": 4,
+              "tick": 7559,
+              "gold": 6519,
+              "rng": 1942416976,
+              "ap": 4,
+              "hp": 45,
+              "maxHp": 45,
+              "wallLevel": 2,
+              "capacity": 3,
+              "companions": 3,
+              "futureUpkeep": 150,
+              "settledUpkeep": 150,
+              "settledWages": 188
+            }
+          },
+          "observed_result": {
+            "upkeep": 150,
+            "wages": 188,
+            "gold": 6519
+          },
+          "limits": "Normal UI operations on imported earned checkpoints. Third-slot checkpoint comes from the separately declared +12000gold capital experiment. Actual browser combat comparison spans10 updates; complete campaign replay is headless and retains its documented boss rectangle fallback."
+        },
+        "castle_production": {
+          "status": "passed",
+          "bundle": "assets/index-s1hKilh5.js",
+          "newGame": {
+            "tick": 0,
+            "hp": 40,
+            "gold": 200,
+            "ammo": 5,
+            "wallLevel": 1,
+            "capacity": 1
+          },
+          "migration": {
+            "from": 15,
+            "to": 16,
+            "fullEnvelopeEquality": true,
+            "exactCurrentRestore": true,
+            "tick": 674,
+            "hp": 40,
+            "gold": 209,
+            "wallLevel": 1,
+            "rngUnchanged": true
+          },
+          "browserPaused": true,
+          "consoleErrors": [],
+          "screenshot": "castle-production-restored.jpg"
         }
       }
     }

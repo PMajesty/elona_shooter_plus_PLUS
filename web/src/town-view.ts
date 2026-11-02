@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
-import { castleUpgradeCost, castleUpkeep, type CastleUpgradeKind } from './castle-upgrades.ts';
+import { castleRepairAmount, castleUpgradeCost, castleUpkeep, type CastleUpgradeKind } from './castle-upgrades.ts';
 
 export type TownTab = 'mission' | 'castle' | 'shop' | 'characters' | 'equipment' | null;
 export type TownDialog = 'repair' | 'rest' | 'title' | null;
@@ -22,7 +22,7 @@ export interface TownLayout {
 }
 interface TownViewState {
   day: number; gold: number; castleHp: number; castleMaxHp: number; title: 0 | 1;
-  wallLevel: number; party: { capacity: 1 | 2 | 3 };
+  wallLevel: number; wallFixCount: number; repairmanLevel: number; party: { capacity: 1 | 2 | 3 };
   player: { level: number; exp: number; selectedSlot: number };
   town: { ap: number; preparation: string } | null; inventory: (Item | null)[];
 }
@@ -87,16 +87,16 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
       text(panel.children.unkeep, String(castleUpkeep(state)), x, y);
       button('button_freeRepair', panel.children.act1, callbacks.repair, x, y);
       const tile = layout.castleUpgrades, asset = manifest.clips[tile.clip];
-      const notice = 'Only House and Wall purchases are available.';
+      const notice = 'Fix Wall, Wall, House and Repairman purchases are available.';
       const hint = text(panel.children.hint2, notice, x, y);
       button(tile.pageButtons[0], panel.children.page1, () => {}, x, y);
       button(tile.pageButtons[1], panel.children.page2, () => callbacks.message('These Castle upgrades are not available yet.'), x, y, false).setAlpha(tile.disabledAlpha);
       // Остальные цены/уровни исходные, но их плитки явно отключены до реализации покупки.
-      const levels = [0, state.wallLevel, 0, 1, state.party.capacity, 0, 0, 0];
-      const costs = [8 * (state.castleMaxHp - state.castleHp), castleUpgradeCost('wall', state), 1000,
-        (state.inventory.length - 4) ** 2 * 30 + 250, castleUpgradeCost('house', state), 300, 700, 250];
+      const levels = [state.wallFixCount, state.wallLevel, 0, 1, state.party.capacity, 0, state.repairmanLevel, 0];
+      const costs = [castleUpgradeCost('fix-wall', state), castleUpgradeCost('wall', state), 1000,
+        (state.inventory.length - 4) ** 2 * 30 + 250, castleUpgradeCost('house', state), 300, castleUpgradeCost('repairman', state), 250];
       tile.names.forEach((name, index) => {
-        const kind: CastleUpgradeKind | undefined = index === 1 ? 'wall' : index === 4 ? 'house' : undefined;
+        const kind: CastleUpgradeKind | undefined = index === 0 ? 'fix-wall' : index === 1 ? 'wall' : index === 4 ? 'house' : index === 6 ? 'repairman' : undefined;
         const possible = Boolean(kind && costs[index] > 0 && state.gold >= costs[index]);
         const tileX = x + tile.x + index % tile.columns * tile.stepX;
         const tileY = y + tile.y + Math.floor(index / tile.columns) * tile.stepY;
@@ -105,10 +105,14 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         const upFrame = index * 2 + 1;
         const art = scene.add.image(0, 0, tile.clip, String(upFrame))
           .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
-        const label = text(tile.children.upgradeName, name + (levels[index] > 0 ? ` Lv ${levels[index]}` : ''));
+        // Счётчик Fix Wall сохраняется, но исходный индекс0 никогда не показывает суффикс уровня.
+        const label = text(tile.children.upgradeName, name + (index !== 0 && levels[index] > 0 ? ` Lv ${levels[index]}` : ''));
         const cost = text(tile.children.upgradeCost, String(costs[index])).setColor(possible ? tile.affordableColor : tile.unavailableColor);
         group.add([art, label, cost]);
-        const description = kind === 'house'
+        const description = kind === 'fix-wall' ? 'This will completely fix the castle wall.'
+          : kind === 'repairman' ? 'Repairers will slowly fix the castle wall during a battle between waves. '
+            + (state.repairmanLevel > 0 ? `(Currently, they can fix ${castleRepairAmount(state)} HP per wave)` : "[ You haven't acquired this upgrade yet ]")
+          : kind === 'house'
           ? `For each house built, you can hire +1 more troop. (Currently, you can hire ${state.party.capacity} people)`
           : kind === 'wall' ? `Each level of the wall upgrade gives you +5 more max hit points. (Currently, ${state.castleMaxHp} MHP)`
           : `${name} is not available in the current port yet.`;

@@ -12,9 +12,10 @@ import { generateEarlyTownRecruit } from '../src/recruits.ts';
 import { installCandidate } from '../src/party.ts';
 import { castleUpgradeCost, castleUpkeep } from '../src/castle-upgrades.ts';
 
-const castleMode = process.argv[3] === 'castle';
-const output = fileURLToPath(new URL(castleMode ? '../../.build/castle-party-soak' : '../../.build/party-soak', import.meta.url));
-const fixturePrefix = castleMode ? 'castle-party' : 'party';
+const repairMode = process.argv[3] === 'repair';
+const castleMode = repairMode || process.argv[3] === 'castle';
+const fixturePrefix = repairMode ? 'repair-party' : castleMode ? 'castle-party' : 'party';
+const output = fileURLToPath(new URL(`../../.build/${fixturePrefix}-soak`, import.meta.url));
 const browserOutput = fileURLToPath(new URL('../../.build/browser-qa', import.meta.url));
 mkdirSync(output, { recursive: true }); mkdirSync(browserOutput, { recursive: true });
 const seedCount = Number(process.argv[2] ?? 32);
@@ -49,6 +50,8 @@ const actorActivity: Record<number, Activity> = { 1: emptyActivity(), 2: emptyAc
 const partyBattleCounts: Record<number, number> = {};
 const expandedNaturalScenarios = new Set<string>();
 let housePurchases = 0, wallPurchases = 0, maximumCompanions = 0;
+let fixWallPurchases = 0, repairmanPurchases = 0;
+const repairObservations: { scenario: string; tick: number; day: number; level: number; waveBefore: number; hpBefore: number; damage: number; hpAfter: number; restoredHp: number }[] = [];
 
 function finite(value: unknown, path = 'state'): void {
   if (typeof value === 'number') assert.ok(Number.isFinite(value), `${path} is not finite`);
@@ -95,15 +98,15 @@ function run(current: Scenario, initial?: Save): void {
   };
   const activeClass = () => simulation.state.party.slots.find(slot => slot.slot <= 3 && slot.exists)?.member?.devType;
   const activeCount = () => simulation.state.party.slots.filter(slot => slot.slot <= 3 && slot.exists).length;
-  const recordFixture = (reason: string) => {
+  const recordFixture = (reason: string, state = simulation.toSave()) => {
     const classId = activeClass();
     if (!classId || recorded.has(reason)) return;
     recorded.add(reason);
-    const version = simulation.state.version;
-    const file = `${fixturePrefix}-${current.id}-${reason}-v${version}.json`, value = { format: 'elona-shooter-browser', version, appearance: 0, simulation: simulation.toSave() };
+    const version = state.version;
+    const file = `${fixturePrefix}-${current.id}-${reason}-v${version}.json`, value = { format: 'elona-shooter-browser', version, appearance: 0, simulation: state };
     const encoded = JSON.stringify(value, null, 2) + '\n';
     writeFileSync(resolve(browserOutput, file), encoded);
-    snapshots.push({ scenario: current.id, classId, reason, file, sha256: hash(encoded), operation: operations.length, day: simulation.state.day, tick: simulation.state.tick });
+    snapshots.push({ scenario: current.id, classId, reason, file, sha256: hash(encoded), operation: operations.length - (state.tick < simulation.state.tick ? 1 : 0), day: state.day, tick: state.tick });
   };
   const countEvent = (event: SimulationEvent) => {
     if (!event.actorSlot) return;
@@ -127,7 +130,21 @@ function run(current: Scenario, initial?: Save): void {
       if (activeClass()) activity.battles++;
       for (let frame = 0; frame < 6000 && simulation.state.phase === 'battle'; frame++) {
         const input = inputFor(simulation);
+        const beforeRepair = repairMode && simulation.state.repairmanLevel > 0 && simulation.state.newWave && simulation.state.waveIndex > 0
+          && simulation.state.timerRemainder + 20 >= 30 ? clone(simulation.toSave()) : undefined;
         act('tick', [input], sim => sim.tick(input)); totalFrames++;
+        if (beforeRepair && simulation.events.some(event => event.type === 'wave')
+          && !simulation.events.some(event => event.type === 'repair')
+          && !beforeRepair.inventory.some(item => isOccupiedItem(item) && item.leech)
+          && !beforeRepair.party.slots.some(slot => slot.exists && slot.weapon?.leech)) {
+          const damage = simulation.events.filter(event => event.type === 'castle-hit').reduce((sum, event) => sum + (event.amount ?? 0), 0);
+          const expected = Math.min(beforeRepair.castleMaxHp, beforeRepair.castleHp - damage + beforeRepair.repairmanLevel * 2);
+          assert.equal(simulation.state.castleHp, expected, 'Observed wave repair differs from source amount/cap');
+          const restoredHp = expected - (beforeRepair.castleHp - damage);
+          repairObservations.push({ scenario: current.id, tick: simulation.state.tick, day, level: beforeRepair.repairmanLevel,
+            waveBefore: beforeRepair.waveIndex, hpBefore: beforeRepair.castleHp, damage, hpAfter: expected, restoredHp });
+          if (restoredHp > 0) { recordFixture('before-wave-repair', beforeRepair); recordFixture('after-wave-repair'); save(); }
+        }
         for (const event of simulation.events) countEvent(event);
         for (const projectile of simulation.state.projectiles) if (projectile.actorSlot && !seenProjectiles.has(projectile.uid)) {
           seenProjectiles.add(projectile.uid); activity.projectiles++;
@@ -171,6 +188,15 @@ function run(current: Scenario, initial?: Save): void {
     if (castleMode) {
       const state = simulation.state;
       const candidateCost = state.party.slots[4].member?.cost ?? 0;
+      if (repairMode && state.repairmanLevel < (day >= 4 ? 2 : 1)
+        && state.gold >= castleUpgradeCost('repairman', state) + (activeCount() === 0 ? candidateCost : 0)) {
+        recordFixture(`before-repairman${state.repairmanLevel + 1}`);
+        const previousResult = clone(state.result);
+        assert.equal(act('buyCastleUpgrade', ['repairman'], sim => sim.buyCastleUpgrade('repairman')), 'purchased');
+        repairmanPurchases++;
+        assert.deepEqual(state.result, previousResult, 'Repairman purchase repriced an already paid result');
+        recordFixture(`repairman${state.repairmanLevel}`); save();
+      }
       if (activeCount() === state.party.capacity && state.party.capacity < 3 && state.party.slots[4].exists
         && state.gold >= castleUpgradeCost('house', state) + candidateCost) {
         recordFixture(`before-house${state.party.capacity + 1}`);
@@ -203,7 +229,12 @@ function run(current: Scenario, initial?: Save): void {
       } else assert.ok(['not-enough-gold', 'no-candidate', 'house-full', 'party-full'].includes(String(outcome)));
     }
     if (day === 6) act('claimTitle', [], sim => sim.claimTitle());
-    act('freeRepair', [], sim => sim.freeRepair()); save();
+    if (repairMode && simulation.state.castleHp < simulation.state.castleMaxHp && day % 2 === 0
+      && simulation.state.gold >= castleUpgradeCost('fix-wall', simulation.state)) {
+      recordFixture('before-fix-wall');
+      assert.equal(act('buyCastleUpgrade', ['fix-wall'], sim => sim.buyCastleUpgrade('fix-wall')), 'purchased');
+      fixWallPurchases++; recordFixture('fix-wall'); save();
+    } else { act('freeRepair', [], sim => sim.freeRepair()); save(); }
     if (day === 7) break;
     assert.equal(act('startNextDay', [], sim => sim.startNextDay()), true); totalRest++; rests++;
     recordFixture('battle-entry'); if (castleMode) recordFixture(`battle-party${activeCount()}`); save();
@@ -250,21 +281,28 @@ try {
     assert.ok(actorActivity[2].shots > 0 && actorActivity[3].shots > 0, 'Additional companion slots never fired');
     assert.ok(expandedNaturalScenarios.size > 0, 'No natural campaign earned an expanded party');
   } else assert.ok(Object.values(classes).every(row => row.natural.battles + row.controlled.battles > 0), 'One or more classes never entered battle');
+  if (repairMode) {
+    assert.ok(fixWallPurchases > 0 && repairmanPurchases > 0, 'Campaigns did not exercise both repair purchases');
+    assert.ok(repairObservations.some(row => row.scenario.startsWith('natural-') && row.restoredHp > 0), 'No natural campaign actually healed at a wave boundary');
+  }
   const report = { status: 'passed', seedCount, sourceHashes, geometrySha256, scenarios: results.length, frames: totalFrames, checkpoints: totalCheckpoints, restTransitions: totalRest,
     rewardActions: totalRewards, reachedDays, wonDays, naturallyHiredClasses: [...naturalHired].sort(), classes: castleMode ? undefined : classes,
+    ...(repairMode ? { fixWallPurchases, repairmanPurchases, repairObservations,
+      positiveRepairObservations: repairObservations.filter(row => row.restoredHp > 0).length } : {}),
     ...(castleMode ? { housePurchases, wallPurchases, maximumCompanions, partyBattleCounts, expandedNaturalScenarios: [...expandedNaturalScenarios],
       actorActivity: Object.fromEntries(Object.entries(actorActivity).map(([slot, value]) => [slot, Object.fromEntries(
         ['shots', 'hits', 'damage', 'kills', 'reloads', 'reloadCompletions', 'bowDraws', 'levelUps'].map(key => [key, value[key as keyof Activity]]))])) } : {}),
     elapsedMs: Math.round(performance.now() - started),
     collision: 'Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts',
-    policy: castleMode ? 'Aimed Sheriff plus autonomous permanent companions; buy House with enough gold for the next generated candidate, buy one Wall from town2 onward when affordable, then hire through ordinary confirmation; Free Repair and Day6 title before Rest; natural runs have no grants. Separate capital-start adds12000gold at an earned first town to exercise the three-slot party before the current Day7 boundary.'
+    policy: repairMode ? 'Aimed Sheriff and autonomous companions; prioritize Repairman1 when affordable (reserve first hire cost), Repairman2 from town4, then existing House/Wall/hiring policy. Pay Fix Wall on damaged even days when affordable; otherwise Free Repair. Separate capital-start grants12000gold only at an earned first town. No forced kills, HP grants or battle completion. Wave observations exclude leech weapons and item repair and account for same-frame castle-hit events.'
+      : castleMode ? 'Aimed Sheriff plus autonomous permanent companions; buy House with enough gold for the next generated candidate, buy one Wall from town2 onward when affordable, then hire through ordinary confirmation; Free Repair and Day6 title before Rest; natural runs have no grants. Separate capital-start adds12000gold at an earned first town to exercise the three-slot party before the current Day7 boundary.'
       : 'Aimed Sheriff plus autonomous companion; generated equipment and skills retained; collect available loot; source skill choice indexed by seed/day; hire when affordable; Free Repair and Day6 title before Rest; no grants, invincibility, private battle completion or forced kills',
     limits: ['Port full-state/event replay and finite-state checks, not independent original parity or browser validation', 'Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred',
       castleMode ? 'Natural scenarios and the one capital-start are separate: the latter grants12000gold only at an earned first town; it does not establish natural three-companion affordability within seven days'
         : 'Controlled starts replace only the candidate generated at an actually earned first town, with provenance recorded separately',
       'Deaths count castle defeats; companions have no separate HP/death model in the source combat actor'], snapshots, results };
   writeFileSync(resolve(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
-  writeFileSync(resolve(browserOutput, `${fixturePrefix}-soak-fixtures.json`), JSON.stringify({ status: 'passed', report: castleMode ? '../castle-party-soak/report.json' : '../party-soak/report.json', snapshots }, null, 2) + '\n');
+  writeFileSync(resolve(browserOutput, `${fixturePrefix}-soak-fixtures.json`), JSON.stringify({ status: 'passed', report: `../${fixturePrefix}-soak/report.json`, snapshots }, null, 2) + '\n');
   console.log(JSON.stringify({ ...report, classes: undefined, snapshots: undefined, results: undefined }, null, 2));
 } catch (error) {
   writeFileSync(resolve(output, 'failure.json'), JSON.stringify({ scenario, sourceHashes, geometrySha256, checkpoint, operationsSinceCheckpoint: sinceCheckpoint,

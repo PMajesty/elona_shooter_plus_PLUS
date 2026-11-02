@@ -304,7 +304,7 @@ test('v14 town migration installs the retained candidate without RNG, preparatio
   const untouched = structuredClone(legacy);
   const migrated = Simulation.fromSave(legacy);
   assert.deepEqual(legacy, untouched);
-  assert.equal(migrated.state.version, 16);
+  assert.equal(migrated.state.version, 17);
   assert.equal(migrated.state.rng, legacy.rng); assert.equal(migrated.state.gold, legacy.gold);
   assert.equal(migrated.state.totalMoney, legacy.totalMoney);
   assert.deepEqual(migrated.state.inventory, legacy.inventory);

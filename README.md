@@ -3,18 +3,19 @@
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
 Phaser 4. The current implementation covers **seven connected Sheriff days**:
 choose one of 22 appearances, fight, collect ordinary and boss loot, choose earned
-skills, enter town, hire permanent companions, improve the House and Wall, exchange
-equipment, buy/sell and upgrade weapons, mount MODs, use Free Repair, then Rest into Days 2–7 with your
+skills, enter town, hire permanent companions, improve the House and Wall, employ
+a Repairman, exchange equipment, buy/sell and upgrade weapons, mount MODs, repair
+the castle with gold or AP, then Rest into Days 2–7 with your
 retained party and equipment. Victory, defeat,
 rewards, town entry and save/restore work across these stages. Original English
 artwork, fonts, audio and credits are retained.
 
-The seven-day **v16 Castle release** is published at
-[the local release](http://127.0.0.1:5175/elona/) after automated/source checks
-and eleven complete-save browser checks, followed by successful production
-New Game and exact v15-save migration checks. Its deployable archive is
-`.build/elona-shooter-browser-castle-slice.zip`; the verified v15 release is retained
-in `.build/browser-before-castle` and the prior party archive.
+The seven-day **v17 repair release** is published at
+[the local release](http://127.0.0.1:5175/elona/) after automated/source checks,
+eight complete-save browser checks and successful production New Game and exact
+v16-save migration/restore checks. Its deployable archive is
+`.build/elona-shooter-browser-repair-slice.zip`; the verified v16 release is retained
+in `.build/browser-before-repair` and the prior Castle archive.
 
 This is not yet the complete game. Day 8 onward, other playable hero classes, full town
 management, the other Castle upgrades, temporary henchmen, recruit refresh, other card actions, Ragnarok and
@@ -89,7 +90,16 @@ costs **5,000 GP**, permitting two or three permanent companions; it does not hi
 anyone automatically. The first Wall costs **240 GP** and adds five current and
 maximum HP, retaining any existing damage deficit. Its following price depends
 on maxHP. Each extra House adds **50 GP** daily upkeep and each Wall adds **10 GP**;
-the already-settled result does not change. Other Castle tiles remain disabled.
+the already-settled result does not change.
+
+**Fix Wall** spends **8 GP per missing HP** and fully heals without AP or a
+dialog; at full HP it is unavailable. **Repairman** starts at **700 GP**, then
+costs 950 GP at level 1, with later prices `250 × level² + 700`. Buying a level
+adds **60 GP daily upkeep** and repairs **2 HP per level** when an opening or
+ordinary wave begins, capped at maximum HP. Buying it does not heal immediately.
+The final battle-completion boundary does not repair. Wave repair occurs before
+the original perfect-wave check, but cannot undo a previously lost perfect bonus.
+Sandbag, Storage, Looter, Trainer and Castle page2 remain unavailable.
 Town preparation generates stock, cards, next-mission data and a
 recruit once. Open the Shop tab, click stock to pick it up, then click an empty
 owned slot to buy it. Owned items can be moved or swapped; dropping one outside
@@ -97,7 +107,8 @@ the slots asks to sell it. Only Yes confirms, and any other dialog click cancels
 Shop Tokens discount stock. Town HP, AP, prepared data and full inventory records
 survive save/restore. **Mission → Rest** opens the original Resting dialog;
 acknowledging it begins the prepared next battle, up to Day 7. Rest does not heal
-the castle, spend AP or cost gold. Guns refill; consumable charges stay spent.
+the castle, spend AP or cost gold. A purchased Repairman heals when the opening
+wave starts after Rest. Guns refill; consumable charges stay spent.
 Days 2–7 each end in their own rewards and prepared town. Day 4 adds the source's
 harder BATCH1 wave pattern and boss shield. The boss turns when retreating,
 plays its original firing and shield frames, and reduces guarded damage to
@@ -158,7 +169,9 @@ Rejected mounting keeps both items. **No or clicking outside this confirmation
 swaps the MOD and gun**, matching the original owned-inventory behavior; it does
 not cancel like a sale. Stock MODs must first be bought into an empty owned slot.
 
-Saves now use **version 16**; versions **1–15** are accepted. House
+Saves now use **version 17**; versions **1–16** are accepted. Repairman
+level and the paid Fix Wall purchase count persist. Older saves initialize both
+to zero without buying, healing, consuming RNG or changing settled results. House
 capacity, Wall level and maximum HP persist as distinct fields. Legacy saves
 initialize the previously absent Wall level without replaying purchases or
 changing RNG, retained party records, HP or settled balances. Party records,
@@ -289,7 +302,26 @@ grenade flight, shake RNG and death before/after release. See
 [seventh-day wave notes](web/docs/seventh-day-wave-source.md) and
 [seventh-town notes](web/docs/seventh-town-source.md).
 
-The Castle release passes **298 tests**, TypeScript checking and its build.
+The v17 repair release passes **309 tests**, TypeScript checking and its build
+(`assets/index-XNVk3crn.js`). Two identical original runs match **37 observations**:
+17 controlled starting states, eleven tile transactions and nine timer outcomes.
+These include repair eligibility/payment, wave heal/clamp order, perfect-state
+history and the terminal no-heal boundary. Actor activity and decorative
+fireworks are excluded from that source timer diagnostic; connected play is
+checked separately.
+
+Eight browser checks match complete expected save envelopes: Repairman purchases
+for 700/950 gold, an unaffordable upgrade, paid Fix Wall, repeated full-HP rejection,
+Continue, six actual combat updates from tick 10795→10801 with HP 43→45, and earned
+Day5 results/town entry with 170 upkeep and 74 wages. No console errors were observed.
+All 305 public asset files are unchanged, and all 308 candidate/live/archive
+files match. Production New Game exported v17 at tick 0 with 40 HP, 200 gold,
+five shells and both new repair fields at zero. The actual live v16 backup
+migrated and restored with complete-envelope equality at tick 674, 40 HP and
+209 gold, preserving RNG; paused with no console errors. See
+[port verification](docs/port-verification.json).
+
+The historical v16 Castle release passed **298 tests**, TypeScript checking and its build.
 Two identical original runs provide **23 Castle observations**: ten controlled
 starting states and thirteen House/Wall transactions, including caps, denied
 purchases, damaged walls and nonstandard maxHP. The source methods match without
@@ -381,9 +413,23 @@ of three companions within seven days. The same ordinary-contour/boss-rectangle
 boundary applies. Run `node --experimental-strip-types scripts/party-soak.ts 8 castle`
 from `web`; reports are in `.build/castle-party-soak/`.
 
-The next useful slice is the remaining Castle page0 actions, beginning with paid
-Fix Wall and Repairman after their source effects and timing are checked. Day8,
-Lava and the unproven veteran late-game hitbox complaint remain later work.
+The separate repair soak passes **nine campaigns, 135,549 frames and 1,487
+checkpoints**, with 54 Rest transitions, 223 reward actions, 18 Repairman purchases
+and 10 paid Fix Wall purchases. Of 205 observed wave boundaries, 29 restore positive
+HP—64 HP total across five natural campaigns. All eight natural campaigns and the
+separate 12,000-gold capital-start finish Day7. Prioritizing repairs delays six
+natural second hires until Day7 town; expanded-party battles in this run occur
+only in the capital-start. The earlier Castle soak remains the natural
+multiple-companion battle evidence. This is state/event replay under production
+ordinary contours with the documented boss rectangle, not full original balance
+or native browser scheduling parity. Run
+`node --experimental-strip-types scripts/party-soak.ts 8 repair` from `web`;
+reports are in `.build/repair-party-soak/`.
+
+The next useful slice is **Castle Sandbags**, with the original absorption,
+price, cap and upkeep connected to battle damage and save/restore. Source behavior
+must be checked before implementation. Storage, Looter and Trainer remain later
+Castle work, alongside Day8/Lava and the unproven veteran late-game hitbox complaint.
 
 `npm.cmd run test:projectile-soak` separately exercises eight projectile guns
 and hand grenades under three seeds: **27 scenarios, 9,720 frames and 1,080
@@ -427,6 +473,7 @@ python tools/build_seventh_day_wave_oracle.py
 python tools/build_boss_special_oracle.py
 python tools/build_seventh_town_oracle.py
 python tools/build_castle_upgrades_oracle.py
+python tools/build_castle_repair_oracle.py
 python tools/serve_oracle.py
 ```
 
@@ -457,7 +504,9 @@ with `test:sixth-day-wave-reference`, `test:barbarian-reference` and
 `?suite=boss-special` and `?suite=seventh-town`, with
 `test:seventh-day-wave-reference`, `test:boss-special-reference` and
 `test:seventh-town-reference`. Castle House/Wall transactions use
-`?suite=castle-upgrades` and `npm.cmd run test:castle-upgrades-reference`.
+`?suite=castle-upgrades` and `npm.cmd run test:castle-upgrades-reference`. Paid
+repair and Repairman use `?suite=castle-repair` and
+`npm.cmd run test:castle-repair-reference`.
 Run these scripts with `npm.cmd run` from `web/`. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, use the matching comparison command: `npm.cmd run test:reference`,
