@@ -1,8 +1,8 @@
 # Castle purchase UI
 
 The Castle panel presents the original eight first-page tiles. Fix Wall, Wall,
-Sandbag, Storage, House, Looter and Repairman use the production immediate-purchase API;
-Trainer and page2 are visibly disabled and explain their unavailable scope. This note covers the
+Sandbag, Storage, House, Looter, Repairman and Trainer use the production immediate-purchase API;
+page2 is visibly disabled and explains its unavailable scope. This note covers the
 UI and asset boundary. Transaction evidence is in
 [castle-upgrades-source.md](castle-upgrades-source.md); browser acceptance is
 recorded separately by the integration owner.
@@ -43,9 +43,9 @@ in a browser.
 
 `MainTimeline.as:1322–1356` appends positive current levels, displays the cost,
 uses blue `#0000cc` when available and red `#cc0000` otherwise, and dims an
-unavailable tile to0.3. The port follows those values. Trainer displays its default
-source level/price but remains disabled regardless of gold. Page2 is unavailable.
-No other Castle purchase is exposed by this UI.
+unavailable tile to0.3. The port follows those values. All eight first-page tiles
+use their live levels and purchase guards. Page2 is unavailable; no second-page
+Castle purchase is exposed by this UI.
 
 `MainTimeline.as:13526–13555` purchases immediately: payment sound, current
 price deduction, upgrade, tile rebuild and interface refresh. There is no
@@ -55,13 +55,13 @@ Failure beeps; the small explanatory status messages are port UI rather than
 quotes from the original game. Affordability is recomputed by the transaction
 API, so rendered prices never authorize a stale purchase.
 
-Upkeep comes from `castleUpkeep(state)` and all seven enabled prices from
+Upkeep comes from `castleUpkeep(state)` and all eight prices from
 `castleUpgradeCost`. Free Repair continues to rebuild the panel after healing.
-Main accepts save envelopes 1–21 and emits 21. The town DOM diagnostic
+Main accepts save envelopes 1–22 and emits 22. The town DOM diagnostic
 `data-castle-upgrades` exposes House, Wall, maxHP, upkeep, the Fix Wall purchase
 counter, Repairman level/repair amount, Sandbag level/damage multiplier/absorption
-percentage, derived Storage level/capacity, Looter level/value multiplier and
-the seven current costs for ordinary
+percentage, derived Storage level/capacity, Looter level/value multiplier,
+Trainer level/experience multiplier and the eight current costs for ordinary
 browser checks; it is not an alternate action interface.
 
 ## Paid repair and Repairman extension
@@ -197,13 +197,46 @@ Number arithmetic and integer truncation; the UI does not replace the calculatio
 with an algebraically simplified percentage. `looterFix` at 12321–12324 returns
 1 for zero levels, otherwise `1.05 + level * 0.08`.
 
-The canonical field is `looterLevel`, and the wrapper emits version 21 while
-accepting versions 1–21. The runtime owns legacy initialization and valuation
+Version 21 introduced canonical `looterLevel` and accepted versions 1–21.
+The runtime owns legacy initialization and valuation
 of future ordinary/boss rewards; the UI does not reprice existing items or
 settled results. `data-castle-upgrades` adds `looter`, `looterCost`,
 `lootMultiplier` and `lootValueIncreasePercent` for inspecting ordinary UI state.
-Trainer and page 2 remain explicitly unavailable. Original-method comparisons
-and actual browser purchase/Continue/reward checks are separate acceptance evidence.
+Page 2 remains explicitly unavailable; the subsequent Trainer extension is below.
+Original-method comparisons and actual browser purchase/Continue/reward checks
+are separate acceptance evidence.
+
+## Trainer extension
+
+Trainer is tile 7 at parent origin `(474.41238023502831,228)`. Existing atlas
+frames 15/16 provide normal/hover artwork, using the same source registration,
+hit rectangle and embedded fonts. The source label is `Trainer` at level zero
+and `Trainer Lv N` after purchase. The title, cost, blue/red affordability color
+and dimmed state update through the ordinary Castle rebuild.
+
+`MainTimeline.as:12622–12624` gives the price `level² * 180 + 250`; no Trainer
+cap follows in the source cost checks or `upgradeMax`. The optional host lock
+branch at 12658 is disabled by a literal `false`, so the port does not invent a
+host restriction. `calcUnkeep` at 1660–1679 has no Trainer term: buying it does
+not add recurring upkeep. A normal click uses the shared payment sound and
+`buyCastleUpgrade('trainer')`, with no AP, RNG or confirmation dialog. Denial
+uses the existing beep/status path and preserves state.
+
+The source hint at 11881 is “With more trainers, your troops will gain experience
+a lot faster.” Level zero uses the shared `[ You haven't acquired this upgrade
+yet ]` detail. At positive levels the detail is `(Currently, your troops get N%
+more EXP)`, with `N = Math.trunc(castleTrainerMultiplier(state) * 100 - 100)`.
+`trainerFix` at 12949–12952 returns 1 for level zero and otherwise
+`1.03 + level * 0.04`. The UI keeps that Number arithmetic and truncation, rather
+than substituting an algebraically simplified percentage.
+
+Version 22 persists canonical `trainerLevel`. Main exports version 22 and accepts
+versions 1–22; the runtime owns migration, XP recipient rules and progression.
+The view neither grants XP on purchase nor changes level-up state. Town diagnostics
+add `trainer`, `trainerCost`, `trainerMultiplier` and
+`trainerExperienceIncreasePercent`. All eight first-page tiles are now connected;
+page 2 remains disabled. Source XP comparisons and actual browser purchase,
+Continue and combat/growth checks remain separate acceptance evidence.
 
 ## Preservation and reproduction
 

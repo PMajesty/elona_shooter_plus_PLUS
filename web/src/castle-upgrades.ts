@@ -1,6 +1,6 @@
 import { lootValueMultiplier } from './items.ts';
 
-export type CastleUpgradeKind = 'house' | 'wall' | 'fix-wall' | 'repairman' | 'sandbag' | 'storage' | 'looter';
+export type CastleUpgradeKind = 'house' | 'wall' | 'fix-wall' | 'repairman' | 'sandbag' | 'storage' | 'looter' | 'trainer';
 export type CastleUpgradeOutcome = 'purchased' | 'not-enough-gold' | 'capped' | 'unavailable';
 export interface CastleUpgradeState {
   party: { capacity: 1 | 2 | 3 };
@@ -9,6 +9,7 @@ export interface CastleUpgradeState {
   repairmanLevel: number;
   sandbagLevel: number;
   looterLevel: number;
+  trainerLevel: number;
   inventory: readonly unknown[];
 }
 
@@ -20,6 +21,7 @@ export function castleUpgradeCost(kind: CastleUpgradeKind, state: CastleUpgradeS
   if (kind === 'sandbag') return state.sandbagLevel >= 10 ? 0 : state.sandbagLevel * state.sandbagLevel * 240 + 1000;
   if (kind === 'storage') return state.inventory.length >= 16 ? 0 : (state.inventory.length - 4) ** 2 * 30 + 250;
   if (kind === 'looter') return state.looterLevel * state.looterLevel * 125 + 300;
+  if (kind === 'trainer') return state.trainerLevel * state.trainerLevel * 180 + 250;
   return Math.trunc(state.castleMaxHp * state.castleMaxHp / 2.5 - 400);
 }
 
@@ -30,6 +32,10 @@ export function castleUpkeep(state: CastleUpgradeState): number {
 
 export function castleLootMultiplier(state: Pick<CastleUpgradeState, 'looterLevel'>): number {
   return lootValueMultiplier(state.looterLevel);
+}
+
+export function castleTrainerMultiplier(state: Pick<CastleUpgradeState, 'trainerLevel'>): number {
+  return state.trainerLevel === 0 ? 1 : 1.03 + state.trainerLevel * 0.04;
 }
 
 export function castleStorageLevel(state: Pick<CastleUpgradeState, 'inventory'>): number {

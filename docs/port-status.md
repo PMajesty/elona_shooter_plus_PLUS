@@ -5,16 +5,26 @@ consumables, ordinary/boss loot, earned skills, prepared towns, shop transaction
 weapon Upgrade, MOD mounting, Free Repair, Rest, the first title claim and its salary,
 plus permanent recruitment, companion equipment, autonomous AI, growth and wages,
 and Castle House capacity two/three, Wall, Sandbag, expanded Storage, Looter,
-paid Fix Wall and Repairman purchases.
+paid Fix Wall, Repairman and Trainer purchases.
 This is not a complete remake.
 The TypeScript/Phaser client runs independently of Flash and Ruffle; the preserved
 game remains the reference for behavior, content and appearance.
 
-The **v21 Looter release** is served at `http://127.0.0.1:5175/elona/` after
-351 passing tests, 26 accepted original observations, seven complete-save UI checks
+The **v22 Trainer release** is served at `http://127.0.0.1:5175/elona/` after
+363 passing tests, 27 accepted original observations, seven complete-save UI checks
+and production New Game/exact v21-save migration and restore checks. All 308 files
+from `.build/browser-trainer-final` match the live build and ZIP; all 305 public
+assets are unchanged. The bundle is `assets/index-mtID2Ws9.js`; the archive is
+`.build/elona-shooter-browser-trainer-slice.zip` (8,576,292 bytes), SHA-256
+`c7d8cdd3623af49fd01f4536eb94262056c81a2fa913ff87d6c5ac8995fdee27`.
+The verified v21 release remains in `.build/browser-before-trainer` (308 files)
+and the Looter archive below.
+
+The historical **v21 Looter release** was verified with 351 passing tests,
+26 accepted original observations, seven complete-save UI checks
 and final production New Game/exact v20-save migration and restore checks. All 308
-files from `.build/browser-looter-final` match the live build and ZIP; all 305 public
-assets are unchanged. The bundle is `assets/index-CH4ZkfIi.js`; the archive is
+files from `.build/browser-looter-final` matched its published build and ZIP; all
+305 public assets were unchanged. The bundle is `assets/index-CH4ZkfIi.js`; the archive is
 `.build/elona-shooter-browser-looter-slice.zip` (8,576,060 bytes), SHA-256
 `172fdfbfb83e22b54d004df0611a1594ff578f4524244484bcdaedd38a9a16c2`.
 
@@ -109,7 +119,7 @@ establish this late-game diagnosis.
   the damage deficit; its price is derived from maxHP (first 240 GP). House adds 50
   upkeep per level and Wall adds 10 per purchase. Existing settled results remain
   historical. The original tiles, prices, levels and affordability are displayed;
-  Trainer and page2 remain disabled.
+  Castle page2 remains disabled.
 - Paid **Fix Wall** costs 8 GP per missing HP, heals fully and increments its
   retained purchase count, without AP/RNG/dialog. Full HP cost 0 disables it.
   **Repairman** costs `250 × level² + 700` before purchase and adds 60 GP upkeep
@@ -137,6 +147,14 @@ establish this late-game diagnosis.
   does not collect it. A pending modal blocks item movement and Proceed, saves
   both endpoints and reconstructs the original dialog/icon placement on Continue.
   Incompatible confirmation closes the dialog without changing either item.
+- **Trainer** is available in Castle. Price is `180 × level² + 250`
+  before purchase, with no source cap, AP/RNG cost or upkeep. Kill XP uses 1 at
+  level zero, otherwise `1.03 + level × 0.04`, after the original integer stages.
+  Both hero and companions receive the multiplier in the observed original runtime:
+  its intended-looking hero exemption references undefined `_root.pc`.
+  Weapon XP and the fixed daily 250 XP are unchanged; pending growth retains source
+  RNG order and party-cache timing. The original tile, level suffix, affordability
+  and float-truncated percentage hint are displayed.
 - **Looter** is available at `125 × level² + 300` before purchase,
   with no source cap and 5 GP recurring upkeep per level. Purchase spends only
   gold, changes no existing items and leaves paid results intact. Future random
@@ -188,11 +206,11 @@ Ordinary-enemy collision uses original filled contours and placement matrices,
 including persisted sheep shadow history. Bosses use rendered alpha geometry;
 the headless soak uses an explicitly documented boss rectangle fallback.
 
-Current saves use **version 21**, accepting port versions **1–20**.
-`looterLevel` is canonical and validated as a nonnegative integer. Older saves
-initialize it to zero without purchases, RNG changes or altered items/results.
-The level reaches future ordinary and boss generation while already-generated
-offers remain stored exactly across reload.
+Current saves use **version 22**, accepting port versions **1–21**.
+`trainerLevel` is canonical and validated as a nonnegative integer. Older saves
+initialize it to zero without purchases, XP changes or RNG draws. Existing Looter,
+inventory, offers, prepared towns, party records and settled results are preserved.
+The verified v21 baseline remains separately recoverable.
 The pending loot MOD action stores distinct offer/owned endpoints, validates them
 against the current reward phase and occupied item types, and restores without
 replaying the transaction. Incompatible pairs remain valid pending saves because
@@ -279,6 +297,45 @@ a different format. The static build supports subdirectory hosting and requires
 no Flash plugin, Ruffle, external CDN or gameplay server.
 
 ## Evidence and intentional corrections
+
+The v22 Trainer release passes **363 tests**, TypeScript checking and its build
+(`assets/index-mtID2Ws9.js`). **All 27 original observations are accepted**:
+11 purchase observations and 16 kill/settlement cases. Six focused reference tests
+include five negative controls for a hero exemption, early multiplication before
+integer XP stages, multiplying daily XP, extra weapon XP and premature party-cache
+refresh. The observed original `_root.pc` is undefined, so Trainer affects hero
+kills too; this source behavior is retained. Threshold cases verify both growth
+draws before later drop RNG. See [Trainer source notes](../web/docs/castle-trainer-source.md),
+`web/tests/fixtures/original-castle-trainer-trace.json` and
+`.build/oracle/castle-trainer-comparison-report.json`.
+
+Four natural campaigns pass **61,042 frames and 732 save/event replay checkpoints**,
+with 16 Trainer purchases, 24 Rest transitions and four Day7 wins, without gold,
+item, HP or RNG grants. Of 1,332 paired single-kill observations, 442 hero and 451
+companion credits increase, with four earlier level-ups. Another 48 ambiguous
+frames are retained without isolated attribution. All 24 paired daily settlements
+are identical except for Trainer level. These one-boundary Trainer0 controls are
+port integration measurements; they do not replace the original comparison.
+The runner uses production ordinary contours and the documented boss rectangle
+fallback. Evidence: `.build/trainer-party-soak/report.json` and
+`.build/trainer-tests-output.txt`.
+
+The independent audit in `.build/browser-qa/trainer-scenario-audit.json`
+confirms all 224 saved fixtures, 16 purchases, 1,332 paired kills and 24 daily
+settlements. Seven full-envelope UI checks pass: Trainer levels 1/2,
+insufficient-gold rejection, Continue, Rest, companion growth and earned
+result/town entry. From an earned checkpoint, three actual browser updates take
+White from level 4 / XP 937 to level 5 / XP 0; the separate Trainer0 control ends
+at level 4 / XP 992. This is an observed browser transition plus a port control,
+not a new original scheduler comparison.
+
+All 308 candidate/live/ZIP files match and all 305 public assets are unchanged.
+Production New Game starts at tick 0, HP 40, gold 200, ammo 5 and Trainer 0.
+The actual v21 backup migrates and restores with complete-envelope equality at
+tick 674, HP 40 and gold 209, with unchanged RNG; paused, without console errors.
+Evidence: `.build/browser-qa/trainer-ui-verification.json`,
+`.build/browser-qa/trainer-production-verification.json` and
+`.build/trainer-publication.json`.
 
 The v21 release passes **351 tests**, TypeScript checking and its build.
 **All 26 original observations are accepted**, covering purchase/denial, upkeep,
@@ -770,10 +827,10 @@ reports are in `.build/repair-party-soak/`.
 
 ## Next integrated work and continuation
 
-Connect **Trainer to actual
-companion experience and postbattle progression** before broader campaign
-expansion. The existing source audit supplies the starting point; price, timing,
-cache behavior and growth effects need their own integrated verification.
+Audit **Day8/Lava and its town, recruit and boss dependencies**, then connect
+Rest → battle → rewards → town when the source requirements fit a bounded slice.
+Progression coverage is the next priority over optional Castle page2 work;
+uncovered dependencies must be identified before enabling the next day.
 The [Castle source audit](../web/docs/castle-upgrades-source.md) and
 [UI notes](../web/docs/castle-upgrades-ui-source.md) retain the current boundaries.
 Later campaign work still includes Lava and further town thresholds; Day8 onward

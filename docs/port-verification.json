@@ -1,6 +1,6 @@
 {
   "date": "2026-11-02",
-  "milestone": "Castle Looter purchases, recurring upkeep and live ordinary/boss reward-generation budget, original item/random traces and v21 persistence; published locally and browser-verified",
+  "milestone": "Castle Trainer purchases and live hero/companion kill XP, original growth/random traces and v22 persistence; published locally and browser-verified",
   "complete_port": false,
   "environment": {
     "os": "Windows",
@@ -10,18 +10,18 @@
     "vite": "8.3.5"
   },
   "automated": {
-    "simulation_tests_passed": 351,
+    "simulation_tests_passed": 363,
     "simulation_tests_failed": 0,
     "typescript": "passed",
     "candidate_build": "passed",
     "production_build": "identical to verified candidate",
-    "test_output": ".build/looter-tests-output.txt",
-    "build_output": ".build/looter-build-output.txt",
-    "looter_natural_campaigns": {
+    "test_output": ".build/trainer-tests-output.txt",
+    "build_output": ".build/trainer-build-output.txt",
+    "trainer_natural_campaigns": {
       "status": "passed",
       "seedCount": 4,
       "sourceHashes": {
-        "simulation.ts": "52014244ad0786e683ba2f2139103d9ac2afa661f98bd1a782e8315e1dd3037e",
+        "simulation.ts": "004f952bc721a0af6dabc432f00c661f0dc5cf893eba832c2c64cb20bcb1ba60",
         "items.ts": "4c7f84d8f77bb7e96c262b0bc0f03612a50c707483027397c3e76201ded7a4b8",
         "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
         "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
@@ -31,14 +31,14 @@
         "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
         "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
         "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
-        "castle-upgrades.ts": "8b849a1e3449972a15af689fa5fc4ac6f92a850d69444bb098087ed4d64c106d"
+        "castle-upgrades.ts": "f243c506c40010c9b0053fc873b6cdbd3fdd659328c33ccc0dbb5a72623bfec3"
       },
       "geometrySha256": "505b48ffe234d7187db5445bd4306f0d104648985d18a0719e7c47605fec3ad2",
       "scenarios": 4,
-      "frames": 61187,
-      "checkpoints": 703,
+      "frames": 61042,
+      "checkpoints": 732,
       "restTransitions": 24,
-      "rewardActions": 101,
+      "rewardActions": 102,
       "reachedDays": {
         "1": 4,
         "2": 4,
@@ -62,7 +62,8 @@
         4,
         8
       ],
-      "looterPurchases": 16,
+      "trainerPurchases": 16,
+      "ambiguousTrainerFrames": 48,
       "housePurchases": 0,
       "wallPurchases": 4,
       "maximumCompanions": 1,
@@ -73,12 +74,12 @@
       "expandedNaturalScenarios": [],
       "actorActivity": {
         "1": {
-          "shots": 893,
-          "hits": 861,
-          "damage": 43758,
-          "kills": 536,
-          "reloads": 560,
-          "reloadCompletions": 85,
+          "shots": 1005,
+          "hits": 930,
+          "damage": 44687,
+          "kills": 537,
+          "reloads": 574,
+          "reloadCompletions": 83,
           "bowDraws": 0,
           "levelUps": 27
         },
@@ -103,13 +104,13 @@
           "levelUps": 0
         }
       },
-      "elapsedMs": 10256,
+      "elapsedMs": 41568,
       "collision": "Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts",
-      "policy": "Natural starts only; prioritize Looter toward level4 by town4 when affordable, reserve first hire cost, then existing House/Wall/hiring/repair policy. This target is a test purchase policy, not a game cap. No gold, item, HP or RNG grants, private completion or forced kills. Observe actual ordinary/boss generation boundaries; a one-boundary control changes only Looter to0. Generated item records and final random state may differ; no per-drop value increase is assumed. Purchase must preserve every existing item, prepared town and paid result.",
+      "policy": "Four-seed default natural starts only; buy Trainer toward level4 by town4 when affordable while reserving first hire cost, then existing House/Wall/hiring/repair policy. Level4 is a test target, not a gameplay cap. No gold, item, HP or RNG grants, private completion or forced kills. Observe single matching kill frames against a one-frame Trainer0 control; record XP, weapon XP, growth and random state. Retain ambiguous multi-kill/divergent frames as a count instead of claiming isolated attribution. The campaign itself always continues unchanged. Daily settlement controls must remain identical except Trainer level.",
       "limits": [
         "Port full-state/event replay and finite-state checks, not independent original parity or browser validation",
         "Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred",
-        "Counterfactual reward boundaries are port integration evidence; independent original generation traces establish source fidelity. Unchanged low-budget outcomes are retained, and higher budgets do not guarantee a more valuable individual drop.",
+        "Trainer0 counterfactuals are port integration evidence, separate from original-game comparison. XP gain is reconstructed from observed level and remainder; natural observed values are below the single-level modulo overflow boundary. No new browser timing, full original scheduling or late-game hitbox claim.",
         "Deaths count castle defeats; companions have no separate HP/death model in the source combat actor"
       ],
       "results": [
@@ -126,17 +127,17 @@
             }
           ],
           "activity": {
-            "shots": 191,
-            "hits": 169,
-            "damage": 13921,
-            "kills": 153,
-            "reloads": 190,
-            "reloadCompletions": 29,
+            "shots": 203,
+            "hits": 185,
+            "damage": 16240,
+            "kills": 169,
+            "reloads": 200,
+            "reloadCompletions": 27,
             "bowDraws": 0,
             "projectiles": 0,
             "projectileKinds": {},
             "levelUps": 7,
-            "wages": 417,
+            "wages": 423,
             "wageSettlements": 6,
             "battles": 6,
             "victories": 6,
@@ -145,11 +146,11 @@
           "finalDay": 7,
           "phase": "town",
           "castleHp": 45,
-          "gold": 2150,
+          "gold": 1708,
           "victories": 7,
-          "checkpoints": 177,
+          "checkpoints": 185,
           "rests": 6,
-          "operationCount": 15508
+          "operationCount": 15524
         },
         {
           "id": "natural-1",
@@ -164,19 +165,19 @@
             }
           ],
           "activity": {
-            "shots": 189,
-            "hits": 203,
-            "damage": 12269,
-            "kills": 175,
-            "reloads": 186,
-            "reloadCompletions": 27,
+            "shots": 190,
+            "hits": 179,
+            "damage": 11022,
+            "kills": 151,
+            "reloads": 184,
+            "reloadCompletions": 26,
             "bowDraws": 0,
             "projectiles": 23,
             "projectileKinds": {
               "hand-grenade": 23
             },
             "levelUps": 7,
-            "wages": 480,
+            "wages": 474,
             "wageSettlements": 6,
             "battles": 6,
             "victories": 6,
@@ -185,11 +186,11 @@
           "finalDay": 7,
           "phase": "town",
           "castleHp": 45,
-          "gold": 1974,
+          "gold": 1679,
           "victories": 7,
-          "checkpoints": 178,
+          "checkpoints": 183,
           "rests": 6,
-          "operationCount": 15571
+          "operationCount": 15293
         },
         {
           "id": "natural-2",
@@ -204,17 +205,17 @@
             }
           ],
           "activity": {
-            "shots": 329,
-            "hits": 321,
-            "damage": 2704,
-            "kills": 56,
+            "shots": 421,
+            "hits": 394,
+            "damage": 3329,
+            "kills": 67,
             "reloads": 0,
             "reloadCompletions": 0,
             "bowDraws": 0,
             "projectiles": 0,
             "projectileKinds": {},
             "levelUps": 6,
-            "wages": 529,
+            "wages": 543,
             "wageSettlements": 6,
             "battles": 6,
             "victories": 6,
@@ -223,11 +224,11 @@
           "finalDay": 7,
           "phase": "town",
           "castleHp": 45,
-          "gold": 1141,
+          "gold": 667,
           "victories": 7,
-          "checkpoints": 173,
+          "checkpoints": 180,
           "rests": 6,
-          "operationCount": 15122
+          "operationCount": 15134
         },
         {
           "id": "natural-3",
@@ -242,17 +243,17 @@
             }
           ],
           "activity": {
-            "shots": 184,
-            "hits": 168,
-            "damage": 14864,
-            "kills": 152,
-            "reloads": 184,
-            "reloadCompletions": 29,
+            "shots": 191,
+            "hits": 172,
+            "damage": 14096,
+            "kills": 150,
+            "reloads": 190,
+            "reloadCompletions": 30,
             "bowDraws": 0,
             "projectiles": 0,
             "projectileKinds": {},
             "levelUps": 7,
-            "wages": 607,
+            "wages": 615,
             "wageSettlements": 6,
             "battles": 6,
             "victories": 6,
@@ -261,28 +262,30 @@
           "finalDay": 7,
           "phase": "town",
           "castleHp": 45,
-          "gold": 1933,
+          "gold": 1592,
           "victories": 7,
-          "checkpoints": 175,
+          "checkpoints": 184,
           "rests": 6,
-          "operationCount": 15199
+          "operationCount": 15305
         }
       ]
     },
-    "looter_observation_summary": {
-      "boundaries": 48,
-      "ordinary_changed": 0,
-      "ordinary_unchanged": 24,
-      "boss_changed": 11,
-      "boss_unchanged": 13,
-      "limit": "Unchanged ordinary outcomes do not by themselves prove a floor-clamped generator call; guaranteed drops and unchanged accepted outcomes also occur."
+    "trainer_observation_summary": {
+      "matched_single_kill_pairs": 1332,
+      "hero_positive_xp_gain_pairs": 442,
+      "companion_positive_xp_gain_pairs": 451,
+      "growth_difference_pairs": 4,
+      "ambiguous_frames_excluded": 48,
+      "unchanged_daily_settlement_pairs": 24,
+      "limit": "One-boundary Trainer0 controls are separate measurements, not campaigns without Trainer or original-game parity evidence."
     },
-    "looter_campaigns_report": ".build/looter-party-soak/report.json",
-    "looter_campaigns_report_sha256": "f0991aa89bb6310f126bac16960c832f624bc87916c4736f44fbd9d2eb138d0f",
+    "trainer_campaigns_report": ".build/trainer-party-soak/report.json",
+    "trainer_campaigns_report_sha256": "0d2c269b7fcad30ade1602a1d36aa83fd0c6f19b41dbc9558513e0cce0dbe639",
     "independent_scenario_audit": {
       "status": "passed",
+      "reportSha256": "0d2c269b7fcad30ade1602a1d36aa83fd0c6f19b41dbc9558513e0cce0dbe639",
       "sourceHashes": {
-        "simulation.ts": "52014244ad0786e683ba2f2139103d9ac2afa661f98bd1a782e8315e1dd3037e",
+        "simulation.ts": "004f952bc721a0af6dabc432f00c661f0dc5cf893eba832c2c64cb20bcb1ba60",
         "items.ts": "4c7f84d8f77bb7e96c262b0bc0f03612a50c707483027397c3e76201ded7a4b8",
         "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
         "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
@@ -292,516 +295,549 @@
         "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
         "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
         "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
-        "castle-upgrades.ts": "8b849a1e3449972a15af689fa5fc4ac6f92a850d69444bb098087ed4d64c106d"
+        "castle-upgrades.ts": "f243c506c40010c9b0053fc873b6cdbd3fdd659328c33ccc0dbb5a72623bfec3"
       },
       "geometrySha256": "505b48ffe234d7187db5445bd4306f0d104648985d18a0719e7c47605fec3ad2",
-      "fixtureHashesVerified": 168,
-      "fullStateCheckpointComparisons": 168,
-      "recordedTickOperations": 61187,
+      "fixtureHashesVerified": 224,
+      "fullStateFixtureComparisons": 224,
+      "restoredFixtureBoundaries": 207,
+      "fullStateAndEventOperationComparisons": 61256,
+      "recordedTickOperations": 61042,
+      "runnerCheckpoints": 732,
+      "runnerCheckpointLimit": "The 732 runner checkpoints were inspected in the runner; this independent replay restores at each distinct recorded fixture boundary and verifies every intervening operation, rather than asserting it recreated the runner checkpoint schedule.",
       "ordinaryPurchaseBoundariesVerified": 16,
+      "purchases": [
+        {
+          "scenario": "natural-0",
+          "operation": 1666,
+          "day": 1,
+          "oldLevel": 0,
+          "cost": 250,
+          "goldBefore": 995,
+          "goldAfter": 745,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-0",
+          "operation": 3292,
+          "day": 2,
+          "oldLevel": 1,
+          "cost": 430,
+          "goldBefore": 1108,
+          "goldAfter": 678,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-0",
+          "operation": 5413,
+          "day": 3,
+          "oldLevel": 2,
+          "cost": 970,
+          "goldBefore": 1229,
+          "goldAfter": 259,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-0",
+          "operation": 10092,
+          "day": 5,
+          "oldLevel": 3,
+          "cost": 1870,
+          "goldBefore": 1926,
+          "goldAfter": 56,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-1",
+          "operation": 1699,
+          "day": 1,
+          "oldLevel": 0,
+          "cost": 250,
+          "goldBefore": 968,
+          "goldAfter": 718,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-1",
+          "operation": 3417,
+          "day": 2,
+          "oldLevel": 1,
+          "cost": 430,
+          "goldBefore": 1051,
+          "goldAfter": 621,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-1",
+          "operation": 5545,
+          "day": 3,
+          "oldLevel": 2,
+          "cost": 970,
+          "goldBefore": 1451,
+          "goldAfter": 481,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-1",
+          "operation": 12708,
+          "day": 6,
+          "oldLevel": 3,
+          "cost": 1870,
+          "goldBefore": 2629,
+          "goldAfter": 759,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-2",
+          "operation": 1699,
+          "day": 1,
+          "oldLevel": 0,
+          "cost": 250,
+          "goldBefore": 980,
+          "goldAfter": 730,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-2",
+          "operation": 3305,
+          "day": 2,
+          "oldLevel": 1,
+          "cost": 430,
+          "goldBefore": 864,
+          "goldAfter": 434,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-2",
+          "operation": 5355,
+          "day": 3,
+          "oldLevel": 2,
+          "cost": 970,
+          "goldBefore": 1213,
+          "goldAfter": 243,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-2",
+          "operation": 15133,
+          "day": 7,
+          "oldLevel": 3,
+          "cost": 1870,
+          "goldBefore": 2537,
+          "goldAfter": 667,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-3",
+          "operation": 1675,
+          "day": 1,
+          "oldLevel": 0,
+          "cost": 250,
+          "goldBefore": 965,
+          "goldAfter": 715,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-3",
+          "operation": 3371,
+          "day": 2,
+          "oldLevel": 1,
+          "cost": 430,
+          "goldBefore": 1047,
+          "goldAfter": 617,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-3",
+          "operation": 5467,
+          "day": 3,
+          "oldLevel": 2,
+          "cost": 970,
+          "goldBefore": 1358,
+          "goldAfter": 388,
+          "onlyGoldAndLevelChanged": true
+        },
+        {
+          "scenario": "natural-3",
+          "operation": 12819,
+          "day": 6,
+          "oldLevel": 3,
+          "cost": 1870,
+          "goldBefore": 2564,
+          "goldAfter": 694,
+          "onlyGoldAndLevelChanged": true
+        }
+      ],
       "allStartsFreshNatural": true,
       "replays": [
         {
           "scenario": "natural-0",
           "seed": 42,
-          "operations": 15508,
-          "checkpoints": 42,
+          "replaySha256": "8728ceeec06461976c68fe9cecfb5bdb148dc8938ea9b8564e0c9882a7008095",
+          "operations": 15524,
+          "fixtureComparisons": 58,
           "finalDay": 7,
           "phase": "town"
         },
         {
           "scenario": "natural-1",
           "seed": 2654435761,
-          "operations": 15571,
-          "checkpoints": 43,
+          "replaySha256": "14350a8144398d57df6d4c859eea880619fbb6791f3eedb64ed1d305138cee7f",
+          "operations": 15293,
+          "fixtureComparisons": 57,
           "finalDay": 7,
           "phase": "town"
         },
         {
           "scenario": "natural-2",
           "seed": 1013904226,
-          "operations": 15122,
-          "checkpoints": 41,
+          "replaySha256": "1eacdad404fbc7c5d9229232ac29d6170f2c36f4076c761d8584aa5d36607304",
+          "operations": 15134,
+          "fixtureComparisons": 53,
           "finalDay": 7,
           "phase": "town"
         },
         {
           "scenario": "natural-3",
           "seed": 3668339987,
-          "operations": 15199,
-          "checkpoints": 42,
+          "replaySha256": "42cb834b063216b53b491e13a1a72bc394ec77aaf08244123fc63ca7be1046fd",
+          "operations": 15305,
+          "fixtureComparisons": 56,
           "finalDay": 7,
           "phase": "town"
         }
       ],
-      "rewardPairCount": 48,
-      "rewardPairCounts": {
-        "ordinary": {
-          "changed": 0,
-          "unchanged": 24
+      "matchedSingleKillPairs": 1332,
+      "matchedObservationsSha256": "1c4254fac66b6bd4c0d87acdcdff73db2a113b0221b183767fc089ed2af67e3f",
+      "gainCounts": {
+        "hero": {
+          "increased": 442,
+          "unchanged": 386
         },
-        "boss": {
-          "changed": 11,
-          "unchanged": 13
+        "companion": {
+          "increased": 451,
+          "unchanged": 53
         }
       },
-      "rewardPairs": [
-        {
-          "scenario": "natural-0",
-          "day": 2,
-          "stage": "ordinary",
-          "level": 1,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-0",
-          "day": 2,
-          "stage": "boss",
-          "level": 1,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-0",
-          "day": 3,
-          "stage": "ordinary",
-          "level": 2,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-0",
-          "day": 3,
-          "stage": "boss",
-          "level": 2,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
+      "ambiguousFramesExcluded": 48,
+      "directAwardValidation": {
+        "pairs": 1332,
+        "method": "Math.trunc(killedEnemy.exp * castleTrainerMultiplier(beforeState)) after the actual production kill; control award equals the same adjusted enemy EXP. Both exact remainder and one-level threshold are checked independently of reconstructed gain.",
+        "minimumAward": 3,
+        "maximumAward": 903,
+        "maximumPreAwardTotal": 1316,
+        "awardsAtLeast1000": 0,
+        "moduloOverflowCases": 0
+      },
+      "growthPairs": [
         {
           "scenario": "natural-0",
           "day": 4,
-          "stage": "ordinary",
+          "tick": 6867,
           "level": 3,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-0",
-          "day": 4,
-          "stage": "boss",
-          "level": 3,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-0",
-          "day": 5,
-          "stage": "ordinary",
-          "level": 4,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-0",
-          "day": 5,
-          "stage": "boss",
-          "level": 4,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-0",
-          "day": 6,
-          "stage": "ordinary",
-          "level": 4,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-0",
-          "day": 6,
-          "stage": "boss",
-          "level": 4,
-          "changed": true,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "actorSlot": 1,
+          "enemyUid": 156,
+          "gainWith": 63,
+          "gainWithout": 55,
+          "levelWith": 5,
+          "levelWithout": 4,
+          "rngWith": 205993386,
+          "rngWithout": 1802368363,
+          "initialExp": 937,
+          "adjustedEnemyExp": 55
         },
         {
           "scenario": "natural-0",
           "day": 7,
-          "stage": "ordinary",
+          "tick": 15388,
           "level": 4,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "actorSlot": 1,
+          "enemyUid": 396,
+          "gainWith": 72,
+          "gainWithout": 61,
+          "levelWith": 8,
+          "levelWithout": 7,
+          "rngWith": 1697496108,
+          "rngWithout": 3078233283,
+          "initialExp": 932,
+          "adjustedEnemyExp": 61
+        },
+        {
+          "scenario": "natural-1",
+          "day": 4,
+          "tick": 6513,
+          "level": 3,
+          "actorSlot": 0,
+          "enemyUid": 154,
+          "gainWith": 24,
+          "gainWithout": 21,
+          "levelWith": 5,
+          "levelWithout": 4,
+          "rngWith": 4129693848,
+          "rngWithout": 4129693848,
+          "initialExp": 976,
+          "adjustedEnemyExp": 21
+        },
+        {
+          "scenario": "natural-3",
+          "day": 3,
+          "tick": 4621,
+          "level": 2,
+          "actorSlot": 1,
+          "enemyUid": 96,
+          "gainWith": 34,
+          "gainWithout": 31,
+          "levelWith": 3,
+          "levelWithout": 2,
+          "rngWith": 1860458186,
+          "rngWithout": 1410501387,
+          "initialExp": 967,
+          "adjustedEnemyExp": 31
+        }
+      ],
+      "dailySettlementPairs": 24,
+      "settlements": [
+        {
+          "scenario": "natural-0",
+          "day": 2,
+          "tick": 3275,
+          "level": 1,
+          "rng": 140869722,
+          "upkeep": 40,
+          "wages": 53
+        },
+        {
+          "scenario": "natural-0",
+          "day": 3,
+          "tick": 5387,
+          "level": 2,
+          "rng": 1553669115,
+          "upkeep": 50,
+          "wages": 64
+        },
+        {
+          "scenario": "natural-0",
+          "day": 4,
+          "tick": 7518,
+          "level": 3,
+          "rng": 1569349955,
+          "upkeep": 50,
+          "wages": 69
+        },
+        {
+          "scenario": "natural-0",
+          "day": 5,
+          "tick": 10053,
+          "level": 3,
+          "rng": 1073269536,
+          "upkeep": 50,
+          "wages": 74
+        },
+        {
+          "scenario": "natural-0",
+          "day": 6,
+          "tick": 12669,
+          "level": 4,
+          "rng": 799284103,
+          "upkeep": 50,
+          "wages": 79
         },
         {
           "scenario": "natural-0",
           "day": 7,
-          "stage": "boss",
+          "tick": 15471,
           "level": 4,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 1275391185,
+          "upkeep": 50,
+          "wages": 84
         },
         {
           "scenario": "natural-1",
           "day": 2,
-          "stage": "ordinary",
+          "tick": 3399,
           "level": 1,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-1",
-          "day": 2,
-          "stage": "boss",
-          "level": 1,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 3724189201,
+          "upkeep": 40,
+          "wages": 61
         },
         {
           "scenario": "natural-1",
           "day": 3,
-          "stage": "ordinary",
+          "tick": 5520,
           "level": 2,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-1",
-          "day": 3,
-          "stage": "boss",
-          "level": 2,
-          "changed": true,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 4088624717,
+          "upkeep": 40,
+          "wages": 67
         },
         {
           "scenario": "natural-1",
           "day": 4,
-          "stage": "ordinary",
+          "tick": 7716,
           "level": 3,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-1",
-          "day": 4,
-          "stage": "boss",
-          "level": 3,
-          "changed": true,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 471567989,
+          "upkeep": 40,
+          "wages": 73
         },
         {
           "scenario": "natural-1",
           "day": 5,
-          "stage": "ordinary",
+          "tick": 10068,
           "level": 3,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-1",
-          "day": 5,
-          "stage": "boss",
-          "level": 3,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 597273842,
+          "upkeep": 50,
+          "wages": 85
         },
         {
           "scenario": "natural-1",
           "day": 6,
-          "stage": "ordinary",
-          "level": 4,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-1",
-          "day": 6,
-          "stage": "boss",
-          "level": 4,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "tick": 12662,
+          "level": 3,
+          "rng": 4167477609,
+          "upkeep": 50,
+          "wages": 91
         },
         {
           "scenario": "natural-1",
           "day": 7,
-          "stage": "ordinary",
+          "tick": 15240,
           "level": 4,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-1",
-          "day": 7,
-          "stage": "boss",
-          "level": 4,
-          "changed": true,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 1847863696,
+          "upkeep": 50,
+          "wages": 97
         },
         {
           "scenario": "natural-2",
           "day": 2,
-          "stage": "ordinary",
+          "tick": 3287,
           "level": 1,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-2",
-          "day": 2,
-          "stage": "boss",
-          "level": 1,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 3870127239,
+          "upkeep": 40,
+          "wages": 73
         },
         {
           "scenario": "natural-2",
           "day": 3,
-          "stage": "ordinary",
+          "tick": 5330,
           "level": 2,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-2",
-          "day": 3,
-          "stage": "boss",
-          "level": 2,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 432610276,
+          "upkeep": 40,
+          "wages": 80
         },
         {
           "scenario": "natural-2",
           "day": 4,
-          "stage": "ordinary",
+          "tick": 7553,
           "level": 3,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-2",
-          "day": 4,
-          "stage": "boss",
-          "level": 3,
-          "changed": true,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 2230245825,
+          "upkeep": 40,
+          "wages": 87
         },
         {
           "scenario": "natural-2",
           "day": 5,
-          "stage": "ordinary",
+          "tick": 10034,
           "level": 3,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-2",
-          "day": 5,
-          "stage": "boss",
-          "level": 3,
-          "changed": true,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 2545864615,
+          "upkeep": 50,
+          "wages": 94
         },
         {
           "scenario": "natural-2",
           "day": 6,
-          "stage": "ordinary",
+          "tick": 12593,
           "level": 3,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-2",
-          "day": 6,
-          "stage": "boss",
-          "level": 3,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 1293306546,
+          "upkeep": 50,
+          "wages": 101
         },
         {
           "scenario": "natural-2",
           "day": 7,
-          "stage": "ordinary",
-          "level": 4,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-2",
-          "day": 7,
-          "stage": "boss",
-          "level": 4,
-          "changed": true,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "tick": 15080,
+          "level": 3,
+          "rng": 883263434,
+          "upkeep": 50,
+          "wages": 108
         },
         {
           "scenario": "natural-3",
           "day": 2,
-          "stage": "ordinary",
+          "tick": 3353,
           "level": 1,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-3",
-          "day": 2,
-          "stage": "boss",
-          "level": 1,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 4097016402,
+          "upkeep": 40,
+          "wages": 79
         },
         {
           "scenario": "natural-3",
           "day": 3,
-          "stage": "ordinary",
+          "tick": 5442,
           "level": 2,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-3",
-          "day": 3,
-          "stage": "boss",
-          "level": 2,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 373854072,
+          "upkeep": 40,
+          "wages": 87
         },
         {
           "scenario": "natural-3",
           "day": 4,
-          "stage": "ordinary",
+          "tick": 7709,
           "level": 3,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-3",
-          "day": 4,
-          "stage": "boss",
-          "level": 3,
-          "changed": true,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 1266716832,
+          "upkeep": 40,
+          "wages": 95
         },
         {
           "scenario": "natural-3",
           "day": 5,
-          "stage": "ordinary",
+          "tick": 10233,
           "level": 3,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-3",
-          "day": 5,
-          "stage": "boss",
-          "level": 3,
-          "changed": true,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 3695542036,
+          "upkeep": 50,
+          "wages": 110
         },
         {
           "scenario": "natural-3",
           "day": 6,
-          "stage": "ordinary",
-          "level": 4,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-3",
-          "day": 6,
-          "stage": "boss",
-          "level": 4,
-          "changed": true,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "tick": 12773,
+          "level": 3,
+          "rng": 1255658264,
+          "upkeep": 50,
+          "wages": 118
         },
         {
           "scenario": "natural-3",
           "day": 7,
-          "stage": "ordinary",
+          "tick": 15251,
           "level": 4,
-          "changed": false,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
-        },
-        {
-          "scenario": "natural-3",
-          "day": 7,
-          "stage": "boss",
-          "level": 4,
-          "changed": true,
-          "fullStateMatch": true,
-          "controlMatchesReportedItemsAndRng": true
+          "rng": 934246841,
+          "upkeep": 50,
+          "wages": 126
         }
       ],
       "fullSuite": {
-        "tests": 351,
-        "passed": 351,
+        "tests": 363,
+        "passed": 363,
         "failed": 0,
-        "log": ".build/looter-tests-output.txt"
+        "log": ".build/trainer-tests-output.txt"
       },
       "limits": [
-        "Independent replay of the current port and its recorded operations, not an original Flash parity test.",
-        "All four runs begin at normal New Game and use only recorded ordinary input/actions; no capital, item, HP or RNG grants.",
-        "The Looter0 control is limited to one observed reward boundary, preserving the actual prior campaign and slot metadata; it is not a second campaign without Looter.",
-        "Ordinary-enemy geometry uses production filled contours; bosses retain the declared headless rectangle fallback.",
-        "All24 ordinary observations are unchanged; eleven boss observations differ. Higher budgets do not guarantee greater individual sale value, and the unchanged observations alone do not prove every case reached the minimum-500 clamp."
+        "Independent replay of the current port and its recorded ordinary operations, not an original Flash parity test or browser timing test.",
+        "Four natural New Game starts, with no capital, item, HP, RNG, candidate or completion grants; the level4 purchase policy is a test target, not a gameplay cap.",
+        "Trainer0 controls change only one observed frame after the actual trained campaign history. They do not model a complete campaign without Trainer.",
+        "Single matching kill comparisons exclude multi-kill or divergent kill attribution. Level growth may change later same-frame RNG; reported RNG differences are retained, not normalized.",
+        "Ordinary-enemy geometry uses production filled contours; bosses use the declared headless rectangle fallback.",
+        "All daily settlement controls have no kill on their boundary and match full state after restoring only Trainer level; the fixed250 XP remains unmultiplied."
       ]
     },
-    "independent_scenario_audit_report": ".build/browser-qa/looter-scenario-audit.json",
+    "independent_scenario_audit_report": ".build/browser-qa/trainer-scenario-audit.json",
     "asset_preservation": {
       "status": "passed",
       "allAssetsPreserved": true,
       "publicAssetCount": 305,
-      "current": ".build/browser-looter-final",
-      "previous": ".build/browser-loot-mod-final"
+      "current": ".build/browser-trainer-final",
+      "previous": ".build/browser-looter-final"
     },
-    "prior_evidence": "v20 loot MOD and earlier runs remain historical; current Looter evidence uses fresh source hashes, campaigns and full browser exports."
+    "prior_evidence": "v21 Looter and earlier runs remain historical; current Trainer evidence uses fresh source hashes, campaigns and full browser exports."
   },
   "browser_checks": {
     "new_game": {
@@ -5497,9 +5533,406 @@
       "browserPaused": true,
       "consoleErrors": [],
       "screenshot": "looter-production-restored.jpg"
+    },
+    "castle_trainer": {
+      "status": "passed",
+      "report": ".build/browser-qa/trainer-ui-verification.json",
+      "checkCount": 7,
+      "checks": {
+        "trainer1": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "trainer-ui-trainer1-v22.json",
+          "expectedFrom": "trainer-party-natural-0-before-trainer1-v22.json",
+          "args": [],
+          "day": 1,
+          "tick": 1658,
+          "gold": 745,
+          "ap": 4,
+          "rng": 251928491,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 6,
+          "trainerLevel": 1,
+          "multiplier": 1.07,
+          "futureUpkeep": 40,
+          "settledUpkeep": 40,
+          "settledWages": 0,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 3,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            null
+          ]
+        },
+        "trainer2": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "trainer-ui-trainer2-v22.json",
+          "expectedFrom": "trainer-ui-trainer1-v22.json",
+          "args": [],
+          "day": 1,
+          "tick": 1658,
+          "gold": 315,
+          "ap": 4,
+          "rng": 251928491,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 6,
+          "trainerLevel": 2,
+          "multiplier": 1.11,
+          "futureUpkeep": 40,
+          "settledUpkeep": 40,
+          "settledWages": 0,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 3,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            null
+          ]
+        },
+        "blocked": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "trainer-ui-blocked-v22.json",
+          "expectedFrom": "trainer-ui-trainer2-v22.json",
+          "args": [],
+          "day": 1,
+          "tick": 1658,
+          "gold": 315,
+          "ap": 4,
+          "rng": 251928491,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 6,
+          "trainerLevel": 2,
+          "multiplier": 1.11,
+          "futureUpkeep": 40,
+          "settledUpkeep": 40,
+          "settledWages": 0,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 3,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            null
+          ]
+        },
+        "restore": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "trainer-ui-restore-v22.json",
+          "expectedFrom": "trainer-ui-trainer2-v22.json",
+          "args": [],
+          "day": 1,
+          "tick": 1658,
+          "gold": 315,
+          "ap": 4,
+          "rng": 251928491,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 6,
+          "trainerLevel": 2,
+          "multiplier": 1.11,
+          "futureUpkeep": 40,
+          "settledUpkeep": 40,
+          "settledWages": 0,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 3,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            null
+          ]
+        },
+        "rest": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "trainer-ui-rest-v22.json",
+          "expectedFrom": "trainer-ui-trainer2-v22.json",
+          "args": [],
+          "day": 2,
+          "tick": 1658,
+          "gold": 315,
+          "ap": null,
+          "rng": 2692231246,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 6,
+          "trainerLevel": 2,
+          "multiplier": 1.11,
+          "futureUpkeep": 40,
+          "settledUpkeep": 0,
+          "settledWages": 0,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 3,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            null
+          ]
+        },
+        "idle-growth": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "trainer-ui-idle-growth-v22.json",
+          "expectedFrom": "trainer-party-natural-0-before-trainer-growth-slot1-day4-v22.json",
+          "frames": 3,
+          "input": {
+            "aimX": 359.5,
+            "aimY": 578,
+            "firePressed": false,
+            "fireReleased": false,
+            "fireHeld": false,
+            "reload": false
+          },
+          "trainerLevel": 3,
+          "day": 4,
+          "tick": 6869,
+          "memberBefore": {
+            "level": 4,
+            "exp": 937
+          },
+          "memberWith": {
+            "level": 5,
+            "exp": 0
+          },
+          "memberWithout": {
+            "level": 4,
+            "exp": 992
+          },
+          "rngWith": 3031571123,
+          "rngWithout": 1843334891,
+          "events": [
+            {
+              "type": "level-up",
+              "actorSlot": 1,
+              "amount": 5
+            },
+            {
+              "actorSlot": 1,
+              "type": "kill",
+              "x": 48.11319146240273,
+              "y": 277,
+              "critical": false,
+              "enemyUid": 156
+            }
+          ],
+          "limits": "Actual browser idle frames from an earned checkpoint, complete export replay; Trainer0 branch is separate port control, not independent original proof."
+        },
+        "result-town": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "trainer-ui-result-town-v22.json",
+          "expectedFrom": "trainer-party-natural-0-trainer-result-v22.json",
+          "args": [],
+          "day": 2,
+          "tick": 3275,
+          "gold": 1108,
+          "ap": 4,
+          "rng": 423535753,
+          "hp": 40,
+          "maxHp": 40,
+          "capacity": 6,
+          "trainerLevel": 1,
+          "multiplier": 1.07,
+          "futureUpkeep": 40,
+          "settledUpkeep": 40,
+          "settledWages": 53,
+          "inventory": [
+            {
+              "id": 3,
+              "ammo": 5,
+              "reloadTime": 0
+            },
+            {
+              "id": 11,
+              "ammo": 2,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 6,
+              "ammo": 0,
+              "reloadTime": 0
+            },
+            {
+              "id": 24,
+              "ammo": 1,
+              "reloadTime": 0
+            },
+            {
+              "id": 117,
+              "ammo": 0,
+              "reloadTime": 0
+            }
+          ]
+        }
+      },
+      "scope": "Actual CUA tile purchases 1/2, unaffordable purchase, Continue, Rest, three idle combat updates with companion growth, and results-to-town. Full exported envelopes compared.",
+      "screenshots": [
+        ".build/browser-qa/trainer-castle.jpg",
+        ".build/browser-qa/trainer-companion-growth.jpg",
+        ".build/browser-qa/trainer-results.jpg"
+      ],
+      "limits": [
+        "Earned headless checkpoints imported for browser input checks, not a full manually played browser campaign.",
+        "Campaign collision uses production ordinary contours and the documented boss rectangle fallback.",
+        "Separate 27 original method observations establish controlled source parity. No new pixel/audio/performance or late-game hitbox claim."
+      ]
+    },
+    "trainer_production": {
+      "status": "passed",
+      "bundle": "assets/index-mtID2Ws9.js",
+      "newGame": {
+        "tick": 0,
+        "hp": 40,
+        "gold": 200,
+        "ammo": 5,
+        "inventorySlots": 6,
+        "wallLevel": 1,
+        "capacity": 1,
+        "repairmanLevel": 0,
+        "wallFixCount": 0,
+        "sandbagLevel": 0,
+        "looterLevel": 0,
+        "trainerLevel": 0
+      },
+      "migration": {
+        "from": 21,
+        "to": 22,
+        "fullEnvelopeEquality": true,
+        "exactCurrentRestore": true,
+        "tick": 674,
+        "hp": 40,
+        "gold": 209,
+        "wallLevel": 1,
+        "rngUnchanged": true
+      },
+      "browserPaused": true,
+      "consoleErrors": [],
+      "screenshot": "trainer-production-restored.jpg"
     }
   },
-  "checkpoint_provenance": "Four fresh natural Sheriff starts (42,2654435761,1013904226,3668339987) complete seven days with ordinary actions and no gold/item/HP/RNG grants. All168 captured states and61,187 tick operations independently replayed. All16 purchases preserve everything except gold/level.48 one-boundary Looter0 controls are measurements only; they do not replace campaign state or original-game reference evidence.",
+  "checkpoint_provenance": "Four fresh natural Sheriff starts (42,2654435761,1013904226,3668339987) complete seven days with ordinary actions and no gold/item/HP/RNG grants. All 224 captured states and 61,256 operations (61,042 ticks) independently replayed, restoring at 207 distinct fixture boundaries; the runner separately performed 732 checkpoints. All 16 purchases preserve everything except gold/level. 1,332 matching single-kill Trainer0 controls and 24 daily settlement controls are measurements only; they do not replace campaign state or original-game reference evidence.",
   "performance": {
     "comparison_with_flash_or_ruffle": "not measured",
     "sample": {
@@ -5520,7 +5953,8 @@
     "sandbag_release": "No new Flash/browser performance comparison; seven normal hidden-browser updates establish state behavior only.",
     "storage_release": "No new Flash/browser performance comparison; the campaign run measures deterministic state/event replay and finite state, not native browser performance.",
     "loot_mod_release": "No new Flash/browser performance comparison or late-game hitbox finding; natural scenarios verify state/event replay, saved confirmations and subsequent mounted-weapon behavior.",
-    "looter_release": "No new Flash/browser performance comparison or late-game hitbox finding. Current measurements establish controlled source reward parity, ordinary browser actions, save preservation and deterministic campaign replay."
+    "looter_release": "No new Flash/browser performance comparison or late-game hitbox finding. Current measurements establish controlled source reward parity, ordinary browser actions, save preservation and deterministic campaign replay.",
+    "trainer_release": "No new Flash/browser performance comparison or late-game hitbox finding. Current measurements establish controlled source XP/purchase parity, ordinary browser actions, save preservation and deterministic campaign replay."
   },
   "screenshots": [
     ".build/browser-qa/character-creation.jpg",
@@ -5588,7 +6022,11 @@
     ".build/browser-qa/looter-boss-rewards.jpg",
     ".build/browser-qa/looter-castle.jpg",
     ".build/browser-qa/looter-production-restored.jpg",
-    ".build/browser-qa/looter-results-upkeep.jpg"
+    ".build/browser-qa/looter-results-upkeep.jpg",
+    ".build/browser-qa/trainer-castle.jpg",
+    ".build/browser-qa/trainer-companion-growth.jpg",
+    ".build/browser-qa/trainer-production-restored.jpg",
+    ".build/browser-qa/trainer-results.jpg"
   ],
   "preserved_baselines": {
     "original/elonashooter1.3.swf": {
@@ -13703,32 +14141,248 @@
         "Looter raises a generator budget, not a guarantee that each item improves; integer rounding, minimum500 and random acceptance remain observable",
         "No artificial gameplay cap is asserted; source signed-int overflow at extreme unreachable prices is outside these level0..13 captures"
       ]
+    },
+    "castle_trainer": {
+      "observedSnapshots": 27,
+      "status": "passed",
+      "matchedSnapshots": 27,
+      "comparisons": [
+        {
+          "scenario": "hero-normal-0",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "hero-normal-1",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "hero-growth-0",
+          "matched": true,
+          "originalDrawCount": 5,
+          "portDrawCount": 5,
+          "differences": []
+        },
+        {
+          "scenario": "hero-growth-1",
+          "matched": true,
+          "originalDrawCount": 7,
+          "portDrawCount": 7,
+          "differences": []
+        },
+        {
+          "scenario": "companion-growth-0",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "companion-growth-1",
+          "matched": true,
+          "originalDrawCount": 6,
+          "portDrawCount": 6,
+          "differences": []
+        },
+        {
+          "scenario": "companion-critical-0",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "companion-critical-1",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "noble-gap-0",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "noble-gap-10",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "noble-gap-growth-0",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "noble-gap-growth-10",
+          "matched": true,
+          "originalDrawCount": 6,
+          "portDrawCount": 6,
+          "differences": []
+        },
+        {
+          "scenario": "mission-fraction-0",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "mission-fraction-3",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "settlement-reserves-0",
+          "matched": true,
+          "originalDrawCount": 102,
+          "portDrawCount": 102,
+          "differences": []
+        },
+        {
+          "scenario": "settlement-reserves-10",
+          "matched": true,
+          "originalDrawCount": 102,
+          "portDrawCount": 102,
+          "differences": []
+        },
+        {
+          "scenario": "trainer-insufficient",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "trainer-insufficient",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "trainer-first",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "trainer-first",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "trainer-sequence",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "trainer-sequence",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "trainer-sequence",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "trainer-float-hint",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "trainer-float-hint",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "trainer-high-level",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        },
+        {
+          "scenario": "trainer-high-level",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        }
+      ],
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "d7484a046ff5f5e3af913bed3354dcb9186ccc9fb95da43a0667a5223b8ee976",
+      "traceSha256": "2fbe245324e68c6f9e96c43ccf66ae51975c6e610a0794dc282bc3571fbb0ede",
+      "checks": [
+        "Actual tile7 purchases at AP0, insufficient/exact payment, sequential levels and a level10\u219211 no-cap witness",
+        "Exact costs, unchanged upkeep/items/prepared town/settled result and zero purchase RNG",
+        "Original hero pc typo observation: undefined pc, declared _pc0, Trainer therefore applies to hero and companions",
+        "Original procHit, kill XP integer stages, Noble/catchup/critical/mission multiplier and threshold growth before drop RNG",
+        "Every sampled RNG draw and final state; inactive/candidate records excluded; weapon XP and daily250 unchanged",
+        "Cached party effects remain unchanged after automatic companion skill growth"
+      ],
+      "limits": [
+        "Controlled original procHit and eventAfterBattle calls; native complete combat/result scheduling is separate",
+        "Original contour hit is an adapter input, not a new browser geometry parity claim",
+        "Source hero SP moved into eventLevel7 queue is compared to equivalent persisted pending skillPoints",
+        "Never-created empty slots use null in the port; their original updateAlly-only reloadTime0 is projected to absent metadata, while all generated item fields remain exact",
+        "Normal gameplay options and current sister-alive context; casual/tight/search rewards are audited but not enabled by this slice",
+        "Purchase levels0..11 are bounded witnesses, not an artificial cap or extreme signed-int overflow claim"
+      ]
     }
   },
   "production_recovery": {
     "status": "passed",
-    "release_directory": ".build/browser-looter-final",
-    "previous_directory": ".build/browser-before-looter",
-    "current_bundle": "assets/index-CH4ZkfIi.js",
+    "release_directory": ".build/browser-trainer-final",
+    "previous_directory": ".build/browser-before-trainer",
+    "current_bundle": "assets/index-mtID2Ws9.js",
     "candidate_build_matches_production": true,
     "copied_release_files_hash_checked": 308,
     "archive_files_hash_checked": 308,
-    "current_package": ".build/elona-shooter-browser-looter-slice.zip",
-    "current_package_bytes": 8576060,
-    "current_package_sha256": "172fdfbfb83e22b54d004df0611a1594ff578f4524244484bcdaedd38a9a16c2",
-    "previous_package": ".build/elona-shooter-browser-loot-mod-slice.zip",
-    "previous_bundle": "assets/index-BJh2mRko.js",
-    "candidate_browser_verification": ".build/browser-qa/looter-ui-verification.json",
-    "production_backup": ".build/browser-qa/looter-production-before-v20.json",
-    "production_browser_verification": ".build/browser-qa/looter-production-verification.json",
-    "production_restored_screenshot": ".build/browser-qa/looter-production-restored.jpg",
+    "current_package": ".build/elona-shooter-browser-trainer-slice.zip",
+    "current_package_bytes": 8576292,
+    "current_package_sha256": "c7d8cdd3623af49fd01f4536eb94262056c81a2fa913ff87d6c5ac8995fdee27",
+    "previous_package": ".build/elona-shooter-browser-looter-slice.zip",
+    "previous_bundle": "assets/index-CH4ZkfIi.js",
+    "candidate_browser_verification": ".build/browser-qa/trainer-ui-verification.json",
+    "production_backup": ".build/browser-qa/trainer-production-before-v21.json",
+    "production_browser_verification": ".build/browser-qa/trainer-production-verification.json",
+    "production_restored_screenshot": ".build/browser-qa/trainer-production-restored.jpg",
     "production_console_errors": [],
-    "publication_report": ".build/looter-publication.json",
-    "current_save_version": 21,
+    "publication_report": ".build/trainer-publication.json",
+    "current_save_version": 22,
     "production_browser_smoke": "passed",
     "restored_battle": {
-      "from": 20,
-      "to": 21,
+      "from": 21,
+      "to": 22,
       "fullEnvelopeEquality": true,
       "exactCurrentRestore": true,
       "tick": 674,
@@ -19963,6 +20617,1239 @@
           "browserPaused": true,
           "consoleErrors": [],
           "screenshot": "loot-mod-production-restored.jpg"
+        }
+      }
+    },
+    {
+      "milestone": "Castle Looter purchases, recurring upkeep and live ordinary/boss reward-generation budget, original item/random traces and v21 persistence; published locally and browser-verified",
+      "saveVersion": 21,
+      "automated": {
+        "simulation_tests_passed": 351,
+        "simulation_tests_failed": 0,
+        "typescript": "passed",
+        "candidate_build": "passed",
+        "production_build": "identical to verified candidate",
+        "test_output": ".build/looter-tests-output.txt",
+        "build_output": ".build/looter-build-output.txt",
+        "looter_natural_campaigns": {
+          "status": "passed",
+          "seedCount": 4,
+          "sourceHashes": {
+            "simulation.ts": "52014244ad0786e683ba2f2139103d9ac2afa661f98bd1a782e8315e1dd3037e",
+            "items.ts": "4c7f84d8f77bb7e96c262b0bc0f03612a50c707483027397c3e76201ded7a4b8",
+            "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
+            "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
+            "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
+            "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
+            "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
+            "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
+            "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
+            "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
+            "castle-upgrades.ts": "8b849a1e3449972a15af689fa5fc4ac6f92a850d69444bb098087ed4d64c106d"
+          },
+          "geometrySha256": "505b48ffe234d7187db5445bd4306f0d104648985d18a0719e7c47605fec3ad2",
+          "scenarios": 4,
+          "frames": 61187,
+          "checkpoints": 703,
+          "restTransitions": 24,
+          "rewardActions": 101,
+          "reachedDays": {
+            "1": 4,
+            "2": 4,
+            "3": 4,
+            "4": 4,
+            "5": 4,
+            "6": 4,
+            "7": 4
+          },
+          "wonDays": {
+            "1": 4,
+            "2": 4,
+            "3": 4,
+            "4": 4,
+            "5": 4,
+            "6": 4,
+            "7": 4
+          },
+          "naturallyHiredClasses": [
+            2,
+            4,
+            8
+          ],
+          "looterPurchases": 16,
+          "housePurchases": 0,
+          "wallPurchases": 4,
+          "maximumCompanions": 1,
+          "partyBattleCounts": {
+            "0": 4,
+            "1": 24
+          },
+          "expandedNaturalScenarios": [],
+          "actorActivity": {
+            "1": {
+              "shots": 893,
+              "hits": 861,
+              "damage": 43758,
+              "kills": 536,
+              "reloads": 560,
+              "reloadCompletions": 85,
+              "bowDraws": 0,
+              "levelUps": 27
+            },
+            "2": {
+              "shots": 0,
+              "hits": 0,
+              "damage": 0,
+              "kills": 0,
+              "reloads": 0,
+              "reloadCompletions": 0,
+              "bowDraws": 0,
+              "levelUps": 0
+            },
+            "3": {
+              "shots": 0,
+              "hits": 0,
+              "damage": 0,
+              "kills": 0,
+              "reloads": 0,
+              "reloadCompletions": 0,
+              "bowDraws": 0,
+              "levelUps": 0
+            }
+          },
+          "elapsedMs": 10256,
+          "collision": "Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts",
+          "policy": "Natural starts only; prioritize Looter toward level4 by town4 when affordable, reserve first hire cost, then existing House/Wall/hiring/repair policy. This target is a test purchase policy, not a game cap. No gold, item, HP or RNG grants, private completion or forced kills. Observe actual ordinary/boss generation boundaries; a one-boundary control changes only Looter to0. Generated item records and final random state may differ; no per-drop value increase is assumed. Purchase must preserve every existing item, prepared town and paid result.",
+          "limits": [
+            "Port full-state/event replay and finite-state checks, not independent original parity or browser validation",
+            "Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred",
+            "Counterfactual reward boundaries are port integration evidence; independent original generation traces establish source fidelity. Unchanged low-budget outcomes are retained, and higher budgets do not guarantee a more valuable individual drop.",
+            "Deaths count castle defeats; companions have no separate HP/death model in the source combat actor"
+          ],
+          "results": [
+            {
+              "id": "natural-0",
+              "seed": 42,
+              "kind": "natural",
+              "hired": [
+                {
+                  "day": 1,
+                  "classId": 2,
+                  "cost": 400,
+                  "name": "White"
+                }
+              ],
+              "activity": {
+                "shots": 191,
+                "hits": 169,
+                "damage": 13921,
+                "kills": 153,
+                "reloads": 190,
+                "reloadCompletions": 29,
+                "bowDraws": 0,
+                "projectiles": 0,
+                "projectileKinds": {},
+                "levelUps": 7,
+                "wages": 417,
+                "wageSettlements": 6,
+                "battles": 6,
+                "victories": 6,
+                "castleDefeats": 0
+              },
+              "finalDay": 7,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 2150,
+              "victories": 7,
+              "checkpoints": 177,
+              "rests": 6,
+              "operationCount": 15508
+            },
+            {
+              "id": "natural-1",
+              "seed": 2654435761,
+              "kind": "natural",
+              "hired": [
+                {
+                  "day": 1,
+                  "classId": 4,
+                  "cost": 400,
+                  "name": "Girard"
+                }
+              ],
+              "activity": {
+                "shots": 189,
+                "hits": 203,
+                "damage": 12269,
+                "kills": 175,
+                "reloads": 186,
+                "reloadCompletions": 27,
+                "bowDraws": 0,
+                "projectiles": 23,
+                "projectileKinds": {
+                  "hand-grenade": 23
+                },
+                "levelUps": 7,
+                "wages": 480,
+                "wageSettlements": 6,
+                "battles": 6,
+                "victories": 6,
+                "castleDefeats": 0
+              },
+              "finalDay": 7,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 1974,
+              "victories": 7,
+              "checkpoints": 178,
+              "rests": 6,
+              "operationCount": 15571
+            },
+            {
+              "id": "natural-2",
+              "seed": 1013904226,
+              "kind": "natural",
+              "hired": [
+                {
+                  "day": 1,
+                  "classId": 8,
+                  "cost": 400,
+                  "name": "Sullivan"
+                }
+              ],
+              "activity": {
+                "shots": 329,
+                "hits": 321,
+                "damage": 2704,
+                "kills": 56,
+                "reloads": 0,
+                "reloadCompletions": 0,
+                "bowDraws": 0,
+                "projectiles": 0,
+                "projectileKinds": {},
+                "levelUps": 6,
+                "wages": 529,
+                "wageSettlements": 6,
+                "battles": 6,
+                "victories": 6,
+                "castleDefeats": 0
+              },
+              "finalDay": 7,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 1141,
+              "victories": 7,
+              "checkpoints": 173,
+              "rests": 6,
+              "operationCount": 15122
+            },
+            {
+              "id": "natural-3",
+              "seed": 3668339987,
+              "kind": "natural",
+              "hired": [
+                {
+                  "day": 1,
+                  "classId": 2,
+                  "cost": 400,
+                  "name": "Jenkins"
+                }
+              ],
+              "activity": {
+                "shots": 184,
+                "hits": 168,
+                "damage": 14864,
+                "kills": 152,
+                "reloads": 184,
+                "reloadCompletions": 29,
+                "bowDraws": 0,
+                "projectiles": 0,
+                "projectileKinds": {},
+                "levelUps": 7,
+                "wages": 607,
+                "wageSettlements": 6,
+                "battles": 6,
+                "victories": 6,
+                "castleDefeats": 0
+              },
+              "finalDay": 7,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 1933,
+              "victories": 7,
+              "checkpoints": 175,
+              "rests": 6,
+              "operationCount": 15199
+            }
+          ]
+        },
+        "looter_observation_summary": {
+          "boundaries": 48,
+          "ordinary_changed": 0,
+          "ordinary_unchanged": 24,
+          "boss_changed": 11,
+          "boss_unchanged": 13,
+          "limit": "Unchanged ordinary outcomes do not by themselves prove a floor-clamped generator call; guaranteed drops and unchanged accepted outcomes also occur."
+        },
+        "looter_campaigns_report": ".build/looter-party-soak/report.json",
+        "looter_campaigns_report_sha256": "f0991aa89bb6310f126bac16960c832f624bc87916c4736f44fbd9d2eb138d0f",
+        "independent_scenario_audit": {
+          "status": "passed",
+          "sourceHashes": {
+            "simulation.ts": "52014244ad0786e683ba2f2139103d9ac2afa661f98bd1a782e8315e1dd3037e",
+            "items.ts": "4c7f84d8f77bb7e96c262b0bc0f03612a50c707483027397c3e76201ded7a4b8",
+            "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
+            "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
+            "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
+            "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
+            "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
+            "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
+            "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
+            "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
+            "castle-upgrades.ts": "8b849a1e3449972a15af689fa5fc4ac6f92a850d69444bb098087ed4d64c106d"
+          },
+          "geometrySha256": "505b48ffe234d7187db5445bd4306f0d104648985d18a0719e7c47605fec3ad2",
+          "fixtureHashesVerified": 168,
+          "fullStateCheckpointComparisons": 168,
+          "recordedTickOperations": 61187,
+          "ordinaryPurchaseBoundariesVerified": 16,
+          "allStartsFreshNatural": true,
+          "replays": [
+            {
+              "scenario": "natural-0",
+              "seed": 42,
+              "operations": 15508,
+              "checkpoints": 42,
+              "finalDay": 7,
+              "phase": "town"
+            },
+            {
+              "scenario": "natural-1",
+              "seed": 2654435761,
+              "operations": 15571,
+              "checkpoints": 43,
+              "finalDay": 7,
+              "phase": "town"
+            },
+            {
+              "scenario": "natural-2",
+              "seed": 1013904226,
+              "operations": 15122,
+              "checkpoints": 41,
+              "finalDay": 7,
+              "phase": "town"
+            },
+            {
+              "scenario": "natural-3",
+              "seed": 3668339987,
+              "operations": 15199,
+              "checkpoints": 42,
+              "finalDay": 7,
+              "phase": "town"
+            }
+          ],
+          "rewardPairCount": 48,
+          "rewardPairCounts": {
+            "ordinary": {
+              "changed": 0,
+              "unchanged": 24
+            },
+            "boss": {
+              "changed": 11,
+              "unchanged": 13
+            }
+          },
+          "rewardPairs": [
+            {
+              "scenario": "natural-0",
+              "day": 2,
+              "stage": "ordinary",
+              "level": 1,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-0",
+              "day": 2,
+              "stage": "boss",
+              "level": 1,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-0",
+              "day": 3,
+              "stage": "ordinary",
+              "level": 2,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-0",
+              "day": 3,
+              "stage": "boss",
+              "level": 2,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-0",
+              "day": 4,
+              "stage": "ordinary",
+              "level": 3,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-0",
+              "day": 4,
+              "stage": "boss",
+              "level": 3,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-0",
+              "day": 5,
+              "stage": "ordinary",
+              "level": 4,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-0",
+              "day": 5,
+              "stage": "boss",
+              "level": 4,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-0",
+              "day": 6,
+              "stage": "ordinary",
+              "level": 4,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-0",
+              "day": 6,
+              "stage": "boss",
+              "level": 4,
+              "changed": true,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-0",
+              "day": 7,
+              "stage": "ordinary",
+              "level": 4,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-0",
+              "day": 7,
+              "stage": "boss",
+              "level": 4,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-1",
+              "day": 2,
+              "stage": "ordinary",
+              "level": 1,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-1",
+              "day": 2,
+              "stage": "boss",
+              "level": 1,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-1",
+              "day": 3,
+              "stage": "ordinary",
+              "level": 2,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-1",
+              "day": 3,
+              "stage": "boss",
+              "level": 2,
+              "changed": true,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-1",
+              "day": 4,
+              "stage": "ordinary",
+              "level": 3,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-1",
+              "day": 4,
+              "stage": "boss",
+              "level": 3,
+              "changed": true,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-1",
+              "day": 5,
+              "stage": "ordinary",
+              "level": 3,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-1",
+              "day": 5,
+              "stage": "boss",
+              "level": 3,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-1",
+              "day": 6,
+              "stage": "ordinary",
+              "level": 4,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-1",
+              "day": 6,
+              "stage": "boss",
+              "level": 4,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-1",
+              "day": 7,
+              "stage": "ordinary",
+              "level": 4,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-1",
+              "day": 7,
+              "stage": "boss",
+              "level": 4,
+              "changed": true,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-2",
+              "day": 2,
+              "stage": "ordinary",
+              "level": 1,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-2",
+              "day": 2,
+              "stage": "boss",
+              "level": 1,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-2",
+              "day": 3,
+              "stage": "ordinary",
+              "level": 2,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-2",
+              "day": 3,
+              "stage": "boss",
+              "level": 2,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-2",
+              "day": 4,
+              "stage": "ordinary",
+              "level": 3,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-2",
+              "day": 4,
+              "stage": "boss",
+              "level": 3,
+              "changed": true,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-2",
+              "day": 5,
+              "stage": "ordinary",
+              "level": 3,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-2",
+              "day": 5,
+              "stage": "boss",
+              "level": 3,
+              "changed": true,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-2",
+              "day": 6,
+              "stage": "ordinary",
+              "level": 3,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-2",
+              "day": 6,
+              "stage": "boss",
+              "level": 3,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-2",
+              "day": 7,
+              "stage": "ordinary",
+              "level": 4,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-2",
+              "day": 7,
+              "stage": "boss",
+              "level": 4,
+              "changed": true,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-3",
+              "day": 2,
+              "stage": "ordinary",
+              "level": 1,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-3",
+              "day": 2,
+              "stage": "boss",
+              "level": 1,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-3",
+              "day": 3,
+              "stage": "ordinary",
+              "level": 2,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-3",
+              "day": 3,
+              "stage": "boss",
+              "level": 2,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-3",
+              "day": 4,
+              "stage": "ordinary",
+              "level": 3,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-3",
+              "day": 4,
+              "stage": "boss",
+              "level": 3,
+              "changed": true,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-3",
+              "day": 5,
+              "stage": "ordinary",
+              "level": 3,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-3",
+              "day": 5,
+              "stage": "boss",
+              "level": 3,
+              "changed": true,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-3",
+              "day": 6,
+              "stage": "ordinary",
+              "level": 4,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-3",
+              "day": 6,
+              "stage": "boss",
+              "level": 4,
+              "changed": true,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-3",
+              "day": 7,
+              "stage": "ordinary",
+              "level": 4,
+              "changed": false,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            },
+            {
+              "scenario": "natural-3",
+              "day": 7,
+              "stage": "boss",
+              "level": 4,
+              "changed": true,
+              "fullStateMatch": true,
+              "controlMatchesReportedItemsAndRng": true
+            }
+          ],
+          "fullSuite": {
+            "tests": 351,
+            "passed": 351,
+            "failed": 0,
+            "log": ".build/looter-tests-output.txt"
+          },
+          "limits": [
+            "Independent replay of the current port and its recorded operations, not an original Flash parity test.",
+            "All four runs begin at normal New Game and use only recorded ordinary input/actions; no capital, item, HP or RNG grants.",
+            "The Looter0 control is limited to one observed reward boundary, preserving the actual prior campaign and slot metadata; it is not a second campaign without Looter.",
+            "Ordinary-enemy geometry uses production filled contours; bosses retain the declared headless rectangle fallback.",
+            "All24 ordinary observations are unchanged; eleven boss observations differ. Higher budgets do not guarantee greater individual sale value, and the unchanged observations alone do not prove every case reached the minimum-500 clamp."
+          ]
+        },
+        "independent_scenario_audit_report": ".build/browser-qa/looter-scenario-audit.json",
+        "asset_preservation": {
+          "status": "passed",
+          "allAssetsPreserved": true,
+          "publicAssetCount": 305,
+          "current": ".build/browser-looter-final",
+          "previous": ".build/browser-loot-mod-final"
+        },
+        "prior_evidence": "v20 loot MOD and earlier runs remain historical; current Looter evidence uses fresh source hashes, campaigns and full browser exports."
+      },
+      "production_recovery": {
+        "status": "passed",
+        "release_directory": ".build/browser-looter-final",
+        "previous_directory": ".build/browser-before-looter",
+        "current_bundle": "assets/index-CH4ZkfIi.js",
+        "candidate_build_matches_production": true,
+        "copied_release_files_hash_checked": 308,
+        "archive_files_hash_checked": 308,
+        "current_package": ".build/elona-shooter-browser-looter-slice.zip",
+        "current_package_bytes": 8576060,
+        "current_package_sha256": "172fdfbfb83e22b54d004df0611a1594ff578f4524244484bcdaedd38a9a16c2",
+        "previous_package": ".build/elona-shooter-browser-loot-mod-slice.zip",
+        "previous_bundle": "assets/index-BJh2mRko.js",
+        "candidate_browser_verification": ".build/browser-qa/looter-ui-verification.json",
+        "production_backup": ".build/browser-qa/looter-production-before-v20.json",
+        "production_browser_verification": ".build/browser-qa/looter-production-verification.json",
+        "production_restored_screenshot": ".build/browser-qa/looter-production-restored.jpg",
+        "production_console_errors": [],
+        "publication_report": ".build/looter-publication.json",
+        "current_save_version": 21,
+        "production_browser_smoke": "passed",
+        "restored_battle": {
+          "from": 20,
+          "to": 21,
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "tick": 674,
+          "hp": 40,
+          "gold": 209,
+          "wallLevel": 1,
+          "rngUnchanged": true
+        }
+      },
+      "browser_checks": {
+        "castle_looter": {
+          "status": "passed",
+          "report": ".build/browser-qa/looter-ui-verification.json",
+          "checkCount": 7,
+          "checks": {
+            "looter1": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "looter-ui-looter1-v21.json",
+              "expectedFrom": "looter-party-natural-0-before-looter1-v21.json",
+              "args": [],
+              "day": 1,
+              "tick": 1658,
+              "gold": 695,
+              "ap": 4,
+              "rng": 251928491,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 6,
+              "looterLevel": 1,
+              "multiplier": 1.1300000000000001,
+              "futureUpkeep": 45,
+              "settledUpkeep": 40,
+              "settledWages": 0,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 3,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                null
+              ]
+            },
+            "looter2": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "looter-ui-looter2-v21.json",
+              "expectedFrom": "looter-ui-looter1-v21.json",
+              "args": [],
+              "day": 1,
+              "tick": 1658,
+              "gold": 270,
+              "ap": 4,
+              "rng": 251928491,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 6,
+              "looterLevel": 2,
+              "multiplier": 1.21,
+              "futureUpkeep": 50,
+              "settledUpkeep": 40,
+              "settledWages": 0,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 3,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                null
+              ]
+            },
+            "blocked": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "looter-ui-blocked-v21.json",
+              "expectedFrom": "looter-ui-looter2-v21.json",
+              "args": [],
+              "day": 1,
+              "tick": 1658,
+              "gold": 270,
+              "ap": 4,
+              "rng": 251928491,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 6,
+              "looterLevel": 2,
+              "multiplier": 1.21,
+              "futureUpkeep": 50,
+              "settledUpkeep": 40,
+              "settledWages": 0,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 3,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                null
+              ]
+            },
+            "restore": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "looter-ui-restore-v21.json",
+              "expectedFrom": "looter-ui-looter2-v21.json",
+              "args": [],
+              "day": 1,
+              "tick": 1658,
+              "gold": 270,
+              "ap": 4,
+              "rng": 251928491,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 6,
+              "looterLevel": 2,
+              "multiplier": 1.21,
+              "futureUpkeep": 50,
+              "settledUpkeep": 40,
+              "settledWages": 0,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 3,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                null
+              ]
+            },
+            "boss": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "looter-ui-boss-v21.json",
+              "expectedFrom": "looter-party-natural-1-before-looter-boss-day3-v21.json",
+              "args": [],
+              "day": 3,
+              "tick": 5520,
+              "gold": 668,
+              "ap": null,
+              "rng": 2837552470,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 6,
+              "looterLevel": 2,
+              "multiplier": 1.21,
+              "futureUpkeep": 50,
+              "settledUpkeep": 50,
+              "settledWages": 67,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 2,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                }
+              ]
+            },
+            "rest": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "looter-ui-rest-v21.json",
+              "expectedFrom": "looter-ui-looter2-v21.json",
+              "args": [],
+              "day": 2,
+              "tick": 1658,
+              "gold": 270,
+              "ap": null,
+              "rng": 2692231246,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 6,
+              "looterLevel": 2,
+              "multiplier": 1.21,
+              "futureUpkeep": 50,
+              "settledUpkeep": 0,
+              "settledWages": 0,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 3,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                null
+              ]
+            },
+            "result-town": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "looter-ui-result-town-v21.json",
+              "expectedFrom": "looter-party-natural-0-looter-result-v21.json",
+              "args": [],
+              "day": 2,
+              "tick": 3275,
+              "gold": 1053,
+              "ap": 4,
+              "rng": 423535753,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 6,
+              "looterLevel": 1,
+              "multiplier": 1.1300000000000001,
+              "futureUpkeep": 45,
+              "settledUpkeep": 45,
+              "settledWages": 53,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 2,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                }
+              ]
+            }
+          },
+          "scope": "Actual CUA tile purchases1/2, unaffordable purchase, Continue, ordinary Proceed to boss generation, Rest and results-to-town. Full exported envelopes compared.",
+          "screenshots": [
+            ".build/browser-qa/looter-castle.jpg",
+            ".build/browser-qa/looter-boss-rewards.jpg",
+            ".build/browser-qa/looter-results-upkeep.jpg"
+          ],
+          "limits": [
+            "Earned headless checkpoints imported for browser input checks, not a full manually played browser campaign.",
+            "Campaign collision uses production ordinary contours and the documented boss rectangle fallback.",
+            "Separate26 original method observations establish controlled source parity. No new pixel/audio/performance or late-game hitbox claim."
+          ]
+        },
+        "looter_production": {
+          "status": "passed",
+          "bundle": "assets/index-CH4ZkfIi.js",
+          "newGame": {
+            "tick": 0,
+            "hp": 40,
+            "gold": 200,
+            "ammo": 5,
+            "inventorySlots": 6,
+            "wallLevel": 1,
+            "capacity": 1,
+            "repairmanLevel": 0,
+            "wallFixCount": 0,
+            "sandbagLevel": 0,
+            "looterLevel": 0
+          },
+          "migration": {
+            "from": 20,
+            "to": 21,
+            "fullEnvelopeEquality": true,
+            "exactCurrentRestore": true,
+            "tick": 674,
+            "hp": 40,
+            "gold": 209,
+            "wallLevel": 1,
+            "rngUnchanged": true
+          },
+          "browserPaused": true,
+          "consoleErrors": [],
+          "screenshot": "looter-production-restored.jpg"
         }
       }
     }

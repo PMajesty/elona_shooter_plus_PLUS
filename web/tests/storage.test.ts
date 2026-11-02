@@ -171,7 +171,7 @@ test('v18 migration keeps repairs, Sandbags, companions and RNG; v19 onward acce
   simulation.state.castleHp = 43; assert.equal(simulation.buyCastleUpgrade('fix-wall'), 'purchased');
   assert.equal(simulation.requestRecruit(), 'previewed'); assert.equal(simulation.resolvePartyAction(true), 'hired');
   const legacy = asLegacyV18Save(simulation.toSave()), before = structuredClone(legacy);
-  assert.deepEqual(Simulation.fromSave(legacy).toSave(), { ...legacy, version: 21, looterLevel: 0, pendingLootAction: null }); assert.deepEqual(legacy, before);
+  assert.deepEqual(Simulation.fromSave(legacy).toSave(), { ...legacy, version: 22, trainerLevel: 0, looterLevel: 0, pendingLootAction: null }); assert.deepEqual(legacy, before);
   assert.equal(simulation.buyCastleUpgrade('storage'), 'purchased'); const checkpoint = saved(simulation);
   for (const corrupt of [
     (value: any) => { value.version = 18; },

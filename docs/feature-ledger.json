@@ -2,61 +2,68 @@
   "schemaVersion": 1,
   "updated": "2026-11-02",
   "currentRelease": {
-    "saveVersion": 21,
+    "saveVersion": 22,
     "verificationStatus": "passed",
-    "implementedCampaign": "Seven connected Sheriff days with prior Castle, party and loot MOD mechanics, plus ordinary Looter purchases, recurring upkeep and future ordinary/boss random-item generation budgets. The original tile, level suffix, price, affordability and float-truncated hint are connected. Trainer and second-page upgrades remain unavailable.",
-    "publication": "Published and production-verified locally at http://127.0.0.1:5175/elona/: assets/index-CH4ZkfIi.js from .build/browser-looter-final. All 308 candidate/live/ZIP files match and all 305 public assets are unchanged. All 351 tests, 26 original observations, seven full-envelope UI checks and final production New Game/exact actual v20→v21 migration and restore checks pass without console errors.",
+    "implementedCampaign": "Seven connected Sheriff days with prior Castle, party and loot mechanics, plus original Trainer purchases and live hero/companion kill XP. All eight first-page Castle tiles are connected; second-page upgrades remain unavailable.",
+    "publication": "Published and production-verified locally at http://127.0.0.1:5175/elona/: assets/index-mtID2Ws9.js from .build/browser-trainer-final. All 308 candidate/live/ZIP files match and all 305 public assets are unchanged. All 363 tests, 27 original observations, seven full-envelope UI checks and production New Game/exact actual v21→v22 migration and restore checks pass without console errors.",
     "automatedVerification": {
       "status": "passed",
       "typecheckPassed": true,
       "releaseBuildPassed": true,
-      "focusedTestsPassed": 26,
-      "affectedLegacyTestsPassed": 115,
+      "testsPassed": 363,
+      "focusedTestsPassed": 38,
+      "affectedLegacyTestsPassed": 117,
+      "focusedReferenceTests": 6,
+      "negativeControls": 5,
       "originalComparison": {
-        "observedSnapshots": 26,
-        "matchingSnapshots": 26,
+        "observedSnapshots": 27,
+        "matchingSnapshots": 27,
         "status": "accepted",
-        "report": ".build/oracle/castle-looter-comparison-report.json",
-        "fixture": "web/tests/fixtures/original-castle-looter-trace.json",
-        "traceSha256": "c3e88707f82a6e5f148dbf782659568d1386765a66bb1dfc2f118b6276c61ce9",
-        "instrumentedSwfSha256": "5495bfdd046aaac92ce4a74b82aa6eaf0afc452a7f71d00c46b522f3c76ca6e0"
+        "report": ".build/oracle/castle-trainer-comparison-report.json",
+        "fixture": "web/tests/fixtures/original-castle-trainer-trace.json",
+        "traceSha256": "2fbe245324e68c6f9e96c43ccf66ae51975c6e610a0794dc282bc3571fbb0ede",
+        "instrumentedSwfSha256": "d7484a046ff5f5e3af913bed3354dcb9186ccc9fb95da43a0667a5223b8ee976"
       },
       "soak": {
         "status": "passed",
         "naturalCampaigns": 4,
-        "frames": 61187,
-        "saveReplayCheckpoints": 703,
-        "looterPurchases": 16,
+        "frames": 61042,
+        "saveReplayCheckpoints": 732,
+        "trainerPurchases": 16,
         "restTransitions": 24,
-        "rewardActions": 101,
+        "rewardActions": 102,
         "day7Wins": 4,
-        "observedGenerationBoundaries": 48,
-        "changedBoundaries": 11,
-        "changedBossBoundaries": 11,
-        "unchangedBoundaries": 37,
-        "provenance": "Four natural starts with no gold, item, HP or RNG grants. Normal purchases target level four by town four when affordable, reserving first-hire cost. Separate one-boundary replays change only Looter to zero; this is a measurement control, not a campaign grant or level cap.",
-        "limits": "Production ordinary contours and documented boss rectangle fallback. All 11 changed outcomes were boss rewards; 37 were unchanged. Unchanged ordinary outcomes do not all establish the 500 minimum: fixed drops and the same accepted item can also remain unchanged. Targeted original cases prove the minimum separately. No guarantee of greater value for each individual drop, original scheduler parity or broad browser campaign parity.",
+        "pairedSingleKills": 1332,
+        "increasedHeroCredits": 442,
+        "increasedCompanionCredits": 451,
+        "earlierLevelUps": 4,
+        "ambiguousFramesNotAttributed": 48,
+        "unchangedDailySettlements": 24,
+        "savedFixtures": 224,
+        "provenance": "Four natural starts with no gold, item, HP or RNG grants. Ordinary purchases target level four by town four when affordable, reserving first-hire cost. Paired single-kill and settlement replays set only Trainer to zero; the campaign continues unchanged. Level four is a test target, not a source cap.",
+        "limits": "Production ordinary contours and documented boss rectangle fallback. Counterfactual port observations are integration evidence, separate from the original comparison. Ambiguous multi-kill/divergent frames have no isolated attribution. No new original scheduler, browser timing or late-game hitbox parity claim.",
         "independentAudit": {
-          "savedFixturesVerified": 168,
+          "savedFixturesVerified": 224,
           "purchasesVerified": 16,
-          "pairedGenerationBoundariesVerified": 48,
-          "report": ".build/browser-qa/looter-scenario-audit.json"
+          "pairedSingleKillsVerified": 1332,
+          "dailySettlementPairsVerified": 24,
+          "restoredFixtureBoundaries": 207,
+          "fullStateAndEventOperationComparisons": 61256,
+          "limit": "The independent replay verifies every intervening operation and restores at distinct recorded fixture boundaries; it does not claim to recreate the runner checkpoint schedule.",
+          "report": ".build/browser-qa/trainer-scenario-audit.json"
         }
       },
       "evidence": [
-        ".build/looter-focused-tests-output.txt",
-        ".build/looter-legacy-tests-output.txt",
-        ".build/looter-build-output.txt",
-        ".build/looter-party-soak/report.json",
-        ".build/oracle/castle-looter-comparison-report.json",
-        "web/tests/looter.test.ts",
-        ".build/looter-tests-output.txt",
-        "web/tests/castle-looter-reference.test.ts",
-        "web/tests/fixtures/original-castle-looter-trace.json"
-      ],
-      "testsPassed": 351,
-      "focusedReferenceTests": 4,
-      "negativeControls": 3
+        ".build/trainer-focused-tests-output.txt",
+        ".build/trainer-legacy-tests-output.txt",
+        ".build/trainer-tests-output.txt",
+        ".build/trainer-build-output.txt",
+        ".build/trainer-party-soak/report.json",
+        ".build/oracle/castle-trainer-comparison-report.json",
+        "web/tests/trainer.test.ts",
+        "web/tests/castle-trainer-reference.test.ts",
+        "web/tests/fixtures/original-castle-trainer-trace.json"
+      ]
     },
     "acceptedOriginalEvidence": [
       {
@@ -223,16 +230,90 @@
         "traceSha256": "c3e88707f82a6e5f148dbf782659568d1386765a66bb1dfc2f118b6276c61ce9",
         "instrumentedSwfSha256": "5495bfdd046aaac92ce4a74b82aa6eaf0afc452a7f71d00c46b522f3c76ca6e0",
         "limits": "Controlled levels 0–13, ordinary/boss generation and original Castle input. Shop comparison ends after its three random-item calls. Native battle/result scheduling, additional option combinations and extreme signed-int price overflow are outside these captures. No guaranteed improvement to every item."
+      },
+      {
+        "feature": "Castle Trainer purchases, hero/companion kill XP and unchanged daily settlement",
+        "matchingSnapshots": 27,
+        "fixture": "web/tests/fixtures/original-castle-trainer-trace.json",
+        "comparison": ".build/oracle/castle-trainer-comparison-report.json",
+        "traceSha256": "2fbe245324e68c6f9e96c43ccf66ae51975c6e610a0794dc282bc3571fbb0ede",
+        "instrumentedSwfSha256": "d7484a046ff5f5e3af913bed3354dcb9186ccc9fb95da43a0667a5223b8ee976",
+        "limits": "Controlled original purchase, procHit/kill and settlement boundaries; not complete native scheduler or browser contour parity. The observed undefined root.pc applies Trainer to hero kills as well as companions."
       }
     ],
     "browserVerification": [
-      "Seven full-envelope checks pass: purchases to Looter levels 1 and 2, insufficient-gold rejection, Continue, actual boss generation, Rest and earned result/town entry.",
-      "Production New Game starts at tick 0, HP 40, gold 200, ammo 5, six inventory slots and Looter 0. The actual v20 backup migrates and restores exactly to v21 at tick 674, HP 40 and gold 209, with unchanged RNG, paused and without console errors."
+      "Seven full-envelope checks pass: Trainer levels 1 and 2, insufficient-gold rejection, Continue, Rest, actual companion growth and earned result/town entry.",
+      "Three actual browser updates from an earned checkpoint take White from level 4 / XP 937 to level 5 / XP 0. The separate port Trainer0 control ends at level 4 / XP 992; this is not additional original scheduler evidence.",
+      "Production New Game starts at tick 0, HP 40, gold 200, ammo 5 and Trainer 0. The actual v21 backup migrates and restores exactly to v22 at tick 674, HP 40 and gold 209, with unchanged RNG, paused and without console errors."
     ],
-    "evidence": "web/docs/castle-upgrades-ui-source.md; web/tests/looter.test.ts; .build/looter-party-soak/report.json; .build/browser-qa/looter-scenario-audit.json; .build/browser-qa/looter-ui-verification.json; .build/browser-qa/looter-production-verification.json; .build/looter-publication.json",
-    "limits": "Looter changes random-item generation budgets, not every sale price. Guaranteed loot, already-generated offers, owned item records and settled results are not repriced. The 500 minimum and original acceptance rules remain. Trainer, second-page upgrades, Day 8 onward, other hero classes and the veteran late-game hitbox investigation are incomplete.",
-    "nextIntegratedWork": "Connect Trainer to actual companion experience and postbattle progression before broader campaign expansion.",
+    "evidence": "web/docs/castle-trainer-source.md; web/docs/castle-upgrades-ui-source.md; web/tests/trainer.test.ts; .build/trainer-party-soak/report.json; .build/oracle/castle-trainer-comparison-report.json; .build/browser-qa/trainer-scenario-audit.json; .build/browser-qa/trainer-ui-verification.json; .build/browser-qa/trainer-production-verification.json; .build/trainer-publication.json",
+    "limits": "Trainer multiplies kill XP after source integer stages, including the hero because the original root.pc is undefined. Weapon XP and the fixed daily 250 XP remain unchanged. Purchase has no upkeep, AP or RNG cost and no source cap. Second-page upgrades, Day 8 onward, other hero classes and the veteran late-game hitbox investigation remain incomplete.",
+    "nextIntegratedWork": "Audit Day8/Lava and its town, recruit and boss dependencies, then connect Rest, battle, rewards and town when the dependency boundary permits. Prefer progression coverage before optional Castle page2 work.",
     "previousPublished": {
+      "saveVersion": 21,
+      "verificationStatus": "passed",
+      "implementedCampaign": "Seven connected Sheriff days with prior Castle, party and loot MOD mechanics, plus ordinary Looter purchases, recurring upkeep and future ordinary/boss random-item generation budgets. The original tile, level suffix, price, affordability and float-truncated hint are connected. Trainer and second-page upgrades remain unavailable.",
+      "publication": "Published and production-verified locally at http://127.0.0.1:5175/elona/: assets/index-CH4ZkfIi.js from .build/browser-looter-final. All 308 candidate/live/ZIP files match and all 305 public assets are unchanged. All 351 tests, 26 original observations, seven full-envelope UI checks and final production New Game/exact actual v20→v21 migration and restore checks pass without console errors.",
+      "automatedVerification": {
+        "status": "passed",
+        "typecheckPassed": true,
+        "releaseBuildPassed": true,
+        "focusedTestsPassed": 26,
+        "affectedLegacyTestsPassed": 115,
+        "originalComparison": {
+          "observedSnapshots": 26,
+          "matchingSnapshots": 26,
+          "status": "accepted",
+          "report": ".build/oracle/castle-looter-comparison-report.json",
+          "fixture": "web/tests/fixtures/original-castle-looter-trace.json",
+          "traceSha256": "c3e88707f82a6e5f148dbf782659568d1386765a66bb1dfc2f118b6276c61ce9",
+          "instrumentedSwfSha256": "5495bfdd046aaac92ce4a74b82aa6eaf0afc452a7f71d00c46b522f3c76ca6e0"
+        },
+        "soak": {
+          "status": "passed",
+          "naturalCampaigns": 4,
+          "frames": 61187,
+          "saveReplayCheckpoints": 703,
+          "looterPurchases": 16,
+          "restTransitions": 24,
+          "rewardActions": 101,
+          "day7Wins": 4,
+          "observedGenerationBoundaries": 48,
+          "changedBoundaries": 11,
+          "changedBossBoundaries": 11,
+          "unchangedBoundaries": 37,
+          "provenance": "Four natural starts with no gold, item, HP or RNG grants. Normal purchases target level four by town four when affordable, reserving first-hire cost. Separate one-boundary replays change only Looter to zero; this is a measurement control, not a campaign grant or level cap.",
+          "limits": "Production ordinary contours and documented boss rectangle fallback. All 11 changed outcomes were boss rewards; 37 were unchanged. Unchanged ordinary outcomes do not all establish the 500 minimum: fixed drops and the same accepted item can also remain unchanged. Targeted original cases prove the minimum separately. No guarantee of greater value for each individual drop, original scheduler parity or broad browser campaign parity.",
+          "independentAudit": {
+            "savedFixturesVerified": 168,
+            "purchasesVerified": 16,
+            "pairedGenerationBoundariesVerified": 48,
+            "report": ".build/browser-qa/looter-scenario-audit.json"
+          }
+        },
+        "evidence": [
+          ".build/looter-focused-tests-output.txt",
+          ".build/looter-legacy-tests-output.txt",
+          ".build/looter-build-output.txt",
+          ".build/looter-party-soak/report.json",
+          ".build/oracle/castle-looter-comparison-report.json",
+          "web/tests/looter.test.ts",
+          ".build/looter-tests-output.txt",
+          "web/tests/castle-looter-reference.test.ts",
+          "web/tests/fixtures/original-castle-looter-trace.json"
+        ],
+        "testsPassed": 351,
+        "focusedReferenceTests": 4,
+        "negativeControls": 3
+      },
+      "browserVerification": [
+        "Seven full-envelope checks pass: purchases to Looter levels 1 and 2, insufficient-gold rejection, Continue, actual boss generation, Rest and earned result/town entry.",
+        "Production New Game starts at tick 0, HP 40, gold 200, ammo 5, six inventory slots and Looter 0. The actual v20 backup migrates and restores exactly to v21 at tick 674, HP 40 and gold 209, with unchanged RNG, paused and without console errors."
+      ],
+      "evidence": "web/docs/castle-upgrades-ui-source.md; web/tests/looter.test.ts; .build/looter-party-soak/report.json; .build/browser-qa/looter-scenario-audit.json; .build/browser-qa/looter-ui-verification.json; .build/browser-qa/looter-production-verification.json; .build/looter-publication.json",
+      "limits": "Looter changes random-item generation budgets, not every sale price. Guaranteed loot, already-generated offers, owned item records and settled results are not repriced. The 500 minimum and original acceptance rules remain. Trainer, second-page upgrades, Day 8 onward, other hero classes and the veteran late-game hitbox investigation are incomplete.",
+      "nextIntegratedWork": "Connect Trainer to actual companion experience and postbattle progression before broader campaign expansion.",
+      "previousPublished": {
       "saveVersion": 20,
       "verificationStatus": "passed",
       "implementedCampaign": "Seven connected Sheriff days with existing Castle and party mechanics, plus MOD mounting in ordinary and boss rewards. Any offer/owned endpoint pair can open the original confirmation. Yes mounts a compatible MOD; No/outside swaps complete records; pending dialogs save and restore while blocking moves and Proceed.",
@@ -719,11 +800,18 @@
         "rollback": ".build/browser-before-loot-mod contains all 308 verified v19 files; the prior Storage ZIP is retained."
       }
     },
+      "archive": {
+        "path": ".build/elona-shooter-browser-looter-slice.zip",
+        "bytes": 8576060,
+        "sha256": "172fdfbfb83e22b54d004df0611a1594ff578f4524244484bcdaedd38a9a16c2",
+        "rollback": ".build/browser-before-looter contains all 308 verified v20 files; the prior loot MOD ZIP is retained."
+      }
+    },
     "archive": {
-      "path": ".build/elona-shooter-browser-looter-slice.zip",
-      "bytes": 8576060,
-      "sha256": "172fdfbfb83e22b54d004df0611a1594ff578f4524244484bcdaedd38a9a16c2",
-      "rollback": ".build/browser-before-looter contains all 308 verified v20 files; the prior loot MOD ZIP is retained."
+      "path": ".build/elona-shooter-browser-trainer-slice.zip",
+      "bytes": 8576292,
+      "sha256": "c7d8cdd3623af49fd01f4536eb94262056c81a2fa913ff87d6c5ac8995fdee27",
+      "rollback": ".build/browser-before-trainer contains all 308 verified v21 files; the prior Looter ZIP is retained."
     }
   },
   "purpose": "Track the original game's systems and content against implemented behavior and independent evidence. This is an expandable inventory, not an exhaustive specification or a completion percentage.",
@@ -1271,7 +1359,7 @@
         "MainTimeline:9380 trait registrations"
       ],
       "status": "partial",
-      "implemented": "Kill/completion XP, levels and earned Sheriff choices persist across Days 1–7. All 15 original candidate definitions, eligibility/order/descriptions/previews, Capable options and duplicate retries feed the normal postbattle UI. Hidden potentials and base aiming/teamwork are saved; level-up consumes both original growth rolls. Five weapon-XP buckets follow the selected item's required trait at kill time, including grenade kills and the non-promoting other bucket. After completion XP, each of four weapon skills promotes at most once when XP is strictly above skillLevel*12+20, then clears that bucket. Earned non-Sheriff weapon skills remain valid without entering the Sheriff random-choice list. Active companions receive 250 completion XP, original per-class automatic growth/focus and all pending SP processing before loot. Cached party effects remain pre-growth until explicit source refresh boundaries; companion wages use settled level and cached Accountant.",
+      "implemented": "Kill/completion XP, levels and earned Sheriff choices persist across Days 1–7. All 15 original candidate definitions, eligibility/order/descriptions/previews, Capable options and duplicate retries feed the normal postbattle UI. Hidden potentials and base aiming/teamwork are saved; level-up consumes both original growth rolls. Five weapon-XP buckets follow the selected item's required trait at kill time, including grenade kills and the non-promoting other bucket. After completion XP, each of four weapon skills promotes at most once when XP is strictly above skillLevel*12+20, then clears that bucket. Earned non-Sheriff weapon skills remain valid without entering the Sheriff random-choice list. Active companions receive 250 completion XP, original per-class automatic growth/focus and all pending SP processing before loot. Cached party effects remain pre-growth until explicit source refresh boundaries; companion wages use settled level and cached Accountant. Trainer now multiplies kill XP after original integer stages for hero and companions, preserving the observed undefined root.pc branch. Threshold growth consumes both original rolls before later drops. Weapon XP, the fixed daily 250 XP and source party-cache refresh timing remain unchanged.",
       "evidence": [
         "web/tests/simulation.test.ts:first-battle result",
         "docs/port-verification.json:browser_checks.victory_checkpoint",
@@ -1286,7 +1374,11 @@
         "web/tests/day-two.test.ts: saved rewards and chosen traits across both days",
         "web/tests/castle-reference.test.ts: original Defender, Insurance and Last Hope behavior",
         "web/tests/party-progression-reference.test.ts:45 original observations",
-        "web/tests/party-combat-reference.test.ts:postbattle XP, weapon thresholds and cache-preserving growth"
+        "web/tests/party-combat-reference.test.ts:postbattle XP, weapon thresholds and cache-preserving growth",
+        "web/tests/castle-trainer-reference.test.ts: 27 accepted original observations and five negative controls",
+        "web/tests/trainer.test.ts: kill XP order, threshold growth, fixed daily XP and migration",
+        ".build/trainer-party-soak/report.json: 1332 paired single kills, 442 hero and 451 companion increases, four earlier level-ups; 48 ambiguous frames not attributed",
+        ".build/browser-qa/trainer-ui-verification.json: seven full-envelope purchase, restore, growth and transition checks; production v21→v22 restore verified separately"
       ],
       "unverified": [
         "Remaining party and town actions that use chosen traits",
@@ -1359,7 +1451,7 @@
         "MainTimeline:12629 Sandbag price and12673 cap"
       ],
       "status": "partial",
-      "implemented": "All seven enabled battles settle rewards, perfect bonus, default upkeep, tax and available salary once after reward choices, with original fame/AP/AP draws. Base rewards are600/620/640/660/680/700/720 on Days1–7; perfect bonus is30% and default upkeep40. Tax is zero through Day5 and10 on Day6, giving normal/perfect Day6 net650/860 before other income. Claim Title in town6 spends4AP and grants Honorary Citizen with daily salary100; it spends no gold/RNG and does not alter the settled Day6 result. The claimed title carries into the Day7 result: tax45, salary100, default upkeep40 and base reward720 produce normal/perfect net735/951 (635/851 without a title). The original settlement-method comparison and the separate focused headless campaign cover these boundaries. Free Repair costs2AP, fully heals and spends no gold/RNG. Legacy early-paid results retain their final balance. Purchases deduct integer stored value; sale loot receives full value and other items one fifth. Sales, battle gold, Insurance and settlement update cumulative earned money; purchases do not reduce it. Rest spends no AP/gold and does not heal. These listed net figures are solo baselines. Active companions add positive wage deductions after growth; cached Accountant affects wages and refreshed Negotiator affects the next prepared mission, without retroactively changing settled rewards. Castle House/Wall purchases are immediate, spend gold only and do not reroll or hire automatically. House1→2 costs2000 and2→3 costs5000, capped3; Wall cost is int(maxHP²/2.5−400), adds5 current/maxHP and preserves damage deficit. Current Wall level and maxHP are distinct. House adds50 recurring upkeep per level and Wall adds10 per purchase; already-settled results retain their historical amounts. Paid Fix Wall costs int(8×missingHP), fillsHP and increments its saved purchase count; cost0 at fullHP disables it. Repairman costs level²×250+700, adds60 recurring upkeep per level and heals2HP/level at opening and ordinary new-wave boundaries before perfect-wave evaluation. It does not heal on purchase, Rest acknowledgment, ordinary elapsed frames or the final battle-completion boundary. A previously lost perfect flag remains false. No repair sound/effect is added to the silent source HP update. Sandbag costs level²×240+1000, caps at10 with cost0 and adds40 recurring upkeep per level. Purchase spends gold only, does not heal and does not reprice settled results. Storage purchases append one owned slot up to 16; cost is (slots−4)²×30+250, derived level is slots−5 and upkeep is 40 per level. No duplicate stored Storage level. Cap/denial preserve state. Looter now costs level²×125+300 without a source cap, adds 5 recurring upkeep per level and spends no AP/RNG. Purchase changes no existing items or paid result. Trainer and page 2 remain disabled.",
+      "implemented": "All seven enabled battles settle rewards, perfect bonus, default upkeep, tax and available salary once after reward choices, with original fame/AP/AP draws. Base rewards are600/620/640/660/680/700/720 on Days1–7; perfect bonus is30% and default upkeep40. Tax is zero through Day5 and10 on Day6, giving normal/perfect Day6 net650/860 before other income. Claim Title in town6 spends4AP and grants Honorary Citizen with daily salary100; it spends no gold/RNG and does not alter the settled Day6 result. The claimed title carries into the Day7 result: tax45, salary100, default upkeep40 and base reward720 produce normal/perfect net735/951 (635/851 without a title). The original settlement-method comparison and the separate focused headless campaign cover these boundaries. Free Repair costs2AP, fully heals and spends no gold/RNG. Legacy early-paid results retain their final balance. Purchases deduct integer stored value; sale loot receives full value and other items one fifth. Sales, battle gold, Insurance and settlement update cumulative earned money; purchases do not reduce it. Rest spends no AP/gold and does not heal. These listed net figures are solo baselines. Active companions add positive wage deductions after growth; cached Accountant affects wages and refreshed Negotiator affects the next prepared mission, without retroactively changing settled rewards. Castle House/Wall purchases are immediate, spend gold only and do not reroll or hire automatically. House1→2 costs2000 and2→3 costs5000, capped3; Wall cost is int(maxHP²/2.5−400), adds5 current/maxHP and preserves damage deficit. Current Wall level and maxHP are distinct. House adds50 recurring upkeep per level and Wall adds10 per purchase; already-settled results retain their historical amounts. Paid Fix Wall costs int(8×missingHP), fillsHP and increments its saved purchase count; cost0 at fullHP disables it. Repairman costs level²×250+700, adds60 recurring upkeep per level and heals2HP/level at opening and ordinary new-wave boundaries before perfect-wave evaluation. It does not heal on purchase, Rest acknowledgment, ordinary elapsed frames or the final battle-completion boundary. A previously lost perfect flag remains false. No repair sound/effect is added to the silent source HP update. Sandbag costs level²×240+1000, caps at10 with cost0 and adds40 recurring upkeep per level. Purchase spends gold only, does not heal and does not reprice settled results. Storage purchases append one owned slot up to 16; cost is (slots−4)²×30+250, derived level is slots−5 and upkeep is 40 per level. No duplicate stored Storage level. Cap/denial preserve state. Looter now costs level²×125+300 without a source cap, adds 5 recurring upkeep per level and spends no AP/RNG. Purchase changes no existing items or paid result. Trainer costs level²×180+250 with no source cap, upkeep, AP or RNG cost. Purchases leave existing XP, prepared state and settled results unchanged; the live level applies to later kill XP. All eight first-page tiles are connected. Page 2 remains disabled.",
       "evidence": [
         "web/tests/simulation.test.ts:first-battle reward plan",
         "web/tests/town.test.ts: delayed once-only settlement, legacy balances and repair guards/persistence",
@@ -1399,10 +1491,14 @@
         "web/tests/looter.test.ts: purchase, reward-generation, persistence and guard checks",
         ".build/looter-party-soak/report.json: four natural campaigns, 48 paired generation boundaries; 11 changed boss outcomes and 37 unchanged outcomes",
         "web/tests/castle-looter-reference.test.ts: 26 accepted original observations and three negative controls; original level-12 hint displays 100%",
-        ".build/browser-qa/looter-ui-verification.json: seven accepted full-envelope purchase, restore, reward and transition checks"
+        ".build/browser-qa/looter-ui-verification.json: seven accepted full-envelope purchase, restore, reward and transition checks",
+        "web/docs/castle-trainer-source.md",
+        "web/tests/castle-trainer-reference.test.ts: 11 original purchase observations within the accepted 27-snapshot trace",
+        ".build/trainer-party-soak/report.json: 16 ordinary purchases in four natural campaigns",
+        ".build/browser-qa/trainer-ui-verification.json: seven full-envelope purchase, restore, growth and transition checks; production v21→v22 restore verified separately"
       ],
       "unverified": [
-        "Trainer and second-page upgrades",
+        "Second-page upgrades",
         "Integrated economy after Day7 and later title ranks",
         "Wage/party combinations beyond sampled cases and town income beyond the first-title salary"
       ]
@@ -1472,7 +1568,7 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot with JSON import/export and Continue. Version 7 stores canonical inventory equipment/ammunition/reload state, selected slot, five consumable cooldowns, in-flight grenade damage, protection, five weapon-XP buckets, hero potentials/traits, enemy shadow/boss-damage/disarmed state, rewards and cumulative earnings. Current seven-day saves retain active mission parameters, previous-town metadata, the current prepared town, AP, earned medals, perfect-day and boss-spawn counters. Versions 1–6 migrate without rerunning settled rewards or prepared towns; explicit provenance marks reconstructed data. Current saves require shadow history instead of silently deriving a replacement from the frame. Version8 adds full projectile/bow lifecycles. Version9 persists the upgrade reference and pending Upgrade/MOD confirmation; versions1–8 migrate, initializing these fields without RNG. Town reload metadata retained by enchant is accepted; active-battle timer validation remains strict. Version10 adds Archer counters and cosmetic arrow state, permits Day3 and validates previousTown against day−1. Versions1–9 migrate without creating arrows or consuming RNG. Version11 supports Day4 and boss facing; versions1–10 migrate without RNG, including normalization of legacy walkingframes212–219 into200–211. Shield countdown/animation and fourth-town grown recruits persist. Version12 enables Day5 and persists Fly hover counters, timeline/shadow state and fifth-town level2/3 recruits. Version11 migrates without rerolls or RNG changes; historical migrations retain their documented reconstruction behavior. Current saves validate campaign/previous-town bindings and reject missing or invalid Fly state. Version13 adds the persistent first title, explicit result tax/salary and Barbarian rage, child-rage frame and parent hit-effect records. Legacy versions1–12 initialize previously unavailable title/tax/salary without consuming RNG or changing paid balances. Barbarian requires v13 state with valid effect fields; unsupported prior Barbarian history is rejected rather than reconstructed. Version14 enables Day7 and seventh-town level4 recruits, preserves an already claimed title into salary settlement, and persists boss special action5 and cosmetic projectiles (null weaponSlot/damage−1). Legacy v13 state migrates without rerolling or replaying settlement; current validation rejects malformed cosmetic sentinels and invalid boss special state. Medal62 is accepted for earned seventh-perfect saves. Version 15 adds canonical party/candidate/inactive records, cached effects, owner-attributed projectiles, AI/retained targets and pending hire/dismiss/MOD dialogs. Legacy 1–14 migration uses retained candidate data without RNG or granting an owned companion. The initial v15 air-as-armor pattern is repaired only when unambiguous, preserving selected/retained target identities, cache history and RNG; mixed states are rejected. Earned Day5 browser import and current roundtrip match complete expected state. Version16 persists Wall level separately from maximum HP and accepts upgraded House capacity2/3. Legacy1–15 initializes Wall level1 without RNG or repricing settled history; current validation rejects impossible upgrade/HP state. Version17 retains wallFixCount and repairmanLevel as nonnegative integers. Legacy1–16 sets both0 without purchases, healing or RNG. The existing newWave/index state preserves repair timing across save/replay, without an additional timer. Version18 validates sandbagLevel as an integer0–10. Legacy1–17 initializes it0 without purchase/healing/RNG or settled-result changes, preserving prior repair and party state. Version 19 stores canonical inventory length 6–16 and derives Storage level, with no duplicate field. Older versions 1–18 remain strict six-slot inventories. Pending action/upgrade/party indices validate actual capacity; battle selection and cooldown lengths remain five. Consumable reload metadata is retained at the corrected source postbattle boundary. Version 20 persists pending loot MOD endpoints and validates phase, distinct addresses, actual capacity and occupied types. Incompatible MOD/gun pairs are allowed until Yes because that is the source check boundary. Versions 1–19 initialize the new pending action to null without RNG; v19 expanded capacity and all item metadata persist. Version 21 persists nonnegative integer looterLevel. Versions 1–20 initialize it to zero without purchase, RNG changes or repricing existing items, offers and settled results.",
+      "implemented": "One browser slot with JSON import/export and Continue. Version 7 stores canonical inventory equipment/ammunition/reload state, selected slot, five consumable cooldowns, in-flight grenade damage, protection, five weapon-XP buckets, hero potentials/traits, enemy shadow/boss-damage/disarmed state, rewards and cumulative earnings. Current seven-day saves retain active mission parameters, previous-town metadata, the current prepared town, AP, earned medals, perfect-day and boss-spawn counters. Versions 1–6 migrate without rerunning settled rewards or prepared towns; explicit provenance marks reconstructed data. Current saves require shadow history instead of silently deriving a replacement from the frame. Version8 adds full projectile/bow lifecycles. Version9 persists the upgrade reference and pending Upgrade/MOD confirmation; versions1–8 migrate, initializing these fields without RNG. Town reload metadata retained by enchant is accepted; active-battle timer validation remains strict. Version10 adds Archer counters and cosmetic arrow state, permits Day3 and validates previousTown against day−1. Versions1–9 migrate without creating arrows or consuming RNG. Version11 supports Day4 and boss facing; versions1–10 migrate without RNG, including normalization of legacy walkingframes212–219 into200–211. Shield countdown/animation and fourth-town grown recruits persist. Version12 enables Day5 and persists Fly hover counters, timeline/shadow state and fifth-town level2/3 recruits. Version11 migrates without rerolls or RNG changes; historical migrations retain their documented reconstruction behavior. Current saves validate campaign/previous-town bindings and reject missing or invalid Fly state. Version13 adds the persistent first title, explicit result tax/salary and Barbarian rage, child-rage frame and parent hit-effect records. Legacy versions1–12 initialize previously unavailable title/tax/salary without consuming RNG or changing paid balances. Barbarian requires v13 state with valid effect fields; unsupported prior Barbarian history is rejected rather than reconstructed. Version14 enables Day7 and seventh-town level4 recruits, preserves an already claimed title into salary settlement, and persists boss special action5 and cosmetic projectiles (null weaponSlot/damage−1). Legacy v13 state migrates without rerolling or replaying settlement; current validation rejects malformed cosmetic sentinels and invalid boss special state. Medal62 is accepted for earned seventh-perfect saves. Version 15 adds canonical party/candidate/inactive records, cached effects, owner-attributed projectiles, AI/retained targets and pending hire/dismiss/MOD dialogs. Legacy 1–14 migration uses retained candidate data without RNG or granting an owned companion. The initial v15 air-as-armor pattern is repaired only when unambiguous, preserving selected/retained target identities, cache history and RNG; mixed states are rejected. Earned Day5 browser import and current roundtrip match complete expected state. Version16 persists Wall level separately from maximum HP and accepts upgraded House capacity2/3. Legacy1–15 initializes Wall level1 without RNG or repricing settled history; current validation rejects impossible upgrade/HP state. Version17 retains wallFixCount and repairmanLevel as nonnegative integers. Legacy1–16 sets both0 without purchases, healing or RNG. The existing newWave/index state preserves repair timing across save/replay, without an additional timer. Version18 validates sandbagLevel as an integer0–10. Legacy1–17 initializes it0 without purchase/healing/RNG or settled-result changes, preserving prior repair and party state. Version 19 stores canonical inventory length 6–16 and derives Storage level, with no duplicate field. Older versions 1–18 remain strict six-slot inventories. Pending action/upgrade/party indices validate actual capacity; battle selection and cooldown lengths remain five. Consumable reload metadata is retained at the corrected source postbattle boundary. Version 20 persists pending loot MOD endpoints and validates phase, distinct addresses, actual capacity and occupied types. Incompatible MOD/gun pairs are allowed until Yes because that is the source check boundary. Versions 1–19 initialize the new pending action to null without RNG; v19 expanded capacity and all item metadata persist. Version 21 persists nonnegative integer looterLevel. Versions 1–20 initialize it to zero without purchase, RNG changes or repricing existing items, offers and settled results. Version 22 persists nonnegative integer trainerLevel. Versions 1–21 initialize it to zero without purchases, XP changes, RNG draws or altering existing Looter, inventory, party, pending rewards and settled results.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",
@@ -1533,7 +1629,9 @@
         ".build/looter-party-soak/report.json: four natural campaigns, 48 paired generation boundaries; 11 changed boss outcomes and 37 unchanged outcomes",
         "web/tests/castle-looter-reference.test.ts: 26 accepted original observations and three negative controls; original level-12 hint displays 100%",
         ".build/browser-qa/looter-ui-verification.json: seven accepted full-envelope purchase, restore, reward and transition checks",
-        ".build/browser-qa/looter-production-verification.json: exact actual v20→v21 migration/restore and New Game with Looter 0"
+        ".build/browser-qa/looter-production-verification.json: exact actual v20→v21 migration/restore and New Game with Looter 0",
+        "web/tests/trainer.test.ts: v21 migration, current roundtrip and invalid Trainer rejection",
+        ".build/browser-qa/trainer-ui-verification.json: seven full-envelope purchase, restore, growth and transition checks; production v21→v22 restore verified separately"
       ],
       "unverified": [
         "Original six save-slot interface parity",
@@ -1561,7 +1659,7 @@
         "ally1 and enemy_* frame scripts in original SWF"
       ],
       "status": "partial",
-      "implemented": "Selected original assets and reconstructed character timeline layers support the seven-day Sheriff slice, town mission/castle/shop menus, original item/coin art and Free Repair/sale/Rest dialogs. The battle hotbar renders owned equipment, ammo and per-slot cooldowns; selected weapon presentation, repair/prayer/defend effects and sounds use original assets. Original item popup, upgrade arrow and separate shop labels support before/after upgrade and MOD confirmations. Original Archer1092 and enemyarrow2282 body/shadow are rendered, including stage overlay order and source registration; generated bounds drive the Archer clamp. Original Fly952 retains all126 frames, its distant shadow and falling corpse, death sound, filled-contour collision and independently measured per-frame bounds; source geometry includes the shadow approximately104pixels below the living body. Original Barbarian1340, rage2385 and hit/critical1459 artwork render saved frame/offset/alpha state. Rage child contours and parent-only particle bounds remain distinct, preserving the original targeting and knockback behavior. The city title action uses the original New Title! dialog/card and Honorary Citizen text. Day7 boss wind-up and the existing grenade2 body/shadow assets render the saved special attack and cosmetic flight; candidate browser export/replay confirms the controlled flight and landing, with body/shadow observed and audio still unverified. Original Characters/Equipment shells, controls, portrait placement/alpha/filter and Impact font support party menus; OriginalAlly layers render companions with actor-specific weapon/reload events and targeting cursors. Visual and audio parity remains bounded by the actual observed screens. Original Castle sprite2192/picture2191 tile states and page buttons1625/1630 support House/Wall levels, costs and affordability. Source geometry keeps the near-transparent button region clickable without including raster blur expansion; source font1535 uses the loaded ui family. Existing original tile0/6 art supports Fix Wall and Repairman without asset changes. Repairman level0 uses the source not-yet-acquired detail; positive levels show the current HP/wave. FixWall never displays a level suffix. Purchases use payment sound; automatic wave repairs update the ordinary HP HUD without invented audio/VFX. Existing Castle tile2 frames5/6 now support Sandbag purchase, cap and the source absorption hint; no new artwork or effects are introduced. Storage uses original tile 3 frames 7/8 without new assets; shop/equipment rows retain source y=250+row×48 before the town offset of −22, and loot rows use y=224+row×48 before the offset of −26. The loot panel status hides when it would overlap the second row; messages use the existing external status. Ordinary/boss loot reuse dialog sprite 2131 and Yes/No artwork at stage coordinates, independent of the shifted reward panel. The carried MOD icon appears above its target gun using source registration; no source duplicate remains. Shop uses the same confirmation renderer. No new assets are required. Looter reuses Castle tile 5 frames 11/12 and source text/registration without new assets. Current level, affordability, cost, upkeep and the exact float-truncated percentage update through the ordinary purchase API.",
+      "implemented": "Selected original assets and reconstructed character timeline layers support the seven-day Sheriff slice, town mission/castle/shop menus, original item/coin art and Free Repair/sale/Rest dialogs. The battle hotbar renders owned equipment, ammo and per-slot cooldowns; selected weapon presentation, repair/prayer/defend effects and sounds use original assets. Original item popup, upgrade arrow and separate shop labels support before/after upgrade and MOD confirmations. Original Archer1092 and enemyarrow2282 body/shadow are rendered, including stage overlay order and source registration; generated bounds drive the Archer clamp. Original Fly952 retains all126 frames, its distant shadow and falling corpse, death sound, filled-contour collision and independently measured per-frame bounds; source geometry includes the shadow approximately104pixels below the living body. Original Barbarian1340, rage2385 and hit/critical1459 artwork render saved frame/offset/alpha state. Rage child contours and parent-only particle bounds remain distinct, preserving the original targeting and knockback behavior. The city title action uses the original New Title! dialog/card and Honorary Citizen text. Day7 boss wind-up and the existing grenade2 body/shadow assets render the saved special attack and cosmetic flight; candidate browser export/replay confirms the controlled flight and landing, with body/shadow observed and audio still unverified. Original Characters/Equipment shells, controls, portrait placement/alpha/filter and Impact font support party menus; OriginalAlly layers render companions with actor-specific weapon/reload events and targeting cursors. Visual and audio parity remains bounded by the actual observed screens. Original Castle sprite2192/picture2191 tile states and page buttons1625/1630 support House/Wall levels, costs and affordability. Source geometry keeps the near-transparent button region clickable without including raster blur expansion; source font1535 uses the loaded ui family. Existing original tile0/6 art supports Fix Wall and Repairman without asset changes. Repairman level0 uses the source not-yet-acquired detail; positive levels show the current HP/wave. FixWall never displays a level suffix. Purchases use payment sound; automatic wave repairs update the ordinary HP HUD without invented audio/VFX. Existing Castle tile2 frames5/6 now support Sandbag purchase, cap and the source absorption hint; no new artwork or effects are introduced. Storage uses original tile 3 frames 7/8 without new assets; shop/equipment rows retain source y=250+row×48 before the town offset of −22, and loot rows use y=224+row×48 before the offset of −26. The loot panel status hides when it would overlap the second row; messages use the existing external status. Ordinary/boss loot reuse dialog sprite 2131 and Yes/No artwork at stage coordinates, independent of the shifted reward panel. The carried MOD icon appears above its target gun using source registration; no source duplicate remains. Shop uses the same confirmation renderer. No new assets are required. Looter reuses Castle tile 5 frames 11/12 and source text/registration without new assets. Current level, affordability, cost, upkeep and the exact float-truncated percentage update through the ordinary purchase API. Trainer reuses original Castle tile7 frames15/16, source registration/font and float-truncated experience hint, without new assets. Positive levels use the original suffix; level zero shows the shared unacquired detail. No new cap, recurring upkeep or host restriction is introduced.",
       "evidence": [
         "docs/asset-manifest.json",
         "docs/ui-reference.md",
@@ -1585,7 +1683,9 @@
         "web/tests/looter.test.ts: purchase, reward-generation, persistence and guard checks",
         ".build/looter-party-soak/report.json: four natural campaigns, 48 paired generation boundaries; 11 changed boss outcomes and 37 unchanged outcomes",
         "web/tests/castle-looter-reference.test.ts: 26 accepted original observations and three negative controls; original level-12 hint displays 100%",
-        ".build/browser-qa/looter-ui-verification.json: seven accepted full-envelope purchase, restore, reward and transition checks"
+        ".build/browser-qa/looter-ui-verification.json: seven accepted full-envelope purchase, restore, reward and transition checks",
+        "web/docs/castle-upgrades-ui-source.md: original Trainer tile, hint, price, level and existing artwork",
+        ".build/browser-qa/trainer-ui-verification.json: seven full-envelope purchase, restore, growth and transition checks; production v21→v22 restore verified separately"
       ],
       "unverified": [
         "Complete scene/state visual comparison",

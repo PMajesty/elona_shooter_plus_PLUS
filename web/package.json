@@ -57,7 +57,9 @@
     "test:soak": "node --experimental-strip-types scripts/soak.ts",
     "test:projectile-soak": "node --experimental-strip-types scripts/projectile-soak.ts",
     "test:castle-looter-reference": "node --experimental-strip-types scripts/compare-castle-looter-reference.ts",
-    "test:looter-party-soak": "node --experimental-strip-types scripts/party-soak.ts 4 looter"
+    "test:looter-party-soak": "node --experimental-strip-types scripts/party-soak.ts 4 looter",
+    "test:castle-trainer-reference": "node --experimental-strip-types scripts/compare-castle-trainer-reference.ts",
+    "test:trainer-party-soak": "node --experimental-strip-types scripts/party-soak.ts 4 trainer"
   },
   "dependencies": {
     "phaser": "4.2.1"

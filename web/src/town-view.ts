@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
-import { castleDamageMultiplier, castleLootMultiplier, castleRepairAmount, castleStorageLevel, castleUpgradeCost, castleUpkeep, type CastleUpgradeKind } from './castle-upgrades.ts';
+import { castleDamageMultiplier, castleLootMultiplier, castleRepairAmount, castleStorageLevel, castleTrainerMultiplier, castleUpgradeCost, castleUpkeep, type CastleUpgradeKind } from './castle-upgrades.ts';
 
 export type TownTab = 'mission' | 'castle' | 'shop' | 'characters' | 'equipment' | null;
 export type TownDialog = 'repair' | 'rest' | 'title' | null;
@@ -22,7 +22,7 @@ export interface TownLayout {
 }
 interface TownViewState {
   day: number; gold: number; castleHp: number; castleMaxHp: number; title: 0 | 1;
-  wallLevel: number; wallFixCount: number; repairmanLevel: number; sandbagLevel: number; looterLevel: number; party: { capacity: 1 | 2 | 3 };
+  wallLevel: number; wallFixCount: number; repairmanLevel: number; sandbagLevel: number; looterLevel: number; trainerLevel: number; party: { capacity: 1 | 2 | 3 };
   player: { level: number; exp: number; selectedSlot: number };
   town: { ap: number; preparation: string } | null; inventory: (Item | null)[];
 }
@@ -87,16 +87,16 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
       text(panel.children.unkeep, String(castleUpkeep(state)), x, y);
       button('button_freeRepair', panel.children.act1, callbacks.repair, x, y);
       const tile = layout.castleUpgrades, asset = manifest.clips[tile.clip];
-      const notice = 'Trainer and page 2 purchases are not available yet.';
+      const notice = 'Page 2 purchases are not available yet.';
       const hint = text(panel.children.hint2, notice, x, y);
       button(tile.pageButtons[0], panel.children.page1, () => {}, x, y);
       button(tile.pageButtons[1], panel.children.page2, () => callbacks.message('These Castle upgrades are not available yet.'), x, y, false).setAlpha(tile.disabledAlpha);
-      // Остальные цены/уровни исходные, но их плитки явно отключены до реализации покупки.
-      const levels = [state.wallFixCount, state.wallLevel, state.sandbagLevel, castleStorageLevel(state), state.party.capacity, state.looterLevel, state.repairmanLevel, 0];
+      // Все восемь исходных плиток первой страницы используют общие проверки покупки.
+      const levels = [state.wallFixCount, state.wallLevel, state.sandbagLevel, castleStorageLevel(state), state.party.capacity, state.looterLevel, state.repairmanLevel, state.trainerLevel];
       const costs = [castleUpgradeCost('fix-wall', state), castleUpgradeCost('wall', state), castleUpgradeCost('sandbag', state),
-        castleUpgradeCost('storage', state), castleUpgradeCost('house', state), castleUpgradeCost('looter', state), castleUpgradeCost('repairman', state), 250];
+        castleUpgradeCost('storage', state), castleUpgradeCost('house', state), castleUpgradeCost('looter', state), castleUpgradeCost('repairman', state), castleUpgradeCost('trainer', state)];
       tile.names.forEach((name, index) => {
-        const kind: CastleUpgradeKind | undefined = index === 0 ? 'fix-wall' : index === 1 ? 'wall' : index === 2 ? 'sandbag' : index === 3 ? 'storage' : index === 4 ? 'house' : index === 5 ? 'looter' : index === 6 ? 'repairman' : undefined;
+        const kind: CastleUpgradeKind | undefined = index === 0 ? 'fix-wall' : index === 1 ? 'wall' : index === 2 ? 'sandbag' : index === 3 ? 'storage' : index === 4 ? 'house' : index === 5 ? 'looter' : index === 6 ? 'repairman' : index === 7 ? 'trainer' : undefined;
         const possible = Boolean(kind && costs[index] > 0 && state.gold >= costs[index]);
         const tileX = x + tile.x + index % tile.columns * tile.stepX;
         const tileY = y + tile.y + Math.floor(index / tile.columns) * tile.stepY;
@@ -117,6 +117,8 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
           // Сохраняем исходный текст и int(Number*100-100): упрощённый процент может округлиться иначе.
           : kind === 'looter' ? 'The more looters you have the, the more valuable stuff you find will be. '
             + (state.looterLevel > 0 ? `(Currently, looted items's value will be ${Math.trunc(castleLootMultiplier(state) * 100 - 100)}% higher)` : "[ You haven't acquired this upgrade yet ]")
+          : kind === 'trainer' ? 'With more trainers, your troops will gain experience a lot faster. '
+            + (state.trainerLevel > 0 ? `(Currently, your troops get ${Math.trunc(castleTrainerMultiplier(state) * 100 - 100)}% more EXP)` : "[ You haven't acquired this upgrade yet ]")
           : kind === 'repairman' ? 'Repairers will slowly fix the castle wall during a battle between waves. '
             + (state.repairmanLevel > 0 ? `(Currently, they can fix ${castleRepairAmount(state)} HP per wave)` : "[ You haven't acquired this upgrade yet ]")
           : kind === 'house'

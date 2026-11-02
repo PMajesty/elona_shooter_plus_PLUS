@@ -3,15 +3,24 @@
 A browser remake of **Elona Shooter Plus 1.3.0.4**, written in TypeScript with
 Phaser 4. The current implementation covers **seven connected Sheriff days**:
 choose one of 22 appearances, fight, collect ordinary and boss loot, choose earned
-skills, enter town, hire permanent companions, improve the House, Wall and Sandbags, expand Storage, employ
-a Repairman, exchange equipment, buy/sell and upgrade weapons, mount MODs, repair
+skills, enter town, hire permanent companions, improve the House, Wall and Sandbags,
+expand Storage, employ Repairmen and Trainers, exchange equipment, buy/sell and
+upgrade weapons, mount MODs, repair
 the castle with gold or AP, then Rest into Days 2–7 with your
 retained party and equipment. Victory, defeat,
 rewards, town entry and save/restore work across these stages. Original English
 artwork, fonts, audio and credits are retained.
 
-The **v21 Looter release** is published at
-[the local release](http://127.0.0.1:5175/elona/) after 351 passing tests,
+The **v22 Trainer release** is published at
+[the local release](http://127.0.0.1:5175/elona/) after 363 passing tests,
+27 accepted original observations, seven complete-save UI checks and production
+New Game/exact v21-save migration and restore checks. Trainer connects the original
+Castle purchase to hero and companion kill XP, with no recurring upkeep.
+The deployable archive is `.build/elona-shooter-browser-trainer-slice.zip`;
+the verified v21 release remains in `.build/browser-before-trainer` and the
+Looter archive.
+
+The historical **v21 Looter release** was verified with 351 passing tests,
 26 accepted original observations, seven complete-save UI checks and successful
 production New Game/exact v20-save migration and restore checks. Looter now
 connects the original Castle purchase to future ordinary/boss generation budgets.
@@ -114,7 +123,7 @@ slot adds **40 GP daily upkeep**. Shop, Equipment and ordinary/boss loot show ei
 columns and a second row when needed. Purchases, sales, swaps, town Upgrade/MODs,
 Shop Tokens and companion equipment use the expanded slots; only the **first five**
 remain battle hotkeys. At16 slots, further purchases cost nothing and are blocked.
-Trainer and Castle page2 remain unavailable. MOD mounting during ordinary and
+Castle page2 remains unavailable. MOD mounting during ordinary and
 boss loot uses these same expanded slots.
 
 **Looter** is available in Castle. Its first level costs **300 GP**;
@@ -125,6 +134,14 @@ and boss prizes. This raises the generation budget, not every item's sale value:
 guaranteed drops and already-owned/offered items are unchanged, the minimum
 budget remains 500, and individual outcomes can stay the same. Purchase consumes
 no AP or RNG and does not alter a settled result.
+**Trainer** is available in Castle. Purchases cost
+`180 × current level² + 250` (250, then 430 GP), without a source level cap,
+AP cost, RNG draw or additional upkeep. Kill XP uses multiplier 1 at level zero,
+otherwise `1.03 + level × 0.04`, after the original integer adjustment stages.
+The observed original applies it to both hero and companion kills. Weapon XP and
+the fixed **250 XP daily completion award** are unchanged. Its original tile,
+level, affordability and float-truncated percentage hint are retained.
+
 Town preparation generates stock, cards, next-mission data and a
 recruit once. Open the Shop tab, click stock to pick it up, then click an empty
 owned slot to buy it. Owned items can be moved or swapped; dropping one outside
@@ -199,9 +216,10 @@ gun does not collect it automatically. While confirmation is open, clicks cannot
 also move another item or advance rewards. Stock MODs must first be bought into
 an empty owned slot.
 
-Saves now use **version 21**; versions **1–20** are accepted. The canonical
-`looterLevel` is a nonnegative integer; older saves initialize it to zero without
-purchase, RNG changes or repricing stored items or results. Pending
+Current saves use **version 22**; versions **1–21** are accepted. Canonical
+`trainerLevel` is a nonnegative integer; older saves initialize it to zero without
+purchases, XP changes or RNG draws. Existing `looterLevel`, items, offers, party
+state and settled results remain unchanged. Pending
 loot MOD confirmation retains both area/index endpoints and resumes on the same
 reward screen without repeating a move or enchant. Older versions initialize it
 to null without consuming RNG. Capacity is the owned inventory length 6–16;
@@ -341,6 +359,45 @@ grenade flight, shake RNG and death before/after release. See
 [boss-special notes](web/docs/boss-special-source.md),
 [seventh-day wave notes](web/docs/seventh-day-wave-source.md) and
 [seventh-town notes](web/docs/seventh-town-source.md).
+
+The v22 Trainer release passes **363 tests**, TypeScript checking and its build
+(`assets/index-mtID2Ws9.js`). **All 27 original observations are accepted**:
+11 purchase observations and 16 kill/settlement cases. Six focused reference tests
+include five negative controls for a hero exemption, early multiplication before
+integer XP stages, multiplying daily XP, extra weapon XP and premature party-cache
+refresh. The observed original `_root.pc` is undefined, so Trainer affects hero
+kills too; this source behavior is retained. Threshold cases verify both growth
+draws before later drop RNG. See [Trainer source notes](web/docs/castle-trainer-source.md),
+`web/tests/fixtures/original-castle-trainer-trace.json` and
+`.build/oracle/castle-trainer-comparison-report.json`.
+
+Four natural campaigns pass **61,042 frames and 732 save/event replay checkpoints**,
+with 16 Trainer purchases, 24 Rest transitions and four Day7 wins, without gold,
+item, HP or RNG grants. Of 1,332 paired single-kill observations, 442 hero and 451
+companion credits increase, with four earlier level-ups. Another 48 ambiguous
+frames are retained without isolated attribution. All 24 paired daily settlements
+are identical except for Trainer level. These one-boundary Trainer0 controls are
+port integration measurements; they do not replace the original comparison.
+The runner uses production ordinary contours and the documented boss rectangle
+fallback. Evidence: `.build/trainer-party-soak/report.json` and
+`.build/trainer-tests-output.txt`.
+
+The independent audit in `.build/browser-qa/trainer-scenario-audit.json`
+confirms all 224 saved fixtures, 16 purchases, 1,332 paired kills and 24 daily
+settlements. Seven full-envelope UI checks pass: Trainer levels 1/2,
+insufficient-gold rejection, Continue, Rest, companion growth and earned
+result/town entry. From an earned checkpoint, three actual browser updates take
+White from level 4 / XP 937 to level 5 / XP 0; the separate Trainer0 control ends
+at level 4 / XP 992. This is an observed browser transition plus a port control,
+not a new original scheduler comparison.
+
+All 308 candidate/live/ZIP files match and all 305 public assets are unchanged.
+Production New Game starts at tick 0, HP 40, gold 200, ammo 5 and Trainer 0.
+The actual v21 backup migrates and restores with complete-envelope equality at
+tick 674, HP 40 and gold 209, with unchanged RNG; paused, without console errors.
+Evidence: `.build/browser-qa/trainer-ui-verification.json`,
+`.build/browser-qa/trainer-production-verification.json` and
+`.build/trainer-publication.json`.
 
 The v21 release passes **351 tests**, TypeScript checking and its build.
 **All 26 original observations are accepted**, covering purchase/denial, upkeep,
@@ -614,10 +671,11 @@ or native browser scheduling parity. Run
 `node --experimental-strip-types scripts/party-soak.ts 8 repair` from `web`;
 reports are in `.build/repair-party-soak/`.
 
-The next useful slice is **Trainer tied to
-actual companion experience and postbattle progression**.
-Day8/Lava, broader campaign expansion and the unproven veteran late-game hitbox
-complaint remain later work.
+The next useful slice is a source audit of **Day8/Lava and its town, recruit and
+boss dependencies**, followed by connected Rest → battle → rewards → town when
+those dependencies fit a bounded implementation. This extends progression coverage
+before optional Castle page2 work. Day8 is not enabled yet; the veteran late-game
+hitbox complaint still needs its own failing original encounter.
 
 `npm.cmd run test:projectile-soak` separately exercises eight projectile guns
 and hand grenades under three seeds: **27 scenarios, 9,720 frames and 1,080
@@ -666,6 +724,7 @@ python tools/build_castle_sandbag_oracle.py
 python tools/build_castle_storage_oracle.py
 python tools/build_loot_mod_oracle.py
 python tools/build_castle_looter_oracle.py
+python tools/build_castle_trainer_oracle.py
 python tools/serve_oracle.py
 ```
 
@@ -705,6 +764,8 @@ and `npm.cmd run test:castle-storage-reference`. Reward MOD mounting uses
 `npm.cmd run test:loot-mod-scenarios` for the earned-checkpoint integration branches.
 Looter uses `?suite=castle-looter` and `npm.cmd run test:castle-looter-reference`;
 `npm.cmd run test:looter-party-soak` runs the four natural purchase/reward campaigns.
+Trainer uses `?suite=castle-trainer` and `npm.cmd run test:castle-trainer-reference`;
+`npm.cmd run test:trainer-party-soak` runs the four natural purchase/XP campaigns.
 Run these scripts with `npm.cmd run` from `web/`. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, use the matching comparison command: `npm.cmd run test:reference`,
