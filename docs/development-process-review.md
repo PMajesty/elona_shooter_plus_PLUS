@@ -207,3 +207,11 @@ working direct URL to inspect the saved checkpoint and restore the user's whole
 backup. Do not infer ordinary-browser download behavior or change export code
 without evidence. Same-origin host reload/Continue passed; no broader hosting
 claim follows. Temporary host controls were removed from the served build.
+
+Late ranged attacks reused the existing enemy-arrow state/render/save path and
+campaign tests, rather than adding a parallel projectile harness. A controlled
+launch screenshot plus a frozen mid-flight import/Continue established rendering
+and saved state without trying to click within a subsecond flight repeatedly.
+Space resumes a paused battle but reloads during play; use Escape for pausing.
+Compare serialized JSON when checking UI exports: REPL structuredClone prototypes
+made a strict object comparison report false differences despite identical data.

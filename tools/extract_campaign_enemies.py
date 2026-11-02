@@ -10,6 +10,32 @@ import extract_web_assets as assets
 KINDS = ['cata', 'spider', 'ghost', 'ogre', 'knight', 'bird', 'tank', 'dino', 'dragon']
 
 
+def extract_enemy_shots(xml, manifest):
+    sprites = {int(tag.get('spriteId')): tag for tag in xml.find('tags') if tag.get('type') == 'DefineSpriteTag'}
+    bodies = {'enemyBoltBody': 2206, 'enemyTankBoltBody': 2202}
+    for suffix, directory, extra in [('png', assets.CACHE, []), ('svg', assets.ROOT / '.build/svg-bounds', ['-format', 'sprite:svg'])]:
+        missing = [symbol for symbol in bodies.values() if not list(directory.glob(f'DefineSprite_{symbol}*'))]
+        if missing:
+            assets.ffdec(['-ignorebackground', '-selectid', ','.join(map(str, missing)), *extra, '-export', 'sprite', directory, assets.SOURCE], 'enemy-shots-' + suffix)
+    for key, symbol in bodies.items():
+        manifest['clips'][key] = assets.atlas(key, symbol, sprites[symbol])
+    visuals = {}
+    for kind, symbol, key in [('bolt', 2207, 'enemyBoltBody'), ('tank-bolt', 2203, 'enemyTankBoltBody'), ('fireball', 2196, 'flameBody')]:
+        placements = assets.placed_frame(sprites[symbol].find('subTags'), 1)
+        body = next(tag for tag in placements if tag.get('name') == 'mc')
+        matrix = body.find('matrix')
+        visual = {'characterId': symbol, 'clip': key, 'bodyX': int(matrix.get('translateX', '0')) / 20,
+                  'initialBodyY': int(matrix.get('translateY', '0')) / 20}
+        shadow = next((tag for tag in placements if tag.get('name') == 'shadow'), None)
+        if shadow is not None:
+            matrix = shadow.find('matrix')
+            visual['shadow'] = {'clip': 'grenadeShadow', 'x': int(matrix.get('translateX', '0')) / 20,
+                'initialY': int(matrix.get('translateY', '0')) / 20, 'scaleX': float(matrix.get('scaleX', '1')),
+                'scaleY': float(matrix.get('scaleY', '1')), 'aboveBody': int(shadow.get('depth')) > int(body.get('depth'))}
+        visuals[kind] = visual
+    manifest['enemyShotVisuals'] = visuals
+
+
 def extract_dropped_rat(xml, manifest):
     symbol = 1258
     for suffix, directory, extra in [('png', assets.CACHE, []), ('svg', assets.ROOT / '.build/svg-bounds', ['-format', 'sprite:svg'])]:
@@ -34,6 +60,7 @@ def main():
     manifest_path = assets.DEST / 'manifest.json'
     manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
     extract_dropped_rat(xml, manifest)
+    extract_enemy_shots(xml, manifest)
     timelines = {}
     for kind, symbol in symbols.items():
         sprite = sprites[symbol]
@@ -72,6 +99,9 @@ def main():
         provenance['counts'] = {key: len(manifest[key]) for key in ['images', 'clips', 'sounds', 'fonts']}
         provenance['campaignEnemies'] = {'symbols': symbols, 'timelines': 'web/src/enemy-timelines.ts',
                                          'collision': 'raster alpha for later enemies; filled contours retained for early enemies'}
+        provenance['enemyShots'] = {'parents': {'bolt': 2207, 'tank-bolt': 2203, 'fireball': 2196},
+                                    'bodies': {'enemyBoltBody': 2206, 'enemyTankBoltBody': 2202, 'flameBody': 2195},
+                                    'motion': 'web/src/enemy-arrows.ts', 'damage': 'source launch frame; flight is decorative'}
         provenance['runtimeAdjustments'] = [text.replace('Ordinary enemy collision uses original filled contours and placement matrices, not bitmap alpha',
             'Early enemies use source filled contours; later enemy atlases currently use raster alpha collision') for text in provenance.get('runtimeAdjustments', [])]
         provenance_path.write_text(json.dumps(provenance, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

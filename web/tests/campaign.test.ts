@@ -9,6 +9,7 @@ import { prepareEarlyTown } from '../src/town-preparation.ts';
 import { SAVE_VERSION } from '../src/save-version.ts';
 import { generateHenchman } from '../src/party.ts';
 import { RAT_DROP_BODY_X, ratDropLocalPoint } from '../src/bird-drop.ts';
+import { createEnemyArrow, createEnemyShot, advanceEnemyArrow } from '../src/enemy-arrows.ts';
 
 const seeded = (seed: number) => () => {
   seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5;
@@ -30,6 +31,66 @@ function atDay(day: number): Simulation {
   }
   return sim;
 }
+
+test('late ranged enemies launch original visible attacks at the damage frame, with resumable flights and no impact damage', () => {
+  for (const [kind, frame, shotKind] of [['cata', 113, 'bolt'], ['tank', 102, 'tank-bolt'], ['dino', 146, null], ['dragon', 66, 'fireball']] as const) {
+    const sim = atDay(35); sim.state.spawnTimer = 100000;
+    sim['spawnEnemy'](kind); const enemy = sim.state.enemies[0];
+    Object.assign(enemy, { x: 220, speed: 0, frame: frame - 1, attacking: true });
+    const hp = sim.state.castleHp, attack = enemy.attack, rng = sim.state.rng;
+    sim.tick();
+    assert.equal(enemy.frame, frame);
+    assert.equal(sim.state.castleHp, hp - attack);
+    assert.ok(sim.events.some(event => event.type === 'enemy-attack' && event.enemyKind === kind));
+    assert.equal(sim.state.enemyArrows.length, shotKind ? 1 : 0);
+    if (shotKind) {
+      const shot = sim.state.enemyArrows[0];
+      assert.equal(shot.kind, shotKind); assert.equal(shot.age, 0);
+      assert.equal(shot.x, 220 + (kind === 'tank' ? 65 : 50));
+    }
+    const save = sim.toSave(), restored = Simulation.fromSave(JSON.parse(JSON.stringify(save)));
+    assert.deepEqual(restored.toSave(), save);
+    for (let tick = 0; tick < 30; tick++) {
+      sim.tick(); restored.tick();
+      assert.deepEqual(restored.toSave(), sim.toSave()); assert.deepEqual(restored.events, sim.events);
+      assert.equal(sim.state.castleHp, hp - attack);
+    }
+    assert.equal(sim.state.enemyArrows.length, 0);
+    assert.notEqual(sim.state.rng, rng); // Только исходное damageCastle расходует случайные числа.
+  }
+});
+
+test('Cata/Tank bolts and Dragon fireball follow source per-frame positions, rotation and lifetime without RNG', () => {
+  const bolt = createEnemyShot(1, 'bolt', 220, 240), tank = createEnemyShot(2, 'tank-bolt', 220, 240);
+  assert.equal(bolt.y, -34.05); assert.equal(tank.y, -27.55);
+  assert.equal(bolt.rotation, 74); assert.equal(bolt.shadowY, -12.05);
+  advanceEnemyArrow(bolt); advanceEnemyArrow(tank);
+  assert.deepEqual([bolt.x, tank.x, bolt.y, tank.y, bolt.rotation, bolt.shadowY], [295, 310, 211.1, 211.1, 75, 250]);
+  const fireball = createEnemyShot(3, 'fireball', 220, 90);
+  assert.equal(fireball.y, -34.5); advanceEnemyArrow(fireball);
+  assert.deepEqual([fireball.x, fireball.y, fireball.rotation], [295, 97.5, 100]);
+  for (let tick = 0; tick < 14; tick++) advanceEnemyArrow(fireball);
+  assert.equal(fireball.x, 645); assert.equal(fireball.removed, false);
+  advanceEnemyArrow(fireball); assert.equal(fireball.removed, true);
+});
+
+test('v40 arrows keep their exact legacy fields and RNG while new shot kinds are validated', () => {
+  const sim = new Simulation(42); sim.state.spawnTimer = 100000;
+  sim.state.enemyArrows.push(createEnemyArrow(sim.state.nextUid++, 220, 240));
+  const legacy = sim.toSave(); legacy.version = 40;
+  const untouched = structuredClone(legacy), restored = Simulation.fromSave(legacy);
+  assert.deepEqual(restored.toSave(), { ...legacy, version: SAVE_VERSION });
+  assert.deepEqual(legacy, untouched);
+  for (const kind of ['bolt', 'tank-bolt', 'fireball'] as const) {
+    const save = sim.toSave(); save.enemyArrows[0] = createEnemyShot(save.enemyArrows[0].uid, kind, 220, 240);
+    assert.deepEqual(Simulation.fromSave(save).toSave(), save);
+    for (const invalidKind of ['invented', ['bolt'], null, 7, {}]) {
+      const invalid = structuredClone(save); (invalid.enemyArrows[0] as any).kind = invalidKind;
+      assert.throws(() => Simulation.fromSave(invalid), /enemy arrow/);
+    }
+    save.version = 40; assert.throws(() => Simulation.fromSave(save), /enemy arrow/);
+  }
+});
 
 test('bird drops retain ground anchors, drift, tilt and aerial AI targeting from the original enemy rules', () => {
   const sim = atDay(35); sim.state.spawnTimer = 100000;

@@ -2330,6 +2330,30 @@
       "count": 19,
       "uniqueFrames": 4,
       "characterId": 1258
+    },
+    "enemyBoltBody": {
+      "image": "sprites/enemyBoltBody.png",
+      "json": "sprites/enemyBoltBody.json",
+      "originX": 2.95,
+      "originY": 21.95,
+      "frameWidth": 6,
+      "frameHeight": 44,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2206
+    },
+    "enemyTankBoltBody": {
+      "image": "sprites/enemyTankBoltBody.png",
+      "json": "sprites/enemyTankBoltBody.json",
+      "originX": 8.95,
+      "originY": 9.45,
+      "frameWidth": 12,
+      "frameHeight": 13,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2202
     }
   },
   "sounds": {
@@ -2535,5 +2559,41 @@
   },
   "allyAnimation": "ally-animation.json",
   "collisionGeometry": "collision-geometry.json",
-  "townLayout": "town-layout.json"
+  "townLayout": "town-layout.json",
+  "enemyShotVisuals": {
+    "bolt": {
+      "characterId": 2207,
+      "clip": "enemyBoltBody",
+      "bodyX": 0.95,
+      "initialBodyY": -34.05,
+      "shadow": {
+        "clip": "grenadeShadow",
+        "x": -12.1,
+        "initialY": -12.05,
+        "scaleX": 2.1250153,
+        "scaleY": 1.0,
+        "aboveBody": true
+      }
+    },
+    "tank-bolt": {
+      "characterId": 2203,
+      "clip": "enemyTankBoltBody",
+      "bodyX": 0.0,
+      "initialBodyY": -27.55,
+      "shadow": {
+        "clip": "grenadeShadow",
+        "x": -12.1,
+        "initialY": -12.05,
+        "scaleX": 2.1250153,
+        "scaleY": 1.0,
+        "aboveBody": false
+      }
+    },
+    "fireball": {
+      "characterId": 2196,
+      "clip": "flameBody",
+      "bodyX": 1.8,
+      "initialBodyY": -34.5
+    }
+  }
 }

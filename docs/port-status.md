@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v40, website iframe input correction**.
+Updated 2026-11-02. Current local build: **v41, original late-enemy attack projectiles**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -50,6 +50,15 @@ Weapon changes/Rest reset spin; F transfers it without duplication. Original
 wind-up/down/loop clips follow the phase and pause/clear with the game. V39 retains
 optional manual spin/clock state; older saves add no spin fields or RNG draws.
 Source: onEnterFrame2477, shoot7896, refreshPlayer4622 and chainSoundLength984.
+Cata and Tank now launch their separate original bolts, and Dragon launches its
+original fireball. Their source motion, rotation, shadows and removal are connected
+to the existing saved enemy-flight system. Tank also shows its original muzzle
+flash; all four late ranged attackers, including Dino's existing beam, use their
+launch sounds. Damage remains immediate at the source attack frame; arrival adds
+no damage or RNG draws. V41 saves flight kinds; older arrows retain their exact
+fields and RNG. Muzzle flashes remain transient like other explosion effects.
+Source: enemy_cata113, enemy_tank102, enemy_dino146, enemy_dragon66;
+bolt2207/bolt_tank2203/fireball2196 and their original child artwork.
 Bird-dropped rats now retain a ground anchor while the original parachute/body
 clip falls1.5px/frame, drifts±0.5, tilts and reverses by the source5% check. They
 register for AI targeting in the air and keep falling during knockback. Death
@@ -221,90 +230,42 @@ historical player SOL compatibility remains unverified.
 
 ## Validation and limits
 
-- Last full suite: **565 tests pass**; the three fall checks also passed after a
-  test-only knockback assertion. Simulation/save code is unchanged by the audio
-  loader and iframe input corrections, so those results were reused. Current
-  typecheck/build pass. Bundle: assets/index-Bi81nsvB.js. Existing comparisons cover hero
+- Last full suite: **568 tests pass**. Three affected checks passed again after
+  tightening imported projectile-kind validation. Current typecheck/build pass;
+  bundle: assets/index-vYPYHC8g.js. Browser rendering used index-CJ-uDcPE.js before
+  that validation-only tightening. Existing source/deterministic checks cover
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
-- The current controlled40-day campaign reached18 enemy kinds in96827 frames using
-  strong test gear. Dragon was not selected in this random run; separate seeded
-  mission and per-enemy checks cover all kinds. An earlier run encountered all19;
-  this is an observation, not a guarantee for every seed or difficulty-parity evidence.
-  Other checks cover later-cycle boundaries/formulas, Day150 medals and Day1000
-  saves. Hours-long browser stability and later difficulty remain unmeasured.
-- Muted browser evidence covers New Game, combat/reload/F/results/town, original
+- The controlled40-day campaign reached18 enemy kinds in96827 frames using strong
+  gear. Dragon was absent from this seed; separate per-kind/mission checks cover
+  all kinds. Later-cycle formulas, Day150 medals and Day1000 saves are checked.
+  This establishes progression, not natural difficulty balance or hours-long play.
+- Muted browser checks cover New Game, combat/reload/F/results/town, original
   controls/help/options, equipment/services/hires, all eight slots, JSON saves,
-  Carry Over, medal unlocks/Museum, Sister reactions and Flash collection import.
-  Historical player Flash collection/adventure files remain unverified.
-  Five controlled adventure checks cover
-  all eight heroes, modes, exact owned/town contents, changed activities/options,
-  inactive recruit cells, later-cycle Hardcore/Rest, deterministic replay and
-  invalid/deleted/unsupported files. The existing AMF encoder fixture is shared.
-- Unchanged town-card, medal-notice and lifetime-kill browser checks retain their
-  .build/browser-qa/{town-events,medal-notices,kill-history}-verification.json evidence.
-- Flash adventure browser check: Cancel preserved the user's full envelope;
-  a controlled Hunter Day3 file imported to slot8 matched the entire expected
-  save, Continue stayed equal, and Rest started Day4 with an exact town Carry Over
-  checkpoint. Evidence: .build/browser-qa/flash-adventure-verification.json,
-  flash-adventure-preview.png and flash-adventure-town.png.
-- Independent original-save check: ordinary Casual Hunter New Game/battle/results
-  under muted Ruffle0.7.1 produced a native Day1/level2 town SOL:806 GP,5/40 HP,
-  29 kills. Original search produced Rejoice!, AP4→5 and cursor446→455. Importing
-  that SOL reproduced the complete English event and saved changes; browser import,
-  search and actual Return to Title/Continue matched full expected envelopes.
-  The before/after SOLs are committed [regression fixtures](../web/tests/fixtures/flash-native/README.md),
-  independent of the test encoder. Evidence: .build/browser-qa/native-flash-verification.json,
-  ruffle-original-search.png and native-import-search.png. This covers one source
-  save under Ruffle, not historical player files, native Adobe Flash or the index.
-- Chain Gun browser check: controlled Militia mid-spin import matched the complete
-  expected envelope. A short hold retained220 ammo; a longer hold fired to181;
-  release stopped there and wound down. Save/Return to Title/Continue retained the
-  entire interrupted-spin envelope. Four new checks cover counter/clock boundaries,
-  recoil, release/resume, AI floor, F/weapon changes, JSON replay and old/invalid saves.
-  Evidence: .build/browser-qa/chain-gun-verification.json and chain-gun-browser.png.
-- Disposable slot8 was removed. The user's complete Sheriff adventure/collection
-  was restored exactly at v40: Day1, tick674, RNG1744019180, HP40,
-  gold209 remain unchanged, paused/muted. No test medals/records, console errors or fullscreen.
-- Falling-rat browser check: a controlled Day26 live fall imported exactly, and
-  an ordinary mouse shot hit the visible body in the air (one bullet, actual kill).
-  Export/reimport of the mid-air death retained the full envelope. Body and ground
-  shadow remained separated. Three source-rule regressions cover drift/rotation,
-  AI acquisition/aiming, knockback, death/landing, replay and legacy/invalid saves.
-  Evidence: .build/browser-qa/bird-drop-verification.json and bird-drop-browser.png.
-- Crowded-battle baseline: a controlled Day41 began with150 enemies (six bosses),
-  three companions with launchers/Wind Bow, and hero Chain Gun AI. After313.821s,
-  131 enemies and all companions remained active; simulation advanced313.833s.
-  Five later300-sample windows of Phaser's smoothed render delta averaged
-  16.67–16.72ms (59.8–60 FPS). These are not raw frame gaps or a full-run stall
-  distribution. No console
-  errors. The133041-byte end save reloaded with the complete envelope unchanged;
-  headless round-trip/90-tick replay also passed. Evidence:
-  .build/browser-qa/crowded-battle-verification.json and crowded-battle-browser.png.
-  This is local controlled density evidence, not balance, memory profiling,
-  hours-long stability, cross-browser hosting or a measured Flash advantage.
-- Earlier detailed evidence remains in Git (through146a891), existing
-  .build/browser-qa records and historical verification. Reuse it for unchanged
-  behavior. The source's inactive card/debug-start functions were audited below.
+  Carry Over, medals/Museum, Sister reactions and Flash imports. Current user's
+  entire adventure/collection is restored except the explicit v40→v41 version
+  fields: Day1, tick674, RNG1744019180, HP40, gold209. Slot8 is empty; slot1 is
+  selected, paused/muted. No console errors or fullscreen during the latest check.
 
-- Website iframe check: surrounding text input/keys and native-to-small resize
-  retained identical paused battle metadata after the fix. At360px display width,
-  the620×380 buffer retained working weapon selection/fire (rifle10→9 rounds).
-  Releasing a bow drag outside the frame created a real arrow and cleared drawing.
-  Host-page reload/Continue retained tick170, ammo/selection/pause; a direct-route
-  export retained that tick and arrow. Disposable slot8 was removed and the user's
-  complete adventure/collection restored exactly, paused/muted, without errors or
-  fullscreen. Typecheck/build passed;565 unchanged simulation tests were reused.
-  Evidence: .build/browser-qa/embedding-verification.json and embedding-browser.png.
-  The temporary host page was removed. Two iframe export attempts reported success
-  without producing a download in IAB; direct-route export succeeded. Cross-origin,
-  sandboxed and ordinary-browser iframe downloads remain unverified.
+Recent evidence is in ignored `.build/browser-qa/`; older detail remains in Git.
+Reuse it for unchanged behavior rather than repeating whole browser/campaign runs.
+
+| Check | Evidence and practical boundary |
+| --- | --- |
+| Town events, medals, lifetime kills | `{town-events,medal-notices,kill-history}-verification.json`: ordinary source narratives/controls, saved outcomes and notifications. |
+| Flash adventure import | `flash-adventure-verification.json`: Cancel preserves the full envelope; controlled Hunter Day3 import/Continue/Rest matches expected saved state. Five automated checks cover classes/modes, owned contents, replay and refusal of invalid files. |
+| Independent original save | `native-flash-verification.json`: actual original-game/Ruffle0.7.1 Casual Hunter Day1 SOL (806 GP,5/40 HP,29 kills); original Rejoice! search AP4→5/cursor446→455 matches port import/search/Continue. Before/after SOLs are committed regression fixtures. This covers one source save, not historical player files/native Adobe Flash/index. |
+| Chain Gun | `chain-gun-verification.json`: short hold keeps220 rounds, longer hold fires to181, release stops; entire interrupted-spin save survives Continue. |
+| Bird-dropped rats | `bird-drop-verification.json`: actual shot kills the falling body with its separate ground shadow; mid-air death export/import matches the full envelope. |
+| Crowded battle | `crowded-battle-verification.json`: controlled Day41 starts150 enemies/six bosses/three companions;313.821s wall vs313.833s simulation, five smoothed render windows near60 FPS;133041-byte save reloads exactly. Not raw frame-gap/stall, memory, hours-long or Flash-performance evidence. |
+| Website embedding | `embedding-verification.json`: host input/resizing preserves paused metadata;360px display keeps620×380 buffer and working rifle fire10→9; outside bow release creates an arrow; host reload/Continue retains tick170/selection/ammo. Temporary host removed. Two iframe exports reported success without a file in IAB; direct export worked. Other browser/origin policies remain unverified. |
+| Late enemy attacks | `late-attacks-verification.json`, `late-attacks-browser.png`: actual Cata/Tank/Dragon shots and Tank flash render; all four launch sounds are loaded while muted. A controlled tick6 save with all three flights survives import and actual Return to Title/Continue with the entire envelope unchanged. Source-derived motion/launch timing, flight removal, replay, legacy arrows and invalid kinds have automated checks. Transient flashes are not saved. |
 
 Current evidence does not establish whole-game parity, native Flash timing, full
-pixel/contour parity or a measured performance advantage. Historical details are
-in Git and [historical verification](port-verification.json). The Codex app crash
-stopped the preview; it was recovered at the same URL. Recovery does not establish
-that the app's crash cause was fixed.
+pixel/contour parity or a measured performance advantage. The Codex app crash
+stopped the preview; recovery at the same URL did not establish its crash cause.
+Historical verification stays in Git and port-verification.json; do not reread it
+for routine continuation.
 
 ## Remaining features and differences
 
@@ -321,7 +282,7 @@ that the app's crash cause was fixed.
    has an independent original-game/Ruffle save and search comparison. The browser dropdown displays all eight choices at once,
    rather than the original ComboBox's five-row scrolling list.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
-   camera shake, decorative boss reticle, some ranged spell effects/frame sounds,
+   camera shake, decorative boss reticle, other enemy frame sounds,
    rage art and raster/filter/subpixel differences. Chain Gun phase playback follows
    deterministic time; sample-perfect audio/native SoundChannel scheduling is unverified.
    Firework timing/tint/audio and screen flashes approximate the Flash presentation;

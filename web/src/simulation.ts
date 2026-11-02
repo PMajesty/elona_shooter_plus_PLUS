@@ -25,7 +25,7 @@ import { shadowHitAtFrame } from './collision.ts';
 import { advanceProtection, explosionContains, explosionStats, planConsumableUse } from './consumables.ts';
 import { advanceProjectile, createProjectile, type ExplosionKind, type ProjectileState } from './projectiles.ts';
 import { EQUIPMENT_SERVICE_COST, equipmentServiceEligible, createUpgradePreview, modMountFailure, upgradeCost, type EquipmentService, type TownEquipmentAction, type TownEquipmentOutcome, type LootItemAddress, type LootEquipmentAction } from './equipment.ts';
-import { advanceEnemyArrow, createEnemyArrow, type EnemyArrowState } from './enemy-arrows.ts';
+import { advanceEnemyArrow, createEnemyArrow, createEnemyShot, type EnemyArrowState } from './enemy-arrows.ts';
 import { ARCHER_DISPLAY_WIDTHS, FLY_DISPLAY_WIDTHS, barbarianParentWidth, lavaParentWidth } from './enemy-display-bounds.ts';
 import { createPartyState, addStartingLittleGirl, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
 import { ALL_TRAITS, CLASS_CHOICE_ORDER, availableCompanionTraits, partySkills, gainCompanionTrait, levelUpCompanion, companionWage, type PartySkillState } from './party-progression.ts';
@@ -90,7 +90,7 @@ export interface SimulationState {
   pendingPartyAction: PartyPendingAction | null;
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
-export interface SimulationEvent { actorSlot?: number; type: 'enemy-drop' | 'sister-killed' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
+export interface SimulationEvent { actorSlot?: number; enemyKind?: EnemyKind; type: 'enemy-attack' | 'enemy-drop' | 'sister-killed' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
 export interface SimulationOptions { mods?: GameMods; mode?: GameMode; hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
@@ -1344,7 +1344,16 @@ export class Simulation {
     if (action.shadow !== undefined) enemy.shadowHit = action.shadow;
     if (action.attacked) enemy.attacked = true;
     if (action.alert && enemy.hp > 0) alertParty(enemy as PartyAITarget, this.battleAIActors(), this.partyAIContext());
-    if (action.damage && enemy.hp > 0) this.damageCastle(enemy.attack, enemy);
+    if (action.damage && enemy.hp > 0) {
+      if (enemy.kind === 'cata' || enemy.kind === 'tank' || enemy.kind === 'dragon') {
+        const kind = enemy.kind === 'cata' ? 'bolt' : enemy.kind === 'tank' ? 'tank-bolt' : 'fireball';
+        this.state.enemyArrows.push(createEnemyShot(this.state.nextUid++, kind, enemy.x, enemy.y));
+      }
+      if (['cata', 'tank', 'dino', 'dragon'].includes(enemy.kind)) {
+        this.events.push({ type: 'enemy-attack', enemyKind: enemy.kind, enemyUid: enemy.uid, x: enemy.x, y: enemy.y });
+      }
+      this.damageCastle(enemy.attack, enemy);
+    }
     if (action.jump && action.jump !== enemy.frame) { enemy.frame = action.jump; this.runLaterFrame(enemy, timeline); }
   }
 
@@ -2188,6 +2197,7 @@ export class Simulation {
       || ['uid', 'x', 'dx', 'dy', 'sy', 'y', 'rotation', 'shadowY', 'age'].some(key => !finite(arrow[key]))
       || !Number.isInteger(arrow.uid) || arrow.uid < 1 || arrow.uid >= Number(value.nextUid)
       || !Number.isInteger(arrow.age) || arrow.age < 0 || arrow.age > 100 || arrow.removed !== false
+      || arrow.kind !== undefined && (Number(value.version) < 41 || typeof arrow.kind !== 'string' || !['bolt', 'tank-bolt', 'fireball'].includes(arrow.kind))
       || arrow.x < -100 || arrow.x > 650 || Math.abs(arrow.y) > 2000 || Math.abs(arrow.dx) > 100 || Math.abs(arrow.dy) > 2000 || Math.abs(arrow.sy) > 1000)) throw new Error('Invalid enemy arrow state.');
     const actorIds = [...simulation.state.enemies, ...restoredProjectiles, ...arrows].map(actor => actor.uid);
     if (new Set(actorIds).size !== actorIds.length) throw new Error('Duplicate actor identity.');

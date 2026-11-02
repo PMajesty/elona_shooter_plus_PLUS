@@ -9,7 +9,7 @@
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
     "images": 152,
-    "clips": 77,
+    "clips": 80,
     "sounds": 89,
     "fonts": 6
   },
@@ -61,5 +61,19 @@
     },
     "timelines": "web/src/enemy-timelines.ts",
     "collision": "raster alpha for later enemies; filled contours retained for early enemies"
+  },
+  "enemyShots": {
+    "parents": {
+      "bolt": 2207,
+      "tank-bolt": 2203,
+      "fireball": 2196
+    },
+    "bodies": {
+      "enemyBoltBody": 2206,
+      "enemyTankBoltBody": 2202,
+      "flameBody": 2195
+    },
+    "motion": "web/src/enemy-arrows.ts",
+    "damage": "source launch frame; flight is decorative"
   }
 }

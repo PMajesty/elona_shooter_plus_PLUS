@@ -39,13 +39,14 @@ import { ITEM_TYPE, isOccupiedItem } from './items.ts';
 import { STANDING_SISTER } from './castle-sister.ts';
 import { alphaMaskHit, ordinaryEnemyHit, type CollisionGeometry } from './collision.ts';
 import type { ProjectileKind } from './projectiles.ts';
+import type { EnemyShotKind } from './enemy-arrows.ts';
 import { titlePointerHit, titleStateHit, type TitleButtonState } from './title-hit.ts';
 import './style.css';
 
 interface ImageAsset { file: string; width: number; height: number; originX: number; originY: number }
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number; frameAlpha?: number[] }
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
-interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual }
+interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual; enemyShotVisuals: Record<EnemyShotKind, ProjectileVisual> }
 interface PortSave { format: 'elona-shooter-browser'; version: number; appearance: number; simulation: unknown; profile?: GlobalProfile; carryCheckpoint?: unknown; options?: GameOptions }
 type Screen = 'title' | 'gene' | 'mods' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
@@ -74,6 +75,7 @@ for (const key of ['soundDead4', 'soundDead8', 'soundDead9']) USED_SOUNDS.add(ke
 for (const key of ['soundBow1', 'soundBow2', 'soundDead1', 'soundDead2', 'soundDead6', 'soundFireball', 'soundRampageEnemy', 'soundPuls', 'soundLow']) USED_SOUNDS.add(key);
 USED_SOUNDS.add('soundFirework');
 for (const key of ['soundChain1', 'soundChain2', 'soundChain3', 'soundDrop']) USED_SOUNDS.add(key);
+for (const key of ['soundTank2', 'soundLightning']) USED_SOUNDS.add(key);
 let manifest: Manifest;
 let gameScene: ElonaScene;
 
@@ -96,7 +98,7 @@ class ElonaScene extends Phaser.Scene {
   private bossFrames = new Map<number, number>();
   private bossBars = new Map<number, { container: Phaser.GameObjects.Container; fill: Phaser.GameObjects.Image }>();
   private projectileSprites = new Map<number, { container: Phaser.GameObjects.Container; body: Phaser.GameObjects.Container; images: Phaser.GameObjects.Image[]; shadow?: Phaser.GameObjects.Image }>();
-  private enemyArrowSprites = new Map<number, { container: Phaser.GameObjects.Container; body: Phaser.GameObjects.Image; shadow: Phaser.GameObjects.Image }>();
+  private enemyArrowSprites = new Map<number, { container: Phaser.GameObjects.Container; body: Phaser.GameObjects.Image; shadow?: Phaser.GameObjects.Image }>();
   private playerSprite?: OriginalAlly;
   private castleSisterSprite?: Phaser.GameObjects.Image;
   private heroAimCursor?: Phaser.GameObjects.Image;
@@ -240,6 +242,8 @@ class ElonaScene extends Phaser.Scene {
     this.firePressed = this.fireReleased = this.reloadRequested = false; this.slotRequested = undefined;
     this.firingGesture = this.firingReleaseOwned = false;
     this.input.setDefaultCursor('default');
+    // Эффекты, добавленные в stage над HUD, тоже принадлежат текущему экрану.
+    for (const effect of this.effects) effect.object.destroy();
     this.root.removeAll(true);
     if (!['loot', 'boss-loot', 'skill', 'result'].includes(screen)) { this.celebration?.destroy(); this.celebration = undefined; this.fireworkMedalChecked = false; }
     this.volumeIcon = undefined; this.pauseDialog = undefined; this.flash = undefined; this.flashFrames = 0; this.flashClock = 0;
@@ -904,29 +908,34 @@ class ElonaScene extends Phaser.Scene {
   private paintEnemyArrows(): void {
     const arrows = this.sim?.state.enemyArrows ?? [];
     const present = new Set<number>();
-    const visual = manifest.enemyArrowVisual;
     for (const arrow of arrows) {
       if (arrow.removed) continue;
+      const visual = arrow.kind ? manifest.enemyShotVisuals[arrow.kind] : manifest.enemyArrowVisual;
       present.add(arrow.uid);
       let sprite = this.enemyArrowSprites.get(arrow.uid);
       if (!sprite) {
-        const asset = manifest.clips[visual.clip], shadowAsset = manifest.clips[visual.shadow!.clip];
+        const asset = manifest.clips[visual.clip];
         const body = this.add.image(visual.bodyX, arrow.y, visual.clip, '1')
           .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
-        const shadow = this.add.image(visual.shadow!.x, arrow.shadowY, visual.shadow!.clip, '1')
-          .setOrigin(shadowAsset.originX / shadowAsset.frameWidth, shadowAsset.originY / shadowAsset.frameHeight)
-          .setScale(visual.shadow!.scaleX, visual.shadow!.scaleY);
-        // stage.addChild в SWF помещает стрелу и её тень над всем корнем игры, включая HUD.
-        const group = this.add.container(arrow.x, 0, visual.shadow!.aboveBody ? [body, shadow] : [shadow, body]).setDepth(1);
+        let shadow: Phaser.GameObjects.Image | undefined;
+        if (visual.shadow) {
+          const shadowAsset = manifest.clips[visual.shadow.clip];
+          shadow = this.add.image(visual.shadow.x, arrow.shadowY, visual.shadow.clip, '1')
+            .setOrigin(shadowAsset.originX / shadowAsset.frameWidth, shadowAsset.originY / shadowAsset.frameHeight)
+            .setScale(visual.shadow.scaleX, visual.shadow.scaleY);
+        }
+        // stage.addChild в SWF помещает вражеские снаряды над корнем игры, включая HUD.
+        const images = shadow ? visual.shadow!.aboveBody ? [body, shadow] : [shadow, body] : [body];
+        const group = this.add.container(arrow.x, 0, images).setDepth(1);
         sprite = { container: group, body, shadow };
         this.enemyArrowSprites.set(arrow.uid, sprite);
       }
       sprite.container.setX(arrow.x);
       sprite.body.setY(arrow.y).setAngle(arrow.rotation);
-      sprite.shadow.setY(arrow.shadowY);
+      sprite.shadow?.setY(arrow.shadowY);
     }
     for (const [uid, sprite] of this.enemyArrowSprites) if (!present.has(uid)) { sprite.container.destroy(true); this.enemyArrowSprites.delete(uid); }
-    container.dataset.enemyArrows = JSON.stringify(arrows.filter(arrow => !arrow.removed).map(({ uid, x, y, rotation, shadowY, age }) => ({ uid, x, y, rotation, shadowY, age })));
+    container.dataset.enemyArrows = JSON.stringify(arrows.filter(arrow => !arrow.removed).map(({ uid, kind, x, y, rotation, shadowY, age }) => ({ uid, kind, x, y, rotation, shadowY, age })));
   }
 
   private paintProjectiles(): void {
@@ -1031,6 +1040,18 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private renderEvent(event: SimulationEvent): void {
+    if (event.type === 'enemy-attack') {
+      const key = { cata: 'soundBow1', tank: 'soundTank2', dino: 'soundLightning', dragon: 'soundFireball' }[event.enemyKind as 'cata' | 'tank' | 'dino' | 'dragon'];
+      const pan = Phaser.Math.Clamp(Math.trunc(Math.trunc(event.x ?? 0) / 25), 0, 19) * 0.08 - 0.8;
+      if (key) this.playSound(key, 0.9, pan);
+      if (event.enemyKind === 'tank') {
+        const asset = manifest.clips.explosion;
+        const muzzle = this.add.image((event.x ?? 0) + 45, (event.y ?? 0) - 23, 'explosion', '1')
+          .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setScale(0.4).setAlpha(0.75).setDepth(1);
+        this.effects.push({ object: muzzle, ticks: 22, clip: 'explosion', frame: 1 });
+      }
+      return;
+    }
     if (event.type === 'boss-shot' || event.type === 'boss-special') {
       // getWeaponInfo использует gun6/gun2, а soundPos делит поле на 20 звуковых позиций.
       const pan = Phaser.Math.Clamp(Math.trunc(Math.trunc(event.x ?? 0) / 25), 0, 19) * 0.08 - 0.8;
