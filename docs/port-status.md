@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-03. Current local build: **v41, original item-information panels**.
+Updated 2026-11-03. Current local build: **v41, original item and skill information**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -46,6 +46,12 @@ Original getClass English descriptions and skill descriptions use the existing
 hint1657 artwork. Locked classes show ?????? and the original medal requirement;
 page navigation says Previous Page on the second page. Starting medal bonuses
 still apply on Proceed, matching the source; they are not prematurely previewed.
+Barracks and New Game now share all five original skill-hint fields: owned name,
+description, current benefit, finite cap and Base/Party category. Sniper/Duelist
+hints show the source maximum damage bonus, not calculation markers. Their combat
+limits use the same unchanged formulas. The creation view now correctly groups
+weapon skills as normal skills, with source ordering/black text; the previous
+creation-view grouping was wrong. Weapon skills remain focusable in Barracks.
 Rogue/Hunter start with Little Girl; Militia has its starting weapons and periodic
 grenade. Sniper, Ranger, Duelist
 and Noble unlock through the four original level10 class medals. Sniper's idle
@@ -280,11 +286,11 @@ historical player SOL compatibility remains unverified.
 
 ## Validation and limits
 
-- Last full suite: **575 tests pass** in10.71s. Three new item-panel checks cover
-  source value versus sale proceeds, manual reload/shells, bow versus Gravity Gun
-  dash fields, living progress and non-weapon English descriptions. Current
-  typecheck/build pass; bundle: assets/index-Dp4CYC5J.js. Original comparison,
-  deterministic gameplay and save tests pass without simulation/format changes.
+- Last full suite: **578 tests pass** in11.236s. Three new skill-hint checks cover
+  source Sniper/Duelist bonus strings, owned/maxed names and effects, finite caps
+  and normal/Base/Party categories. Current typecheck/build pass; bundle:
+  assets/index-BfIjAP1Y.js. Original comparisons, deterministic gameplay and save
+  tests pass; combat formulas, RNG and save format remain unchanged.
   Existing source/deterministic checks cover
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
@@ -334,6 +340,7 @@ Reuse it for unchanged behavior rather than repeating whole browser/campaign run
 | Graphics loss | `context-loss-before.json`, `context-recovery-verification.json`, `context-recovery-browser.png`: actual WEBGL_lose_context previously advanced tick681→697 while invisible. Patched combat stays at681 through loss/resume attempts, restores paused, preserves the full frozen save across reload/Continue, tolerates loss while already paused and resumes normal shooting5→4. No game script/console errors; a separately attributed favicon404 remains. User profile untouched. |
 | New Game information | `gene-info-verification.json`, `gene-{class-hint,locked,noble}-browser.png`: class skill/starting skills and original English hover text render; locked names/requirement match source. A controlled medal collection unlocks all four advanced labels; Noble proceeds into combat and its full save survives Continue exactly. Source medal bonuses apply only on Proceed; the check confirms Luck is absent before and present afterward. No script errors; user profile untouched. |
 | Item information | `item-popup-verification.json`, `item-popup-{equipment,shop,upgrade,loot}-browser.png`: original panel fields/artwork render across equipment, shop, loot and upgrade comparison. Red requirements, modified living-weapon progress and non-gun descriptions are readable. Hover/carry preserve the full save; equipment moves, purchase cost, loot collection and upgrade Cancel work. Final full-envelope Continue matches. Controlled fixture variants, muted isolated Chrome, no script errors or user-profile changes. |
+| Skill information | `trait-hint-verification.json`, `trait-hint-{barracks,sniper,party}-browser.png`: all five source fields render; weapon focus preserves gold/AP/RNG, hovering preserves the entire save and Continue restores it exactly. Noble skill order matches source; controlled advanced-class unlocks permit an ordinary Sniper start and shot10→9. Muted isolated Chrome, no script errors or changes to the user profile. |
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. The Codex app crash

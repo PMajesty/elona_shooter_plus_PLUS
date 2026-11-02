@@ -127,7 +127,10 @@ or claiming ordinary-browser compatibility from an API return.
    delivery units or build bespoke harness families for every purchase.
 5. Use one muted browser phase for an integrated slice, reuse the existing tab,
    preserve the whole user adventure/collection and never enter native fullscreen.
-   Observe the actual UI phase before dependent canvas actions.
+   Observe the actual UI phase before dependent canvas actions. After rebuilding
+   interactive rows, allow Phaser's next preUpdate to register them before a test
+   moves the pointer. A targeted mutation trace distinguished that test race from
+   a missing tooltip; waiting only after pointer movement was too late.
 6. Keep practical Git/save recovery; push useful checkpoints. No repeated release
    archives, hash manifestos or full migration ceremonies for minor additions.
 7. Read current docs and affected code, not historical traces. Discover tools by

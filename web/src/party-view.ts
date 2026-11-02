@@ -1,5 +1,8 @@
 import { createItemPopupView, type ItemPopupLayout } from './item-popup-view.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
+import { createOriginalHintView } from './original-hint-view.ts';
+import { traitHintValues, type OriginalHintInfo } from './trait-hint.ts';
+import type { TownLayout } from './town-view.ts';
 import Phaser from 'phaser';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
 import type { LootViewManifest } from './loot-view.ts';
@@ -13,6 +16,7 @@ interface Placement {
 interface Panel { image: string; labelsImage: string; children: Record<string, Placement> }
 interface Portrait { children: Record<string, Placement>; shadow: { clip: string; x: number; y: number; scaleX: number; scaleY: number } }
 export interface PartyLayout {
+  medals: TownLayout['medals'];
   itemPopup: ItemPopupLayout;
   menuPosition: { x: number; y: number };
   characters: Panel & { portraits: { x: number; y: number; stepX: number; candidateIndex: number; candidateExtraX: number } };
@@ -41,6 +45,7 @@ export interface PartyViewState {
   ap: number;
 }
 export interface PartyViewCallbacks {
+  traitHint?(info: OriginalHintInfo | null): void;
   itemPopup?(info: ItemPopupInfo | null): void;
   selectCharacter(slot: number): void;
   recruit(): void; dismiss(): void; confirm(value: boolean): void; cancel(): void; close(): void;
@@ -154,6 +159,8 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
   root.once('destroy', () => animate.remove());
 
   if (tab === 'characters') {
+    const traitHint = createOriginalHintView(scene, manifest, layout.medals, callbacks.traitHint);
+    traitHint.root.setPosition(menu.x + panel.children.hint.x, menu.y + panel.children.hint.y); root.add(traitHint.root);
     const positions = layout.characters.portraits;
     for (const member of state.members) portrait(member, menu.x + positions.x + member.slot * positions.stepX + (member.slot === positions.candidateIndex ? positions.candidateExtraX : 0), menu.y + positions.y);
     const member = state.members.find(value => value.slot === state.selectedSlot) ?? state.members[0];
@@ -183,7 +190,8 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
         clip('partyTraitIcon', base ? 2 : trait.kind === 'party' ? 3 : 1, x + icon.x, y + icon.y).setScale(icon.scaleX, icon.scaleY);
         const label = text(spec.children.traitName, trait.name, x, y).setColor(base ? '#044010' : '#000000');
         const area = scene.add.zone(x, y, 130, 18).setOrigin(0).setName(`party-trait-${trait.id}`).setInteractive({ useHandCursor: !candidate && !base });
-        area.on('pointerover', () => hint.setText(trait.description));
+        area.on('pointerover', () => { if (!modal) traitHint.show(traitHintValues(trait.id, member.traitLevels)); });
+        area.on('pointerout', traitHint.hide);
         area.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
           event.stopPropagation(); if (modal || candidate) return;
           if (base) message("Base skills can't be focused."); else callbacks.focus(member.focusedTrait === trait.id ? -1 : trait.id);
@@ -202,6 +210,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
         const choose = scene.add.zone(menu.x + p.x, menu.y + p.y, width, height).setOrigin(0).setInteractive({ useHandCursor: true }).setName('party-order'); root.add(choose);
         choose.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
           event.stopPropagation(); if (modal) return;
+          traitHint.hide();
           if (list) { list.destroy(); list = null; return; }
           list = scene.add.container(0, 0); root.add(list);
           const options = ORDERS.filter(order => hero || order.value !== -1), listX = menu.x + p.x, listY = menu.y + p.y + height;

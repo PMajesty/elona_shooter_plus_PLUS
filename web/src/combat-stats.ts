@@ -1,6 +1,7 @@
 import { ITEM_TYPE, ItemFactory, isOccupiedItem, type Item, type ItemContext } from './items.ts';
 import { TRAIT, type TraitLevels } from './progression.ts';
 import { calculateAnyTrait } from './party-progression.ts';
+import { sniperDamageLimit, duelistDamageLimit } from './class-limits.ts';
 
 export const COMBAT_TRAIT = {
   ...TRAIT, HUNTER: 1, SNIPER: 2, ROGUE: 3, MILITIA: 4, RANGER: 5, DUELIST: 7, NOBLE: 8, GUARDIAN: 9,
@@ -57,7 +58,7 @@ export function recoverAccuracy(item: Readonly<Item>, traits: CombatTraits, accu
 export function shotDamage(item: Readonly<Item>, traits: CombatTraits, context: { missionDamage?: number; frenzy?: number; idleCount?: number; rampage?: boolean } = {}): number {
   let damage = int(item.attack! * (context.missionDamage ?? 1) * (100 + combatTrait(COMBAT_TRAIT.AIMED_SHOT, traits) + combatTrait(COMBAT_TRAIT.NOBLE, traits)) / 100);
   if (level(traits, COMBAT_TRAIT.DUELIST) > 0) damage = int(damage * (100 + (context.frenzy ?? 0)) / 100);
-  if (level(traits, COMBAT_TRAIT.SNIPER) > 0) damage = int(damage * Math.min(100 + combatTrait(COMBAT_TRAIT.SNIPER, traits) * (context.idleCount ?? 0), int(160 + Math.sqrt(level(traits, COMBAT_TRAIT.SNIPER)) * 2 + level(traits, COMBAT_TRAIT.SNIPER))) / 100);
+  if (level(traits, COMBAT_TRAIT.SNIPER) > 0) damage = int(damage * Math.min(100 + combatTrait(COMBAT_TRAIT.SNIPER, traits) * (context.idleCount ?? 0), sniperDamageLimit(level(traits, COMBAT_TRAIT.SNIPER))) / 100);
   // baseDamage имеет тип int: каждое составное умножение тоже отбрасывает дробную часть.
   if (context.rampage) damage = int(damage * 1.5);
   return damage;
@@ -159,7 +160,7 @@ export function criticalKillCooldown(shootTimer: number, traits: CombatTraits): 
 export function duelistHitFrenzy(item: Readonly<Item>, traits: CombatTraits, frenzy: number, path: 'hitscan' | 'projectile'): number {
   const skill = level(traits, COMBAT_TRAIT.DUELIST);
   if (!skill) return frenzy;
-  return Math.min(int(40 + Math.sqrt(skill) * 1.6 + skill), frenzy + combatTrait(COMBAT_TRAIT.DUELIST, traits) / (item.shootRate * (path === 'hitscan' ? 0.02 : 0.03)) + (path === 'hitscan' ? 0.05 : 0.1));
+  return Math.min(duelistDamageLimit(skill), frenzy + combatTrait(COMBAT_TRAIT.DUELIST, traits) / (item.shootRate * (path === 'hitscan' ? 0.02 : 0.03)) + (path === 'hitscan' ? 0.05 : 0.1));
 }
 
 export type ProjectileKind = 'grenade' | 'rocket' | 'bolt' | 'arrow' | 'gravity' | 'flame';

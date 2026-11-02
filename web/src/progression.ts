@@ -1,3 +1,5 @@
+import { sniperDamageLimit, duelistDamageLimit } from './class-limits.ts';
+
 export type TraitLevels = Record<number, number>;
 export const TRAIT = {
   SHERIFF: 6, COOL: 100, ACCURACY: 101, CAPABLE: 102, SHOTGUN: 105,
@@ -158,7 +160,13 @@ export interface TraitDescription {
 export function describeTrait(id: number, traits: Readonly<TraitLevels>, definitions: Readonly<Record<number, TraitDefinition>> = SHERIFF_TRAITS): TraitDescription {
   if (!Object.hasOwn(definitions, id)) throw new Error(`Unknown trait: ${id}`);
   const definition = definitions[id], current = traits[id] ?? 0, next = current + 1;
-  const effect = (level: number) => level === 0 ? 'None' : `${definition.effectPrefix}${definition.displayLevel ? level : Math.trunc(definition.calculate(level))}${definition.effectSuffix}${level === definition.maxLevel ? ' [Maxed]' : ''}`;
+  const effect = (level: number) => {
+    if (level === 0) return 'None';
+    const value = definition.effectPrefix === 'sniper1' ? `${sniperDamageLimit(level) - 100}% damage bonus(max)`
+      : definition.effectPrefix === 'duelist1' ? `${duelistDamageLimit(level)}% damage bonus(max)`
+      : `${definition.effectPrefix}${definition.displayLevel ? level : Math.trunc(definition.calculate(level))}${definition.effectSuffix}`;
+    return value + (level === definition.maxLevel ? ' [Maxed]' : '');
+  };
   return {
     id, name: `${definition.name}${next > 1 ? ` ${next}` : '(New!)'}`,
     description: definition.description + (definition.party ? ' Party Skill.' : ''),

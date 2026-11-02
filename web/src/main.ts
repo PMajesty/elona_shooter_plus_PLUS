@@ -5,6 +5,8 @@ import Phaser from 'phaser';
 import { HERO_CLASSES, heroClassUnlocked, type HeroClass } from './hero-classes.ts';
 import { createGeneInfoView } from './gene-info-view.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
+import { traitHintValues, type OriginalHintInfo } from './trait-hint.ts';
+import { sniperDamageLimit, duelistDamageLimit } from './class-limits.ts';
 import { createProfile, mergeProfile, mergeProfiles, validProfile, type GlobalProfile } from './profile.ts';
 import { MEDALS } from './medals.ts';
 import { MedalNotices, type MedalNotice } from './medal-notices.ts';
@@ -78,6 +80,9 @@ function showStartupFailure(message: string): void {
 }
 function inspectItemPopup(info: ItemPopupInfo | null): void {
   if (info) container.dataset.itemPopup = JSON.stringify(info); else delete container.dataset.itemPopup;
+}
+function inspectTraitHint(info: OriginalHintInfo | null): void {
+  if (info) container.dataset.traitHint = JSON.stringify(info); else delete container.dataset.traitHint;
 }
 const USED_SOUNDS = new Set(['soundSearch', 'soundEat1', 'soundParty', 'soundClick1', 'soundGun3', 'soundReloading2', 'soundReloaded2', 'soundThrow1', 'soundExp1', 'soundDead3', 'soundDead5', 'soundDead7', 'soundDeadChicken', 'soundDeadBoss1', 'soundDamage1', 'soundPop1', 'soundBattleBegin', 'soundBattleEnd', 'soundKilled', 'soundRampage', 'soundComplete', 'soundGold1', 'soundBgForest']);
 for (let index = 0; index < 5; index++) USED_SOUNDS.add(`soundGoodshot${index}`);
@@ -333,6 +338,7 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.medalHint;
     delete container.dataset.geneHint; delete container.dataset.geneTraits; delete container.dataset.geneClassLabels;
     delete container.dataset.itemPopup;
+    delete container.dataset.traitHint;
     delete container.dataset.carryOverAvailable; delete container.dataset.carryOverConfirmation;
     container.dataset.carryOver = String(Boolean(this.sim?.state.carryOver));
   }
@@ -1326,8 +1332,8 @@ class ElonaScene extends Phaser.Scene {
     if (meter && this.adrenalineFill) {
       const level = state.player.traits[HERO_CLASSES[state.player.classId].id];
       const ratio = state.player.classId === 'ranger' ? meter.frenzy / 1000
-        : state.player.classId === 'duelist' ? meter.frenzy / Math.trunc(40 + Math.sqrt(level) * 1.6 + level)
-        : ALL_TRAITS[2].calculate(level) * meter.idleCount / (Math.trunc(160 + Math.sqrt(level) * 2 + level) - 100);
+        : state.player.classId === 'duelist' ? meter.frenzy / duelistDamageLimit(level)
+        : ALL_TRAITS[2].calculate(level) * meter.idleCount / (sniperDamageLimit(level) - 100);
       this.adrenalineFill.setScale(Math.max(0, Math.min(1, ratio)), 1.000473);
     }
     container.dataset.gameMode = state.mode ?? 'normal';
@@ -1621,8 +1627,8 @@ class ElonaScene extends Phaser.Scene {
     const state = this.sim.state;
     container.dataset.heroSettings = JSON.stringify(this.sim.heroSettings);
     const traits = (levels: Readonly<Record<number, number>>): PartyViewTrait[] => Object.entries(levels).filter(([, level]) => level > 0).map(([key, level]) => {
-      const id = Number(key), definition = ALL_TRAITS[id];
-      return { id, name: `${definition?.name ?? `Skill ${id}`} ${level}`, description: definition?.description ?? '',
+      const id = Number(key), definition = ALL_TRAITS[id], info = traitHintValues(id, levels);
+      return { id, name: info.name, description: info.description,
         kind: id < 100 ? 'class' : id >= 900 ? 'base' : definition?.party ? 'party' : 'normal' };
     });
     const members: PartyViewMember[] = [{ slot: 0, name: 'You', appearance: this.appearance, level: state.player.level, exp: state.player.exp,
@@ -1660,6 +1666,7 @@ class ElonaScene extends Phaser.Scene {
     this.root.add(createPartyView(this, { selectedSlot: this.selectedCharacter, members, inventory: state.inventory, gold: state.gold, capacity: state.party.capacity,
       ap: state.town!.ap, dialog: pending?.kind === 'hire' ? 'recruit' : pending?.kind === 'dismiss' ? 'dismiss' : pending ? 'mod' : null }, manifest, this.cache.json.get('town-layout') as PartyLayout, {
       itemPopup: inspectItemPopup,
+      traitHint: inspectTraitHint,
       serviceItem: (service, slot) => {
         const outcome = this.sim!.serviceTownItem(service, slot);
         if (outcome === 'recycled' || outcome === 'restocked') changed('soundMod');
