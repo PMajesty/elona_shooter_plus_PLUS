@@ -21,6 +21,8 @@
     "test:sandbag-party-soak": "node --experimental-strip-types scripts/party-soak.ts 8 sandbag",
     "test:castle-storage-reference": "node --experimental-strip-types scripts/compare-castle-storage-reference.ts",
     "test:storage-party-soak": "node --experimental-strip-types scripts/party-soak.ts 8 storage",
+    "test:loot-mod-reference": "node --experimental-strip-types scripts/compare-loot-mod-reference.ts",
+    "test:loot-mod-scenarios": "node --experimental-strip-types scripts/loot-mod-scenarios.ts",
     "test:reference": "node --experimental-strip-types scripts/compare-reference.ts",
     "test:wave-reference": "node --experimental-strip-types scripts/compare-wave-reference.ts",
     "test:prepared-wave-reference": "node --experimental-strip-types scripts/compare-prepared-wave-reference.ts",

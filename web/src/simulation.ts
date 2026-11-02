@@ -9,7 +9,7 @@ import { TRAIT, SHERIFF_TRAITS, SHERIFF_CHOICE_ORDER, applySheriffChoice, availa
 import { shadowHitAtFrame } from './collision.ts';
 import { advanceProtection, explosionContains, explosionStats, planConsumableUse } from './consumables.ts';
 import { advanceProjectile, createProjectile, type ExplosionKind, type ProjectileState } from './projectiles.ts';
-import { createUpgradePreview, modMountFailure, upgradeCost, type TownEquipmentAction, type TownEquipmentOutcome } from './equipment.ts';
+import { createUpgradePreview, modMountFailure, upgradeCost, type TownEquipmentAction, type TownEquipmentOutcome, type LootItemAddress, type LootEquipmentAction } from './equipment.ts';
 import { advanceEnemyArrow, createEnemyArrow, type EnemyArrowState } from './enemy-arrows.ts';
 import { ARCHER_DISPLAY_WIDTHS, FLY_DISPLAY_WIDTHS, barbarianParentWidth } from './enemy-display-bounds.ts';
 import { createPartyState, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
@@ -36,7 +36,7 @@ export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCoun
 export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'>;
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
 export interface SimulationState {
-  version: 19; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1 | 2 | 3 | 4 | 5 | 6 | 7; tick: number; timerRemainder: number; rng: number; nextUid: number;
+  version: 20; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: 1 | 2 | 3 | 4 | 5 | 6 | 7; tick: number; timerRemainder: number; rng: number; nextUid: number;
   activeMission: ActiveMission; resultBefore: number; earnedMedals: number[]; perfectDays: number; bossesSpawned: number;
   hero: KnownHeroInitialization; title: 0 | 1;
   castleHp: number; castleMaxHp: number; wallLevel: number; wallFixCount: number; repairmanLevel: number; sandbagLevel: number; gold: number; totalMoney: number; kills: number; criticalKills: number;
@@ -54,13 +54,14 @@ export interface SimulationState {
   previousTown: ReadyTown | null;
   upgradeReference: Item | null;
   pendingTownAction: TownEquipmentAction | null;
+  pendingLootAction: LootEquipmentAction | null;
   party: PartyState; partySkills: PartySkillState; partyAI: PartyAIShared; retainedAITargets: PartyAITarget[];
   pendingPartyAction: PartyPendingAction | null;
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
 export interface SimulationEvent { actorSlot?: number; type: 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
 export interface SimulationOptions { hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean }
-export type LootArea = 'offers' | 'inventory';
+export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
 export type PurchaseOutcome = 'purchased' | 'occupied' | 'not-enough-gold' | 'unavailable';
 
@@ -110,7 +111,7 @@ export class Simulation {
     this.pendingOpeningMission = generateLowLevelMission(0, 1, random);
     const generated = generateSheriffHero(random);
     this.state = {
-      version: 19, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
+      version: 20, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
       activeMission: this.missionParameters(this.pendingOpeningMission), resultBefore: STARTING_CLASS.money, earnedMedals: [40], perfectDays: 0, bossesSpawned: 0,
       castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, wallLevel: 1, wallFixCount: 0, repairmanLevel: 0, sandbagLevel: 0, gold: STARTING_CLASS.money, totalMoney: 0, kills: 0, criticalKills: 0,
       aimX: 300, aimY: 240, fireHeld: false, pendingShot: false,
@@ -119,7 +120,7 @@ export class Simulation {
       enemies: [], projectiles: [], enemyArrows: [], loot: [], result: { reward: 0, perfectBonus: 0, upkeep: 0, tax: 0, salary: 0, wages: 0, netReward: 0 },
       itemCooldowns: Array(5).fill(0), protection: { counter: 0, blueMultiplierAdd: 0 }, inventory: generated.inventory, lootOffers: Array(8).fill(null), postbattle: 'none', inventoryProvenance: 'original-generation',
       bossKilled: 0, skillChoices: [], traitsProvenance: 'known-starting-traits', bossKilledProvenance: 'observed',
-      town: null, previousTown: null, upgradeReference: null, pendingTownAction: null,
+      town: null, previousTown: null, upgradeReference: null, pendingTownAction: null, pendingLootAction: null,
       party: createPartyState(), partySkills: partySkills([{ traits: generated.traits }]), partyAI: createPartyAIShared(), retainedAITargets: [], pendingPartyAction: null,
     };
     if (!options.deferOpeningWaves) this.startOpeningBattle();
@@ -1114,11 +1115,47 @@ export class Simulation {
   }
 
   moveLootItem(fromArea: LootArea, from: number, toArea: LootArea, to: number): boolean {
-    if (this.state.phase !== 'victory' || !['loot', 'boss-loot'].includes(this.state.postbattle)) return false;
+    if (this.state.phase !== 'victory' || !['loot', 'boss-loot'].includes(this.state.postbattle) || this.state.pendingLootAction) return false;
     if (!['offers', 'inventory'].includes(fromArea) || !['offers', 'inventory'].includes(toArea)) return false;
     const source = fromArea === 'offers' ? this.state.lootOffers : this.state.inventory;
     const destination = toArea === 'offers' ? this.state.lootOffers : this.state.inventory;
+    if (isOccupiedItem(source[from]) && source[from]!.type === ITEM_TYPE.mod && isOccupiedItem(destination[to]) && destination[to]!.type === ITEM_TYPE.gun) {
+      return this.beginLootModMount({ area: fromArea, index: from }, { area: toArea, index: to }) === 'previewed';
+    }
     return source === destination ? swapInventorySlots(source, from, to) : collectLootItem(source, destination, from, to);
+  }
+
+  private validLootAddress(address: unknown): address is LootItemAddress {
+    if (!record(address) || !['offers', 'inventory'].includes(String(address.area)) || typeof address.area !== 'string' || !Number.isInteger(address.index)) return false;
+    const slots = address.area === 'offers' ? this.state.lootOffers : this.state.inventory;
+    return typeof address.index === 'number' && address.index >= 0 && address.index < slots.length;
+  }
+
+  beginLootModMount(mod: LootItemAddress, gun: LootItemAddress): TownEquipmentOutcome {
+    const state = this.state;
+    if (state.phase !== 'victory' || !['loot', 'boss-loot'].includes(state.postbattle) || state.pendingLootAction || state.pendingTownAction || state.pendingPartyAction
+      || !this.validLootAddress(mod) || !this.validLootAddress(gun) || (mod.area === gun.area && mod.index === gun.index)) return 'unavailable';
+    const source = (mod.area === 'offers' ? state.lootOffers : state.inventory)[mod.index];
+    const target = (gun.area === 'offers' ? state.lootOffers : state.inventory)[gun.index];
+    if (!isOccupiedItem(source) || source.type !== ITEM_TYPE.mod || !isOccupiedItem(target) || target.type !== ITEM_TYPE.gun) return 'unavailable';
+    // В loot оба ряда имеют op=1; диалог не переносит предметы и не расходует RNG.
+    state.pendingLootAction = { kind: 'mod', mod: { ...mod }, gun: { ...gun } };
+    return 'previewed';
+  }
+
+  resolveLootModMount(confirm: boolean): TownEquipmentOutcome {
+    const state = this.state, action = state.pendingLootAction;
+    if (state.phase !== 'victory' || !['loot', 'boss-loot'].includes(state.postbattle) || !action || typeof confirm !== 'boolean') return 'unavailable';
+    state.pendingLootAction = null;
+    // No/щелчок снаружи меняет полные записи местами, как исходный endDialog.
+    if (!confirm) return this.moveLootItem(action.gun.area, action.gun.index, action.mod.area, action.mod.index) ? 'swapped' : 'unavailable';
+    const source = (action.mod.area === 'offers' ? state.lootOffers : state.inventory)[action.mod.index];
+    const target = (action.gun.area === 'offers' ? state.lootOffers : state.inventory)[action.gun.index];
+    const failure = modMountFailure(source, target);
+    if (failure) return failure;
+    this.equipmentFactory().enchant(target!, source!.mod, source!.modMax);
+    source!.num = 0;
+    return 'mounted';
   }
 
   collectLoot(offer: number, slot = this.state.inventory.findIndex(item => !isOccupiedItem(item))): boolean {
@@ -1130,7 +1167,7 @@ export class Simulation {
   }
 
   finishLoot(): boolean {
-    if (this.state.phase !== 'victory' || !['loot', 'boss-loot'].includes(this.state.postbattle)) return false;
+    if (this.state.phase !== 'victory' || !['loot', 'boss-loot'].includes(this.state.postbattle) || this.state.pendingLootAction) return false;
     if (this.state.postbattle === 'loot' && this.state.bossKilled > 0) {
       this.state.lootOffers = this.equipmentFactory().bossLoot(this.state.bossKilled, false, this.state.lootOffers);
       this.state.postbattle = 'boss-loot';
@@ -1318,7 +1355,7 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
-    if (!record(value) || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].includes(Number(value.version)) || typeof value.version !== 'number' || (![1, 2, 3, 4, 5, 6, 7].includes(Number(value.day)) || typeof value.day !== 'number' || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
+    if (!record(value) || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].includes(Number(value.version)) || typeof value.version !== 'number' || (![1, 2, 3, 4, 5, 6, 7].includes(Number(value.day)) || typeof value.day !== 'number' || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || ![2, ...(Number(value.day) >= 2 ? [3] : [])].includes(Number(value.bossWave)) || (value.waveIndex === 5 && value.newWave !== true)) throw new Error('Invalid counters.');
@@ -1413,6 +1450,7 @@ export class Simulation {
     if (value.version < 16) simulation.state.wallLevel = 1;
     if (value.version < 17) { simulation.state.wallFixCount = 0; simulation.state.repairmanLevel = 0; }
     if (value.version < 18) simulation.state.sandbagLevel = 0;
+    if (value.version < 20) simulation.state.pendingLootAction = null;
     if (value.version < 15) {
       const town = simulation.state.town?.preparation === 'ready' ? simulation.state.town : simulation.state.previousTown;
       simulation.state.party = createPartyState(town?.recruit);
@@ -1503,7 +1541,7 @@ export class Simulation {
         reconstructionRng >>>= 0;
         return reconstructionRng / 4294967296;
       };
-      simulation.state.version = 19;
+      simulation.state.version = 20;
       simulation.state.inventory = createStartingInventory(reconstructionRandom);
       simulation.state.lootOffers = Array(8).fill(null);
       simulation.state.postbattle = 'none';
@@ -1544,7 +1582,7 @@ export class Simulation {
       if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > (value.version < 15 ? 4 : 14) || !validTownPreparation(state.previousTown, validItem, (state.day - 1) as 1 | 2 | 3 | 4 | 5 | 6, state.activeMission.absorbFix) || state.activeMission.reward !== state.previousTown.mission.reward) throw new Error('Invalid previous town.');
     } else if (state.previousTown !== null) throw new Error('Unexpected previous town.');
     if (Number(value.version) < 3) {
-      state.version = 19;
+      state.version = 20;
       if (state.phase === 'victory' && state.postbattle === 'result') {
         // Старый результат пропускал награды босса и навыки; новые награды расходуют основной поток.
         state.postbattle = 'loot';
@@ -1588,6 +1626,16 @@ export class Simulation {
     const drawnBow = state.inventory[state.player.selectedSlot];
     if (state.player.bowDrawing && (state.phase !== 'battle' || !isOccupiedItem(drawnBow) || ![24, 25].includes(drawnBow.id))) throw new Error('Invalid bow draw selection.');
     if (state.upgradeReference !== null && (!validItem(state.upgradeReference) || !isOccupiedItem(state.upgradeReference) || state.upgradeReference.type !== ITEM_TYPE.gun)) throw new Error('Invalid upgrade reference.');
+    const lootPending = state.pendingLootAction;
+    if (lootPending !== null) {
+      if (!record(lootPending) || lootPending.kind !== 'mod' || state.phase !== 'victory' || !['loot', 'boss-loot'].includes(state.postbattle)
+        || state.pendingTownAction !== null || state.pendingPartyAction !== null || !simulation.validLootAddress(lootPending.mod) || !simulation.validLootAddress(lootPending.gun)
+        || (lootPending.mod.area === lootPending.gun.area && lootPending.mod.index === lootPending.gun.index)) throw new Error('Invalid pending loot mod action.');
+      const source = (lootPending.mod.area === 'offers' ? state.lootOffers : state.inventory)[lootPending.mod.index];
+      const target = (lootPending.gun.area === 'offers' ? state.lootOffers : state.inventory)[lootPending.gun.index];
+      // Несовместимость оружия допускается до Yes, но типы и занятость концов должны сохраниться.
+      if (!isOccupiedItem(source) || source.type !== ITEM_TYPE.mod || !isOccupiedItem(target) || target.type !== ITEM_TYPE.gun) throw new Error('Invalid pending loot mod items.');
+    }
     const pending = state.pendingTownAction;
     if (pending !== null) {
       if (!record(pending) || state.phase !== 'town' || state.town?.preparation !== 'ready') throw new Error('Invalid pending town equipment action.');
@@ -1603,7 +1651,7 @@ export class Simulation {
         if (!isOccupiedItem(mod) || mod.type !== ITEM_TYPE.mod || !isOccupiedItem(gun) || gun.type !== ITEM_TYPE.gun) throw new Error('Invalid pending mod items.');
       } else throw new Error('Unknown pending town equipment action.');
     }
-    state.version = 19;
+    state.version = 20;
     // Уже оплаченный результат v4 не пересчитывается; недостающая первая лавка создаётся один раз.
     if (state.phase === 'town' && state.town?.preparation === 'pending') simulation.prepareTown();
     return simulation;

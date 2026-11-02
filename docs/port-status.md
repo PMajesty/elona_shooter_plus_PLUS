@@ -9,13 +9,19 @@ This is not a complete remake.
 The TypeScript/Phaser client runs independently of Flash and Ruffle; the preserved
 game remains the reference for behavior, content and appearance.
 
-The **v19 Storage release** is served at `http://127.0.0.1:5175/elona/` after
-automated/source checks, fourteen complete-save UI checks and final production
-New Game/exact v18-save migration and restore checks. All 308 files from
-`.build/browser-storage-final` match the live build and ZIP. The bundle is
-`assets/index-Cb35fe28.js`; the deployable archive is
-`.build/elona-shooter-browser-storage-slice.zip` (8,574,659 bytes), SHA-256
-`d9ca912bb4b049b8a966b5f3b9d72c5bc72dbbe43377d1c1dde11aef8745cd58`.
+The **v20 loot MOD release** is served at `http://127.0.0.1:5175/elona/` after
+automated/source checks, eleven complete-save UI checks and final production
+New Game/exact v19-save migration and restore checks. All 308 files from
+`.build/browser-loot-mod-final` match the live build and ZIP; all 305 public assets
+are unchanged. The bundle is `assets/index-BJh2mRko.js`; the deployable archive is
+`.build/elona-shooter-browser-loot-mod-slice.zip` (8,575,802 bytes), SHA-256
+`ec60bddb523cbc6c7f53c03608670256bba994669e94f23f0c4da50f5ad20e15`.
+
+The verified v19 release remains in `.build/browser-before-loot-mod` (all 308
+files) and `.build/elona-shooter-browser-storage-slice.zip` (8,574,659 bytes),
+SHA-256 `d9ca912bb4b049b8a966b5f3b9d72c5bc72dbbe43377d1c1dde11aef8745cd58`.
+Its bundle is `assets/index-Cb35fe28.js`; fourteen complete-save UI checks and
+production v18-save migration/restore evidence remain recorded below.
 The verified v18 release remains in `.build/browser-before-storage` (all 308 files)
 and `.build/elona-shooter-browser-sandbag-slice.zip` (8,574,403 bytes), SHA-256
 `945b2023d734cf5569c0cab3ec3d187423c6747210148d96930f80fb7b972d1e`.
@@ -116,8 +122,14 @@ establish this late-game diagnosis.
   capacity disables payment. Each extra slot adds 40 upkeep. The source eight-column
   shop/Equipment/loot grids wrap into a second row. Expanded indices work through
   shop buy/sale/swap/Token/Upgrade/MOD and companion equipment; only the first five
-  retain combat hotkeys/cooldowns. Loot transfer supports extra slots, but original
-  loot-phase MOD confirmation remains unported and is explicitly directed to town.
+  retain combat hotkeys/cooldowns. Loot transfer and MOD mounting support extra slots.
+- **Loot MOD mounting** works in ordinary and boss rewards
+  for all four offer/owned endpoint combinations. Yes mounts a compatible MOD,
+  refills the gun and consumes only the MOD's occupied count without AP/gold/RNG.
+  No or any outside click swaps the complete records. Mounting on an offered gun
+  does not collect it. A pending modal blocks item movement and Proceed, saves
+  both endpoints and reconstructs the original dialog/icon placement on Continue.
+  Incompatible confirmation closes the dialog without changing either item.
 - Day6 settlement deducts the first 10 GP tax separately from default upkeep 40.
   Mission → Claim title costs 4 AP and grants Honorary Citizen, once eligible.
   It consumes no RNG and pays no immediate gold. Its 100 GP salary begins at the
@@ -160,10 +172,15 @@ Ordinary-enemy collision uses original filled contours and placement matrices,
 including persisted sheep shadow history. Bosses use rendered alpha geometry;
 the headless soak uses an explicitly documented boss rectangle fallback.
 
-Current saves use **version 19**, accepting port versions **1–18**.
-Inventory length 6–16 is canonical, and Storage level is derived without a duplicate
-saved field. Legacy versions keep their strict six-slot inventory with metadata,
-RNG and paid history preserved; migration does not grant capacity or buy upgrades.
+Current saves use **version 20**, accepting port versions **1–19**.
+The pending loot MOD action stores distinct offer/owned endpoints, validates them
+against the current reward phase and occupied item types, and restores without
+replaying the transaction. Incompatible pairs remain valid pending saves because
+original compatibility checks happen on Yes. Older versions initialize the action
+to null without RNG. Inventory length 6–16 is canonical, and Storage level is
+derived without a duplicate saved field. Versions 1–18 keep their strict six-slot
+inventory; v19 retains actual capacity. Metadata, RNG and paid history remain
+preserved; migration does not grant capacity or buy upgrades.
 Current pending actions validate indices against actual capacity. Version18's
 Sandbag state remains intact.
 Sandbag level is an integer0–10; legacy saves initialize it to zero without
@@ -243,7 +260,46 @@ no Flash plugin, Ruffle, external CDN or gameplay server.
 
 ## Evidence and intentional corrections
 
-The v19 Storage release passes **331 tests**, TypeScript checking and its build
+The v20 loot MOD release passes **341 tests**, TypeScript checking and its
+build (`assets/index-BJh2mRko.js`). **All 53 original observations across 18 cases
+match**, covering ordinary/boss rewards, all offer/owned directions, Yes,
+No/outside swaps, rejection, consumed metadata, new Living Weapon and cached
+Engineer. Four focused reference tests include three negative controls for No
+as a no-op, erased inactive MOD metadata and omitted Engineer. The final rifle
+case distinguishes 72 attack with cached Engineer from 70 without it; the earlier
+Shotgun probe rounded both results equally and was replaced with this stronger
+probe. This is method-boundary evidence, not complete native scheduling or
+browser-input parity. See [loot MOD source notes](../web/docs/loot-mod-source.md)
+and [UI notes](../web/docs/loot-mod-ui-source.md).
+
+The natural integration run passes **4,487 aggregate frames, 53 save/replay
+checkpoints and 27 saved fixtures**. One fresh seed earns the MOD, rewards,
+towns and paid Storage normally; four confirm/cancel branches start from those
+earned checkpoints. An independent replay audit verifies every fixture and real
+automatic reloads in both mounted branches. No items, gold, HP or RNG are granted.
+These are aggregate branches, not one continuous campaign; the runner uses original
+ordinary contours and the documented boss rectangle fallback. Reports are
+`.build/loot-mod-scenarios/report.json` and
+`.build/browser-qa/loot-mod-scenario-audit.json`. These headless checks remain
+separate from the original-method and actual browser evidence.
+
+Eleven full-envelope UI checks pass on the final candidate: all four offer/owned
+endpoint directions, pending Continue, Yes/No, a click over the covered Proceed
+button that declines without advancing rewards, the shared town confirmation,
+Rest and full-mod-capacity rejection. The rejection fixture explicitly grants
+one Damage enchantment to an earned gun; its separate provenance is recorded in
+`.build/browser-qa/loot-mod-controlled-full-provenance.json`. It is failure-path
+evidence, not natural acquisition. The natural integration branches above have
+no grants. All 305 public asset files are unchanged, and all 308 candidate/live/ZIP
+files match. Production New Game starts at tick 0 with HP 40, gold 200, ammo 5,
+six inventory slots and no pending loot action. The actual v19 backup migrates
+and restores with complete-envelope equality at tick 674, HP 40, gold 209 and
+unchanged RNG; paused, with no console errors. Evidence:
+`.build/browser-qa/loot-mod-ui-verification.json`,
+`.build/browser-qa/loot-mod-production-verification.json` and
+`.build/loot-mod-publication.json`; screenshot `loot-mod-production-restored.jpg`.
+
+The historical v19 Storage release passes **331 tests**, TypeScript checking and its build
 (`assets/index-Cb35fe28.js`). **All 37 original observations match**. The initial
 36/37 comparison exposed consumable reload metadata being cleared too early at
 battle completion; correcting that boundary preserves it until the source's
@@ -657,11 +713,10 @@ reports are in `.build/repair-party-soak/`.
 
 ## Next integrated work and continuation
 
-The next slice is **MOD mounting during loot**, using original confirmation,
-cancel and persistence probes followed by integration into ordinary/boss rewards.
-This remains an explicit gap in the expanded inventory flow; town MOD support
-does not establish reward-phase parity. Looter valuation is another bounded Castle
-candidate. Trainer remains separate work before broader campaign expansion.
+Connect the **Looter Castle upgrade to actual reward valuation**, followed by
+Trainer before broader campaign expansion. Loot MOD mounting now covers the
+previously missing reward interaction, with separate original-method, natural
+integration and accepted browser evidence.
 The [Castle source audit](../web/docs/castle-upgrades-source.md) and
 [UI notes](../web/docs/castle-upgrades-ui-source.md) retain the current boundaries.
 Later campaign work still includes Lava and further town thresholds; Day8 onward

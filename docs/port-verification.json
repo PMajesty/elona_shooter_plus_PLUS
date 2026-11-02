@@ -1,6 +1,6 @@
 {
   "date": "2026-11-02",
-  "milestone": "Storage purchases and expanded owned inventory through sixteen slots, original refill boundaries and upkeep, v19 persistence; published locally and browser-verified",
+  "milestone": "MOD mounting during ordinary and boss loot across offered and owned items, original Yes/No behavior and saved confirmation, v20 persistence; published locally and browser-verified",
   "complete_port": false,
   "environment": {
     "os": "Windows",
@@ -10,315 +10,275 @@
     "vite": "8.3.5"
   },
   "automated": {
-    "simulation_tests_passed": 331,
+    "simulation_tests_passed": 341,
     "simulation_tests_failed": 0,
     "typescript": "passed",
     "candidate_build": "passed",
     "production_build": "identical to verified candidate",
-    "test_output": ".build/storage-tests-output.txt",
-    "build_output": ".build/storage-build-output.txt",
-    "storage_party_soak": {
+    "test_output": ".build/loot-mod-tests-output.txt",
+    "build_output": ".build/loot-mod-build-output.txt",
+    "loot_mod_natural_scenarios": {
       "status": "passed",
-      "seedCount": 8,
+      "seed": 1013904226,
       "sourceHashes": {
-        "simulation.ts": "10e6a3238b8862e93b81c17aab5d5a2e06b1dab201576b89b87b6ea0ab73ffa9",
-        "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
-        "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
-        "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
-        "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
-        "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
+        "simulation.ts": "caf2755e001282cc6ebd565259d3f959ccbda1c5dc277730e9fc07b4a28021cb",
+        "items.ts": "ae214eea99ef295cb557efc56c804f7e9a40b128fbe931a3fcf9883bd560e242",
+        "equipment.ts": "a8d56549a111c516e3754c1c5996a44f9283ab5fa5c28b5005e4e03d81e86776",
         "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
-        "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
-        "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
-        "castle-upgrades.ts": "1c67c39f830ebf5aa60bc8d9bfcf56989817ba359be0dfc58a92afc839ab1ba8"
+        "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639"
       },
       "geometrySha256": "505b48ffe234d7187db5445bd4306f0d104648985d18a0719e7c47605fec3ad2",
-      "scenarios": 9,
-      "frames": 135074,
-      "checkpoints": 1491,
-      "restTransitions": 54,
-      "rewardActions": 253,
-      "reachedDays": {
-        "1": 8,
-        "2": 9,
-        "3": 9,
-        "4": 9,
-        "5": 9,
-        "6": 9,
-        "7": 9
-      },
-      "wonDays": {
-        "1": 8,
-        "2": 9,
-        "3": 9,
-        "4": 9,
-        "5": 9,
-        "6": 9,
-        "7": 8
-      },
-      "naturallyHiredClasses": [
-        1,
-        2,
-        3,
-        4,
-        6,
-        8,
-        9
-      ],
-      "storagePurchases": 34,
-      "maximumInventorySlots": 16,
-      "expandedLootTransfers": 34,
-      "housePurchases": 5,
-      "wallPurchases": 9,
-      "maximumCompanions": 2,
-      "partyBattleCounts": {
-        "0": 8,
-        "1": 49,
-        "2": 5
-      },
-      "expandedNaturalScenarios": [
-        "natural-0",
-        "natural-1",
-        "natural-3",
-        "natural-6"
-      ],
-      "actorActivity": {
-        "1": {
-          "shots": 1918,
-          "hits": 1615,
-          "damage": 83335,
-          "kills": 955,
-          "reloads": 908,
-          "reloadCompletions": 158,
-          "bowDraws": 437,
-          "levelUps": 53
-        },
-        "2": {
-          "shots": 100,
-          "hits": 96,
-          "damage": 5842,
-          "kills": 84,
-          "reloads": 94,
-          "reloadCompletions": 20,
-          "bowDraws": 0,
-          "levelUps": 5
-        },
-        "3": {
-          "shots": 0,
-          "hits": 0,
-          "damage": 0,
-          "kills": 0,
-          "reloads": 0,
-          "reloadCompletions": 0,
-          "bowDraws": 0,
-          "levelUps": 0
-        }
-      },
-      "elapsedMs": 29775,
-      "collision": "Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts",
-      "policy": "Aimed Sheriff and autonomous companions; buy capacity7/8/9 from town1/2/3 when affordable, reserve first hire cost, then existing House/Wall/hiring policy. Collect actual loot into first available slot including expanded backpack. Check every extra item across Rest and full-state/event replay. Natural starts have no grants; separate capital-start adds20000gold only at earned first town and buys all16slots through ordinary transactions. No granted items, forced kills or private battle completion.",
-      "limits": [
-        "Port full-state/event replay and finite-state checks, not independent original parity or browser validation",
-        "Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred",
-        "Capital capacity16 evidence grants20000gold only at earned first town; it does not establish natural full Storage affordability within seven days",
-        "Deaths count castle defeats; companions have no separate HP/death model in the source combat actor"
-      ],
-      "restObservations": 54,
-      "occupiedExtraSlotRestObservations": 45,
-      "fixtureCount": 263,
-      "naturalDay7Wins": 7,
-      "campaignOutcomes": [
+      "frames": 4487,
+      "checkpoints": 53,
+      "provenance": "Fresh natural seed; actual combat earns first boss MOD, ordinary loot, towns and one paid Storage purchase. Branches use only normal item moves. No item/gold/HP/RNG grants. Ordinary contours with documented boss rectangle fallback.",
+      "limits": "Port state/event and persistence integration. Independent original method comparison and native browser input/rendering are separate.",
+      "outcomes": [
         {
-          "id": "natural-0",
-          "kind": "natural",
-          "finalDay": 7,
-          "phase": "town",
-          "castleHp": 45,
-          "gold": 18
+          "id": "boss-mount",
+          "originDay": 1,
+          "originStage": "boss-loot",
+          "confirm": true,
+          "mod": {
+            "area": "offers",
+            "index": 0
+          },
+          "gun": {
+            "area": "inventory",
+            "index": 0
+          },
+          "finalDay": 2,
+          "tick": 1992,
+          "hp": 40,
+          "autoReload": 1
         },
         {
-          "id": "natural-1",
-          "kind": "natural",
-          "finalDay": 7,
-          "phase": "town",
-          "castleHp": 45,
-          "gold": 315
+          "id": "boss-cancel",
+          "originDay": 1,
+          "originStage": "boss-loot",
+          "confirm": false,
+          "mod": {
+            "area": "offers",
+            "index": 0
+          },
+          "gun": {
+            "area": "offers",
+            "index": 7
+          },
+          "finalDay": 2,
+          "tick": 1992,
+          "hp": 40,
+          "autoReload": 0
         },
         {
-          "id": "natural-2",
-          "kind": "natural",
-          "finalDay": 7,
-          "phase": "town",
-          "castleHp": 45,
-          "gold": 1950
+          "id": "ordinary-mount",
+          "originDay": 2,
+          "originStage": "loot",
+          "confirm": true,
+          "mod": {
+            "area": "inventory",
+            "index": 3
+          },
+          "gun": {
+            "area": "inventory",
+            "index": 6
+          },
+          "finalDay": 3,
+          "tick": 3587,
+          "hp": 38,
+          "autoReload": 1
         },
         {
-          "id": "natural-3",
-          "kind": "natural",
-          "finalDay": 7,
-          "phase": "town",
-          "castleHp": 45,
-          "gold": 45
-        },
-        {
-          "id": "natural-4",
-          "kind": "natural",
-          "finalDay": 7,
-          "phase": "defeat",
-          "castleHp": 0,
-          "gold": 1567
-        },
-        {
-          "id": "natural-5",
-          "kind": "natural",
-          "finalDay": 7,
-          "phase": "town",
-          "castleHp": 45,
-          "gold": 2313
-        },
-        {
-          "id": "natural-6",
-          "kind": "natural",
-          "finalDay": 7,
-          "phase": "town",
-          "castleHp": 45,
-          "gold": 319
-        },
-        {
-          "id": "natural-7",
-          "kind": "natural",
-          "finalDay": 7,
-          "phase": "town",
-          "castleHp": 45,
-          "gold": 2431
-        },
-        {
-          "id": "capital-storage-capacity",
-          "kind": "capital-start",
-          "finalDay": 7,
-          "phase": "town",
-          "castleHp": 45,
-          "gold": 2255
+          "id": "ordinary-cancel",
+          "originDay": 2,
+          "originStage": "loot",
+          "confirm": false,
+          "mod": {
+            "area": "inventory",
+            "index": 3
+          },
+          "gun": {
+            "area": "offers",
+            "index": 7
+          },
+          "finalDay": 3,
+          "tick": 3587,
+          "hp": 38,
+          "autoReload": 0
         }
       ],
-      "capitalProvenance": "Only +20000 gold at an actually earned first town; all sixteen slots purchased through ordinary transactions. This does not establish natural full-capacity affordability within seven days.",
-      "metadataCorrection": "Original capture confirmed fillAmmo preserves consumable ammo and reload metadata; updateAlly at Rest resets the timer only. The prior run is retained in .build/storage-party-soak-before-metadata-fix. All nine operation replay files and recorded outcomes are unchanged in the corrected-runtime run."
+      "fixtureCount": 27,
+      "branchAccounting": "4487 frames are aggregate execution: one fresh earned path plus four branches from its boss/ordinary reward checkpoints, not one continuous campaign."
     },
-    "storage_party_soak_report": ".build/storage-party-soak/report.json",
-    "storage_party_soak_report_sha256": "a1ab896d0f21bd28efcf188f4689a87599e330d447aa11219c841fa51613676b",
-    "storage_party_soak_fixtures": ".build/browser-qa/storage-party-soak-fixtures.json",
-    "independent_soak_audit": {
+    "loot_mod_scenarios_report": ".build/loot-mod-scenarios/report.json",
+    "loot_mod_scenarios_report_sha256": "acfbaa3ff9a3326b1d26e72c1246a386309b43a55880ac044804b9984eb4f507",
+    "independent_scenario_audit": {
       "status": "passed",
       "sourceHashes": {
-        "simulation.ts": "10e6a3238b8862e93b81c17aab5d5a2e06b1dab201576b89b87b6ea0ab73ffa9",
-        "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
-        "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
-        "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
-        "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
-        "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
+        "simulation.ts": "caf2755e001282cc6ebd565259d3f959ccbda1c5dc277730e9fc07b4a28021cb",
+        "items.ts": "ae214eea99ef295cb557efc56c804f7e9a40b128fbe931a3fcf9883bd560e242",
+        "equipment.ts": "a8d56549a111c516e3754c1c5996a44f9283ab5fa5c28b5005e4e03d81e86776",
         "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
-        "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
-        "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
-        "castle-upgrades.ts": "1c67c39f830ebf5aa60bc8d9bfcf56989817ba359be0dfc58a92afc839ab1ba8"
+        "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639"
       },
-      "fixtureHashesVerified": 263,
-      "capitalOnlyGold": 20000,
-      "observations": [
+      "fixtureHashesVerified": 27,
+      "fullStateCheckpointComparisons": 27,
+      "freshStartExact": true,
+      "allBranchesExactEarnedOrigins": true,
+      "runs": [
         {
-          "scenario": "natural-0",
-          "before": "before-loot-slot7",
-          "after": "loot-slot7",
-          "operations": 1,
-          "occupiedRest": null,
-          "fullStateMatch": true
+          "id": "earned",
+          "operations": 3295,
+          "shots": 79,
+          "automaticReloads": 0,
+          "automaticCompletions": 0,
+          "finalTick": 3287
         },
         {
-          "scenario": "natural-0",
-          "before": "before-loot-slot8",
-          "after": "loot-slot8",
-          "operations": 1,
-          "occupiedRest": null,
-          "fullStateMatch": true
+          "id": "boss-mount",
+          "operations": 308,
+          "shots": 5,
+          "automaticReloads": 5,
+          "automaticCompletions": 1,
+          "finalTick": 1992
         },
         {
-          "scenario": "natural-0",
-          "before": "before-loot-slot9",
-          "after": "loot-slot9",
-          "operations": 1,
-          "occupiedRest": null,
-          "fullStateMatch": true
+          "id": "boss-cancel",
+          "operations": 311,
+          "shots": 5,
+          "automaticReloads": 0,
+          "automaticCompletions": 0,
+          "finalTick": 1992
         },
         {
-          "scenario": "natural-0",
-          "before": "loot-slot7",
-          "after": "before-loot-slot8",
-          "operations": 2118,
-          "occupiedRest": 1,
-          "fullStateMatch": true
+          "id": "ordinary-mount",
+          "operations": 315,
+          "shots": 7,
+          "automaticReloads": 5,
+          "automaticCompletions": 2,
+          "finalTick": 3587
         },
         {
-          "scenario": "capital-storage-capacity",
-          "before": "before-storage7",
-          "after": "storage7",
-          "operations": 1,
-          "occupiedRest": null,
-          "fullStateMatch": true
-        },
-        {
-          "scenario": "capital-storage-capacity",
-          "before": "before-storage8",
-          "after": "storage8",
-          "operations": 1,
-          "occupiedRest": null,
-          "fullStateMatch": true
-        },
-        {
-          "scenario": "capital-storage-capacity",
-          "before": "before-storage9",
-          "after": "storage9",
-          "operations": 1,
-          "occupiedRest": null,
-          "fullStateMatch": true
-        },
-        {
-          "scenario": "capital-storage-capacity",
-          "before": "before-storage16",
-          "after": "storage16",
-          "operations": 1,
-          "occupiedRest": null,
-          "fullStateMatch": true
-        },
-        {
-          "scenario": "capital-storage-capacity",
-          "before": "before-storage-rest",
-          "after": "storage-rest",
-          "operations": 1,
-          "occupiedRest": 0,
-          "fullStateMatch": true
+          "id": "ordinary-cancel",
+          "operations": 315,
+          "shots": 7,
+          "automaticReloads": 0,
+          "automaticCompletions": 0,
+          "finalTick": 3587
         }
       ],
       "limits": [
-        "Independent selected operation replay of port production state; not original parity or browser evidence",
-        "Original ordinary-enemy contours; boss rectangle fallback as recorded by the campaign runner"
-      ],
-      "preFixComparison": {
-        "replayFiles": 9,
-        "allReplayFilesByteIdentical": true,
-        "unchangedReportFields": [
-          "results",
-          "storageRestObservations",
-          "storagePurchases",
-          "expandedLootTransfers",
-          "frames",
-          "checkpoints",
-          "reachedDays",
-          "wonDays",
-          "snapshots"
-        ],
-        "allListedFieldsEqual": true
-      }
+        "Port operation replay with original ordinary contours and disclosed boss rectangle fallback; not original-method parity or browser-input evidence.",
+        "Four branches share earned checkpoints; 4487 frames are aggregate execution, not one continuous campaign."
+      ]
     },
-    "independent_soak_audit_report": ".build/browser-qa/storage-soak-audit.json",
+    "independent_scenario_audit_report": ".build/browser-qa/loot-mod-scenario-audit.json",
+    "controlled_full_capacity_fixture": {
+      "status": "passed",
+      "kind": "controlled-full-mod-capacity",
+      "baseFixture": "loot-mod-boss-mount-before-v20.json",
+      "baseSha256": "e39378cccc147150473a2c38624cc86a26a4edf196f43b440c5c6e1f13c4e20a",
+      "controlledChange": {
+        "method": "ItemFactory.enchant",
+        "inventorySlot": 0,
+        "weaponId": 3,
+        "modId": 4,
+        "modName": "Damage",
+        "modLevel": 1,
+        "cachedEngineer": 0,
+        "weaponBefore": {
+          "num": 1,
+          "id": 3,
+          "graphic": 13,
+          "type": 1,
+          "reloadTime": 0,
+          "reloadTimeMax": 6,
+          "ammoMax": 5,
+          "value": 520,
+          "mod": 0,
+          "modMax": 1,
+          "shell": 6,
+          "manualReload": true,
+          "automatic": false,
+          "modText": "",
+          "lv": 1,
+          "typeMinor": 2,
+          "special": 0,
+          "leech": 0,
+          "impact": 0,
+          "shootRate": 40,
+          "rare": 100,
+          "autoReload": 0,
+          "livingWeapon": 0,
+          "name": "Shotgun",
+          "baseAccuracy": 65,
+          "accuracyDec": 0.24,
+          "attack": 16,
+          "dmgAir": 80,
+          "dmgArmor": 30,
+          "reqTrait": 105,
+          "reqLv": 1,
+          "range": 0,
+          "ammo": 5
+        },
+        "weaponAfter": {
+          "num": 1,
+          "id": 3,
+          "graphic": 13,
+          "type": 1,
+          "reloadTime": 0,
+          "reloadTimeMax": 6,
+          "ammoMax": 5,
+          "value": 566.6666666666666,
+          "mod": 1,
+          "modMax": 1,
+          "shell": 6,
+          "manualReload": true,
+          "automatic": false,
+          "modText": "Damage(Lv.1) ",
+          "lv": 1,
+          "typeMinor": 2,
+          "special": 0,
+          "leech": 0,
+          "impact": 0,
+          "shootRate": 40,
+          "rare": 100,
+          "autoReload": 0,
+          "livingWeapon": 0,
+          "name": "Shotgun",
+          "baseAccuracy": 65,
+          "accuracyDec": 0.24,
+          "attack": 18,
+          "dmgAir": 80,
+          "dmgArmor": 30,
+          "reqTrait": 105,
+          "reqLv": 1,
+          "range": 0,
+          "ammo": 5
+        }
+      },
+      "otherStateUnchanged": true,
+      "campaignRngUnchanged": true,
+      "rng": 3935495278,
+      "pendingAction": "normal moveLootItem offers[0] -> inventory[0]",
+      "rejectionCheck": "resolveLootModMount(true) returns no-mod-slot and restores exact before state",
+      "fixtures": [
+        {
+          "file": "loot-mod-controlled-full-before-v20.json",
+          "sha256": "0467116750e2013e7a19e30d7113848decb94dbf1405743293bacef927214aa9",
+          "exactSaveRoundtrip": true
+        },
+        {
+          "file": "loot-mod-controlled-full-pending-v20.json",
+          "sha256": "ebc73fc47ef2530799de2fb71e77baf9da6a2e0345819ae6343fd6dd3243dc20",
+          "exactSaveRoundtrip": true
+        }
+      ],
+      "limits": [
+        "One Damage enchantment is deliberately granted to fill the sole MOD slot.",
+        "This is a controlled rejection-UI fixture, not a natural item drop or affordability/balance claim."
+      ]
+    },
+    "controlled_full_capacity_provenance": ".build/browser-qa/loot-mod-controlled-full-provenance.json",
     "asset_preservation": {
       "status": "passed",
       "oldReleaseFiles": 308,
@@ -327,15 +287,15 @@
         "index.html"
       ],
       "added": [
-        "assets/index-Cb35fe28.js"
+        "assets/index-BJh2mRko.js"
       ],
       "removed": [
-        "assets/index-2cijlKJd.js"
+        "assets/index-Cb35fe28.js"
       ],
       "unchangedPublicAssetFiles": 305,
       "allAssetsPreserved": true
     },
-    "prior_evidence": "Sandbag, Repair, Castle and earlier campaign runs remain historical in milestone_history; no fresh v19 claim is inferred from them."
+    "prior_evidence": "Storage and earlier campaign runs remain historical in milestone_history; no fresh v20 campaign claim is inferred from them."
   },
   "browser_checks": {
     "new_game": {
@@ -3838,9 +3798,802 @@
       "browserPaused": true,
       "consoleErrors": [],
       "screenshot": "storage-production-restored.jpg"
+    },
+    "loot_mod_mounting": {
+      "status": "passed",
+      "report": ".build/browser-qa/loot-mod-ui-verification.json",
+      "checkCount": 11,
+      "checks": {
+        "boss-preview": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "file": "loot-mod-ui-boss-preview-v20.json",
+          "expectedFrom": "loot-mod-boss-mount-before-v20.json",
+          "action": "move",
+          "args": [
+            "offers",
+            "0",
+            "inventory",
+            "0"
+          ],
+          "day": 1,
+          "tick": 1692,
+          "gold": 240,
+          "rng": 3935495278,
+          "stage": "boss-loot",
+          "pending": {
+            "kind": "mod",
+            "mod": {
+              "area": "offers",
+              "index": 0
+            },
+            "gun": {
+              "area": "inventory",
+              "index": 0
+            }
+          },
+          "inventory": [
+            {
+              "id": 3,
+              "num": 1,
+              "mod": 0,
+              "ammo": 5,
+              "autoReload": 0
+            },
+            {
+              "id": 11,
+              "num": 1,
+              "mod": 0,
+              "ammo": 3,
+              "autoReload": 0
+            },
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null
+          ],
+          "offers": [
+            {
+              "id": 8,
+              "num": 1,
+              "mod": 10,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "boss-continue": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "file": "loot-mod-ui-boss-continue-v20.json",
+          "expectedFrom": "loot-mod-ui-boss-preview-v20.json",
+          "action": "restore",
+          "args": [],
+          "day": 1,
+          "tick": 1692,
+          "gold": 240,
+          "rng": 3935495278,
+          "stage": "boss-loot",
+          "pending": {
+            "kind": "mod",
+            "mod": {
+              "area": "offers",
+              "index": 0
+            },
+            "gun": {
+              "area": "inventory",
+              "index": 0
+            }
+          },
+          "inventory": [
+            {
+              "id": 3,
+              "num": 1,
+              "mod": 0,
+              "ammo": 5,
+              "autoReload": 0
+            },
+            {
+              "id": 11,
+              "num": 1,
+              "mod": 0,
+              "ammo": 3,
+              "autoReload": 0
+            },
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null
+          ],
+          "offers": [
+            {
+              "id": 8,
+              "num": 1,
+              "mod": 10,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "boss-yes": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "file": "loot-mod-ui-boss-yes-v20.json",
+          "expectedFrom": "loot-mod-ui-boss-continue-v20.json",
+          "action": "yes",
+          "args": [],
+          "day": 1,
+          "tick": 1692,
+          "gold": 240,
+          "rng": 3935495278,
+          "stage": "boss-loot",
+          "pending": null,
+          "inventory": [
+            {
+              "id": 3,
+              "num": 1,
+              "mod": 1,
+              "ammo": 5,
+              "autoReload": 1
+            },
+            {
+              "id": 11,
+              "num": 1,
+              "mod": 0,
+              "ammo": 3,
+              "autoReload": 0
+            },
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null
+          ],
+          "offers": [
+            {
+              "id": 8,
+              "num": 0,
+              "mod": 10,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "boss-no": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "file": "loot-mod-ui-boss-no-v20.json",
+          "expectedFrom": "loot-mod-boss-cancel-pending-v20.json",
+          "action": "no",
+          "args": [],
+          "day": 1,
+          "tick": 1692,
+          "gold": 240,
+          "rng": 3935495278,
+          "stage": "boss-loot",
+          "pending": null,
+          "inventory": [
+            null,
+            {
+              "id": 11,
+              "num": 1,
+              "mod": 0,
+              "ammo": 3,
+              "autoReload": 0
+            },
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null
+          ],
+          "offers": [
+            {
+              "id": 3,
+              "num": 1,
+              "mod": 0,
+              "ammo": 5,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            {
+              "id": 8,
+              "num": 1,
+              "mod": 10,
+              "ammo": 0,
+              "autoReload": 0
+            }
+          ]
+        },
+        "ordinary-preview": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "file": "loot-mod-ui-ordinary-preview-v20.json",
+          "expectedFrom": "loot-mod-ordinary-mount-before-v20.json",
+          "action": "move",
+          "args": [
+            "inventory",
+            "3",
+            "inventory",
+            "6"
+          ],
+          "day": 2,
+          "tick": 3287,
+          "gold": 636,
+          "rng": 1005681249,
+          "stage": "loot",
+          "pending": {
+            "kind": "mod",
+            "mod": {
+              "area": "inventory",
+              "index": 3
+            },
+            "gun": {
+              "area": "inventory",
+              "index": 6
+            }
+          },
+          "inventory": [
+            null,
+            {
+              "id": 11,
+              "num": 1,
+              "mod": 0,
+              "ammo": 1,
+              "autoReload": 0
+            },
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 8,
+              "num": 1,
+              "mod": 10,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            {
+              "id": 3,
+              "num": 1,
+              "mod": 0,
+              "ammo": 5,
+              "autoReload": 0
+            }
+          ],
+          "offers": [
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 6,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 28,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 6,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "ordinary-outside": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "file": "loot-mod-ui-ordinary-outside-v20.json",
+          "expectedFrom": "loot-mod-ui-ordinary-preview-v20.json",
+          "action": "no",
+          "args": [],
+          "day": 2,
+          "tick": 3287,
+          "gold": 636,
+          "rng": 1005681249,
+          "stage": "loot",
+          "pending": null,
+          "inventory": [
+            null,
+            {
+              "id": 11,
+              "num": 1,
+              "mod": 0,
+              "ammo": 1,
+              "autoReload": 0
+            },
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 3,
+              "num": 1,
+              "mod": 0,
+              "ammo": 5,
+              "autoReload": 0
+            },
+            null,
+            null,
+            {
+              "id": 8,
+              "num": 1,
+              "mod": 10,
+              "ammo": 0,
+              "autoReload": 0
+            }
+          ],
+          "offers": [
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 6,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 28,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 6,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "ordinary-offered-yes": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "file": "loot-mod-ui-ordinary-offered-yes-v20.json",
+          "expectedFrom": "loot-mod-ordinary-cancel-pending-v20.json",
+          "action": "yes",
+          "args": [],
+          "day": 2,
+          "tick": 3287,
+          "gold": 636,
+          "rng": 1005681249,
+          "stage": "loot",
+          "pending": null,
+          "inventory": [
+            null,
+            {
+              "id": 11,
+              "num": 1,
+              "mod": 0,
+              "ammo": 1,
+              "autoReload": 0
+            },
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 8,
+              "num": 0,
+              "mod": 10,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null
+          ],
+          "offers": [
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 6,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 28,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 6,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null,
+            {
+              "id": 3,
+              "num": 1,
+              "mod": 1,
+              "ammo": 5,
+              "autoReload": 1
+            }
+          ]
+        },
+        "town-preview": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "file": "loot-mod-ui-town-preview-v20.json",
+          "expectedFrom": "loot-mod-boss-cancel-town-v20.json",
+          "action": "town-preview",
+          "args": [
+            "3",
+            "0"
+          ],
+          "day": 1,
+          "tick": 1692,
+          "gold": 980,
+          "rng": 3718486936,
+          "stage": "result",
+          "pending": null,
+          "inventory": [
+            {
+              "id": 3,
+              "num": 1,
+              "mod": 0,
+              "ammo": 5,
+              "autoReload": 0
+            },
+            {
+              "id": 11,
+              "num": 1,
+              "mod": 0,
+              "ammo": 3,
+              "autoReload": 0
+            },
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 8,
+              "num": 1,
+              "mod": 10,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null
+          ],
+          "offers": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "town-yes": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "file": "loot-mod-ui-town-yes-v20.json",
+          "expectedFrom": "loot-mod-ui-town-preview-v20.json",
+          "action": "town-yes",
+          "args": [],
+          "day": 1,
+          "tick": 1692,
+          "gold": 980,
+          "rng": 3718486936,
+          "stage": "result",
+          "pending": null,
+          "inventory": [
+            {
+              "id": 3,
+              "num": 1,
+              "mod": 1,
+              "ammo": 5,
+              "autoReload": 1
+            },
+            {
+              "id": 11,
+              "num": 1,
+              "mod": 0,
+              "ammo": 3,
+              "autoReload": 0
+            },
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 8,
+              "num": 0,
+              "mod": 10,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null
+          ],
+          "offers": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "rest": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "file": "loot-mod-ui-rest-v20.json",
+          "expectedFrom": "loot-mod-ui-town-yes-v20.json",
+          "action": "rest",
+          "args": [],
+          "day": 2,
+          "tick": 1692,
+          "gold": 980,
+          "rng": 2978657487,
+          "stage": "none",
+          "pending": null,
+          "inventory": [
+            {
+              "id": 3,
+              "num": 1,
+              "mod": 1,
+              "ammo": 5,
+              "autoReload": 1
+            },
+            {
+              "id": 11,
+              "num": 1,
+              "mod": 0,
+              "ammo": 3,
+              "autoReload": 0
+            },
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            {
+              "id": 8,
+              "num": 0,
+              "mod": 10,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null
+          ],
+          "offers": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "full-rejected": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "file": "loot-mod-ui-full-rejected-v20.json",
+          "expectedFrom": "loot-mod-controlled-full-pending-v20.json",
+          "action": "failure",
+          "args": [
+            "no-mod-slot"
+          ],
+          "day": 1,
+          "tick": 1692,
+          "gold": 240,
+          "rng": 3935495278,
+          "stage": "boss-loot",
+          "pending": null,
+          "inventory": [
+            {
+              "id": 3,
+              "num": 1,
+              "mod": 1,
+              "ammo": 5,
+              "autoReload": 0
+            },
+            {
+              "id": 11,
+              "num": 1,
+              "mod": 0,
+              "ammo": 3,
+              "autoReload": 0
+            },
+            {
+              "id": 117,
+              "num": 1,
+              "mod": 0,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null
+          ],
+          "offers": [
+            {
+              "id": 8,
+              "num": 1,
+              "mod": 10,
+              "ammo": 0,
+              "autoReload": 0
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        }
+      },
+      "controlledFullCapacityCheckNames": [
+        "full-rejected"
+      ],
+      "scope": "Actual CUA ordinary/boss loot confirmation, Continue, Yes/No/outside behavior, town regression and Rest actions enumerated in the report; full exported envelopes compared. Controlled full-capacity rejection is labeled separately.",
+      "limits": [
+        "Natural checkpoints were earned through headless ordinary input with original ordinary-enemy contours and the disclosed boss rectangle fallback; not a manually played full browser campaign.",
+        "The full-capacity rejection fixture grants exactly one Damage enchantment to fill the owned Shotgun slot. It is not a natural drop, affordability or balance claim.",
+        "Port replay and browser checks are separate from 53 independent original-method observations. No new pixel, audio, performance or late-game hitbox claim."
+      ]
+    },
+    "loot_mod_production": {
+      "status": "passed",
+      "bundle": "assets/index-BJh2mRko.js",
+      "newGame": {
+        "tick": 0,
+        "hp": 40,
+        "gold": 200,
+        "ammo": 5,
+        "inventorySlots": 6,
+        "wallLevel": 1,
+        "capacity": 1,
+        "repairmanLevel": 0,
+        "wallFixCount": 0,
+        "sandbagLevel": 0
+      },
+      "migration": {
+        "from": 19,
+        "to": 20,
+        "fullEnvelopeEquality": true,
+        "exactCurrentRestore": true,
+        "tick": 674,
+        "hp": 40,
+        "gold": 209,
+        "wallLevel": 1,
+        "rngUnchanged": true
+      },
+      "browserPaused": true,
+      "consoleErrors": [],
+      "screenshot": "loot-mod-production-restored.jpg"
     }
   },
-  "checkpoint_provenance": "Storage fixtures carry operation indexes and byte hashes in storage-party-soak-fixtures.json. Eight natural campaigns have no grants; seven win Day7 and natural-4 loses Day7. The separate capital scenario starts from earned first town +20000 gold only and buys capacity sixteen normally. Actual loot reaches expanded slots and is checked through Rest. The full-state/event replay uses production ordinary-enemy contours and the disclosed boss rectangle fallback.",
+  "checkpoint_provenance": "Fresh natural seed1013904226 earns the boss MOD, ordinary rewards, towns and paid Storage through recorded normal inputs. Four branches change only normal loot choices and moves; no item, gold, HP or RNG grants. All27 natural checkpoint hashes and full-state replays are audited. Separate loot-mod-controlled-full-provenance.json records one explicitly granted Damage enchantment solely for the rejection UI check.",
   "performance": {
     "comparison_with_flash_or_ruffle": "not measured",
     "sample": {
@@ -3859,7 +4612,8 @@
     "castle_release": "No new Flash/browser performance comparison. Headless simulation throughput and the background-browser ten-update check are not latency or rendering performance evidence.",
     "repair_release": "No new Flash/browser performance comparison. The six-update hidden-browser healing check establishes state behavior only.",
     "sandbag_release": "No new Flash/browser performance comparison; seven normal hidden-browser updates establish state behavior only.",
-    "storage_release": "No new Flash/browser performance comparison; the campaign run measures deterministic state/event replay and finite state, not native browser performance."
+    "storage_release": "No new Flash/browser performance comparison; the campaign run measures deterministic state/event replay and finite state, not native browser performance.",
+    "loot_mod_release": "No new Flash/browser performance comparison or late-game hitbox finding; natural scenarios verify state/event replay, saved confirmations and subsequent mounted-weapon behavior."
   },
   "screenshots": [
     ".build/browser-qa/character-creation.jpg",
@@ -3919,7 +4673,11 @@
     ".build/browser-qa/storage-loot-row9.jpg",
     ".build/browser-qa/storage-production-restored.jpg",
     ".build/browser-qa/storage-result-upkeep.jpg",
-    ".build/browser-qa/storage-row9-shop.jpg"
+    ".build/browser-qa/storage-row9-shop.jpg",
+    ".build/browser-qa/loot-mod-boss-pending.jpg",
+    ".build/browser-qa/loot-mod-full-rejected.jpg",
+    ".build/browser-qa/loot-mod-production-restored.jpg",
+    ".build/browser-qa/loot-mod-town-pending.jpg"
   ],
   "preserved_baselines": {
     "original/elonashooter1.3.swf": {
@@ -11396,32 +12154,463 @@
         "Loot MOD confirmation remains a known port gap; this fixture compares town MOD transactions only",
         "Source UI slot positions/hotkey labels are recorded; actual port rendering and save/resume have separate browser checks"
       ]
+    },
+    "loot_mod": {
+      "status": "passed",
+      "cases": 18,
+      "observedSnapshots": 53,
+      "matchedSnapshots": 53,
+      "comparisons": [
+        {
+          "scenario": "offer-owned-yes",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "offer-owned-yes",
+          "mode": "loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "offer-owned-yes",
+          "mode": "loot",
+          "op": "confirm",
+          "outcome": "mounted",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "offer-owned-no",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "offer-owned-no",
+          "mode": "loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "offer-owned-no",
+          "mode": "loot",
+          "op": "cancel",
+          "outcome": "swapped",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-offer-yes",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-offer-yes",
+          "mode": "loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-offer-yes",
+          "mode": "loot",
+          "op": "confirm",
+          "outcome": "mounted",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-offer-outside",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-offer-outside",
+          "mode": "loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-offer-outside",
+          "mode": "loot",
+          "op": "cancel",
+          "outcome": "swapped",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-owned-yes",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-owned-yes",
+          "mode": "loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-owned-yes",
+          "mode": "loot",
+          "op": "confirm",
+          "outcome": "mounted",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-owned-no",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-owned-no",
+          "mode": "loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "owned-owned-no",
+          "mode": "loot",
+          "op": "cancel",
+          "outcome": "swapped",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "offer-offer-yes",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "offer-offer-yes",
+          "mode": "loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "offer-offer-yes",
+          "mode": "loot",
+          "op": "confirm",
+          "outcome": "mounted",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "offer-offer-no",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "offer-offer-no",
+          "mode": "loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "offer-offer-no",
+          "mode": "loot",
+          "op": "cancel",
+          "outcome": "swapped",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "boss-offer-last-owned-yes",
+          "mode": "boss-loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "boss-offer-last-owned-yes",
+          "mode": "boss-loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "boss-offer-last-owned-yes",
+          "mode": "boss-loot",
+          "op": "confirm",
+          "outcome": "mounted",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "boss-last-owned-offer-no",
+          "mode": "boss-loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "boss-last-owned-offer-no",
+          "mode": "boss-loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "boss-last-owned-offer-no",
+          "mode": "boss-loot",
+          "op": "cancel",
+          "outcome": "swapped",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "full-capacity",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "full-capacity",
+          "mode": "loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "full-capacity",
+          "mode": "loot",
+          "op": "confirm",
+          "outcome": "no-mod-slot",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "ammo-bow",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "ammo-bow",
+          "mode": "loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "ammo-bow",
+          "mode": "loot",
+          "op": "confirm",
+          "outcome": "incompatible-ammo-mod",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "boss-reloading-bow",
+          "mode": "boss-loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "boss-reloading-bow",
+          "mode": "boss-loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "boss-reloading-bow",
+          "mode": "boss-loot",
+          "op": "confirm",
+          "outcome": "incompatible-ammo-mod",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "auto-reload-magazine",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "auto-reload-magazine",
+          "mode": "loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "auto-reload-magazine",
+          "mode": "loot",
+          "op": "confirm",
+          "outcome": "incompatible-auto-reload",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "already-living",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "already-living",
+          "mode": "loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "already-living",
+          "mode": "loot",
+          "op": "confirm",
+          "outcome": "already-living",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "boss-living-new",
+          "mode": "boss-loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "boss-living-new",
+          "mode": "boss-loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "boss-living-new",
+          "mode": "boss-loot",
+          "op": "confirm",
+          "outcome": "mounted",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "repeated-damage-engineer",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "repeated-damage-engineer",
+          "mode": "loot",
+          "op": "preview",
+          "outcome": "previewed",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "repeated-damage-engineer",
+          "mode": "loot",
+          "op": "confirm",
+          "outcome": "mounted",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "reverse-gun-mod",
+          "mode": "loot",
+          "op": "before",
+          "matched": true,
+          "differences": []
+        },
+        {
+          "scenario": "reverse-gun-mod",
+          "mode": "loot",
+          "op": "swap",
+          "outcome": "swapped",
+          "matched": true,
+          "differences": []
+        }
+      ],
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "4666992fd4f29c36801e87b5f8274c45e37880c51921f83b57f5c7f587525f08",
+      "traceSha256": "3be24c9b8398d261c1958d95fb202ab6a6eccaa8cac6ef4e84aa845697282751",
+      "checks": [
+        "Actual ordinary/boss loot inventory drag and result Yes/No/outside shape clicks",
+        "All four offered/owned directions, original owned slot35, reverse gun-to-MOD plain swap",
+        "All33 fields: preview unchanged, confirmation enchant and retained consumed MOD, No complete-record swap",
+        "Full-capacity, ammo/reloading, automatic-reload and duplicate-Living guards; new Living and cached Engineer repeated Damage",
+        "Unchanged gold/AP/totalMoney, exact shared RNG, reward stage and party/result invariants"
+      ],
+      "limits": [
+        "Controlled item setup and synchronous original methods; loot generation, native result scheduling and actual browser drag are separate",
+        "Popup warning text/count is recorded from the original; production outcomes compare its meaning, not every duplicated popup/audio cue",
+        "Cached Engineer25 is an explicit method input; acquiring that party skill is outside this capture",
+        "Save persistence, modal lock integration and connected reward collection require separate runtime/browser checks"
+      ]
     }
   },
   "production_recovery": {
     "status": "passed",
-    "release_directory": ".build/browser-storage-final",
-    "previous_directory": ".build/browser-before-storage",
-    "current_bundle": "assets/index-Cb35fe28.js",
+    "release_directory": ".build/browser-loot-mod-final",
+    "previous_directory": ".build/browser-before-loot-mod",
+    "current_bundle": "assets/index-BJh2mRko.js",
     "candidate_build_matches_production": true,
     "copied_release_files_hash_checked": 308,
     "archive_files_hash_checked": 308,
-    "current_package": ".build/elona-shooter-browser-storage-slice.zip",
-    "current_package_bytes": 8574659,
-    "current_package_sha256": "d9ca912bb4b049b8a966b5f3b9d72c5bc72dbbe43377d1c1dde11aef8745cd58",
-    "previous_package": ".build/elona-shooter-browser-sandbag-slice.zip",
-    "previous_bundle": "assets/index-2cijlKJd.js",
-    "candidate_browser_verification": ".build/browser-qa/storage-ui-verification.json",
-    "production_backup": ".build/browser-qa/storage-production-before-v18.json",
-    "production_browser_verification": ".build/browser-qa/storage-production-verification.json",
-    "production_restored_screenshot": ".build/browser-qa/storage-production-restored.jpg",
+    "current_package": ".build/elona-shooter-browser-loot-mod-slice.zip",
+    "current_package_bytes": 8575802,
+    "current_package_sha256": "ec60bddb523cbc6c7f53c03608670256bba994669e94f23f0c4da50f5ad20e15",
+    "previous_package": ".build/elona-shooter-browser-storage-slice.zip",
+    "previous_bundle": "assets/index-Cb35fe28.js",
+    "candidate_browser_verification": ".build/browser-qa/loot-mod-ui-verification.json",
+    "production_backup": ".build/browser-qa/loot-mod-production-before-v19.json",
+    "production_browser_verification": ".build/browser-qa/loot-mod-production-verification.json",
+    "production_restored_screenshot": ".build/browser-qa/loot-mod-production-restored.jpg",
     "production_console_errors": [],
-    "publication_report": ".build/storage-publication.json",
-    "current_save_version": 19,
+    "publication_report": ".build/loot-mod-publication.json",
+    "current_save_version": 20,
     "production_browser_smoke": "passed",
     "restored_battle": {
-      "from": 18,
-      "to": 19,
+      "from": 19,
+      "to": 20,
       "fullEnvelopeEquality": true,
       "exactCurrentRestore": true,
       "tick": 674,
@@ -15230,6 +16419,1312 @@
           "browserPaused": true,
           "consoleErrors": [],
           "screenshot": "sandbag-production-restored.jpg"
+        }
+      }
+    },
+    {
+      "milestone": "Storage purchases and expanded owned inventory through sixteen slots, original refill boundaries and upkeep, v19 persistence; published locally and browser-verified",
+      "saveVersion": 19,
+      "automated": {
+        "simulation_tests_passed": 331,
+        "simulation_tests_failed": 0,
+        "typescript": "passed",
+        "candidate_build": "passed",
+        "production_build": "identical to verified candidate",
+        "test_output": ".build/storage-tests-output.txt",
+        "build_output": ".build/storage-build-output.txt",
+        "storage_party_soak": {
+          "status": "passed",
+          "seedCount": 8,
+          "sourceHashes": {
+            "simulation.ts": "10e6a3238b8862e93b81c17aab5d5a2e06b1dab201576b89b87b6ea0ab73ffa9",
+            "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
+            "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
+            "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
+            "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
+            "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
+            "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
+            "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
+            "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
+            "castle-upgrades.ts": "1c67c39f830ebf5aa60bc8d9bfcf56989817ba359be0dfc58a92afc839ab1ba8"
+          },
+          "geometrySha256": "505b48ffe234d7187db5445bd4306f0d104648985d18a0719e7c47605fec3ad2",
+          "scenarios": 9,
+          "frames": 135074,
+          "checkpoints": 1491,
+          "restTransitions": 54,
+          "rewardActions": 253,
+          "reachedDays": {
+            "1": 8,
+            "2": 9,
+            "3": 9,
+            "4": 9,
+            "5": 9,
+            "6": 9,
+            "7": 9
+          },
+          "wonDays": {
+            "1": 8,
+            "2": 9,
+            "3": 9,
+            "4": 9,
+            "5": 9,
+            "6": 9,
+            "7": 8
+          },
+          "naturallyHiredClasses": [
+            1,
+            2,
+            3,
+            4,
+            6,
+            8,
+            9
+          ],
+          "storagePurchases": 34,
+          "maximumInventorySlots": 16,
+          "expandedLootTransfers": 34,
+          "housePurchases": 5,
+          "wallPurchases": 9,
+          "maximumCompanions": 2,
+          "partyBattleCounts": {
+            "0": 8,
+            "1": 49,
+            "2": 5
+          },
+          "expandedNaturalScenarios": [
+            "natural-0",
+            "natural-1",
+            "natural-3",
+            "natural-6"
+          ],
+          "actorActivity": {
+            "1": {
+              "shots": 1918,
+              "hits": 1615,
+              "damage": 83335,
+              "kills": 955,
+              "reloads": 908,
+              "reloadCompletions": 158,
+              "bowDraws": 437,
+              "levelUps": 53
+            },
+            "2": {
+              "shots": 100,
+              "hits": 96,
+              "damage": 5842,
+              "kills": 84,
+              "reloads": 94,
+              "reloadCompletions": 20,
+              "bowDraws": 0,
+              "levelUps": 5
+            },
+            "3": {
+              "shots": 0,
+              "hits": 0,
+              "damage": 0,
+              "kills": 0,
+              "reloads": 0,
+              "reloadCompletions": 0,
+              "bowDraws": 0,
+              "levelUps": 0
+            }
+          },
+          "elapsedMs": 29775,
+          "collision": "Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts",
+          "policy": "Aimed Sheriff and autonomous companions; buy capacity7/8/9 from town1/2/3 when affordable, reserve first hire cost, then existing House/Wall/hiring policy. Collect actual loot into first available slot including expanded backpack. Check every extra item across Rest and full-state/event replay. Natural starts have no grants; separate capital-start adds20000gold only at earned first town and buys all16slots through ordinary transactions. No granted items, forced kills or private battle completion.",
+          "limits": [
+            "Port full-state/event replay and finite-state checks, not independent original parity or browser validation",
+            "Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred",
+            "Capital capacity16 evidence grants20000gold only at earned first town; it does not establish natural full Storage affordability within seven days",
+            "Deaths count castle defeats; companions have no separate HP/death model in the source combat actor"
+          ],
+          "restObservations": 54,
+          "occupiedExtraSlotRestObservations": 45,
+          "fixtureCount": 263,
+          "naturalDay7Wins": 7,
+          "campaignOutcomes": [
+            {
+              "id": "natural-0",
+              "kind": "natural",
+              "finalDay": 7,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 18
+            },
+            {
+              "id": "natural-1",
+              "kind": "natural",
+              "finalDay": 7,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 315
+            },
+            {
+              "id": "natural-2",
+              "kind": "natural",
+              "finalDay": 7,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 1950
+            },
+            {
+              "id": "natural-3",
+              "kind": "natural",
+              "finalDay": 7,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 45
+            },
+            {
+              "id": "natural-4",
+              "kind": "natural",
+              "finalDay": 7,
+              "phase": "defeat",
+              "castleHp": 0,
+              "gold": 1567
+            },
+            {
+              "id": "natural-5",
+              "kind": "natural",
+              "finalDay": 7,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 2313
+            },
+            {
+              "id": "natural-6",
+              "kind": "natural",
+              "finalDay": 7,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 319
+            },
+            {
+              "id": "natural-7",
+              "kind": "natural",
+              "finalDay": 7,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 2431
+            },
+            {
+              "id": "capital-storage-capacity",
+              "kind": "capital-start",
+              "finalDay": 7,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 2255
+            }
+          ],
+          "capitalProvenance": "Only +20000 gold at an actually earned first town; all sixteen slots purchased through ordinary transactions. This does not establish natural full-capacity affordability within seven days.",
+          "metadataCorrection": "Original capture confirmed fillAmmo preserves consumable ammo and reload metadata; updateAlly at Rest resets the timer only. The prior run is retained in .build/storage-party-soak-before-metadata-fix. All nine operation replay files and recorded outcomes are unchanged in the corrected-runtime run."
+        },
+        "storage_party_soak_report": ".build/storage-party-soak/report.json",
+        "storage_party_soak_report_sha256": "a1ab896d0f21bd28efcf188f4689a87599e330d447aa11219c841fa51613676b",
+        "storage_party_soak_fixtures": ".build/browser-qa/storage-party-soak-fixtures.json",
+        "independent_soak_audit": {
+          "status": "passed",
+          "sourceHashes": {
+            "simulation.ts": "10e6a3238b8862e93b81c17aab5d5a2e06b1dab201576b89b87b6ea0ab73ffa9",
+            "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
+            "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
+            "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
+            "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
+            "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
+            "collision.ts": "4c0d0420dc37c4f09d8fa7513dd901dc61d3dd130848e291695da6f3bb01cfb2",
+            "town-preparation.ts": "d751e22993e4061e4e4fa3d8405c9f053a7b1c1f6a6779db03c8c7be1af0cb9f",
+            "town-save.ts": "e5ec792a0e53b97bbb0de84cb1c1cc1bd28eb953312b33d69cd29c72b1aa6ddf",
+            "castle-upgrades.ts": "1c67c39f830ebf5aa60bc8d9bfcf56989817ba359be0dfc58a92afc839ab1ba8"
+          },
+          "fixtureHashesVerified": 263,
+          "capitalOnlyGold": 20000,
+          "observations": [
+            {
+              "scenario": "natural-0",
+              "before": "before-loot-slot7",
+              "after": "loot-slot7",
+              "operations": 1,
+              "occupiedRest": null,
+              "fullStateMatch": true
+            },
+            {
+              "scenario": "natural-0",
+              "before": "before-loot-slot8",
+              "after": "loot-slot8",
+              "operations": 1,
+              "occupiedRest": null,
+              "fullStateMatch": true
+            },
+            {
+              "scenario": "natural-0",
+              "before": "before-loot-slot9",
+              "after": "loot-slot9",
+              "operations": 1,
+              "occupiedRest": null,
+              "fullStateMatch": true
+            },
+            {
+              "scenario": "natural-0",
+              "before": "loot-slot7",
+              "after": "before-loot-slot8",
+              "operations": 2118,
+              "occupiedRest": 1,
+              "fullStateMatch": true
+            },
+            {
+              "scenario": "capital-storage-capacity",
+              "before": "before-storage7",
+              "after": "storage7",
+              "operations": 1,
+              "occupiedRest": null,
+              "fullStateMatch": true
+            },
+            {
+              "scenario": "capital-storage-capacity",
+              "before": "before-storage8",
+              "after": "storage8",
+              "operations": 1,
+              "occupiedRest": null,
+              "fullStateMatch": true
+            },
+            {
+              "scenario": "capital-storage-capacity",
+              "before": "before-storage9",
+              "after": "storage9",
+              "operations": 1,
+              "occupiedRest": null,
+              "fullStateMatch": true
+            },
+            {
+              "scenario": "capital-storage-capacity",
+              "before": "before-storage16",
+              "after": "storage16",
+              "operations": 1,
+              "occupiedRest": null,
+              "fullStateMatch": true
+            },
+            {
+              "scenario": "capital-storage-capacity",
+              "before": "before-storage-rest",
+              "after": "storage-rest",
+              "operations": 1,
+              "occupiedRest": 0,
+              "fullStateMatch": true
+            }
+          ],
+          "limits": [
+            "Independent selected operation replay of port production state; not original parity or browser evidence",
+            "Original ordinary-enemy contours; boss rectangle fallback as recorded by the campaign runner"
+          ],
+          "preFixComparison": {
+            "replayFiles": 9,
+            "allReplayFilesByteIdentical": true,
+            "unchangedReportFields": [
+              "results",
+              "storageRestObservations",
+              "storagePurchases",
+              "expandedLootTransfers",
+              "frames",
+              "checkpoints",
+              "reachedDays",
+              "wonDays",
+              "snapshots"
+            ],
+            "allListedFieldsEqual": true
+          }
+        },
+        "independent_soak_audit_report": ".build/browser-qa/storage-soak-audit.json",
+        "asset_preservation": {
+          "status": "passed",
+          "oldReleaseFiles": 308,
+          "newReleaseFiles": 308,
+          "changed": [
+            "index.html"
+          ],
+          "added": [
+            "assets/index-Cb35fe28.js"
+          ],
+          "removed": [
+            "assets/index-2cijlKJd.js"
+          ],
+          "unchangedPublicAssetFiles": 305,
+          "allAssetsPreserved": true
+        },
+        "prior_evidence": "Sandbag, Repair, Castle and earlier campaign runs remain historical in milestone_history; no fresh v19 claim is inferred from them."
+      },
+      "production_recovery": {
+        "status": "passed",
+        "release_directory": ".build/browser-storage-final",
+        "previous_directory": ".build/browser-before-storage",
+        "current_bundle": "assets/index-Cb35fe28.js",
+        "candidate_build_matches_production": true,
+        "copied_release_files_hash_checked": 308,
+        "archive_files_hash_checked": 308,
+        "current_package": ".build/elona-shooter-browser-storage-slice.zip",
+        "current_package_bytes": 8574659,
+        "current_package_sha256": "d9ca912bb4b049b8a966b5f3b9d72c5bc72dbbe43377d1c1dde11aef8745cd58",
+        "previous_package": ".build/elona-shooter-browser-sandbag-slice.zip",
+        "previous_bundle": "assets/index-2cijlKJd.js",
+        "candidate_browser_verification": ".build/browser-qa/storage-ui-verification.json",
+        "production_backup": ".build/browser-qa/storage-production-before-v18.json",
+        "production_browser_verification": ".build/browser-qa/storage-production-verification.json",
+        "production_restored_screenshot": ".build/browser-qa/storage-production-restored.jpg",
+        "production_console_errors": [],
+        "publication_report": ".build/storage-publication.json",
+        "current_save_version": 19,
+        "production_browser_smoke": "passed",
+        "restored_battle": {
+          "from": 18,
+          "to": 19,
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "tick": 674,
+          "hp": 40,
+          "gold": 209,
+          "wallLevel": 1,
+          "rngUnchanged": true
+        }
+      },
+      "browser_checks": {
+        "castle_storage": {
+          "status": "passed",
+          "report": ".build/browser-qa/storage-ui-verification.json",
+          "checkCount": 14,
+          "checks": {
+            "storage7": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-storage7-v19.json",
+              "expectedFrom": "storage-party-natural-0-before-storage7-v19.json",
+              "args": [],
+              "day": 1,
+              "tick": 1658,
+              "gold": 625,
+              "ap": 4,
+              "rng": 251928491,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 7,
+              "storageLevel": 2,
+              "futureUpkeep": 80,
+              "settledUpkeep": 40,
+              "settledWages": 0,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 3,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                null,
+                null
+              ]
+            },
+            "storage9": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-storage9-v19.json",
+              "expectedFrom": "storage-party-natural-0-before-storage9-v19.json",
+              "args": [],
+              "day": 3,
+              "tick": 5387,
+              "gold": 432,
+              "ap": 4,
+              "rng": 688830609,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 9,
+              "storageLevel": 4,
+              "futureUpkeep": 160,
+              "settledUpkeep": 120,
+              "settledWages": 58,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 2,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 28,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 103,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                null
+              ]
+            },
+            "blocked": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-blocked-v19.json",
+              "expectedFrom": "storage-ui-storage9-v19.json",
+              "args": [],
+              "day": 3,
+              "tick": 5387,
+              "gold": 432,
+              "ap": 4,
+              "rng": 688830609,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 9,
+              "storageLevel": 4,
+              "futureUpkeep": 160,
+              "settledUpkeep": 120,
+              "settledWages": 58,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 2,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 28,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 103,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                null
+              ]
+            },
+            "buy9": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-buy9-v19.json",
+              "expectedFrom": "storage-ui-storage9-v19.json",
+              "args": [
+                1,
+                8
+              ],
+              "day": 3,
+              "tick": 5387,
+              "gold": 87,
+              "ap": 4,
+              "rng": 688830609,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 9,
+              "storageLevel": 4,
+              "futureUpkeep": 160,
+              "settledUpkeep": 120,
+              "settledWages": 58,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 2,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 28,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 103,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 12,
+                  "ammo": 2,
+                  "reloadTime": 0
+                }
+              ]
+            },
+            "swap-to-backpack": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-swap-to-backpack-v19.json",
+              "expectedFrom": "storage-ui-buy9-v19.json",
+              "args": [
+                0,
+                8
+              ],
+              "day": 3,
+              "tick": 5387,
+              "gold": 87,
+              "ap": 4,
+              "rng": 688830609,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 9,
+              "storageLevel": 4,
+              "futureUpkeep": 160,
+              "settledUpkeep": 120,
+              "settledWages": 58,
+              "inventory": [
+                {
+                  "id": 12,
+                  "ammo": 2,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 2,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 28,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 103,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                }
+              ]
+            },
+            "restore": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-restore-v19.json",
+              "expectedFrom": "storage-ui-swap-to-backpack-v19.json",
+              "args": [],
+              "day": 3,
+              "tick": 5387,
+              "gold": 87,
+              "ap": 4,
+              "rng": 688830609,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 9,
+              "storageLevel": 4,
+              "futureUpkeep": 160,
+              "settledUpkeep": 120,
+              "settledWages": 58,
+              "inventory": [
+                {
+                  "id": 12,
+                  "ammo": 2,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 2,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 28,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 103,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                }
+              ]
+            },
+            "loot9": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-loot9-v19.json",
+              "expectedFrom": "storage-party-natural-0-before-loot-slot9-v19.json",
+              "args": [
+                0,
+                8
+              ],
+              "day": 4,
+              "tick": 7470,
+              "gold": 454,
+              "ap": null,
+              "rng": 3630472838,
+              "hp": 39,
+              "maxHp": 40,
+              "capacity": 9,
+              "storageLevel": 4,
+              "futureUpkeep": 160,
+              "settledUpkeep": 160,
+              "settledWages": 69,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 28,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 103,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 35,
+                  "ammo": 0,
+                  "reloadTime": 0
+                }
+              ]
+            },
+            "storage16": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-storage16-v19.json",
+              "expectedFrom": "storage-party-capital-storage-capacity-before-storage16-v19.json",
+              "args": [],
+              "day": 1,
+              "tick": 1658,
+              "gold": 3345,
+              "ap": 4,
+              "rng": 251928491,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 16,
+              "storageLevel": 11,
+              "futureUpkeep": 440,
+              "settledUpkeep": 40,
+              "settledWages": 0,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 3,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "capped": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-capped-v19.json",
+              "expectedFrom": "storage-ui-storage16-v19.json",
+              "args": [],
+              "day": 1,
+              "tick": 1658,
+              "gold": 3345,
+              "ap": 4,
+              "rng": 251928491,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 16,
+              "storageLevel": 11,
+              "futureUpkeep": 440,
+              "settledUpkeep": 40,
+              "settledWages": 0,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 3,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "buy16": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-buy16-v19.json",
+              "expectedFrom": "storage-ui-storage16-v19.json",
+              "args": [
+                1,
+                15
+              ],
+              "day": 1,
+              "tick": 1658,
+              "gold": 2789,
+              "ap": 4,
+              "rng": 251928491,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 16,
+              "storageLevel": 11,
+              "futureUpkeep": 440,
+              "settledUpkeep": 40,
+              "settledWages": 0,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 3,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                {
+                  "id": 36,
+                  "ammo": 80,
+                  "reloadTime": 0
+                }
+              ]
+            },
+            "upgrade-preview": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-upgrade-preview-v19.json",
+              "expectedFrom": "storage-ui-buy16-v19.json",
+              "args": [
+                15
+              ],
+              "day": 1,
+              "tick": 1658,
+              "gold": 2789,
+              "ap": 4,
+              "rng": 2258720387,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 16,
+              "storageLevel": 11,
+              "futureUpkeep": 440,
+              "settledUpkeep": 40,
+              "settledWages": 0,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 3,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                {
+                  "id": 36,
+                  "ammo": 80,
+                  "reloadTime": 0
+                }
+              ]
+            },
+            "upgrade-confirm": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-upgrade-confirm-v19.json",
+              "expectedFrom": "storage-ui-upgrade-preview-v19.json",
+              "args": [],
+              "day": 1,
+              "tick": 1658,
+              "gold": 1622,
+              "ap": 0,
+              "rng": 2258720387,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 16,
+              "storageLevel": 11,
+              "futureUpkeep": 440,
+              "settledUpkeep": 40,
+              "settledWages": 0,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 3,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                {
+                  "id": 36,
+                  "ammo": 80,
+                  "reloadTime": 0
+                }
+              ]
+            },
+            "rest": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-rest-v19.json",
+              "expectedFrom": "storage-ui-buy9-v19.json",
+              "args": [],
+              "day": 4,
+              "tick": 5387,
+              "gold": 87,
+              "ap": null,
+              "rng": 1287780969,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 9,
+              "storageLevel": 4,
+              "futureUpkeep": 160,
+              "settledUpkeep": 0,
+              "settledWages": 0,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 2,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 28,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 103,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 12,
+                  "ammo": 2,
+                  "reloadTime": 0
+                }
+              ]
+            },
+            "result-town": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "storage-ui-result-town-v19.json",
+              "expectedFrom": "storage-party-natural-0-storage-result-v19.json",
+              "args": [],
+              "day": 2,
+              "tick": 3275,
+              "gold": 948,
+              "ap": 4,
+              "rng": 423535753,
+              "hp": 40,
+              "maxHp": 40,
+              "capacity": 7,
+              "storageLevel": 2,
+              "futureUpkeep": 80,
+              "settledUpkeep": 80,
+              "settledWages": 53,
+              "inventory": [
+                {
+                  "id": 3,
+                  "ammo": 5,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 11,
+                  "ammo": 2,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 6,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 24,
+                  "ammo": 1,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 117,
+                  "ammo": 0,
+                  "reloadTime": 0
+                },
+                {
+                  "id": 28,
+                  "ammo": 0,
+                  "reloadTime": 0
+                }
+              ]
+            }
+          },
+          "scope": "Actual CUA Storage, inventory and persistence actions enumerated in the report; full exported envelopes compared. Extra backpack slots are separate from the five battle selection slots.",
+          "limits": [
+            "Imported earned checkpoints, not a manually played full browser campaign.",
+            "The headless capacity-sixteen checkpoint uses explicitly disclosed capital; natural scenarios exercise purchases through capacity nine.",
+            "Port replay and browser checks are separate from the 37 independent original-method observations. No new pixel, audio or performance parity claim."
+          ],
+          "consoleErrors": [],
+          "candidateBuildReuse": {
+            "firstFiveChecks": [
+              "storage7",
+              "storage9",
+              "blocked",
+              "buy9",
+              "swap-to-backpack"
+            ],
+            "initialBundle": "assets/index-TCf-NGxf.js",
+            "finalBundle": "assets/index-Cb35fe28.js",
+            "reason": "The only intervening runtime change preserves consumable reload metadata during battle settlement. These five browser actions do not exercise settlement; all exported envelopes were compared again against the corrected runtime. The remaining nine checks ran against the final bundle."
+          }
+        },
+        "storage_production": {
+          "status": "passed",
+          "bundle": "assets/index-Cb35fe28.js",
+          "newGame": {
+            "tick": 0,
+            "hp": 40,
+            "gold": 200,
+            "ammo": 5,
+            "inventorySlots": 6,
+            "wallLevel": 1,
+            "capacity": 1,
+            "repairmanLevel": 0,
+            "wallFixCount": 0,
+            "sandbagLevel": 0
+          },
+          "migration": {
+            "from": 18,
+            "to": 19,
+            "fullEnvelopeEquality": true,
+            "exactCurrentRestore": true,
+            "tick": 674,
+            "hp": 40,
+            "gold": 209,
+            "wallLevel": 1,
+            "rngUnchanged": true
+          },
+          "browserPaused": true,
+          "consoleErrors": [],
+          "screenshot": "storage-production-restored.jpg"
         }
       }
     }

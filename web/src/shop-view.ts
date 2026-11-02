@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { ITEM_TYPE, isOccupiedItem, itemPrice, type Item } from './items.ts';
 import type { LootViewManifest } from './loot-view.ts';
+import { createModConfirmation } from './mod-confirmation-view.ts';
 
 interface Placement {
   x: number; y: number; scaleX: number; scaleY: number; rotationDegrees: number;
@@ -121,6 +122,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
 
   interface SlotView { area: Area; index: number; item: Item; icon: Phaser.GameObjects.Container; originalX: number; originalY: number; width: number; height: number }
   let carrying: SlotView | undefined;
+  let pendingModIcon: SlotView | undefined;
   const ownedSlots: { item: Item | null; plate: Phaser.GameObjects.Image }[] = [];
   const point = new Phaser.Math.Vector2();
   const localPointer = (pointer: Phaser.Input.Pointer) => root.getWorldTransformMatrix().applyInverse(pointer.worldX, pointer.worldY, point);
@@ -185,6 +187,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
       if (item.type === ITEM_TYPE.use && item.ammoMax > 0) icon.add(scene.add.text(30.95, 2, `x ${item.ammo}`, { fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
       root.add(icon);
       slotView = { area, index, item, icon, originalX: iconX, originalY: y, width, height: GRAPHIC_HEIGHT[item.graphic] ?? asset.frameHeight };
+      if (pending?.kind === 'mod' && area === 'inventory' && pending.modSlot === index) pendingModIcon = slotView;
     }
     const zone = scene.add.zone(x, y, 50, 50).setOrigin(0).setInteractive({ useHandCursor: true });
     zone.setName(`shop-${area}-${index}`).setData({ area, index, itemId: item?.id ?? null }); root.add(zone);
@@ -234,6 +237,13 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
   const stock = panel.slots.stock, inventory = panel.slots.inventory;
   for (let index = 0; index < stock.count; index++) addSlot('stock', index, state.shop[index] ?? null, menu.x + stock.x + index % stock.columns * stock.stepX, menu.y + stock.y);
   for (let index = 0; index < state.inventory.length; index++) addSlot('inventory', index, state.inventory[index], menu.x + inventory.x + index % inventory.columns * inventory.stepX, menu.y + inventory.y + Math.floor(index / inventory.columns) * inventory.stepY);
+  if (pendingModIcon && pending?.kind === 'mod') {
+    const x = menu.x + inventory.x + pending.gunSlot % inventory.columns * inventory.stepX;
+    const y = menu.y + inventory.y + Math.floor(pending.gunSlot / inventory.columns) * inventory.stepY;
+    // Исходная перетаскиваемая иконка остаётся над целью, а не в своей старой ячейке.
+    pendingModIcon.icon.setPosition(x - (pendingModIcon.width - 48) / 2 - 4, y).setName('shop-pending-mod-icon');
+    root.bringToTop(pendingModIcon.icon);
+  }
   root.bringToTop(status); root.bringToTop(warning); root.bringToTop(tooltip);
 
   const itemComparison = (item: Item, placement: Placement, label: string) => {
@@ -262,24 +272,23 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
       if (name === 'reqText') object.setColor(needsSkill(item) ? '#cc0000' : '#0000cc');
     }
   };
-  if (pending) {
+  if (pending?.kind === 'mod') {
+    root.add(createModConfirmation(scene, manifest, layout.saleDialog, callbacks.resolveEquipment, 'shop-equipment'));
+  } else if (pending) {
     const dialog = layout.saleDialog;
     image(dialog.image);
-    const question = pending.kind === 'upgrade' ? `It costs you ${pending.cost} gp. Really upgrade the weapon?`
-      : 'Do you really want to mount the mod on this gun?';
+    const question = `It costs you ${pending.cost} gp. Really upgrade the weapon?`;
     text(dialog.children.question, question).setName('shop-equipment-question');
-    if (pending.kind === 'upgrade') {
-      const before = state.inventory[pending.slot], after = state.upgradeReference;
-      if (isOccupiedItem(before) && isOccupiedItem(after)) {
-        itemComparison(before, dialog.children.pop1, 'before');
-        itemComparison(after, dialog.children.pop2, 'after');
-        const placement = dialog.children.poparrow, asset = manifest.clips.shopUpgradeArrow;
-        root.add(scene.add.image(placement.x, placement.y, 'shopUpgradeArrow', '1')
-          .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight)
-          .setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees));
-      }
+    const before = state.inventory[pending.slot], after = state.upgradeReference;
+    if (isOccupiedItem(before) && isOccupiedItem(after)) {
+      itemComparison(before, dialog.children.pop1, 'before');
+      itemComparison(after, dialog.children.pop2, 'after');
+      const placement = dialog.children.poparrow, asset = manifest.clips.shopUpgradeArrow;
+      root.add(scene.add.image(placement.x, placement.y, 'shopUpgradeArrow', '1')
+        .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight)
+        .setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees));
     }
-    // Исходный MOD No переставляет два собственных предмета; это не отмена продажи.
+    // Отмена Upgrade сохраняет уже созданный вариант, не возвращая потраченные броски RNG.
     const dismiss = scene.add.zone(0, 0, 620, 380).setOrigin(0).setInteractive(); root.add(dismiss);
     dismiss.setName('shop-equipment-cancel-background');
     dismiss.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); callbacks.resolveEquipment(false); });

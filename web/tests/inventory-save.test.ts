@@ -73,7 +73,7 @@ test('battle item quantities follow shooting, reload cancellation and grenade us
   assert.deepEqual(Simulation.fromSave(simulation.toSave()).state, simulation.state);
 });
 
-test('loot moves preserve both items, reject unsupported mod mounting and handle a full inventory', () => {
+test('loot moves preserve both items, preview MOD mounting and handle a full inventory', () => {
   const simulation = victory();
   const itemFactory = factory();
   simulation.state.lootOffers = Array.from({ length: 8 }, () => itemFactory.generate(117));
@@ -91,10 +91,14 @@ test('loot moves preserve both items, reject unsupported mod mounting and handle
   assert.equal(simulation.state.lootOffers[2], statue);
   simulation.state.lootOffers[3] = itemFactory.generate(8);
   const beforeRejected = simulation.toSave();
-  assert.equal(simulation.collectLoot(3, 0), false);
+  assert.equal(simulation.collectLoot(3, 0), true);
+  assert.deepEqual(simulation.state.pendingLootAction, { kind: 'mod', mod: { area: 'offers', index: 3 }, gun: { area: 'inventory', index: 0 } });
+  assert.deepEqual(simulation.state.inventory, beforeRejected.inventory);
+  assert.deepEqual(simulation.state.lootOffers, beforeRejected.lootOffers);
+  const pending = simulation.toSave();
   assert.equal(simulation.moveLootItem('offers', -1, 'inventory', 0), false);
   assert.equal(simulation.moveLootItem('inventory', 1.5, 'offers', 0), false);
-  assert.deepEqual(simulation.toSave(), beforeRejected);
+  assert.deepEqual(simulation.toSave(), pending);
   assert.equal(simulation.state.rng, before.rng);
 });
 

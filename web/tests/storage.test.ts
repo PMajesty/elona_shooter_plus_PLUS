@@ -165,13 +165,13 @@ test('settlement preserves imported consumable reload metadata, while the follow
   restore(simulation);
 });
 
-test('v18 migration keeps repairs, Sandbags, companions and RNG; v19 alone accepts six through sixteen valid slots', () => {
+test('v18 migration keeps repairs, Sandbags, companions and RNG; v19 onward accepts six through sixteen valid slots', () => {
   const simulation = town();
   for (const kind of ['house', 'wall', 'repairman', 'sandbag'] as const) assert.equal(simulation.buyCastleUpgrade(kind), 'purchased');
   simulation.state.castleHp = 43; assert.equal(simulation.buyCastleUpgrade('fix-wall'), 'purchased');
   assert.equal(simulation.requestRecruit(), 'previewed'); assert.equal(simulation.resolvePartyAction(true), 'hired');
   const legacy = asLegacyV18Save(simulation.toSave()), before = structuredClone(legacy);
-  assert.deepEqual(Simulation.fromSave(legacy).toSave(), { ...legacy, version: 19 }); assert.deepEqual(legacy, before);
+  assert.deepEqual(Simulation.fromSave(legacy).toSave(), { ...legacy, version: 20, pendingLootAction: null }); assert.deepEqual(legacy, before);
   assert.equal(simulation.buyCastleUpgrade('storage'), 'purchased'); const checkpoint = saved(simulation);
   for (const corrupt of [
     (value: any) => { value.version = 18; },

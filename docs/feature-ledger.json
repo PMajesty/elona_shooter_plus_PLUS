@@ -2,46 +2,36 @@
   "schemaVersion": 1,
   "updated": "2026-11-02",
   "currentRelease": {
-    "saveVersion": 19,
+    "saveVersion": 20,
     "verificationStatus": "passed",
-    "implementedCampaign": "Seven connected Sheriff days and prior Castle/party mechanics, plus Storage purchases expanding canonical inventory from 6 to 16 slots and original two-row shop/Equipment/loot grids. Expanded slots support ordinary transfers, town sales, Token, Upgrade, MOD and companion equipment. Battle access remains five slots and loot offers remain eight; original loot-phase MOD confirmation is still unported.",
-    "publication": "Published and production-verified locally at http://127.0.0.1:5175/elona/: assets/index-Cb35fe28.js from .build/browser-storage-final; 308 candidate/live/ZIP files match and 305 public assets are unchanged. All 331 tests, 37 original observations, fourteen full-envelope UI checks and final production New Game/exact actual v18→v19 migration and restore checks pass without console errors.",
+    "implementedCampaign": "Seven connected Sheriff days with existing Castle and party mechanics, plus MOD mounting in ordinary and boss rewards. Any offer/owned endpoint pair can open the original confirmation. Yes mounts a compatible MOD; No/outside swaps complete records; pending dialogs save and restore while blocking moves and Proceed.",
+    "publication": "Published and production-verified locally at http://127.0.0.1:5175/elona/: assets/index-BJh2mRko.js from .build/browser-loot-mod-final. All 308 candidate/live/ZIP files match, and all 305 public assets are unchanged. All 341 tests, 53 original observations, eleven full-envelope UI checks and final production New Game/exact actual v19→v20 migration and restore checks pass without console errors.",
     "automatedVerification": {
       "status": "passed",
+      "testsPassed": 341,
       "typecheckPassed": true,
       "releaseBuildPassed": true,
-      "sourceFinding": "The initial 36/37 comparison exposed premature consumable reload reset at finishDay. Retaining metadata until the correct source boundary now matches 37/37 observations; negative controls independently detect lost inactive metadata, premature reset and refilling only the initial six slots.",
-      "soak": {
-        "scenarios": 9,
-        "naturalCampaigns": 8,
-        "capitalStartCampaigns": 1,
-        "frames": 135074,
-        "saveReplayCheckpoints": 1491,
-        "restTransitions": 54,
-        "rewardActions": 253,
-        "storagePurchases": 34,
-        "maximumInventorySlots": 16,
-        "expandedLootTransfers": 34,
-        "restWithOccupiedExtraSlots": 45,
-        "naturalDay7Wins": 7,
-        "naturalDay7Defeats": 1,
-        "capitalDay7Wins": 1,
-        "capitalProvenance": "Adds 20,000 gold only at an earned first town, buys 16 slots through normal transactions and finishes Day 7; no item grants, forced kills or private battle completion. This is not evidence of natural full-capacity affordability."
+      "acceptedLootModObservations": 53,
+      "cases": 18,
+      "focusedReferenceTests": 4,
+      "negativeControls": 3,
+      "integration": {
+        "frames": 4487,
+        "saveReplayCheckpoints": 53,
+        "savedFixtures": 27,
+        "confirmCancelBranches": 4,
+        "provenance": "A fresh natural seed earns the MOD, ordinary/boss rewards, towns and a paid Storage upgrade; four branches start from earned checkpoints. No item, gold, HP or RNG grants. Independent replay confirms the 27 fixtures and real automatic reloads in both mounted branches.",
+        "limits": "Aggregate branch execution, not one continuous campaign. Production ordinary contours and documented boss rectangle fallback. Port state/event replay does not establish original scheduling or browser-input parity."
       },
       "evidence": [
-        ".build/storage-party-soak/report.json",
-        ".build/oracle/castle-storage-comparison-before-consumable-metadata.json",
-        "web/tests/storage.test.ts",
-        "web/tests/castle-storage-reference.test.ts",
-        "web/docs/castle-upgrades-ui-source.md",
-        ".build/oracle/castle-storage-comparison-report.json",
-        "web/tests/fixtures/original-castle-storage-trace.json"
-      ],
-      "limits": "Exact state/event replay uses production ordinary contours and documented boss rectangle. Original method references exclude fresh town generation/native scheduling/full reward flow; actual UI and production migration have separate accepted checks. Loot MOD parity remains unclaimed.",
-      "testsPassed": 331,
-      "acceptedStorageObservations": 37,
-      "focusedReferenceTests": 4,
-      "negativeControls": 3
+        ".build/loot-mod-tests-output.txt",
+        ".build/loot-mod-build-output.txt",
+        ".build/oracle/loot-mod-comparison-report.json",
+        ".build/loot-mod-scenarios/report.json",
+        ".build/browser-qa/loot-mod-scenario-audit.json",
+        "web/tests/loot-mod.test.ts",
+        "web/tests/loot-mod-reference.test.ts"
+      ]
     },
     "acceptedOriginalEvidence": [
       {
@@ -184,404 +174,474 @@
         "traceSha256": "7ef3c3b02c73d861c2432f91401f00e358d5fdb89cf8496ea2c61b006d3fe65b",
         "instrumentedSwfSha256": "4caf0485cac7eaa7c0d8df0a8255899d94dd06bee1efd6864c05998c9b598968",
         "limits": "Controlled original Storage/transaction/fillAmmo/updateAlly/input seams; native UI/scheduling and full rewards excluded. Town MOD only; loot MOD remains missing. Empty uninitialized cell metadata is not represented by null slots."
+      },
+      {
+        "feature": "MOD mounting in ordinary and boss loot",
+        "matchingSnapshots": 53,
+        "cases": 18,
+        "focusedTests": 4,
+        "negativeControls": 3,
+        "fixture": "web/tests/fixtures/original-loot-mod-trace.json",
+        "comparison": ".build/oracle/loot-mod-comparison-report.json",
+        "traceSha256": "3be24c9b8398d261c1958d95fb202ab6a6eccaa8cac6ef4e84aa845697282751",
+        "instrumentedSwfSha256": "4666992fd4f29c36801e87b5f8274c45e37880c51921f83b57f5c7f587525f08",
+        "limits": "Controlled original inventory/confirmation methods and original Yes/outside button geometry. Cached Engineer is an explicit method input; fresh loot generation, native scheduling and save/browser integration are separate.",
+        "negativeControl": "Repeated Damage on the final rifle gives 72 attack with cached Engineer 25 versus 70 without it; the earlier Shotgun probe could not distinguish those inputs."
       }
     ],
     "browserVerification": [
-      "Fourteen full-envelope checks pass: purchases reaching 7, 9 and 16 slots; insufficient-gold and capacity guards; purchases into slots 9 and 16; owned transfer; Continue; loot into slot 9; expanded-slot Upgrade preview and confirmation; Rest preserving two extra Hammer charges; and earned result/town upkeep of 80.",
-      "The first five exports preceded the consumable metadata fix and were re-compared against the final runtime; nine checks ran on the final candidate Cb35fe28. All 305 public assets are unchanged; 308 release files are byte-identical across candidate, live directory and ZIP.",
-      "Production New Game starts at tick 0, HP 40, gold 200, ammo 5 and six inventory slots. The actual v18 backup migrated and restored exactly to v19 at tick 674, HP 40 and gold 209, with unchanged RNG, paused and without console errors."
+      "Eleven full-envelope checks pass on the final candidate: all four offer/owned directions, pending Continue, Yes/No, an outside click over covered Proceed that declines without advancing rewards, the shared town helper preview/Yes, Rest and full-mod-capacity rejection.",
+      "The rejection fixture grants one Damage enchantment to an earned gun, recorded in .build/browser-qa/loot-mod-controlled-full-provenance.json. This controlled failure case is separate from the no-grant natural integration branches and the original-method fixture.",
+      "Production New Game starts at tick 0, HP 40, gold 200, ammo 5, six inventory slots and no pending loot action. The actual v19 backup migrates and restores exactly to v20 at tick 674, HP 40 and gold 209, with unchanged RNG, paused and without console errors."
     ],
-    "evidence": "docs/port-verification.json; .build/browser-qa/storage-ui-verification.json; .build/storage-party-soak/report.json; .build/storage-publication.json; .build/browser-qa/storage-production-verification.json",
-    "limits": "Storage does not add combat hotkeys or increase offer count. Original common invDrag permits loot MOD mounting, but the port keeps that confirmation in town only; simple loot collection must not imply loot-MOD parity. No new assets or layout metadata were needed. Day 8 onward, Looter, Trainer, second-page upgrades, other hero classes and the late-game hitbox investigation remain incomplete.",
-    "nextIntegratedWork": "Loot MOD: original confirmation/cancel/persistence probes then connected reward-screen implementation. Looter valuation remains a later bounded Castle candidate.",
+    "evidence": "web/docs/loot-mod-source.md; web/docs/loot-mod-ui-source.md; .build/oracle/loot-mod-comparison-report.json; .build/loot-mod-scenarios/report.json; .build/browser-qa/loot-mod-ui-verification.json; .build/browser-qa/loot-mod-production-verification.json; .build/loot-mod-publication.json",
+    "limits": "Reward MOD mounting does not automatically collect an offered gun or expand combat hotkeys. Warning outcomes are matched, but the UI presents one failure message where the original can emit several. No complete pixel, audio or native scheduler parity. Day 8 onward, Looter, Trainer, second-page upgrades, other hero classes and the veteran late-game hitbox investigation remain incomplete.",
+    "nextIntegratedWork": "Connect the Looter Castle upgrade to actual reward valuation, followed by Trainer before broader campaign expansion.",
     "previousPublished": {
-      "saveVersion": 18,
+      "saveVersion": 19,
       "verificationStatus": "passed",
-      "implementedCampaign": "Seven connected Sheriff days with permanent companions and Castle House/Wall/paid repair/Repairman actions, plus Sandbag purchases throughlevel10, source damage absorption, recurring upkeep and saved level. Other Castle actions and Day8 combat remain unavailable.",
-      "publication": "Published and production-verified locally at http://127.0.0.1:5175/elona/: all308 candidate/live/ZIP files match; bundle assets/index-2cijlKJd.js from .build/browser-sandbag-final.319 tests,25 original comparisons,six complete-envelope candidate UI checks and final production NewGame/exact actual v17→v18 migration/restore pass without console errors. All305 public assets remain unchanged.",
+      "implementedCampaign": "Seven connected Sheriff days and prior Castle/party mechanics, plus Storage purchases expanding canonical inventory from 6 to 16 slots and original two-row shop/Equipment/loot grids. Expanded slots support ordinary transfers, town sales, Token, Upgrade, MOD and companion equipment. Battle access remains five slots and loot offers remain eight; original loot-phase MOD confirmation is still unported.",
+      "publication": "Published and production-verified locally at http://127.0.0.1:5175/elona/: assets/index-Cb35fe28.js from .build/browser-storage-final; 308 candidate/live/ZIP files match and 305 public assets are unchanged. All 331 tests, 37 original observations, fourteen full-envelope UI checks and final production New Game/exact actual v18→v19 migration and restore checks pass without console errors.",
       "automatedVerification": {
         "status": "passed",
         "typecheckPassed": true,
         "releaseBuildPassed": true,
-        "evidence": [
-          ".build/sandbag-build-output.txt",
-          "web/src/castle-upgrades.ts",
-          "web/docs/castle-upgrades-ui-source.md",
-          ".build/sandbag-party-soak/report.json",
-          ".build/sandbag-party-soak-low-damage/failure.json",
-          ".build/browser-qa/sandbag-ui-verification.json",
-          ".build/sandbag-tests-output.txt",
-          ".build/oracle/castle-sandbag-comparison-report.json",
-          ".build/sandbag-asset-preservation.json"
-        ],
-        "limits": "The soak uses production ordinary contours and a documented boss rectangle. One positive integer-damage pair is limited connected-play evidence. The separate original25-case diagnostic independently distinguishes additive mission absorption(48) from multiplicative(49); it does not prove full campaign balance or native scheduling parity.",
+        "sourceFinding": "The initial 36/37 comparison exposed premature consumable reload reset at finishDay. Retaining metadata until the correct source boundary now matches 37/37 observations; negative controls independently detect lost inactive metadata, premature reset and refilling only the initial six slots.",
         "soak": {
           "scenarios": 9,
           "naturalCampaigns": 8,
           "capitalStartCampaigns": 1,
-          "frames": 132552,
-          "saveReplayCheckpoints": 1470,
-          "restTransitions": 53,
-          "rewardActions": 219,
-          "sandbagPurchases": 19,
-          "repairmanPurchases": 17,
-          "fixWallPurchases": 11,
-          "positiveWaveHeals": 41,
-          "naturalDay7Wins": 8,
-          "capitalOutcome": "Day6 defeat under the declared Armor-only companion/exposure policy",
-          "singleHitCounterfactualPairs": 186,
-          "positiveIntegerReductions": 1,
-          "excludedAmbiguousLethalFrames": 1,
-          "positiveCase": {
-            "scenario": "capital-sandbag-exposure",
-            "day": 3,
-            "tick": 3553,
-            "sandbagLevel": 4,
-            "damageWith": 3,
-            "damageWithout": 4,
-            "rng": 367407443
-          },
-          "provenance": "Only the capital-start receives12000gold at an earned first town. Sandbag4 purchases and Armor-only orders use ordinary actions; hero avoids Crows until one positive reduction. Counterfactual measurement replays one actual frame with only Sandbag set0, requires same final RNG, a single hit and survival. No HP/skill/item/candidate/RNG grants in the campaign.",
-          "priorAttempt": ".build/sandbag-party-soak-low-damage/; levels1/2 and earned medals did not expose a positive integer reduction"
+          "frames": 135074,
+          "saveReplayCheckpoints": 1491,
+          "restTransitions": 54,
+          "rewardActions": 253,
+          "storagePurchases": 34,
+          "maximumInventorySlots": 16,
+          "expandedLootTransfers": 34,
+          "restWithOccupiedExtraSlots": 45,
+          "naturalDay7Wins": 7,
+          "naturalDay7Defeats": 1,
+          "capitalDay7Wins": 1,
+          "capitalProvenance": "Adds 20,000 gold only at an earned first town, buys 16 slots through normal transactions and finishes Day 7; no item grants, forced kills or private battle completion. This is not evidence of natural full-capacity affordability."
         },
-        "testsPassed": 319,
-        "acceptedSandbagObservations": 25,
-        "damageCases": 12,
-        "controlledStartingStates": 6,
-        "transactionOutcomes": 7
+        "evidence": [
+          ".build/storage-party-soak/report.json",
+          ".build/oracle/castle-storage-comparison-before-consumable-metadata.json",
+          "web/tests/storage.test.ts",
+          "web/tests/castle-storage-reference.test.ts",
+          "web/docs/castle-upgrades-ui-source.md",
+          ".build/oracle/castle-storage-comparison-report.json",
+          "web/tests/fixtures/original-castle-storage-trace.json"
+        ],
+        "limits": "Exact state/event replay uses production ordinary contours and documented boss rectangle. Original method references exclude fresh town generation/native scheduling/full reward flow; actual UI and production migration have separate accepted checks. Loot MOD parity remains unclaimed.",
+        "testsPassed": 331,
+        "acceptedStorageObservations": 37,
+        "focusedReferenceTests": 4,
+        "negativeControls": 3
       },
       "browserVerification": [
-        "Six complete-envelope checks pass: Sandbag level1/2 purchase, unaffordable rejection, Continue, seven actual updates3552→3559 HP45→42 with matching state/RNG (paired level0 damage4 versus3), and earned Day3 settlement80upkeep/58wages then town entry. No console errors.",
-        "All305 public assets unchanged;308 candidate/live/ZIP files match. Production NewGame exported v18 tick0/HP40/gold200/ammo5 with Sandbag and repair fields0. Actual live v17 backup migrated and restored with complete-envelope equality at tick674/HP40/gold209 and unchanged RNG; paused with no console errors."
+        "Fourteen full-envelope checks pass: purchases reaching 7, 9 and 16 slots; insufficient-gold and capacity guards; purchases into slots 9 and 16; owned transfer; Continue; loot into slot 9; expanded-slot Upgrade preview and confirmation; Rest preserving two extra Hammer charges; and earned result/town upkeep of 80.",
+        "The first five exports preceded the consumable metadata fix and were re-compared against the final runtime; nine checks ran on the final candidate Cb35fe28. All 305 public assets are unchanged; 308 release files are byte-identical across candidate, live directory and ZIP.",
+        "Production New Game starts at tick 0, HP 40, gold 200, ammo 5 and six inventory slots. The actual v18 backup migrated and restored exactly to v19 at tick 674, HP 40 and gold 209, with unchanged RNG, paused and without console errors."
       ],
-      "evidence": "docs/port-verification.json; web/docs/castle-upgrades-ui-source.md; .build/sandbag-party-soak/report.json; .build/browser-qa/sandbag-ui-verification.json; .build/sandbag-publication.json; .build/browser-qa/sandbag-production-verification.json",
-      "limits": "Original Castle tile2 artwork is reused with no asset edits. A purchase/absorption implementation does not complete Storage/Looter/Trainer/page2, Day8+, other hero classes, Chain Gun audio-position timing or the veteran late-game hitbox diagnosis.",
+      "evidence": "docs/port-verification.json; .build/browser-qa/storage-ui-verification.json; .build/storage-party-soak/report.json; .build/storage-publication.json; .build/browser-qa/storage-production-verification.json",
+      "limits": "Storage does not add combat hotkeys or increase offer count. Original common invDrag permits loot MOD mounting, but the port keeps that confirmation in town only; simple loot collection must not imply loot-MOD parity. No new assets or layout metadata were needed. Day 8 onward, Looter, Trainer, second-page upgrades, other hero classes and the late-game hitbox investigation remain incomplete.",
+      "nextIntegratedWork": "Loot MOD: original confirmation/cancel/persistence probes then connected reward-screen implementation. Looter valuation remains a later bounded Castle candidate.",
       "previousPublished": {
-        "saveVersion": 17,
+        "saveVersion": 18,
         "verificationStatus": "passed",
-        "implementedCampaign": "Seven connected Sheriff days with permanent companions and Castle House/Wall upgrades, plus paid Fix Wall and Repairman purchases, source-ordered opening/ordinary-wave repair, perfect-check timing, recurring upkeep and saved repair state. Other Castle actions and Day8 combat remain unavailable.",
-        "publication": "Published and production-verified locally at http://127.0.0.1:5175/elona/: all308 files from .build/browser-repair-final match live and ZIP bytes; bundle assets/index-XNVk3crn.js. Eight complete-envelope candidate UI checks and final production NewGame/exact actual v16→v17 migration/restore pass without console errors. All305 public assets are unchanged.",
+        "implementedCampaign": "Seven connected Sheriff days with permanent companions and Castle House/Wall/paid repair/Repairman actions, plus Sandbag purchases throughlevel10, source damage absorption, recurring upkeep and saved level. Other Castle actions and Day8 combat remain unavailable.",
+        "publication": "Published and production-verified locally at http://127.0.0.1:5175/elona/: all308 candidate/live/ZIP files match; bundle assets/index-2cijlKJd.js from .build/browser-sandbag-final.319 tests,25 original comparisons,six complete-envelope candidate UI checks and final production NewGame/exact actual v17→v18 migration/restore pass without console errors. All305 public assets remain unchanged.",
         "automatedVerification": {
           "status": "passed",
-          "testsPassed": 309,
           "typecheckPassed": true,
           "releaseBuildPassed": true,
-          "acceptedRepairObservations": 37,
-          "controlledStartingStates": 17,
-          "tileTransactions": 11,
-          "timerOutcomes": 9,
+          "evidence": [
+            ".build/sandbag-build-output.txt",
+            "web/src/castle-upgrades.ts",
+            "web/docs/castle-upgrades-ui-source.md",
+            ".build/sandbag-party-soak/report.json",
+            ".build/sandbag-party-soak-low-damage/failure.json",
+            ".build/browser-qa/sandbag-ui-verification.json",
+            ".build/sandbag-tests-output.txt",
+            ".build/oracle/castle-sandbag-comparison-report.json",
+            ".build/sandbag-asset-preservation.json"
+          ],
+          "limits": "The soak uses production ordinary contours and a documented boss rectangle. One positive integer-damage pair is limited connected-play evidence. The separate original25-case diagnostic independently distinguishes additive mission absorption(48) from multiplicative(49); it does not prove full campaign balance or native scheduling parity.",
           "soak": {
             "scenarios": 9,
             "naturalCampaigns": 8,
             "capitalStartCampaigns": 1,
-            "frames": 135549,
-            "saveReplayCheckpoints": 1487,
-            "restTransitions": 54,
-            "rewardActions": 223,
-            "repairmanPurchases": 18,
-            "fixWallPurchases": 10,
-            "observedWaveBoundaries": 205,
-            "positiveHeals": 29,
-            "restoredHp": 64,
-            "naturalCampaignsWithPositiveHeals": 5,
-            "day7Wins": 9,
-            "naturalSecondHiresInFinalTown": 6,
-            "twoCompanionBattleEntries": 1,
-            "threeCompanionBattleEntries": 4,
-            "expandedBattleProvenance": "Expanded-party battle entries are only in the separately declared12000gold capital-start. Natural second hires occur in Day7 town; the prior Castle soak provides natural two-companion battle evidence."
+            "frames": 132552,
+            "saveReplayCheckpoints": 1470,
+            "restTransitions": 53,
+            "rewardActions": 219,
+            "sandbagPurchases": 19,
+            "repairmanPurchases": 17,
+            "fixWallPurchases": 11,
+            "positiveWaveHeals": 41,
+            "naturalDay7Wins": 8,
+            "capitalOutcome": "Day6 defeat under the declared Armor-only companion/exposure policy",
+            "singleHitCounterfactualPairs": 186,
+            "positiveIntegerReductions": 1,
+            "excludedAmbiguousLethalFrames": 1,
+            "positiveCase": {
+              "scenario": "capital-sandbag-exposure",
+              "day": 3,
+              "tick": 3553,
+              "sandbagLevel": 4,
+              "damageWith": 3,
+              "damageWithout": 4,
+              "rng": 367407443
+            },
+            "provenance": "Only the capital-start receives12000gold at an earned first town. Sandbag4 purchases and Armor-only orders use ordinary actions; hero avoids Crows until one positive reduction. Counterfactual measurement replays one actual frame with only Sandbag set0, requires same final RNG, a single hit and survival. No HP/skill/item/candidate/RNG grants in the campaign.",
+            "priorAttempt": ".build/sandbag-party-soak-low-damage/; levels1/2 and earned medals did not expose a positive integer reduction"
           },
-          "evidence": [
-            ".build/repair-tests-output.txt",
-            ".build/oracle/castle-repair-comparison-report.json",
-            ".build/repair-party-soak/report.json",
-            "web/tests/castle-repair.test.ts",
-            "web/tests/castle-repair-reference.test.ts",
-            ".build/repair-asset-preservation.json"
-          ],
-          "limits": "Exact production state/event replay with ordinary source contours and documented boss rectangle fallback; not natural three-companion affordability, original campaign balance or native browser scheduling parity."
+          "testsPassed": 319,
+          "acceptedSandbagObservations": 25,
+          "damageCases": 12,
+          "controlledStartingStates": 6,
+          "transactionOutcomes": 7
         },
         "browserVerification": [
-          "Eight full-envelope candidate checks pass: Repairman700/950 purchases, unaffordable upgrade unchanged, paid FixWall, repeated fullHP rejection, exact Continue, actual six updates10795→10801 healing43→45HP, earned Day5 results170upkeep/74wages and town entry. No console errors.",
-          "All305 public assets are unchanged; all308 release files match candidate/live/ZIP. Production NewGame exported v17 tick0/HP40/gold200/ammo5/Wall1/capacity1/repairman0/wallFixCount0. Actual live v16 backup migrated and restored with exact full-envelope equality at tick674/HP40/gold209 and unchanged RNG; paused with no console errors."
+          "Six complete-envelope checks pass: Sandbag level1/2 purchase, unaffordable rejection, Continue, seven actual updates3552→3559 HP45→42 with matching state/RNG (paired level0 damage4 versus3), and earned Day3 settlement80upkeep/58wages then town entry. No console errors.",
+          "All305 public assets unchanged;308 candidate/live/ZIP files match. Production NewGame exported v18 tick0/HP40/gold200/ammo5 with Sandbag and repair fields0. Actual live v17 backup migrated and restored with complete-envelope equality at tick674/HP40/gold209 and unchanged RNG; paused with no console errors."
         ],
-        "evidence": "docs/port-verification.json; web/docs/castle-upgrades-ui-source.md; .build/browser-qa/repair-ui-verification.json; .build/repair-party-soak/report.json; .build/browser-qa/repair-production-verification.json; .build/repair-publication.json",
-        "limits": "Paid Fix Wall and Repairman are bounded Castle actions. Their implementation does not complete remaining Castle tiles, Day8+, other hero classes, Chain Gun audio-position history or the unproven veteran late-game hitbox investigation.",
+        "evidence": "docs/port-verification.json; web/docs/castle-upgrades-ui-source.md; .build/sandbag-party-soak/report.json; .build/browser-qa/sandbag-ui-verification.json; .build/sandbag-publication.json; .build/browser-qa/sandbag-production-verification.json",
+        "limits": "Original Castle tile2 artwork is reused with no asset edits. A purchase/absorption implementation does not complete Storage/Looter/Trainer/page2, Day8+, other hero classes, Chain Gun audio-position timing or the veteran late-game hitbox diagnosis.",
         "previousPublished": {
-          "saveVersion": 16,
+          "saveVersion": 17,
           "verificationStatus": "passed",
-          "implementedCampaign": "Seven connected Sheriff days with permanent party hiring/equipment/AI/growth, plus immediate original Castle House purchases for capacity2/3 and Wall purchases with current/maxHP and recurring upkeep. Other Castle actions and Day8 combat remain unavailable.",
-          "publication": "Published locally and production-verified at http://127.0.0.1:5175/elona/: all308 candidate, live and ZIP files match; bundle assets/index-s1hKilh5.js from .build/browser-castle-final. Eleven candidate UI checks and final production New Game/exact actual v15→v16 migration/restore passed without console errors.",
+          "implementedCampaign": "Seven connected Sheriff days with permanent companions and Castle House/Wall upgrades, plus paid Fix Wall and Repairman purchases, source-ordered opening/ordinary-wave repair, perfect-check timing, recurring upkeep and saved repair state. Other Castle actions and Day8 combat remain unavailable.",
+          "publication": "Published and production-verified locally at http://127.0.0.1:5175/elona/: all308 files from .build/browser-repair-final match live and ZIP bytes; bundle assets/index-XNVk3crn.js. Eight complete-envelope candidate UI checks and final production NewGame/exact actual v16→v17 migration/restore pass without console errors. All305 public assets are unchanged.",
           "automatedVerification": {
             "status": "passed",
-            "testsPassed": 298,
-            "acceptedCastleObservations": 23,
-            "castleStartingStates": 10,
-            "castleTransactions": 13,
+            "testsPassed": 309,
             "typecheckPassed": true,
             "releaseBuildPassed": true,
+            "acceptedRepairObservations": 37,
+            "controlledStartingStates": 17,
+            "tileTransactions": 11,
+            "timerOutcomes": 9,
             "soak": {
               "scenarios": 9,
               "naturalCampaigns": 8,
               "capitalStartCampaigns": 1,
-              "frames": 135297,
-              "saveReplayCheckpoints": 1450,
+              "frames": 135549,
+              "saveReplayCheckpoints": 1487,
               "restTransitions": 54,
               "rewardActions": 223,
-              "housePurchases": 10,
-              "wallPurchases": 9,
-              "naturalCampaignsHiringTwo": 8,
-              "twoCompanionBattleEntries": 23,
-              "threeCompanionBattleEntries": 4,
+              "repairmanPurchases": 18,
+              "fixWallPurchases": 10,
+              "observedWaveBoundaries": 205,
+              "positiveHeals": 29,
+              "restoredHp": 64,
+              "naturalCampaignsWithPositiveHeals": 5,
               "day7Wins": 9,
-              "controlledInput": "One earned first-town state receives12000gold only, then House3 purchases and naturally generated hires. No HP/skill/item/candidate/RNG grants. This does not establish natural three-companion affordability within seven days."
+              "naturalSecondHiresInFinalTown": 6,
+              "twoCompanionBattleEntries": 1,
+              "threeCompanionBattleEntries": 4,
+              "expandedBattleProvenance": "Expanded-party battle entries are only in the separately declared12000gold capital-start. Natural second hires occur in Day7 town; the prior Castle soak provides natural two-companion battle evidence."
             },
             "evidence": [
-              "docs/port-verification.json",
-              "web/tests/castle-upgrades.test.ts",
-              "web/tests/castle-upgrades-reference.test.ts",
-              ".build/oracle/castle-upgrades-comparison-report.json",
-              ".build/castle-party-soak/report.json",
-              ".build/web-assets/castle-assets-verification.json"
+              ".build/repair-tests-output.txt",
+              ".build/oracle/castle-repair-comparison-report.json",
+              ".build/repair-party-soak/report.json",
+              "web/tests/castle-repair.test.ts",
+              "web/tests/castle-repair-reference.test.ts",
+              ".build/repair-asset-preservation.json"
             ],
-            "limits": "Full state/event JSON replay uses production ordinary contours and the documented boss rectangle fallback; not original campaign balance, browser performance or natural three-companion affordability evidence."
+            "limits": "Exact production state/event replay with ordinary source contours and documented boss rectangle fallback; not natural three-companion affordability, original campaign balance or native browser scheduling parity."
           },
           "browserVerification": [
-            "Eleven candidate UI checks match complete expected save envelopes: unaffordable House unchanged; Wall costs240 and adds5 current/maxHP with upkeep40→50, leaving the previously paid result unchanged; Continue is exact.",
-            "Natural House2 costs2000 and second hire400. Separately controlled House3 costs5000, cap rejects unchanged, third hire400. Rest retains allthree companions;10 actual browser updates match production state. Result upkeep150/wages188 and subsequent town entry match.",
-            "Publication matches all308 candidate/archive files. Production loaded s1hKilh5; New Game exported v16 at tick0,HP40,gold200,ammo5,Wall1/capacity1. Actual v15 backup migration and restore matched complete expected envelopes at tick674,HP40,gold209 with unchanged RNG; paused and no console errors."
+            "Eight full-envelope candidate checks pass: Repairman700/950 purchases, unaffordable upgrade unchanged, paid FixWall, repeated fullHP rejection, exact Continue, actual six updates10795→10801 healing43→45HP, earned Day5 results170upkeep/74wages and town entry. No console errors.",
+            "All305 public assets are unchanged; all308 release files match candidate/live/ZIP. Production NewGame exported v17 tick0/HP40/gold200/ammo5/Wall1/capacity1/repairman0/wallFixCount0. Actual live v16 backup migrated and restored with exact full-envelope equality at tick674/HP40/gold209 and unchanged RNG; paused with no console errors."
           ],
-          "evidence": "docs/port-verification.json; web/docs/castle-upgrades-source.md; web/docs/castle-upgrades-ui-source.md; .build/browser-qa/castle-ui-verification.json; .build/browser-qa/castle-production-verification.json; .build/castle-publication.json",
-          "limits": "Castle source comparisons cover ten controlled starting states and thirteen transactions, not gameplay earnings. All eight natural soak campaigns earn two companions; three-companion coverage uses a separately declared capital grant. Source assets are preserved except the explicit Castle panel split/new controls. Day8, remaining Castle actions, temporary hiring and other hero classes remain unavailable; Chain Gun audio-position timing and veteran late-game hitbox diagnosis remain unresolved.",
+          "evidence": "docs/port-verification.json; web/docs/castle-upgrades-ui-source.md; .build/browser-qa/repair-ui-verification.json; .build/repair-party-soak/report.json; .build/browser-qa/repair-production-verification.json; .build/repair-publication.json",
+          "limits": "Paid Fix Wall and Repairman are bounded Castle actions. Their implementation does not complete remaining Castle tiles, Day8+, other hero classes, Chain Gun audio-position history or the unproven veteran late-game hitbox investigation.",
           "previousPublished": {
-            "saveVersion": 15,
+            "saveVersion": 16,
             "verificationStatus": "passed",
-            "implementedCampaign": "Seven connected Sheriff days plus permanent hiring, equipment, autonomous companions, orders, progression, wages and party persistence. All nine generated classes can be hired and fight; one-companion house capacity remains. Day8 combat is disabled.",
-            "publication": "Corrected v15 published locally and browser-verified at http://127.0.0.1:5175/elona/: all 300 candidate, live and archive files match; bundle assets/index-Do-bjyfx.js. Final production New Game and exact actual v14→v15 restoration passed without console errors.",
+            "implementedCampaign": "Seven connected Sheriff days with permanent party hiring/equipment/AI/growth, plus immediate original Castle House purchases for capacity2/3 and Wall purchases with current/maxHP and recurring upkeep. Other Castle actions and Day8 combat remain unavailable.",
+            "publication": "Published locally and production-verified at http://127.0.0.1:5175/elona/: all308 candidate, live and ZIP files match; bundle assets/index-s1hKilh5.js from .build/browser-castle-final. Eleven candidate UI checks and final production New Game/exact actual v15→v16 migration/restore passed without console errors.",
             "automatedVerification": {
               "status": "passed",
-              "testsPassed": 288,
-              "partyIntegrationTests": 20,
-              "acceptedPartyMethodComparisons": 218,
+              "testsPassed": 298,
+              "acceptedCastleObservations": 23,
+              "castleStartingStates": 10,
+              "castleTransactions": 13,
               "typecheckPassed": true,
               "releaseBuildPassed": true,
               "soak": {
-                "seeds": 32,
-                "scenarios": 32,
-                "frames": 482844,
-                "saveReplayCheckpoints": 5024,
-                "restTransitions": 192,
-                "rewardActions": 810,
-                "naturallyHiredClasses": [
-                  1,
-                  2,
-                  3,
-                  4,
-                  5,
-                  6,
-                  7,
-                  8,
-                  9
-                ],
-                "day7Arrivals": 32,
-                "day7Wins": 30,
-                "castleDefeats": 2,
-                "rerunAfterAirClassificationCorrection": true
+                "scenarios": 9,
+                "naturalCampaigns": 8,
+                "capitalStartCampaigns": 1,
+                "frames": 135297,
+                "saveReplayCheckpoints": 1450,
+                "restTransitions": 54,
+                "rewardActions": 223,
+                "housePurchases": 10,
+                "wallPurchases": 9,
+                "naturalCampaignsHiringTwo": 8,
+                "twoCompanionBattleEntries": 23,
+                "threeCompanionBattleEntries": 4,
+                "day7Wins": 9,
+                "controlledInput": "One earned first-town state receives12000gold only, then House3 purchases and naturally generated hires. No HP/skill/item/candidate/RNG grants. This does not establish natural three-companion affordability within seven days."
               },
               "evidence": [
                 "docs/port-verification.json",
-                "web/tests/party-integration.test.ts",
-                "web/scripts/party-soak.ts",
-                ".build/party-soak/report.json",
-                "web/docs/party-integration-status.md"
+                "web/tests/castle-upgrades.test.ts",
+                "web/tests/castle-upgrades-reference.test.ts",
+                ".build/oracle/castle-upgrades-comparison-report.json",
+                ".build/castle-party-soak/report.json",
+                ".build/web-assets/castle-assets-verification.json"
               ],
-              "limits": "Exact state/new-event replay on the corrected runtime; production ordinary contours and a documented rectangular boss fallback. No complete original campaign or browser-performance parity claim."
+              "limits": "Full state/event JSON replay uses production ordinary contours and the documented boss rectangle fallback; not original campaign balance, browser performance or natural three-companion affordability evidence."
             },
             "browserVerification": [
-              "Fourteen existing party UI export checks revalidated against the corrected runtime: hiring for 400 gold with unchanged AP/RNG, pending Continue, order 6, equipment round trip, Rest, 35 combat updates, 13 updates inserting one companion shell, wage 53, town entry and dismissal cancel/confirm. Full expected envelopes match.",
-              "An earned Day 5 early-v15 save at tick 9770 imported through the browser with Crow type 2→1 repair, unchanged RNG and complete expected-envelope/restore equality. Focused Simulation tests separately cover real Crow/Fly spawns and Air (4) versus Armor (5) orders.",
-              "Import Save was observed disabled during asset loading and enabled after scene creation, preventing premature import before the scene exists.",
-              "Final production bundle Do-bjyfx: New Game export 93 reached tick 0, HP 40, gold 200, ammo 5. Actual v14 backup import/export 94 matched complete v15 migration at tick 674, HP 40, gold 209 with unchanged RNG; paused and no console errors."
+              "Eleven candidate UI checks match complete expected save envelopes: unaffordable House unchanged; Wall costs240 and adds5 current/maxHP with upkeep40→50, leaving the previously paid result unchanged; Continue is exact.",
+              "Natural House2 costs2000 and second hire400. Separately controlled House3 costs5000, cap rejects unchanged, third hire400. Rest retains allthree companions;10 actual browser updates match production state. Result upkeep150/wages188 and subsequent town entry match.",
+              "Publication matches all308 candidate/archive files. Production loaded s1hKilh5; New Game exported v16 at tick0,HP40,gold200,ammo5,Wall1/capacity1. Actual v15 backup migration and restore matched complete expected envelopes at tick674,HP40,gold209 with unchanged RNG; paused and no console errors."
             ],
-            "evidence": "docs/port-verification.json:browser_checks.party,party_production,party_air_orders",
-            "limits": "Accepted method references do not establish live spawn classification or native full-battle scheduling. Actual-spawn regressions and the final rerun separately cover the corrected integration. The 32 natural-campaign soak uses production ordinary contours and a boss rectangle; no balance or pixel/audio parity claim. Chain Gun interrupted spin timing retains a counter fallback without source audio-position history. Other hero classes, house upgrades, temporary hiring, many town actions and Day 8 onward remain unavailable. The veteran late-game hitbox report remains unreproduced.",
+            "evidence": "docs/port-verification.json; web/docs/castle-upgrades-source.md; web/docs/castle-upgrades-ui-source.md; .build/browser-qa/castle-ui-verification.json; .build/browser-qa/castle-production-verification.json; .build/castle-publication.json",
+            "limits": "Castle source comparisons cover ten controlled starting states and thirteen transactions, not gameplay earnings. All eight natural soak campaigns earn two companions; three-companion coverage uses a separately declared capital grant. Source assets are preserved except the explicit Castle panel split/new controls. Day8, remaining Castle actions, temporary hiring and other hero classes remain unavailable; Chain Gun audio-position timing and veteran late-game hitbox diagnosis remain unresolved.",
             "previousPublished": {
-              "saveVersion": 14,
-              "implementedCampaign": "Seven connected Sheriff days, missions0–6, rewards and seven prepared towns. Seventh town prepares mission7; Day8 combat remains disabled.",
-              "publication": "Published locally and browser-verified: candidate, live preview and ZIP contain the same 267 files; bundle assets/index-D24uJwik.js. Published New Game and exact v13→v14 restoration passed.",
+              "saveVersion": 15,
+              "verificationStatus": "passed",
+              "implementedCampaign": "Seven connected Sheriff days plus permanent hiring, equipment, autonomous companions, orders, progression, wages and party persistence. All nine generated classes can be hired and fight; one-companion house capacity remains. Day8 combat is disabled.",
+              "publication": "Corrected v15 published locally and browser-verified at http://127.0.0.1:5175/elona/: all 300 candidate, live and archive files match; bundle assets/index-Do-bjyfx.js. Final production New Game and exact actual v14→v15 restoration passed without console errors.",
               "automatedVerification": {
-                "testsPassed": 252,
+                "status": "passed",
+                "testsPassed": 288,
+                "partyIntegrationTests": 20,
+                "acceptedPartyMethodComparisons": 218,
+                "typecheckPassed": true,
+                "releaseBuildPassed": true,
                 "soak": {
                   "seeds": 32,
-                  "scenarios": 96,
-                  "frames": 412874,
-                  "saveReplayCheckpoints": 4501,
-                  "day5Wins": 13,
-                  "day6Wins": 1,
-                  "day7Arrivals": 1,
-                  "day7Wins": 0,
-                  "titleClaims": 1
+                  "scenarios": 32,
+                  "frames": 482844,
+                  "saveReplayCheckpoints": 5024,
+                  "restTransitions": 192,
+                  "rewardActions": 810,
+                  "naturallyHiredClasses": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9
+                  ],
+                  "day7Arrivals": 32,
+                  "day7Wins": 30,
+                  "castleDefeats": 2,
+                  "rerunAfterAirClassificationCorrection": true
                 },
-                "focusedCampaign": "Separate seed42 connected test wins Day7 at10HP and reaches seventh town; all-enemy rectangular collision and the pre-existing Day1 HP39 medal-history setup limit this evidence. Fifth-town Free Repair, Day7 critical aiming, visible-special/Archer priority and one owned grenade are ordinary actions.",
                 "evidence": [
                   "docs/port-verification.json",
-                  ".build/day7-final-tests.txt",
-                  ".build/day7-final-build.txt",
-                  "web/tests/day-two.test.ts",
-                  ".build/test-probes/day7-connected-campaign-report.json",
-                  "web/scripts/soak.ts",
-                  ".build/soak/report.json"
-                ]
+                  "web/tests/party-integration.test.ts",
+                  "web/scripts/party-soak.ts",
+                  ".build/party-soak/report.json",
+                  "web/docs/party-integration-status.md"
+                ],
+                "limits": "Exact state/new-event replay on the corrected runtime; production ordinary contours and a documented rectangular boss fallback. No complete original campaign or browser-performance parity claim."
               },
-              "acceptedOriginalEvidence": [
-                {
-                  "feature": "Fifth-day waves",
-                  "matchingSnapshots": 9,
-                  "fixture": "web/tests/fixtures/original-fifth-day-wave-trace.json",
-                  "comparison": ".build/oracle/fifth-day-waves-comparison-report.json",
-                  "traceSha256": "eb6444578107846ce26478be4d4d32cb428e7d164d1b43426d1a31ce495555f0"
-                },
-                {
-                  "feature": "Fifth-town preparation and recruit growth",
-                  "matchingSnapshots": 17,
-                  "fixture": "web/tests/fixtures/original-fifth-town-trace.json",
-                  "comparison": ".build/oracle/fifth-town-comparison-report.json",
-                  "traceSha256": "d0637440d53ac962a24e219ec5b8fb7424dd34d2f46dcb8297816b447c72e2bb"
-                },
-                {
-                  "feature": "Fly lifecycle and geometry",
-                  "matchingSnapshots": 503,
-                  "rawPoolReuseSnapshotsRetainedSeparately": 73,
-                  "matchingGeometryGrids": 8,
-                  "geometryPoints": 81920,
-                  "fixture": "web/tests/fixtures/original-fly-trace.json",
-                  "comparison": ".build/oracle/fly-comparison-report.json",
-                  "traceSha256": "f613f617ed93c955f94b0059092cac7918f6adcf66f47c845464ca8a8ab00a08"
-                },
-                {
-                  "feature": "Sixth-day waves",
-                  "matchingSnapshots": 9,
-                  "fixture": "web/tests/fixtures/original-sixth-day-wave-trace.json",
-                  "comparison": ".build/oracle/sixth-day-waves-comparison-report.json",
-                  "traceSha256": "35288d4f556069e8a8af2fb7420ab6e913a31f5e289274327228d97a9930508a"
-                },
-                {
-                  "feature": "Sixth-town preparation, title and economy",
-                  "matchingSnapshots": 22,
-                  "fixture": "web/tests/fixtures/original-sixth-town-trace.json",
-                  "comparison": ".build/oracle/sixth-town-comparison-report.json",
-                  "traceSha256": "f15e87bc77e3192311f02a90be509fcb39947801d56331e4b283d4b4c8fd2e25"
-                },
-                {
-                  "feature": "Barbarian lifecycle, effects and geometry",
-                  "matchingSnapshots": 671,
-                  "fixture": "web/tests/fixtures/original-barbarian-trace.json",
-                  "comparison": ".build/oracle/barbarian-comparison-report.json",
-                  "traceSha256": "e011432fcfed517c1f62ab33bc30aa81988863ea2b7317276e06046ac007e38c",
-                  "matchingGeometryGrids": 12,
-                  "geometryPoints": 76800
-                },
-                {
-                  "feature": "Seventh-day RANGED waves",
-                  "matchingSnapshots": 10,
-                  "fixture": "web/tests/fixtures/original-seventh-day-wave-trace.json",
-                  "comparison": ".build/oracle/seventh-day-waves-comparison-report.json",
-                  "traceSha256": "3c44ced37fae7098b420faeb8f68a736df20bf1d00425157f5cde067b411f6da"
-                },
-                {
-                  "feature": "Seventh-town preparation, level-four recruits and title salary",
-                  "matchingSnapshots": 38,
-                  "fixture": "web/tests/fixtures/original-seventh-town-trace.json",
-                  "comparison": ".build/oracle/seventh-town-comparison-report.json",
-                  "traceSha256": "39dabd5c3cb8516c274afabccdd05f1ab0400e0324d4aa066070b93b212a8806"
-                },
-                {
-                  "feature": "Day7 boss special attack and cosmetic grenade",
-                  "matchingSnapshots": 337,
-                  "fixture": "web/tests/fixtures/original-boss-special-trace.json",
-                  "comparison": ".build/oracle/boss-special-comparison-report.json",
-                  "traceSha256": "370d1694b3fe8828bc8e3581a7d0127aabcbc7578eddd3253892af82612b5081"
-                }
-              ],
               "browserVerification": [
-                "Earned sixth-town Rest into Day7 and Continue matched the full save envelope at tick12561, HP11, gold4596 and title1. The later ordinary-contour policy still lost; this is a transition/persistence check, not a Day7 victory.",
-                "A separate connected headless-test result displayed Reward720, Castle Income100, combined Tax/Upkeep−85 and settled gold5369. Proceed and town Continue matched the full save envelope. That winning test uses rectangles for every enemy and the pre-existing Day1 HP39 setup.",
-                "A controlled boss wind-up/flight fixture matched15 browser updates, Continue, then43 more updates including landing and a subsequent ordinary rat spawn. HP11→9 happened once on release; the cosmetic grenade landed with no further castle hit. Original grenade body/shadow were visible; audio was not verified.",
-                "Nine candidate checks cover exports64–72. Published New Game reached tick0 with HP40, gold200 and ammo5; actual backup export73 restored as v14 export74 with full-envelope migration equality at tick674, HP40, gold209, ammo5, kills10 and boss75/150. Candidate and production reported no browser errors. The observed6057ms New Game load is not a comparative performance measurement."
+                "Fourteen existing party UI export checks revalidated against the corrected runtime: hiring for 400 gold with unchanged AP/RNG, pending Continue, order 6, equipment round trip, Rest, 35 combat updates, 13 updates inserting one companion shell, wage 53, town entry and dismissal cancel/confirm. Full expected envelopes match.",
+                "An earned Day 5 early-v15 save at tick 9770 imported through the browser with Crow type 2→1 repair, unchanged RNG and complete expected-envelope/restore equality. Focused Simulation tests separately cover real Crow/Fly spawns and Air (4) versus Armor (5) orders.",
+                "Import Save was observed disabled during asset loading and enabled after scene creation, preventing premature import before the scene exists.",
+                "Final production bundle Do-bjyfx: New Game export 93 reached tick 0, HP 40, gold 200, ammo 5. Actual v14 backup import/export 94 matched complete v15 migration at tick 674, HP 40, gold 209 with unchanged RNG; paused and no console errors."
               ],
-              "evidence": "docs/port-verification.json:browser_checks.seventh_day",
-              "limits": "Bounded source-method comparisons and port replay tests do not establish a complete original seven-day replay or pixel parity. The unchanged soak reaches Day7 once and loses; its ordinary enemies use production contours and its boss uses a rectangle. The separate focused campaign win uses rectangular collision for every enemy and an existing Day1 HP39 setup. Recorded ordinary-contour policies from the earned Day6 title checkpoint also lose; neither result establishes balance parity. Other playable classes, hiring, many town actions and Day8 onward remain incomplete. The veteran late-game hitbox defect remains unreproduced.",
+              "evidence": "docs/port-verification.json:browser_checks.party,party_production,party_air_orders",
+              "limits": "Accepted method references do not establish live spawn classification or native full-battle scheduling. Actual-spawn regressions and the final rerun separately cover the corrected integration. The 32 natural-campaign soak uses production ordinary contours and a boss rectangle; no balance or pixel/audio parity claim. Chain Gun interrupted spin timing retains a counter fallback without source audio-position history. Other hero classes, house upgrades, temporary hiring, many town actions and Day 8 onward remain unavailable. The veteran late-game hitbox report remains unreproduced.",
               "previousPublished": {
-                "saveVersion": 13,
-                "implementedCampaign": "Six connected Sheriff days, missions0–5, rewards and six prepared towns. Sixth town prepares mission6; Day7 combat remains disabled.",
-                "publication": "Published locally and browser-verified: candidate, live preview and ZIP contain the same267 files; bundle assets/index-Bilu_2M0.js. New Game and v12→v13 restoration passed.",
+                "saveVersion": 14,
+                "implementedCampaign": "Seven connected Sheriff days, missions0–6, rewards and seven prepared towns. Seventh town prepares mission7; Day8 combat remains disabled.",
+                "publication": "Published locally and browser-verified: candidate, live preview and ZIP contain the same 267 files; bundle assets/index-D24uJwik.js. Published New Game and exact v13→v14 restoration passed.",
                 "automatedVerification": {
-                  "testsPassed": 234,
+                  "testsPassed": 252,
                   "soak": {
                     "seeds": 32,
                     "scenarios": 96,
-                    "frames": 411504,
-                    "saveReplayCheckpoints": 4490,
+                    "frames": 412874,
+                    "saveReplayCheckpoints": 4501,
                     "day5Wins": 13,
                     "day6Wins": 1,
+                    "day7Arrivals": 1,
+                    "day7Wins": 0,
                     "titleClaims": 1
                   },
+                  "focusedCampaign": "Separate seed42 connected test wins Day7 at10HP and reaches seventh town; all-enemy rectangular collision and the pre-existing Day1 HP39 medal-history setup limit this evidence. Fifth-town Free Repair, Day7 critical aiming, visible-special/Archer priority and one owned grenade are ordinary actions.",
                   "evidence": [
                     "docs/port-verification.json",
+                    ".build/day7-final-tests.txt",
+                    ".build/day7-final-build.txt",
+                    "web/tests/day-two.test.ts",
+                    ".build/test-probes/day7-connected-campaign-report.json",
                     "web/scripts/soak.ts",
-                    ".build/soak/day6-report.json"
+                    ".build/soak/report.json"
                   ]
                 },
-                "browserVerification": [
-                  "Earned fifth-town Rest into Day6 and Continue matched the full save envelope at tick9966, HP3 and gold3862. A separate ordinary-repair branch completed Day6 with HP11 and produced the tested650GP settlement.",
-                  "Result Proceed matched production town preparation. Claim Title changed only title0→1 and AP4→0; gold4596, cumulative earnings, RNG and the settled result stayed unchanged. Continue and a disabled repeat retained the exact save envelope.",
-                  "A controlled Barbarian fixture matched eight production updates, including rage and hit-effect frames, then restored exactly through Continue. This is a controlled presentation/replay check, not an ordinary acquisition or full-volley test.",
-                  "Published New Game reached tick0 with HP40, gold200 and ammo5. The prior production v12 checkpoint restored to v13 with exact full-envelope equality at tick674; candidate and production browser observations reported no errors."
+                "acceptedOriginalEvidence": [
+                  {
+                    "feature": "Fifth-day waves",
+                    "matchingSnapshots": 9,
+                    "fixture": "web/tests/fixtures/original-fifth-day-wave-trace.json",
+                    "comparison": ".build/oracle/fifth-day-waves-comparison-report.json",
+                    "traceSha256": "eb6444578107846ce26478be4d4d32cb428e7d164d1b43426d1a31ce495555f0"
+                  },
+                  {
+                    "feature": "Fifth-town preparation and recruit growth",
+                    "matchingSnapshots": 17,
+                    "fixture": "web/tests/fixtures/original-fifth-town-trace.json",
+                    "comparison": ".build/oracle/fifth-town-comparison-report.json",
+                    "traceSha256": "d0637440d53ac962a24e219ec5b8fb7424dd34d2f46dcb8297816b447c72e2bb"
+                  },
+                  {
+                    "feature": "Fly lifecycle and geometry",
+                    "matchingSnapshots": 503,
+                    "rawPoolReuseSnapshotsRetainedSeparately": 73,
+                    "matchingGeometryGrids": 8,
+                    "geometryPoints": 81920,
+                    "fixture": "web/tests/fixtures/original-fly-trace.json",
+                    "comparison": ".build/oracle/fly-comparison-report.json",
+                    "traceSha256": "f613f617ed93c955f94b0059092cac7918f6adcf66f47c845464ca8a8ab00a08"
+                  },
+                  {
+                    "feature": "Sixth-day waves",
+                    "matchingSnapshots": 9,
+                    "fixture": "web/tests/fixtures/original-sixth-day-wave-trace.json",
+                    "comparison": ".build/oracle/sixth-day-waves-comparison-report.json",
+                    "traceSha256": "35288d4f556069e8a8af2fb7420ab6e913a31f5e289274327228d97a9930508a"
+                  },
+                  {
+                    "feature": "Sixth-town preparation, title and economy",
+                    "matchingSnapshots": 22,
+                    "fixture": "web/tests/fixtures/original-sixth-town-trace.json",
+                    "comparison": ".build/oracle/sixth-town-comparison-report.json",
+                    "traceSha256": "f15e87bc77e3192311f02a90be509fcb39947801d56331e4b283d4b4c8fd2e25"
+                  },
+                  {
+                    "feature": "Barbarian lifecycle, effects and geometry",
+                    "matchingSnapshots": 671,
+                    "fixture": "web/tests/fixtures/original-barbarian-trace.json",
+                    "comparison": ".build/oracle/barbarian-comparison-report.json",
+                    "traceSha256": "e011432fcfed517c1f62ab33bc30aa81988863ea2b7317276e06046ac007e38c",
+                    "matchingGeometryGrids": 12,
+                    "geometryPoints": 76800
+                  },
+                  {
+                    "feature": "Seventh-day RANGED waves",
+                    "matchingSnapshots": 10,
+                    "fixture": "web/tests/fixtures/original-seventh-day-wave-trace.json",
+                    "comparison": ".build/oracle/seventh-day-waves-comparison-report.json",
+                    "traceSha256": "3c44ced37fae7098b420faeb8f68a736df20bf1d00425157f5cde067b411f6da"
+                  },
+                  {
+                    "feature": "Seventh-town preparation, level-four recruits and title salary",
+                    "matchingSnapshots": 38,
+                    "fixture": "web/tests/fixtures/original-seventh-town-trace.json",
+                    "comparison": ".build/oracle/seventh-town-comparison-report.json",
+                    "traceSha256": "39dabd5c3cb8516c274afabccdd05f1ab0400e0324d4aa066070b93b212a8806"
+                  },
+                  {
+                    "feature": "Day7 boss special attack and cosmetic grenade",
+                    "matchingSnapshots": 337,
+                    "fixture": "web/tests/fixtures/original-boss-special-trace.json",
+                    "comparison": ".build/oracle/boss-special-comparison-report.json",
+                    "traceSha256": "370d1694b3fe8828bc8e3581a7d0127aabcbc7578eddd3253892af82612b5081"
+                  }
                 ],
-                "evidence": "docs/port-verification.json:browser_checks.sixth_day",
+                "browserVerification": [
+                  "Earned sixth-town Rest into Day7 and Continue matched the full save envelope at tick12561, HP11, gold4596 and title1. The later ordinary-contour policy still lost; this is a transition/persistence check, not a Day7 victory.",
+                  "A separate connected headless-test result displayed Reward720, Castle Income100, combined Tax/Upkeep−85 and settled gold5369. Proceed and town Continue matched the full save envelope. That winning test uses rectangles for every enemy and the pre-existing Day1 HP39 setup.",
+                  "A controlled boss wind-up/flight fixture matched15 browser updates, Continue, then43 more updates including landing and a subsequent ordinary rat spawn. HP11→9 happened once on release; the cosmetic grenade landed with no further castle hit. Original grenade body/shadow were visible; audio was not verified.",
+                  "Nine candidate checks cover exports64–72. Published New Game reached tick0 with HP40, gold200 and ammo5; actual backup export73 restored as v14 export74 with full-envelope migration equality at tick674, HP40, gold209, ammo5, kills10 and boss75/150. Candidate and production reported no browser errors. The observed6057ms New Game load is not a comparative performance measurement."
+                ],
+                "evidence": "docs/port-verification.json:browser_checks.seventh_day",
+                "limits": "Bounded source-method comparisons and port replay tests do not establish a complete original seven-day replay or pixel parity. The unchanged soak reaches Day7 once and loses; its ordinary enemies use production contours and its boss uses a rectangle. The separate focused campaign win uses rectangular collision for every enemy and an existing Day1 HP39 setup. Recorded ordinary-contour policies from the earned Day6 title checkpoint also lose; neither result establishes balance parity. Other playable classes, hiring, many town actions and Day8 onward remain incomplete. The veteran late-game hitbox defect remains unreproduced.",
                 "previousPublished": {
-                  "saveVersion": 12,
-                  "publication": "Published and browser-verified: candidate, live preview and ZIP contain the same254 files; bundle assets/index-DFJdBXM_.js.",
+                  "saveVersion": 13,
+                  "implementedCampaign": "Six connected Sheriff days, missions0–5, rewards and six prepared towns. Sixth town prepares mission6; Day7 combat remains disabled.",
+                  "publication": "Published locally and browser-verified: candidate, live preview and ZIP contain the same267 files; bundle assets/index-Bilu_2M0.js. New Game and v12→v13 restoration passed.",
+                  "automatedVerification": {
+                    "testsPassed": 234,
+                    "soak": {
+                      "seeds": 32,
+                      "scenarios": 96,
+                      "frames": 411504,
+                      "saveReplayCheckpoints": 4490,
+                      "day5Wins": 13,
+                      "day6Wins": 1,
+                      "titleClaims": 1
+                    },
+                    "evidence": [
+                      "docs/port-verification.json",
+                      "web/scripts/soak.ts",
+                      ".build/soak/day6-report.json"
+                    ]
+                  },
                   "browserVerification": [
-                    "Earned fourth-town Rest into Day5 and subsequent Continue matched the independently replayed full save envelope.",
-                    "Controlled waiting-Fly state matched an independent seven-update replay; Continue retained the exact save envelope. A later observed shot consumed one round and missed; no successful Fly hit or exact browser shot-timing replay is claimed.",
-                    "Production New Game reached tick0; prior production v11 restored to v12 with full migration equality at tick674. Candidate and production console checks reported no errors."
+                    "Earned fifth-town Rest into Day6 and Continue matched the full save envelope at tick9966, HP3 and gold3862. A separate ordinary-repair branch completed Day6 with HP11 and produced the tested650GP settlement.",
+                    "Result Proceed matched production town preparation. Claim Title changed only title0→1 and AP4→0; gold4596, cumulative earnings, RNG and the settled result stayed unchanged. Continue and a disabled repeat retained the exact save envelope.",
+                    "A controlled Barbarian fixture matched eight production updates, including rage and hit-effect frames, then restored exactly through Continue. This is a controlled presentation/replay check, not an ordinary acquisition or full-volley test.",
+                    "Published New Game reached tick0 with HP40, gold200 and ammo5. The prior production v12 checkpoint restored to v13 with exact full-envelope equality at tick674; candidate and production browser observations reported no errors."
                   ],
-                  "evidence": "docs/port-verification.json:browser_checks.fifth_day"
+                  "evidence": "docs/port-verification.json:browser_checks.sixth_day",
+                  "previousPublished": {
+                    "saveVersion": 12,
+                    "publication": "Published and browser-verified: candidate, live preview and ZIP contain the same254 files; bundle assets/index-DFJdBXM_.js.",
+                    "browserVerification": [
+                      "Earned fourth-town Rest into Day5 and subsequent Continue matched the independently replayed full save envelope.",
+                      "Controlled waiting-Fly state matched an independent seven-update replay; Continue retained the exact save envelope. A later observed shot consumed one round and missed; no successful Fly hit or exact browser shot-timing replay is claimed.",
+                      "Production New Game reached tick0; prior production v11 restored to v12 with full migration equality at tick674. Candidate and production console checks reported no errors."
+                    ],
+                    "evidence": "docs/port-verification.json:browser_checks.fifth_day"
+                  }
                 }
+              },
+              "archive": {
+                "path": ".build/elona-shooter-browser-party-slice.zip",
+                "bytes": 8432781,
+                "sha256": "1a49d3530e19f2a8c31fcd3f167f128f5b33139735189489cdae34b38b1c99a7"
               }
             },
             "archive": {
-              "path": ".build/elona-shooter-browser-party-slice.zip",
-              "bytes": 8432781,
-              "sha256": "1a49d3530e19f2a8c31fcd3f167f128f5b33139735189489cdae34b38b1c99a7"
+              "path": ".build/elona-shooter-browser-castle-slice.zip",
+              "bytes": 8573679,
+              "sha256": "510b912aa4da55f270d4b1b9afa28b86f3ddde7e351f6fcf7ea101ac303988b4",
+              "rollback": ".build/browser-before-castle; all300 files match the previous v15, plus prior party ZIP"
             }
           },
           "archive": {
-            "path": ".build/elona-shooter-browser-castle-slice.zip",
-            "bytes": 8573679,
-            "sha256": "510b912aa4da55f270d4b1b9afa28b86f3ddde7e351f6fcf7ea101ac303988b4",
-            "rollback": ".build/browser-before-castle; all300 files match the previous v15, plus prior party ZIP"
+            "path": ".build/elona-shooter-browser-repair-slice.zip",
+            "bytes": 8574119,
+            "sha256": "5c19dbe91bc98155ce4886a619becbf36af285c13234ce57da33c9e7c3594988",
+            "rollback": ".build/browser-before-repair; all308 previous v16 files, plus the preserved Castle ZIP with its original hash"
           }
         },
         "archive": {
-          "path": ".build/elona-shooter-browser-repair-slice.zip",
-          "bytes": 8574119,
-          "sha256": "5c19dbe91bc98155ce4886a619becbf36af285c13234ce57da33c9e7c3594988",
-          "rollback": ".build/browser-before-repair; all308 previous v16 files, plus the preserved Castle ZIP with its original hash"
+          "path": ".build/elona-shooter-browser-sandbag-slice.zip",
+          "bytes": 8574403,
+          "sha256": "945b2023d734cf5569c0cab3ec3d187423c6747210148d96930f80fb7b972d1e",
+          "rollback": ".build/browser-before-sandbag; all308 previous v17 files and prior repair ZIP"
         }
       },
       "archive": {
-        "path": ".build/elona-shooter-browser-sandbag-slice.zip",
-        "bytes": 8574403,
-        "sha256": "945b2023d734cf5569c0cab3ec3d187423c6747210148d96930f80fb7b972d1e",
-        "rollback": ".build/browser-before-sandbag; all308 previous v17 files and prior repair ZIP"
+        "path": ".build/elona-shooter-browser-storage-slice.zip",
+        "bytes": 8574659,
+        "sha256": "d9ca912bb4b049b8a966b5f3b9d72c5bc72dbbe43377d1c1dde11aef8745cd58",
+        "rollback": ".build/browser-before-storage contains all308 verified v18 files; prior Sandbag ZIP retained"
       }
     },
     "archive": {
-      "path": ".build/elona-shooter-browser-storage-slice.zip",
-      "bytes": 8574659,
-      "sha256": "d9ca912bb4b049b8a966b5f3b9d72c5bc72dbbe43377d1c1dde11aef8745cd58",
-      "rollback": ".build/browser-before-storage contains all308 verified v18 files; prior Sandbag ZIP retained"
+      "path": ".build/elona-shooter-browser-loot-mod-slice.zip",
+      "bytes": 8575802,
+      "sha256": "ec60bddb523cbc6c7f53c03608670256bba994669e94f23f0c4da50f5ad20e15",
+      "rollback": ".build/browser-before-loot-mod contains all 308 verified v19 files; the prior Storage ZIP is retained."
     }
   },
   "purpose": "Track the original game's systems and content against implemented behavior and independent evidence. This is an expandable inventory, not an exhaustive specification or a completion percentage.",
@@ -1088,7 +1148,7 @@
         "MainTimeline:11732 updateShopSlots"
       ],
       "status": "partial",
-      "implemented": "58 source item IDs with generation/modifier metadata and six initial persistent inventory slots, expandable to 16 through Storage. All seven enabled towns support purchases into empty slots, complete-record swaps, confirmed sales and Shop Token discounts. Upgrade previews spend source RNG immediately; Yes spends4 AP and the shown gold, while cancellation retains the preview and RNG. Owned MOD confirmation preserves original compatibility guards, fixed enchant, refill and No→swap behavior. Occupied stock purchase remains blocked. Upgrade intentionally retains every installed modifier and Living Weapon progress, correcting the original final-mod loss. Companion Equipment supports empty/compatible transfers and rejects incompatible reverse swaps; MOD No returns the MOD without a gun swap. Ally upgrade selection remains excluded until the gun is moved into hero inventory. Shop/Equipment already use original eight-column, 48-pixel row metadata; every owned action uses actual capacity, including pending Upgrade/MOD save restoration. Battle access remains limited to the first five slots.",
+      "implemented": "58 source item IDs with generation/modifier metadata and six initial persistent inventory slots, expandable to 16 through Storage. All seven enabled towns support purchases into empty slots, complete-record swaps, confirmed sales and Shop Token discounts. Upgrade previews spend source RNG immediately; Yes spends4 AP and the shown gold, while cancellation retains the preview and RNG. Owned MOD confirmation preserves original compatibility guards, fixed enchant, refill and No→swap behavior. Occupied stock purchase remains blocked. Upgrade intentionally retains every installed modifier and Living Weapon progress, correcting the original final-mod loss. Companion Equipment supports empty/compatible transfers and rejects incompatible reverse swaps; MOD No returns the MOD without a gun swap. Ally upgrade selection remains excluded until the gun is moved into hero inventory. Shop/Equipment already use original eight-column, 48-pixel row metadata; every owned action uses actual capacity, including pending Upgrade/MOD save restoration. Battle access remains limited to the first five slots. The MOD dialog renderer is shared with loot; original stage placement and carried-icon positioning are preserved while saved records remain unchanged during confirmation.",
       "evidence": [
         "web/tests/item-reference.test.ts: 157 original snapshots including fields, ordinary/boss offers and RNG; prior 139 unchanged",
         "web/tests/inventory-save.test.ts: item persistence and swaps",
@@ -1106,7 +1166,10 @@
         "web/tests/party-hiring-reference.test.ts:source companion equipment/MOD transactions",
         "web/tests/party-integration.test.ts:atomic guards and saved transactions",
         "web/tests/castle-storage-reference.test.ts: 37 original observations and three negative controls; exact source slot/transaction/ammo boundaries, excluding loot MOD",
-        ".build/browser-qa/storage-ui-verification.json: 14 full-envelope expanded inventory checks; five exports re-compared against the final runtime; nine checks ran on the final candidate"
+        ".build/browser-qa/storage-ui-verification.json: 14 full-envelope expanded inventory checks; five exports re-compared against the final runtime; nine checks ran on the final candidate",
+        "web/docs/loot-mod-source.md: 53 accepted original observations over 18 cases and three negative controls",
+        "web/docs/loot-mod-ui-source.md: original dialog/icon placement and pending UI contract",
+        ".build/browser-qa/loot-mod-ui-verification.json: eleven full-envelope checks on the final candidate, including controlled full-capacity rejection with separately recorded provenance"
       ],
       "unverified": [
         "Refresh Stock",
@@ -1160,7 +1223,7 @@
         "MainTimeline:11166 procLootMenu"
       ],
       "status": "partial",
-      "implemented": "All seven enabled missions retain pending loot and generate ordinary and earned-boss offers once. Normal screens support click pickup/place and swaps with actual owned capacity of 6–16 slots; flow is ordinary loot, earned boss prizes, earned skills, results. Ordinary generation from Day2 onward reuses the previous town's shared stock-slot metadata, including inactive records; daily boss-kill eligibility resets while cumulative boss appearance history persists. Collected gold increases spendable and cumulative earned money together. The original eight offers remain fixed; extra owned slots wrap into source second row. Expanded items persist across Rest. MOD-on-gun during loot remains explicitly blocked and directs the player to town; source shared invDrag allowed it, so this is a known missing reward interaction.",
+      "implemented": "All seven enabled missions retain pending loot and generate ordinary and earned-boss offers once. Normal screens support click pickup/place and swaps with actual owned capacity of 6–16 slots; flow is ordinary loot, earned boss prizes, earned skills, results. Ordinary generation from Day2 onward reuses the previous town's shared stock-slot metadata, including inactive records; daily boss-kill eligibility resets while cumulative boss appearance history persists. Collected gold increases spendable and cumulative earned money together. The original eight offers remain fixed; extra owned slots wrap into source second row. Expanded items persist across Rest. MOD mounting now works in ordinary and boss rewards for all offer/owned endpoint directions. Pending state changes neither records nor AP/gold/RNG. Yes checks compatibility and enchants/refills the target, consuming only the MOD occupied count; No/outside swaps complete records. Offered target guns remain offers until collected. Pending confirmation blocks movement and Proceed and survives save/Continue.",
       "evidence": [
         "web/src/simulation.ts:damageEnemy",
         "web/tests/wave-reference.test.ts:original raw pending loot queue",
@@ -1172,13 +1235,17 @@
         "web/tests/day-two.test.ts: complete second-day loot/boss/skill/result flow and save/resume",
         "web/src/simulation.ts: tickEnemy credits collected drops to both gold and totalMoney",
         "web/tests/castle-storage-reference.test.ts: 37 original observations and three negative controls; exact source slot/transaction/ammo boundaries, excluding loot MOD",
-        ".build/browser-qa/storage-ui-verification.json: 14 full-envelope expanded inventory checks; five exports re-compared against the final runtime; nine checks ran on the final candidate"
+        ".build/browser-qa/storage-ui-verification.json: 14 full-envelope expanded inventory checks; five exports re-compared against the final runtime; nine checks ran on the final candidate",
+        "web/docs/loot-mod-source.md: 53 accepted original observations over 18 cases and three negative controls",
+        "web/docs/loot-mod-ui-source.md: original dialog/icon placement and pending UI contract",
+        ".build/loot-mod-scenarios/report.json: 4,487 aggregate frames, 53 replay checkpoints and 27 earned-origin fixtures",
+        ".build/browser-qa/loot-mod-scenario-audit.json: exact independent replay and actual automatic reloads after mounting",
+        ".build/browser-qa/loot-mod-ui-verification.json: eleven full-envelope checks on the final candidate, including controlled full-capacity rejection with separately recorded provenance"
       ],
       "unverified": [
         "Generation with unimplemented party skills and contexts beyond the seven enabled days",
         "Independent original-runtime connected seven-day postbattle item-flow trace",
-        "Original tooltip rendering and fading",
-        "Original loot-phase MOD confirmation/cancel/persistence (town-only mounting remains a scoped port gap)"
+        "Original tooltip rendering and fading"
       ]
     },
     {
@@ -1315,7 +1382,7 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot with JSON import/export and Continue. Version 7 stores canonical inventory equipment/ammunition/reload state, selected slot, five consumable cooldowns, in-flight grenade damage, protection, five weapon-XP buckets, hero potentials/traits, enemy shadow/boss-damage/disarmed state, rewards and cumulative earnings. Current seven-day saves retain active mission parameters, previous-town metadata, the current prepared town, AP, earned medals, perfect-day and boss-spawn counters. Versions 1–6 migrate without rerunning settled rewards or prepared towns; explicit provenance marks reconstructed data. Current saves require shadow history instead of silently deriving a replacement from the frame. Version8 adds full projectile/bow lifecycles. Version9 persists the upgrade reference and pending Upgrade/MOD confirmation; versions1–8 migrate, initializing these fields without RNG. Town reload metadata retained by enchant is accepted; active-battle timer validation remains strict. Version10 adds Archer counters and cosmetic arrow state, permits Day3 and validates previousTown against day−1. Versions1–9 migrate without creating arrows or consuming RNG. Version11 supports Day4 and boss facing; versions1–10 migrate without RNG, including normalization of legacy walkingframes212–219 into200–211. Shield countdown/animation and fourth-town grown recruits persist. Version12 enables Day5 and persists Fly hover counters, timeline/shadow state and fifth-town level2/3 recruits. Version11 migrates without rerolls or RNG changes; historical migrations retain their documented reconstruction behavior. Current saves validate campaign/previous-town bindings and reject missing or invalid Fly state. Version13 adds the persistent first title, explicit result tax/salary and Barbarian rage, child-rage frame and parent hit-effect records. Legacy versions1–12 initialize previously unavailable title/tax/salary without consuming RNG or changing paid balances. Barbarian requires v13 state with valid effect fields; unsupported prior Barbarian history is rejected rather than reconstructed. Version14 enables Day7 and seventh-town level4 recruits, preserves an already claimed title into salary settlement, and persists boss special action5 and cosmetic projectiles (null weaponSlot/damage−1). Legacy v13 state migrates without rerolling or replaying settlement; current validation rejects malformed cosmetic sentinels and invalid boss special state. Medal62 is accepted for earned seventh-perfect saves. Version 15 adds canonical party/candidate/inactive records, cached effects, owner-attributed projectiles, AI/retained targets and pending hire/dismiss/MOD dialogs. Legacy 1–14 migration uses retained candidate data without RNG or granting an owned companion. The initial v15 air-as-armor pattern is repaired only when unambiguous, preserving selected/retained target identities, cache history and RNG; mixed states are rejected. Earned Day5 browser import and current roundtrip match complete expected state. Version16 persists Wall level separately from maximum HP and accepts upgraded House capacity2/3. Legacy1–15 initializes Wall level1 without RNG or repricing settled history; current validation rejects impossible upgrade/HP state. Version17 retains wallFixCount and repairmanLevel as nonnegative integers. Legacy1–16 sets both0 without purchases, healing or RNG. The existing newWave/index state preserves repair timing across save/replay, without an additional timer. Version18 validates sandbagLevel as an integer0–10. Legacy1–17 initializes it0 without purchase/healing/RNG or settled-result changes, preserving prior repair and party state. Version 19 stores canonical inventory length 6–16 and derives Storage level, with no duplicate field. Older versions 1–18 remain strict six-slot inventories. Pending action/upgrade/party indices validate actual capacity; battle selection and cooldown lengths remain five. Consumable reload metadata is retained at the corrected source postbattle boundary.",
+      "implemented": "One browser slot with JSON import/export and Continue. Version 7 stores canonical inventory equipment/ammunition/reload state, selected slot, five consumable cooldowns, in-flight grenade damage, protection, five weapon-XP buckets, hero potentials/traits, enemy shadow/boss-damage/disarmed state, rewards and cumulative earnings. Current seven-day saves retain active mission parameters, previous-town metadata, the current prepared town, AP, earned medals, perfect-day and boss-spawn counters. Versions 1–6 migrate without rerunning settled rewards or prepared towns; explicit provenance marks reconstructed data. Current saves require shadow history instead of silently deriving a replacement from the frame. Version8 adds full projectile/bow lifecycles. Version9 persists the upgrade reference and pending Upgrade/MOD confirmation; versions1–8 migrate, initializing these fields without RNG. Town reload metadata retained by enchant is accepted; active-battle timer validation remains strict. Version10 adds Archer counters and cosmetic arrow state, permits Day3 and validates previousTown against day−1. Versions1–9 migrate without creating arrows or consuming RNG. Version11 supports Day4 and boss facing; versions1–10 migrate without RNG, including normalization of legacy walkingframes212–219 into200–211. Shield countdown/animation and fourth-town grown recruits persist. Version12 enables Day5 and persists Fly hover counters, timeline/shadow state and fifth-town level2/3 recruits. Version11 migrates without rerolls or RNG changes; historical migrations retain their documented reconstruction behavior. Current saves validate campaign/previous-town bindings and reject missing or invalid Fly state. Version13 adds the persistent first title, explicit result tax/salary and Barbarian rage, child-rage frame and parent hit-effect records. Legacy versions1–12 initialize previously unavailable title/tax/salary without consuming RNG or changing paid balances. Barbarian requires v13 state with valid effect fields; unsupported prior Barbarian history is rejected rather than reconstructed. Version14 enables Day7 and seventh-town level4 recruits, preserves an already claimed title into salary settlement, and persists boss special action5 and cosmetic projectiles (null weaponSlot/damage−1). Legacy v13 state migrates without rerolling or replaying settlement; current validation rejects malformed cosmetic sentinels and invalid boss special state. Medal62 is accepted for earned seventh-perfect saves. Version 15 adds canonical party/candidate/inactive records, cached effects, owner-attributed projectiles, AI/retained targets and pending hire/dismiss/MOD dialogs. Legacy 1–14 migration uses retained candidate data without RNG or granting an owned companion. The initial v15 air-as-armor pattern is repaired only when unambiguous, preserving selected/retained target identities, cache history and RNG; mixed states are rejected. Earned Day5 browser import and current roundtrip match complete expected state. Version16 persists Wall level separately from maximum HP and accepts upgraded House capacity2/3. Legacy1–15 initializes Wall level1 without RNG or repricing settled history; current validation rejects impossible upgrade/HP state. Version17 retains wallFixCount and repairmanLevel as nonnegative integers. Legacy1–16 sets both0 without purchases, healing or RNG. The existing newWave/index state preserves repair timing across save/replay, without an additional timer. Version18 validates sandbagLevel as an integer0–10. Legacy1–17 initializes it0 without purchase/healing/RNG or settled-result changes, preserving prior repair and party state. Version 19 stores canonical inventory length 6–16 and derives Storage level, with no duplicate field. Older versions 1–18 remain strict six-slot inventories. Pending action/upgrade/party indices validate actual capacity; battle selection and cooldown lengths remain five. Consumable reload metadata is retained at the corrected source postbattle boundary. Version 20 persists pending loot MOD endpoints and validates phase, distinct addresses, actual capacity and occupied types. Incompatible MOD/gun pairs are allowed until Yes because that is the source check boundary. Versions 1–19 initialize the new pending action to null without RNG; v19 expanded capacity and all item metadata persist.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",
@@ -1365,7 +1432,13 @@
         ".build/browser-qa/sandbag-production-verification.json:exact actual v17→v18 migration/restore and new-game Sandbag defaults",
         "web/tests/castle-storage-reference.test.ts: 37 original observations and three negative controls; exact source slot/transaction/ammo boundaries, excluding loot MOD",
         ".build/browser-qa/storage-ui-verification.json: 14 full-envelope expanded inventory checks; five exports re-compared against the final runtime; nine checks ran on the final candidate",
-        ".build/browser-qa/storage-production-verification.json: exact actual v18→v19 migration/restore and six-slot New Game"
+        ".build/browser-qa/storage-production-verification.json: exact actual v18→v19 migration/restore and six-slot New Game",
+        "web/docs/loot-mod-source.md: 53 accepted original observations over 18 cases and three negative controls",
+        "web/docs/loot-mod-ui-source.md: original dialog/icon placement and pending UI contract",
+        ".build/loot-mod-scenarios/report.json: 4,487 aggregate frames, 53 replay checkpoints and 27 earned-origin fixtures",
+        ".build/browser-qa/loot-mod-scenario-audit.json: exact independent replay and actual automatic reloads after mounting",
+        ".build/browser-qa/loot-mod-ui-verification.json: eleven full-envelope checks on the final candidate, including controlled full-capacity rejection with separately recorded provenance",
+        ".build/browser-qa/loot-mod-production-verification.json: exact actual v19→v20 migration/restore and New Game with no pending loot action"
       ],
       "unverified": [
         "Original six save-slot interface parity",
@@ -1393,7 +1466,7 @@
         "ally1 and enemy_* frame scripts in original SWF"
       ],
       "status": "partial",
-      "implemented": "Selected original assets and reconstructed character timeline layers support the seven-day Sheriff slice, town mission/castle/shop menus, original item/coin art and Free Repair/sale/Rest dialogs. The battle hotbar renders owned equipment, ammo and per-slot cooldowns; selected weapon presentation, repair/prayer/defend effects and sounds use original assets. Original item popup, upgrade arrow and separate shop labels support before/after upgrade and MOD confirmations. Original Archer1092 and enemyarrow2282 body/shadow are rendered, including stage overlay order and source registration; generated bounds drive the Archer clamp. Original Fly952 retains all126 frames, its distant shadow and falling corpse, death sound, filled-contour collision and independently measured per-frame bounds; source geometry includes the shadow approximately104pixels below the living body. Original Barbarian1340, rage2385 and hit/critical1459 artwork render saved frame/offset/alpha state. Rage child contours and parent-only particle bounds remain distinct, preserving the original targeting and knockback behavior. The city title action uses the original New Title! dialog/card and Honorary Citizen text. Day7 boss wind-up and the existing grenade2 body/shadow assets render the saved special attack and cosmetic flight; candidate browser export/replay confirms the controlled flight and landing, with body/shadow observed and audio still unverified. Original Characters/Equipment shells, controls, portrait placement/alpha/filter and Impact font support party menus; OriginalAlly layers render companions with actor-specific weapon/reload events and targeting cursors. Visual and audio parity remains bounded by the actual observed screens. Original Castle sprite2192/picture2191 tile states and page buttons1625/1630 support House/Wall levels, costs and affordability. Source geometry keeps the near-transparent button region clickable without including raster blur expansion; source font1535 uses the loaded ui family. Existing original tile0/6 art supports Fix Wall and Repairman without asset changes. Repairman level0 uses the source not-yet-acquired detail; positive levels show the current HP/wave. FixWall never displays a level suffix. Purchases use payment sound; automatic wave repairs update the ordinary HP HUD without invented audio/VFX. Existing Castle tile2 frames5/6 now support Sandbag purchase, cap and the source absorption hint; no new artwork or effects are introduced. Storage uses original tile 3 frames 7/8 without new assets; shop/equipment rows retain source y=250+row×48 before the town offset of −22, and loot rows use y=224+row×48 before the offset of −26. The loot panel status hides when it would overlap the second row; messages use the existing external status.",
+      "implemented": "Selected original assets and reconstructed character timeline layers support the seven-day Sheriff slice, town mission/castle/shop menus, original item/coin art and Free Repair/sale/Rest dialogs. The battle hotbar renders owned equipment, ammo and per-slot cooldowns; selected weapon presentation, repair/prayer/defend effects and sounds use original assets. Original item popup, upgrade arrow and separate shop labels support before/after upgrade and MOD confirmations. Original Archer1092 and enemyarrow2282 body/shadow are rendered, including stage overlay order and source registration; generated bounds drive the Archer clamp. Original Fly952 retains all126 frames, its distant shadow and falling corpse, death sound, filled-contour collision and independently measured per-frame bounds; source geometry includes the shadow approximately104pixels below the living body. Original Barbarian1340, rage2385 and hit/critical1459 artwork render saved frame/offset/alpha state. Rage child contours and parent-only particle bounds remain distinct, preserving the original targeting and knockback behavior. The city title action uses the original New Title! dialog/card and Honorary Citizen text. Day7 boss wind-up and the existing grenade2 body/shadow assets render the saved special attack and cosmetic flight; candidate browser export/replay confirms the controlled flight and landing, with body/shadow observed and audio still unverified. Original Characters/Equipment shells, controls, portrait placement/alpha/filter and Impact font support party menus; OriginalAlly layers render companions with actor-specific weapon/reload events and targeting cursors. Visual and audio parity remains bounded by the actual observed screens. Original Castle sprite2192/picture2191 tile states and page buttons1625/1630 support House/Wall levels, costs and affordability. Source geometry keeps the near-transparent button region clickable without including raster blur expansion; source font1535 uses the loaded ui family. Existing original tile0/6 art supports Fix Wall and Repairman without asset changes. Repairman level0 uses the source not-yet-acquired detail; positive levels show the current HP/wave. FixWall never displays a level suffix. Purchases use payment sound; automatic wave repairs update the ordinary HP HUD without invented audio/VFX. Existing Castle tile2 frames5/6 now support Sandbag purchase, cap and the source absorption hint; no new artwork or effects are introduced. Storage uses original tile 3 frames 7/8 without new assets; shop/equipment rows retain source y=250+row×48 before the town offset of −22, and loot rows use y=224+row×48 before the offset of −26. The loot panel status hides when it would overlap the second row; messages use the existing external status. Ordinary/boss loot reuse dialog sprite 2131 and Yes/No artwork at stage coordinates, independent of the shifted reward panel. The carried MOD icon appears above its target gun using source registration; no source duplicate remains. Shop uses the same confirmation renderer. No new assets are required.",
       "evidence": [
         "docs/asset-manifest.json",
         "docs/ui-reference.md",
@@ -1410,7 +1483,10 @@
         "web/docs/party-integration-status.md:published UI checkpoints and remaining visual/audio limits",
         "web/docs/castle-upgrades-ui-source.md",
         ".build/web-assets/castle-assets-verification.json:108images49clips89sounds6fonts;only prior Castle panel/layout/manifest changed",
-        ".build/browser-qa/castle-ui-verification.json:eleven complete-save checks including House/Wall, Continue, expanded party Rest/battle and settlement"
+        ".build/browser-qa/castle-ui-verification.json:eleven complete-save checks including House/Wall, Continue, expanded party Rest/battle and settlement",
+        "web/docs/loot-mod-source.md: 53 accepted original observations over 18 cases and three negative controls",
+        "web/docs/loot-mod-ui-source.md: original dialog/icon placement and pending UI contract",
+        ".build/browser-qa/loot-mod-ui-verification.json: eleven full-envelope checks on the final candidate, including controlled full-capacity rejection with separately recorded provenance"
       ],
       "unverified": [
         "Complete scene/state visual comparison",

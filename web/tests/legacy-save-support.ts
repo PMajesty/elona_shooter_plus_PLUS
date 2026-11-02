@@ -10,7 +10,7 @@ import { ENEMIES } from '../src/content.ts';
 export function withLegacyPartyDefaults(value: Record<string, any>): Record<string, any> {
   const expected = structuredClone(value);
   const town = expected.town?.preparation === 'ready' ? expected.town : expected.previousTown;
-  expected.version = 19;
+  expected.version = 20;
   expected.wallLevel = 1;
   expected.wallFixCount = 0;
   expected.repairmanLevel = 0;
@@ -20,6 +20,7 @@ export function withLegacyPartyDefaults(value: Record<string, any>): Record<stri
   expected.partyAI = createPartyAIShared();
   expected.retainedAITargets = [];
   expected.pendingPartyAction = null;
+  expected.pendingLootAction = null;
   expected.result.wages = 0;
   for (const enemy of expected.enemies) {
     enemy.type = ENEMIES[enemy.kind as keyof typeof ENEMIES].airborne ? 1 : 0;
@@ -29,8 +30,16 @@ export function withLegacyPartyDefaults(value: Record<string, any>): Record<stri
   return expected;
 }
 
-export function asLegacyV18Save(state: SimulationState): Record<string, any> {
+export function asLegacyV19Save(state: SimulationState): Record<string, any> {
   const value: Record<string, any> = structuredClone(state);
+  assert.equal(value.pendingLootAction, null);
+  delete value.pendingLootAction;
+  value.version = 19;
+  return value;
+}
+
+export function asLegacyV18Save(state: SimulationState): Record<string, any> {
+  const value = asLegacyV19Save(state);
   assert.equal(value.inventory.length, 6);
   value.version = 18;
   return value;

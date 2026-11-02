@@ -2,6 +2,8 @@ import { ITEM_TYPE, MODS, ItemFactory, isOccupiedItem, type Item } from './items
 
 export type TownEquipmentAction = { kind: 'upgrade'; slot: number; cost: number }
   | { kind: 'mod'; modSlot: number; gunSlot: number };
+export type LootItemAddress = { area: 'offers' | 'inventory'; index: number };
+export type LootEquipmentAction = { kind: 'mod'; mod: LootItemAddress; gun: LootItemAddress };
 export type TownEquipmentOutcome = 'previewed' | 'upgraded' | 'mounted' | 'swapped' | 'cancelled'
   | 'not-enough-ap' | 'not-enough-gold' | 'no-mod-slot' | 'incompatible-ammo-mod'
   | 'incompatible-auto-reload' | 'already-living' | 'unavailable';

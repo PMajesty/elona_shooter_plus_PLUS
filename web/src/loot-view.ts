@@ -1,8 +1,12 @@
 import Phaser from 'phaser';
 import { ITEM_TYPE, isOccupiedItem, itemPrice, type Item } from './items.ts';
+import { createModConfirmation, type ModConfirmationLayout } from './mod-confirmation-view.ts';
 
 export type LootArea = 'offers' | 'inventory';
-export interface LootViewState { inventory: (Item | null)[]; lootOffers: (Item | null)[]; bossKilled?: number }
+export interface LootViewState {
+  inventory: (Item | null)[]; lootOffers: (Item | null)[]; bossKilled?: number;
+  pendingLootAction: { kind: 'mod'; mod: { area: LootArea; index: number }; gun: { area: LootArea; index: number } } | null;
+}
 export interface LootViewManifest {
   images: Record<string, { originX: number; originY: number; width: number; height: number }>;
   clips: Record<string, { originX: number; originY: number; frameWidth: number; frameHeight: number }>;
@@ -10,6 +14,7 @@ export interface LootViewManifest {
 export interface LootViewCallbacks {
   move(fromArea: LootArea, from: number, toArea: LootArea, to: number): boolean;
   proceed(): void;
+  resolveModMount(confirm: boolean): void;
   message?(text: string): void;
 }
 
@@ -45,9 +50,11 @@ function stats(item: Item): string {
 }
 
 /** Исходный выбор двумя нажатиями: взять предмет, затем указать ячейку назначения. */
-export function createLootView(scene: Phaser.Scene, state: LootViewState, manifest: LootViewManifest, callbacks: LootViewCallbacks, mode: 'ordinary' | 'boss' = 'ordinary'): Phaser.GameObjects.Container {
+export function createLootView(scene: Phaser.Scene, state: LootViewState, manifest: LootViewManifest, callbacks: LootViewCallbacks,
+  dialog: ModConfirmationLayout, mode: 'ordinary' | 'boss' = 'ordinary'): Phaser.GameObjects.Container {
   const root = scene.add.container(MENU_X, 0);
-  root.setName('ordinary-loot-view');
+  const modal = state.pendingLootAction !== null;
+  root.setName(mode === 'boss' ? 'boss-loot-view' : 'ordinary-loot-view').setData('pendingLootAction', state.pendingLootAction);
   const text = (x: number, y: number, value: string, size = 13, color = '#322316') => {
     const object = scene.add.text(x, y, value, { fontFamily: 'ElonaMenu', fontSize: `${size}px`, color, padding: { x: 1, y: 1 } });
     root.add(object); return object;
@@ -73,10 +80,14 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
 
   interface SlotView { area: LootArea; index: number; item: Item; icon: Phaser.GameObjects.Container; originalX: number; originalY: number; width: number; height: number }
   let carrying: SlotView | undefined;
+  let pendingModIcon: SlotView | undefined;
+  const slotPosition = (area: LootArea, index: number) => area === 'offers'
+    ? { x: 140 + index * 50, y: 129 }
+    : { x: 140 + index % 8 * 50, y: 198 + Math.floor(index / 8) * 48 };
   const point = new Phaser.Math.Vector2();
   const localPointer = (pointer: Phaser.Input.Pointer) => root.getWorldTransformMatrix().applyInverse(pointer.worldX, pointer.worldY, point);
   const showTooltip = (item: Item, pointer: Phaser.Input.Pointer) => {
-    if (carrying) return;
+    if (carrying || modal) return;
     tooltipName.setText(item.name).setColor(item.lv > 1 ? '#0000cc' : '#20170e');
     tooltipStats.setText(stats(item)).setY(tooltipName.y + tooltipName.height + 4);
     const height = tooltipStats.y + tooltipStats.height + 8;
@@ -99,7 +110,9 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
   };
 
   background.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
-    event.stopPropagation(); clearCarry(); tooltip.setVisible(false); status.setText('');
+    event.stopPropagation();
+    if (modal) return;
+    clearCarry(); tooltip.setVisible(false); status.setText('');
   });
 
   const addSlot = (area: LootArea, index: number, item: Item | null, x: number, y: number) => {
@@ -121,6 +134,7 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
       }
       root.add(icon);
       slotView = { area, index, item, icon, originalX: iconX, originalY: y, width, height: GRAPHIC_HEIGHT[item.graphic] ?? asset.frameHeight };
+      if (state.pendingLootAction?.mod.area === area && state.pendingLootAction.mod.index === index) pendingModIcon = slotView;
     }
     const zone = scene.add.zone(x, y, 50, 50).setOrigin(0).setInteractive({ useHandCursor: true });
     zone.setName(`loot-${area}-${index}`); zone.setData({ area, index, itemId: item?.id ?? null });
@@ -128,7 +142,9 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
     zone.on('pointerover', (pointer: Phaser.Input.Pointer) => { if (item) showTooltip(item, pointer); });
     zone.on('pointerout', () => { if (!carrying) tooltip.setVisible(false); });
     zone.on('pointerdown', (pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation(); tooltip.setVisible(false); status.setText('');
+      event.stopPropagation();
+      if (modal) return;
+      tooltip.setVisible(false); status.setText('');
       if (!carrying) {
         if (!slotView) return;
         carrying = slotView; root.setData('carrying', { area, index });
@@ -138,29 +154,43 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
         return;
       }
       if (carrying.area === area && carrying.index === index) { clearCarry(); return; }
-      if (carrying.item.type === ITEM_TYPE.mod && item?.type === ITEM_TYPE.gun) {
-        clearCarry(); message('Mount MODs in town. Choose an empty slot here.'); return;
-      }
       // Успех синхронно уничтожает этот вид: после callback нельзя обращаться к его объектам.
       if (callbacks.move(carrying.area, carrying.index, area, index)) return;
       clearCarry(); message('This item could not be moved to that slot.');
     });
   };
 
-  for (let index = 0; index < 8; index++) addSlot('offers', index, state.lootOffers[index] ?? null, 140 + index * 50, 129);
+  for (let index = 0; index < 8; index++) {
+    const p = slotPosition('offers', index);
+    addSlot('offers', index, state.lootOffers[index] ?? null, p.x, p.y);
+  }
   // procLootMenu: (140 + column*50, 224 + row*48); сдвиг окна y=-26 уже запечён в панель.
-  for (let index = 0; index < state.inventory.length; index++) addSlot('inventory', index, state.inventory[index] ?? null, 140 + index % 8 * 50, 198 + Math.floor(index / 8) * 48);
+  for (let index = 0; index < state.inventory.length; index++) {
+    const p = slotPosition('inventory', index);
+    addSlot('inventory', index, state.inventory[index] ?? null, p.x, p.y);
+  }
+  if (pendingModIcon && state.pendingLootAction) {
+    const target = slotPosition(state.pendingLootAction.gun.area, state.pendingLootAction.gun.index);
+    // invDrag переносит только иконку поверх оружия до showDialog; записи ещё не меняются.
+    pendingModIcon.icon.setPosition(target.x - (pendingModIcon.width - 48) / 2 - 4, target.y).setName('loot-pending-mod-icon');
+    root.bringToTop(pendingModIcon.icon);
+  }
 
   const proceed = image('button_proceed', 271, 301).setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 });
   proceed.setName('loot-proceed');
-  proceed.on('pointerover', () => { if (!carrying && manifest.images.button_proceed_over) proceed.setTexture('button_proceed_over'); });
+  proceed.on('pointerover', () => { if (!modal && !carrying && manifest.images.button_proceed_over) proceed.setTexture('button_proceed_over'); });
   proceed.on('pointerout', () => proceed.setTexture('button_proceed'));
   proceed.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
     event.stopPropagation();
+    if (modal) return;
     if (carrying) { clearCarry(); tooltip.setVisible(false); return; }
     callbacks.proceed();
   });
   root.bringToTop(status); root.bringToTop(tooltip);
+  if (modal) {
+    // Компенсируем только сдвиг родителя: оригинальный диалог всегда находится в (0,0) stage.
+    root.add(createModConfirmation(scene, manifest, dialog, callbacks.resolveModMount, 'loot-mod').setX(-MENU_X));
+  }
   scene.input.on('pointermove', moveCarried);
   root.once(Phaser.GameObjects.Events.DESTROY, () => {
     scene.input.off('pointermove', moveCarried);

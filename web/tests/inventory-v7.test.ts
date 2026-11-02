@@ -13,7 +13,7 @@ test('v6 migration moves active ammunition and cooldowns to canonical inventory 
   const untouched = structuredClone(legacy);
   const restored = Simulation.fromSave(legacy);
   assert.deepEqual(legacy, untouched);
-  assert.equal(restored.state.version, 19);
+  assert.equal(restored.state.version, 20);
   assert.deepEqual(restored.state.inventory, legacy.inventory);
   assert.equal(restored.state.player.selectedSlot, 0);
   assert.deepEqual(restored.state.player.weaponExp, [0, 0, 0, legacy.player.weaponExp, 0]);

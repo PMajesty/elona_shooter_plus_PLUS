@@ -10,12 +10,14 @@ retained party and equipment. Victory, defeat,
 rewards, town entry and save/restore work across these stages. Original English
 artwork, fonts, audio and credits are retained.
 
-The seven-day **v19 Storage release** is published at
+The **v20 loot MOD release** is published at
 [the local release](http://127.0.0.1:5175/elona/) after automated/source checks,
-fourteen complete-save UI checks and successful production New Game and exact
-v18-save migration/restore checks. Its deployable archive is
-`.build/elona-shooter-browser-storage-slice.zip`; the verified v18 release is retained
-in `.build/browser-before-storage` and the prior Sandbag archive.
+eleven complete-save UI checks and successful production New Game and exact
+v19-save migration/restore checks. Ordinary loot and boss prizes now support
+mounting confirmation, saved pending dialogs and the original No/outside swap.
+Its deployable archive is `.build/elona-shooter-browser-loot-mod-slice.zip`;
+the verified v19 release remains in `.build/browser-before-loot-mod` and the
+prior Storage archive.
 
 This is not yet the complete game. Day 8 onward, other playable hero classes, full town
 management, the other Castle upgrades, temporary henchmen, recruit refresh, other card actions, Ragnarok and
@@ -112,9 +114,8 @@ slot adds **40 GP daily upkeep**. Shop, Equipment and ordinary/boss loot show ei
 columns and a second row when needed. Purchases, sales, swaps, town Upgrade/MODs,
 Shop Tokens and companion equipment use the expanded slots; only the **first five**
 remain battle hotkeys. At16 slots, further purchases cost nothing and are blocked.
-Looter, Trainer and Castle page2 remain unavailable. **MOD mounting during loot
-is still unported**: keep the MOD and mount it in town; expanded loot transfer
-support does not imply that confirmation works during rewards.
+Looter, Trainer and Castle page2 remain unavailable. Version 20 adds MOD
+mounting during ordinary and boss loot, using these same expanded slots.
 Town preparation generates stock, cards, next-mission data and a
 recruit once. Open the Shop tab, click stock to pick it up, then click an empty
 owned slot to buy it. Owned items can be moved or swapped; dropping one outside
@@ -178,16 +179,24 @@ defect. Opening a preview consumes the original random draws. Cancel keeps the
 gun, gold and AP, but does not rewind RNG; opening another preview generates a
 new one.
 
-To mount a MOD, pick it up from owned inventory and click an owned gun. Yes
-mounts a compatible MOD without spending AP or gold, and consumes the MOD.
-Rejected mounting keeps both items. **No or clicking outside this confirmation
-swaps the MOD and gun**, matching the original owned-inventory behavior; it does
-not cancel like a sale. Stock MODs must first be bought into an empty owned slot.
+To mount a MOD in town, pick it up from owned inventory and click an owned gun.
+Version 20 also supports this on ordinary and boss loot screens, with
+any offered/owned source and destination, including expanded inventory slots.
+Yes mounts a compatible MOD without spending AP, gold or RNG, and consumes the
+MOD while retaining its inactive metadata. Rejected mounting keeps both items.
+**No or clicking outside this confirmation swaps the MOD and gun**, matching the
+original non-ally behavior; it does not cancel like a sale. Mounting on an offered
+gun does not collect it automatically. While confirmation is open, clicks cannot
+also move another item or advance rewards. Stock MODs must first be bought into
+an empty owned slot.
 
-Saves now use **version 19**; versions **1–18** are accepted. Capacity
-is the owned inventory length 6–16; Storage level is derived as slots minus five,
-with no duplicate saved level. Legacy saves retain their six-slot inventory
-without purchases, RNG changes or discarded item metadata. Sandbag
+Saves now use **version 20**; versions **1–19** are accepted. Pending
+loot MOD confirmation retains both area/index endpoints and resumes on the same
+reward screen without repeating a move or enchant. Older versions initialize it
+to null without consuming RNG. Capacity is the owned inventory length 6–16;
+Storage level is derived as slots minus five, with no duplicate saved level.
+Versions 1–18 retain their six-slot inventory; v19 retains its actual expanded
+capacity. Migration makes no purchases or RNG changes and discards no item metadata. Sandbag
 level0–10 persists; older saves initialize it to zero without spending, healing,
 changing RNG or repricing settled results. Repairman
 level and the paid Fix Wall purchase count persist. Older saves initialize both
@@ -322,7 +331,46 @@ grenade flight, shake RNG and death before/after release. See
 [seventh-day wave notes](web/docs/seventh-day-wave-source.md) and
 [seventh-town notes](web/docs/seventh-town-source.md).
 
-The v19 Storage release passes **331 tests**, TypeScript checking and its build
+The v20 loot MOD release passes **341 tests**, TypeScript checking and its
+build (`assets/index-BJh2mRko.js`). **All 53 original observations across 18 cases
+match**, covering ordinary/boss rewards, all offer/owned directions, Yes,
+No/outside swaps, rejection, consumed metadata, new Living Weapon and cached
+Engineer. Four focused reference tests include three negative controls for No
+as a no-op, erased inactive MOD metadata and omitted Engineer. The final rifle
+case distinguishes 72 attack with cached Engineer from 70 without it; the earlier
+Shotgun probe rounded both results equally and was replaced with this stronger
+probe. This is method-boundary evidence, not complete native scheduling or
+browser-input parity. See [loot MOD source notes](web/docs/loot-mod-source.md)
+and [UI notes](web/docs/loot-mod-ui-source.md).
+
+The natural integration run passes **4,487 aggregate frames, 53 save/replay
+checkpoints and 27 saved fixtures**. One fresh seed earns the MOD, rewards,
+towns and paid Storage normally; four confirm/cancel branches start from those
+earned checkpoints. An independent replay audit verifies every fixture and real
+automatic reloads in both mounted branches. No items, gold, HP or RNG are granted.
+These are aggregate branches, not one continuous campaign; the runner uses original
+ordinary contours and the documented boss rectangle fallback. Reports are
+`.build/loot-mod-scenarios/report.json` and
+`.build/browser-qa/loot-mod-scenario-audit.json`. These headless checks remain
+separate from the original-method and actual browser evidence.
+
+Eleven full-envelope UI checks pass on the final candidate: all four offer/owned
+endpoint directions, pending Continue, Yes/No, a click over the covered Proceed
+button that declines without advancing rewards, the shared town confirmation,
+Rest and full-mod-capacity rejection. The rejection fixture explicitly grants
+one Damage enchantment to an earned gun; its separate provenance is recorded in
+`.build/browser-qa/loot-mod-controlled-full-provenance.json`. It is failure-path
+evidence, not natural acquisition. The natural integration branches above have
+no grants. All 305 public asset files are unchanged, and all 308 candidate/live/ZIP
+files match. Production New Game starts at tick 0 with HP 40, gold 200, ammo 5,
+six inventory slots and no pending loot action. The actual v19 backup migrates
+and restores with complete-envelope equality at tick 674, HP 40, gold 209 and
+unchanged RNG; paused, with no console errors. Evidence:
+`.build/browser-qa/loot-mod-ui-verification.json`,
+`.build/browser-qa/loot-mod-production-verification.json` and
+`.build/loot-mod-publication.json`; screenshot `loot-mod-production-restored.jpg`.
+
+The historical v19 Storage release passes **331 tests**, TypeScript checking and its build
 (`assets/index-Cb35fe28.js`). **All 37 original observations match**. The initial
 36/37 comparison exposed consumable reload metadata being cleared too early at
 battle completion; correcting that boundary preserves it until the source's
@@ -518,10 +566,10 @@ or native browser scheduling parity. Run
 `node --experimental-strip-types scripts/party-soak.ts 8 repair` from `web`;
 reports are in `.build/repair-party-soak/`.
 
-The next slice is **MOD mounting during loot**: capture original confirmation,
-cancel and persistence probes, then connect the behavior through the ordinary
-reward flow. Looter valuation is another bounded Castle candidate; Trainer,
-Day8/Lava and the unproven veteran late-game hitbox complaint remain later work.
+The next useful slice is the **Looter Castle upgrade tied to actual reward
+valuation**, followed by Trainer.
+Day8/Lava, broader campaign expansion and the unproven veteran late-game hitbox
+complaint remain later work.
 
 `npm.cmd run test:projectile-soak` separately exercises eight projectile guns
 and hand grenades under three seeds: **27 scenarios, 9,720 frames and 1,080
@@ -568,6 +616,7 @@ python tools/build_castle_upgrades_oracle.py
 python tools/build_castle_repair_oracle.py
 python tools/build_castle_sandbag_oracle.py
 python tools/build_castle_storage_oracle.py
+python tools/build_loot_mod_oracle.py
 python tools/serve_oracle.py
 ```
 
@@ -602,7 +651,9 @@ with `test:sixth-day-wave-reference`, `test:barbarian-reference` and
 repair and Repairman use `?suite=castle-repair` and
 `npm.cmd run test:castle-repair-reference`. Sandbags use `?suite=castle-sandbag`
 and `npm.cmd run test:castle-sandbag-reference`. Storage uses `?suite=castle-storage`
-and `npm.cmd run test:castle-storage-reference`.
+and `npm.cmd run test:castle-storage-reference`. Reward MOD mounting uses
+`?suite=loot-mod` and `npm.cmd run test:loot-mod-reference`; run
+`npm.cmd run test:loot-mod-scenarios` for the earned-checkpoint integration branches.
 Run these scripts with `npm.cmd run` from `web/`. Each page runs the original
 twice automatically, requires identical observations and saves its report. From
 `web/`, use the matching comparison command: `npm.cmd run test:reference`,
