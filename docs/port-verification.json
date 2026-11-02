@@ -1,6 +1,6 @@
 {
   "date": "2026-11-02",
-  "milestone": "Eight connected Sheriff days, original Lava encounters and timer spawn batching, Day8 town/rewards and v23 persistence; published locally and browser-verified",
+  "milestone": "Nine connected Sheriff days, first boss-day town preparation, original spawn/fallback boundaries, corrected title click regions and v24 persistence; published locally and browser-verified",
   "complete_port": false,
   "environment": {
     "os": "Windows",
@@ -10,18 +10,22 @@
     "vite": "8.3.5"
   },
   "automated": {
-    "simulation_tests_passed": 386,
-    "simulation_tests_failed": 0,
+    "simulation_tests_passed": 403,
+    "title_tests_passed": 3,
+    "unique_tests_passed": 406,
+    "tests_failed": 0,
+    "test_scope": "403 tests passed in the full-suite run; three new title tests passed afterward. This is not a claimed single 406-test run.",
     "typescript": "passed",
     "candidate_build": "passed",
-    "production_build": "identical to final verified candidate",
-    "test_output": ".build/day-eight-tests-output.txt",
-    "build_output": ".build/day-eight-build-output.txt",
-    "day_eight_natural_campaigns": {
+    "production_build": "identical to verified candidate",
+    "test_output": ".build/day-nine-tests-output.txt",
+    "title_test_output": ".build/day-nine-title-tests-output.txt",
+    "build_output": ".build/day-nine-build-output.txt",
+    "day_nine_natural_campaigns": {
       "status": "passed",
       "seedCount": 4,
       "sourceHashes": {
-        "simulation.ts": "76461e1af69946d8ee7f94a86425ac60410c3f6dd8af234202abccda7eb990fe",
+        "simulation.ts": "3dacca2bb900194f7e66577fe0d4a7583c3dbfe6d9e6522f671a8dba458dce59",
         "items.ts": "4c7f84d8f77bb7e96c262b0bc0f03612a50c707483027397c3e76201ded7a4b8",
         "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
         "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
@@ -29,20 +33,20 @@
         "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
         "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
         "collision.ts": "796561aab4204994d2916fe604ec7a6b2257c38a74e81211db1c7dafa03ab96c",
-        "town-preparation.ts": "28aa1ceaf29402175d613d09ae63b102bdc136a4f0e5ecf8ecf313d0b9c1f669",
-        "town-save.ts": "a7c277837e76da1462269a98587192ab76ec47af21b41d6424deca185fa9da64",
+        "town-preparation.ts": "a5f4393356d6e092451e5f9a6d7907d55ba8a83489c90e083975444d3914bd22",
+        "town-save.ts": "8c1142e2b80750e62063e2109336b0ef7e00bf92627df301b24541a6f29ceaba",
         "castle-upgrades.ts": "f243c506c40010c9b0053fc873b6cdbd3fdd659328c33ccc0dbb5a72623bfec3",
         "content.ts": "4ccfbeb5ee649257cdb81372d0c882b82b07b95cc4c051443bfa37ea79e667e5",
-        "missions.ts": "f614cffdf11af0c79479e16f17066dbdfbb577b91a8293974ea52a43d6615200",
-        "recruits.ts": "e20f12372840178a8658e7e9cab09600ad46a9bec32db7ca4434c99ebb961527",
+        "missions.ts": "e07e820a66fe8e9f83e8547aa55cf9b0fc3ee6de2e07fbac54ce09b7dc973aec",
+        "recruits.ts": "829fc1137d7a4b555d76562c36c51766d1c3998de3a560856c8ecdf36957ce6c",
         "enemy-display-bounds.ts": "8583558fa1bb87f7abaf29882bc9a8ef43392f57f8bf30a9a828204437391be3"
       },
       "geometrySha256": "d2ec48d541c01f7cb6a233f7823195b8a42b55f5f596ebeb98ab6b1823bfa352",
       "scenarios": 4,
-      "frames": 72263,
-      "checkpoints": 764,
-      "restTransitions": 28,
-      "rewardActions": 111,
+      "frames": 82162,
+      "checkpoints": 865,
+      "restTransitions": 32,
+      "rewardActions": 123,
       "reachedDays": {
         "1": 4,
         "2": 4,
@@ -51,7 +55,8 @@
         "5": 4,
         "6": 4,
         "7": 4,
-        "8": 4
+        "8": 4,
+        "9": 4
       },
       "wonDays": {
         "1": 4,
@@ -61,7 +66,8 @@
         "5": 4,
         "6": 4,
         "7": 4,
-        "8": 4
+        "8": 4,
+        "9": 4
       },
       "naturallyHiredClasses": [
         1,
@@ -75,7 +81,7 @@
       "partyBattleCounts": {
         "0": 4,
         "1": 13,
-        "2": 15
+        "2": 19
       },
       "expandedNaturalScenarios": [
         "natural-0",
@@ -85,24 +91,24 @@
       ],
       "actorActivity": {
         "1": {
-          "shots": 907,
-          "hits": 839,
-          "damage": 49833,
-          "kills": 558,
-          "reloads": 617,
-          "reloadCompletions": 102,
+          "shots": 1054,
+          "hits": 989,
+          "damage": 59524,
+          "kills": 652,
+          "reloads": 728,
+          "reloadCompletions": 117,
           "bowDraws": 0,
-          "levelUps": 26
+          "levelUps": 31
         },
         "2": {
-          "shots": 420,
-          "hits": 357,
-          "damage": 13516,
-          "kills": 184,
-          "reloads": 118,
-          "reloadCompletions": 16,
+          "shots": 563,
+          "hits": 492,
+          "damage": 18095,
+          "kills": 249,
+          "reloads": 158,
+          "reloadCompletions": 21,
           "bowDraws": 0,
-          "levelUps": 17
+          "levelUps": 21
         },
         "3": {
           "shots": 0,
@@ -115,9 +121,9 @@
           "levelUps": 0
         }
       },
-      "elapsedMs": 19895,
+      "elapsedMs": 22869,
       "collision": "Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts",
-      "policy": "Natural New Game starts through Day8; aimed Sheriff plus autonomous companions, ordinary loot/skills/House/Wall/hiring/repair/title transactions. No gold, item, HP or RNG grants, private completion or forced kills. Capture live Lava spawn/alert/attack/explosion/kill and timer batching when encountered, plus Day7 town, Day8 entry/results/town. Actual observed coverage is reported, not assumed.",
+      "policy": "Natural New Game starts through Day9; aimed Sheriff plus autonomous companions, ordinary loot/skills/House/Wall/hiring/repair/title transactions. No gold, item, HP or RNG grants, private completion or forced kills. Capture live Lava spawn/alert/attack/explosion/kill and timer batching when encountered, plus town8, Day9 entry/results/town. Actual observed coverage is reported, not assumed.",
       "limits": [
         "Port full-state/event replay and finite-state checks, not independent original parity or browser validation",
         "Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred",
@@ -144,30 +150,30 @@
             }
           ],
           "activity": {
-            "shots": 333,
-            "hits": 314,
-            "damage": 19438,
-            "kills": 206,
-            "reloads": 219,
-            "reloadCompletions": 32,
+            "shots": 415,
+            "hits": 396,
+            "damage": 23772,
+            "kills": 248,
+            "reloads": 260,
+            "reloadCompletions": 37,
             "bowDraws": 0,
             "projectiles": 0,
             "projectileKinds": {},
-            "levelUps": 11,
-            "wages": 795,
-            "wageSettlements": 7,
-            "battles": 7,
-            "victories": 7,
+            "levelUps": 14,
+            "wages": 983,
+            "wageSettlements": 8,
+            "battles": 8,
+            "victories": 8,
             "castleDefeats": 0
           },
-          "finalDay": 8,
+          "finalDay": 9,
           "phase": "town",
           "castleHp": 45,
-          "gold": 3139,
-          "victories": 8,
-          "checkpoints": 189,
-          "rests": 7,
-          "operationCount": 18062
+          "gold": 3677,
+          "victories": 9,
+          "checkpoints": 215,
+          "rests": 8,
+          "operationCount": 20687
         },
         {
           "id": "natural-1",
@@ -188,33 +194,33 @@
             }
           ],
           "activity": {
-            "shots": 292,
-            "hits": 262,
-            "damage": 14857,
-            "kills": 202,
-            "reloads": 195,
-            "reloadCompletions": 35,
+            "shots": 359,
+            "hits": 330,
+            "damage": 18302,
+            "kills": 241,
+            "reloads": 231,
+            "reloadCompletions": 40,
             "bowDraws": 0,
-            "projectiles": 114,
+            "projectiles": 150,
             "projectileKinds": {
-              "hand-grenade": 27,
-              "bolt": 87
+              "hand-grenade": 32,
+              "bolt": 118
             },
-            "levelUps": 11,
-            "wages": 825,
-            "wageSettlements": 7,
-            "battles": 7,
-            "victories": 7,
+            "levelUps": 13,
+            "wages": 1011,
+            "wageSettlements": 8,
+            "battles": 8,
+            "victories": 8,
             "castleDefeats": 0
           },
-          "finalDay": 8,
+          "finalDay": 9,
           "phase": "town",
           "castleHp": 45,
-          "gold": 3335,
-          "victories": 8,
-          "checkpoints": 194,
-          "rests": 7,
-          "operationCount": 18168
+          "gold": 4142,
+          "victories": 9,
+          "checkpoints": 216,
+          "rests": 8,
+          "operationCount": 20767
         },
         {
           "id": "natural-2",
@@ -235,32 +241,32 @@
             }
           ],
           "activity": {
-            "shots": 385,
-            "hits": 370,
-            "damage": 9744,
-            "kills": 135,
-            "reloads": 118,
-            "reloadCompletions": 16,
+            "shots": 461,
+            "hits": 444,
+            "damage": 12220,
+            "kills": 172,
+            "reloads": 158,
+            "reloadCompletions": 21,
             "bowDraws": 0,
-            "projectiles": 13,
+            "projectiles": 17,
             "projectileKinds": {
-              "hand-grenade": 13
+              "hand-grenade": 17
             },
-            "levelUps": 10,
-            "wages": 886,
-            "wageSettlements": 7,
-            "battles": 7,
-            "victories": 7,
+            "levelUps": 12,
+            "wages": 1097,
+            "wageSettlements": 8,
+            "battles": 8,
+            "victories": 8,
             "castleDefeats": 0
           },
-          "finalDay": 8,
+          "finalDay": 9,
           "phase": "town",
           "castleHp": 45,
-          "gold": 2495,
-          "victories": 8,
-          "checkpoints": 190,
-          "rests": 7,
-          "operationCount": 17946
+          "gold": 3029,
+          "victories": 9,
+          "checkpoints": 216,
+          "rests": 8,
+          "operationCount": 20281
         },
         {
           "id": "natural-3",
@@ -281,42 +287,42 @@
             }
           ],
           "activity": {
-            "shots": 317,
-            "hits": 250,
-            "damage": 19310,
-            "kills": 199,
-            "reloads": 203,
-            "reloadCompletions": 35,
+            "shots": 382,
+            "hits": 311,
+            "damage": 23325,
+            "kills": 240,
+            "reloads": 237,
+            "reloadCompletions": 40,
             "bowDraws": 0,
-            "projectiles": 110,
+            "projectiles": 141,
             "projectileKinds": {
-              "bolt": 110
+              "bolt": 141
             },
-            "levelUps": 11,
-            "wages": 948,
-            "wageSettlements": 7,
-            "battles": 7,
-            "victories": 7,
+            "levelUps": 13,
+            "wages": 1151,
+            "wageSettlements": 8,
+            "battles": 8,
+            "victories": 8,
             "castleDefeats": 0
           },
-          "finalDay": 8,
+          "finalDay": 9,
           "phase": "town",
           "castleHp": 45,
-          "gold": 3092,
-          "victories": 8,
-          "checkpoints": 191,
-          "rests": 7,
-          "operationCount": 18318
+          "gold": 3838,
+          "victories": 9,
+          "checkpoints": 218,
+          "rests": 8,
+          "operationCount": 20682
         }
       ]
     },
-    "campaigns_report": ".build/day-eight-party-soak/report.json",
-    "campaigns_report_sha256": "1940b80905c1908a7654b945c720d342b8fb1cdc0e525d1d69f9166207d9e463",
+    "campaigns_report": ".build/day-nine-party-soak/report.json",
+    "campaigns_report_sha256": "decf34b2244460dc3ef1e7841db1226f4edd6ff9a569d69206413373fec1dac5",
     "independent_scenario_audit": {
       "status": "passed",
-      "reportSha256": "1940b80905c1908a7654b945c720d342b8fb1cdc0e525d1d69f9166207d9e463",
+      "reportSha256": "decf34b2244460dc3ef1e7841db1226f4edd6ff9a569d69206413373fec1dac5",
       "sourceHashes": {
-        "simulation.ts": "76461e1af69946d8ee7f94a86425ac60410c3f6dd8af234202abccda7eb990fe",
+        "simulation.ts": "3dacca2bb900194f7e66577fe0d4a7583c3dbfe6d9e6522f671a8dba458dce59",
         "items.ts": "4c7f84d8f77bb7e96c262b0bc0f03612a50c707483027397c3e76201ded7a4b8",
         "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
         "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
@@ -324,24 +330,24 @@
         "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
         "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
         "collision.ts": "796561aab4204994d2916fe604ec7a6b2257c38a74e81211db1c7dafa03ab96c",
-        "town-preparation.ts": "28aa1ceaf29402175d613d09ae63b102bdc136a4f0e5ecf8ecf313d0b9c1f669",
-        "town-save.ts": "a7c277837e76da1462269a98587192ab76ec47af21b41d6424deca185fa9da64",
+        "town-preparation.ts": "a5f4393356d6e092451e5f9a6d7907d55ba8a83489c90e083975444d3914bd22",
+        "town-save.ts": "8c1142e2b80750e62063e2109336b0ef7e00bf92627df301b24541a6f29ceaba",
         "castle-upgrades.ts": "f243c506c40010c9b0053fc873b6cdbd3fdd659328c33ccc0dbb5a72623bfec3",
         "content.ts": "4ccfbeb5ee649257cdb81372d0c882b82b07b95cc4c051443bfa37ea79e667e5",
-        "missions.ts": "f614cffdf11af0c79479e16f17066dbdfbb577b91a8293974ea52a43d6615200",
-        "recruits.ts": "e20f12372840178a8658e7e9cab09600ad46a9bec32db7ca4434c99ebb961527",
+        "missions.ts": "e07e820a66fe8e9f83e8547aa55cf9b0fc3ee6de2e07fbac54ce09b7dc973aec",
+        "recruits.ts": "829fc1137d7a4b555d76562c36c51766d1c3998de3a560856c8ecdf36957ce6c",
         "enemy-display-bounds.ts": "8583558fa1bb87f7abaf29882bc9a8ef43392f57f8bf30a9a828204437391be3"
       },
       "geometrySha256": "d2ec48d541c01f7cb6a233f7823195b8a42b55f5f596ebeb98ab6b1823bfa352",
       "allStartsFreshNatural": true,
-      "fixtureHashesVerified": 93,
-      "fullStateFixtureComparisons": 93,
-      "restoredFixtureBoundaries": 81,
-      "fullStateAndEventOperationComparisons": 72494,
-      "recordedTickOperations": 72263,
-      "runnerCheckpoints": 764,
+      "fixtureHashesVerified": 105,
+      "fullStateFixtureComparisons": 105,
+      "restoredFixtureBoundaries": 93,
+      "fullStateAndEventOperationComparisons": 82417,
+      "recordedTickOperations": 82162,
+      "runnerCheckpoints": 865,
       "checkpointLimit": "Independent restoration at every distinct recorded fixture boundary; all intervening operations and events compared. The runner checkpoint schedule is not re-created.",
-      "restTransitionsVerified": 28,
+      "restTransitionsVerified": 32,
       "reachedDays": {
         "1": 4,
         "2": 4,
@@ -350,7 +356,8 @@
         "5": 4,
         "6": 4,
         "7": 4,
-        "8": 4
+        "8": 4,
+        "9": 4
       },
       "wonDays": {
         "1": 4,
@@ -360,389 +367,800 @@
         "5": 4,
         "6": 4,
         "7": 4,
-        "8": 4
+        "8": 4,
+        "9": 4
       },
       "replays": [
         {
           "scenario": "natural-0",
           "seed": 42,
-          "replaySha256": "6993112789c7d962dbfae2b4654652981dc66e67bb8a3b0ee7e9e14412dced06",
-          "operations": 18062,
-          "fixtureComparisons": 24,
-          "finalDay": 8,
+          "replaySha256": "ecec0fb7122394fb89e1a8e0cea2e4447d4436a76be3e7083f577907981d4c49",
+          "operations": 20687,
+          "fixtureComparisons": 26,
+          "finalDay": 9,
           "phase": "town",
-          "day9BlockedWithoutMutation": true
+          "day10BlockedWithoutMutation": true
         },
         {
           "scenario": "natural-1",
           "seed": 2654435761,
-          "replaySha256": "8e433cb008853636a28264f65d18efff3f33480b2bc6f53f4f496ca5bc62a511",
-          "operations": 18168,
-          "fixtureComparisons": 27,
-          "finalDay": 8,
+          "replaySha256": "33d6bfe91e14320e5e01fce81c623f252d2c805599431633629e5365579d44a5",
+          "operations": 20767,
+          "fixtureComparisons": 23,
+          "finalDay": 9,
           "phase": "town",
-          "day9BlockedWithoutMutation": true
+          "day10BlockedWithoutMutation": true
         },
         {
           "scenario": "natural-2",
           "seed": 1013904226,
-          "replaySha256": "be18e4d0ff04004d389f8dbee5d840f8ff071147d5af17d2a278a85eca77c43e",
-          "operations": 17946,
-          "fixtureComparisons": 23,
-          "finalDay": 8,
+          "replaySha256": "3a1b8355bd0f3d1bf47bf8ec6a73514bb59ab6830441cfaab038040542a51ab3",
+          "operations": 20281,
+          "fixtureComparisons": 29,
+          "finalDay": 9,
           "phase": "town",
-          "day9BlockedWithoutMutation": true
+          "day10BlockedWithoutMutation": true
         },
         {
           "scenario": "natural-3",
           "seed": 3668339987,
-          "replaySha256": "98af3ed481ea2805b85a34a9780600a709b0d535a14a4ab1c0dacf229430dacc",
-          "operations": 18318,
-          "fixtureComparisons": 19,
-          "finalDay": 8,
+          "replaySha256": "e89d9e7e1d52315abe146c2a98a4c5dbe56c9bcdd95b20a60495945c72b1dd71",
+          "operations": 20682,
+          "fixtureComparisons": 27,
+          "finalDay": 9,
           "phase": "town",
-          "day9BlockedWithoutMutation": true
+          "day10BlockedWithoutMutation": true
         }
       ],
       "observations": [
         {
           "scenario": "natural-0",
-          "tick": 16578,
+          "tick": 19122,
           "kind": "spawn-batch",
           "uids": [
-            441,
-            442
+            521,
+            522
           ]
         },
         {
           "scenario": "natural-0",
-          "tick": 16689,
-          "kind": "spawn-batch",
-          "uids": [
-            447,
-            448
-          ]
-        },
-        {
-          "scenario": "natural-0",
-          "tick": 16974,
-          "kind": "spawn-batch",
-          "uids": [
-            454,
-            455
-          ]
-        },
-        {
-          "scenario": "natural-0",
-          "tick": 17517,
+          "tick": 19173,
           "kind": "lava-spawn",
           "uids": [
-            473
+            524
           ]
         },
         {
           "scenario": "natural-0",
-          "tick": 17536,
+          "tick": 19211,
           "kind": "lava-kill",
           "uids": [
-            473
+            524
           ]
         },
         {
-          "scenario": "natural-1",
-          "tick": 16130,
+          "scenario": "natural-0",
+          "tick": 19535,
           "kind": "lava-spawn",
           "uids": [
-            513
+            534
           ]
         },
         {
-          "scenario": "natural-1",
-          "tick": 16165,
+          "scenario": "natural-0",
+          "tick": 19544,
           "kind": "lava-kill",
           "uids": [
-            513
+            534
+          ]
+        },
+        {
+          "scenario": "natural-0",
+          "tick": 19577,
+          "kind": "spawn-batch",
+          "uids": [
+            536,
+            537
+          ]
+        },
+        {
+          "scenario": "natural-0",
+          "tick": 19577,
+          "kind": "rat-continued-batch",
+          "uids": [
+            536,
+            537
+          ]
+        },
+        {
+          "scenario": "natural-0",
+          "tick": 19604,
+          "kind": "spawn-batch",
+          "uids": [
+            538,
+            539
+          ]
+        },
+        {
+          "scenario": "natural-0",
+          "tick": 19604,
+          "kind": "rat-continued-batch",
+          "uids": [
+            538,
+            539
+          ]
+        },
+        {
+          "scenario": "natural-0",
+          "tick": 19737,
+          "kind": "spawn-batch",
+          "uids": [
+            545,
+            546
           ]
         },
         {
           "scenario": "natural-1",
-          "tick": 17030,
+          "tick": 19071,
+          "kind": "spawn-batch",
+          "uids": [
+            639,
+            640
+          ]
+        },
+        {
+          "scenario": "natural-1",
+          "tick": 19185,
+          "kind": "spawn-batch",
+          "uids": [
+            647,
+            648
+          ]
+        },
+        {
+          "scenario": "natural-1",
+          "tick": 19677,
+          "kind": "spawn-batch",
+          "uids": [
+            671,
+            672
+          ]
+        },
+        {
+          "scenario": "natural-1",
+          "tick": 20132,
+          "kind": "spawn-batch",
+          "uids": [
+            692,
+            693
+          ]
+        },
+        {
+          "scenario": "natural-1",
+          "tick": 20132,
+          "kind": "rat-continued-batch",
+          "uids": [
+            692,
+            693
+          ]
+        },
+        {
+          "scenario": "natural-1",
+          "tick": 20264,
+          "kind": "spawn-batch",
+          "uids": [
+            702,
+            703
+          ]
+        },
+        {
+          "scenario": "natural-1",
+          "tick": 20264,
+          "kind": "rat-continued-batch",
+          "uids": [
+            702,
+            703
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 17936,
+          "kind": "spawn-batch",
+          "uids": [
+            494,
+            495
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 18027,
+          "kind": "spawn-batch",
+          "uids": [
+            499,
+            500
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 18075,
+          "kind": "spawn-batch",
+          "uids": [
+            502,
+            503
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 18399,
           "kind": "lava-spawn",
           "uids": [
-            552
+            512
           ]
         },
         {
-          "scenario": "natural-1",
-          "tick": 17063,
+          "scenario": "natural-2",
+          "tick": 18445,
+          "kind": "lava-kill",
+          "uids": [
+            512
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 18470,
+          "kind": "spawn-batch",
+          "uids": [
+            515,
+            516
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 18470,
+          "kind": "rat-continued-batch",
+          "uids": [
+            515,
+            516
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 18839,
+          "kind": "lava-spawn",
+          "uids": [
+            528
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 18867,
           "kind": "lava-alert",
           "uids": [
-            552
-          ]
-        },
-        {
-          "scenario": "natural-1",
-          "tick": 17089,
-          "kind": "lava-kill",
-          "uids": [
-            552
-          ]
-        },
-        {
-          "scenario": "natural-1",
-          "tick": 17213,
-          "kind": "spawn-batch",
-          "uids": [
-            562,
-            563
-          ]
-        },
-        {
-          "scenario": "natural-1",
-          "tick": 17583,
-          "kind": "spawn-batch",
-          "uids": [
-            578,
-            579
+            528
           ]
         },
         {
           "scenario": "natural-2",
-          "tick": 15755,
+          "tick": 18920,
+          "kind": "lava-kill",
+          "uids": [
+            528
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 19199,
           "kind": "lava-spawn",
           "uids": [
-            423
+            538
           ]
         },
         {
           "scenario": "natural-2",
-          "tick": 15765,
+          "tick": 19207,
           "kind": "lava-kill",
           "uids": [
-            423
+            538
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 19413,
+          "kind": "spawn-batch",
+          "uids": [
+            549,
+            550,
+            551
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 19413,
+          "kind": "rat-continued-batch",
+          "uids": [
+            549,
+            550,
+            551
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 19661,
+          "kind": "spawn-batch",
+          "uids": [
+            555,
+            556
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 19931,
+          "kind": "lava-spawn",
+          "uids": [
+            569
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 19977,
+          "kind": "lava-alert",
+          "uids": [
+            569
+          ]
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 19999,
+          "kind": "lava-kill",
+          "uids": [
+            569
+          ]
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 18350,
+          "kind": "lava-spawn",
+          "uids": [
+            606
+          ]
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 18367,
+          "kind": "lava-kill",
+          "uids": [
+            606
+          ]
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 18864,
+          "kind": "lava-spawn",
+          "uids": [
+            629
+          ]
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 18897,
+          "kind": "lava-kill",
+          "uids": [
+            629
+          ]
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 19281,
+          "kind": "lava-spawn",
+          "uids": [
+            648
+          ]
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 19316,
+          "kind": "lava-alert",
+          "uids": [
+            648
+          ]
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 19328,
+          "kind": "lava-kill",
+          "uids": [
+            648
+          ]
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 19686,
+          "kind": "spawn-batch",
+          "uids": [
+            664,
+            665
+          ]
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 19734,
+          "kind": "lava-spawn",
+          "uids": [
+            668
+          ]
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 19772,
+          "kind": "lava-kill",
+          "uids": [
+            668
+          ]
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 20136,
+          "kind": "spawn-batch",
+          "uids": [
+            684,
+            685
           ]
         }
       ],
       "observationCounts": {
-        "lava-spawn": 4,
-        "lava-alert": 1,
+        "lava-spawn": 10,
+        "lava-alert": 3,
         "lava-attack": 0,
         "lava-explosion": 0,
-        "lava-kill": 4,
-        "spawn-batch": 5
+        "lava-kill": 10,
+        "spawn-batch": 17,
+        "rat-continued-batch": 6
       },
       "batching": [
         {
           "scenario": "natural-0",
-          "tick": 16578,
-          "kinds": [
-            "sheep",
-            "chicken"
-          ],
-          "beforeLength": 10,
-          "afterLength": 8,
-          "finalTimer": 17.6
-        },
-        {
-          "scenario": "natural-0",
-          "tick": 16689,
-          "kinds": [
-            "sheep",
-            "sheep"
-          ],
-          "beforeLength": 4,
-          "afterLength": 2,
-          "finalTimer": 17.6
-        },
-        {
-          "scenario": "natural-0",
-          "tick": 16974,
-          "kinds": [
-            "sheep",
-            "sheep"
-          ],
-          "beforeLength": 14,
-          "afterLength": 12,
-          "finalTimer": 18.6
-        },
-        {
-          "scenario": "natural-1",
-          "tick": 17213,
-          "kinds": [
-            "sheep",
-            "chicken"
-          ],
-          "beforeLength": 5,
-          "afterLength": 3,
-          "finalTimer": 17.6
-        },
-        {
-          "scenario": "natural-1",
-          "tick": 17583,
+          "tick": 19122,
           "kinds": [
             "sheep",
             "rat"
           ],
-          "beforeLength": 15,
-          "afterLength": 13,
-          "finalTimer": 17.6
-        }
-      ],
-      "dayEightBosses": [
+          "beforeLength": 13,
+          "afterLength": 11,
+          "finalTimer": 18.4
+        },
         {
           "scenario": "natural-0",
-          "tick": 16410,
-          "uid": 433,
-          "maxHp": 325,
-          "appearance": 58
+          "tick": 19577,
+          "kinds": [
+            "rat",
+            "rat"
+          ],
+          "beforeLength": 16,
+          "afterLength": 14,
+          "finalTimer": 17.4
+        },
+        {
+          "scenario": "natural-0",
+          "tick": 19604,
+          "kinds": [
+            "rat",
+            "crow"
+          ],
+          "beforeLength": 14,
+          "afterLength": 12,
+          "finalTimer": 18.4
+        },
+        {
+          "scenario": "natural-0",
+          "tick": 19737,
+          "kinds": [
+            "sheep",
+            "sheep"
+          ],
+          "beforeLength": 7,
+          "afterLength": 5,
+          "finalTimer": 17.4
         },
         {
           "scenario": "natural-1",
-          "tick": 16158,
-          "uid": 514,
-          "maxHp": 325,
-          "appearance": 58
+          "tick": 19071,
+          "kinds": [
+            "sheep",
+            "crow"
+          ],
+          "beforeLength": 14,
+          "afterLength": 12,
+          "finalTimer": 17.4
+        },
+        {
+          "scenario": "natural-1",
+          "tick": 19185,
+          "kinds": [
+            "sheep",
+            "sheep"
+          ],
+          "beforeLength": 8,
+          "afterLength": 6,
+          "finalTimer": 17.4
+        },
+        {
+          "scenario": "natural-1",
+          "tick": 19677,
+          "kinds": [
+            "sheep",
+            "barbarian"
+          ],
+          "beforeLength": 6,
+          "afterLength": 4,
+          "finalTimer": 17.4
+        },
+        {
+          "scenario": "natural-1",
+          "tick": 20132,
+          "kinds": [
+            "rat",
+            "fly"
+          ],
+          "beforeLength": 18,
+          "afterLength": 16,
+          "finalTimer": 17.4
+        },
+        {
+          "scenario": "natural-1",
+          "tick": 20264,
+          "kinds": [
+            "rat",
+            "crow"
+          ],
+          "beforeLength": 11,
+          "afterLength": 9,
+          "finalTimer": 17.4
         },
         {
           "scenario": "natural-2",
-          "tick": 16433,
-          "uid": 448,
-          "maxHp": 325,
-          "appearance": 58
+          "tick": 17936,
+          "kinds": [
+            "sheep",
+            "crow"
+          ],
+          "beforeLength": 12,
+          "afterLength": 10,
+          "finalTimer": 17.4
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 18027,
+          "kinds": [
+            "sheep",
+            "chicken"
+          ],
+          "beforeLength": 7,
+          "afterLength": 5,
+          "finalTimer": 17.4
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 18075,
+          "kinds": [
+            "sheep",
+            "archer"
+          ],
+          "beforeLength": 4,
+          "afterLength": 2,
+          "finalTimer": 17.4
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 18470,
+          "kinds": [
+            "rat",
+            "barbarian"
+          ],
+          "beforeLength": 5,
+          "afterLength": 3,
+          "finalTimer": 17.4
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 19413,
+          "kinds": [
+            "rat",
+            "sheep",
+            "rat"
+          ],
+          "beforeLength": 6,
+          "afterLength": 3,
+          "finalTimer": 21.4
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 19661,
+          "kinds": [
+            "sheep",
+            "rat"
+          ],
+          "beforeLength": 16,
+          "afterLength": 14,
+          "finalTimer": 17.4
         },
         {
           "scenario": "natural-3",
-          "tick": 16385,
-          "uid": 517,
-          "maxHp": 325,
-          "appearance": 58
+          "tick": 19686,
+          "kinds": [
+            "sheep",
+            "chicken"
+          ],
+          "beforeLength": 9,
+          "afterLength": 7,
+          "finalTimer": 17.4
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 20136,
+          "kinds": [
+            "sheep",
+            "rat"
+          ],
+          "beforeLength": 13,
+          "afterLength": 11,
+          "finalTimer": 17.4
+        }
+      ],
+      "dayNineBosses": [
+        {
+          "scenario": "natural-0",
+          "tick": 19236,
+          "uid": 527,
+          "maxHp": 350,
+          "appearance": 59
+        },
+        {
+          "scenario": "natural-1",
+          "tick": 18710,
+          "uid": 624,
+          "maxHp": 350,
+          "appearance": 59
+        },
+        {
+          "scenario": "natural-2",
+          "tick": 18818,
+          "uid": 527,
+          "maxHp": 350,
+          "appearance": 59
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 19190,
+          "uid": 641,
+          "maxHp": 350,
+          "appearance": 59
         }
       ],
       "preparedMissionTransfers": [
         {
           "scenario": "natural-0",
-          "tick": 15336,
+          "tick": 18005,
           "mission": {
-            "level": 7,
-            "fixedLv": 7,
+            "level": 8,
+            "fixedLv": 8,
             "strength": 0,
-            "powerOrg": 1640,
-            "reward": 740,
-            "spawnRate": 13.6,
+            "powerOrg": 1760,
+            "reward": 760,
+            "spawnRate": 13.4,
             "hpFix": 1,
             "dmgFix": 1,
             "expFix": 1,
             "absorbFix": 0.02,
             "bossDay": false
           },
-          "bossesSpawned": 7
+          "bossesSpawned": 8
         },
         {
           "scenario": "natural-1",
-          "tick": 15597,
+          "tick": 18110,
           "mission": {
-            "level": 7,
-            "fixedLv": 7,
+            "level": 8,
+            "fixedLv": 8,
             "strength": 0,
-            "powerOrg": 1640,
-            "reward": 740,
-            "spawnRate": 13.6,
+            "powerOrg": 1760,
+            "reward": 760,
+            "spawnRate": 13.4,
             "hpFix": 1,
             "dmgFix": 1,
             "expFix": 1,
             "absorbFix": 0.03,
             "bossDay": false
           },
-          "bossesSpawned": 7
+          "bossesSpawned": 8
         },
         {
           "scenario": "natural-2",
-          "tick": 15185,
+          "tick": 17888,
           "mission": {
-            "level": 7,
-            "fixedLv": 7,
+            "level": 8,
+            "fixedLv": 8,
             "strength": 0,
-            "powerOrg": 1640,
-            "reward": 740,
-            "spawnRate": 13.6,
-            "hpFix": 1,
-            "dmgFix": 1,
-            "expFix": 1,
-            "absorbFix": 0.01,
-            "bossDay": false
-          },
-          "bossesSpawned": 7
-        },
-        {
-          "scenario": "natural-3",
-          "tick": 15398,
-          "mission": {
-            "level": 7,
-            "fixedLv": 7,
-            "strength": 0,
-            "powerOrg": 1640,
-            "reward": 740,
-            "spawnRate": 13.6,
+            "powerOrg": 1760,
+            "reward": 760,
+            "spawnRate": 13.4,
             "hpFix": 1,
             "dmgFix": 1,
             "expFix": 1,
             "absorbFix": 0.02,
             "bossDay": false
           },
-          "bossesSpawned": 7
+          "bossesSpawned": 8
+        },
+        {
+          "scenario": "natural-3",
+          "tick": 18260,
+          "mission": {
+            "level": 8,
+            "fixedLv": 8,
+            "strength": 0,
+            "powerOrg": 1760,
+            "reward": 760,
+            "spawnRate": 13.4,
+            "hpFix": 1,
+            "dmgFix": 1,
+            "expFix": 1,
+            "absorbFix": 0.03,
+            "bossDay": false
+          },
+          "bossesSpawned": 8
         }
       ],
       "settlements": [
         {
           "scenario": "natural-0",
-          "tick": 18005,
+          "tick": 20624,
           "result": {
-            "reward": 740,
-            "perfectBonus": 222,
+            "reward": 760,
+            "perfectBonus": 0,
             "upkeep": 100,
-            "tax": 80,
+            "tax": 115,
             "salary": 100,
-            "wages": 170,
-            "netReward": 712
+            "wages": 188,
+            "netReward": 457
           }
         },
         {
           "scenario": "natural-1",
-          "tick": 18110,
+          "tick": 20703,
           "result": {
-            "reward": 740,
-            "perfectBonus": 222,
+            "reward": 760,
+            "perfectBonus": 228,
             "upkeep": 100,
-            "tax": 80,
+            "tax": 115,
             "salary": 100,
-            "wages": 174,
-            "netReward": 708
+            "wages": 186,
+            "netReward": 687
           }
         },
         {
           "scenario": "natural-2",
-          "tick": 17888,
+          "tick": 20217,
           "result": {
-            "reward": 740,
-            "perfectBonus": 222,
+            "reward": 760,
+            "perfectBonus": 0,
             "upkeep": 100,
-            "tax": 80,
+            "tax": 115,
             "salary": 100,
-            "wages": 197,
-            "netReward": 685
+            "wages": 211,
+            "netReward": 434
           }
         },
         {
           "scenario": "natural-3",
-          "tick": 18260,
+          "tick": 20618,
           "result": {
-            "reward": 740,
-            "perfectBonus": 222,
+            "reward": 760,
+            "perfectBonus": 228,
             "upkeep": 100,
-            "tax": 80,
+            "tax": 115,
             "salary": 100,
-            "wages": 191,
-            "netReward": 691
+            "wages": 203,
+            "netReward": 670
           }
         }
       ],
@@ -754,152 +1172,47 @@
         "No native browser timing, full Flash scheduler or late-game hitbox claim. Full-suite results are recorded separately by their owner."
       ]
     },
-    "independent_scenario_audit_report": ".build/browser-qa/day-eight-scenario-audit.json",
-    "earned_lava_exposure": {
-      "status": "passed",
-      "reportSha256": "7058970a5e231e216acddb26658d06d84522b683c78b4cfb73b581c0cbb34a05",
-      "replaySha256": "5d6c03be35c690b2968917ae3b4f3d16014766aa9b15c922d43679d88879b767",
-      "origin": {
-        "scenario": "natural-2",
-        "classId": 8,
-        "reason": "day7-town",
-        "file": "day-eight-party-natural-2-day7-town-v23.json",
-        "sha256": "4b97fa3fb947bec41ad5becba908c37f4d886857b90187c2f2ab3d1e7eb52c28",
-        "operation": 15237,
-        "day": 7,
-        "tick": 15185
-      },
-      "naturalCampaignAudit": ".build/browser-qa/day-eight-scenario-audit.json",
-      "sourceHashes": {
-        "simulation.ts": "76461e1af69946d8ee7f94a86425ac60410c3f6dd8af234202abccda7eb990fe",
-        "items.ts": "4c7f84d8f77bb7e96c262b0bc0f03612a50c707483027397c3e76201ded7a4b8",
-        "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
-        "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
-        "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
-        "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
-        "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
-        "collision.ts": "796561aab4204994d2916fe604ec7a6b2257c38a74e81211db1c7dafa03ab96c",
-        "town-preparation.ts": "28aa1ceaf29402175d613d09ae63b102bdc136a4f0e5ecf8ecf313d0b9c1f669",
-        "town-save.ts": "a7c277837e76da1462269a98587192ab76ec47af21b41d6424deca185fa9da64",
-        "castle-upgrades.ts": "f243c506c40010c9b0053fc873b6cdbd3fdd659328c33ccc0dbb5a72623bfec3",
-        "content.ts": "4ccfbeb5ee649257cdb81372d0c882b82b07b95cc4c051443bfa37ea79e667e5",
-        "missions.ts": "f614cffdf11af0c79479e16f17066dbdfbb577b91a8293974ea52a43d6615200",
-        "recruits.ts": "e20f12372840178a8658e7e9cab09600ad46a9bec32db7ca4434c99ebb961527",
-        "enemy-display-bounds.ts": "8583558fa1bb87f7abaf29882bc9a8ef43392f57f8bf30a9a828204437391be3"
-      },
-      "geometrySha256": "d2ec48d541c01f7cb6a233f7823195b8a42b55f5f596ebeb98ab6b1823bfa352",
-      "fixtureHashesVerified": 7,
-      "fullStateFixtureComparisons": 7,
-      "fullStateAndEventOperations": 663,
-      "restoredFixtureBoundaries": 7,
-      "tickOperations": 658,
-      "ordinaryOrders": [
-        {
-          "action": "setCompanionOrder",
-          "args": [
-            1,
-            5
-          ]
-        },
-        {
-          "action": "setCompanionPriorities",
-          "args": [
-            1,
-            {
-              "wall": false,
-              "boss": false
-            }
-          ]
-        },
-        {
-          "action": "setCompanionOrder",
-          "args": [
-            2,
-            5
-          ]
-        },
-        {
-          "action": "setCompanionPriorities",
-          "args": [
-            2,
-            {
-              "wall": false,
-              "boss": false
-            }
-          ]
-        }
-      ],
-      "observed": [
-        {
-          "uid": 424,
-          "frameBefore": 34,
-          "frameAfter": 35,
-          "hpBefore": 43,
-          "hpAfter": 32,
-          "damage": 11,
-          "creditedKill": false
-        }
-      ],
-      "finalHp": 32,
-      "limits": [
-        "Deliberate ordinary-input branch from a separately verified natural earned Day7 town, not another independent New Game campaign.",
-        "Only public orders, priorities, Rest and recorded input ticks; no gold, HP, item, RNG, damage, kill or completion grants.",
-        "Original method/geometry parity and browser timing are separate. Boss collision uses the declared headless rectangle fallback."
-      ]
-    },
-    "earned_lava_exposure_report": ".build/browser-qa/day-eight-lava-exposure-report.json",
+    "independent_scenario_audit_report": ".build/browser-qa/day-nine-scenario-audit.json",
     "asset_preservation": {
-      "originalUnchanged": true,
-      "priorFiles": 305,
-      "newFiles": 307,
-      "added": [
-        "sprites\\enemy_lava.json",
-        "sprites\\enemy_lava.png"
-      ],
-      "changed": [
-        "collision-geometry.json",
-        "manifest.json"
-      ],
-      "clip": {
-        "image": "sprites/enemy_lava.png",
-        "json": "sprites/enemy_lava.json",
-        "originX": 35.45,
-        "originY": 38.35,
-        "frameWidth": 73,
-        "frameHeight": 62,
-        "labels": {
-          "init": 1,
-          "alive": 4,
-          "attack": 23,
-          "dead": 98,
-          "null": 223
-        },
-        "count": 223,
-        "uniqueFrames": 43,
-        "characterId": 883
-      }
-    },
-    "collision_regression": {
       "status": "passed",
-      "collisionSourceSha256": "796561aab4204994d2916fe604ec7a6b2257c38a74e81211db1c7dafa03ab96c",
-      "productionLavaComparison": {
-        "snapshots": 659,
-        "geometryGrids": 12,
-        "points": 76800
-      },
-      "priorReferenceTestsPassed": 13,
-      "newLavaTestsPassed": 4,
-      "commands": [
-        "node --experimental-strip-types scripts/compare-lava-reference.ts",
-        "node --experimental-strip-types --test tests/geometry-reference.test.ts tests/archer-reference.test.ts tests/fly-reference.test.ts tests/barbarian-reference.test.ts",
-        "node --experimental-strip-types --test tests/lava-reference.test.ts"
-      ],
-      "limits": [
-        "Targeted checks observed in this agent turn; full integrated suite owned by root.",
-        "No native scheduler, complete pixel or veteran late-game hitbox parity claim."
+      "publicAssetCount": 307,
+      "allAssetsPreserved": true,
+      "comparedTo": ".build/browser-day-eight-release/assets"
+    },
+    "reference_integrity": {
+      "status": "passed",
+      "rows": [
+        {
+          "name": "ninth-day-waves",
+          "traceSha256": "e99ce787af78ad5cfceac32d50ae69c803a83a7b1bd139e2cfb94e86771e9e33",
+          "records": 14,
+          "bothRunsIdentical": true,
+          "fixtureMatchesCapture": true
+        },
+        {
+          "name": "ninth-day-spawn",
+          "traceSha256": "191b73aa5cde40ff7bcc5f23372cf2a2c682ac5d401029cfb708da651af07e57",
+          "records": 14,
+          "bothRunsIdentical": true,
+          "fixtureMatchesCapture": true
+        },
+        {
+          "name": "ninth-town",
+          "traceSha256": "397d9ee9aae7d2a9b79d8920b9eaaaccf1cbd94e71c3c905601110c84dff4399",
+          "records": 24,
+          "bothRunsIdentical": true,
+          "fixtureMatchesCapture": true
+        },
+        {
+          "name": "title-hit",
+          "traceSha256": "600ab39e479e6e1d71728462a611c41e30d115df870f853674e90bd57871b285",
+          "records": 14,
+          "bothRunsIdentical": true,
+          "fixtureMatchesCapture": true
+        }
       ]
     },
-    "prior_evidence": "v22 Trainer and earlier runs remain historical. Current Day8 evidence was regenerated after the global contour-transform correction."
+    "prior_evidence": "v23 and earlier results remain historical; current campaign evidence uses the v24 source hashes."
   },
   "browser_checks": {
     "new_game": {
@@ -6309,9 +6622,429 @@
       "browserPaused": true,
       "consoleErrors": [],
       "screenshot": "day-eight-production-restored.jpg"
+    },
+    "ninth_day": {
+      "status": "passed",
+      "report": ".build/browser-qa/day-nine-ui-verification.json",
+      "checkCount": 6,
+      "checks": {
+        "restore": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "day-nine-ui-restore-v24.json",
+          "expectedFrom": "day-nine-party-natural-0-day8-town-v24.json",
+          "day": 8,
+          "phase": "town",
+          "tick": 18005,
+          "rng": 2282665982,
+          "hp": 45,
+          "gold": 3139,
+          "mission": {
+            "level": 7,
+            "fixedLv": 7,
+            "strength": 0,
+            "powerOrg": 1640,
+            "reward": 740,
+            "spawnRate": 13.6,
+            "hpFix": 1,
+            "dmgFix": 1,
+            "expFix": 1,
+            "absorbFix": 0.02,
+            "bossDay": false
+          },
+          "result": {
+            "reward": 740,
+            "perfectBonus": 222,
+            "upkeep": 100,
+            "tax": 80,
+            "salary": 100,
+            "wages": 170,
+            "netReward": 712
+          },
+          "preparedMission": {
+            "level": 8,
+            "fixedLv": 8,
+            "strength": 0,
+            "power": 1760,
+            "powerOrg": 1760,
+            "reward": 760,
+            "hire": false,
+            "ragnarok": false,
+            "wave": 5,
+            "spawnRate": 13.4,
+            "group": [],
+            "waveType": 0,
+            "loot": [],
+            "newWave": true,
+            "time": 30,
+            "bossDay": false,
+            "bossWave": 2,
+            "note": "",
+            "hpFix": 1,
+            "dmgFix": 1,
+            "expFix": 1,
+            "absorbFix": 0.02,
+            "bossKilled": 0,
+            "noDamage": true,
+            "criticalCount": 0,
+            "resultOther": 0
+          },
+          "elapsedFrames": 0,
+          "observedEvents": []
+        },
+        "rest": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "day-nine-ui-rest-v24.json",
+          "expectedFrom": "day-nine-ui-restore-v24.json",
+          "day": 9,
+          "phase": "battle",
+          "tick": 18005,
+          "rng": 905189076,
+          "hp": 45,
+          "gold": 3139,
+          "mission": {
+            "level": 8,
+            "fixedLv": 8,
+            "strength": 0,
+            "powerOrg": 1760,
+            "reward": 760,
+            "spawnRate": 13.4,
+            "hpFix": 1,
+            "dmgFix": 1,
+            "expFix": 1,
+            "absorbFix": 0.02,
+            "bossDay": false
+          },
+          "result": {
+            "reward": 0,
+            "perfectBonus": 0,
+            "upkeep": 0,
+            "tax": 0,
+            "salary": 0,
+            "wages": 0,
+            "netReward": 0
+          },
+          "preparedMission": null,
+          "elapsedFrames": 0,
+          "observedEvents": []
+        },
+        "battle-restore": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "day-nine-ui-battle-restore-v24.json",
+          "expectedFrom": "day-nine-ui-rest-v24.json",
+          "day": 9,
+          "phase": "battle",
+          "tick": 18005,
+          "rng": 905189076,
+          "hp": 45,
+          "gold": 3139,
+          "mission": {
+            "level": 8,
+            "fixedLv": 8,
+            "strength": 0,
+            "powerOrg": 1760,
+            "reward": 760,
+            "spawnRate": 13.4,
+            "hpFix": 1,
+            "dmgFix": 1,
+            "expFix": 1,
+            "absorbFix": 0.02,
+            "bossDay": false
+          },
+          "result": {
+            "reward": 0,
+            "perfectBonus": 0,
+            "upkeep": 0,
+            "tax": 0,
+            "salary": 0,
+            "wages": 0,
+            "netReward": 0
+          },
+          "preparedMission": null,
+          "elapsedFrames": 0,
+          "observedEvents": []
+        },
+        "batch-idle": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "day-nine-ui-batch-idle-v24.json",
+          "expectedFrom": "day-nine-party-natural-0-before-rat-continued-batch-v24.json",
+          "day": 9,
+          "phase": "battle",
+          "tick": 19577,
+          "rng": 3331551229,
+          "hp": 45,
+          "gold": 3187,
+          "mission": {
+            "level": 8,
+            "fixedLv": 8,
+            "strength": 0,
+            "powerOrg": 1760,
+            "reward": 760,
+            "spawnRate": 13.4,
+            "hpFix": 1,
+            "dmgFix": 1,
+            "expFix": 1,
+            "absorbFix": 0.02,
+            "bossDay": false
+          },
+          "result": {
+            "reward": 0,
+            "perfectBonus": 0,
+            "upkeep": 0,
+            "tax": 0,
+            "salary": 0,
+            "wages": 0,
+            "netReward": 0
+          },
+          "preparedMission": null,
+          "elapsedFrames": 1,
+          "observedEvents": []
+        },
+        "result-town": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "day-nine-ui-result-town-v24.json",
+          "expectedFrom": "day-nine-party-natural-0-day-nine-result-v24.json",
+          "day": 9,
+          "phase": "town",
+          "tick": 20624,
+          "rng": 388343612,
+          "hp": 43,
+          "gold": 3677,
+          "mission": {
+            "level": 8,
+            "fixedLv": 8,
+            "strength": 0,
+            "powerOrg": 1760,
+            "reward": 760,
+            "spawnRate": 13.4,
+            "hpFix": 1,
+            "dmgFix": 1,
+            "expFix": 1,
+            "absorbFix": 0.02,
+            "bossDay": false
+          },
+          "result": {
+            "reward": 760,
+            "perfectBonus": 0,
+            "upkeep": 100,
+            "tax": 115,
+            "salary": 100,
+            "wages": 188,
+            "netReward": 457
+          },
+          "preparedMission": {
+            "level": 9,
+            "fixedLv": 9,
+            "strength": 0,
+            "power": 1880,
+            "powerOrg": 1880,
+            "reward": 780,
+            "hire": false,
+            "ragnarok": false,
+            "wave": 6,
+            "spawnRate": 13.2,
+            "group": [],
+            "waveType": 0,
+            "loot": [
+              1035,
+              1110
+            ],
+            "newWave": true,
+            "time": 30,
+            "bossDay": true,
+            "bossWave": 5,
+            "note": "",
+            "hpFix": 1,
+            "dmgFix": 1,
+            "expFix": 1,
+            "absorbFix": 0.02,
+            "bossKilled": 0,
+            "noDamage": true,
+            "criticalCount": 0,
+            "resultOther": 0
+          },
+          "elapsedFrames": 0,
+          "observedEvents": []
+        },
+        "blocked-rest": {
+          "status": "passed",
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "actual": "day-nine-ui-blocked-rest-v24.json",
+          "expectedFrom": "day-nine-ui-result-town-v24.json",
+          "day": 9,
+          "phase": "town",
+          "tick": 20624,
+          "rng": 388343612,
+          "hp": 43,
+          "gold": 3677,
+          "mission": {
+            "level": 8,
+            "fixedLv": 8,
+            "strength": 0,
+            "powerOrg": 1760,
+            "reward": 760,
+            "spawnRate": 13.4,
+            "hpFix": 1,
+            "dmgFix": 1,
+            "expFix": 1,
+            "absorbFix": 0.02,
+            "bossDay": false
+          },
+          "result": {
+            "reward": 760,
+            "perfectBonus": 0,
+            "upkeep": 100,
+            "tax": 115,
+            "salary": 100,
+            "wages": 188,
+            "netReward": 457
+          },
+          "preparedMission": {
+            "level": 9,
+            "fixedLv": 9,
+            "strength": 0,
+            "power": 1880,
+            "powerOrg": 1880,
+            "reward": 780,
+            "hire": false,
+            "ragnarok": false,
+            "wave": 6,
+            "spawnRate": 13.2,
+            "group": [],
+            "waveType": 0,
+            "loot": [
+              1035,
+              1110
+            ],
+            "newWave": true,
+            "time": 30,
+            "bossDay": true,
+            "bossWave": 5,
+            "note": "",
+            "hpFix": 1,
+            "dmgFix": 1,
+            "expFix": 1,
+            "absorbFix": 0.02,
+            "bossKilled": 0,
+            "noDamage": true,
+            "criticalCount": 0,
+            "resultOther": 0
+          },
+          "elapsedFrames": 0,
+          "observedEvents": []
+        }
+      },
+      "consoleErrors": [],
+      "scope": "Actual Continue into earned town8, Rest into Day9, Continue into saved Day9 battle, one real idle Rat-batch update, results into town9 and disabled Day10 Rest. Complete exported save envelopes compared.",
+      "screenshots": [
+        ".build/browser-qa/day-nine-entry.jpg",
+        ".build/browser-qa/day-nine-rat-batch.jpg",
+        ".build/browser-qa/day-nine-results.jpg",
+        ".build/browser-qa/day-nine-town.jpg"
+      ],
+      "limits": [
+        "Earned headless checkpoints imported for browser input checks, not a full manually played browser campaign.",
+        "Campaigns use ordinary filled contours and the declared headless boss rectangle fallback; the browser Rat-batch boundary has no boss.",
+        "No full native scheduler, pixel/audio/performance parity or veteran late-game hitbox claim. Cosmetic camera shake and the boss reticle remain missing."
+      ]
+    },
+    "title_input": {
+      "status": "passed",
+      "bundle": "assets/index-D8Tk-vVM.js",
+      "canvasOriginAtTitle": {
+        "x": 322.5,
+        "y": 80
+      },
+      "checks": [
+        {
+          "control": "outside New Game",
+          "canvasPoint": [
+            235,
+            195
+          ],
+          "result": "title unchanged"
+        },
+        {
+          "control": "Help",
+          "canvasPoint": [
+            288,
+            291
+          ],
+          "result": "How to Play visible"
+        },
+        {
+          "control": "New Game",
+          "canvasPoint": [
+            265,
+            185
+          ],
+          "result": "appearance and Sheriff setup visible"
+        },
+        {
+          "control": "Continue",
+          "canvasPoint": [
+            268,
+            239
+          ],
+          "result": "earned town8 restored exactly; repeated with saved Day9 battle"
+        }
+      ],
+      "sourcePointEvidence": {
+        "snapshots": 12,
+        "points": 204,
+        "transparentControls": 6
+      },
+      "screenshots": [
+        ".build/browser-qa/day-nine-title-help.jpg",
+        ".build/browser-qa/day-nine-title-new-game.jpg",
+        ".build/browser-qa/day-nine-title.jpg"
+      ],
+      "consoleErrors": []
+    },
+    "day_nine_production": {
+      "status": "passed",
+      "bundle": "assets/index-D8Tk-vVM.js",
+      "newGame": {
+        "tick": 0,
+        "hp": 40,
+        "gold": 200,
+        "ammo": 5,
+        "inventorySlots": 6,
+        "wallLevel": 1,
+        "capacity": 1,
+        "repairmanLevel": 0,
+        "wallFixCount": 0,
+        "sandbagLevel": 0,
+        "looterLevel": 0,
+        "trainerLevel": 0
+      },
+      "migration": {
+        "from": 23,
+        "to": 24,
+        "fullEnvelopeEquality": true,
+        "exactCurrentRestore": true,
+        "tick": 674,
+        "hp": 40,
+        "gold": 209,
+        "wallLevel": 1,
+        "rngUnchanged": true
+      },
+      "browserPaused": true,
+      "consoleErrors": [],
+      "screenshot": "day-nine-production-restored.jpg"
     }
   },
-  "checkpoint_provenance": "Four fresh natural Sheriff starts (42, 2654435761, 1013904226, 3668339987) complete eight days with ordinary actions and no gold/item/HP/RNG grants. All 93 captured states and 72,494 operations (72,263 ticks) independently replayed, restoring at 81 distinct fixture boundaries; the runner separately performed 764 checkpoints. Four Lava spawns/kills, one alert and five batch callbacks occurred; no natural explosion is claimed. A separate 663-operation ordinary-input branch from natural-2 earned Day 7 town produced Lava attack, explosion (HP 43 to 32, no credited kill) and removal, with seven restored fixtures. Controlled original observations are separate evidence.",
+  "checkpoint_provenance": "Four fresh natural Sheriff starts complete nine days with public actions and no gold/item/HP/RNG grants. All 105 fixture states and 82,417 operations/events (82,162 ticks) independently replayed, restoring at 93 distinct fixture boundaries; the runner separately performed 865 checkpoints. Observed 17 batches including six with Rat continuation, ten Lava spawns/kills and three alerts. No Lava attack or explosion occurred in these winning branches. Original source comparisons remain separate evidence.",
   "performance": {
     "comparison_with_flash_or_ruffle": "not measured",
     "sample": {
@@ -6334,7 +7067,8 @@
     "loot_mod_release": "No new Flash/browser performance comparison or late-game hitbox finding; natural scenarios verify state/event replay, saved confirmations and subsequent mounted-weapon behavior.",
     "looter_release": "No new Flash/browser performance comparison or late-game hitbox finding. Current measurements establish controlled source reward parity, ordinary browser actions, save preservation and deterministic campaign replay.",
     "trainer_release": "No new Flash/browser performance comparison or late-game hitbox finding. Current measurements establish controlled source XP/purchase parity, ordinary browser actions, save preservation and deterministic campaign replay.",
-    "day_eight_release": "No new Flash/browser performance comparison. Controlled original traces and global-coordinate contour grids establish the listed boundaries. The fixed six-point Lava edge mismatch is a port precision correction, not reproduction of the reported veteran late-game hitbox issue."
+    "day_eight_release": "No new Flash/browser performance comparison. Controlled original traces and global-coordinate contour grids establish the listed boundaries. The fixed six-point Lava edge mismatch is a port precision correction, not reproduction of the reported veteran late-game hitbox issue.",
+    "day_nine_release": "No new Flash-versus-browser performance benchmark. Source behavior, saved-state replay, native browser inputs and release migration are the verified boundaries."
   },
   "screenshots": [
     ".build/browser-qa/character-creation.jpg",
@@ -6412,7 +7146,15 @@
     ".build/browser-qa/day-eight-lava-explosion.jpg",
     ".build/browser-qa/day-eight-production-restored.jpg",
     ".build/browser-qa/day-eight-results.jpg",
-    ".build/browser-qa/day-eight-town.jpg"
+    ".build/browser-qa/day-eight-town.jpg",
+    ".build/browser-qa/day-nine-entry.jpg",
+    ".build/browser-qa/day-nine-production-restored.jpg",
+    ".build/browser-qa/day-nine-rat-batch.jpg",
+    ".build/browser-qa/day-nine-results.jpg",
+    ".build/browser-qa/day-nine-title-help.jpg",
+    ".build/browser-qa/day-nine-title-new-game.jpg",
+    ".build/browser-qa/day-nine-title.jpg",
+    ".build/browser-qa/day-nine-town.jpg"
   ],
   "preserved_baselines": {
     "original/elonashooter1.3.swf": {
@@ -19962,32 +20704,472 @@
       ],
       "collisionSourceSha256": "796561aab4204994d2916fe604ec7a6b2257c38a74e81211db1c7dafa03ab96c",
       "coordinateReference": "Full global f32 inverse; inverse translation and point multiplication round separately to nearest twip, ties to even. Independently inspected Ruffle source commit bad2f8fbc6e7c1ae741b664034ad19e4ad8af9d0; captured runtime @ruffle-rs/ruffle 0.7.1."
+    },
+    "ninth_day_waves": {
+      "status": "passed",
+      "matchedSnapshots": 12,
+      "comparisons": [
+        {
+          "seed": 42,
+          "mode": "xorshift32",
+          "matched": true,
+          "originalDrawCount": 253,
+          "portDrawCount": 253,
+          "differences": []
+        },
+        {
+          "seed": 1,
+          "mode": "xorshift32",
+          "matched": true,
+          "originalDrawCount": 225,
+          "portDrawCount": 225,
+          "differences": []
+        },
+        {
+          "seed": 3735928559,
+          "mode": "xorshift32",
+          "matched": true,
+          "originalDrawCount": 242,
+          "portDrawCount": 242,
+          "differences": []
+        },
+        {
+          "seed": 6,
+          "mode": "xorshift32",
+          "matched": true,
+          "originalDrawCount": 254,
+          "portDrawCount": 254,
+          "differences": []
+        },
+        {
+          "seed": 42,
+          "mode": "constant-zero",
+          "matched": true,
+          "originalDrawCount": 286,
+          "portDrawCount": 286,
+          "differences": []
+        },
+        {
+          "seed": 42,
+          "mode": "ranged-below-threshold",
+          "matched": true,
+          "originalDrawCount": 220,
+          "portDrawCount": 220,
+          "differences": []
+        },
+        {
+          "seed": 42,
+          "mode": "ranged-at-threshold",
+          "matched": true,
+          "originalDrawCount": 260,
+          "portDrawCount": 260,
+          "differences": []
+        },
+        {
+          "seed": 42,
+          "mode": "constant-high",
+          "matched": true,
+          "originalDrawCount": 258,
+          "portDrawCount": 258,
+          "differences": []
+        },
+        {
+          "seed": 42,
+          "mode": "scripted-batch1",
+          "matched": true,
+          "originalDrawCount": 257,
+          "portDrawCount": 257,
+          "differences": []
+        },
+        {
+          "seed": 42,
+          "mode": "scripted-ranged",
+          "matched": true,
+          "originalDrawCount": 271,
+          "portDrawCount": 271,
+          "differences": []
+        },
+        {
+          "seed": 42,
+          "mode": "fallback-barbarian-at",
+          "matched": true,
+          "originalDrawCount": 271,
+          "portDrawCount": 271,
+          "differences": []
+        },
+        {
+          "seed": 42,
+          "mode": "fallback-barbarian-above",
+          "matched": true,
+          "originalDrawCount": 270,
+          "portDrawCount": 270,
+          "differences": []
+        }
+      ],
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "ef077436fc6f82a611f7ae8286cf33bfb6631cffb288e46b2c1fe6b0b9284e91",
+      "traceSha256": "e99ce787af78ad5cfceac32d50ae69c803a83a7b1bd139e2cfb94e86771e9e33",
+      "boundary": "Original generateMission(8) on calendar day8 then preGenerateWave on calendar day9 versus the production mission and wave generators",
+      "limits": [
+        "Synchronous original methods; Rest interaction, enemy behavior and whole battle scheduling are separate checks",
+        "Constants and the explicit prefix are legal RNG boundary inputs, not claims that a seeded production stream reaches those sequences",
+        "Original observations establish AIR/BATCH1/RANGED/ordinary selection coverage; final waves, delays, mission state and RNG accounting are compared independently"
+      ]
+    },
+    "ninth_day_spawn": {
+      "status": "passed",
+      "observedSnapshots": 12,
+      "matchedSnapshots": 12,
+      "comparisons": [
+        {
+          "scenario": "sheep-first-below",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "sheep-first-at-second-break",
+          "matched": true,
+          "originalDrawCount": 5,
+          "portDrawCount": 5,
+          "differences": []
+        },
+        {
+          "scenario": "rat-first-below",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "rat-first-at-second-break",
+          "matched": true,
+          "originalDrawCount": 5,
+          "portDrawCount": 5,
+          "differences": []
+        },
+        {
+          "scenario": "rat-second-at-continue",
+          "matched": true,
+          "originalDrawCount": 9,
+          "portDrawCount": 9,
+          "differences": []
+        },
+        {
+          "scenario": "mixed-shrinking-even",
+          "matched": true,
+          "originalDrawCount": 10,
+          "portDrawCount": 10,
+          "differences": []
+        },
+        {
+          "scenario": "mixed-shrinking-odd",
+          "matched": true,
+          "originalDrawCount": 10,
+          "portDrawCount": 10,
+          "differences": []
+        },
+        {
+          "scenario": "final-rat-deferred-empty",
+          "matched": true,
+          "originalDrawCount": 5,
+          "portDrawCount": 5,
+          "differences": []
+        },
+        {
+          "scenario": "chicken-first-break",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "lava-first-break",
+          "matched": true,
+          "originalDrawCount": 4,
+          "portDrawCount": 4,
+          "differences": []
+        },
+        {
+          "scenario": "boss-first-break",
+          "matched": true,
+          "originalDrawCount": 6,
+          "portDrawCount": 6,
+          "differences": []
+        },
+        {
+          "scenario": "empty-queue",
+          "matched": true,
+          "originalDrawCount": 0,
+          "portDrawCount": 0,
+          "differences": []
+        }
+      ],
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "79cb3ee517fd479050b4b9c4b9e642db8457cb01b6e7d6e7e31dfc53bd1d00b7",
+      "traceSha256": "191b73aa5cde40ff7bcc5f23372cf2a2c682ac5d401029cfb708da651af07e57",
+      "boundary": "Actual onTick spawn loop and enemy.init at mission8/calendar9; controlled break inputs with full original initialization RNG",
+      "limits": [
+        "Actual original onTick and enemy.init methods under explicit deterministic inputs; native Timer/ENTER_FRAME scheduling is excluded",
+        "Actor AI/reload controls disabled in the source; production uses a full idle Sheriff with no active companion and no pending reload",
+        "Enemy numerical initialization, frames, queues, RNG and break order compared; raw original geometry retained but not asserted as new contour parity",
+        "Undefined original shadowHit means shadow is eligible under the original ==false check and is normalized to true for the canonical boolean"
+      ]
+    },
+    "ninth_town": {
+      "status": "passed",
+      "matchedSnapshots": 22,
+      "comparisons": [
+        {
+          "boundary": "preparation",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 90,
+          "portDrawCount": 90,
+          "differences": []
+        },
+        {
+          "boundary": "preparation",
+          "seed": 1,
+          "matched": true,
+          "originalDrawCount": 113,
+          "portDrawCount": 113,
+          "differences": []
+        },
+        {
+          "boundary": "preparation",
+          "seed": 3735928559,
+          "matched": true,
+          "originalDrawCount": 203,
+          "portDrawCount": 203,
+          "differences": []
+        },
+        {
+          "boundary": "preparation",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 90,
+          "portDrawCount": 90,
+          "differences": []
+        },
+        {
+          "boundary": "preparation",
+          "seed": 1,
+          "matched": true,
+          "originalDrawCount": 113,
+          "portDrawCount": 113,
+          "differences": []
+        },
+        {
+          "boundary": "preparation",
+          "seed": 3735928559,
+          "matched": true,
+          "originalDrawCount": 203,
+          "portDrawCount": 203,
+          "differences": []
+        },
+        {
+          "boundary": "recruit-growth",
+          "scenario": "below-10/27",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 16,
+          "portDrawCount": 16,
+          "differences": []
+        },
+        {
+          "boundary": "recruit-growth",
+          "scenario": "above-10/27",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 18,
+          "portDrawCount": 18,
+          "differences": []
+        },
+        {
+          "boundary": "recruit-growth",
+          "scenario": "below-20/27",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 18,
+          "portDrawCount": 18,
+          "differences": []
+        },
+        {
+          "boundary": "recruit-growth",
+          "scenario": "above-20/27",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 21,
+          "portDrawCount": 21,
+          "differences": []
+        },
+        {
+          "boundary": "weapon-variation",
+          "scenario": "day8-cap",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 1,
+          "portDrawCount": 1,
+          "differences": []
+        },
+        {
+          "boundary": "weapon-variation",
+          "scenario": "below-10/19",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 1,
+          "portDrawCount": 1,
+          "differences": []
+        },
+        {
+          "boundary": "weapon-variation",
+          "scenario": "above-10/19",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 1,
+          "portDrawCount": 1,
+          "differences": []
+        },
+        {
+          "boundary": "weapon-variation",
+          "scenario": "day9-cap",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 1,
+          "portDrawCount": 1,
+          "differences": []
+        },
+        {
+          "boundary": "mission",
+          "scenario": "day8-normal",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "boundary": "mission",
+          "scenario": "day9-boss",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 1,
+          "portDrawCount": 1,
+          "differences": []
+        },
+        {
+          "boundary": "mission",
+          "scenario": "day8-optional",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 2,
+          "portDrawCount": 2,
+          "differences": []
+        },
+        {
+          "boundary": "mission",
+          "scenario": "day9-optional",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 1,
+          "portDrawCount": 1,
+          "differences": []
+        },
+        {
+          "boundary": "result",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "differences": []
+        },
+        {
+          "boundary": "result",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "differences": []
+        },
+        {
+          "boundary": "result",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "differences": []
+        },
+        {
+          "boundary": "result",
+          "seed": 42,
+          "matched": true,
+          "originalDrawCount": 3,
+          "portDrawCount": 3,
+          "differences": []
+        }
+      ],
+      "referenceRuntime": "@ruffle-rs/ruffle 0.7.1",
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "a1c3c17dc902cdafbac783bd22fa3597555cdd8e8730d69270d25522103ca780",
+      "traceSha256": "397d9ee9aae7d2a9b79d8920b9eaaaccf1cbd94e71c3c905601110c84dff4399",
+      "checks": [
+        "Day9 ordered town preparation and retained offer/Militia metadata",
+        "Ordered optional1038 then guaranteed1035/1110 calendar loot",
+        "Recruit level2/3/4 boundaries at10/27 and20/27",
+        "Mk3 variation boundary at10/19 with prior day8 cap control",
+        "First bossDay mission9: six waves, bossWave5 and skipped normal boss-wave RNG, compared with mission8",
+        "Exact RNG draw count and state",
+        "Day9 tax115/upkeep40, normal/perfect settlement with title0/1",
+        "Retained medal60/61/62 absorption.03"
+      ],
+      "limits": [
+        "Default upgrades and solo Sheriff party",
+        "Day10 combat is outside this boundary",
+        "Town generation, recruit, item variation and result cases have separate controlled RNG boundaries",
+        "Source save IO is replaced by observation; whole-campaign scheduling and browser rendering are separate checks"
+      ]
+    },
+    "title_hit": {
+      "status": "passed",
+      "matchedSnapshots": 12,
+      "matchedPoints": 204,
+      "rasterNegativeControls": 6,
+      "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+      "instrumentedSwfSha256": "e529c49d7d901dc1354f2f27d09f6a00b5a0d8b10b8f8f4063886b44761958f5",
+      "traceSha256": "600ab39e479e6e1d71728462a611c41e30d115df870f853674e90bd57871b285",
+      "productionSourceSha256": "726748cb5833d10361581627b6bbd1d09359edb9ce82dfbe13dd66244d43d356",
+      "testOutput": ".build/day-nine-title-tests-output.txt",
+      "limits": "Synchronous original current-state hitTestPoint observations; native input checks are recorded separately. No full title pixel equivalence claim."
     }
   },
   "production_recovery": {
     "status": "passed",
-    "release_directory": ".build/browser-day-eight-release",
-    "previous_directory": ".build/browser-before-day-eight",
-    "current_bundle": "assets/index-CPbT627r.js",
+    "release_directory": ".build/browser-day-nine-final",
+    "previous_directory": ".build/browser-before-day-nine",
+    "current_bundle": "assets/index-D8Tk-vVM.js",
     "candidate_build_matches_production": true,
     "copied_release_files_hash_checked": 310,
     "archive_files_hash_checked": 310,
-    "current_package": ".build/elona-shooter-browser-day-eight-slice.zip",
-    "current_package_bytes": 8665911,
-    "current_package_sha256": "d94325f7ef63956bd3f0f86527e385f24fae799b3b0b777ac089a35546d6772d",
-    "previous_package": ".build/elona-shooter-browser-trainer-slice.zip",
-    "previous_bundle": "assets/index-mtID2Ws9.js",
-    "candidate_browser_verification": ".build/browser-qa/day-eight-ui-verification.json",
-    "production_backup": ".build/browser-qa/day-eight-production-before-v22.json",
-    "production_browser_verification": ".build/browser-qa/day-eight-production-verification.json",
-    "production_restored_screenshot": ".build/browser-qa/day-eight-production-restored.jpg",
+    "current_package": ".build/elona-shooter-browser-day-nine-slice.zip",
+    "current_package_bytes": 8666208,
+    "current_package_sha256": "0a5c6185feb98bff00ee2fa3aa81cb63dd51ced930eca82756c52d3e5b58f69b",
+    "previous_package": ".build/elona-shooter-browser-day-eight-slice.zip",
+    "previous_bundle": "assets/index-CPbT627r.js",
+    "candidate_browser_verification": ".build/browser-qa/day-nine-ui-verification.json",
+    "production_backup": ".build/browser-qa/day-nine-production-before-v23.json",
+    "production_browser_verification": ".build/browser-qa/day-nine-production-verification.json",
+    "production_restored_screenshot": ".build/browser-qa/day-nine-production-restored.jpg",
     "production_console_errors": [],
-    "publication_report": ".build/day-eight-publication.json",
-    "current_save_version": 23,
+    "publication_report": ".build/day-nine-publication.json",
+    "current_save_version": 24,
     "production_browser_smoke": "passed",
     "restored_battle": {
-      "from": 22,
-      "to": 23,
+      "from": 23,
+      "to": 24,
       "fullEnvelopeEquality": true,
       "exactCurrentRestore": true,
       "tick": 674,
@@ -28723,6 +29905,1260 @@
           "screenshot": "trainer-production-restored.jpg"
         }
       }
+    },
+    {
+      "milestone": "Eight connected Sheriff days, original Lava encounters and timer spawn batching, Day8 town/rewards and v23 persistence; published locally and browser-verified",
+      "saveVersion": 23,
+      "automated": {
+        "simulation_tests_passed": 386,
+        "simulation_tests_failed": 0,
+        "typescript": "passed",
+        "candidate_build": "passed",
+        "production_build": "identical to final verified candidate",
+        "test_output": ".build/day-eight-tests-output.txt",
+        "build_output": ".build/day-eight-build-output.txt",
+        "day_eight_natural_campaigns": {
+          "status": "passed",
+          "seedCount": 4,
+          "sourceHashes": {
+            "simulation.ts": "76461e1af69946d8ee7f94a86425ac60410c3f6dd8af234202abccda7eb990fe",
+            "items.ts": "4c7f84d8f77bb7e96c262b0bc0f03612a50c707483027397c3e76201ded7a4b8",
+            "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
+            "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
+            "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
+            "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
+            "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
+            "collision.ts": "796561aab4204994d2916fe604ec7a6b2257c38a74e81211db1c7dafa03ab96c",
+            "town-preparation.ts": "28aa1ceaf29402175d613d09ae63b102bdc136a4f0e5ecf8ecf313d0b9c1f669",
+            "town-save.ts": "a7c277837e76da1462269a98587192ab76ec47af21b41d6424deca185fa9da64",
+            "castle-upgrades.ts": "f243c506c40010c9b0053fc873b6cdbd3fdd659328c33ccc0dbb5a72623bfec3",
+            "content.ts": "4ccfbeb5ee649257cdb81372d0c882b82b07b95cc4c051443bfa37ea79e667e5",
+            "missions.ts": "f614cffdf11af0c79479e16f17066dbdfbb577b91a8293974ea52a43d6615200",
+            "recruits.ts": "e20f12372840178a8658e7e9cab09600ad46a9bec32db7ca4434c99ebb961527",
+            "enemy-display-bounds.ts": "8583558fa1bb87f7abaf29882bc9a8ef43392f57f8bf30a9a828204437391be3"
+          },
+          "geometrySha256": "d2ec48d541c01f7cb6a233f7823195b8a42b55f5f596ebeb98ab6b1823bfa352",
+          "scenarios": 4,
+          "frames": 72263,
+          "checkpoints": 764,
+          "restTransitions": 28,
+          "rewardActions": 111,
+          "reachedDays": {
+            "1": 4,
+            "2": 4,
+            "3": 4,
+            "4": 4,
+            "5": 4,
+            "6": 4,
+            "7": 4,
+            "8": 4
+          },
+          "wonDays": {
+            "1": 4,
+            "2": 4,
+            "3": 4,
+            "4": 4,
+            "5": 4,
+            "6": 4,
+            "7": 4,
+            "8": 4
+          },
+          "naturallyHiredClasses": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "housePurchases": 4,
+          "wallPurchases": 4,
+          "maximumCompanions": 2,
+          "partyBattleCounts": {
+            "0": 4,
+            "1": 13,
+            "2": 15
+          },
+          "expandedNaturalScenarios": [
+            "natural-0",
+            "natural-1",
+            "natural-2",
+            "natural-3"
+          ],
+          "actorActivity": {
+            "1": {
+              "shots": 907,
+              "hits": 839,
+              "damage": 49833,
+              "kills": 558,
+              "reloads": 617,
+              "reloadCompletions": 102,
+              "bowDraws": 0,
+              "levelUps": 26
+            },
+            "2": {
+              "shots": 420,
+              "hits": 357,
+              "damage": 13516,
+              "kills": 184,
+              "reloads": 118,
+              "reloadCompletions": 16,
+              "bowDraws": 0,
+              "levelUps": 17
+            },
+            "3": {
+              "shots": 0,
+              "hits": 0,
+              "damage": 0,
+              "kills": 0,
+              "reloads": 0,
+              "reloadCompletions": 0,
+              "bowDraws": 0,
+              "levelUps": 0
+            }
+          },
+          "elapsedMs": 19895,
+          "collision": "Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts",
+          "policy": "Natural New Game starts through Day8; aimed Sheriff plus autonomous companions, ordinary loot/skills/House/Wall/hiring/repair/title transactions. No gold, item, HP or RNG grants, private completion or forced kills. Capture live Lava spawn/alert/attack/explosion/kill and timer batching when encountered, plus Day7 town, Day8 entry/results/town. Actual observed coverage is reported, not assumed.",
+          "limits": [
+            "Port full-state/event replay and finite-state checks, not independent original parity or browser validation",
+            "Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred",
+            "Only natural starts are used in this mode. Actual observations may include no surviving Lava attack or explosion; independent controlled original traces and integration tests cover those boundaries. No native scheduling, frame-perfect rendering or late-game hitbox claim.",
+            "Deaths count castle defeats; companions have no separate HP/death model in the source combat actor"
+          ],
+          "results": [
+            {
+              "id": "natural-0",
+              "seed": 42,
+              "kind": "natural",
+              "hired": [
+                {
+                  "day": 1,
+                  "classId": 2,
+                  "cost": 400,
+                  "name": "White"
+                },
+                {
+                  "day": 4,
+                  "classId": 8,
+                  "cost": 400,
+                  "name": "Anderson"
+                }
+              ],
+              "activity": {
+                "shots": 333,
+                "hits": 314,
+                "damage": 19438,
+                "kills": 206,
+                "reloads": 219,
+                "reloadCompletions": 32,
+                "bowDraws": 0,
+                "projectiles": 0,
+                "projectileKinds": {},
+                "levelUps": 11,
+                "wages": 795,
+                "wageSettlements": 7,
+                "battles": 7,
+                "victories": 7,
+                "castleDefeats": 0
+              },
+              "finalDay": 8,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 3139,
+              "victories": 8,
+              "checkpoints": 189,
+              "rests": 7,
+              "operationCount": 18062
+            },
+            {
+              "id": "natural-1",
+              "seed": 2654435761,
+              "kind": "natural",
+              "hired": [
+                {
+                  "day": 1,
+                  "classId": 4,
+                  "cost": 400,
+                  "name": "Girard"
+                },
+                {
+                  "day": 4,
+                  "classId": 1,
+                  "cost": 400,
+                  "name": "Howard"
+                }
+              ],
+              "activity": {
+                "shots": 292,
+                "hits": 262,
+                "damage": 14857,
+                "kills": 202,
+                "reloads": 195,
+                "reloadCompletions": 35,
+                "bowDraws": 0,
+                "projectiles": 114,
+                "projectileKinds": {
+                  "hand-grenade": 27,
+                  "bolt": 87
+                },
+                "levelUps": 11,
+                "wages": 825,
+                "wageSettlements": 7,
+                "battles": 7,
+                "victories": 7,
+                "castleDefeats": 0
+              },
+              "finalDay": 8,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 3335,
+              "victories": 8,
+              "checkpoints": 194,
+              "rests": 7,
+              "operationCount": 18168
+            },
+            {
+              "id": "natural-2",
+              "seed": 1013904226,
+              "kind": "natural",
+              "hired": [
+                {
+                  "day": 1,
+                  "classId": 8,
+                  "cost": 400,
+                  "name": "Sullivan"
+                },
+                {
+                  "day": 5,
+                  "classId": 4,
+                  "cost": 450,
+                  "name": "Bell"
+                }
+              ],
+              "activity": {
+                "shots": 385,
+                "hits": 370,
+                "damage": 9744,
+                "kills": 135,
+                "reloads": 118,
+                "reloadCompletions": 16,
+                "bowDraws": 0,
+                "projectiles": 13,
+                "projectileKinds": {
+                  "hand-grenade": 13
+                },
+                "levelUps": 10,
+                "wages": 886,
+                "wageSettlements": 7,
+                "battles": 7,
+                "victories": 7,
+                "castleDefeats": 0
+              },
+              "finalDay": 8,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 2495,
+              "victories": 8,
+              "checkpoints": 190,
+              "rests": 7,
+              "operationCount": 17946
+            },
+            {
+              "id": "natural-3",
+              "seed": 3668339987,
+              "kind": "natural",
+              "hired": [
+                {
+                  "day": 1,
+                  "classId": 2,
+                  "cost": 400,
+                  "name": "Jenkins"
+                },
+                {
+                  "day": 4,
+                  "classId": 1,
+                  "cost": 400,
+                  "name": "Evans"
+                }
+              ],
+              "activity": {
+                "shots": 317,
+                "hits": 250,
+                "damage": 19310,
+                "kills": 199,
+                "reloads": 203,
+                "reloadCompletions": 35,
+                "bowDraws": 0,
+                "projectiles": 110,
+                "projectileKinds": {
+                  "bolt": 110
+                },
+                "levelUps": 11,
+                "wages": 948,
+                "wageSettlements": 7,
+                "battles": 7,
+                "victories": 7,
+                "castleDefeats": 0
+              },
+              "finalDay": 8,
+              "phase": "town",
+              "castleHp": 45,
+              "gold": 3092,
+              "victories": 8,
+              "checkpoints": 191,
+              "rests": 7,
+              "operationCount": 18318
+            }
+          ]
+        },
+        "campaigns_report": ".build/day-eight-party-soak/report.json",
+        "campaigns_report_sha256": "1940b80905c1908a7654b945c720d342b8fb1cdc0e525d1d69f9166207d9e463",
+        "independent_scenario_audit": {
+          "status": "passed",
+          "reportSha256": "1940b80905c1908a7654b945c720d342b8fb1cdc0e525d1d69f9166207d9e463",
+          "sourceHashes": {
+            "simulation.ts": "76461e1af69946d8ee7f94a86425ac60410c3f6dd8af234202abccda7eb990fe",
+            "items.ts": "4c7f84d8f77bb7e96c262b0bc0f03612a50c707483027397c3e76201ded7a4b8",
+            "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
+            "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
+            "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
+            "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
+            "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
+            "collision.ts": "796561aab4204994d2916fe604ec7a6b2257c38a74e81211db1c7dafa03ab96c",
+            "town-preparation.ts": "28aa1ceaf29402175d613d09ae63b102bdc136a4f0e5ecf8ecf313d0b9c1f669",
+            "town-save.ts": "a7c277837e76da1462269a98587192ab76ec47af21b41d6424deca185fa9da64",
+            "castle-upgrades.ts": "f243c506c40010c9b0053fc873b6cdbd3fdd659328c33ccc0dbb5a72623bfec3",
+            "content.ts": "4ccfbeb5ee649257cdb81372d0c882b82b07b95cc4c051443bfa37ea79e667e5",
+            "missions.ts": "f614cffdf11af0c79479e16f17066dbdfbb577b91a8293974ea52a43d6615200",
+            "recruits.ts": "e20f12372840178a8658e7e9cab09600ad46a9bec32db7ca4434c99ebb961527",
+            "enemy-display-bounds.ts": "8583558fa1bb87f7abaf29882bc9a8ef43392f57f8bf30a9a828204437391be3"
+          },
+          "geometrySha256": "d2ec48d541c01f7cb6a233f7823195b8a42b55f5f596ebeb98ab6b1823bfa352",
+          "allStartsFreshNatural": true,
+          "fixtureHashesVerified": 93,
+          "fullStateFixtureComparisons": 93,
+          "restoredFixtureBoundaries": 81,
+          "fullStateAndEventOperationComparisons": 72494,
+          "recordedTickOperations": 72263,
+          "runnerCheckpoints": 764,
+          "checkpointLimit": "Independent restoration at every distinct recorded fixture boundary; all intervening operations and events compared. The runner checkpoint schedule is not re-created.",
+          "restTransitionsVerified": 28,
+          "reachedDays": {
+            "1": 4,
+            "2": 4,
+            "3": 4,
+            "4": 4,
+            "5": 4,
+            "6": 4,
+            "7": 4,
+            "8": 4
+          },
+          "wonDays": {
+            "1": 4,
+            "2": 4,
+            "3": 4,
+            "4": 4,
+            "5": 4,
+            "6": 4,
+            "7": 4,
+            "8": 4
+          },
+          "replays": [
+            {
+              "scenario": "natural-0",
+              "seed": 42,
+              "replaySha256": "6993112789c7d962dbfae2b4654652981dc66e67bb8a3b0ee7e9e14412dced06",
+              "operations": 18062,
+              "fixtureComparisons": 24,
+              "finalDay": 8,
+              "phase": "town",
+              "day9BlockedWithoutMutation": true
+            },
+            {
+              "scenario": "natural-1",
+              "seed": 2654435761,
+              "replaySha256": "8e433cb008853636a28264f65d18efff3f33480b2bc6f53f4f496ca5bc62a511",
+              "operations": 18168,
+              "fixtureComparisons": 27,
+              "finalDay": 8,
+              "phase": "town",
+              "day9BlockedWithoutMutation": true
+            },
+            {
+              "scenario": "natural-2",
+              "seed": 1013904226,
+              "replaySha256": "be18e4d0ff04004d389f8dbee5d840f8ff071147d5af17d2a278a85eca77c43e",
+              "operations": 17946,
+              "fixtureComparisons": 23,
+              "finalDay": 8,
+              "phase": "town",
+              "day9BlockedWithoutMutation": true
+            },
+            {
+              "scenario": "natural-3",
+              "seed": 3668339987,
+              "replaySha256": "98af3ed481ea2805b85a34a9780600a709b0d535a14a4ab1c0dacf229430dacc",
+              "operations": 18318,
+              "fixtureComparisons": 19,
+              "finalDay": 8,
+              "phase": "town",
+              "day9BlockedWithoutMutation": true
+            }
+          ],
+          "observations": [
+            {
+              "scenario": "natural-0",
+              "tick": 16578,
+              "kind": "spawn-batch",
+              "uids": [
+                441,
+                442
+              ]
+            },
+            {
+              "scenario": "natural-0",
+              "tick": 16689,
+              "kind": "spawn-batch",
+              "uids": [
+                447,
+                448
+              ]
+            },
+            {
+              "scenario": "natural-0",
+              "tick": 16974,
+              "kind": "spawn-batch",
+              "uids": [
+                454,
+                455
+              ]
+            },
+            {
+              "scenario": "natural-0",
+              "tick": 17517,
+              "kind": "lava-spawn",
+              "uids": [
+                473
+              ]
+            },
+            {
+              "scenario": "natural-0",
+              "tick": 17536,
+              "kind": "lava-kill",
+              "uids": [
+                473
+              ]
+            },
+            {
+              "scenario": "natural-1",
+              "tick": 16130,
+              "kind": "lava-spawn",
+              "uids": [
+                513
+              ]
+            },
+            {
+              "scenario": "natural-1",
+              "tick": 16165,
+              "kind": "lava-kill",
+              "uids": [
+                513
+              ]
+            },
+            {
+              "scenario": "natural-1",
+              "tick": 17030,
+              "kind": "lava-spawn",
+              "uids": [
+                552
+              ]
+            },
+            {
+              "scenario": "natural-1",
+              "tick": 17063,
+              "kind": "lava-alert",
+              "uids": [
+                552
+              ]
+            },
+            {
+              "scenario": "natural-1",
+              "tick": 17089,
+              "kind": "lava-kill",
+              "uids": [
+                552
+              ]
+            },
+            {
+              "scenario": "natural-1",
+              "tick": 17213,
+              "kind": "spawn-batch",
+              "uids": [
+                562,
+                563
+              ]
+            },
+            {
+              "scenario": "natural-1",
+              "tick": 17583,
+              "kind": "spawn-batch",
+              "uids": [
+                578,
+                579
+              ]
+            },
+            {
+              "scenario": "natural-2",
+              "tick": 15755,
+              "kind": "lava-spawn",
+              "uids": [
+                423
+              ]
+            },
+            {
+              "scenario": "natural-2",
+              "tick": 15765,
+              "kind": "lava-kill",
+              "uids": [
+                423
+              ]
+            }
+          ],
+          "observationCounts": {
+            "lava-spawn": 4,
+            "lava-alert": 1,
+            "lava-attack": 0,
+            "lava-explosion": 0,
+            "lava-kill": 4,
+            "spawn-batch": 5
+          },
+          "batching": [
+            {
+              "scenario": "natural-0",
+              "tick": 16578,
+              "kinds": [
+                "sheep",
+                "chicken"
+              ],
+              "beforeLength": 10,
+              "afterLength": 8,
+              "finalTimer": 17.6
+            },
+            {
+              "scenario": "natural-0",
+              "tick": 16689,
+              "kinds": [
+                "sheep",
+                "sheep"
+              ],
+              "beforeLength": 4,
+              "afterLength": 2,
+              "finalTimer": 17.6
+            },
+            {
+              "scenario": "natural-0",
+              "tick": 16974,
+              "kinds": [
+                "sheep",
+                "sheep"
+              ],
+              "beforeLength": 14,
+              "afterLength": 12,
+              "finalTimer": 18.6
+            },
+            {
+              "scenario": "natural-1",
+              "tick": 17213,
+              "kinds": [
+                "sheep",
+                "chicken"
+              ],
+              "beforeLength": 5,
+              "afterLength": 3,
+              "finalTimer": 17.6
+            },
+            {
+              "scenario": "natural-1",
+              "tick": 17583,
+              "kinds": [
+                "sheep",
+                "rat"
+              ],
+              "beforeLength": 15,
+              "afterLength": 13,
+              "finalTimer": 17.6
+            }
+          ],
+          "dayEightBosses": [
+            {
+              "scenario": "natural-0",
+              "tick": 16410,
+              "uid": 433,
+              "maxHp": 325,
+              "appearance": 58
+            },
+            {
+              "scenario": "natural-1",
+              "tick": 16158,
+              "uid": 514,
+              "maxHp": 325,
+              "appearance": 58
+            },
+            {
+              "scenario": "natural-2",
+              "tick": 16433,
+              "uid": 448,
+              "maxHp": 325,
+              "appearance": 58
+            },
+            {
+              "scenario": "natural-3",
+              "tick": 16385,
+              "uid": 517,
+              "maxHp": 325,
+              "appearance": 58
+            }
+          ],
+          "preparedMissionTransfers": [
+            {
+              "scenario": "natural-0",
+              "tick": 15336,
+              "mission": {
+                "level": 7,
+                "fixedLv": 7,
+                "strength": 0,
+                "powerOrg": 1640,
+                "reward": 740,
+                "spawnRate": 13.6,
+                "hpFix": 1,
+                "dmgFix": 1,
+                "expFix": 1,
+                "absorbFix": 0.02,
+                "bossDay": false
+              },
+              "bossesSpawned": 7
+            },
+            {
+              "scenario": "natural-1",
+              "tick": 15597,
+              "mission": {
+                "level": 7,
+                "fixedLv": 7,
+                "strength": 0,
+                "powerOrg": 1640,
+                "reward": 740,
+                "spawnRate": 13.6,
+                "hpFix": 1,
+                "dmgFix": 1,
+                "expFix": 1,
+                "absorbFix": 0.03,
+                "bossDay": false
+              },
+              "bossesSpawned": 7
+            },
+            {
+              "scenario": "natural-2",
+              "tick": 15185,
+              "mission": {
+                "level": 7,
+                "fixedLv": 7,
+                "strength": 0,
+                "powerOrg": 1640,
+                "reward": 740,
+                "spawnRate": 13.6,
+                "hpFix": 1,
+                "dmgFix": 1,
+                "expFix": 1,
+                "absorbFix": 0.01,
+                "bossDay": false
+              },
+              "bossesSpawned": 7
+            },
+            {
+              "scenario": "natural-3",
+              "tick": 15398,
+              "mission": {
+                "level": 7,
+                "fixedLv": 7,
+                "strength": 0,
+                "powerOrg": 1640,
+                "reward": 740,
+                "spawnRate": 13.6,
+                "hpFix": 1,
+                "dmgFix": 1,
+                "expFix": 1,
+                "absorbFix": 0.02,
+                "bossDay": false
+              },
+              "bossesSpawned": 7
+            }
+          ],
+          "settlements": [
+            {
+              "scenario": "natural-0",
+              "tick": 18005,
+              "result": {
+                "reward": 740,
+                "perfectBonus": 222,
+                "upkeep": 100,
+                "tax": 80,
+                "salary": 100,
+                "wages": 170,
+                "netReward": 712
+              }
+            },
+            {
+              "scenario": "natural-1",
+              "tick": 18110,
+              "result": {
+                "reward": 740,
+                "perfectBonus": 222,
+                "upkeep": 100,
+                "tax": 80,
+                "salary": 100,
+                "wages": 174,
+                "netReward": 708
+              }
+            },
+            {
+              "scenario": "natural-2",
+              "tick": 17888,
+              "result": {
+                "reward": 740,
+                "perfectBonus": 222,
+                "upkeep": 100,
+                "tax": 80,
+                "salary": 100,
+                "wages": 197,
+                "netReward": 685
+              }
+            },
+            {
+              "scenario": "natural-3",
+              "tick": 18260,
+              "result": {
+                "reward": 740,
+                "perfectBonus": 222,
+                "upkeep": 100,
+                "tax": 80,
+                "salary": 100,
+                "wages": 191,
+                "netReward": 691
+              }
+            }
+          ],
+          "limits": [
+            "Independent full replay of recorded port operations; original Flash method parity is established by separate accepted references.",
+            "Four natural New Game starts, only listed public gameplay actions; no HP, item, gold, RNG, candidate, completion or kill grants.",
+            "Production filled contours for ordinary enemies, declared headless rectangle fallback for bosses.",
+            "Natural Lava attack and explosion counts may be zero; this replay does not claim an unobserved branch.",
+            "No native browser timing, full Flash scheduler or late-game hitbox claim. Full-suite results are recorded separately by their owner."
+          ]
+        },
+        "independent_scenario_audit_report": ".build/browser-qa/day-eight-scenario-audit.json",
+        "earned_lava_exposure": {
+          "status": "passed",
+          "reportSha256": "7058970a5e231e216acddb26658d06d84522b683c78b4cfb73b581c0cbb34a05",
+          "replaySha256": "5d6c03be35c690b2968917ae3b4f3d16014766aa9b15c922d43679d88879b767",
+          "origin": {
+            "scenario": "natural-2",
+            "classId": 8,
+            "reason": "day7-town",
+            "file": "day-eight-party-natural-2-day7-town-v23.json",
+            "sha256": "4b97fa3fb947bec41ad5becba908c37f4d886857b90187c2f2ab3d1e7eb52c28",
+            "operation": 15237,
+            "day": 7,
+            "tick": 15185
+          },
+          "naturalCampaignAudit": ".build/browser-qa/day-eight-scenario-audit.json",
+          "sourceHashes": {
+            "simulation.ts": "76461e1af69946d8ee7f94a86425ac60410c3f6dd8af234202abccda7eb990fe",
+            "items.ts": "4c7f84d8f77bb7e96c262b0bc0f03612a50c707483027397c3e76201ded7a4b8",
+            "party.ts": "e8704d3eb280cdbf614468778aece6fe391ac841df52c2eb210048384dd7b5a0",
+            "party-ai.ts": "656c2c581bc29019d9e431d28b48f13d65ba6a663d8c3ed779d8cfd5b5d90639",
+            "party-progression.ts": "cdd7d2a22ab95fb3a78e568dcdc280783a6b9b338fd6f5e587e304de4fdfc06b",
+            "party-save.ts": "07102d4b2cc15ebd702c032715940500af4084a5bbe9ff181d1c026f8ec1ef55",
+            "projectiles.ts": "d3234d966ba14470bdd517fb54fd21175f6ad020a1f03f9e6b764f23f2508259",
+            "collision.ts": "796561aab4204994d2916fe604ec7a6b2257c38a74e81211db1c7dafa03ab96c",
+            "town-preparation.ts": "28aa1ceaf29402175d613d09ae63b102bdc136a4f0e5ecf8ecf313d0b9c1f669",
+            "town-save.ts": "a7c277837e76da1462269a98587192ab76ec47af21b41d6424deca185fa9da64",
+            "castle-upgrades.ts": "f243c506c40010c9b0053fc873b6cdbd3fdd659328c33ccc0dbb5a72623bfec3",
+            "content.ts": "4ccfbeb5ee649257cdb81372d0c882b82b07b95cc4c051443bfa37ea79e667e5",
+            "missions.ts": "f614cffdf11af0c79479e16f17066dbdfbb577b91a8293974ea52a43d6615200",
+            "recruits.ts": "e20f12372840178a8658e7e9cab09600ad46a9bec32db7ca4434c99ebb961527",
+            "enemy-display-bounds.ts": "8583558fa1bb87f7abaf29882bc9a8ef43392f57f8bf30a9a828204437391be3"
+          },
+          "geometrySha256": "d2ec48d541c01f7cb6a233f7823195b8a42b55f5f596ebeb98ab6b1823bfa352",
+          "fixtureHashesVerified": 7,
+          "fullStateFixtureComparisons": 7,
+          "fullStateAndEventOperations": 663,
+          "restoredFixtureBoundaries": 7,
+          "tickOperations": 658,
+          "ordinaryOrders": [
+            {
+              "action": "setCompanionOrder",
+              "args": [
+                1,
+                5
+              ]
+            },
+            {
+              "action": "setCompanionPriorities",
+              "args": [
+                1,
+                {
+                  "wall": false,
+                  "boss": false
+                }
+              ]
+            },
+            {
+              "action": "setCompanionOrder",
+              "args": [
+                2,
+                5
+              ]
+            },
+            {
+              "action": "setCompanionPriorities",
+              "args": [
+                2,
+                {
+                  "wall": false,
+                  "boss": false
+                }
+              ]
+            }
+          ],
+          "observed": [
+            {
+              "uid": 424,
+              "frameBefore": 34,
+              "frameAfter": 35,
+              "hpBefore": 43,
+              "hpAfter": 32,
+              "damage": 11,
+              "creditedKill": false
+            }
+          ],
+          "finalHp": 32,
+          "limits": [
+            "Deliberate ordinary-input branch from a separately verified natural earned Day7 town, not another independent New Game campaign.",
+            "Only public orders, priorities, Rest and recorded input ticks; no gold, HP, item, RNG, damage, kill or completion grants.",
+            "Original method/geometry parity and browser timing are separate. Boss collision uses the declared headless rectangle fallback."
+          ]
+        },
+        "earned_lava_exposure_report": ".build/browser-qa/day-eight-lava-exposure-report.json",
+        "asset_preservation": {
+          "originalUnchanged": true,
+          "priorFiles": 305,
+          "newFiles": 307,
+          "added": [
+            "sprites\\enemy_lava.json",
+            "sprites\\enemy_lava.png"
+          ],
+          "changed": [
+            "collision-geometry.json",
+            "manifest.json"
+          ],
+          "clip": {
+            "image": "sprites/enemy_lava.png",
+            "json": "sprites/enemy_lava.json",
+            "originX": 35.45,
+            "originY": 38.35,
+            "frameWidth": 73,
+            "frameHeight": 62,
+            "labels": {
+              "init": 1,
+              "alive": 4,
+              "attack": 23,
+              "dead": 98,
+              "null": 223
+            },
+            "count": 223,
+            "uniqueFrames": 43,
+            "characterId": 883
+          }
+        },
+        "collision_regression": {
+          "status": "passed",
+          "collisionSourceSha256": "796561aab4204994d2916fe604ec7a6b2257c38a74e81211db1c7dafa03ab96c",
+          "productionLavaComparison": {
+            "snapshots": 659,
+            "geometryGrids": 12,
+            "points": 76800
+          },
+          "priorReferenceTestsPassed": 13,
+          "newLavaTestsPassed": 4,
+          "commands": [
+            "node --experimental-strip-types scripts/compare-lava-reference.ts",
+            "node --experimental-strip-types --test tests/geometry-reference.test.ts tests/archer-reference.test.ts tests/fly-reference.test.ts tests/barbarian-reference.test.ts",
+            "node --experimental-strip-types --test tests/lava-reference.test.ts"
+          ],
+          "limits": [
+            "Targeted checks observed in this agent turn; full integrated suite owned by root.",
+            "No native scheduler, complete pixel or veteran late-game hitbox parity claim."
+          ]
+        },
+        "prior_evidence": "v22 Trainer and earlier runs remain historical. Current Day8 evidence was regenerated after the global contour-transform correction."
+      },
+      "production_recovery": {
+        "status": "passed",
+        "release_directory": ".build/browser-day-eight-release",
+        "previous_directory": ".build/browser-before-day-eight",
+        "current_bundle": "assets/index-CPbT627r.js",
+        "candidate_build_matches_production": true,
+        "copied_release_files_hash_checked": 310,
+        "archive_files_hash_checked": 310,
+        "current_package": ".build/elona-shooter-browser-day-eight-slice.zip",
+        "current_package_bytes": 8665911,
+        "current_package_sha256": "d94325f7ef63956bd3f0f86527e385f24fae799b3b0b777ac089a35546d6772d",
+        "previous_package": ".build/elona-shooter-browser-trainer-slice.zip",
+        "previous_bundle": "assets/index-mtID2Ws9.js",
+        "candidate_browser_verification": ".build/browser-qa/day-eight-ui-verification.json",
+        "production_backup": ".build/browser-qa/day-eight-production-before-v22.json",
+        "production_browser_verification": ".build/browser-qa/day-eight-production-verification.json",
+        "production_restored_screenshot": ".build/browser-qa/day-eight-production-restored.jpg",
+        "production_console_errors": [],
+        "publication_report": ".build/day-eight-publication.json",
+        "current_save_version": 23,
+        "production_browser_smoke": "passed",
+        "restored_battle": {
+          "from": 22,
+          "to": 23,
+          "fullEnvelopeEquality": true,
+          "exactCurrentRestore": true,
+          "tick": 674,
+          "hp": 40,
+          "gold": 209,
+          "wallLevel": 1,
+          "rngUnchanged": true
+        }
+      },
+      "browser_checks": {
+        "eighth_day": {
+          "status": "passed",
+          "report": ".build/browser-qa/day-eight-ui-verification.json",
+          "checkCount": 5,
+          "checks": {
+            "rest": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "day-eight-ui-rest-v23.json",
+              "expectedFrom": "day-eight-party-natural-0-day7-town-v23.json",
+              "day": 8,
+              "phase": "battle",
+              "tick": 15336,
+              "rng": 3050523583,
+              "hp": 45,
+              "gold": 2298,
+              "mission": {
+                "level": 7,
+                "fixedLv": 7,
+                "strength": 0,
+                "powerOrg": 1640,
+                "reward": 740,
+                "spawnRate": 13.6,
+                "hpFix": 1,
+                "dmgFix": 1,
+                "expFix": 1,
+                "absorbFix": 0.02,
+                "bossDay": false
+              },
+              "result": {
+                "reward": 0,
+                "perfectBonus": 0,
+                "upkeep": 0,
+                "tax": 0,
+                "salary": 0,
+                "wages": 0,
+                "netReward": 0
+              },
+              "preparedMission": null,
+              "elapsedFrames": 0,
+              "observedEvents": []
+            },
+            "restore": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "day-eight-ui-restore-v23.json",
+              "expectedFrom": "day-eight-ui-rest-v23.json",
+              "day": 8,
+              "phase": "battle",
+              "tick": 15336,
+              "rng": 3050523583,
+              "hp": 45,
+              "gold": 2298,
+              "mission": {
+                "level": 7,
+                "fixedLv": 7,
+                "strength": 0,
+                "powerOrg": 1640,
+                "reward": 740,
+                "spawnRate": 13.6,
+                "hpFix": 1,
+                "dmgFix": 1,
+                "expFix": 1,
+                "absorbFix": 0.02,
+                "bossDay": false
+              },
+              "result": {
+                "reward": 0,
+                "perfectBonus": 0,
+                "upkeep": 0,
+                "tax": 0,
+                "salary": 0,
+                "wages": 0,
+                "netReward": 0
+              },
+              "preparedMission": null,
+              "elapsedFrames": 0,
+              "observedEvents": []
+            },
+            "lava-idle": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "day-eight-ui-lava-idle-v23.json",
+              "expectedFrom": "day-eight-lava-exposure-before-explosion-v23.json",
+              "day": 8,
+              "phase": "battle",
+              "tick": 15827,
+              "rng": 3020699299,
+              "hp": 32,
+              "gold": 1700,
+              "mission": {
+                "level": 7,
+                "fixedLv": 7,
+                "strength": 0,
+                "powerOrg": 1640,
+                "reward": 740,
+                "spawnRate": 13.6,
+                "hpFix": 1,
+                "dmgFix": 1,
+                "expFix": 1,
+                "absorbFix": 0.01,
+                "bossDay": false
+              },
+              "result": {
+                "reward": 0,
+                "perfectBonus": 0,
+                "upkeep": 0,
+                "tax": 0,
+                "salary": 0,
+                "wages": 0,
+                "netReward": 0
+              },
+              "preparedMission": null,
+              "elapsedFrames": 1,
+              "observedEvents": [
+                {
+                  "type": "castle-hit",
+                  "amount": 11,
+                  "x": 575,
+                  "y": 220
+                },
+                {
+                  "type": "lava-explode",
+                  "x": 528.25,
+                  "y": 266,
+                  "enemyUid": 424
+                }
+              ]
+            },
+            "result-town": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "day-eight-ui-result-town-v23.json",
+              "expectedFrom": "day-eight-party-natural-0-day-eight-result-v23.json",
+              "day": 8,
+              "phase": "town",
+              "tick": 18005,
+              "rng": 2282665982,
+              "hp": 45,
+              "gold": 3139,
+              "mission": {
+                "level": 7,
+                "fixedLv": 7,
+                "strength": 0,
+                "powerOrg": 1640,
+                "reward": 740,
+                "spawnRate": 13.6,
+                "hpFix": 1,
+                "dmgFix": 1,
+                "expFix": 1,
+                "absorbFix": 0.02,
+                "bossDay": false
+              },
+              "result": {
+                "reward": 740,
+                "perfectBonus": 222,
+                "upkeep": 100,
+                "tax": 80,
+                "salary": 100,
+                "wages": 170,
+                "netReward": 712
+              },
+              "preparedMission": {
+                "level": 8,
+                "fixedLv": 8,
+                "strength": 0,
+                "power": 1760,
+                "powerOrg": 1760,
+                "reward": 760,
+                "hire": false,
+                "ragnarok": false,
+                "wave": 5,
+                "spawnRate": 13.4,
+                "group": [],
+                "waveType": 0,
+                "loot": [],
+                "newWave": true,
+                "time": 30,
+                "bossDay": false,
+                "bossWave": 2,
+                "note": "",
+                "hpFix": 1,
+                "dmgFix": 1,
+                "expFix": 1,
+                "absorbFix": 0.02,
+                "bossKilled": 0,
+                "noDamage": true,
+                "criticalCount": 0,
+                "resultOther": 0
+              },
+              "elapsedFrames": 0,
+              "observedEvents": []
+            },
+            "blocked-rest": {
+              "status": "passed",
+              "fullEnvelopeEquality": true,
+              "exactCurrentRestore": true,
+              "actual": "day-eight-ui-blocked-rest-v23.json",
+              "expectedFrom": "day-eight-ui-result-town-v23.json",
+              "day": 8,
+              "phase": "town",
+              "tick": 18005,
+              "rng": 2282665982,
+              "hp": 45,
+              "gold": 3139,
+              "mission": {
+                "level": 7,
+                "fixedLv": 7,
+                "strength": 0,
+                "powerOrg": 1640,
+                "reward": 740,
+                "spawnRate": 13.6,
+                "hpFix": 1,
+                "dmgFix": 1,
+                "expFix": 1,
+                "absorbFix": 0.02,
+                "bossDay": false
+              },
+              "result": {
+                "reward": 740,
+                "perfectBonus": 222,
+                "upkeep": 100,
+                "tax": 80,
+                "salary": 100,
+                "wages": 170,
+                "netReward": 712
+              },
+              "preparedMission": {
+                "level": 8,
+                "fixedLv": 8,
+                "strength": 0,
+                "power": 1760,
+                "powerOrg": 1760,
+                "reward": 760,
+                "hire": false,
+                "ragnarok": false,
+                "wave": 5,
+                "spawnRate": 13.4,
+                "group": [],
+                "waveType": 0,
+                "loot": [],
+                "newWave": true,
+                "time": 30,
+                "bossDay": false,
+                "bossWave": 2,
+                "note": "",
+                "hpFix": 1,
+                "dmgFix": 1,
+                "expFix": 1,
+                "absorbFix": 0.02,
+                "bossKilled": 0,
+                "noDamage": true,
+                "criticalCount": 0,
+                "resultOther": 0
+              },
+              "elapsedFrames": 0,
+              "observedEvents": []
+            }
+          },
+          "final_title_label": {
+            "status": "passed",
+            "bundle": "assets/index-CPbT627r.js",
+            "label": "Sheriff \u00b7 Day 8",
+            "screenshot": ".build/browser-qa/day-eight-final-title.jpg",
+            "scope": "Actual candidate title after final rebuild; five earlier UI paths unchanged."
+          },
+          "scope": "Actual CUA Rest to Day8, Continue, one idle Lava explosion update, results-to-town and disabled Day9 Rest. Complete exported save envelopes compared with deterministic production replay.",
+          "consoleErrors": [],
+          "screenshots": [
+            ".build/browser-qa/day-eight-entry.jpg",
+            ".build/browser-qa/day-eight-lava-explosion.jpg",
+            ".build/browser-qa/day-eight-results.jpg",
+            ".build/browser-qa/day-eight-town.jpg"
+          ],
+          "limits": [
+            "Earned headless checkpoints imported for browser input checks, not a full manually played browser campaign.",
+            "Campaign collision uses production ordinary contours and the documented boss rectangle fallback. The one-frame browser Lava scenario contains no boss.",
+            "The five behavior checks used the initial candidate; a final title-label-only change was rebuilt and separately inspected before production New Game and migration checks.",
+            "No complete pixel/audio/native scheduler/performance parity or veteran late-game hitbox claim. Cosmetic camera shake remains absent."
+          ]
+        },
+        "day_eight_production": {
+          "status": "passed",
+          "bundle": "assets/index-CPbT627r.js",
+          "newGame": {
+            "tick": 0,
+            "hp": 40,
+            "gold": 200,
+            "ammo": 5,
+            "inventorySlots": 6,
+            "wallLevel": 1,
+            "capacity": 1,
+            "repairmanLevel": 0,
+            "wallFixCount": 0,
+            "sandbagLevel": 0,
+            "looterLevel": 0,
+            "trainerLevel": 0
+          },
+          "migration": {
+            "from": 22,
+            "to": 23,
+            "fullEnvelopeEquality": true,
+            "exactCurrentRestore": true,
+            "tick": 674,
+            "hp": 40,
+            "gold": 209,
+            "wallLevel": 1,
+            "rngUnchanged": true
+          },
+          "browserPaused": true,
+          "consoleErrors": [],
+          "screenshot": "day-eight-production-restored.jpg"
+        }
+      }
     }
-  ]
+  ],
+  "checkpoint_status": {
+    "goal": "paused",
+    "watcher": "paused",
+    "reason": "User returned, requested a progress report, then explicitly requested a checkpoint, documentation update, push and stop.",
+    "next_work_when_resumed": "Audit Day10 special boss-day battle dependencies before enabling that day."
+  }
 }

@@ -118,9 +118,11 @@ test('seventh-town preparation has no guaranteed calendar loot and supports eigh
   }
 });
 
-test('eighth town prepares mission8 while its future battle remains outside the supported wave boundary', () => {
+test('eighth town prepares mission8 for the ninth battle while the prepared boss day stays unavailable', () => {
   const mission = generateLowLevelMission(8, 8, () => 0.5);
   assert.equal(mission.powerOrg, 1760); assert.equal(mission.reward, 760);
   assert.deepEqual(mission.loot, []);
-  assert.throws(() => generateLowLevelWaves(mission, 8, () => 0.5), /Unsupported low-level wave configuration/);
+  assert.equal(generateLowLevelWaves(mission, 9, () => 0.5).waves.length, 5);
+  const bossDay = generateLowLevelMission(9, 9, () => 0.5);
+  assert.throws(() => generateLowLevelWaves(bossDay, 9, () => 0.5), /Unsupported low-level wave configuration/);
 });

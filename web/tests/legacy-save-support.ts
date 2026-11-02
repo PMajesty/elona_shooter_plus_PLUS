@@ -10,7 +10,7 @@ import { ENEMIES } from '../src/content.ts';
 export function withLegacyPartyDefaults(value: Record<string, any>): Record<string, any> {
   const expected = structuredClone(value);
   const town = expected.town?.preparation === 'ready' ? expected.town : expected.previousTown;
-  expected.version = 23;
+  expected.version = 24;
   expected.wallLevel = 1;
   expected.wallFixCount = 0;
   expected.repairmanLevel = 0;

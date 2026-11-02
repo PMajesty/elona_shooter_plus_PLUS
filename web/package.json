@@ -65,7 +65,11 @@
     "test:eighth-town-reference": "node --experimental-strip-types scripts/compare-eighth-town-reference.ts",
     "test:lava-reference": "node --experimental-strip-types scripts/compare-lava-reference.ts",
     "test:day-eight-party-soak": "node --experimental-strip-types scripts/party-soak.ts 4 day-eight",
-    "test:day-eight-lava-exposure": "node --experimental-strip-types scripts/day-eight-lava-exposure.ts"
+    "test:day-eight-lava-exposure": "node --experimental-strip-types scripts/day-eight-lava-exposure.ts",
+    "test:ninth-day-wave-reference": "node --experimental-strip-types scripts/compare-ninth-day-wave-reference.ts",
+    "test:ninth-day-spawn-reference": "node --experimental-strip-types scripts/compare-ninth-day-spawn-reference.ts",
+    "test:ninth-town-reference": "node --experimental-strip-types scripts/compare-ninth-town-reference.ts",
+    "test:day-nine-party-soak": "node --experimental-strip-types scripts/party-soak.ts 4 day-nine"
   },
   "dependencies": {
     "phaser": "4.2.1"

@@ -1,0 +1,3525 @@
+{
+  "format": "elona-original-ninth-day-spawn-trace",
+  "version": 1,
+  "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "instrumentedSwfSha256": "79cb3ee517fd479050b4b9c4b9e642db8457cb01b6e7d6e7e31dfc53bd1d00b7",
+  "traceSha256": "191b73aa5cde40ff7bcc5f23372cf2a2c682ac5d401029cfb708da651af07e57",
+  "runtime": "@ruffle-rs/ruffle 0.7.1",
+  "capturedAt": "2026-11-02T04:46:08.837Z",
+  "boundary": "Actual onTick spawn loop and enemy.init at mission8/calendar9; controlled break inputs with full original initialization RNG",
+  "limits": [
+    "Actual original onTick and enemy.init methods under explicit deterministic inputs; native Timer/ENTER_FRAME scheduling is excluded",
+    "Actor AI/reload controls disabled in the source; production uses a full idle Sheriff with no active companion and no pending reload",
+    "Enemy numerical initialization, frames, queues, RNG and break order compared; raw original geometry retained but not asserted as new contour parity",
+    "Undefined original shadowHit means shadow is eligible under the original ==false check and is normalized to true for the canonical boolean"
+  ],
+  "records": [
+    {
+      "actorsDisabled": true,
+      "clock": "synchronous-original-onTick",
+      "day": 9,
+      "enemyFrameAdvance": false,
+      "kind": "ninth-day-spawn",
+      "missionLevel": 8,
+      "seed": 42,
+      "type": "ready",
+      "version": 1
+    },
+    {
+      "before": {
+        "bossCounter": 8,
+        "delays": [
+          13.4,
+          14.4,
+          15.4
+        ],
+        "drawCount": 0,
+        "enemies": [],
+        "hp": 40,
+        "newWave": false,
+        "noDamage": true,
+        "queue": [
+          3,
+          3,
+          3
+        ],
+        "rngState": 42,
+        "tick": 0,
+        "time": 0,
+        "wave": 4
+      },
+      "config": {
+        "ids": [
+          3,
+          3,
+          3
+        ],
+        "name": "sheep-first-below",
+        "prefix": [
+          0.25,
+          0.5,
+          0.75,
+          0.7499999
+        ]
+      },
+      "drawCount": 4,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.25
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.5
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.75
+        },
+        {
+          "index": 4,
+          "state": 3648046016,
+          "value": 0.7499999
+        }
+      ],
+      "kind": "ninth-day-spawn",
+      "rngState": 3648046016,
+      "scenario": "sheep-first-below",
+      "spawnEvents": [
+        {
+          "drawCount": 3,
+          "enemy": {
+            "alive": true,
+            "attack": 1,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": null,
+              "count": null,
+              "fireNum": null,
+              "hpMax": null,
+              "idle": null,
+              "weapon": null
+            },
+            "bounds": {
+              "height": 17.95,
+              "width": 28.95,
+              "x": -14,
+              "y": -1.95
+            },
+            "crit": [
+              4,
+              19,
+              -1,
+              9
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 29,
+            "frame": 1,
+            "free": false,
+            "gold": 7,
+            "height": 17.95,
+            "hp": 42,
+            "id": 3,
+            "knockBack": 0,
+            "level": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "shadowHit": true,
+            "speed": 0.8999999999999999,
+            "speedOrg": 0.8999999999999999,
+            "type": 0,
+            "width": 28.95,
+            "x": -20,
+            "y": 286
+          },
+          "id": 3,
+          "remaining": [
+            3,
+            3
+          ],
+          "rngState": 476557059,
+          "slot": 0,
+          "tick": 1
+        }
+      ],
+      "steps": [
+        {
+          "bossCounter": 8,
+          "delays": [
+            13.4,
+            14.4
+          ],
+          "drawCount": 4,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 1,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 17.95,
+                "width": 28.95,
+                "x": -14,
+                "y": -1.95
+              },
+              "crit": [
+                4,
+                19,
+                -1,
+                9
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 29,
+              "frame": 1,
+              "free": false,
+              "gold": 7,
+              "height": 17.95,
+              "hp": 42,
+              "id": 3,
+              "knockBack": 0,
+              "level": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 0.8999999999999999,
+              "speedOrg": 0.8999999999999999,
+              "type": 0,
+              "width": 28.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [
+            3,
+            3
+          ],
+          "rngState": 3648046016,
+          "tick": 1,
+          "time": 15.4,
+          "wave": 4
+        }
+      ],
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "before": {
+        "bossCounter": 8,
+        "delays": [
+          13.4,
+          14.4,
+          15.4
+        ],
+        "drawCount": 0,
+        "enemies": [],
+        "hp": 40,
+        "newWave": false,
+        "noDamage": true,
+        "queue": [
+          3,
+          3,
+          3
+        ],
+        "rngState": 42,
+        "tick": 0,
+        "time": 0,
+        "wave": 4
+      },
+      "config": {
+        "ids": [
+          3,
+          3,
+          3
+        ],
+        "name": "sheep-first-at-second-break",
+        "prefix": [
+          0.25,
+          0.5,
+          0.75,
+          0.75,
+          0.800001
+        ]
+      },
+      "drawCount": 5,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.25
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.5
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.75
+        },
+        {
+          "index": 4,
+          "state": 3648046016,
+          "value": 0.75
+        },
+        {
+          "index": 5,
+          "state": 3759983556,
+          "value": 0.800001
+        }
+      ],
+      "kind": "ninth-day-spawn",
+      "rngState": 3759983556,
+      "scenario": "sheep-first-at-second-break",
+      "spawnEvents": [
+        {
+          "drawCount": 3,
+          "enemy": {
+            "alive": true,
+            "attack": 1,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": null,
+              "count": null,
+              "fireNum": null,
+              "hpMax": null,
+              "idle": null,
+              "weapon": null
+            },
+            "bounds": {
+              "height": 17.95,
+              "width": 28.95,
+              "x": -14,
+              "y": -1.95
+            },
+            "crit": [
+              4,
+              19,
+              -1,
+              9
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 29,
+            "frame": 1,
+            "free": false,
+            "gold": 7,
+            "height": 17.95,
+            "hp": 42,
+            "id": 3,
+            "knockBack": 0,
+            "level": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "shadowHit": true,
+            "speed": 0.8999999999999999,
+            "speedOrg": 0.8999999999999999,
+            "type": 0,
+            "width": 28.95,
+            "x": -20,
+            "y": 286
+          },
+          "id": 3,
+          "remaining": [
+            3,
+            3
+          ],
+          "rngState": 476557059,
+          "slot": 0,
+          "tick": 1
+        }
+      ],
+      "steps": [
+        {
+          "bossCounter": 8,
+          "delays": [
+            13.4,
+            14.4
+          ],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 1,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 17.95,
+                "width": 28.95,
+                "x": -14,
+                "y": -1.95
+              },
+              "crit": [
+                4,
+                19,
+                -1,
+                9
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 29,
+              "frame": 1,
+              "free": false,
+              "gold": 7,
+              "height": 17.95,
+              "hp": 42,
+              "id": 3,
+              "knockBack": 0,
+              "level": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 0.8999999999999999,
+              "speedOrg": 0.8999999999999999,
+              "type": 0,
+              "width": 28.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [
+            3,
+            3
+          ],
+          "rngState": 3759983556,
+          "tick": 1,
+          "time": 15.4,
+          "wave": 4
+        }
+      ],
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "before": {
+        "bossCounter": 8,
+        "delays": [
+          13.4,
+          14.4,
+          15.4
+        ],
+        "drawCount": 0,
+        "enemies": [],
+        "hp": 40,
+        "newWave": false,
+        "noDamage": true,
+        "queue": [
+          17,
+          17,
+          17
+        ],
+        "rngState": 42,
+        "tick": 0,
+        "time": 0,
+        "wave": 4
+      },
+      "config": {
+        "ids": [
+          17,
+          17,
+          17
+        ],
+        "name": "rat-first-below",
+        "prefix": [
+          0.25,
+          0.5,
+          0.75,
+          0.8749999
+        ]
+      },
+      "drawCount": 4,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.25
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.5
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.75
+        },
+        {
+          "index": 4,
+          "state": 3648046016,
+          "value": 0.8749999
+        }
+      ],
+      "kind": "ninth-day-spawn",
+      "rngState": 3648046016,
+      "scenario": "rat-first-below",
+      "spawnEvents": [
+        {
+          "drawCount": 3,
+          "enemy": {
+            "alive": true,
+            "attack": 2,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": null,
+              "count": null,
+              "fireNum": null,
+              "hpMax": null,
+              "idle": null,
+              "weapon": null
+            },
+            "bounds": {
+              "height": 26.15,
+              "width": 30.95,
+              "x": -21.2,
+              "y": -9.2
+            },
+            "crit": [
+              -6,
+              9,
+              -11,
+              1
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 21,
+            "frame": 14,
+            "free": false,
+            "gold": 7,
+            "height": 26.15,
+            "hp": 16,
+            "id": 17,
+            "knockBack": 0,
+            "level": 1,
+            "scaleX": 1,
+            "scaleY": 1,
+            "shadowHit": true,
+            "speed": 3.35,
+            "speedOrg": 3.35,
+            "type": 0,
+            "width": 30.95,
+            "x": -20,
+            "y": 286
+          },
+          "id": 17,
+          "remaining": [
+            17,
+            17
+          ],
+          "rngState": 476557059,
+          "slot": 0,
+          "tick": 1
+        }
+      ],
+      "steps": [
+        {
+          "bossCounter": 8,
+          "delays": [
+            13.4,
+            14.4
+          ],
+          "drawCount": 4,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [
+            17,
+            17
+          ],
+          "rngState": 3648046016,
+          "tick": 1,
+          "time": 15.4,
+          "wave": 4
+        }
+      ],
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "before": {
+        "bossCounter": 8,
+        "delays": [
+          13.4,
+          14.4,
+          15.4
+        ],
+        "drawCount": 0,
+        "enemies": [],
+        "hp": 40,
+        "newWave": false,
+        "noDamage": true,
+        "queue": [
+          17,
+          17,
+          17
+        ],
+        "rngState": 42,
+        "tick": 0,
+        "time": 0,
+        "wave": 4
+      },
+      "config": {
+        "ids": [
+          17,
+          17,
+          17
+        ],
+        "name": "rat-first-at-second-break",
+        "prefix": [
+          0.25,
+          0.5,
+          0.75,
+          0.875,
+          0.800001
+        ]
+      },
+      "drawCount": 5,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.25
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.5
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.75
+        },
+        {
+          "index": 4,
+          "state": 3648046016,
+          "value": 0.875
+        },
+        {
+          "index": 5,
+          "state": 3759983556,
+          "value": 0.800001
+        }
+      ],
+      "kind": "ninth-day-spawn",
+      "rngState": 3759983556,
+      "scenario": "rat-first-at-second-break",
+      "spawnEvents": [
+        {
+          "drawCount": 3,
+          "enemy": {
+            "alive": true,
+            "attack": 2,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": null,
+              "count": null,
+              "fireNum": null,
+              "hpMax": null,
+              "idle": null,
+              "weapon": null
+            },
+            "bounds": {
+              "height": 26.15,
+              "width": 30.95,
+              "x": -21.2,
+              "y": -9.2
+            },
+            "crit": [
+              -6,
+              9,
+              -11,
+              1
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 21,
+            "frame": 14,
+            "free": false,
+            "gold": 7,
+            "height": 26.15,
+            "hp": 16,
+            "id": 17,
+            "knockBack": 0,
+            "level": 1,
+            "scaleX": 1,
+            "scaleY": 1,
+            "shadowHit": true,
+            "speed": 3.35,
+            "speedOrg": 3.35,
+            "type": 0,
+            "width": 30.95,
+            "x": -20,
+            "y": 286
+          },
+          "id": 17,
+          "remaining": [
+            17,
+            17
+          ],
+          "rngState": 476557059,
+          "slot": 0,
+          "tick": 1
+        }
+      ],
+      "steps": [
+        {
+          "bossCounter": 8,
+          "delays": [
+            13.4,
+            14.4
+          ],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [
+            17,
+            17
+          ],
+          "rngState": 3759983556,
+          "tick": 1,
+          "time": 15.4,
+          "wave": 4
+        }
+      ],
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "before": {
+        "bossCounter": 8,
+        "delays": [
+          13.4,
+          14.4,
+          15.4,
+          16.4
+        ],
+        "drawCount": 0,
+        "enemies": [],
+        "hp": 40,
+        "newWave": false,
+        "noDamage": true,
+        "queue": [
+          19,
+          17,
+          17,
+          17
+        ],
+        "rngState": 42,
+        "tick": 0,
+        "time": 0,
+        "wave": 4
+      },
+      "config": {
+        "ids": [
+          19,
+          17,
+          17,
+          17
+        ],
+        "name": "rat-second-at-continue",
+        "prefix": [
+          0.25,
+          0.5,
+          0.75,
+          0.875,
+          0.8,
+          0.25,
+          0.5,
+          0.75,
+          0.5
+        ]
+      },
+      "drawCount": 9,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.25
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.5
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.75
+        },
+        {
+          "index": 4,
+          "state": 3648046016,
+          "value": 0.875
+        },
+        {
+          "index": 5,
+          "state": 3759983556,
+          "value": 0.8
+        },
+        {
+          "index": 6,
+          "state": 1441438134,
+          "value": 0.25
+        },
+        {
+          "index": 7,
+          "state": 3713466840,
+          "value": 0.5
+        },
+        {
+          "index": 8,
+          "state": 2431644334,
+          "value": 0.75
+        },
+        {
+          "index": 9,
+          "state": 3120216979,
+          "value": 0.5
+        }
+      ],
+      "kind": "ninth-day-spawn",
+      "rngState": 3120216979,
+      "scenario": "rat-second-at-continue",
+      "spawnEvents": [
+        {
+          "drawCount": 3,
+          "enemy": {
+            "alive": true,
+            "attack": 2,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": null,
+              "count": null,
+              "fireNum": null,
+              "hpMax": null,
+              "idle": null,
+              "weapon": null
+            },
+            "bounds": {
+              "height": 26.15,
+              "width": 30.95,
+              "x": -21.2,
+              "y": -9.2
+            },
+            "crit": [
+              -6,
+              9,
+              -11,
+              1
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 21,
+            "frame": 14,
+            "free": false,
+            "gold": 7,
+            "height": 26.15,
+            "hp": 16,
+            "id": 17,
+            "knockBack": 0,
+            "level": 1,
+            "scaleX": 1,
+            "scaleY": 1,
+            "shadowHit": true,
+            "speed": 3.35,
+            "speedOrg": 3.35,
+            "type": 0,
+            "width": 30.95,
+            "x": -20,
+            "y": 286
+          },
+          "id": 17,
+          "remaining": [
+            19,
+            17,
+            17
+          ],
+          "rngState": 476557059,
+          "slot": 0,
+          "tick": 1
+        },
+        {
+          "drawCount": 8,
+          "enemy": {
+            "alive": true,
+            "attack": 2,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": null,
+              "count": null,
+              "fireNum": null,
+              "hpMax": null,
+              "idle": null,
+              "weapon": null
+            },
+            "bounds": {
+              "height": 26.15,
+              "width": 30.95,
+              "x": -21.2,
+              "y": -9.2
+            },
+            "crit": [
+              -6,
+              9,
+              -11,
+              1
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 21,
+            "frame": 14,
+            "free": false,
+            "gold": 7,
+            "height": 26.15,
+            "hp": 16,
+            "id": 17,
+            "knockBack": 0,
+            "level": 1,
+            "scaleX": 1,
+            "scaleY": 1,
+            "shadowHit": true,
+            "speed": 3.35,
+            "speedOrg": 3.35,
+            "type": 0,
+            "width": 30.95,
+            "x": -20,
+            "y": 286
+          },
+          "id": 17,
+          "remaining": [
+            19,
+            17
+          ],
+          "rngState": 2431644334,
+          "slot": 1,
+          "tick": 1
+        }
+      ],
+      "steps": [
+        {
+          "bossCounter": 8,
+          "delays": [
+            13.4,
+            14.4
+          ],
+          "drawCount": 9,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            },
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [
+            19,
+            17
+          ],
+          "rngState": 3120216979,
+          "tick": 1,
+          "time": 19.4,
+          "wave": 4
+        }
+      ],
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "before": {
+        "bossCounter": 8,
+        "delays": [
+          13.4,
+          14.4,
+          15.4,
+          16.4
+        ],
+        "drawCount": 0,
+        "enemies": [],
+        "hp": 40,
+        "newWave": false,
+        "noDamage": true,
+        "queue": [
+          3,
+          17,
+          3,
+          17
+        ],
+        "rngState": 42,
+        "tick": 0,
+        "time": 0,
+        "wave": 4
+      },
+      "config": {
+        "ids": [
+          3,
+          17,
+          3,
+          17
+        ],
+        "name": "mixed-shrinking-even",
+        "prefix": [
+          0.25,
+          0.5,
+          0.75,
+          0.9,
+          0.8,
+          0.25,
+          0.5,
+          0.75,
+          0.9,
+          0.8
+        ]
+      },
+      "drawCount": 10,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.25
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.5
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.75
+        },
+        {
+          "index": 4,
+          "state": 3648046016,
+          "value": 0.9
+        },
+        {
+          "index": 5,
+          "state": 3759983556,
+          "value": 0.8
+        },
+        {
+          "index": 6,
+          "state": 1441438134,
+          "value": 0.25
+        },
+        {
+          "index": 7,
+          "state": 3713466840,
+          "value": 0.5
+        },
+        {
+          "index": 8,
+          "state": 2431644334,
+          "value": 0.75
+        },
+        {
+          "index": 9,
+          "state": 3120216979,
+          "value": 0.9
+        },
+        {
+          "index": 10,
+          "state": 1067267639,
+          "value": 0.8
+        }
+      ],
+      "kind": "ninth-day-spawn",
+      "rngState": 1067267639,
+      "scenario": "mixed-shrinking-even",
+      "spawnEvents": [
+        {
+          "drawCount": 3,
+          "enemy": {
+            "alive": true,
+            "attack": 2,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": null,
+              "count": null,
+              "fireNum": null,
+              "hpMax": null,
+              "idle": null,
+              "weapon": null
+            },
+            "bounds": {
+              "height": 26.15,
+              "width": 30.95,
+              "x": -21.2,
+              "y": -9.2
+            },
+            "crit": [
+              -6,
+              9,
+              -11,
+              1
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 21,
+            "frame": 14,
+            "free": false,
+            "gold": 7,
+            "height": 26.15,
+            "hp": 16,
+            "id": 17,
+            "knockBack": 0,
+            "level": 1,
+            "scaleX": 1,
+            "scaleY": 1,
+            "shadowHit": true,
+            "speed": 3.35,
+            "speedOrg": 3.35,
+            "type": 0,
+            "width": 30.95,
+            "x": -20,
+            "y": 286
+          },
+          "id": 17,
+          "remaining": [
+            3,
+            17,
+            3
+          ],
+          "rngState": 476557059,
+          "slot": 0,
+          "tick": 1
+        },
+        {
+          "drawCount": 8,
+          "enemy": {
+            "alive": true,
+            "attack": 1,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": null,
+              "count": null,
+              "fireNum": null,
+              "hpMax": null,
+              "idle": null,
+              "weapon": null
+            },
+            "bounds": {
+              "height": 17.95,
+              "width": 28.95,
+              "x": -14,
+              "y": -1.95
+            },
+            "crit": [
+              4,
+              19,
+              -1,
+              9
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 29,
+            "frame": 1,
+            "free": false,
+            "gold": 7,
+            "height": 17.95,
+            "hp": 42,
+            "id": 3,
+            "knockBack": 0,
+            "level": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "shadowHit": true,
+            "speed": 0.8999999999999999,
+            "speedOrg": 0.8999999999999999,
+            "type": 0,
+            "width": 28.95,
+            "x": -20,
+            "y": 286
+          },
+          "id": 3,
+          "remaining": [
+            3,
+            17
+          ],
+          "rngState": 2431644334,
+          "slot": 1,
+          "tick": 1
+        }
+      ],
+      "steps": [
+        {
+          "bossCounter": 8,
+          "delays": [
+            13.4,
+            14.4
+          ],
+          "drawCount": 10,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            },
+            {
+              "alive": true,
+              "attack": 1,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 17.95,
+                "width": 28.95,
+                "x": -14,
+                "y": -1.95
+              },
+              "crit": [
+                4,
+                19,
+                -1,
+                9
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 29,
+              "frame": 1,
+              "free": false,
+              "gold": 7,
+              "height": 17.95,
+              "hp": 42,
+              "id": 3,
+              "knockBack": 0,
+              "level": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 0.8999999999999999,
+              "speedOrg": 0.8999999999999999,
+              "type": 0,
+              "width": 28.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [
+            3,
+            17
+          ],
+          "rngState": 1067267639,
+          "tick": 1,
+          "time": 19.4,
+          "wave": 4
+        }
+      ],
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "before": {
+        "bossCounter": 8,
+        "delays": [
+          13.4,
+          14.4,
+          15.4
+        ],
+        "drawCount": 0,
+        "enemies": [],
+        "hp": 40,
+        "newWave": false,
+        "noDamage": true,
+        "queue": [
+          17,
+          3,
+          17
+        ],
+        "rngState": 42,
+        "tick": 0,
+        "time": 0,
+        "wave": 4
+      },
+      "config": {
+        "ids": [
+          17,
+          3,
+          17
+        ],
+        "name": "mixed-shrinking-odd",
+        "prefix": [
+          0.25,
+          0.5,
+          0.75,
+          0.9,
+          0.8,
+          0.25,
+          0.5,
+          0.75,
+          0.9,
+          0.8
+        ]
+      },
+      "drawCount": 10,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.25
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.5
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.75
+        },
+        {
+          "index": 4,
+          "state": 3648046016,
+          "value": 0.9
+        },
+        {
+          "index": 5,
+          "state": 3759983556,
+          "value": 0.8
+        },
+        {
+          "index": 6,
+          "state": 1441438134,
+          "value": 0.25
+        },
+        {
+          "index": 7,
+          "state": 3713466840,
+          "value": 0.5
+        },
+        {
+          "index": 8,
+          "state": 2431644334,
+          "value": 0.75
+        },
+        {
+          "index": 9,
+          "state": 3120216979,
+          "value": 0.9
+        },
+        {
+          "index": 10,
+          "state": 1067267639,
+          "value": 0.8
+        }
+      ],
+      "kind": "ninth-day-spawn",
+      "rngState": 1067267639,
+      "scenario": "mixed-shrinking-odd",
+      "spawnEvents": [
+        {
+          "drawCount": 3,
+          "enemy": {
+            "alive": true,
+            "attack": 2,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": null,
+              "count": null,
+              "fireNum": null,
+              "hpMax": null,
+              "idle": null,
+              "weapon": null
+            },
+            "bounds": {
+              "height": 26.15,
+              "width": 30.95,
+              "x": -21.2,
+              "y": -9.2
+            },
+            "crit": [
+              -6,
+              9,
+              -11,
+              1
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 21,
+            "frame": 14,
+            "free": false,
+            "gold": 7,
+            "height": 26.15,
+            "hp": 16,
+            "id": 17,
+            "knockBack": 0,
+            "level": 1,
+            "scaleX": 1,
+            "scaleY": 1,
+            "shadowHit": true,
+            "speed": 3.35,
+            "speedOrg": 3.35,
+            "type": 0,
+            "width": 30.95,
+            "x": -20,
+            "y": 286
+          },
+          "id": 17,
+          "remaining": [
+            17,
+            3
+          ],
+          "rngState": 476557059,
+          "slot": 0,
+          "tick": 1
+        },
+        {
+          "drawCount": 8,
+          "enemy": {
+            "alive": true,
+            "attack": 1,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": null,
+              "count": null,
+              "fireNum": null,
+              "hpMax": null,
+              "idle": null,
+              "weapon": null
+            },
+            "bounds": {
+              "height": 17.95,
+              "width": 28.95,
+              "x": -14,
+              "y": -1.95
+            },
+            "crit": [
+              4,
+              19,
+              -1,
+              9
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 29,
+            "frame": 1,
+            "free": false,
+            "gold": 7,
+            "height": 17.95,
+            "hp": 42,
+            "id": 3,
+            "knockBack": 0,
+            "level": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "shadowHit": true,
+            "speed": 0.8999999999999999,
+            "speedOrg": 0.8999999999999999,
+            "type": 0,
+            "width": 28.95,
+            "x": -20,
+            "y": 286
+          },
+          "id": 3,
+          "remaining": [
+            17
+          ],
+          "rngState": 2431644334,
+          "slot": 1,
+          "tick": 1
+        }
+      ],
+      "steps": [
+        {
+          "bossCounter": 8,
+          "delays": [
+            13.4
+          ],
+          "drawCount": 10,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            },
+            {
+              "alive": true,
+              "attack": 1,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 17.95,
+                "width": 28.95,
+                "x": -14,
+                "y": -1.95
+              },
+              "crit": [
+                4,
+                19,
+                -1,
+                9
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 29,
+              "frame": 1,
+              "free": false,
+              "gold": 7,
+              "height": 17.95,
+              "hp": 42,
+              "id": 3,
+              "knockBack": 0,
+              "level": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 0.8999999999999999,
+              "speedOrg": 0.8999999999999999,
+              "type": 0,
+              "width": 28.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [
+            17
+          ],
+          "rngState": 1067267639,
+          "tick": 1,
+          "time": 18.4,
+          "wave": 4
+        }
+      ],
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "before": {
+        "bossCounter": 8,
+        "delays": [
+          13.4
+        ],
+        "drawCount": 0,
+        "enemies": [],
+        "hp": 40,
+        "newWave": false,
+        "noDamage": true,
+        "queue": [
+          17
+        ],
+        "rngState": 42,
+        "tick": 0,
+        "time": 0,
+        "wave": 4
+      },
+      "config": {
+        "ids": [
+          17
+        ],
+        "name": "final-rat-deferred-empty",
+        "prefix": [
+          0.25,
+          0.5,
+          0.75,
+          0.9,
+          0.8
+        ],
+        "ticks": 15
+      },
+      "drawCount": 5,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.25
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.5
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.75
+        },
+        {
+          "index": 4,
+          "state": 3648046016,
+          "value": 0.9
+        },
+        {
+          "index": 5,
+          "state": 3759983556,
+          "value": 0.8
+        }
+      ],
+      "kind": "ninth-day-spawn",
+      "rngState": 3759983556,
+      "scenario": "final-rat-deferred-empty",
+      "spawnEvents": [
+        {
+          "drawCount": 3,
+          "enemy": {
+            "alive": true,
+            "attack": 2,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": null,
+              "count": null,
+              "fireNum": null,
+              "hpMax": null,
+              "idle": null,
+              "weapon": null
+            },
+            "bounds": {
+              "height": 26.15,
+              "width": 30.95,
+              "x": -21.2,
+              "y": -9.2
+            },
+            "crit": [
+              -6,
+              9,
+              -11,
+              1
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 21,
+            "frame": 14,
+            "free": false,
+            "gold": 7,
+            "height": 26.15,
+            "hp": 16,
+            "id": 17,
+            "knockBack": 0,
+            "level": 1,
+            "scaleX": 1,
+            "scaleY": 1,
+            "shadowHit": true,
+            "speed": 3.35,
+            "speedOrg": 3.35,
+            "type": 0,
+            "width": 30.95,
+            "x": -20,
+            "y": 286
+          },
+          "id": 17,
+          "remaining": [],
+          "rngState": 476557059,
+          "slot": 0,
+          "tick": 1
+        }
+      ],
+      "steps": [
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 1,
+          "time": 13.4,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 2,
+          "time": 12.4,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 3,
+          "time": 11.4,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 4,
+          "time": 10.4,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 5,
+          "time": 9.4,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 6,
+          "time": 8.4,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 7,
+          "time": 7.4,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 8,
+          "time": 6.4,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 9,
+          "time": 5.4,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 10,
+          "time": 4.4,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 11,
+          "time": 3.4000000000000004,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 12,
+          "time": 2.4000000000000004,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 13,
+          "time": 1.4000000000000004,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 14,
+          "time": 0.40000000000000036,
+          "wave": 4
+        },
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 5,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 2,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 26.15,
+                "width": 30.95,
+                "x": -21.2,
+                "y": -9.2
+              },
+              "crit": [
+                -6,
+                9,
+                -11,
+                1
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 21,
+              "frame": 14,
+              "free": false,
+              "gold": 7,
+              "height": 26.15,
+              "hp": 16,
+              "id": 17,
+              "knockBack": 0,
+              "level": 1,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 3.35,
+              "speedOrg": 3.35,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": true,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 3759983556,
+          "tick": 15,
+          "time": -0.5999999999999996,
+          "wave": 4
+        }
+      ],
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "before": {
+        "bossCounter": 8,
+        "delays": [
+          13.4,
+          14.4
+        ],
+        "drawCount": 0,
+        "enemies": [],
+        "hp": 40,
+        "newWave": false,
+        "noDamage": true,
+        "queue": [
+          3,
+          19
+        ],
+        "rngState": 42,
+        "tick": 0,
+        "time": 0,
+        "wave": 4
+      },
+      "config": {
+        "ids": [
+          3,
+          19
+        ],
+        "name": "chicken-first-break",
+        "prefix": [
+          0.25,
+          0.5,
+          0.75,
+          0.999999
+        ]
+      },
+      "drawCount": 4,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.25
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.5
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.75
+        },
+        {
+          "index": 4,
+          "state": 3648046016,
+          "value": 0.999999
+        }
+      ],
+      "kind": "ninth-day-spawn",
+      "rngState": 3648046016,
+      "scenario": "chicken-first-break",
+      "spawnEvents": [
+        {
+          "drawCount": 3,
+          "enemy": {
+            "alive": true,
+            "attack": 1,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": null,
+              "count": null,
+              "fireNum": null,
+              "hpMax": null,
+              "idle": null,
+              "weapon": null
+            },
+            "bounds": {
+              "height": 7.3,
+              "width": 16.05,
+              "x": -11,
+              "y": 4.6
+            },
+            "crit": [
+              -4,
+              4,
+              -12,
+              -4
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 37,
+            "frame": 1,
+            "free": false,
+            "gold": 8,
+            "height": 7.3,
+            "hp": 54,
+            "id": 19,
+            "knockBack": 0,
+            "level": 2,
+            "scaleX": 1,
+            "scaleY": 1,
+            "shadowHit": true,
+            "speed": 1.9500000000000002,
+            "speedOrg": 1.9500000000000002,
+            "type": 0,
+            "width": 16.05,
+            "x": -20,
+            "y": 286
+          },
+          "id": 19,
+          "remaining": [
+            3
+          ],
+          "rngState": 476557059,
+          "slot": 0,
+          "tick": 1
+        }
+      ],
+      "steps": [
+        {
+          "bossCounter": 8,
+          "delays": [
+            13.4
+          ],
+          "drawCount": 4,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 1,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 7.3,
+                "width": 16.05,
+                "x": -11,
+                "y": 4.6
+              },
+              "crit": [
+                -4,
+                4,
+                -12,
+                -4
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 37,
+              "frame": 1,
+              "free": false,
+              "gold": 8,
+              "height": 7.3,
+              "hp": 54,
+              "id": 19,
+              "knockBack": 0,
+              "level": 2,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 1.9500000000000002,
+              "speedOrg": 1.9500000000000002,
+              "type": 0,
+              "width": 16.05,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [
+            3
+          ],
+          "rngState": 3648046016,
+          "tick": 1,
+          "time": 14.4,
+          "wave": 4
+        }
+      ],
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "before": {
+        "bossCounter": 8,
+        "delays": [
+          13.4,
+          14.4
+        ],
+        "drawCount": 0,
+        "enemies": [],
+        "hp": 40,
+        "newWave": false,
+        "noDamage": true,
+        "queue": [
+          3,
+          4
+        ],
+        "rngState": 42,
+        "tick": 0,
+        "time": 0,
+        "wave": 4
+      },
+      "config": {
+        "ids": [
+          3,
+          4
+        ],
+        "name": "lava-first-break",
+        "prefix": [
+          0.25,
+          0.5,
+          0.75,
+          0.999999
+        ]
+      },
+      "drawCount": 4,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.25
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.5
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.75
+        },
+        {
+          "index": 4,
+          "state": 3648046016,
+          "value": 0.999999
+        }
+      ],
+      "kind": "ninth-day-spawn",
+      "rngState": 3648046016,
+      "scenario": "lava-first-break",
+      "spawnEvents": [
+        {
+          "drawCount": 3,
+          "enemy": {
+            "alive": true,
+            "attack": 12,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": null,
+              "count": null,
+              "fireNum": null,
+              "hpMax": null,
+              "idle": null,
+              "weapon": null
+            },
+            "bounds": {
+              "height": 34.6,
+              "width": 30.95,
+              "x": -15.5,
+              "y": -17.5
+            },
+            "crit": [
+              -9,
+              9,
+              -19,
+              -7
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 121,
+            "frame": 1,
+            "free": false,
+            "gold": 13,
+            "height": 34.6,
+            "hp": 72,
+            "id": 4,
+            "knockBack": 0,
+            "level": 9,
+            "scaleX": 1,
+            "scaleY": 1,
+            "shadowHit": true,
+            "speed": 5.5,
+            "speedOrg": 5.5,
+            "type": 0,
+            "width": 30.95,
+            "x": -20,
+            "y": 286
+          },
+          "id": 4,
+          "remaining": [
+            3
+          ],
+          "rngState": 476557059,
+          "slot": 0,
+          "tick": 1
+        }
+      ],
+      "steps": [
+        {
+          "bossCounter": 8,
+          "delays": [
+            13.4
+          ],
+          "drawCount": 4,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 12,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": null,
+                "count": null,
+                "fireNum": null,
+                "hpMax": null,
+                "idle": null,
+                "weapon": null
+              },
+              "bounds": {
+                "height": 34.6,
+                "width": 30.95,
+                "x": -15.5,
+                "y": -17.5
+              },
+              "crit": [
+                -9,
+                9,
+                -19,
+                -7
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 121,
+              "frame": 1,
+              "free": false,
+              "gold": 13,
+              "height": 34.6,
+              "hp": 72,
+              "id": 4,
+              "knockBack": 0,
+              "level": 9,
+              "scaleX": 1,
+              "scaleY": 1,
+              "shadowHit": true,
+              "speed": 5.5,
+              "speedOrg": 5.5,
+              "type": 0,
+              "width": 30.95,
+              "x": -20,
+              "y": 286
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [
+            3
+          ],
+          "rngState": 3648046016,
+          "tick": 1,
+          "time": 14.4,
+          "wave": 4
+        }
+      ],
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "before": {
+        "bossCounter": 8,
+        "delays": [
+          13.4,
+          14.4
+        ],
+        "drawCount": 0,
+        "enemies": [],
+        "hp": 40,
+        "newWave": false,
+        "noDamage": true,
+        "queue": [
+          3,
+          999
+        ],
+        "rngState": 42,
+        "tick": 0,
+        "time": 0,
+        "wave": 4
+      },
+      "config": {
+        "ids": [
+          3,
+          999
+        ],
+        "name": "boss-first-break",
+        "prefix": [
+          0.25,
+          0.25,
+          0.5,
+          0.5,
+          0.75,
+          0.999999
+        ]
+      },
+      "drawCount": 6,
+      "draws": [
+        {
+          "index": 1,
+          "state": 11355432,
+          "value": 0.25
+        },
+        {
+          "index": 2,
+          "state": 2836018348,
+          "value": 0.25
+        },
+        {
+          "index": 3,
+          "state": 476557059,
+          "value": 0.5
+        },
+        {
+          "index": 4,
+          "state": 3648046016,
+          "value": 0.5
+        },
+        {
+          "index": 5,
+          "state": 3759983556,
+          "value": 0.75
+        },
+        {
+          "index": 6,
+          "state": 1441438134,
+          "value": 0.999999
+        }
+      ],
+      "kind": "ninth-day-spawn",
+      "rngState": 1441438134,
+      "scenario": "boss-first-break",
+      "spawnEvents": [
+        {
+          "drawCount": 5,
+          "enemy": {
+            "alive": true,
+            "attack": 1,
+            "attacked": false,
+            "attacking": false,
+            "boss": {
+              "action": 3,
+              "count": 130,
+              "fireNum": null,
+              "hpMax": 350,
+              "idle": null,
+              "weapon": 1
+            },
+            "bounds": {
+              "height": 0,
+              "width": 0,
+              "x": 0,
+              "y": 0
+            },
+            "crit": [
+              -100,
+              -100,
+              -100,
+              -100
+            ],
+            "deathTicks": 0,
+            "drop": 0,
+            "dropping": false,
+            "exp": 201,
+            "frame": 1,
+            "free": false,
+            "gold": 18,
+            "height": 0,
+            "hp": 350,
+            "id": 999,
+            "knockBack": 0,
+            "level": 8,
+            "scaleX": -1,
+            "scaleY": 1,
+            "shadowHit": null,
+            "speed": 1.5,
+            "speedOrg": 1.5,
+            "type": 0,
+            "width": 0,
+            "x": -20,
+            "y": 273
+          },
+          "id": 999,
+          "remaining": [
+            3
+          ],
+          "rngState": 3759983556,
+          "slot": 0,
+          "tick": 1
+        }
+      ],
+      "steps": [
+        {
+          "bossCounter": 9,
+          "delays": [
+            13.4
+          ],
+          "drawCount": 6,
+          "enemies": [
+            {
+              "alive": true,
+              "attack": 1,
+              "attacked": false,
+              "attacking": false,
+              "boss": {
+                "action": 3,
+                "count": 130,
+                "fireNum": null,
+                "hpMax": 350,
+                "idle": null,
+                "weapon": 1
+              },
+              "bounds": {
+                "height": 0,
+                "width": 0,
+                "x": 0,
+                "y": 0
+              },
+              "crit": [
+                -100,
+                -100,
+                -100,
+                -100
+              ],
+              "deathTicks": 0,
+              "drop": 0,
+              "dropping": false,
+              "exp": 201,
+              "frame": 1,
+              "free": false,
+              "gold": 18,
+              "height": 0,
+              "hp": 350,
+              "id": 999,
+              "knockBack": 0,
+              "level": 8,
+              "scaleX": -1,
+              "scaleY": 1,
+              "shadowHit": null,
+              "speed": 1.5,
+              "speedOrg": 1.5,
+              "type": 0,
+              "width": 0,
+              "x": -20,
+              "y": 273
+            }
+          ],
+          "hp": 40,
+          "newWave": false,
+          "noDamage": true,
+          "queue": [
+            3
+          ],
+          "rngState": 1441438134,
+          "tick": 1,
+          "time": 14.4,
+          "wave": 4
+        }
+      ],
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "before": {
+        "bossCounter": 8,
+        "delays": [],
+        "drawCount": 0,
+        "enemies": [],
+        "hp": 40,
+        "newWave": false,
+        "noDamage": true,
+        "queue": [],
+        "rngState": 42,
+        "tick": 0,
+        "time": 0,
+        "wave": 4
+      },
+      "config": {
+        "ids": [],
+        "name": "empty-queue",
+        "prefix": []
+      },
+      "drawCount": 0,
+      "draws": [],
+      "kind": "ninth-day-spawn",
+      "rngState": 42,
+      "scenario": "empty-queue",
+      "spawnEvents": [],
+      "steps": [
+        {
+          "bossCounter": 8,
+          "delays": [],
+          "drawCount": 0,
+          "enemies": [],
+          "hp": 40,
+          "newWave": true,
+          "noDamage": true,
+          "queue": [],
+          "rngState": 42,
+          "tick": 1,
+          "time": -1,
+          "wave": 4
+        }
+      ],
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "kind": "ninth-day-spawn",
+      "ok": true,
+      "snapshots": 12,
+      "type": "complete",
+      "version": 1
+    }
+  ]
+}

@@ -9,6 +9,11 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / ".build/oracle/browser-report.json"
 REPORTS = {
+    "/api/title-hit-report": ROOT / ".build/oracle/title-hit-browser-report.json",
+    "/api/ninth-day-waves-report": ROOT / ".build/oracle/ninth-day-waves-browser-report.json",
+    "/api/ninth-day-spawn-report": ROOT / ".build/oracle/ninth-day-spawn-browser-report.json",
+    "/api/ninth-town-report": ROOT / ".build/oracle/ninth-town-browser-report.json",
+
     "/api/eighth-day-waves-report": ROOT / ".build/oracle/eighth-day-waves-browser-report.json",
     "/api/eighth-day-spawn-report": ROOT / ".build/oracle/eighth-day-spawn-browser-report.json",
     "/api/eighth-town-report": ROOT / ".build/oracle/eighth-town-browser-report.json",
@@ -59,6 +64,15 @@ REPORTS = {
     "/api/town-preparation-report": ROOT / ".build/oracle/town-preparation-browser-report.json",
 }
 ROUTES = {
+    "/title-hit-reference.swf": ROOT / ".build/oracle/title-hit-reference.swf",
+    "/title-hit-build-report.json": ROOT / ".build/oracle/title-hit-build-report.json",
+    "/ninth-day-waves-reference.swf": ROOT / ".build/oracle/ninth-day-waves-reference.swf",
+    "/ninth-day-waves-build-report.json": ROOT / ".build/oracle/ninth-day-waves-build-report.json",
+    "/ninth-day-spawn-reference.swf": ROOT / ".build/oracle/ninth-day-spawn-reference.swf",
+    "/ninth-day-spawn-build-report.json": ROOT / ".build/oracle/ninth-day-spawn-build-report.json",
+    "/ninth-town-reference.swf": ROOT / ".build/oracle/ninth-town-reference.swf",
+    "/ninth-town-build-report.json": ROOT / ".build/oracle/ninth-town-build-report.json",
+
     "/eighth-day-waves-reference.swf": ROOT / ".build/oracle/eighth-day-waves-reference.swf",
     "/eighth-day-waves-build-report.json": ROOT / ".build/oracle/eighth-day-waves-build-report.json",
     "/eighth-day-spawn-reference.swf": ROOT / ".build/oracle/eighth-day-spawn-reference.swf",

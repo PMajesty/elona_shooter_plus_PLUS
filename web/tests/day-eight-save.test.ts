@@ -60,7 +60,7 @@ test('v22 town7 migrates without rerolls and normal Rest preserves upgrades, par
   assert.ok(before.town?.preparation === 'ready'); assert.equal(before.town.mission.absorbFix, 0.03);
   const legacy: Record<string, any> = structuredClone(before); legacy.version = 22;
   const untouched = structuredClone(legacy), migrated = Simulation.fromSave(legacy);
-  assert.deepEqual(migrated.toSave(), { ...before, version: 23 }); assert.deepEqual(legacy, untouched);
+  assert.deepEqual(migrated.toSave(), { ...before, version: 24 }); assert.deepEqual(legacy, untouched);
   assert.equal(migrated.state.rng, before.rng);
   assert.equal(simulation.startNextDay(), true); assert.equal(migrated.startNextDay(), true);
   assert.deepEqual(migrated.state, simulation.state); assert.deepEqual(migrated.events, simulation.events);
@@ -153,7 +153,7 @@ test('v23 rejects Lava in older or earlier saves and rejects missing alert histo
   assert.throws(() => Simulation.fromSave(earlierWave), /Lava is unavailable/);
 });
 
-test('Day8 settlement is paid once and prepares a resumable town8 while Day9 Rest remains unavailable', () => {
+test('Day8 settlement is paid once and prepares a resumable town8 with exact onward Rest', () => {
   const simulation = seventhTown(); assert.equal(simulation.claimTitle(), 'claimed');
   assert.equal(simulation.buyCastleUpgrade('repairman'), 'purchased');
   assert.equal(simulation.startNextDay(), true);
@@ -171,6 +171,7 @@ test('Day8 settlement is paid once and prepares a resumable town8 while Day9 Res
   assert.ok(simulation.state.town?.preparation === 'ready');
   assert.equal(simulation.state.town.mission.level, 8); assert.equal(simulation.state.town.mission.absorbFix, 0.03);
   resumed = restore(simulation); const town = resumed.toSave();
-  assert.equal(resumed.startNextDay(), false); assert.deepEqual(resumed.toSave(), town);
   assert.equal(resumed.claimTitle(), 'unavailable'); assert.deepEqual(resumed.toSave(), town);
+  assert.equal(resumed.startNextDay(), true); assert.equal(simulation.startNextDay(), true);
+  assert.equal(resumed.state.day, 9); assert.deepEqual(resumed.state, simulation.state);
 });

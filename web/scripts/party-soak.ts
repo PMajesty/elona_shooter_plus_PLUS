@@ -17,10 +17,12 @@ const storageMode = process.argv[3] === 'storage';
 const looterMode = process.argv[3] === 'looter';
 const trainerMode = process.argv[3] === 'trainer';
 const dayEightMode = process.argv[3] === 'day-eight';
-const lastDay = dayEightMode ? 8 : 7;
+const dayNineMode = process.argv[3] === 'day-nine';
+const progressionMode = dayEightMode || dayNineMode;
+const lastDay = dayNineMode ? 9 : dayEightMode ? 8 : 7;
 const repairMode = sandbagMode || process.argv[3] === 'repair';
-const castleMode = dayEightMode || trainerMode || looterMode || storageMode || repairMode || process.argv[3] === 'castle';
-const fixturePrefix = dayEightMode ? 'day-eight-party' : trainerMode ? 'trainer-party' : looterMode ? 'looter-party' : storageMode ? 'storage-party' : sandbagMode ? 'sandbag-party' : repairMode ? 'repair-party' : castleMode ? 'castle-party' : 'party';
+const castleMode = progressionMode || trainerMode || looterMode || storageMode || repairMode || process.argv[3] === 'castle';
+const fixturePrefix = dayNineMode ? 'day-nine-party' : dayEightMode ? 'day-eight-party' : trainerMode ? 'trainer-party' : looterMode ? 'looter-party' : storageMode ? 'storage-party' : sandbagMode ? 'sandbag-party' : repairMode ? 'repair-party' : castleMode ? 'castle-party' : 'party';
 const output = fileURLToPath(new URL(`../../.build/${fixturePrefix}-soak`, import.meta.url));
 const browserOutput = fileURLToPath(new URL('../../.build/browser-qa', import.meta.url));
 mkdirSync(output, { recursive: true }); mkdirSync(browserOutput, { recursive: true });
@@ -67,7 +69,7 @@ const trainerSettlementObservations: object[] = [];
 const storageRestObservations: { scenario: string; day: number; capacity: number; occupiedExtraSlots: number }[] = [];
 const sandbagObservations: { scenario: string; tick: number; day: number; level: number; damageWith: number; damageWithout: number; avoided: number; rng: number }[] = [];
 const repairObservations: { scenario: string; tick: number; day: number; level: number; waveBefore: number; hpBefore: number; damage: number; hpAfter: number; restoredHp: number }[] = [];
-const dayEightObservations: { scenario: string; tick: number; kind: string; uids: number[] }[] = [];
+const progressionObservations: { scenario: string; tick: number; kind: string; uids: number[] }[] = [];
 
 function finite(value: unknown, path = 'state'): void {
   if (typeof value === 'number') assert.ok(Number.isFinite(value), `${path} is not finite`);
@@ -115,7 +117,7 @@ function run(current: Scenario, initial?: Save): void {
   const activeClass = () => simulation.state.party.slots.find(slot => slot.slot <= 3 && slot.exists)?.member?.devType;
   const activeCount = () => simulation.state.party.slots.filter(slot => slot.slot <= 3 && slot.exists).length;
   const recordFixture = (reason: string, state = simulation.toSave()) => {
-    const classId = activeClass() ?? (dayEightMode || storageMode || looterMode || trainerMode ? 0 : undefined);
+    const classId = activeClass() ?? (progressionMode || storageMode || looterMode || trainerMode ? 0 : undefined);
     if (classId === undefined || recorded.has(reason)) return;
     recorded.add(reason);
     const version = state.version;
@@ -199,21 +201,22 @@ function run(current: Scenario, initial?: Save): void {
           && simulation.state.timerRemainder + 20 >= 30 ? clone(simulation.toSave()) : undefined;
         const beforeLooter = looterMode && simulation.state.looterLevel > 0 && simulation.state.newWave && simulation.state.waveIndex === 0
           && simulation.state.timerRemainder + 20 >= 30 ? clone(simulation.toSave()) : undefined;
-        const beforeDayEight = dayEightMode && day === 8 ? clone(simulation.toSave()) : undefined;
+        const beforeProgression = progressionMode && day === lastDay ? clone(simulation.toSave()) : undefined;
         if (beforeLooter) recordFixture(`before-looter-ordinary-day${beforeLooter.day}`);
         act('tick', [input], sim => sim.tick(input)); totalFrames++;
-        if (beforeDayEight) {
-          const born = simulation.state.enemies.filter(enemy => enemy.uid >= beforeDayEight.nextUid);
+        if (beforeProgression) {
+          const born = simulation.state.enemies.filter(enemy => enemy.uid >= beforeProgression.nextUid);
           const lava = simulation.state.enemies.filter(enemy => enemy.kind === 'lava');
           const observe = (kind: string, uids: number[]) => {
             if (!uids.length) return;
-            dayEightObservations.push({ scenario: current.id, tick: simulation.state.tick, kind, uids });
-            if (!recorded.has(kind)) { recordFixture(`before-${kind}`, beforeDayEight); recordFixture(kind); save(); }
+            progressionObservations.push({ scenario: current.id, tick: simulation.state.tick, kind, uids });
+            if (!recorded.has(kind)) { recordFixture(`before-${kind}`, beforeProgression); recordFixture(kind); save(); }
           };
           observe('lava-spawn', born.filter(enemy => enemy.kind === 'lava').map(enemy => enemy.uid));
           observe('spawn-batch', born.length > 1 ? born.map(enemy => enemy.uid) : []);
-          observe('lava-alert', lava.filter(enemy => enemy.alerted && !beforeDayEight.enemies.find(old => old.uid === enemy.uid)?.alerted).map(enemy => enemy.uid));
-          observe('lava-attack', lava.filter(enemy => enemy.attacking && !beforeDayEight.enemies.find(old => old.uid === enemy.uid)?.attacking).map(enemy => enemy.uid));
+          if (dayNineMode) observe('rat-continued-batch', born.length > 1 && born.slice(0, -1).some(enemy => enemy.kind === 'rat') ? born.map(enemy => enemy.uid) : []);
+          observe('lava-alert', lava.filter(enemy => enemy.alerted && !beforeProgression.enemies.find(old => old.uid === enemy.uid)?.alerted).map(enemy => enemy.uid));
+          observe('lava-attack', lava.filter(enemy => enemy.attacking && !beforeProgression.enemies.find(old => old.uid === enemy.uid)?.attacking).map(enemy => enemy.uid));
           observe('lava-explosion', simulation.events.filter(event => event.type === 'lava-explode').map(event => event.enemyUid!));
           observe('lava-kill', simulation.events.filter(event => event.type === 'kill' && lava.some(enemy => enemy.uid === event.enemyUid)).map(event => event.enemyUid!));
         }
@@ -295,7 +298,7 @@ function run(current: Scenario, initial?: Save): void {
       if (storageMode && simulation.state.inventory.length > 6) recordFixture('storage-result');
       if (looterMode && simulation.state.looterLevel > 0) recordFixture('looter-result');
       if (trainerMode && simulation.state.trainerLevel > 0) recordFixture('trainer-result');
-      if (dayEightMode && day === 8) recordFixture('day-eight-result');
+      if (progressionMode && day === lastDay) recordFixture(dayNineMode ? 'day-nine-result' : 'day-eight-result');
       if (activeClass()) { activity.wages += simulation.state.result.wages; activity.wageSettlements++; recordFixture('result'); if (castleMode) recordFixture(`result-party${activeCount()}`); }
       assert.equal(act('enterTown', [], sim => sim.enterTown()), true); save();
     }
@@ -398,12 +401,12 @@ function run(current: Scenario, initial?: Save): void {
       assert.equal(act('buyCastleUpgrade', ['fix-wall'], sim => sim.buyCastleUpgrade('fix-wall')), 'purchased');
       fixWallPurchases++; recordFixture('fix-wall'); save();
     } else { act('freeRepair', [], sim => sim.freeRepair()); save(); }
-    if (dayEightMode && day >= 7) recordFixture(`day${day}-town`);
+    if (progressionMode && day >= lastDay - 1) recordFixture(`day${day}-town`);
     if (day === lastDay) break;
     const beforeRestInventory = storageMode ? clone(simulation.state.inventory) : undefined;
     if (storageMode && simulation.state.inventory.length > 6) recordFixture('before-storage-rest');
     assert.equal(act('startNextDay', [], sim => sim.startNextDay()), true); totalRest++; rests++;
-    if (dayEightMode && simulation.state.day === 8) recordFixture('day-eight-entry');
+    if (progressionMode && simulation.state.day === lastDay) recordFixture(dayNineMode ? 'day-nine-entry' : 'day-eight-entry');
     if (beforeRestInventory) {
       assert.equal(simulation.state.inventory.length, beforeRestInventory.length);
       for (let slot = 6; slot < beforeRestInventory.length; slot++) {
@@ -449,7 +452,7 @@ try {
     run({ id: `controlled-class-${classId}`, seed: firstTown.seed, kind: 'controlled-start', classId,
       origin: `${firstTown.scenario} at operation${firstTown.operations}; candidate generation prefix [0.5,0.5,0.5,${(classId - 0.5) / 9}], remaining draws0.5; campaign RNG unchanged` }, value);
   }
-  if (castleMode && !looterMode && !trainerMode && !dayEightMode) {
+  if (castleMode && !looterMode && !trainerMode && !progressionMode) {
     const value = clone(firstTown.save);
     // Явный капитал — единственный контролируемый вход; кандидаты и бои затем идут обычным путём.
     const capital = storageMode ? 20000 : 12000;
@@ -485,17 +488,17 @@ try {
     assert.ok(trainerObservations.some(row => row.levelWith > row.levelWithout), 'No observed Trainer bonus crossed a level boundary');
     assert.ok(trainerSettlementObservations.length > 0, 'No Trainer campaign settled a completed day');
   }
-  if (dayEightMode) {
-    assert.ok((wonDays[8] ?? 0) > 0, 'No natural campaign completed Day8');
-    assert.ok(dayEightObservations.some(row => row.kind === 'lava-spawn'), 'No natural Lava encounter');
-    assert.ok(dayEightObservations.some(row => row.kind === 'spawn-batch'), 'No natural timer spawned a batch');
+  if (progressionMode) {
+    assert.ok((wonDays[lastDay] ?? 0) > 0, `No natural campaign completed Day${lastDay}`);
+    assert.ok(progressionObservations.some(row => row.kind === 'lava-spawn'), 'No natural Lava encounter');
+    assert.ok(progressionObservations.some(row => row.kind === 'spawn-batch'), 'No natural timer spawned a batch');
   }
   const report = { status: 'passed', seedCount, sourceHashes, geometrySha256, scenarios: results.length, frames: totalFrames, checkpoints: totalCheckpoints, restTransitions: totalRest,
     rewardActions: totalRewards, reachedDays, wonDays, naturallyHiredClasses: [...naturalHired].sort(), classes: castleMode ? undefined : classes,
     ...(storageMode ? { storagePurchases, maximumInventorySlots, expandedLootTransfers, storageRestObservations } : {}),
     ...(looterMode ? { looterPurchases, looterObservations } : {}),
     ...(trainerMode ? { trainerPurchases, trainerObservations, trainerSettlementObservations, ambiguousTrainerFrames } : {}),
-    ...(dayEightMode ? { dayEightObservations } : {}),
+    ...(progressionMode ? { [dayNineMode ? 'dayNineObservations' : 'dayEightObservations']: progressionObservations } : {}),
     ...(sandbagMode ? { sandbagPurchases, sandbagObservations, ambiguousSandbagFrames,
       positiveDamageReductions: sandbagObservations.filter(row => row.avoided > 0).length,
       avoidedDamage: sandbagObservations.reduce((sum, row) => sum + row.avoided, 0) } : {}),
@@ -506,7 +509,7 @@ try {
         ['shots', 'hits', 'damage', 'kills', 'reloads', 'reloadCompletions', 'bowDraws', 'levelUps'].map(key => [key, value[key as keyof Activity]]))])) } : {}),
     elapsedMs: Math.round(performance.now() - started),
     collision: 'Production ordinary-enemy filled contours; boss uses the same rectangular fallback as soak.ts',
-    policy: dayEightMode ? 'Natural New Game starts through Day8; aimed Sheriff plus autonomous companions, ordinary loot/skills/House/Wall/hiring/repair/title transactions. No gold, item, HP or RNG grants, private completion or forced kills. Capture live Lava spawn/alert/attack/explosion/kill and timer batching when encountered, plus Day7 town, Day8 entry/results/town. Actual observed coverage is reported, not assumed.'
+    policy: progressionMode ? `Natural New Game starts through Day${lastDay}; aimed Sheriff plus autonomous companions, ordinary loot/skills/House/Wall/hiring/repair/title transactions. No gold, item, HP or RNG grants, private completion or forced kills. Capture live Lava spawn/alert/attack/explosion/kill and timer batching when encountered, plus town${lastDay - 1}, Day${lastDay} entry/results/town. Actual observed coverage is reported, not assumed.`
       : trainerMode ? 'Four-seed default natural starts only; buy Trainer toward level4 by town4 when affordable while reserving first hire cost, then existing House/Wall/hiring/repair policy. Level4 is a test target, not a gameplay cap. No gold, item, HP or RNG grants, private completion or forced kills. Observe single matching kill frames against a one-frame Trainer0 control; record XP, weapon XP, growth and random state. Retain ambiguous multi-kill/divergent frames as a count instead of claiming isolated attribution. The campaign itself always continues unchanged. Daily settlement controls must remain identical except Trainer level.'
       : looterMode ? 'Natural starts only; prioritize Looter toward level4 by town4 when affordable, reserve first hire cost, then existing House/Wall/hiring/repair policy. This target is a test purchase policy, not a game cap. No gold, item, HP or RNG grants, private completion or forced kills. Observe actual ordinary/boss generation boundaries; a one-boundary control changes only Looter to0. Generated item records and final random state may differ; no per-drop value increase is assumed. Purchase must preserve every existing item, prepared town and paid result.'
       : storageMode ? 'Aimed Sheriff and autonomous companions; buy capacity7/8/9 from town1/2/3 when affordable, reserve first hire cost, then existing House/Wall/hiring policy. Collect actual loot into first available slot including expanded backpack. Check every extra item across Rest and full-state/event replay. Natural starts have no grants; separate capital-start adds20000gold only at earned first town and buys all16slots through ordinary transactions. No granted items, forced kills or private battle completion.'
@@ -515,7 +518,7 @@ try {
       : castleMode ? 'Aimed Sheriff plus autonomous permanent companions; buy House with enough gold for the next generated candidate, buy one Wall from town2 onward when affordable, then hire through ordinary confirmation; Free Repair and Day6 title before Rest; natural runs have no grants. Separate capital-start adds12000gold at an earned first town to exercise the three-slot party before the current Day7 boundary.'
       : 'Aimed Sheriff plus autonomous companion; generated equipment and skills retained; collect available loot; source skill choice indexed by seed/day; hire when affordable; Free Repair and Day6 title before Rest; no grants, invincibility, private battle completion or forced kills',
     limits: ['Port full-state/event replay and finite-state checks, not independent original parity or browser validation', 'Class coverage records actual hire/battle/activity; class presence does not imply that every behavior occurred',
-      dayEightMode ? 'Only natural starts are used in this mode. Actual observations may include no surviving Lava attack or explosion; independent controlled original traces and integration tests cover those boundaries. No native scheduling, frame-perfect rendering or late-game hitbox claim.'
+      progressionMode ? 'Only natural starts are used in this mode. Actual observations may include no surviving Lava attack or explosion; independent controlled original traces and integration tests cover those boundaries. No native scheduling, frame-perfect rendering or late-game hitbox claim.'
       : trainerMode ? 'Trainer0 counterfactuals are port integration evidence, separate from original-game comparison. XP gain is reconstructed from observed level and remainder; natural observed values are below the single-level modulo overflow boundary. No new browser timing, full original scheduling or late-game hitbox claim.'
       : looterMode ? 'Counterfactual reward boundaries are port integration evidence; independent original generation traces establish source fidelity. Unchanged low-budget outcomes are retained, and higher budgets do not guarantee a more valuable individual drop.'
       : storageMode ? 'Capital capacity16 evidence grants20000gold only at earned first town; it does not establish natural full Storage affordability within seven days'

@@ -1,6 +1,6 @@
 # Browser port status
 
-Current release: **eight connected Sheriff days**, with owned firearms and
+Current release: **nine connected Sheriff days**, with owned firearms and
 consumables, ordinary/boss loot, earned skills, prepared towns, shop transactions,
 weapon Upgrade, MOD mounting, Free Repair, Rest, the first title claim and its salary,
 plus permanent recruitment, companion equipment, autonomous AI, growth and wages,
@@ -10,13 +10,24 @@ This is not a complete remake.
 The TypeScript/Phaser client runs independently of Flash and Ruffle; the preserved
 game remains the reference for behavior, content and appearance.
 
-The **v23 Day8 release is published** at `http://127.0.0.1:5175/elona/`. It connects
+The **v24 Day9 release is published** at `http://127.0.0.1:5175/elona/`. It connects Rest from town8 through
+the original mission8 fallback and Sheep/Rat batching rules, rewards and town9.
+The first boss-day mission9 is prepared and persisted, but Day10 remains blocked.
+Accepted source comparisons,406 unique tests and a four-case natural campaign run pass.
+Typechecking/final build, six complete-envelope UI paths, four title controls and
+production New Game/exact v23-save migration and restore pass. All 310 files match
+the tested build and archive, bundle `assets/index-D8Tk-vVM.js`. The archive is
+`.build/elona-shooter-browser-day-nine-slice.zip` (8,666,208 bytes), SHA-256
+`0a5c6185feb98bff00ee2fa3aa81cb63dd51ced930eca82756c52d3e5b58f69b`.
+Rollback `.build/browser-before-day-nine` retains all 310 verified v23 files.
+
+The historical **v23 Day8 release** connected
 Rest from town7 to Lava/spawn batching, rewards and town8 while retaining the existing party and
-Castle systems. It passes 386 tests, the original method/sampled geometry checks,
+Castle systems. It passed 386 tests, the original method/sampled geometry checks,
 four natural eight-day campaigns and five complete-save browser checks.
 Final saved-day label and production New Game/exact v22-save migration and
-restore checks pass. All 310 files from `.build/browser-day-eight-release` match
-the live build and ZIP. Bundle: `assets/index-CPbT627r.js`; archive:
+restore checks passed. All 310 files from `.build/browser-day-eight-release` matched
+its published build and ZIP. Bundle: `assets/index-CPbT627r.js`; archive:
 `.build/elona-shooter-browser-day-eight-slice.zip` (8,665,911 bytes), SHA-256
 `d94325f7ef63956bd3f0f86527e385f24fae799b3b0b777ac089a35546d6772d`.
 Rollback `.build/browser-before-day-eight` retains all 308 verified v22 files.
@@ -86,7 +97,7 @@ establish this late-game diagnosis.
 
 - Title, New Game, 22 appearances and Sheriff creation, including original hidden
   hero rolls, pre-Proceed rerolls and level growth.
-- Opening mission0 and prepared missions1–7 on displayed Days1–8, victory/defeat,
+- Opening mission0 and prepared missions1–8 on displayed Days1–9, victory/defeat,
   rewards and subsequent towns. Day4 includes BATCH1 wave selection, boss shields,
   fourth-town MOD stock and level-2 recruit growth. Day5 adds AIR waves and Fly
   movement, hovering, knockback, distant shadow, death and castle exit. The fifth
@@ -97,7 +108,9 @@ establish this late-game diagnosis.
   the wall is hit at release and the travelling grenade's explosion is cosmetic.
   Its seventh town can generate level-4 recruits and prepares mission7. The v23
   release uses that saved mission for Day8, with reachable Lava and the source
-  Sheep batching branch. Town8 prepares mission8; Day9 combat remains disabled.
+  Sheep batching branch. The v24 release uses town8's prepared mission8 for
+  Day9, with the additional Barbarian fallback draw and Rat continuation threshold.
+  Town9 prepares six-wave boss mission9; Day10 combat remains disabled.
 - Mouse aiming/shooting and keys 1–5 for owned slots. Damage, accuracy, cadence,
   ammo, skill requirements, manual/magazine reload, automatic fire/reload and
   covered Sheriff skills use source-derived calculations.
@@ -108,7 +121,7 @@ establish this late-game diagnosis.
   selected; charges and per-slot cooldowns persist. Hammers spend a charge even
   at full HP; the Grail is single-use.
 - Original art, fonts, audio, layered character animation, boss health bars and
-  the source boss appearance progression for the eight covered days.
+  the source boss appearance progression for the nine covered days.
 - Ordinary loot → earned boss prizes → earned Sheriff skill choices → results.
   Gold settles once. Owned inventory slots, offers and choices persist without rerolls.
 - Town preparation retains stock, cards, next-mission/recruit data and search
@@ -123,7 +136,7 @@ establish this late-game diagnosis.
   items, as in the source. A shop MOD must first be bought into an empty slot.
 - Free Repair costs 2 AP, restores the wall and costs no gold/RNG. A full wall
   rejects before the insufficient-AP check. Mission → Rest starts the next prepared battle
-  after dialog acknowledgment into Days2–8, without healing or spending gold/AP. Guns refill;
+  after dialog acknowledgment into Days2–9, without healing or spending gold/AP. Guns refill;
   consumable charges stay spent.
 - Castle House/Wall clicks purchase immediately without AP, RNG or confirmation.
   House costs 2,000 then 5,000 GP, caps at 3 and enables the corresponding permanent
@@ -188,6 +201,11 @@ establish this late-game diagnosis.
   earned merely for the eighth perfect completion. Town8 has no MOD sale or
   guaranteed calendar item; recruits remain level2–4 with thresholds5/12 and5/6.
   Random weapon variation can now reach Mk3, including its higher skill requirement.
+  Day9 tax is115 plus actual upkeep/wages and earned title salary. No ninth-perfect
+  medal or second title tier opens. Town9 recruits remain level2–4 at thresholds
+  10/27 and20/27, with the same Mk3 cap. Its prepared mission9 has six waves,
+  bossDay true and bossWave5, skipping the ordinary boss-wave RNG draw. Ordered
+  future guarantees are1035 Shop Token then1110 Dragonfly Statue after optional1038.
 - Pause, browser-local save, Continue and validated JSON import/export.
 - Characters supports permanent hiring/cancel/dismissal of all nine generated classes,
   orders, Boss/Defend preferences and skill focus. Initial house capacity is one;
@@ -200,7 +218,7 @@ establish this late-game diagnosis.
   Orders retain source quirks, including NoArmor falling through to Normal targeting.
   See [party integration](../web/docs/party-integration-status.md).
 
-Other playable hero classes, Day 9+, Ragnarok, temporary Mission Hire, recruit
+Other playable hero classes, Day 10+, Ragnarok, temporary Mission Hire, recruit
 refresh, other card/search actions, stock refresh, the remaining Castle/economy
 actions, complete global medals and original Flash
 save conversion remain unfinished. Companion/town skills cannot exercise systems
@@ -209,6 +227,12 @@ or test counts; see the [feature ledger](feature-ledger.json).
 Interrupted Chain Gun spin-up/down still uses the known counter fallback; the
 original audio-channel position and reverse-seek history are not yet persisted.
 Exact interrupted spin timing is not claimed.
+
+The original boss also adds child reticle `rectile2425` at `(13,-20)` in
+`mc.sub` after crossing x20 (`enemy.as`1050–1056); its child frame72 removes it.
+That cosmetic child is still missing from the port. This is a known pre-existing
+rendering gap from the earlier days, not a new Day9 behavior or full-pixel-parity
+claim.
 
 ## Architecture and persistence
 
@@ -223,12 +247,16 @@ Ordinary-enemy collision uses original filled contours and placement matrices,
 including persisted sheep shadow history. Bosses use rendered alpha geometry;
 the headless soak uses an explicitly documented boss rectangle fallback.
 
-Current saves use **version 23**, accepting port versions **1–22**. Version22
+Current saves use **version 24**, accepting port versions **1–23**. Version23
+migration changes only the version; RNG, owned state and history persist. Day9
+uses the stored mission8 and prior town8. Town9 requires the first boss-day
+mission's six waves/bossWave5 and ordered calendar guarantees, while earlier
+town validation remains strict and Day10 Rest is blocked. Version22
 migration retains existing state and RNG without adding fields or replaying
 actions. Day8 keeps the prepared mission7 and prior town7, allowing historical
 0.03 absorption and medal62 to persist into battle. Lava requires alert history
 and hit-effect fields; earlier-format/earlier-day Lava records are rejected.
-The eighth town remains resumable, with Day9 Rest disabled.
+The eighth town remains resumable and can now Rest into Day9.
 `trainerLevel` is canonical and validated as a nonnegative integer. Older saves
 initialize it to zero without purchases, XP changes or RNG draws. Existing Looter,
 inventory, offers, prepared towns, party records and settled results are preserved.
@@ -320,7 +348,57 @@ no Flash plugin, Ruffle, external CDN or gameplay server.
 
 ## Evidence and intentional corrections
 
-The v23 Day8 release matches **10 original wave cases**, **10 timer-spawn
+The v24 Day9 release matches **12 original wave cases**, **12 timer-spawn
+observations** and **22 town/recruit/item/mission/settlement observations** from
+repeatable original runs. The new fallback draw uses the source strict>0.5
+Barbarian threshold. Rat reaches the second batching condition at0.875; the
+original shrinking queue and delayed new-wave boundary remain intact. Town
+comparison includes prior mission8 controls, proving that mission9 skips the
+normal boss-wave draw and preserves ordered guarantees. Negative controls detect
+incorrect RNG despite equal mission fields and incorrect loot order despite equal
+RNG. See [Day9 wave/spawn notes](../web/docs/ninth-day-wave-source.md) and
+[ninth-town notes](../web/docs/ninth-town-source.md).
+
+The release passes **406 unique tests** across the403-test full-suite run and
+three added title-helper tests. Typechecking and the final build pass:
+`.build/browser-day-nine-final`,310 files, bundle `assets/index-D8Tk-vVM.js`.
+The current four natural campaigns all win Day9:82,162 ticks,865 runner checkpoints,
+32 Rest transitions and105 fixtures. Observations include17 multi-spawn callbacks,
+six Rat continuations, ten Lava spawns/kills and three alerts. No gold, HP, item or
+RNG grants are made. Independent replay checks all105 fixture hashes/full states
+and82,417 operations/events, restoring at93 distinct recorded boundaries; it does
+not recreate the865 runner checkpoint schedule. Every observed ninth boss has350
+HP/appearance59. These branches contain no Lava explosions. The port uses production ordinary contours and the declared
+headless boss rectangle. This is integration/replay evidence, not original
+whole-campaign or native-scheduling equality. All307 public assets are byte-identical
+to v23. Six complete-envelope UI checks pass: town8 Continue, Rest into Day9,
+battle Continue, actual idle batching, result→town9 and blocked Day10.
+Production New Game starts at tick0, HP40, gold200 and five shells. The actual
+v23 backup migrates/restores to the exact expected v24 envelope at tick674,
+HP40 and gold209, with unchanged RNG, paused and no console errors. All 310
+live/ZIP files match the tested build; rollback retains all 310 v23 files.
+Evidence: `.build/day-nine-party-soak/report.json`,
+`.build/browser-qa/day-nine-scenario-audit.json` and
+`.build/day-nine-asset-preservation.json`,
+`.build/browser-qa/day-nine-ui-verification.json`,
+`.build/browser-qa/day-nine-production-verification.json` and
+`.build/day-nine-publication.json`.
+
+The title New Game/Continue/Help hit correction matches **12 original button
+states and204 points**. Original text-field rectangles include transparent
+spaces between letters; six measured alpha-zero samples reject the previous
+PNG-alpha threshold. Picking retains the separate current-state and declared
+Hit regions, and clicks use the original integer coordinates and Down bounds.
+Source Over/Down textures replace the previous tint and pointer exit restores Up.
+Actual New Game and Help transparent-point clicks plus an outside control pass
+in the browser; Continue also restores the earned town8 and saved Day9 battle
+exactly. All four title controls pass, recorded in
+`.build/browser-qa/day-nine-title-ui-verification.json`.
+No asset bytes changed. See [title notes](../web/docs/title-hit-source.md),
+`.build/day-nine-title-tests-output.txt` and `.build/day-nine-build-output.txt`.
+This is a port input correction, not native pointer scheduling or full-pixel parity.
+
+The historical v23 Day8 release matches **10 original wave cases**, **10 timer-spawn
 observations**, **18 town/recruit/variation/settlement observations**, and **659
 Lava states plus 12 grids / 76,800 sampled points**. Each diagnostic has two
 identical actual original runs and preserves the original compared methods and
@@ -912,19 +990,20 @@ reports are in `.build/repair-party-soak/`.
 
 ## Next integrated work and continuation
 
-Next, audit **Day9 and its mission,
-enemy, boss and town dependencies** before enabling its connected battle.
+For a later resume, audit **Day10's first boss-day battle and
+its enemy, reward, medal and town dependencies** before enabling it.
 Progression coverage is the next priority over optional Castle page2 work;
 uncovered dependencies must be identified before enabling the next day.
 The [Castle source audit](../web/docs/castle-upgrades-source.md) and
 [UI notes](../web/docs/castle-upgrades-ui-source.md) retain the current boundaries.
-Later campaign work still includes additional enemies and town thresholds; Day9 onward
+Later campaign work still includes additional enemies and town thresholds; Day10 onward
 remains unavailable. The veteran late-game hitbox report is still unproven and
 requires its own failing original encounter before a correction is claimed.
 
-The long-term goal and the existing **30-minute watcher remain active**. Unchanged
-monitoring stays quiet. The user is asleep and authorized autonomous continuation;
-request help only for a consequential decision or access that cannot be resolved
-independently. Current user direction overrides old plans and watcher instructions.
+The long-term goal and **30-minute watcher are paused at the user's v24 checkpoint**.
+The user requested documentation, commit/push and then stopping for now; no
+automatic feature work should continue. The next-slice notes above are retained
+for a later explicit resume. Current user direction overrides prior plans and
+watcher instructions.
 Original SWF/AS and startup-fix baselines remain unchanged. Their separate
 [SWF verification](verification.json) is not browser-port completeness evidence.

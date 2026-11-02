@@ -139,7 +139,7 @@ test('v20 migrates only Looter0, preserving expanded inventory, castle state, pa
   sim.state.lootOffers[0] = new ItemFactory(() => 0.5).generate(8);
   assert.equal(sim.beginLootModMount({ area: 'offers', index: 0 }, { area: 'inventory', index: 0 }), 'previewed');
   const legacy = asLegacyV20Save(sim.toSave()), untouched = structuredClone(legacy);
-  const expected = { ...legacy, version: 23, trainerLevel: 0, looterLevel: 0 };
+  const expected = { ...legacy, version: 24, trainerLevel: 0, looterLevel: 0 };
   assert.deepEqual(Simulation.fromSave(legacy).toSave(), expected); assert.deepEqual(legacy, untouched);
   assert.deepEqual(Simulation.fromSave({ ...legacy, looterLevel: 100 }).toSave(), expected);
   for (const invalidLevel of [undefined, null, -1, 0.5, '1', Infinity, NaN]) {

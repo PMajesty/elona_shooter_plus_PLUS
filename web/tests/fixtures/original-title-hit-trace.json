@@ -1,0 +1,1730 @@
+{
+  "format": "elona-original-title-hit-trace",
+  "version": 1,
+  "runtime": "@ruffle-rs/ruffle 0.7.1",
+  "capturedAt": "2026-11-02T04:48:53.124Z",
+  "originalSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
+  "instrumentedSwfSha256": "e529c49d7d901dc1354f2f27d09f6a00b5a0d8b10b8f8f4063886b44761958f5",
+  "traceSha256": "600ab39e479e6e1d71728462a611c41e30d115df870f853674e90bd57871b285",
+  "boundary": "Original SimpleButton hitTestPoint on four original DisplayObject states at a controlled position; native mouse state transitions are separate.",
+  "records": [
+    {
+      "clock": "synchronous-original-hitTestPoint",
+      "kind": "title-hit",
+      "snapshots": 12,
+      "type": "ready",
+      "version": 1
+    },
+    {
+      "bounds": {
+        "height": 35.8,
+        "width": 138,
+        "x": 251,
+        "y": 182.1
+      },
+      "button": "newGame",
+      "kind": "title-hit",
+      "points": [
+        {
+          "hit": true,
+          "localX": 100,
+          "localY": 0,
+          "worldX": 300,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -10,
+          "worldX": 280,
+          "worldY": 190
+        },
+        {
+          "hit": false,
+          "localX": 50,
+          "localY": 0,
+          "worldX": 250,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 51,
+          "localY": 0,
+          "worldX": 251,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 52.95,
+          "localY": 0,
+          "worldX": 252.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 53,
+          "localY": 0,
+          "worldX": 253,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -18,
+          "worldX": 280,
+          "worldY": 182
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17.9,
+          "worldX": 280,
+          "worldY": 182.1
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17,
+          "worldX": 280,
+          "worldY": 183
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 17.9,
+          "worldX": 280,
+          "worldY": 217.9
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18,
+          "worldX": 280,
+          "worldY": 218
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.8,
+          "worldX": 280,
+          "worldY": 218.8
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.85,
+          "worldX": 280,
+          "worldY": 218.85
+        },
+        {
+          "hit": true,
+          "localX": 189,
+          "localY": 0,
+          "worldX": 389,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 190.95,
+          "localY": 0,
+          "worldX": 390.95,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 191,
+          "localY": 0,
+          "worldX": 391,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 191.05,
+          "localY": 0,
+          "worldX": 391.05,
+          "worldY": 200
+        }
+      ],
+      "state": "up",
+      "symbol": 2521,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "bounds": {
+        "height": 35.8,
+        "width": 138,
+        "x": 253,
+        "y": 183
+      },
+      "button": "newGame",
+      "kind": "title-hit",
+      "points": [
+        {
+          "hit": true,
+          "localX": 100,
+          "localY": 0,
+          "worldX": 300,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -10,
+          "worldX": 280,
+          "worldY": 190
+        },
+        {
+          "hit": false,
+          "localX": 50,
+          "localY": 0,
+          "worldX": 250,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 51,
+          "localY": 0,
+          "worldX": 251,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 52.95,
+          "localY": 0,
+          "worldX": 252.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 53,
+          "localY": 0,
+          "worldX": 253,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -18,
+          "worldX": 280,
+          "worldY": 182
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -17.9,
+          "worldX": 280,
+          "worldY": 182.1
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17,
+          "worldX": 280,
+          "worldY": 183
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 17.9,
+          "worldX": 280,
+          "worldY": 217.9
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18,
+          "worldX": 280,
+          "worldY": 218
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18.8,
+          "worldX": 280,
+          "worldY": 218.8
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.85,
+          "worldX": 280,
+          "worldY": 218.85
+        },
+        {
+          "hit": true,
+          "localX": 189,
+          "localY": 0,
+          "worldX": 389,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 190.95,
+          "localY": 0,
+          "worldX": 390.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 191,
+          "localY": 0,
+          "worldX": 391,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 191.05,
+          "localY": 0,
+          "worldX": 391.05,
+          "worldY": 200
+        }
+      ],
+      "state": "over",
+      "symbol": 2521,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "bounds": {
+        "height": 35.8,
+        "width": 138,
+        "x": 253,
+        "y": 183
+      },
+      "button": "newGame",
+      "kind": "title-hit",
+      "points": [
+        {
+          "hit": true,
+          "localX": 100,
+          "localY": 0,
+          "worldX": 300,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -10,
+          "worldX": 280,
+          "worldY": 190
+        },
+        {
+          "hit": false,
+          "localX": 50,
+          "localY": 0,
+          "worldX": 250,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 51,
+          "localY": 0,
+          "worldX": 251,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 52.95,
+          "localY": 0,
+          "worldX": 252.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 53,
+          "localY": 0,
+          "worldX": 253,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -18,
+          "worldX": 280,
+          "worldY": 182
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -17.9,
+          "worldX": 280,
+          "worldY": 182.1
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17,
+          "worldX": 280,
+          "worldY": 183
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 17.9,
+          "worldX": 280,
+          "worldY": 217.9
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18,
+          "worldX": 280,
+          "worldY": 218
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18.8,
+          "worldX": 280,
+          "worldY": 218.8
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.85,
+          "worldX": 280,
+          "worldY": 218.85
+        },
+        {
+          "hit": true,
+          "localX": 189,
+          "localY": 0,
+          "worldX": 389,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 190.95,
+          "localY": 0,
+          "worldX": 390.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 191,
+          "localY": 0,
+          "worldX": 391,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 191.05,
+          "localY": 0,
+          "worldX": 391.05,
+          "worldY": 200
+        }
+      ],
+      "state": "down",
+      "symbol": 2521,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "bounds": {
+        "height": 35.8,
+        "width": 138,
+        "x": 253,
+        "y": 183
+      },
+      "button": "newGame",
+      "kind": "title-hit",
+      "points": [
+        {
+          "hit": true,
+          "localX": 100,
+          "localY": 0,
+          "worldX": 300,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -10,
+          "worldX": 280,
+          "worldY": 190
+        },
+        {
+          "hit": false,
+          "localX": 50,
+          "localY": 0,
+          "worldX": 250,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 51,
+          "localY": 0,
+          "worldX": 251,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 52.95,
+          "localY": 0,
+          "worldX": 252.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 53,
+          "localY": 0,
+          "worldX": 253,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -18,
+          "worldX": 280,
+          "worldY": 182
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -17.9,
+          "worldX": 280,
+          "worldY": 182.1
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17,
+          "worldX": 280,
+          "worldY": 183
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 17.9,
+          "worldX": 280,
+          "worldY": 217.9
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18,
+          "worldX": 280,
+          "worldY": 218
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18.8,
+          "worldX": 280,
+          "worldY": 218.8
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.85,
+          "worldX": 280,
+          "worldY": 218.85
+        },
+        {
+          "hit": true,
+          "localX": 189,
+          "localY": 0,
+          "worldX": 389,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 190.95,
+          "localY": 0,
+          "worldX": 390.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 191,
+          "localY": 0,
+          "worldX": 391,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 191.05,
+          "localY": 0,
+          "worldX": 391.05,
+          "worldY": 200
+        }
+      ],
+      "state": "hit",
+      "symbol": 2521,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "bounds": {
+        "height": 35.8,
+        "width": 138,
+        "x": 251,
+        "y": 182.1
+      },
+      "button": "continue",
+      "kind": "title-hit",
+      "points": [
+        {
+          "hit": true,
+          "localX": 100,
+          "localY": 0,
+          "worldX": 300,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -10,
+          "worldX": 280,
+          "worldY": 190
+        },
+        {
+          "hit": false,
+          "localX": 50,
+          "localY": 0,
+          "worldX": 250,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 51,
+          "localY": 0,
+          "worldX": 251,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 52.95,
+          "localY": 0,
+          "worldX": 252.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 53,
+          "localY": 0,
+          "worldX": 253,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -18,
+          "worldX": 280,
+          "worldY": 182
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17.9,
+          "worldX": 280,
+          "worldY": 182.1
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17,
+          "worldX": 280,
+          "worldY": 183
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 17.9,
+          "worldX": 280,
+          "worldY": 217.9
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18,
+          "worldX": 280,
+          "worldY": 218
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.8,
+          "worldX": 280,
+          "worldY": 218.8
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.85,
+          "worldX": 280,
+          "worldY": 218.85
+        },
+        {
+          "hit": true,
+          "localX": 189,
+          "localY": 0,
+          "worldX": 389,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 190.95,
+          "localY": 0,
+          "worldX": 390.95,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 191,
+          "localY": 0,
+          "worldX": 391,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 191.05,
+          "localY": 0,
+          "worldX": 391.05,
+          "worldY": 200
+        }
+      ],
+      "state": "up",
+      "symbol": 2542,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "bounds": {
+        "height": 35.8,
+        "width": 138,
+        "x": 253,
+        "y": 183
+      },
+      "button": "continue",
+      "kind": "title-hit",
+      "points": [
+        {
+          "hit": true,
+          "localX": 100,
+          "localY": 0,
+          "worldX": 300,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -10,
+          "worldX": 280,
+          "worldY": 190
+        },
+        {
+          "hit": false,
+          "localX": 50,
+          "localY": 0,
+          "worldX": 250,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 51,
+          "localY": 0,
+          "worldX": 251,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 52.95,
+          "localY": 0,
+          "worldX": 252.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 53,
+          "localY": 0,
+          "worldX": 253,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -18,
+          "worldX": 280,
+          "worldY": 182
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -17.9,
+          "worldX": 280,
+          "worldY": 182.1
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17,
+          "worldX": 280,
+          "worldY": 183
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 17.9,
+          "worldX": 280,
+          "worldY": 217.9
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18,
+          "worldX": 280,
+          "worldY": 218
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18.8,
+          "worldX": 280,
+          "worldY": 218.8
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.85,
+          "worldX": 280,
+          "worldY": 218.85
+        },
+        {
+          "hit": true,
+          "localX": 189,
+          "localY": 0,
+          "worldX": 389,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 190.95,
+          "localY": 0,
+          "worldX": 390.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 191,
+          "localY": 0,
+          "worldX": 391,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 191.05,
+          "localY": 0,
+          "worldX": 391.05,
+          "worldY": 200
+        }
+      ],
+      "state": "over",
+      "symbol": 2542,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "bounds": {
+        "height": 35.8,
+        "width": 138,
+        "x": 253,
+        "y": 183
+      },
+      "button": "continue",
+      "kind": "title-hit",
+      "points": [
+        {
+          "hit": true,
+          "localX": 100,
+          "localY": 0,
+          "worldX": 300,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -10,
+          "worldX": 280,
+          "worldY": 190
+        },
+        {
+          "hit": false,
+          "localX": 50,
+          "localY": 0,
+          "worldX": 250,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 51,
+          "localY": 0,
+          "worldX": 251,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 52.95,
+          "localY": 0,
+          "worldX": 252.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 53,
+          "localY": 0,
+          "worldX": 253,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -18,
+          "worldX": 280,
+          "worldY": 182
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -17.9,
+          "worldX": 280,
+          "worldY": 182.1
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17,
+          "worldX": 280,
+          "worldY": 183
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 17.9,
+          "worldX": 280,
+          "worldY": 217.9
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18,
+          "worldX": 280,
+          "worldY": 218
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18.8,
+          "worldX": 280,
+          "worldY": 218.8
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.85,
+          "worldX": 280,
+          "worldY": 218.85
+        },
+        {
+          "hit": true,
+          "localX": 189,
+          "localY": 0,
+          "worldX": 389,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 190.95,
+          "localY": 0,
+          "worldX": 390.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 191,
+          "localY": 0,
+          "worldX": 391,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 191.05,
+          "localY": 0,
+          "worldX": 391.05,
+          "worldY": 200
+        }
+      ],
+      "state": "down",
+      "symbol": 2542,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "bounds": {
+        "height": 35.8,
+        "width": 138,
+        "x": 253,
+        "y": 183
+      },
+      "button": "continue",
+      "kind": "title-hit",
+      "points": [
+        {
+          "hit": true,
+          "localX": 100,
+          "localY": 0,
+          "worldX": 300,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -10,
+          "worldX": 280,
+          "worldY": 190
+        },
+        {
+          "hit": false,
+          "localX": 50,
+          "localY": 0,
+          "worldX": 250,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 51,
+          "localY": 0,
+          "worldX": 251,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 52.95,
+          "localY": 0,
+          "worldX": 252.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 53,
+          "localY": 0,
+          "worldX": 253,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -18,
+          "worldX": 280,
+          "worldY": 182
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -17.9,
+          "worldX": 280,
+          "worldY": 182.1
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17,
+          "worldX": 280,
+          "worldY": 183
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 17.9,
+          "worldX": 280,
+          "worldY": 217.9
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18,
+          "worldX": 280,
+          "worldY": 218
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18.8,
+          "worldX": 280,
+          "worldY": 218.8
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.85,
+          "worldX": 280,
+          "worldY": 218.85
+        },
+        {
+          "hit": true,
+          "localX": 189,
+          "localY": 0,
+          "worldX": 389,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 190.95,
+          "localY": 0,
+          "worldX": 390.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 191,
+          "localY": 0,
+          "worldX": 391,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 191.05,
+          "localY": 0,
+          "worldX": 391.05,
+          "worldY": 200
+        }
+      ],
+      "state": "hit",
+      "symbol": 2542,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "bounds": {
+        "height": 35.8,
+        "width": 83,
+        "x": 251,
+        "y": 182.1
+      },
+      "button": "help",
+      "kind": "title-hit",
+      "points": [
+        {
+          "hit": true,
+          "localX": 100,
+          "localY": 0,
+          "worldX": 300,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -10,
+          "worldX": 280,
+          "worldY": 190
+        },
+        {
+          "hit": false,
+          "localX": 50,
+          "localY": 0,
+          "worldX": 250,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 51,
+          "localY": 0,
+          "worldX": 251,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 52.95,
+          "localY": 0,
+          "worldX": 252.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 53,
+          "localY": 0,
+          "worldX": 253,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -18,
+          "worldX": 280,
+          "worldY": 182
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17.9,
+          "worldX": 280,
+          "worldY": 182.1
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17,
+          "worldX": 280,
+          "worldY": 183
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 17.9,
+          "worldX": 280,
+          "worldY": 217.9
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18,
+          "worldX": 280,
+          "worldY": 218
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.8,
+          "worldX": 280,
+          "worldY": 218.8
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.85,
+          "worldX": 280,
+          "worldY": 218.85
+        },
+        {
+          "hit": true,
+          "localX": 132,
+          "localY": 0,
+          "worldX": 332,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 133.95,
+          "localY": 0,
+          "worldX": 333.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 134,
+          "localY": 0,
+          "worldX": 334,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 134.05,
+          "localY": 0,
+          "worldX": 334.05,
+          "worldY": 200
+        }
+      ],
+      "state": "up",
+      "symbol": 2579,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "bounds": {
+        "height": 35.8,
+        "width": 81,
+        "x": 253,
+        "y": 183
+      },
+      "button": "help",
+      "kind": "title-hit",
+      "points": [
+        {
+          "hit": true,
+          "localX": 100,
+          "localY": 0,
+          "worldX": 300,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -10,
+          "worldX": 280,
+          "worldY": 190
+        },
+        {
+          "hit": false,
+          "localX": 50,
+          "localY": 0,
+          "worldX": 250,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 51,
+          "localY": 0,
+          "worldX": 251,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 52.95,
+          "localY": 0,
+          "worldX": 252.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 53,
+          "localY": 0,
+          "worldX": 253,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -18,
+          "worldX": 280,
+          "worldY": 182
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -17.9,
+          "worldX": 280,
+          "worldY": 182.1
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17,
+          "worldX": 280,
+          "worldY": 183
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 17.9,
+          "worldX": 280,
+          "worldY": 217.9
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18,
+          "worldX": 280,
+          "worldY": 218
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18.8,
+          "worldX": 280,
+          "worldY": 218.8
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.85,
+          "worldX": 280,
+          "worldY": 218.85
+        },
+        {
+          "hit": true,
+          "localX": 132,
+          "localY": 0,
+          "worldX": 332,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 133.95,
+          "localY": 0,
+          "worldX": 333.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 134,
+          "localY": 0,
+          "worldX": 334,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 134.05,
+          "localY": 0,
+          "worldX": 334.05,
+          "worldY": 200
+        }
+      ],
+      "state": "over",
+      "symbol": 2579,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "bounds": {
+        "height": 35.8,
+        "width": 81,
+        "x": 253,
+        "y": 183
+      },
+      "button": "help",
+      "kind": "title-hit",
+      "points": [
+        {
+          "hit": true,
+          "localX": 100,
+          "localY": 0,
+          "worldX": 300,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -10,
+          "worldX": 280,
+          "worldY": 190
+        },
+        {
+          "hit": false,
+          "localX": 50,
+          "localY": 0,
+          "worldX": 250,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 51,
+          "localY": 0,
+          "worldX": 251,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 52.95,
+          "localY": 0,
+          "worldX": 252.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 53,
+          "localY": 0,
+          "worldX": 253,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -18,
+          "worldX": 280,
+          "worldY": 182
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -17.9,
+          "worldX": 280,
+          "worldY": 182.1
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17,
+          "worldX": 280,
+          "worldY": 183
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 17.9,
+          "worldX": 280,
+          "worldY": 217.9
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18,
+          "worldX": 280,
+          "worldY": 218
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18.8,
+          "worldX": 280,
+          "worldY": 218.8
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.85,
+          "worldX": 280,
+          "worldY": 218.85
+        },
+        {
+          "hit": true,
+          "localX": 132,
+          "localY": 0,
+          "worldX": 332,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 133.95,
+          "localY": 0,
+          "worldX": 333.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 134,
+          "localY": 0,
+          "worldX": 334,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 134.05,
+          "localY": 0,
+          "worldX": 334.05,
+          "worldY": 200
+        }
+      ],
+      "state": "down",
+      "symbol": 2579,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "bounds": {
+        "height": 35.8,
+        "width": 81,
+        "x": 253,
+        "y": 183
+      },
+      "button": "help",
+      "kind": "title-hit",
+      "points": [
+        {
+          "hit": true,
+          "localX": 100,
+          "localY": 0,
+          "worldX": 300,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -10,
+          "worldX": 280,
+          "worldY": 190
+        },
+        {
+          "hit": false,
+          "localX": 50,
+          "localY": 0,
+          "worldX": 250,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 51,
+          "localY": 0,
+          "worldX": 251,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 52.95,
+          "localY": 0,
+          "worldX": 252.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 53,
+          "localY": 0,
+          "worldX": 253,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -18,
+          "worldX": 280,
+          "worldY": 182
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": -17.9,
+          "worldX": 280,
+          "worldY": 182.1
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": -17,
+          "worldX": 280,
+          "worldY": 183
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 17.9,
+          "worldX": 280,
+          "worldY": 217.9
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18,
+          "worldX": 280,
+          "worldY": 218
+        },
+        {
+          "hit": true,
+          "localX": 80,
+          "localY": 18.8,
+          "worldX": 280,
+          "worldY": 218.8
+        },
+        {
+          "hit": false,
+          "localX": 80,
+          "localY": 18.85,
+          "worldX": 280,
+          "worldY": 218.85
+        },
+        {
+          "hit": true,
+          "localX": 132,
+          "localY": 0,
+          "worldX": 332,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 133.95,
+          "localY": 0,
+          "worldX": 333.95,
+          "worldY": 200
+        },
+        {
+          "hit": true,
+          "localX": 134,
+          "localY": 0,
+          "worldX": 334,
+          "worldY": 200
+        },
+        {
+          "hit": false,
+          "localX": 134.05,
+          "localY": 0,
+          "worldX": 334.05,
+          "worldY": 200
+        }
+      ],
+      "state": "hit",
+      "symbol": 2579,
+      "type": "snapshot",
+      "version": 1
+    },
+    {
+      "kind": "title-hit",
+      "ok": true,
+      "sampledPoints": 204,
+      "snapshots": 12,
+      "type": "complete",
+      "version": 1
+    }
+  ],
+  "rasterNegativeControl": {
+    "method": "Pillow RGBA PNG alpha read at source-local (80,-10), image registration from manifest; not original expected geometry.",
+    "samples": [
+      {
+        "button": "newGame",
+        "state": "up",
+        "file": "buttons/button_newGame.png",
+        "sha256": "ca8a996a8291409db0cffe56b330fc2b3e11121d2faabef67de05797fd15cd90",
+        "localX": 80,
+        "localY": -10,
+        "pixel": [
+          57,
+          35
+        ],
+        "alpha": 0
+      },
+      {
+        "button": "newGame",
+        "state": "over",
+        "file": "buttons/button_newGame_over.png",
+        "sha256": "6e3286d66283237e895cb47607bfa5d33fe73ecdc4773f8a27d39c096511c6c1",
+        "localX": 80,
+        "localY": -10,
+        "pixel": [
+          57,
+          35
+        ],
+        "alpha": 0
+      },
+      {
+        "button": "continue",
+        "state": "up",
+        "file": "buttons/button_continue.png",
+        "sha256": "cbb8021729a73cc968964f60438006d108b6bd6c53f84ef38daa72760d59a6e2",
+        "localX": 80,
+        "localY": -10,
+        "pixel": [
+          57,
+          35
+        ],
+        "alpha": 0
+      },
+      {
+        "button": "continue",
+        "state": "over",
+        "file": "buttons/button_continue_over.png",
+        "sha256": "0245ac64255bbefe3ad410e1198696eb66e88e573863e01d05356d944c81241e",
+        "localX": 80,
+        "localY": -10,
+        "pixel": [
+          57,
+          35
+        ],
+        "alpha": 0
+      },
+      {
+        "button": "help",
+        "state": "up",
+        "file": "buttons/button_help.png",
+        "sha256": "cd0edaeac3b337b0ebf91cf800e97d5598a0e993716c4393f022bcfba9c857ab",
+        "localX": 80,
+        "localY": -10,
+        "pixel": [
+          57,
+          35
+        ],
+        "alpha": 0
+      },
+      {
+        "button": "help",
+        "state": "over",
+        "file": "buttons/button_help_over.png",
+        "sha256": "927bc742deef201c0d6b8f965878d7fcff7d34d8759fbb2574445b73ce3aea9d",
+        "localX": 80,
+        "localY": -10,
+        "pixel": [
+          57,
+          35
+        ],
+        "alpha": 0
+      }
+    ]
+  }
+}
