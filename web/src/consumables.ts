@@ -9,7 +9,7 @@ export type ConsumableEffect =
   | { kind: 'grenade'; damage: number; baseSpeed: 12; weaponSlot: null }
   | { kind: 'repair'; castleHp: number; restoredHp: number; flashFrames: 15 }
   | { kind: 'protection'; frames: number; effectX: 550; effectY: 270 }
-  | { kind: 'ragnarok'; enemyId: 13; spawnAttempts: 30; missionTimeDelta: 200; message: "Let's Ragnarok!"; requires: 'original-dinosaur-runtime' };
+  | { kind: 'ragnarok'; enemyId: 13; spawnAttempts: 30; missionTimeDelta: 200; message: "Let's Ragnarok!" };
 export type ConsumablePlan =
   | { status: 'unavailable' | 'cooling' | 'unsupported' | 'invalid' }
   | { status: 'ready'; itemAfter: Item; effect: ConsumableEffect; cooldownFrames: number | null; blocksForUpdates: number };
@@ -41,8 +41,7 @@ export function planConsumableUse(item: Readonly<Item> | null | undefined, conte
   } else if (item.id === 37) {
     effect = { kind: 'protection', frames: Math.trunc(item.attack!), effectX: 550, effectY: 270 };
   } else {
-    // Это намерение, а не замена тридцати исходных spawnEnemy фиктивным уроном.
-    effect = { kind: 'ragnarok', enemyId: 13, spawnAttempts: 30, missionTimeDelta: 200, message: "Let's Ragnarok!", requires: 'original-dinosaur-runtime' };
+    effect = { kind: 'ragnarok', enemyId: 13, spawnAttempts: 30, missionTimeDelta: 200, message: "Let's Ragnarok!" };
   }
   const itemAfter = { ...item, ammo: item.ammo - 1 };
   if (itemAfter.ammo <= 0) itemAfter.num = 0;

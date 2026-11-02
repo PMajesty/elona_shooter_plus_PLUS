@@ -2,17 +2,17 @@
   "schemaVersion": 1,
   "updated": "2026-11-02",
   "currentRelease": {
-    "saveVersion": 32,
+    "saveVersion": 33,
     "verificationStatus": "passed",
-    "implementedCampaign": "All eight heroes and repeating normal campaign cycles, original strength scaling and large variants; browser save safety boundary Day1000. Town activities, Museum, hire and persistent medal unlocks remain integrated.",
+    "implementedCampaign": "All eight heroes and repeating normal campaign cycles, original strength scaling and large variants; browser save safety boundary Day1000. Town activities, Museum, hire and persistent medal unlocks remain integrated. Ragnarok artifact use now spawns real dinosaurs, persists battle state and awards its survivor medal and bonuses.",
     "publication": {
       "status": "local-build",
       "url": "http://127.0.0.1:5175/elona/",
-      "bundle": "assets/index-DMdQEh_a.js",
-      "priorCheckpoint": "523cbf9"
+      "bundle": "assets/index-BvHbh_z7.js",
+      "priorCheckpoint": "6fef93b"
     },
     "automatedVerification": {
-      "testsPassed": 464,
+      "testsPassed": 468,
       "fullSuite": true,
       "controlledCampaignFrames": 97293,
       "controlledCampaignDays": 40,
@@ -22,15 +22,16 @@
       "temporaryHireTests": 6,
       "museumTests": 7,
       "classProfileTests": 6,
-      "cycleBoundaryCombatDays": 12
+      "cycleBoundaryCombatDays": 12,
+      "ragnarokTests": 4
     },
     "browserVerification": [
-      "Ordinary Day40 Rest opens Day41 with fixedLv3/strength200; complete state equals expected with observed pointer input",
-      "Controlled large variants render and survive import/Continue; original game/profile envelope restored exactly after migration, paused/muted"
+      "Number3 activates the owned Ragnarok, consumes the artifact and exports all30 dinosaurs plus the saved mission flag",
+      "Continue preserves the full state using observed pointer coordinates; original adventure/profile restored exactly after migration, paused/muted, no console errors"
     ],
     "browserEvidence": [
-      ".build/browser-qa/cycle-transition-verification.json",
-      ".build/browser-qa/cycle-large-enemies.png"
+      ".build/browser-qa/ragnarok-verification.json",
+      ".build/browser-qa/ragnarok.png"
     ],
     "knownGaps": "docs/port-status.md"
   },
@@ -389,19 +390,20 @@
         "itemTimer and bullet_grenade in original SWF"
       ],
       "status": "partial",
-      "implemented": "Owned grenades use their stored damage and quantities, independent slot cooldowns and saved in-flight damage. Repair Hammer consumes a charge even at full HP; Holy Grail applies timed protection and retains the original inactive ammo=-1 sentinel. Number-key use preserves gun selection and reload; the hotbar shows owned items, quantities and cooldowns. Ragnarok remains owned and unconsumed when its unavailable action is requested.",
+      "implemented": "Owned grenades use their stored damage and quantities, independent slot cooldowns and saved in-flight damage. Repair Hammer consumes a charge even at full HP; Holy Grail applies timed protection and retains the original inactive ammo=-1 sentinel. Number-key use preserves gun selection and reload; the hotbar shows owned items, quantities and cooldowns. Ragnarok consumes its artifact, attempts30 real dinosaur spawns, extends the spawn timer200 ticks and records the surviving-battle medal.",
       "evidence": [
         "web/tests/simulation.test.ts:grenade test",
         "docs/port-verification.json:browser_checks.grenade",
         "web/tests/consumables.test.ts: source-derived consumption, cooldown, flight, blast and protection calculations",
-        "web/tests/consumables-save.test.ts: actual hammer/grenade/Grail integration, cooldowns, protection expiry, saved flight and unavailable Ragnarok",
+        "web/tests/consumables-save.test.ts: actual hammer/grenade/Grail integration, cooldowns, protection expiry, saved flight and consumed Ragnarok sentinel",
         "web/tests/castle-reference.test.ts: original protection-before-damage ordering and expiry/fade snapshots",
-        "web/tests/projectile-reference.test.ts:controlled original hand-grenade trajectory and explosion observations, with vertical diagnostics kept separate"
+        "web/tests/projectile-reference.test.ts:controlled original hand-grenade trajectory and explosion observations, with vertical diagnostics kept separate",
+        "web/tests/ragnarok.test.ts: actual attacks, capacity, deterministic replay, victory/defeat medal boundaries, wages, New Game and Rest; ragnarok-verification.json: actual keyboard activation/Continue"
       ],
       "unverified": [
-        "Ragnarok dinosaur spawning and its full battle consequences",
         "Native battle/event interleaving beyond the accepted controlled projectile comparisons",
-        "Matched original inventory cooldown presentation and child timing"
+        "Matched original inventory cooldown presentation and child timing",
+        "Exact Ragnarok camera shake/flash presentation and unassisted difficulty balance"
       ],
       "intentionalDifferences": [
         "Vertical grenade aims use explicit saved progress with fixed x and bounded travel to the requested impact point, correcting the original zero-divisor trajectory.",
@@ -492,7 +494,7 @@
         "web/tests/campaign.test.ts: fixed-level formulas, boss counts, cycle boundaries and Day1000 saves; cycle-transition-verification.json: actual Day40 Rest -> Day41"
       ],
       "unverified": [
-        "Alternative difficulty modifiers and Ragnarok",
+        "Alternative difficulty modifiers",
         "Full native Flash input/timing comparison, later-cycle balance and long-session performance"
       ],
       "campaignUpdate": "V32 connects repeated cycles, original strength scaling and eligible large variants, including rendered size/collision and saved state. Core encounters remain source-led; later-cycle balance and long-session performance are not established."
@@ -787,7 +789,7 @@
         "MainTimeline:11782 difficulty options"
       ],
       "status": "partial",
-      "implemented": "Campaign saves and a separate browser profile retain earned medal IDs and best day. All38 original medal descriptions are shown in the Museum. Critical/perfect/day/action/class medals and action AP/robbery bonuses work. Prepared absorption remains separate from newly earned flags. V31 carries medals into New Game, unlocks four advanced heroes and applies original starting gold, trait, inventory, fame and Gravity Gun bonuses once. Legacy incorrect class awards migrate to the actual hero. Alternative modes/starts and remaining medal effects/triggers remain incomplete.",
+      "implemented": "Campaign saves and a separate browser profile retain earned medal IDs and best day. All38 original medal descriptions are shown in the Museum. Critical/perfect/day/action/class medals and action AP/robbery bonuses work. Prepared absorption remains separate from newly earned flags. V31 carries medals into New Game, unlocks four advanced heroes and applies original starting gold, trait, inventory, fame and Gravity Gun bonuses once. Legacy incorrect class awards migrate to the actual hero. Alternative modes/starts and remaining medal effects/triggers remain incomplete. V33 awards Ragnarok92 only on victory, before wage settlement; it supplies the existing3% wage denominator bonus and future-start Luck+1.",
       "evidence": [
         "web/docs/rest-notes.md: source audit of early medal timing, future-start bonuses and fireworks discrepancy",
         "web/tests/day-two.test.ts: a first perfect result on Day 2 changes only the next prepared mission's absorption",
@@ -799,7 +801,7 @@
         "web/tests/class-unlocks.test.ts: global collection, New Game bonus boundaries and validation; class-unlocks-verification.json: locked/unlocked UI and exact profile restoration"
       ],
       "unverified": [
-        "Remaining medal triggers, including Clear fireworks93 and Ragnarok92",
+        "Remaining medal triggers, including Clear fireworks93",
         "Hardcore/casual/alternative-start behavior",
         "Carry-over",
         "Remaining medal effects, including recycling/modding bonuses"
@@ -816,7 +818,7 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot, Continue and JSON import/export retain campaign, equipment, party, town, search and hero class state. V31 adds a separate persistent medal collection included in exports. Current-format import restores the collection snapshot; legacy import merges earned medals; Continue preserves it. Invalid collection imports preserve the running game, while corrupted collection storage does not block a valid adventure. Earlier saves migrate without rerolling. Battles load paused. V32 saves retain large-variant flags and validate cycle parameters through Day1000; older adventures migrate without state/RNG changes.",
+      "implemented": "One browser slot, Continue and JSON import/export retain campaign, equipment, party, town, search and hero class state. V31 adds a separate persistent medal collection included in exports. Current-format import restores the collection snapshot; legacy import merges earned medals; Continue preserves it. Invalid collection imports preserve the running game, while corrupted collection storage does not block a valid adventure. Earlier saves migrate without rerolling. Battles load paused. V32 saves retain large-variant flags and validate cycle parameters through Day1000; older adventures migrate without state/RNG changes. V33 preserves the optional active Ragnarok flag and rejects malformed/old-format flags without altering older normal adventures.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",

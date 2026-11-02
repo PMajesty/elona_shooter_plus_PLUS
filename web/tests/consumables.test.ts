@@ -47,7 +47,7 @@ test('single-use artifacts begin at zero ammo and become inactive with the origi
     assert.equal(plan.cooldownFrames, null); assert.equal(plan.blocksForUpdates, 0);
     assert.equal(planConsumableUse(plan.itemAfter, context).status, 'unavailable');
     if (id === 37) assert.deepEqual(plan.effect, { kind: 'protection', frames: 250, effectX: 550, effectY: 270 });
-    else assert.deepEqual(plan.effect, { kind: 'ragnarok', enemyId: 13, spawnAttempts: 30, missionTimeDelta: 200, message: "Let's Ragnarok!", requires: 'original-dinosaur-runtime' });
+    else assert.deepEqual(plan.effect, { kind: 'ragnarok', enemyId: 13, spawnAttempts: 30, missionTimeDelta: 200, message: "Let's Ragnarok!" });
   }
 });
 

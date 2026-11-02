@@ -97,7 +97,7 @@ test('Grail blocks actual sheep wall attacks through restore and expires before 
   restore(simulation);
 });
 
-test('only inactive artifacts accept the original negative-ammo sentinel and unsupported Ragnarok remains owned', () => {
+test('only inactive artifacts accept the original negative-ammo sentinel, including consumed Ragnarok', () => {
   const simulation = new Simulation(42);
   simulation.state.inventory[2] = item(37);
   simulation.useSlot(2);
@@ -108,8 +108,8 @@ test('only inactive artifacts accept the original negative-ammo sentinel and uns
     assert.throws(() => Simulation.fromSave(invalid));
   }
   simulation.state.inventory[3] = item(38);
-  const before = simulation.toSave();
-  assert.equal(simulation.useSlot(3), false);
-  assert.deepEqual(simulation.toSave(), before);
-  assert.ok(simulation.events.some(event => event.type === 'beep' && event.message?.includes('Ragnarok')));
+  assert.equal(simulation.useSlot(3), true);
+  assert.equal(simulation.state.inventory[3]!.ammo, -1);
+  assert.equal(simulation.state.inventory[3]!.num, 0);
+  restore(simulation);
 });

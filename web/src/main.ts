@@ -145,7 +145,7 @@ class ElonaScene extends Phaser.Scene {
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Eight hero classes and repeating campaign cycles, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Sniper, Ranger, Duelist and Noble unlock through class medals; the browser medal collection carries into new games and is included in exports. Importing a current-format backup also restores that collection. Ragnarok, remaining town actions, alternative modes and original multiple save slots are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Eight hero classes and repeating campaign cycles, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Sniper, Ranger, Duelist and Noble unlock through class medals; the browser medal collection carries into new games and is included in exports. Importing a current-format backup also restores that collection. Remaining town actions, alternative modes and original multiple save slots are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
     document.querySelector<HTMLButtonElement>('#import-save')!.disabled = false;
   }
@@ -793,9 +793,9 @@ class ElonaScene extends Phaser.Scene {
       const effect = this.clip('layhand', 1, event.x ?? 550, event.y ?? 270);
       if (effect) this.effects.push({ object: effect, ticks: manifest.clips.layhand.count, clip: 'layhand', frame: 1 });
     }
-    if (event.type === 'wave' || event.type === 'rampage' || event.type === 'level-up') {
+    if (event.type === 'wave' || event.type === 'rampage' || event.type === 'level-up' || event.type === 'ragnarok') {
       const position = actorSlot === 0 ? { x: 310, y: 90 } : partyActorPosition(actorSlot);
-      const message = this.text(position.x, position.y - (actorSlot ? 35 : 0), event.type === 'wave' ? `Wave ${event.amount}` : event.type === 'rampage' ? 'RAMPAGE!' : 'Level Up!', actorSlot ? 14 : 27, '#ffefb0').setOrigin(0.5).setShadow(2, 2, '#000000', 3);
+      const message = this.text(position.x, position.y - (actorSlot ? 35 : 0), event.type === 'wave' ? `Wave ${event.amount}` : event.type === 'rampage' ? 'RAMPAGE!' : event.type === 'ragnarok' ? event.message! : 'Level Up!', actorSlot ? 14 : 27, '#ffefb0').setOrigin(0.5).setShadow(2, 2, '#000000', 3);
       this.effects.push({ object: message, ticks: 45 });
     }
   }

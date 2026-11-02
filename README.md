@@ -2,7 +2,7 @@
 
 A TypeScript/Phaser browser remake of Elona Shooter Plus 1.3.0.4.
 The current local build supports **all eight original hero classes** and
-**repeating campaign cycles**. This is an incomplete remake; Ragnarok, event cards,
+**repeating campaign cycles**. This is an incomplete remake; event cards,
 alternative modes and remaining systems are still being ported.
 
 Open [the local game](http://127.0.0.1:5175/elona/).
@@ -22,6 +22,8 @@ unless you previously enabled it; its button explicitly displays the current sta
   The current browser save safety boundary is Day1000; this is not an endless-play claim.
 - Manual/automatic reload, owned firearms, bows, projectile weapons and consumables;
   enemies, bosses and health bars; ordinary/boss loot, skills and settlements.
+  Ragnarok consumes its artifact, attempts30 real dinosaur spawns and extends the
+  spawn timer; surviving awards its original medal and bonuses.
 - Prepared towns, shop buy/sell, weapon upgrades and MOD mounting; permanent
   companions, equipment, orders, autonomous combat, growth and wages.
 - Both Castle pages: House, Wall, Sandbag, Storage, Looter, Fix Wall, Repairman,
@@ -36,7 +38,7 @@ unless you previously enabled it; its button explicitly displays the current sta
   saved counters and action medals with their next-town AP chances.
 - A persistent browser medal collection with class unlocks and original New Game
   starting bonuses. One browser save with Continue and JSON import/export.
-  Version32 accepts prior browser saves; original Flash saves require a future converter.
+  Version33 accepts prior browser saves; original Flash saves require a future converter.
 
 Remaining work and validation limits are in [port status](docs/port-status.md).
 The [process review](docs/development-process-review.md) records the correction
@@ -92,6 +94,8 @@ the original six save slots remain incomplete.
 Additional controlled combat crosses Day40/80 through ordinary rewards, towns,
 Rest and JSON restores. Source-formula checks cover later cycles and Day1000 save
 boundaries; these do not prove balanced play or long-session performance there.
+Ragnarok checks cover actual attacks, capacity, one-use consumption, save replay,
+victory/defeat medal boundaries, wage reduction and the future New Game bonus.
 Test counts do not establish whole-game completeness or full pixel parity.
 
 ## Original assets and recovery

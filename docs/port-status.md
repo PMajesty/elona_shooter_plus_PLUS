@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v32, eight hero classes, repeating cycles**.
+Updated 2026-11-02. Current local build: **v33, eight hero classes, repeating cycles**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -29,6 +29,10 @@ enemy HP/attack and movement speed scale by their source formulas. After Day40,
 the original5% roll can produce eligible enemies at1.25 size, triple HP, slower
 speed and double XP/gold. Original unscaled weak-point rectangles are retained.
 The browser save safety boundary is Day1000, not an original campaign ending.
+Ragnarok now uses the ordinary inventory controls: its artifact is consumed,
+30 real dinosaur spawns are attempted and the next spawn timer gains200 ticks.
+Winning the battle awards medal92, including its wage reduction and future-start
+Luck bonus. The battle flag survives saves and resets at Rest for the next mission.
 
 Town coverage includes shop buy/sell, upgrades/MOD mounting, permanent companions
 with equipment/orders/AI/growth/wages, temporary Mission Hire, both Castle pages,
@@ -44,9 +48,8 @@ Continue and JSON backups work; imported/continued battles open paused.
 
 ## Validation and limits
 
-- **464 tests passed**, with typechecking and production build passing. Two focused
-  cycle tests passed again after adding the Day1000 henchman save assertion.
-  Latest bundle: `assets/index-DMdQEh_a.js`.
+- **468 tests passed**, with typechecking and production build passing.
+  Latest bundle: `assets/index-BvHbh_z7.js`.
 - New checks cover unlock requirements, global profile validation/storage, carried
   medals, starting bonuses applied once, actual Sniper/Duelist damage, Ranger
   rampage, Noble XP, reload/decay, save replay and older-save migration. All eight
@@ -74,6 +77,16 @@ Continue and JSON backups work; imported/continued battles open paused.
   coordinates as input. Controlled normal/large sheep display original artwork;
   import and Continue retain variant state. No console errors. Evidence:
   `.build/browser-qa/cycle-transition-verification.json` and `cycle-large-enemies.png`.
+- V33 tests cover Ragnarok consumption,30 spawn attempts, the shared200-enemy
+  capacity, actual dinosaur attacks and saved replay, controlled battle survival,
+  defeat, medal timing, discounted wages, future New Game Luck and reset at Rest.
+  The number3 key activated the artifact in the muted browser; all30 dinosaurs,
+  consumed item and mission flag were exported and retained by Continue (pointer
+  coordinates treated as observed input). No console errors. Evidence:
+  `.build/browser-qa/ragnarok-verification.json` and `ragnarok.png`.
+  This controlled survival run does not establish unassisted Ragnarok balance.
+  An actual crash from killing an enemy before the first wave's timer boundary
+  is fixed: missing group size follows the source's int(NaN)→0 drop calculation.
 - The user's original Sheriff adventure **and collection** were restored with full
   exported-envelope equality: day1, tick674, RNG1744019180, HP40, gold209, paused
   and muted. No test unlocks remain in the collection.
@@ -86,7 +99,7 @@ Historical details are in Git and [historical verification](port-verification.js
 
 1. Long-session stability/performance and difficulty evidence beyond the first
    cycle; the current Day1000 save safety boundary remains an intentional limit.
-2. Ragnarok, event-card systems, alternative modes/starts and remaining medal
+2. Event-card systems, alternative modes/starts and remaining medal
    effects/triggers, including recycling/modding bonuses and decorative fireworks.
 3. Original six save slots/global slot UI, deletion and Flash save conversion.
 4. Measured performance, rendering sharpness and remaining visual/audio details:

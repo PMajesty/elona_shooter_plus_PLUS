@@ -45,7 +45,7 @@ export interface EnemyState {
   type?: 0 | 1 | 2; tag?: number; onMark?: boolean;
 }
 export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCount: number }
-export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'> & { hire?: true };
+export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'> & { hire?: true; ragnarok?: true };
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
 export interface SimulationState {
   version: typeof SAVE_VERSION; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: number; tick: number; timerRemainder: number; rng: number; nextUid: number;
@@ -72,7 +72,7 @@ export interface SimulationState {
   pendingPartyAction: PartyPendingAction | null;
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
-export interface SimulationEvent { actorSlot?: number; type: 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
+export interface SimulationEvent { actorSlot?: number; type: 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
 export interface SimulationOptions { hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
@@ -310,9 +310,12 @@ export class Simulation {
       } else if (plan.effect.kind === 'protection') {
         this.state.protection.counter = plan.effect.frames;
         this.events.push({ type: 'protection', x: plan.effect.effectX, y: plan.effect.effectY });
-      } else {
-        this.events.push({ type: 'beep', message: 'Ragnarok is still being ported.' });
-        return false;
+      } else if (plan.effect.kind === 'ragnarok') {
+        const before = this.state.enemies.length;
+        for (let i = 0; i < plan.effect.spawnAttempts; i++) this.spawnEnemy('dino');
+        this.state.activeMission.ragnarok = true;
+        this.state.spawnTimer += plan.effect.missionTimeDelta;
+        this.events.push({ type: 'ragnarok', amount: this.state.enemies.length - before, message: plan.effect.message });
       }
       Object.assign(item, plan.itemAfter);
       this.state.itemCooldowns[slot] = plan.blocksForUpdates;
@@ -894,7 +897,8 @@ export class Simulation {
       }
       if (member) member.earnedGold += enemy.gold;
     }
-    const groupSize = this.state.waves[Math.max(0, this.state.waveIndex)].initialCount;
+    // До первого onTick group[wave] ещё undefined; исходный int(NaN) даёт ноль.
+    const groupSize = this.state.waves[Math.max(0, this.state.waveIndex)]?.initialCount ?? 0;
     if (int(this.random() * groupSize * 5) === 0 || int(this.random() * 400 * groupSize) < this.state.partySkills.effects[109]) { enemy.drop = 2; this.state.loot.push(definition.loot); }
     if (enemy.kind === 'boss') { enemy.drop = 1; this.state.bossKilled++; }
     enemy.frame = ENEMY_TIMELINES[enemy.kind]?.labels.dead ?? (enemy.kind === 'dropped-rat' ? 93 : enemy.kind === 'sheep' ? 107 : enemy.kind === 'rat' ? 93 : enemy.kind === 'chicken' ? 208 : enemy.kind === 'crow' ? 58 : enemy.kind === 'archer' ? 94 : enemy.kind === 'fly' ? 12 : enemy.kind === 'barbarian' ? 84 : enemy.kind === 'lava' ? 98 : enemy.kind === 'boss' ? 281 : 1);
@@ -1337,6 +1341,7 @@ export class Simulation {
     }
     const classMedal = heroClassMedal(player.classId);
     if (player.level >= 10 && classMedal !== undefined) this.awardMedal(classMedal);
+    if (this.state.activeMission.ragnarok) this.awardMedal(92);
     const rewardShare = this.state.activeMission.hire ? 0.5 : 1;
     const fullReward = this.state.activeMission.reward;
     const reward = fullReward * rewardShare;
@@ -1833,6 +1838,7 @@ export class Simulation {
       if (!record(value.protection) || !Number.isInteger(value.protection.counter) || Number(value.protection.counter) < -99 || Number(value.protection.counter) > 250 || !finite(value.protection.blueMultiplierAdd) || value.protection.blueMultiplierAdd < -0.2 || value.protection.blueMultiplierAdd > 1.4) throw new Error('Invalid protection effect.');
       const mission = value.activeMission, level = Number(value.day) - 1;
       const expected = generateLowLevelMission(level, Number(value.day), () => 0);
+      if (record(mission) && mission.ragnarok !== undefined && (Number(value.version) < 33 || mission.ragnarok !== true)) throw new Error('Invalid Ragnarok state.');
       if (!record(mission) || Object.entries({ level, fixedLv: expected.fixedLv, strength: expected.strength, powerOrg: expected.powerOrg, ...(value.version < 15 || value.day === 1 ? { reward: 600 + level * 20 } : {}), spawnRate: expected.spawnRate, ...(Number(value.version) < 27 || value.day === 1 ? { hpFix: 1, dmgFix: 1, expFix: 1 } : {}), bossDay: expected.bossDay }).some(([key, expected]) => mission[key] !== expected) || !Number.isInteger(mission.reward) || (Number(value.version) < 27 ? ![0, 0.01, ...(Number(value.day) >= 5 ? [0.02] : []), ...(Number(value.day) >= 8 ? [0.03] : []), ...(Number(value.day) >= 11 ? [0.04] : [])].includes(Number(mission.absorbFix)) : !finite(mission.absorbFix) || mission.absorbFix < 0 || mission.absorbFix > 0.24) || (value.day === 1 && (value.version < 31 ? mission.absorbFix !== 0 : ![0, 0.01, 0.02, 0.03, 0.04].includes(Number(mission.absorbFix))))) throw new Error('Invalid active mission.');
       if (Number(value.version) >= 27 && ['hpFix', 'dmgFix', 'expFix'].some(key => !finite(mission[key]) || Number(mission[key]) < 1 || Number(mission[key]) > 100)) throw new Error('Invalid mission bonuses.');
       if (!finite(value.resultBefore) || !Number.isInteger(value.perfectDays) || Number(value.perfectDays) < 0 || Number(value.perfectDays) > Number(value.day) || !Number.isInteger(value.bossesSpawned) || Number(value.bossesSpawned) < 0 || Number(value.bossesSpawned) > Number(value.day) * 10) throw new Error('Invalid campaign counters.');
