@@ -1,32 +1,60 @@
 export const SAVE_KEY = 'elona-shooter-plus-plus.port.save.v1';
+export const SAVE_SLOTS = 8;
 import { createProfile, validProfile, type GlobalProfile } from './profile.ts';
+const SLOT_KEY = 'elona-shooter-plus-plus.port.slot.v1';
+const DELETED_FORMAT = 'elona-shooter-browser-deleted';
+function validSlot(slot: number): boolean { return Number.isInteger(slot) && slot >= 0 && slot < SAVE_SLOTS; }
+function slotKey(slot: number): string {
+  if (!validSlot(slot)) throw new RangeError('Invalid save slot.');
+  // Первый слот сохраняет прежний ключ: существующее приключение не копируется и не теряется.
+  return slot === 0 ? SAVE_KEY : `${SAVE_KEY}.slot.${slot}`;
+}
+export function readSelectedSlot(): number {
+  try { const slot = Number(localStorage.getItem(SLOT_KEY) ?? 0); return validSlot(slot) ? slot : 0; } catch { return 0; }
+}
+export function selectSaveSlot(slot: number): boolean {
+  if (!validSlot(slot)) return false;
+  try { localStorage.setItem(SLOT_KEY, String(slot)); return true; } catch { return false; }
+}
 const PROFILE_KEY = 'elona-shooter-plus-plus.port.profile.v1';
 const OPTIONS_KEY = 'elona-shooter-plus-plus.port.options.v1';
 export function canSaveAdventure(state: { mode?: string; phase: string }): boolean {
   return state.mode !== 'hardcore' || state.phase === 'town';
 }
-export function clearSave(): boolean {
-  try { localStorage.removeItem(SAVE_KEY); return true; } catch { return false; }
+export function clearSave(slot = readSelectedSlot()): boolean {
+  try { localStorage.removeItem(slotKey(slot)); return true; } catch { return false; }
 }
 
 export type SaveRead = { kind: 'empty' } | { kind: 'saved'; data: unknown } | { kind: 'error'; message: string };
 
-export function readSave(): SaveRead {
+export function readSave(slot = readSelectedSlot()): SaveRead {
   try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    return raw === null ? { kind: 'empty' } : { kind: 'saved', data: JSON.parse(raw) };
+    const raw = localStorage.getItem(slotKey(slot));
+    if (raw === null) return { kind: 'empty' };
+    const data = JSON.parse(raw);
+    return data?.format === DELETED_FORMAT ? { kind: 'empty' } : { kind: 'saved', data };
   } catch {
     return { kind: 'error', message: 'The saved game could not be read. Import a backup, or start a new game.' };
   }
 }
 
-export function storeSave(data: unknown): boolean {
+export function storeSave(data: unknown, slot = readSelectedSlot()): boolean {
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    localStorage.setItem(slotKey(slot), JSON.stringify(data));
     return true;
   } catch {
     return false;
   }
+}
+
+export function deleteSaveSlot(slot: number): boolean {
+  try {
+    const key = slotKey(slot), raw = localStorage.getItem(key);
+    if (raw === null) return true;
+    try { if (JSON.parse(raw)?.format === DELETED_FORMAT) return true; } catch { /* Повреждённый слот тоже можно убрать из списка. */ }
+    // SharedObject оригинала помечает слот удалённым, сохраняя его данные.
+    localStorage.setItem(key, JSON.stringify({ format: DELETED_FORMAT, raw })); return true;
+  } catch { return false; }
 }
 
 export function readProfile(): { profile: GlobalProfile; warning?: string } {

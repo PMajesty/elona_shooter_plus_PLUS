@@ -2,6 +2,42 @@
   "version": 1,
   "sourceSha256": "4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663",
   "rootFrame": 71,
+  "titleSaves": {
+    "children": {
+      "saveBox": {
+        "characterId": 1740,
+        "x": 470.5,
+        "y": 30.7,
+        "matrix": [
+          1.4000092,
+          0.0,
+          0.0,
+          1.0,
+          470.5,
+          30.7
+        ],
+        "scaleX": 1.4000092,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "trash": {
+        "characterId": 2644,
+        "x": 445.95,
+        "y": 29.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          445.95,
+          29.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      }
+    }
+  },
   "menuPosition": {
     "x": 24.41238023502831,
     "y": -22

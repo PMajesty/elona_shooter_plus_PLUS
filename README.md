@@ -3,7 +3,7 @@
 A TypeScript/Phaser browser remake of Elona Shooter Plus 1.3.0.4.
 The current local build supports **all eight original hero classes** and
 **repeating campaign cycles**, including Casual and Hardcore modes. This is an
-incomplete remake; remaining medal effects and the original save-slot UI are still being ported.
+incomplete remake; remaining medal effects, Flash-save conversion and other systems are still being ported.
 
 Open [the local game](http://127.0.0.1:5175/elona/).
 Original artwork, English text, audio and credits are retained. Sound starts muted
@@ -41,7 +41,8 @@ unless you previously enabled it; its button explicitly displays the current sta
   robbery for 2 AP with daily diminishing payouts, Robber skill/medal bonuses,
   saved counters and action medals with their next-town AP chances.
 - A persistent browser medal collection with class unlocks and original New Game
-  starting bonuses. One browser save with Continue and JSON import/export.
+  starting bonuses. Eight browser save slots with the original title dropdown,
+  trash icon and deletion confirmation, plus Continue and JSON import/export.
   Version35 accepts prior browser saves; original Flash saves require a future converter.
 - Casual lowers encounter power/taxes and grants35% more kill XP. Hardcore uses
   normal combat, deletes the resumable save when a battle starts and permits
@@ -72,6 +73,11 @@ export a backup to transfer it between browsers or websites. Current-format impo
 restore the saved medal collection as well as the adventure. Legacy imports merge
 their medals into the existing collection; Continue preserves the collection.
 Keep a recent export before restoring an older backup.
+Select an Empty Save on the title screen before New Game to keep a separate run.
+Continue, save and JSON import/export use that selected slot; existing browser
+adventures remain in the first slot. Medals/day records are shared across slots
+and survive deleting an adventure. Each JSON backup contains one adventure and
+the shared collection; exporting one does not export all eight adventures.
 The page contains only the centered game and its requested top-right fullscreen
 icon. There is no added bottom toolbar or floating explanatory message overlay.
 Browser shortcuts: Ctrl+S saves, Ctrl+Shift+S exports a JSON backup,
@@ -107,7 +113,8 @@ projectile replay, half rewards, wages, departure and old-save migration.
 Museum checks cover payouts, medal thresholds, daily resets, action AP bonuses,
 correct hero-class awards and migration. Unlock checks cover the global collection,
 starting bonuses and actual class combat effects. Some medal effects and
-the original six save slots remain incomplete.
+Flash-save conversion remain incomplete. Slot tests cover eight independent
+adventures, selection persistence, deletion, Hardcore isolation and storage failures.
 Additional controlled combat crosses Day40/80 through ordinary rewards, towns,
 Rest and JSON restores. Source-formula checks cover later cycles and Day1000 save
 boundaries; these do not prove balanced play or long-session performance there.

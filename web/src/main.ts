@@ -1,15 +1,18 @@
-import { MAX_CAMPAIGN_DAY, validCampaignDay } from './missions.ts';
+import { MAX_CAMPAIGN_DAY } from './missions.ts';
 import { GAME_MODS, type GameMod } from './game-mods.ts';
 import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
 import Phaser from 'phaser';
-import { HERO_CLASSES, heroClassUnlocked, isHeroClass, type HeroClass } from './hero-classes.ts';
+import { HERO_CLASSES, heroClassUnlocked, type HeroClass } from './hero-classes.ts';
 import { createProfile, mergeProfile, mergeProfiles, validProfile, type GlobalProfile } from './profile.ts';
 import { MEDALS } from './medals.ts';
 import { TITLES, nextTitle } from './titles.ts';
 import { Simulation, type SimulationState, type EnemyState, type SimulationEvent } from './simulation.ts';
 import { WORLD } from './content.ts';
 import { weaponPresentation } from './combat-stats.ts';
-import { exportSave, readMute, readSave, readProfile, storeProfile, canSaveAdventure, clearSave, storeMute, storeSave } from './storage.ts';
+import { SAVE_SLOTS, readSelectedSlot, selectSaveSlot, deleteSaveSlot, exportSave, readMute, readSave, readProfile, storeProfile, canSaveAdventure, clearSave, storeMute, storeSave } from './storage.ts';
+import { saveSlotLabel } from './save-slots.ts';
+import { createTitleSavesView, type TitleSavesLayout } from './title-saves-view.ts';
+import { createModConfirmation, type ModConfirmationLayout } from './mod-confirmation-view.ts';
 import { OriginalAlly, type OriginalAllyMetadata } from './original-animation.ts';
 import { createLootView } from './loot-view.ts';
 import { createSkillView } from './skill-view.ts';
@@ -59,6 +62,7 @@ let gameScene: ElonaScene;
 class ElonaScene extends Phaser.Scene {
   screen: Screen = 'title';
   sim?: Simulation;
+  saveSlot = readSelectedSlot();
   private carryCheckpoint?: SimulationState;
   appearance = 0;
   paused = false;
@@ -182,6 +186,8 @@ class ElonaScene extends Phaser.Scene {
     this.pauseLayer = undefined; this.playerSprite = undefined; this.cursor = undefined; this.selection = undefined; this.ammoFill = undefined;
     if (!keepTownAmbience) { this.ambient?.destroy(); this.ambient = undefined; }
     container.dataset.screen = screen;
+    container.dataset.saveSlot = String(this.saveSlot);
+    delete container.dataset.deleteSaveSlot;
     status.hide();
     container.dataset.paused = 'false';
     container.dataset.bossBars = '0'; container.dataset.bossHealth = '[]';
@@ -273,7 +279,7 @@ class ElonaScene extends Phaser.Scene {
         button.on('pointerover', () => showState('over')).on('pointerout', () => showState('up')).on('pointerup', () => showState('over'));
       } else this.labelButton(x + 45, y - 15, key.replace('button_', ''), action);
     }
-    const saved = readSave();
+    const saved = readSave(this.saveSlot);
     if (saved.kind === 'saved') {
       try {
         const parsed = this.parseSave(saved.data, true);
@@ -281,13 +287,28 @@ class ElonaScene extends Phaser.Scene {
         this.profile = mergeProfile(this.profile, parsed.simulation.state); if (storeProfile(this.profile)) delete this.profileRead.warning;
       } catch { /* Повреждённое приключение не блокирует создание нового героя. */ }
     }
-    const savedDay = saved.kind === 'saved' ? (saved.data as { simulation?: { day?: unknown } } | null)?.simulation?.day : undefined;
-    const savedClass = saved.kind === 'saved' ? (saved.data as { simulation?: { player?: { classId?: unknown } } } | null)?.simulation?.player?.classId : undefined;
-    const className = isHeroClass(savedClass) ? HERO_CLASSES[savedClass].name : 'Hero';
-    this.text(469, 32, saved.kind === 'saved' ? (validCampaignDay(savedDay) ? `${className} · Day ${savedDay}` : `Saved ${className}`) : 'Empty Save', 12, '#151515', 'Arial').setBackgroundColor('#ede9de').setFixedSize(137, 20);
+    const labels = Array.from({ length: SAVE_SLOTS }, (_, slot) => saveSlotLabel(readSave(slot)));
+    container.dataset.saveSlots = JSON.stringify(labels);
+    this.root.add(createTitleSavesView(this, manifest, this.cache.json.get('town-layout') as TitleSavesLayout, labels, this.saveSlot, slot => {
+      this.playSound('soundClick1');
+      if (slot !== this.saveSlot && !selectSaveSlot(slot)) { status.textContent = 'The selected save slot could not be stored.'; return; }
+      this.saveSlot = slot; this.showTitle();
+    }, () => this.confirmDeleteSave()));
     this.text(334, 11, `Most Days Survived: ${this.profile.bestDay} / ${this.profile.bestHardcoreDay ?? 0} (HC) / ${this.profile.bestCasualDay ?? 0} (Casual)`, 12, '#ffffff').setShadow(1, 1, '#000000', 2);
     if (saved.kind === 'error') status.textContent = saved.message;
     else if (this.profileRead.warning) status.textContent = this.profileRead.warning;
+  }
+
+  private confirmDeleteSave(): void {
+    const slot = this.saveSlot, name = saveSlotLabel(readSave(slot));
+    const layout = (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog;
+    const dialog = createModConfirmation(this, manifest, layout, answer => {
+      this.playSound('soundClick1');
+      if (!answer || deleteSaveSlot(slot)) { this.showTitle(); return; }
+      this.playSound('soundBeep');
+      (dialog.getByName('delete-save-question') as Phaser.GameObjects.Text).setText('The save could not be deleted.');
+    }, 'delete-save', `Really delete\n${name}?`);
+    container.dataset.deleteSaveSlot = String(slot); this.root.add(dialog);
   }
 
   private showHelp(): void {
@@ -1334,12 +1355,12 @@ class ElonaScene extends Phaser.Scene {
     const save = this.makeSave();
     if (!save) {
       if (this.sim && !['title', 'gene', 'mods'].includes(this.screen) && !canSaveAdventure(this.sim.state)) {
-        const cleared = clearSave(); storeProfile(this.profile);
+        const cleared = clearSave(this.saveSlot); storeProfile(this.profile);
         if (notify || !cleared) status.textContent = cleared ? 'Hardcore Mode: you can only save or export the game in town.' : 'The Hardcore save could not be cleared from browser storage.';
       } else if (notify) status.textContent = 'Start a game before saving.';
       return false;
     }
-    const stored = storeSave(save);
+    const stored = storeSave(save, this.saveSlot);
     const profileStored = storeProfile(this.profile);
     if (!profileStored && stored) { status.textContent = 'The game was saved, but the medal collection could not be stored. Export a backup.'; return true; }
     if (!stored || notify) status.textContent = stored ? 'Game saved in this browser. Export a save to keep a separate backup.' : 'Browser storage is unavailable. Export your save to keep your progress.';
@@ -1359,9 +1380,9 @@ class ElonaScene extends Phaser.Scene {
   }
 
   continueGame(): void {
-    const saved = readSave();
-    if (saved.kind !== 'saved') { status.textContent = saved.kind === 'error' ? saved.message : 'Save Game not found.'; return; }
-    try { this.loadGame(saved.data); } catch (error) { status.textContent = error instanceof Error ? error.message : 'Unable to read save.'; }
+    const saved = readSave(this.saveSlot);
+    if (saved.kind !== 'saved') { this.playSound('soundBeep'); status.textContent = saved.kind === 'error' ? saved.message : 'Save Game not found.'; return; }
+    try { this.loadGame(saved.data); } catch (error) { this.playSound('soundBeep'); status.textContent = error instanceof Error ? error.message : 'Unable to read save.'; }
   }
 
   loadGame(raw: unknown, restoreCollection = false): void {
@@ -1411,7 +1432,7 @@ function exportAdventure(): void {
   if (gameScene?.sim && !['title', 'gene', 'mods'].includes(gameScene.screen) && !canSaveAdventure(gameScene.sim.state)) {
     status.textContent = 'Hardcore Mode: you can only save or export the game in town.'; return;
   }
-  const current = gameScene?.makeSave(), saved = readSave();
+  const current = gameScene?.makeSave(), saved = readSave(gameScene?.saveSlot);
   const data = current ?? (saved.kind === 'saved' ? saved.data : undefined);
   if (data) { exportSave(data); status.textContent = 'Save exported.'; } else status.textContent = 'Start a game before exporting a save.';
 }

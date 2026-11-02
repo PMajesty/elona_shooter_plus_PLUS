@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v37, Equipment Recycle and Charge Item**.
+Updated 2026-11-02. Current local build: **v37, eight independent save slots**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -75,8 +75,14 @@ existing numeric title field without changing the save format or earlier saves.
 Source: MainTimeline.newTitle (9752), titleList (9247), claim dialog (10632).
 
 Original assets, English UI and credits remain. Sound starts muted unless the user
-enabled it. Browser testing reuses a tab when available and keeps it muted. One browser save,
-Continue and JSON backups work; imported/continued battles open paused.
+enabled it. Browser testing reuses a tab when available and keeps it muted. Eight
+browser slots use the original title-screen ComboBox skin/placement and trash
+button. Selection persists; New Game, Continue, saves and JSON import/export use
+the selected slot. Existing single saves remain under their original key as slot1,
+without copying or rewriting them. Deletion uses the original confirmation and
+marks only that adventure empty; the shared medal collection/day records remain.
+Hardcore clears only its active adventure slot. Each JSON export holds one run
+and the shared collection, not every slot. Imported/continued battles open paused.
 The browser page now contains only the centered game on black. The surrounding
 heading, instructions, feature list and footer are removed. The requested fullscreen
 icon stays in the top-right corner for manual use. The added bottom toolbar and
@@ -87,22 +93,14 @@ Never activate native fullscreen in testing: it takes over the user's desktop.
 
 ## Validation and limits
 
-- **495 tests covered**: the latest full run passed494; its remaining renamed
-  test-helper call was corrected and the12 affected service/MOD tests then passed.
-  Typechecking and production build pass. Latest bundle: assets/index-CnSL4HP9.js.
-  Service checks cover costs, exact generation, no-op failures, reload fields,
-  medal thresholds/efficiency, Carry Over and JSON replay. The full run caught
-  legacy loot generation reading medals before migration initialized them; the
-  context now treats that missing legacy collection as empty. Title checks cover every unlock day, sequential
-  late claims, AP refusal, settlement credits, rank limits and save/Carry Over
-  restoration. Carry Over checks cover full-town restoration,
-  minimum/earned money, AP, medal restrictions, repeated JSON replay and refusal
-  of Day1/Hardcore/incompatible/malformed checkpoints. Existing MOD checks cover selection/reset without
-  hero/RNG rerolls, combined Casual/Intense power, both skipped batch branches,
-  actual movement, spread/recoil, range penalty, manual XP, boss rewards, party
-  weapon-skill limits, explicit upgrade behavior, fixed Active AP, sale refreshes,
-  malformed imports and JSON replay across Rest. Earlier normal saves migrate
-  without adding MOD fields or changing their simulation RNG/state.
+- **501 tests passed**, with typechecking and production build passing. Latest
+  bundle: assets/index-BadSh2EE.js. Slot checks cover unchanged legacy storage,
+  eight independent adventures, selection persistence, shared medals/mute,
+  deletion/tombstones, Hardcore isolation, corrupt data and failed writes.
+  Existing deterministic checks cover classes, campaign, equipment services,
+  medal efficiency, modes/MODs, town economy, titles, Carry Over and JSON replay.
+  Legacy loot generation treats a not-yet-initialized medal collection as empty
+  during migration; it does not consume extra RNG to reconstruct that field.
 - The controlled full40-day campaign completed in96494 simulation frames, with
   all19 enemy kinds, rewards, towns and save boundaries. Its changed frame count
   follows the repeating MOD-sale correction and resulting generation RNG. Strong
@@ -136,6 +134,12 @@ Never activate native fullscreen in testing: it takes over the user's desktop.
   preserved the complete result. No console errors or fullscreen activation.
   Evidence: .build/browser-qa/equipment-services-verification.json and
   equipment-recycle-selection.png. The user's full adventure/collection was restored.
+- The muted slot browser check created a real New Game in empty slot8 while slot1
+  remained intact, verified exact-envelope Cancel, selection persistence and
+  Continue of slot8, then deleted only that disposable run and resumed slot1.
+  Both continued exports matched their complete saved envelopes. No console
+  errors/fullscreen activation. Evidence: .build/browser-qa/save-slots-verification.json,
+  save-slots-dropdown.png and save-slot-delete-confirmation.png.
 - Earlier browser evidence covers reload/combat/results/town, activities, hires,
   Museum, class unlocks, Ragnarok and both difficulty modes. Hardcore battle export
   is refused and Continue has no battle save; its town checkpoint loads and Rest
@@ -156,10 +160,12 @@ that the app's crash cause was fixed.
 1. Long-session stability/performance and difficulty evidence beyond the first
    cycle; the current Day1000 save safety boundary remains an intentional limit.
 2. Remaining medal effects/triggers and decorative fireworks.
-3. Original six save slots/global slot UI, deletion and Flash save conversion.
+3. Flash save conversion. The browser dropdown displays all eight choices at once,
+   rather than the original ComboBox's five-row scrolling list.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
    camera shake, decorative boss reticle, some ranged spell effects/frame sounds,
    rage art, Chain Gun interruption timing and raster/filter/subpixel differences.
+   Original pause/settings/help screens and controls also need completion.
 5. Separate static castle Sister damage/death interactions. Bird-rat falling
    motion is approximate; later enemy hit regions use rendered alpha. Town/search/
    robbery outcomes use concise English messages rather than all original modals.
@@ -179,6 +185,10 @@ Alternative-start audit: optionAltStart is initialized to0 and never assigned a
 different value in the preserved source; no player control was found. Its debug
 branches are not treated as missing normal gameplay without contrary evidence.
 Carry Over is reachable and has been implemented separately.
+
+Save-slot audit corrected the earlier six-slot inventory: init creates six empty
+names, but the title sets maxSave=8 (2598); updateSaveSlot (10082) fills all eight.
+The port follows the title behavior, shared medal index and original deletion prompt.
 
 ## Working direction
 

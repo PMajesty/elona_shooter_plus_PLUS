@@ -911,6 +911,30 @@
       "height": 17,
       "originX": 1.0,
       "originY": 0.0
+    },
+    "button_deleteSave": {
+      "file": "buttons/button_deleteSave.png",
+      "width": 36,
+      "height": 36,
+      "originX": 8.0,
+      "originY": 8.0,
+      "characterId": 2644
+    },
+    "button_deleteSave_over": {
+      "file": "buttons/button_deleteSave_over.png",
+      "width": 36,
+      "height": 36,
+      "originX": 8.0,
+      "originY": 8.0,
+      "characterId": 2644
+    },
+    "button_deleteSave_down": {
+      "file": "buttons/button_deleteSave_down.png",
+      "width": 36,
+      "height": 36,
+      "originX": 8.0,
+      "originY": 8.0,
+      "characterId": 2644
     }
   },
   "clips": {

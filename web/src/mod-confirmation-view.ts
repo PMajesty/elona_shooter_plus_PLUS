@@ -9,7 +9,7 @@ export interface ModConfirmationLayout { image: string; children: Record<string,
 
 /** Общий исходный dialogMod живёт на stage, а не в смещённом окне добычи. */
 export function createModConfirmation(scene: Phaser.Scene, manifest: LootViewManifest, layout: ModConfirmationLayout,
-  resolve: (confirm: boolean) => void, name: string): Phaser.GameObjects.Container {
+  resolve: (confirm: boolean) => void, name: string, question = 'Do you really want to mount the mod on this gun?'): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName(`${name}-dialog`);
   const image = (key: string, placement?: Placement) => {
     const asset = manifest.images[key];
@@ -21,7 +21,7 @@ export function createModConfirmation(scene: Phaser.Scene, manifest: LootViewMan
   image(layout.image);
   const placement = layout.children.question, field = placement.text!;
   const width = field.bounds[2] - field.bounds[0];
-  root.add(scene.add.text(placement.x, placement.y, 'Do you really want to mount the mod on this gun?', {
+  root.add(scene.add.text(placement.x, placement.y, question, {
     fontFamily: 'ElonaMenu', fontSize: `${field.fontSize}px`, color: field.color,
     wordWrap: { width }, align: field.align === 2 ? 'center' : 'left', padding: { x: 1, y: 1 },
   }).setFixedSize(width, 0).setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees).setName(`${name}-question`));

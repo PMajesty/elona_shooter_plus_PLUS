@@ -52,6 +52,7 @@ BUTTONS = {"button_newGame": 2521, "button_continue": 2542, "button_help": 2579,
            "button_castlePage1": 1625, "button_castlePage2": 1630}
 BUTTONS["button_robVisitors"] = 1831
 BUTTONS["button_modBack"] = 1893
+BUTTONS["button_deleteSave"] = 2644
 FORCE = False
 
 
@@ -576,6 +577,7 @@ def town_layout(xml, sprites):
                 (int(hit_bounds.get("Ymax")) - int(hit_bounds.get("Ymin"))) / 20]
     # В городе окно стартует с 630; после боя та же анимация стартовала с 590.
     return {"version": 1, "sourceSha256": ORIGINAL_SHA256, "rootFrame": 71,
+            "titleSaves": {"children": {name: value for name, value in placements(tags, 22).items() if name in {"saveBox", "trash"}}},
             "menuPosition": {"x": 630 - sum(i ** 1.7 for i in range(16)), "y": -22},
             "panelImageOffset": {"x": 0, "y": -22}, "navigation": navigation, "rootChildren": root,
             "mission": {"characterId": 1995, "frame": 40, "image": "townMission", "labelsImage": "townMissionLabels",
