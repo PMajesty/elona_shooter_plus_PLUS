@@ -34,7 +34,17 @@ type Screen = 'title' | 'gene' | 'mods' | 'battle' | 'loot' | 'boss-loot' | 'ski
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
 const loadStatus = document.querySelector<HTMLDivElement>('#load-status')!;
-const status = document.querySelector<HTMLParagraphElement>('#save-status')!;
+const statusElement = document.querySelector<HTMLParagraphElement>('#save-status')!;
+let messageTimer: ReturnType<typeof setTimeout> | undefined;
+const status = {
+  get textContent(): string | null { return statusElement.textContent; },
+  set textContent(message: string | null) {
+    statusElement.textContent = message; statusElement.hidden = !message;
+    clearTimeout(messageTimer);
+    messageTimer = setTimeout(() => { statusElement.hidden = true; }, 6000);
+  },
+  hide() { clearTimeout(messageTimer); statusElement.hidden = true; },
+};
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}assets/${path}`;
 const MENU_X = -15.587619764971691;
 const bootStarted = performance.now();
@@ -143,13 +153,17 @@ class ElonaScene extends Phaser.Scene {
       if (this.paused) this.togglePause();
       else this.reloadRequested = true;
     });
-    this.input.keyboard?.on('keydown-ESC', () => { if (this.screen === 'battle') this.togglePause(); else if (this.screen === 'gene') this.showTitle(); else if (this.screen === 'mods') this.leaveGameMods(); });
+    this.input.keyboard?.on('keydown-ESC', () => {
+      if (this.screen === 'battle') this.togglePause();
+      else if (this.screen === 'gene') this.showTitle();
+      else if (this.screen === 'mods') this.leaveGameMods();
+      else container.dataset.toolsOpen = String(container.dataset.toolsOpen !== 'true');
+    });
     ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE'].forEach((key, slot) => {
       this.input.keyboard?.on(`keydown-${key}`, () => { if (this.screen === 'battle' && !this.paused) this.slotRequested = slot; });
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Eight hero classes and repeating campaign cycles, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Sniper, Ranger, Duelist and Noble unlock through class medals; the browser medal collection carries into new games and is included in exports. Importing a current-format backup also restores that collection. Casual and Hardcore modes are playable. All seven original Game MODs are selectable at creation. Carry Over restores the last town after defeat from Day 2 onward (outside Hardcore); most medals are then restricted. Original multiple save slots are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
     document.querySelector<HTMLButtonElement>('#import-save')!.disabled = false;
   }
@@ -173,6 +187,8 @@ class ElonaScene extends Phaser.Scene {
     this.pauseLayer = undefined; this.playerSprite = undefined; this.cursor = undefined; this.selection = undefined; this.ammoFill = undefined;
     if (!keepTownAmbience) { this.ambient?.destroy(); this.ambient = undefined; }
     container.dataset.screen = screen;
+    delete container.dataset.toolsOpen;
+    status.hide();
     container.dataset.paused = 'false';
     container.dataset.bossBars = '0'; container.dataset.bossHealth = '[]';
     container.dataset.bossVisuals = '[]';
@@ -289,6 +305,7 @@ class ElonaScene extends Phaser.Scene {
     this.text(123, 73, 'How to Play', 26);
     this.text(123, 121, 'Mouse: aim and fire; bows hold/release.\n1–5 select or use an inventory slot.\nSpace reloads; click cancels manual reload.\nEsc pauses; Space also resumes.\n\nDefend the castle until the day ends.\nMission → Rest starts the next day\nwithout repairing the castle.', 16).setLineSpacing(3);
     this.labelButton(245, 288, 'Return to Title', () => this.showTitle(), 145);
+    container.dataset.toolsOpen = 'true';
   }
 
   showGene(page: 0 | 1 = 0, keepHero = false): void {
@@ -391,7 +408,8 @@ class ElonaScene extends Phaser.Scene {
     refresh();
     const menu = this.root.list.filter(object => !background.has(object));
     this.root.add(this.add.container(MENU_X, 0, menu));
-    status.textContent = 'Choose optional Game MODs. Proceed starts this adventure; Back resets MODs. Alternative starts are still being ported.';
+    status.textContent = 'Choose optional Game MODs. Proceed starts this adventure; Back resets MODs.';
+    status.hide();
   }
 
   private simulationOptions() { return { hitTest: (enemy: Readonly<EnemyState>, x: number, y: number) => this.hitTest(enemy, x, y) }; }
@@ -1015,6 +1033,7 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.traits = JSON.stringify(this.sim.state.player.traits);
     container.dataset.skillPoints = String(this.sim.state.player.skillPoints);
     status.textContent = 'Choose a skill, review its improvement, then press Proceed to learn it.';
+    status.hide();
   }
 
   private showTown(tab: TownTab = 'mission', dialog: TownDialog = null, saleSlot: number | null = null, upgradeSelecting = false): void {
@@ -1208,6 +1227,7 @@ class ElonaScene extends Phaser.Scene {
       : tab === 'shop' ? (saleSlot === null ? 'Click stock, then an empty owned slot to buy. Drop an owned item outside its slots to sell; confirmation is required.' : 'Confirm the sale with Yes, or click elsewhere to keep the item.')
       : `Castle has two upgrade pages. Mission activities prepare bonuses for the next battle; shop and recruit refresh each cost 2 AP. ${this.sim.state.day < MAX_CAMPAIGN_DAY ? `Mission → Rest begins Day ${this.sim.state.day + 1}.` : 'The browser save safety limit has been reached.'}`;
     if (this.sim.state.carryOver) status.textContent = `Carry Over Mode — most new medals are unavailable. ${status.textContent}`;
+    status.hide();
   }
 
   private showPartyPanel(tab: 'characters' | 'equipment'): void {
@@ -1287,7 +1307,7 @@ class ElonaScene extends Phaser.Scene {
     if (this.screen !== 'battle') return;
     this.paused = !this.paused; this.accumulator = 0; this.firePressed = this.fireReleased = false; this.firingGesture = this.firingReleaseOwned = false;
     container.dataset.paused = String(this.paused);
-    if (!this.paused) { this.pauseLayer?.destroy(true); this.pauseLayer = undefined; this.ambient?.resume(); this.bowSound?.resume(); for (const sound of this.companionBowSounds.values()) sound.resume(); return; }
+    if (!this.paused) { status.hide(); this.pauseLayer?.destroy(true); this.pauseLayer = undefined; this.ambient?.resume(); this.bowSound?.resume(); for (const sound of this.companionBowSounds.values()) sound.resume(); return; }
     for (const sound of this.companionBowSounds.values()) sound.pause();
     this.ambient?.pause(); this.bowSound?.pause(); this.saveGame(false);
     const existing = new Set(this.root.list);

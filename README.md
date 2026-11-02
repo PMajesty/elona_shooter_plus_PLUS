@@ -68,6 +68,9 @@ export a backup to transfer it between browsers or websites. Current-format impo
 restore the saved medal collection as well as the adventure. Legacy imports merge
 their medals into the existing collection; Continue preserves the collection.
 Keep a recent export before restoring an older backup.
+The page contains only the centered game. Full screen, sound and JSON backup
+controls appear inside the pause menu or title Help screen; Esc also toggles them
+on town/result/title screens. Action feedback appears briefly inside the game.
 
 ```powershell
 npm.cmd test
