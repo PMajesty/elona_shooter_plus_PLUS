@@ -27,6 +27,7 @@ import { repairEarlyV15AirTargets, validatePartySave } from './party-save.ts';
 import { CASTLE_UPGRADES, castleUpgradeCost, castleUpkeep, castleRepairAmount, castleDamageMultiplier, castleTrainerMultiplier, type CastleUpgradeKind, type CastleUpgradeOutcome } from './castle-upgrades.ts';
 
 export interface EnemyState {
+  large?: true;
   bomb?: { startX: number; startY: number; targetX: number; targetY: number; curve: number; counter: number; rotation: number };
   uid: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number;
   speed: number; speedOrg: number; attack: number; gold: number; exp: number;
@@ -617,7 +618,8 @@ export class Simulation {
   }
 
   private hitEnemy(enemy: EnemyState, x: number, y: number): boolean {
-    return this.options.hitTest?.(enemy, x, y) ?? inside(ENEMIES[enemy.kind].body, x - enemy.x, y - enemy.y);
+    const scale = enemy.large ? 1.25 : 1;
+    return this.options.hitTest?.(enemy, x, y) ?? inside(ENEMIES[enemy.kind].body, (x - enemy.x) / scale, (y - enemy.y) / scale);
   }
 
   requestReload(manual = true): boolean {
@@ -746,16 +748,21 @@ export class Simulation {
         attacking: false, attacked: false, frame: 1, shadowHit: false, deathTicks: 0, drop: 0, removed: false,
         bossAction: 0, bossCount: 0, bossIdle: 0, bossFireNum: 0, bossWeapon: 0, bossDamage: 0, appearance: 0, type: 0, tag: 0, onMark: false,
         bomb: { startX: 650, startY: 240, targetX, targetY, curve: 0.003, counter: int(Math.abs(targetX - 650) / speed) + 1, rotation: 0 } });
+      const bomb = this.state.enemies[this.state.enemies.length - 1];
+      bomb.hp = bomb.maxHp = int(this.state.activeMission.hpFix * (100 + this.state.activeMission.strength * 1.2) / 100);
+      bomb.attack = int(bomb.attack * (100 + this.state.activeMission.strength / 2) / 100);
+      this.applyLargeVariant(bomb);
       return;
     }
     const gold = 1 + int(this.random() * definition.power / 10 + 5);
     const bossWeapon = kind === 'boss' ? 1 + int(this.random() * 2) : 0;
     const bossCount = kind === 'boss' ? 100 + int(this.random() * 60) : 0;
     // Даже при нулевых strength/THREAT исходное умножение и деление влияют на последний бит Number.
-    const speed = (definition.speedBase + this.random() * definition.speedRandom) * 100 / (100 + this.state.partySkills.effects[112]);
+    const strength = this.state.activeMission.strength;
+    const speed = (definition.speedBase + this.random() * definition.speedRandom) * (100 + strength / 8) / (100 + this.state.partySkills.effects[112]);
     const yRoll = this.random();
     const y = int(kind === 'fly' ? yRoll * 70 / 1.5 + 80 : yRoll * (kind === 'boss' ? 105 : definition.airborne ? 70 : WORLD.groundWidth) + (kind === 'boss' ? 195 : definition.airborne ? 40 : WORLD.groundLine));
-    const hp = kind === 'boss' ? 150 + this.state.activeMission.level * 25 : int(definition.hp * this.state.activeMission.hpFix);
+    const hp = kind === 'boss' ? 150 + this.state.activeMission.level * 25 : int(definition.hp * this.state.activeMission.hpFix * (100 + strength * 1.2) / 100);
     const ranged = kind === 'archer' ? { rangedCounter: 120 } : kind === 'fly' ? { flyCounter: 0 } : kind === 'barbarian' ? { rampage: 0 as const, rageEffectFrame: 0, hitEffects: [] } : kind === 'lava' ? { alerted: false, hitEffects: [] } : {};
     const later = ENEMY_TIMELINES[kind];
     const behaviorCounter = kind === 'dino' ? 50 + int(this.random() * 70) : kind === 'dragon' ? 80 + int(this.random() * 50) : 0;
@@ -763,7 +770,18 @@ export class Simulation {
     const appearance = kind === 'boss' ? 51 + this.state.bossesSpawned++ % 15 : 0;
     const uid = this.state.nextUid++;
     this.state.enemies.push({ uid, kind, type: definition.airborne ? 1 : definition.armor ? 2 : 0, tag: 0, onMark: false, x: -20, y, hp, maxHp: hp, speed, speedOrg: speed, attack: kind === 'boss' ? (this.state.activeMission.bossDay ? int((1 + int(this.state.activeMission.level / 15)) / 2) + 1 : 1 + int(this.state.activeMission.level / 15)) : definition.attack, gold, exp: 1 + int(definition.power * 0.4), knockBack: 0, disarmed: 0, attacking: false, attacked: false, frame: kind === 'rat' ? 14 : 1, shadowHit: shadowHitAtFrame(kind, kind === 'rat' ? 14 : 1), deathTicks: 0, drop: 0, removed: false, bossAction: kind === 'boss' ? 3 : 0, bossCount, bossIdle: 0, bossFireNum: 0, bossWeapon, bossDamage: 0, appearance, ...(kind === 'boss' ? { bossFacing: -1 as const } : {}), ...(later ? { frame: later.labels.init ?? 1, behaviorCounter, direction } : {}), ...ranged });
+    const spawned = this.state.enemies[this.state.enemies.length - 1];
+    if (kind !== 'boss') spawned.attack = int(spawned.attack * (100 + strength / 2) / 100);
+    this.applyLargeVariant(spawned);
     if (kind === 'boss') this.state.partyAI.targetBossUid = uid;
+  }
+
+  private applyLargeVariant(enemy: EnemyState): void {
+    // В исходнике бросок выполняется и для исключённых видов; слабые места не масштабируются.
+    if (this.state.day > 40 && this.random() > 0.95 && !['ogre', 'dino', 'dragon', 'boss', 'dropped-rat'].includes(enemy.kind)) {
+      enemy.large = true; enemy.hp *= 3; enemy.maxHp *= 3;
+      enemy.speed *= 0.75; enemy.speedOrg *= 0.75; enemy.exp *= 2; enemy.gold *= 2;
+    }
   }
 
   private damageEnemy(enemy: EnemyState, raw: number, criticalValue: number | boolean, weaponSlot: number | null, x: number, y: number, actorSlot = 0): void {
@@ -1783,7 +1801,7 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
-    if (!record(value) || !supportedSaveVersion(value.version) || (!validCampaignDay(value.day) || (value.version < 26 && Number(value.day) > 9) || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7) || (value.version < 23 && value.day === 8) || (value.version < 24 && value.day === 9)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
+    if (!record(value) || !supportedSaveVersion(value.version) || (!validCampaignDay(value.day) || (value.version < 32 && Number(value.day) > 40) || (value.version < 26 && Number(value.day) > 9) || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7) || (value.version < 23 && value.day === 8) || (value.version < 24 && value.day === 9)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || !Number.isInteger(value.bossWave) || Number(value.bossWave) < 2 || Number(value.bossWave) >= (Array.isArray(value.waves) ? value.waves.length : 0) || (Array.isArray(value.waves) && value.waveIndex === value.waves.length && value.newWave !== true)) throw new Error('Invalid counters.');
@@ -1814,16 +1832,18 @@ export class Simulation {
       if (!Array.isArray(value.itemCooldowns) || value.itemCooldowns.length !== 5 || value.itemCooldowns.some(time => !Number.isInteger(time) || time < 0 || time > 2001)) throw new Error('Invalid item cooldowns.');
       if (!record(value.protection) || !Number.isInteger(value.protection.counter) || Number(value.protection.counter) < -99 || Number(value.protection.counter) > 250 || !finite(value.protection.blueMultiplierAdd) || value.protection.blueMultiplierAdd < -0.2 || value.protection.blueMultiplierAdd > 1.4) throw new Error('Invalid protection effect.');
       const mission = value.activeMission, level = Number(value.day) - 1;
-      if (!record(mission) || Object.entries({ level, fixedLv: level, strength: 0, powerOrg: 800 + level * 120, ...(value.version < 15 || value.day === 1 ? { reward: 600 + level * 20 } : {}), spawnRate: Math.max(5, 15 - level / 5), ...(Number(value.version) < 27 || value.day === 1 ? { hpFix: 1, dmgFix: 1, expFix: 1 } : {}), bossDay: level % 10 === 9 }).some(([key, expected]) => mission[key] !== expected) || !Number.isInteger(mission.reward) || (Number(value.version) < 27 ? ![0, 0.01, ...(Number(value.day) >= 5 ? [0.02] : []), ...(Number(value.day) >= 8 ? [0.03] : []), ...(Number(value.day) >= 11 ? [0.04] : [])].includes(Number(mission.absorbFix)) : !finite(mission.absorbFix) || mission.absorbFix < 0 || mission.absorbFix > 0.24) || (value.day === 1 && (value.version < 31 ? mission.absorbFix !== 0 : ![0, 0.01, 0.02, 0.03, 0.04].includes(Number(mission.absorbFix))))) throw new Error('Invalid active mission.');
+      const expected = generateLowLevelMission(level, Number(value.day), () => 0);
+      if (!record(mission) || Object.entries({ level, fixedLv: expected.fixedLv, strength: expected.strength, powerOrg: expected.powerOrg, ...(value.version < 15 || value.day === 1 ? { reward: 600 + level * 20 } : {}), spawnRate: expected.spawnRate, ...(Number(value.version) < 27 || value.day === 1 ? { hpFix: 1, dmgFix: 1, expFix: 1 } : {}), bossDay: expected.bossDay }).some(([key, expected]) => mission[key] !== expected) || !Number.isInteger(mission.reward) || (Number(value.version) < 27 ? ![0, 0.01, ...(Number(value.day) >= 5 ? [0.02] : []), ...(Number(value.day) >= 8 ? [0.03] : []), ...(Number(value.day) >= 11 ? [0.04] : [])].includes(Number(mission.absorbFix)) : !finite(mission.absorbFix) || mission.absorbFix < 0 || mission.absorbFix > 0.24) || (value.day === 1 && (value.version < 31 ? mission.absorbFix !== 0 : ![0, 0.01, 0.02, 0.03, 0.04].includes(Number(mission.absorbFix))))) throw new Error('Invalid active mission.');
       if (Number(value.version) >= 27 && ['hpFix', 'dmgFix', 'expFix'].some(key => !finite(mission[key]) || Number(mission[key]) < 1 || Number(mission[key]) > 100)) throw new Error('Invalid mission bonuses.');
       if (!finite(value.resultBefore) || !Number.isInteger(value.perfectDays) || Number(value.perfectDays) < 0 || Number(value.perfectDays) > Number(value.day) || !Number.isInteger(value.bossesSpawned) || Number(value.bossesSpawned) < 0 || Number(value.bossesSpawned) > Number(value.day) * 10) throw new Error('Invalid campaign counters.');
       if (!Array.isArray(value.earnedMedals) || new Set(value.earnedMedals).size !== value.earnedMedals.length || !value.earnedMedals.includes(40) || value.earnedMedals.some(id => !Number.isInteger(id) || !Object.hasOwn(MEDALS, id)) || (Number(value.version) < 31 && value.earnedMedals.includes(62) && (value.version < 14 || Number(value.day) < 7 || Number(value.perfectDays) < 7 || (value.day === 7 && !['victory', 'town'].includes(String(value.phase)))))) throw new Error('Invalid earned medals.');
     }
-    if (!Array.isArray(value.waves) || value.waves.length !== generateLowLevelMission(Number(value.day) - 1, Number(value.day), () => 0).wave || value.waves.some(wave => !record(wave) || !Array.isArray(wave.enemies) || wave.enemies.length > 1000 || wave.enemies.some(kind => typeof kind !== 'string' || !Object.hasOwn(ENEMIES, kind)) || !Array.isArray(wave.delays) || wave.delays.length !== wave.enemies.length || wave.delays.some(delay => !finite(delay) || delay < 0 || delay > 1000) || !finite(wave.initialCount) || wave.initialCount < wave.enemies.length)) throw new Error('Invalid wave state.');
+    if (!Array.isArray(value.waves) || value.waves.length !== generateLowLevelMission(Number(value.day) - 1, Number(value.day), () => 0).wave || value.waves.some(wave => !record(wave) || !Array.isArray(wave.enemies) || wave.enemies.length > 10000 || wave.enemies.some(kind => typeof kind !== 'string' || !Object.hasOwn(ENEMIES, kind)) || !Array.isArray(wave.delays) || wave.delays.length !== wave.enemies.length || wave.delays.some(delay => !finite(delay) || delay < -1000 || delay > 1000) || !finite(wave.initialCount) || wave.initialCount < wave.enemies.length)) throw new Error('Invalid wave state.');
     if ((Number(value.version) < 23 || Number(value.day) < 8) && (value.waves as unknown as WaveState[]).some(wave => wave.enemies.includes('lava'))) throw new Error('Lava is unavailable in this saved mission.');
     const enemyNumbers = ['uid', 'x', 'y', 'hp', 'maxHp', 'speed', 'speedOrg', 'attack', 'gold', 'exp', 'knockBack', 'frame', 'deathTicks', 'drop', 'bossAction', 'bossCount', 'bossIdle', 'bossFireNum', 'bossWeapon'];
     if (!Array.isArray(value.enemies) || value.enemies.length > 200 || value.enemies.some(enemy => !record(enemy) || typeof enemy.kind !== 'string' || !Object.hasOwn(ENEMIES, enemy.kind) || enemyNumbers.some(key => !finite(enemy[key])) || Number(enemy.maxHp) <= 0 || Number(enemy.hp) > Number(enemy.maxHp) || ['attacking', 'attacked', 'removed'].some(key => typeof enemy[key] !== 'boolean') || (enemy.shadowHit !== undefined && typeof enemy.shadowHit !== 'boolean'))) throw new Error('Invalid enemies.');
     if (!legacyEquipment && value.enemies.some(enemy => typeof (enemy as Record<string, unknown>).shadowHit !== 'boolean')) throw new Error('Missing enemy shadow history.');
+    if (value.enemies.some(enemy => { const e = enemy as unknown as EnemyState; return e.large !== undefined && (Number(value.version) < 32 || Number(value.day) <= 40 || e.large !== true || ['ogre', 'dino', 'dragon', 'boss', 'dropped-rat'].includes(e.kind)); })) throw new Error('Invalid large enemy.');
     const ids = value.enemies.map(enemy => (enemy as Record<string, unknown>).uid);
     if (new Set(ids).size !== ids.length || ids.some(id => !Number.isInteger(id) || Number(id) < 1)) throw new Error('Invalid enemy identifiers.');
     let restoredProjectiles: SimulationState['projectiles'];

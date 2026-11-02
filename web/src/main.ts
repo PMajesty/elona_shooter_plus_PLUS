@@ -145,7 +145,7 @@ class ElonaScene extends Phaser.Scene {
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Rogue, Hunter, Sheriff and Militia Days 1–40, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Sniper, Ranger, Duelist and Noble unlock through class medals; the browser medal collection carries into new games and is included in exports. Importing a current-format backup also restores that collection. Ragnarok, remaining town actions, Day 41 onward and original multiple save slots are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Eight hero classes and repeating campaign cycles, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Sniper, Ranger, Duelist and Noble unlock through class medals; the browser medal collection carries into new games and is included in exports. Importing a current-format backup also restores that collection. Ragnarok, remaining town actions, alternative modes and original multiple save slots are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
     document.querySelector<HTMLButtonElement>('#import-save')!.disabled = false;
   }
@@ -280,7 +280,7 @@ class ElonaScene extends Phaser.Scene {
     this.root.add(this.add.rectangle(0, 0, 620, 380, 0x000000, 0.45).setOrigin(0));
     this.root.add(this.add.rectangle(90, 50, 440, 280, 0xe0d1ae).setOrigin(0).setStrokeStyle(2, 0x9e8c61));
     this.text(123, 73, 'How to Play', 26);
-    this.text(123, 121, 'Mouse: aim and fire; bows hold/release.\n1–5 select or use an inventory slot.\nSpace reloads; click cancels manual reload.\nEsc pauses; Space also resumes.\n\nDefend the castle until the day ends.\nMission → Rest starts the next day (up to\nDay 40) without repairing the castle.', 16).setLineSpacing(3);
+    this.text(123, 121, 'Mouse: aim and fire; bows hold/release.\n1–5 select or use an inventory slot.\nSpace reloads; click cancels manual reload.\nEsc pauses; Space also resumes.\n\nDefend the castle until the day ends.\nMission → Rest starts the next day\nwithout repairing the castle.', 16).setLineSpacing(3);
     this.labelButton(245, 288, 'Return to Title', () => this.showTitle(), 145);
   }
 
@@ -515,8 +515,10 @@ class ElonaScene extends Phaser.Scene {
       const asset = manifest.clips[key];
       if (!(sprite instanceof OriginalAlly)) {
         sprite.setFrame(this.enemyFrame(enemy, key));
+        const scale = enemy.large ? 1.25 : 1;
+        sprite.setScale(scale);
         if (enemy.bomb) sprite.setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setPosition(enemy.x, enemy.y).setAngle(enemy.bomb.rotation);
-        else sprite.setPosition(enemy.x - asset.originX, enemy.y - asset.originY);
+        else sprite.setPosition(enemy.x - asset.originX * scale, enemy.y - asset.originY * scale);
       }
       sprite.setAlpha(enemy.hp <= 0 && enemy.deathTicks > 99 ? Math.pow(0.96, enemy.deathTicks - 99) : 1);
       this.root.bringToTop(sprite);
@@ -524,7 +526,8 @@ class ElonaScene extends Phaser.Scene {
         const rageAsset = manifest.clips.enemyRage;
         let rage = this.enemyRageSprites.get(enemy.uid);
         if (!rage) { rage = this.clip('enemyRage', enemy.rageEffectFrame, enemy.x, enemy.y + 20)!; this.enemyRageSprites.set(enemy.uid, rage); }
-        rage.setFrame(String(enemy.rageEffectFrame)).setPosition(enemy.x - rageAsset.originX, enemy.y + 20 - rageAsset.originY).setAlpha(sprite.alpha);
+        const scale = enemy.large ? 1.25 : 1;
+        rage.setFrame(String(enemy.rageEffectFrame)).setScale(scale).setPosition(enemy.x - rageAsset.originX * scale, enemy.y + (20 - rageAsset.originY) * scale).setAlpha(sprite.alpha);
         this.root.bringToTop(rage);
       } else { this.enemyRageSprites.get(enemy.uid)?.destroy(); this.enemyRageSprites.delete(enemy.uid); }
       if (enemy.kind === 'barbarian' || enemy.kind === 'lava') {
@@ -680,6 +683,7 @@ class ElonaScene extends Phaser.Scene {
       return actor.hitTestWorld(x, y, (key, frame, localX, localY) => this.texturePixelHit(key, frame, localX, localY));
     }
     const geometry = this.cache.json.get('collision-geometry') as CollisionGeometry;
+    if (enemy.large) { x = enemy.x + (x - enemy.x) / 1.25; y = enemy.y + (y - enemy.y) / 1.25; }
     if (!geometry.enemies[enemy.kind]) {
       const key = this.enemyClip(enemy), asset = manifest.clips[key];
       const dx = x - enemy.x, dy = y - enemy.y, angle = -(enemy.bomb?.rotation ?? 0) * Math.PI / 180;
@@ -1126,7 +1130,7 @@ class ElonaScene extends Phaser.Scene {
       : tab === 'characters' ? 'Select a portrait to inspect skills, wages and orders. Select the available candidate, then Recruit, to hire a companion.'
       : tab === 'equipment' ? 'Click an item, then a destination slot. Companions need the weapon’s required skill. Dropping outside cancels the move.'
       : tab === 'shop' ? (saleSlot === null ? 'Click stock, then an empty owned slot to buy. Drop an owned item outside its slots to sell; confirmation is required.' : 'Confirm the sale with Yes, or click elsewhere to keep the item.')
-      : `Castle has two upgrade pages. Mission activities prepare bonuses for the next battle; shop and recruit refresh each cost 2 AP. ${this.sim.state.day < MAX_CAMPAIGN_DAY ? `Mission → Rest begins Day ${this.sim.state.day + 1}.` : 'The next campaign cycle is not available yet.'}`;
+      : `Castle has two upgrade pages. Mission activities prepare bonuses for the next battle; shop and recruit refresh each cost 2 AP. ${this.sim.state.day < MAX_CAMPAIGN_DAY ? `Mission → Rest begins Day ${this.sim.state.day + 1}.` : 'The browser save safety limit has been reached.'}`;
   }
 
   private showPartyPanel(tab: 'characters' | 'equipment'): void {

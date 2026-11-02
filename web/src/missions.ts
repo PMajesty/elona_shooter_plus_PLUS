@@ -107,37 +107,38 @@ export function generateLowLevelWaves(mission: Readonly<LowLevelMission>, calend
       for (let n = 0; n < count; n++) enemies.push(kind);
     };
     // Успешный AIR прерывает цепочку до проверок BATCH1/RANGED/BATCH2.
+    const level = mission.fixedLv;
     if (mission.bossDay) {
       if (index === mission.bossWave) for (let n = 0; n < Math.trunc(Math.sqrt(mission.level)); n++) enemies.push('boss');
       else for (let n = 0; n < mission.wave - index - 1; n++) select(randLv(mission.fixedLv, 1), 1, []);
-    } else if (random() < 0.1 && mission.level > 3) {
-      select(randLv(mission.level, 0.5), 20, ['AIR']);
-      select(randLv(mission.level, 0.8), 20, ['AIR']);
-      select(mission.level, 20, ['AIR']);
-      select(mission.level + 2, 20, ['AIR']);
-      select(randLv(mission.level, 0.2), 20, ['AIR']);
-    } else if (random() < 0.1 && mission.level > 2) {
+    } else if (random() < 0.1 && level > 3) {
+      select(randLv(level, 0.5), 20, ['AIR']);
+      select(randLv(level, 0.8), 20, ['AIR']);
+      select(level, 20, ['AIR']);
+      select(level + 2, 20, ['AIR']);
+      select(randLv(level, 0.2), 20, ['AIR']);
+    } else if (random() < 0.1 && level > 2) {
       // BATCH1 прерывает цепочку: броски RANGED и BATCH2 здесь не выполняются.
-      select(randLv(mission.level, 0.7), 40, ['BATCH']);
-      select(mission.level + 2, 20, []);
-      select(randLv(mission.level, 1), 60, ['BATCH']);
-    } else if (random() < 0.2 && mission.level > 5) {
+      select(randLv(level, 0.7), 40, ['BATCH']);
+      select(level + 2, 20, []);
+      select(randLv(level, 1), 60, ['BATCH']);
+    } else if (random() < 0.2 && level > 5) {
       // Исходные бюджеты RANGED дают 90%; успешная ветка пропускает бросок BATCH2.
-      select(randLv(mission.level, 0.8), 10, []);
-      select(randLv(mission.level, 1), 30, ['RANGED']);
-      select(mission.level + 2, 20, []);
-      select(randLv(mission.level, 1), 15, []);
-      select(randLv(mission.level, 1), 15, ['RANGED']);
+      select(randLv(level, 0.8), 10, []);
+      select(randLv(level, 1), 30, ['RANGED']);
+      select(level + 2, 20, []);
+      select(randLv(level, 1), 15, []);
+      select(randLv(level, 1), 15, ['RANGED']);
     } else {
-      const batch = random() < 0.15 && mission.level > 10;
-      if (batch) select(randLv(mission.level - 2, 0.8), 100, ['MASS']);
+      const batch = random() < 0.15 && level > 10;
+      if (batch) select(randLv(level - 2, 0.8), 100, ['MASS']);
       else {
-        select(randLv(mission.level, 0.25), 15, ['BATCH']);
-        if (mission.level > 1) select(randLv(mission.level, 0.8), 15, []);
-        select(randLv(mission.level, 0.5), 20, ['BATCH']);
-        select(mission.level + 2, 20, []);
-        if (mission.level > 1) select(randLv(mission.level, 1), 15, []);
-        select(randLv(mission.level, 0.4), 15, ['BATCH']);
+        select(randLv(level, 0.25), 15, ['BATCH']);
+        if (mission.level > 1) select(randLv(level, 0.8), 15, []);
+        select(randLv(level, 0.5), 20, ['BATCH']);
+        select(level + 2, 20, []);
+        if (mission.level > 1) select(randLv(level, 1), 15, []);
+        select(randLv(level, 0.4), 15, ['BATCH']);
       }
     }
     if (index === mission.bossWave) enemies.push('boss');
@@ -156,7 +157,8 @@ export function generateLowLevelWaves(mission: Readonly<LowLevelMission>, calend
   return { waves, power, group: waves.map(wave => wave.initialCount) };
 }
 
-export const MAX_CAMPAIGN_DAY = 40;
+// Практический предел импорта, не длина исходной кампании и не перечень отдельных миссий.
+export const MAX_CAMPAIGN_DAY = 1000;
 export function validCampaignDay(day: unknown): day is number {
   return typeof day === 'number' && Number.isInteger(day) && day >= 1 && day <= MAX_CAMPAIGN_DAY;
 }

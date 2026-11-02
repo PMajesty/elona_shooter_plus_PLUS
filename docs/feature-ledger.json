@@ -2,17 +2,17 @@
   "schemaVersion": 1,
   "updated": "2026-11-02",
   "currentRelease": {
-    "saveVersion": 31,
+    "saveVersion": 32,
     "verificationStatus": "passed",
-    "implementedCampaign": "All eight hero classes, Days1-40, global medal collection, original class unlocks and New Game bonuses, both Castle pages, town activities, temporary hire, Museum and robbery.",
+    "implementedCampaign": "All eight heroes and repeating normal campaign cycles, original strength scaling and large variants; browser save safety boundary Day1000. Town activities, Museum, hire and persistent medal unlocks remain integrated.",
     "publication": {
       "status": "local-build",
       "url": "http://127.0.0.1:5175/elona/",
-      "bundle": "assets/index-C7sJfAxq.js",
-      "priorCheckpoint": "1faea55"
+      "bundle": "assets/index-DMdQEh_a.js",
+      "priorCheckpoint": "523cbf9"
     },
     "automatedVerification": {
-      "testsPassed": 461,
+      "testsPassed": 464,
       "fullSuite": true,
       "controlledCampaignFrames": 97293,
       "controlledCampaignDays": 40,
@@ -21,15 +21,16 @@
       "searchTests": 6,
       "temporaryHireTests": 6,
       "museumTests": 7,
-      "classProfileTests": 6
+      "classProfileTests": 6,
+      "cycleBoundaryCombatDays": 12
     },
     "browserVerification": [
-      "Locked Sniper selection refused; medal-unlocked second-page selection and actual New Game battle with original adrenaline HUD",
-      "Malformed collection import preserves full envelope; original adventure and collection restored exactly, paused/muted"
+      "Ordinary Day40 Rest opens Day41 with fixedLv3/strength200; complete state equals expected with observed pointer input",
+      "Controlled large variants render and survive import/Continue; original game/profile envelope restored exactly after migration, paused/muted"
     ],
     "browserEvidence": [
-      ".build/browser-qa/class-unlocks-verification.json",
-      ".build/browser-qa/unlocked-classes.png"
+      ".build/browser-qa/cycle-transition-verification.json",
+      ".build/browser-qa/cycle-large-enemies.png"
     ],
     "knownGaps": "docs/port-status.md"
   },
@@ -318,14 +319,13 @@
         ".build/browser-qa/day-eight-lava-exposure-audit.json:earned ordinary-input attack branch, seven fixtures;HP43→32/no credited kill/removal"
       ],
       "unverified": [
-        "Strength/large-enemy variants in later campaign cycles",
         "Native parent/child scheduling and pixel collision equivalence",
         "Decorative ranged projectiles, some source sound/visual effects"
       ],
       "intentionalDifferences": [
         "Original Fly initialization retains pooled dirCounter and resKnock. New port Fly actors reset the counter to0 and resistance to1. The accepted original fixture records fresh/explicit-reset behavior separately from73 raw reuse observations; this fixes a demonstrated state leak, not the reported late-game hitbox defect."
       ],
-      "campaignUpdate": "v26 extends ordinary progression through Day40, full first-cycle enemy selection, nine later families/bird drops, source frame-command attacks and multi-boss days. New collision uses rendered alpha; later cycles remain guarded. See web/tests/campaign.test.ts and docs/port-status.md.",
+      "campaignUpdate": "V32 connects repeated cycles, original strength scaling and eligible large variants, including rendered size/collision and saved state. Core encounters remain source-led; later-cycle balance and long-session performance are not established.",
       "sisterUpdate": "Sister upgrades distribute bombs across battle waves. Bombs fly/settle, can be shot, chain explosions, and apply Love compensation/medal damage. Their original sprite rotates with matching inverse-transform pixel hit testing."
     },
     {
@@ -455,10 +455,12 @@
         "MainTimeline:7435 generateMission(0)",
         "MainTimeline:12144 generateMission",
         "MainTimeline:5274 generateWave",
-        "MainTimeline:8323 wave progression"
+        "MainTimeline:8323 wave progression",
+        "MainTimeline:2753 spawnEnemy large variants",
+        "embedded enemy.as:init strength and speed formulas"
       ],
       "status": "partial",
-      "implemented": "Connected first 40-day encounter cycle: general wave counts, boss-day groups, AIR/BATCH/RANGED/MASS selection, repeated calendar loot, town/recruit generation and Rest/save flow. Verified with twelve seeded generation runs and one controlled forty-day progression run.",
+      "implemented": "Repeating normal encounter cycles use original fixed-level selection, calendar power/rewards/loot, boss groups and strengthened enemies. Ordinary combat/rewards/town/Rest/saves cross the first two cycle boundaries. Day1000 is a browser save safety boundary, not an original ending.",
       "evidence": [
         "web/tests/simulation.test.ts:first mission and completion",
         "docs/port-verification.json:browser_checks.victory_checkpoint",
@@ -486,14 +488,14 @@
         "web/docs/eighth-day-wave-source.md:10 accepted wave cases and10 actual timer-spawn observations",
         "web/tests/day-eight-save.test.ts:prepared mission history and bounded next-day transition",
         ".build/browser-qa/day-eight-scenario-audit.json:four fresh natural Day8 wins;93 full fixture states and72494 operation/event comparisons",
-        "web/docs/ninth-day-wave-source.md:12 wave and12 timer-spawn original observations"
+        "web/docs/ninth-day-wave-source.md:12 wave and12 timer-spawn original observations",
+        "web/tests/campaign.test.ts: fixed-level formulas, boss counts, cycle boundaries and Day1000 saves; cycle-transition-verification.json: actual Day40 Rest -> Day41"
       ],
       "unverified": [
-        "Day41+ strengthened cycles and large variants",
-        "Difficulty modifiers, mission hiring and Ragnarok",
-        "Full native Flash input/timing comparison and unassisted full-cycle balance"
+        "Alternative difficulty modifiers and Ragnarok",
+        "Full native Flash input/timing comparison, later-cycle balance and long-session performance"
       ],
-      "campaignUpdate": "v26 extends ordinary progression through Day40, full first-cycle enemy selection, nine later families/bird drops, source frame-command attacks and multi-boss days. New collision uses rendered alpha; later cycles remain guarded. See web/tests/campaign.test.ts and docs/port-status.md."
+      "campaignUpdate": "V32 connects repeated cycles, original strength scaling and eligible large variants, including rendered size/collision and saved state. Core encounters remain source-led; later-cycle balance and long-session performance are not established."
     },
     {
       "id": "original.town.entry",
@@ -814,7 +816,7 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot, Continue and JSON import/export retain campaign, equipment, party, town, search and hero class state. V31 adds a separate persistent medal collection included in exports. Current-format import restores the collection snapshot; legacy import merges earned medals; Continue preserves it. Invalid collection imports preserve the running game, while corrupted collection storage does not block a valid adventure. Earlier saves migrate without rerolling. Battles load paused.",
+      "implemented": "One browser slot, Continue and JSON import/export retain campaign, equipment, party, town, search and hero class state. V31 adds a separate persistent medal collection included in exports. Current-format import restores the collection snapshot; legacy import merges earned medals; Continue preserves it. Invalid collection imports preserve the running game, while corrupted collection storage does not block a valid adventure. Earlier saves migrate without rerolling. Battles load paused. V32 saves retain large-variant flags and validate cycle parameters through Day1000; older adventures migrate without state/RNG changes.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",
@@ -881,7 +883,8 @@
         "web/tests/day-eight-save.test.ts:v22 migration, Day8 party/upgrades/mission preservation, Lava lifecycle replay and malformed-save rejection",
         ".build/browser-qa/day-eight-ui-verification.json:five complete-envelope Rest/Continue/Lava/result-town/blocked-Day9 checks",
         "web/tests/day-nine-save.test.ts:legacy version23, prepared mission8, town9 boss-day validation and blockedDay10",
-        "web/tests/class-unlocks.test.ts: profile storage, validation and older-class save migration; class-unlocks-verification.json: rejected import preserves full envelope and original game/profile restoration"
+        "web/tests/class-unlocks.test.ts: profile storage, validation and older-class save migration; class-unlocks-verification.json: rejected import preserves full envelope and original game/profile restoration",
+        "web/tests/campaign.test.ts: later-cycle saves, malformed variants, Day1000 henchman; cycle-transition-verification.json: browser Rest/Continue and exact user restoration"
       ],
       "unverified": [
         "Original six save slots, slot deletion and global slot UI",

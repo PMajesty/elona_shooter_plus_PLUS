@@ -55,7 +55,7 @@ export function generateEarlyTownRecruit(random: () => number, day: number, opti
 
 /** generatePlayer: общий путь обычного кандидата и временного ополченца. */
 export function generateNpcRecruit(random: () => number, day: number, level: number, forcedClass?: RecruitClass, options: RecruitGenerationOptions = {}): FirstTownRecruit {
-  if (!validCampaignDay(day) || !Number.isInteger(level) || level < 1 || level > 999) throw new RangeError('Invalid NPC generation.');
+  if (!validCampaignDay(day) || !Number.isInteger(level) || level < 1 || level > 1000000) throw new RangeError('Invalid NPC generation.');
   const sex = Math.trunc(random() * 2);
   const name = RECRUIT_NAMES[Math.trunc(random() * RECRUIT_NAMES.length)];
   const devType = forcedClass ?? (Math.trunc(random() * 9) + 1) as RecruitClass;

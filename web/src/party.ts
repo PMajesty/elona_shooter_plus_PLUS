@@ -180,14 +180,14 @@ const finite = (value: unknown, low = -1e9, high = 1e9): value is number => type
 export function validPartyMember(value: unknown): value is PartyMember {
   if (!record(value) || !integer(value.devType, 1, 9) || !integer(value.sex, 0, 1)
     || !integer(value.appearance, 0, 59) || typeof value.name !== 'string' || value.name.length < 1 || value.name.length > 256) return false;
-  if (!integer(value.level, 1, 999) || !integer(value.exp, 0, 1000000000) || !integer(value.skillPoints, 0, 999)
+  if (!integer(value.level, 1, 1000000) || !integer(value.exp, 0, 1000000000) || !integer(value.skillPoints, 0, 1000000)
     || !integer(value.nextTrait, 0, 99) || !integer(value.trained, 0) || !integer(value.kills, 0)
     || !finite(value.earnedGold, 0) || !finite(value.money, 0) || !finite(value.cost, 0)
     || !finite(value.potentialAim, 0, 1) || !finite(value.potentialTeam, 0, 1) || !integer(value.ai, 0, 6)
     || typeof value.optBoss !== 'boolean' || typeof value.optWall !== 'boolean') return false;
-  if (!record(value.traits) || value.traits[value.devType] !== value.level || !integer(value.traits[900], 1, 999)
-    || !integer(value.traits[901], 1, 999) || Object.entries(value.traits).some(([key, level]) =>
-      !Object.hasOwn(ALL_TRAITS, key) || !integer(level, 0, ALL_TRAITS[Number(key)].maxLevel))) return false;
+  if (!record(value.traits) || value.traits[value.devType] !== value.level || !integer(value.traits[900], 1, 1000009)
+    || !integer(value.traits[901], 1, 1000009) || Object.entries(value.traits).some(([key, level]) =>
+      !Object.hasOwn(ALL_TRAITS, key) || !integer(level, 0, Number(key) === value.devType ? Number(value.level) : Number(key) >= 900 ? 9 + Number(value.level) : ALL_TRAITS[Number(key)].maxLevel))) return false;
   if (!integer(value.focus, -1, 899) || value.focus !== -1 && (!Object.hasOwn(ALL_TRAITS, value.focus)
     || value.focus < 100 || !value.traits[value.focus])) return false;
   if (!Array.isArray(value.weaponExp) || value.weaponExp.length !== 5 || value.weaponExp.some(x => !finite(x, 0))

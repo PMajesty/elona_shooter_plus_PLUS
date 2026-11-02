@@ -1,9 +1,9 @@
 # Elona Shooter Plus PLUS
 
 A TypeScript/Phaser browser remake of Elona Shooter Plus 1.3.0.4.
-The current local build supports **all eight original hero classes** through
-**Days 1–40**. This is an incomplete remake; later campaign cycles and remaining town systems
-are the next substantial work.
+The current local build supports **all eight original hero classes** and
+**repeating campaign cycles**. This is an incomplete remake; Ragnarok, event cards,
+alternative modes and remaining systems are still being ported.
 
 Open [the local game](http://127.0.0.1:5175/elona/).
 Original artwork, English text, audio and credits are retained. Sound starts muted
@@ -16,8 +16,10 @@ unless you previously enabled it; its button explicitly displays the current sta
   starting rifle, Simple Flame Thrower and Simple Chain Gun.
   Sniper, Ranger, Duelist and Noble unlock through the four starting-class medals.
   Their adrenaline effects and Noble's passive bonuses are connected to combat.
-- The first 40-day encounter cycle: Catapult, Spider, Ghost, Ogre, Knight, Bird,
+- Repeating 40-level encounter cycles: Catapult, Spider, Ghost, Ogre, Knight, Bird,
   Tank, Dino and Dragon, bird-dropped rats, multi-boss days and later boss attacks.
+  Later cycles increase enemy strength and can spawn the original larger variants.
+  The current browser save safety boundary is Day1000; this is not an endless-play claim.
 - Manual/automatic reload, owned firearms, bows, projectile weapons and consumables;
   enemies, bosses and health bars; ordinary/boss loot, skills and settlements.
 - Prepared towns, shop buy/sell, weapon upgrades and MOD mounting; permanent
@@ -34,7 +36,7 @@ unless you previously enabled it; its button explicitly displays the current sta
   saved counters and action medals with their next-town AP chances.
 - A persistent browser medal collection with class unlocks and original New Game
   starting bonuses. One browser save with Continue and JSON import/export.
-  Version31 accepts prior browser saves; original Flash saves require a future converter.
+  Version32 accepts prior browser saves; original Flash saves require a future converter.
 
 Remaining work and validation limits are in [port status](docs/port-status.md).
 The [process review](docs/development-process-review.md) records the correction
@@ -87,6 +89,9 @@ Museum checks cover payouts, medal thresholds, daily resets, action AP bonuses,
 correct hero-class awards and migration. Unlock checks cover the global collection,
 starting bonuses and actual class combat effects. Modes, some medal effects and
 the original six save slots remain incomplete.
+Additional controlled combat crosses Day40/80 through ordinary rewards, towns,
+Rest and JSON restores. Source-formula checks cover later cycles and Day1000 save
+boundaries; these do not prove balanced play or long-session performance there.
 Test counts do not establish whole-game completeness or full pixel parity.
 
 ## Original assets and recovery
