@@ -1,4 +1,5 @@
 import type { SimulationState } from './simulation.ts';
+import { lifetimeKills } from './kill-history.ts';
 
 export interface GameOptions {
   showDamage: boolean; showAllyDamage: boolean; lowQuality: boolean;
@@ -20,6 +21,7 @@ export function showDamageNumber(options: GameOptions, actorSlot: number, critic
   return criticalType !== 3 && (actorSlot === 0 ? options.showDamage : options.showAllyDamage);
 }
 export function pauseStatistics(state: SimulationState): string {
+  const kills = lifetimeKills(state);
   const lines = [`Elona Shooter Stactics  Day ${state.day}`];
   if (state.mode === 'casual') lines.push('You are playing Casual Mode.');
   if (state.mode === 'hardcore') lines.push('You are playing Hardcore Mode.');
@@ -30,6 +32,6 @@ export function pauseStatistics(state: SimulationState): string {
   if (state.carryOver) lines.push("You've used Carry Over Option.");
   lines.push(`${state.perfectDays} Perfect Games scored.`, `${state.economy.eggsCollected} eggs collected.`,
     `Exploded ${state.economy.sistersExploded} sisters.`, `Robbed ${state.economy.visitorsRobbed} children.`,
-    `Total of ${state.kills} enemies killed.`, `Total of ${state.totalMoney} GP earned.`, 'This game modded by Alfred.', '');
+    `Total of ${kills.complete ? '' : 'at least '}${kills.count} enemies killed.`, `Total of ${state.totalMoney} GP earned.`, 'This game modded by Alfred.', '');
   return lines.join('\n');
 }

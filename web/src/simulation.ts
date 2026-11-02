@@ -5,6 +5,7 @@ import { TITLES, isTitle, nextTitle, type Title } from './titles.ts';
 import { generateEarlyTownRecruit } from './recruits.ts';
 import { generateHenchman } from './party.ts';
 import { MEDALS } from './medals.ts';
+import { nextKillHistory, type KillHistory } from './kill-history.ts';
 import { fixedSearchRandom } from './town-search.ts';
 import { createTownEconomy, validTownEconomy, museumIncome, TOWN_ACTIVITIES, type TownEconomy, type TownActivity } from './town-economy.ts';
 import { ENEMY_TIMELINES, type EnemyTimeline } from './enemy-timelines.ts';
@@ -58,6 +59,7 @@ export interface SimulationState {
   castleSister?: CastleSister;
   heroAI?: { enabled: boolean; state: PartyAIState };
   recycleCount?: number;
+  killHistory?: KillHistory;
   carryOver?: true;
   mods?: GameMods;
   mode?: Exclude<GameMode, 'normal'>;
@@ -521,6 +523,7 @@ export class Simulation {
     const state = this.state;
     // Оригинал создаёт наёмника перед увеличением календарного дня.
     if (town.mission.hire) generateHenchman(state.party, state.day, () => this.random(), state.partySkills.effects[120]);
+    state.killHistory = nextKillHistory(state);
     state.day = state.day + 1;
     if (state.mode === 'hardcore') { if (state.day >= 20) this.awardMedal(95); if (state.day >= 80) this.awardMedal(97); }
     state.previousTown = town;
@@ -2003,6 +2006,10 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
+    if (record(value) && value.killHistory !== undefined && (!record(value.killHistory)
+      || !Number.isSafeInteger(value.killHistory.completed) || Number(value.killHistory.completed) < 0
+      || value.killHistory.incomplete !== undefined && value.killHistory.incomplete !== true
+      || !Number.isSafeInteger(Number(value.killHistory.completed) + Number(value.kills)))) throw new Error('Invalid lifetime kill history.');
     if (record(value) && value.heroSettings !== undefined && (!record(value.heroSettings)
       || !Number.isInteger(value.heroSettings.order) || Number(value.heroSettings.order) < -1 || Number(value.heroSettings.order) > 6
       || !Number.isInteger(value.heroSettings.focus) || value.heroSettings.focus !== -1 && (Number(value.heroSettings.focus) < 100 || Number(value.heroSettings.focus) >= 900)

@@ -81,6 +81,9 @@ unless you previously enabled it; the mute preference persists between visits.
   with the adventure; default options preserve existing save envelopes.
   Original crosshair variants, separate player/NPC damage numbers and victory
   fireworks are connected. Watching results long enough awards Ha-na-bi.
+  Lifetime kill totals persist through Rest, Continue and JSON backups; Carry Over
+  restores the earlier town's count. Older Day2+ browser saves show an explicit
+  lower bound because earlier kills were never recorded.
 
 Remaining work and validation limits are in [port status](docs/port-status.md).
 The [process review](docs/development-process-review.md) records the correction

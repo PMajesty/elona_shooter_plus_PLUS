@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v38, original medal award notifications**.
+Updated 2026-11-02. Current local build: **v38, persistent lifetime kill statistics**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -156,6 +156,12 @@ quit confirmation and all six English option controls are connected. Settings
 control player/NPC damage numbers, nearest-pixel rendering, fireworks, original
 color-blind crosshair and screen flashes. Non-default options are saved beside
 the simulation; old/default envelopes remain unchanged. Mute remains independent.
+Statistics now retain hero/companion enemy kills across days. Rest records the
+finished battle once; Carry Over restores the town's count and discards kills from
+the failed attempt. The optional history travels with saves without changing
+combat RNG. Old Day1 saves retain exact totals and unchanged envelopes; older
+Day2+ saves display a lower bound ("at least") because prior kills were not stored.
+Source: game.totalKill initialization9233, enemy.damage and pauseMenu8799.
 Original firework launch/particle clips run on results with a separate decorative
 random stream;651 unpaused presentation frames award Ha-na-bi. Source startFire
 uses48 bursts or60 with medal65; Ha-na-bi's advertised +25 has no check there.
@@ -173,8 +179,8 @@ Other encodings/types fail before storage changes. Source: saveIndex10961/loadIn
 
 ## Validation and limits
 
-- **547 tests passed**, with typechecking and production build passing. Latest
-  bundle: assets/index-p2d_cYXA.js. Slot checks cover unchanged legacy storage,
+- **551 tests passed**, with typechecking and production build passing. Latest
+  bundle: assets/index-D7lMl7Ks.js. Slot checks cover unchanged legacy storage,
   eight independent adventures, selection persistence, shared medals/mute,
   deletion/tombstones, Hardcore isolation, corrupt data and failed writes.
   Existing deterministic checks cover classes, campaign, equipment services,
@@ -212,6 +218,9 @@ Other encodings/types fail before storage changes. Source: saveIndex10961/loadIn
   The existing18 deterministic search cases also check source narrative prefixes.
   Four medal-notice checks cover original text/layout, idempotence, slot overflow,
   frame139/150 reuse/removal, shared/saved award suppression and unchanged JSON/RNG.
+  Four lifetime-kill checks cover real hero/NPC kills, corpse/bomb exclusions,
+  repeated Rest/Carry Over, JSON replay, legacy lower bounds, RNG independence and
+  malformed/unsafe history values.
 - The controlled full40-day campaign completed in96494 simulation frames, with
   all19 enemy kinds, rewards, towns and save boundaries. Its changed frame count
   follows the repeating MOD-sale correction and resulting generation RNG. Strong
@@ -337,6 +346,13 @@ Other encodings/types fail before storage changes. Source: saveIndex10961/loadIn
   and original-medal-award.png. Asset loading exceeded the browser tool's wait
   deadline on two reloads but completed without another reload or a game error.
 
+- The muted lifetime-kill check used a controlled seven-kill Day1 town in slot8.
+  Rest started Day2 with zero current kills; the original Statistics panel still
+  displayed seven total kills. Save/Return to Title/Continue preserved the full
+  envelope, reusing loaded assets. The test run was deleted and the user's whole
+  adventure/collection restored exactly. No console errors or fullscreen.
+  Evidence: .build/browser-qa/kill-history-verification.json and lifetime-kills.png.
+
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. Historical details are
 in Git and [historical verification](port-verification.json). The Codex app crash
@@ -358,7 +374,7 @@ that the app's crash cause was fixed.
    rage art, Chain Gun interruption timing and raster/filter/subpixel differences.
    Firework timing/tint/audio and screen flashes approximate the Flash presentation;
    medal notification glow/filter transitions are approximate.
-   low quality uses nearest filtering/pixel rounding rather than rerasterizing
+   Low quality uses nearest filtering/pixel rounding rather than rerasterizing
    original vectors. The right pause panel shifts50px left and statistics panel15px
    up to fit620×380. Statistics
    uses wheel scrolling instead of a native Flash TextArea scrollbar. Normal-mode
@@ -366,8 +382,8 @@ that the app's crash cause was fixed.
    button was town-only. The medal93 bonus text/source-count discrepancy is preserved.
    Help's dynamic TextArea uses canvas cropping/scrolling in place of Flash's native
    component; external credits retain their original URLs, whose availability is unverified.
-   The pause statistics' total-kill label still uses the current battle counter;
-   a lifetime counter is not yet recorded. External Museum link availability is unverified.
+   External Museum link availability is unverified. Older Day2+ browser saves lack
+   earlier kill totals, so their lifetime statistic remains a marked lower bound.
 5. Bird-rat falling motion is approximate; later enemy hit regions use rendered
    alpha. Searching preserves the source's ineffective Trouble HP expression;
    its restored original narrative still promises an HP increase.
