@@ -1,4 +1,5 @@
 import { GAME_MODS, validGameMods, type GameMods, type GameMod } from './game-mods.ts';
+import { townEvent, type TownActionResult, type CompletedTownAction } from './town-events.ts';
 import { STANDING_SISTER, advanceCastleSister, castleSisterHit, validCastleSister, type CastleSister } from './castle-sister.ts';
 import { TITLES, isTitle, nextTitle, type Title } from './titles.ts';
 import { generateEarlyTownRecruit } from './recruits.ts';
@@ -1733,7 +1734,7 @@ export class Simulation {
       || this.state.party.slots.slice(0, 3).some(slot => slot.exists && slot.member!.trained < e.specialTrainer));
   }
 
-  performTownActivity(action: TownActivity): { outcome: 'done' | 'not-enough-ap' | 'unavailable'; message: string } {
+  performTownActivity(action: TownActivity): TownActionResult {
     if (!Object.hasOwn(TOWN_ACTIVITIES, action) || !this.townActivityAvailable(action)) return { outcome: 'unavailable', message: 'This activity is unavailable.' };
     const state = this.state, town = state.town as ReadyTown, e = state.economy, info = TOWN_ACTIVITIES[action];
     if (town.ap < info.cost) return { outcome: 'not-enough-ap', message: "You don't have enough action points!" };
@@ -1741,7 +1742,7 @@ export class Simulation {
     if (action === 'search') {
       // AP списывается до события: случайная прибавка или потеря применяется к остатку.
       town.ap -= info.cost;
-      return { outcome: 'done', message: this.searchTown() };
+      return this.searchTown();
     } else if (action === 'train') {
       const actors = [{ slot: 0, actor: state.player, devType: HERO_CLASSES[state.player.classId].id },
         ...state.party.slots.slice(0, 3).filter(slot => slot.exists).map(slot => ({ slot: slot.slot, actor: slot.member!, devType: slot.member!.devType }))];
@@ -1758,35 +1759,41 @@ export class Simulation {
       selected.actor.traits[skill] = (selected.actor.traits[skill] ?? 0) + 1;
       if (selected.slot === 0) e.heroTraining++; else state.party.slots[selected.slot - 1].member!.trained++;
       this.refreshPartySkills();
-      message = `${selected.slot === 0 ? 'You gain' : state.party.slots[selected.slot - 1].member!.name + ' gains'} ${ALL_TRAITS[skill].name}!`;
+      const name = selected.slot === 0 ? 'You' : state.party.slots[selected.slot - 1].member!.name;
+      const gain = selected.slot === 0 ? 'you gain ' : `${name} gains `;
+      const remaining = e.specialTrainer - (selected.slot === 0 ? e.heroTraining : state.party.slots[selected.slot - 1].member!.trained);
+      message = `The special trainer picks ${name}. After hours of training, ${gain}${ALL_TRAITS[skill].name} ${selected.actor.traits[skill]}! ${name} ${remaining > 0 ? `can still take the training ${remaining} time(s).` : 'reached maximum training limit.'}`;
     } else if (action === 'pray') {
       town.baseAbsorbFix ??= town.mission.absorbFix;
       town.mission.absorbFix += int(this.random() * 15 + 5) / 100;
       town.flags.prayed = true; e.prayers++;
-      message = `A holy aura surrounds your castle. The wall will absorb ${int(town.mission.absorbFix * 100)}% damage during the next battle.`;
+      message = `A holy aura surrounds your castle as you say grace to your God. The castle wall will absorb ${int(town.mission.absorbFix * 100)}% damage during the next battle.`;
     } else if (action === 'dinner') {
       town.mission.expFix = 1.05 + this.random() / 4 + state.partySkills.effects[126] / 100;
-      message = `You and your troops will get ${int(town.mission.expFix * 100 - 100)}% more exp in the next battle.`;
+      message = `You and your troops enjoy a meal and some drinks with some of the soldiers. You are refreshed! You and your troops will get ${int(town.mission.expFix * 100 - 100)}% more exp in the next battle.`;
     } else if (action === 'party') {
       town.flags.partyHeld = true; e.parties++;
       town.mission.dmgFix += e.villa / 10;
-      message = `Everyone celebrates the victory! You and your troops deal ${e.villa * 10}% more damage tomorrow.`;
+      message = `You hold a party and celebrate the victory today. Everyone seems to be enjoying it! You and your troops deal ${e.villa * 10}% more damage tomorrow.`;
     } else if (action === 'eggs') {
       const eggs = 2 + int(e.chickens / 2 + int(this.random() * e.chickens / 2) * (100 + state.partySkills.effects[124]) / 100);
       const bonus = 1 + Number(state.earnedMedals.includes(50)) * 0.05 + Number(state.earnedMedals.includes(51)) * 0.15 + Number(state.earnedMedals.includes(52)) * 0.3;
       const gold = int(eggs * 12 * bonus);
       e.eggsCollected += eggs; town.flags.egg = true; state.gold += gold; state.totalMoney += gold;
-      message = `Your chickens produced ${eggs} eggs today! You sold them and received ${gold} gold pieces.`;
+      message = `Your lovely chickens produced ${eggs} eggs today! You sold them and received ${gold} gold pieces.`;
     } else {
       town.flags.taunted++; e.taunts++;
       const increase = 0.3 + this.random() / 4;
+      const before = town.mission.reward;
       town.mission.hpFix += increase;
       town.mission.reward = int(town.mission.reward * (100 + state.partySkills.effects[125] / town.flags.taunted) / 100);
-      message = `Enemies will have ${int(increase * 100)}% more HP tomorrow. Your mission reward is now ${town.mission.reward} gold pieces!`;
+      message = `You taunt the enemies outside the castle. They will have ${int(increase * 100)}% more HP tomorrow. Your King decided to increase your reward from ${before} to ${town.mission.reward} gold pieces!`;
     }
     town.ap -= info.cost;
     this.actionMedals();
-    return { outcome: 'done', message };
+    const presentation = { train: [16, 'Training', 'soundComplete'], pray: [5, 'Prayer', 'soundPray1'], dinner: [12, 'Dinner', 'soundEat1'], party: [15, 'Party', 'soundParty'], eggs: [1, 'Eggs', 'soundGold1'], taunt: [14, 'Taunt!', 'soundGold1'] } as const;
+    const [card, title, sound] = presentation[action];
+    return townEvent(card, title, message, sound);
   }
 
   private actionMedals(): void {
@@ -1797,7 +1804,7 @@ export class Simulation {
     if (e.robberies >= 20) this.awardMedal(84);
   }
 
-  robMuseumVisitors(): { outcome: 'done' | 'not-enough-ap' | 'unavailable'; message: string } {
+  robMuseumVisitors(): TownActionResult {
     if (!this.partyMutationAvailable()) return { outcome: 'unavailable', message: 'Museum visitors are only available in town.' };
     const state = this.state, town = state.town as ReadyTown, e = state.economy;
     if (town.ap < 2) return { outcome: 'not-enough-ap', message: "You don't have enough action points!" };
@@ -1809,7 +1816,9 @@ export class Simulation {
     const gold = int(amount);
     e.visitorsRobbed += int(amount / 10) + 1;
     state.gold += gold; state.totalMoney += gold; this.actionMedals();
-    return { outcome: 'done', message: `Slaughter! ${town.flags.robbed > 1 ? "There're only few people left in the museum, but you manage to collect" : 'You collect'} ${gold} gold pieces.` };
+    return townEvent(6, 'Slaughter!', town.flags.robbed > 1
+      ? `You start firing a gun at women and children AGAIN! There're only few people left in the museum but you manage to collect ${gold} gold pieces.`
+      : `You start firing a gun at women and children. After you have slaughtered them all, you search the ground for money and collect ${gold} gold pieces!`, 'soundGun2');
   }
 
   visitMuseum(bestHardcoreDay = 0): boolean {
@@ -1826,72 +1835,73 @@ export class Simulation {
     this.awardMedal(91); return this.state.earnedMedals.length !== count;
   }
 
-  private searchTown(): string {
+  private searchTown(): CompletedTownAction {
+    const result = (title: string, text: string, sound = 'soundSearch') => townEvent(13, title, text, sound);
     const state = this.state, town = state.town as ReadyTown, e = state.economy;
     const random = () => fixedSearchRandom(town.searched++);
     if (random() * (100 + state.partySkills.effects[137]) < 35) {
       if (random() < 0.15) {
         const increase = 0.1 + random() / 5;
         // В исходном search стоит hpFix + value без присваивания; не исправляем баланс молча.
-        return `Trouble: A fool taunted the enemies. They boast ${int(increase * 100)}% more HP tomorrow.`;
+        return result('Trouble', `A fool taunted the enemies and rose their morale. The enemies will have ${int(increase * 100)}% more HP tomorrow.`);
       }
-      if (random() < 0.2) { town.ap = Math.max(0, town.ap - 2); return 'Chatterbox: An old lady delays you with endless chatter. You lose 2 action points.'; }
+      if (random() < 0.2) { town.ap = Math.max(0, town.ap - 2); return result('Chatterbox', 'An old lady stops you and delays you with deadly endless chatter. You lose 2 action point.'); }
       if (random() < 0.05 && e.chickens > 2) {
         const lost = Math.min(int(random() * 4 + 2), e.chickens - 1); e.chickens -= lost;
-        return `Chickens gone: Crazy chickens broke out of the cage. You lost ${lost} chickens!`;
+        return result('Chickens gone', `Some crazy chickens broke out of the cage. You lost ${lost} chickens!`);
       }
       if (random() < 0.3 && state.castleHp > 1) {
         const lost = Math.min(int(random() * state.castleMaxHp / 4 + 1), state.castleHp - 1); state.castleHp -= lost;
-        return 'Disaster: A mob destroyed the walls. You need to repair them at once.';
+        return result('Disaster', 'A cloud of pessimistic mobs gone nuts and destroyed the walls. You need to repair them at once.');
       }
       if (random() < 0.3 && state.gold > 0) {
         const lost = Math.min(int(random() * 30 * state.day + 40) + 2, state.gold); state.gold -= lost;
-        return `Thief!: You were pickpocketed while shopping. You lost ${lost} gold pieces!`;
+        return result('Thief!', `You were pickpocketed while you were shopping. You lost ${lost} gold pieces!`, 'soundGold1');
       }
-      if (random() < 0.4) { town.ap = Math.max(0, town.ap - 1); return 'Ouch...: You trip over a stone and lose 1 action point.'; }
-      return 'Fruitless: You were unable to find anything useful in the town.';
+      if (random() < 0.4) { town.ap = Math.max(0, town.ap - 1); return result('Ouch...', 'You trip over a stone and lose 1 action point.'); }
+      return result('Fruitless', 'You were unable to find anything useful in the town.');
     }
     if (random() < 0.15) {
-      if (++e.searchTraining < 3) return `Talent: You start to develop one of your skills. [Progress: ${e.searchTraining}/3]`;
+      if (++e.searchTraining < 3) return result('Talent', `While taking a walk, you suddenly realize your hidden potential. You start to develop one of your skills. [Progress:${e.searchTraining}/3]`);
       e.searchTraining = 0;
       const pool = availableHeroTraits(state.player.classId, state.player.level, state.player.traits);
       const skill = pool[int(random() * pool.length)];
       if (skill !== undefined) { state.player.traits[skill] = (state.player.traits[skill] ?? 0) + 1; this.refreshPartySkills(); }
-      return skill === undefined ? 'Talent: All available skills are already mastered.' : `Talent Flowered!: You gained ${ALL_TRAITS[skill].name}!`;
+      return skill === undefined ? result('Talent', 'All available skills are already mastered.') : result('Talent Flowered!', `It seems you've finally unfolded the potential for one of your skills. You've gained ${ALL_TRAITS[skill].name} ${state.player.traits[skill]}!`);
     }
-    if (random() < 0.15) { e.fame++; return 'Popularity: Your fame has increased by 1.'; }
-    if (random() < 0.22) { state.castleMaxHp++; return 'Good news: An engineer fortified the castle walls. The walls now have +1 max HP.'; }
+    if (random() < 0.15) { e.fame++; return result('Popularity', 'It seems you are edging up in popularity. Your fame has been increased by 1.'); }
+    if (random() < 0.22) { state.castleMaxHp++; return result('Good news', 'One of the engineers succeeded to fortify the caste walls. The walls now have +1 max HP.'); }
     if (random() < 0.12) {
       const count = int(random() * 4) + 2; e.chickens += count;
       [30, 60, 120].forEach((threshold, i) => { if (e.chickens >= threshold) this.awardMedal(50 + i); });
-      return `Free Chicken: You find stray chickens and steal ${count} chickens.`;
+      return result('Free Chicken', `You find stray chickens. You carefully look around and steal ${count} chickens.`);
     }
     if (random() < 0.2) {
       random(); this.regenerateShop();
-      return "Sales Time: The shops are thronged with customers. The shop's inventory has been restocked.";
+      return result('Sales Time', "You hear bells. Looking around, you notice that the shops in the plaza are all thronged with customers. It's sale time! The shop's inventory has been restocked.");
     }
     if (random() < 0.15) {
       random();
       const slot = state.inventory.findIndex(item => !isOccupiedItem(item));
-      if (slot < 0) return 'Gift?: You pick up something valuable. But your inventory is full...';
+      if (slot < 0) return result('Gift?', 'You pick up something valuable on the ground. But your inventory is full...');
       const item = this.equipmentFactory().randomItem(state.day * 100 + 1000, 3, state.inventory[slot] ?? undefined);
       state.inventory[slot] = item;
-      return `Gift?: ${item.name} added to your inventory!`;
+      return result('Gift?', `You pick up something valuable on the ground. ${item.name} added to your inventory!`);
     }
     if (random() < 0.25) {
       const amount = int(random() * 10) + 5;
       // Исходный текст показывает amount, но player.exp хранит десятые доли опыта.
       state.player.exp += amount * 10;
       for (const slot of state.party.slots.slice(0, 4)) if (slot.member) slot.member.exp += amount * 10;
-      return `Training: You join a militia drill. Your party gains ${amount} exp.`;
+      return result('Training', `You come upon a bounch of militias jogging for a training drill. You decided to join up with them. Your party gains ${amount} exp.`);
     }
-    if (random() < 0.3) { town.ap += 2; return 'Rejoice!: Soldiers buy you a drink at the bar. You gain 2 action points.'; }
-    if (random() < 0.15) { town.ap += 3; return 'Hero: The townspeople applaud your efforts. You gain 3 action points.'; }
+    if (random() < 0.3) { town.ap += 2; return result('Rejoice!', 'A group of soldiers celebrate you and buy you a drink at the bar. It made you even more determined to win the battle tomorrow. You gain 2 action points.'); }
+    if (random() < 0.15) { town.ap += 3; return result('Hero', 'As you walk up to the plaza, children and women gather around you to applaud your effort. You gain 3 action points.'); }
     if (random() < 0.65) {
       const gold = int(random() * 10 * Math.min(state.day, 40) + 100) + 2; state.gold += gold; state.totalMoney += gold;
-      return `Look!: You found a wallet at the side of the road. You get ${gold} gold pieces!`;
+      return result('Look!', `You found a wallet at the side of the road. You look cautiously round and open the wallet. You get ${gold} gold pieces!`, 'soundGold1');
     }
-    return 'Nothing Found: You wander around the town looking for something but in vain.';
+    return result('Nothing Found', 'You wander around the town looking for something but in vain.');
   }
 
   freeRepair(): RepairOutcome {

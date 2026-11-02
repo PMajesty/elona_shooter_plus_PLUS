@@ -170,27 +170,6 @@
       "originX": 0,
       "originY": 0
     },
-    "eventRepair": {
-      "file": "screens/eventRepair.png",
-      "width": 620,
-      "height": 380,
-      "originX": 0,
-      "originY": 0
-    },
-    "eventRest": {
-      "file": "screens/eventRest.png",
-      "width": 620,
-      "height": 380,
-      "originX": 0,
-      "originY": 0
-    },
-    "eventNewTitle": {
-      "file": "screens/eventNewTitle.png",
-      "width": 620,
-      "height": 380,
-      "originX": 0,
-      "originY": 0
-    },
     "shopSaleDialog": {
       "file": "screens/shopSaleDialog.png",
       "width": 620,
@@ -1189,6 +1168,13 @@
     },
     "medalHint": {
       "file": "screens/medalHint.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "eventWindow": {
+      "file": "screens/eventWindow.png",
       "width": 620,
       "height": 380,
       "originX": 0,
@@ -2305,6 +2291,18 @@
       "count": 127,
       "uniqueFrames": 34,
       "characterId": 2622
+    },
+    "townEventCards": {
+      "image": "sprites/townEventCards.png",
+      "json": "sprites/townEventCards.json",
+      "originX": 29.95,
+      "originY": 40.0,
+      "frameWidth": 61,
+      "frameHeight": 80,
+      "labels": {},
+      "count": 16,
+      "uniqueFrames": 16,
+      "characterId": 2336
     }
   },
   "sounds": {

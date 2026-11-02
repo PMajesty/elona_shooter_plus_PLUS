@@ -62,6 +62,7 @@ CLIPS.update({"sisterFireAtWill": 2593, "fireAtWillRage": 2386})
 CLIPS.update({"gameVolume": 2671, "originalCrosshair": 2689, "fireworkLaunch": 96,
               "fireworkBit1": 101, "fireworkBit2": 91})
 CLIPS["museumKongregate"] = 1835
+CLIPS["townEventCards"] = 2336
 BUTTONS.update({"button_pauseTitle": 1487, "button_pauseSave": 1490, "button_gameMenu": 2703})
 FORCE = False
 
@@ -669,13 +670,13 @@ def town_layout(xml, sprites):
             "saleDialog": {"characterId": 2131, "frame": 1, "image": "shopSaleDialog",
                            "children": placements(sprites[2131].find("subTags"), 1)},
             "itemPopup": {"characterId": 1791, "clip": "itemPopup", "children": placements(sprites[1791].find("subTags"), 1)},
-            "repairDialog": {"characterId": 2437, "frame": 1, "image": "eventRepair",
+            "repairDialog": {"characterId": 2437, "frame": 1, "image": "eventWindow",
                              "cardFrame": 2, "children": placements(sprites[2437].find("subTags"), 1)},
             "claimTitleAction": {"characterId": 2431, "sourceIndex": 9, "x": 465, "y": 255,
                                  "cardClip": "townActionCard", "cardFrame": 3, "cardRotation": -9,
                                  "hoverScale": 1.04, "pinClip": "townActionPin", "text": "4 AP\nClaim title",
                                  "children": placements(sprites[2431].find("subTags"), 1)},
-            "newTitleDialog": {"characterId": 2437, "frame": 1, "image": "eventNewTitle",
+            "newTitleDialog": {"characterId": 2437, "frame": 1, "image": "eventWindow",
                                "cardFrame": 3, "children": placements(sprites[2437].find("subTags"), 1)}}
 
 
@@ -801,12 +802,8 @@ def main():
                     if tag.get("name") in labels]
         manifest["images"][name] = static_screen(xml, name, selected, offset=(0, -22))
     (DEST / "screens/townShopLabels.png").unlink(missing_ok=True)
-    manifest["images"]["eventRepair"] = static_screen(xml, "eventRepair",
-        placed_frame(sprites[2437].find("subTags"), 1), {"title", "text", "okButton"}, sprite_frames={2336: 2})
-    manifest["images"]["eventRest"] = static_screen(xml, "eventRest",
-        placed_frame(sprites[2437].find("subTags"), 1), {"title", "text", "okButton"}, sprite_frames={2336: 11})
-    manifest["images"]["eventNewTitle"] = static_screen(xml, "eventNewTitle",
-        placed_frame(sprites[2437].find("subTags"), 1), {"title", "text", "okButton"}, sprite_frames={2336: 3})
+    manifest["images"]["eventWindow"] = static_screen(xml, "eventWindow",
+        placed_frame(sprites[2437].find("subTags"), 1), {"title", "text", "okButton", "card"})
     manifest["images"]["shopSaleDialog"] = static_screen(xml, "shopSaleDialog",
         placed_frame(sprites[2131].find("subTags"), 1), {"question", "yes", "no", "pop1", "pop2", "poparrow"})
     for name, image_id in {"background": 2491, "clouds": 2494, "town": 2743, "parchment": 1477}.items():
@@ -879,7 +876,7 @@ def main():
             "partyPortraitBackground bakes ally3 bg placement, alpha41/256 and blur11 in parent portrait coordinates; selection opacity applies to the whole portrait",
             "Shop Upgrade and Refresh labels are separate so each retains its own enabled state",
             "Item comparison popup retains original static labels and renders saved before/after values separately",
-            "Town scene and panels omit runtime HUD fields; Free Repair/Rest use original event card frames 2/11",
+            "Town events use original eventWindow2437 and separate card2336 frames with runtime text",
             "gene and result retain offset (0,-26); application applies menu slide X offset",
             "Item quantities and radio labels are rendered by the application",
             "allyBack and allyFront retain source depths around separately selected charaPic poses",

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { Simulation, type ReadyTown } from '../src/simulation.ts';
 import { fixedSearchRandom } from '../src/town-search.ts';
 import { isOccupiedItem, ITEM_TYPE } from '../src/items.ts';
@@ -24,6 +24,9 @@ const search = (sim: Simulation) => {
 };
 
 test('search reaches every original event family with a persistent deterministic cursor', () => {
+  const original = readFileSync(new URL('../../src/original/MainTimeline.as', import.meta.url), 'utf8');
+  const prefixes = new Map([...original.matchAll(/searchProc\(param1,"([^"]+)","((?:\\.|[^"\\])*)"/g)]
+    .map(match => [match[1], JSON.parse(`"${match[2].replace(/\\'/g, "'")}"`) as string]));
   const cases: [number, string, number][] = [
     [0, 'Trouble', 3], [2, 'Fruitless', 9], [4, 'Look!', 16], [6, 'Rejoice!', 15],
     [7, 'Training', 16], [9, 'Gift?', 17], [10, 'Sales Time', 17], [11, 'Free Chicken', 17],
@@ -33,7 +36,11 @@ test('search reaches every original event family with a persistent deterministic
   ];
   for (const [counter, event, next] of cases) {
     const sim = town(counter), copy = restore(sim);
-    assert.ok(search(sim).startsWith(`${event}:`), `counter ${counter}`);
+    const result = sim.performTownActivity('search'); assert.equal(result.outcome, 'done');
+    if (result.outcome !== 'done') throw new Error('Search failed.');
+    assert.ok(result.message.startsWith(`${event}:`), `counter ${counter}`);
+    assert.equal(result.notice.cardFrame, 13); assert.equal(result.notice.title, event);
+    assert.ok(result.notice.text.startsWith(prefixes.get(event) ?? 'You pick up something valuable on the ground. '), `Original English: ${event}`);
     assert.equal((sim.state.town as ReadyTown).searched, next);
     search(copy); assert.deepEqual(copy.toSave(), sim.toSave());
     assert.deepEqual(restore(sim).toSave(), sim.toSave());

@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v38, hero skill focus and persistent AI orders**.
+Updated 2026-11-02. Current local build: **v38, original town event cards and narratives**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -87,6 +87,13 @@ with equipment/orders/AI/growth/wages, temporary Mission Hire, both Castle pages
 repair, Smith stock, Museum income, chickens/eggs, Sister bombs, Villa/Party and
 Sp.Trainer training. Prayer, Dinner, Taunt, searches and paid shop/recruit refreshes
 apply their source effects. Searches retain their own saved random sequence.
+Town activities now show the original event window, card artwork and complete
+English narratives: all six activities, all18 search families and their talent/gift
+variants, first/repeated robbery, shop/recruit refreshes and Mission Hire. Rest,
+Free Repair and title events share the same source renderer. Outcomes are saved
+when applied; dismissing the notice spends nothing and consumes no RNG. Escape,
+Space or Enter can dismiss a notice without pausing the town underneath it.
+Source: showEventDialog, search/searchProc and procEventDialog; window2437/card2336.
 Both original Museum medal pages show all38 English descriptions and earned states;
 visitor robbery, action-medal AP bonuses and class/day/perfect-day medals work.
 Survival medals now cover all six source boundaries: days10/20/35/50/80/150.
@@ -161,8 +168,8 @@ Other encodings/types fail before storage changes. Source: saveIndex10961/loadIn
 
 ## Validation and limits
 
-- **540 tests passed**, with typechecking and production build passing. Latest
-  bundle: assets/index-DwePjkFe.js. Slot checks cover unchanged legacy storage,
+- **543 tests passed**, with typechecking and production build passing. Latest
+  bundle: assets/index-C-ZJCORr.js. Slot checks cover unchanged legacy storage,
   eight independent adventures, selection persistence, shared medals/mute,
   deletion/tombstones, Hardcore isolation, corrupt data and failed writes.
   Existing deterministic checks cover classes, campaign, equipment services,
@@ -195,6 +202,9 @@ Other encodings/types fail before storage changes. Source: saveIndex10961/loadIn
   and original accuracy penalties, Sniper/Militia JSON replay, manual-mode reset,
   preserved defaults and corrupt/missing state. Existing party AI tests cover the
   shared targeting routines; unchanged full campaigns were not replayed.
+  Three town-event content checks compare fixed English text, activity cards/titles
+  and robbery amounts with the preserved ActionScript, including JSON round trips.
+  The existing18 deterministic search cases also check source narrative prefixes.
 - The controlled full40-day campaign completed in96494 simulation frames, with
   all19 enemy kinds, rewards, towns and save boundaries. Its changed frame count
   follows the repeating MOD-sale correction and resulting generation RNG. Strong
@@ -302,6 +312,15 @@ Other encodings/types fail before storage changes. Source: saveIndex10961/loadIn
   errors/fullscreen. Evidence: .build/browser-qa/hero-town-controls-verification.json
   and hero-town-controls.png.
 
+- The muted town-event check used slot8: Prayer, Search, New Goods, visitor robbery
+  and Rest displayed original cards/text. Prayer and stock-refresh dismissal left
+  the entire exported envelopes unchanged; Continue retained the complete town
+  after robbery. Rest started Day2 combat, then Escape paused it. The disposable
+  run was deleted and the user's whole adventure/collection restored exactly.
+  No console errors or fullscreen activation. Evidence:
+  .build/browser-qa/town-events-verification.json, original-town-prayer.png and
+  original-town-new-goods.png. Unchanged campaigns were not replayed.
+
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. Historical details are
 in Git and [historical verification](port-verification.json). The Codex app crash
@@ -332,9 +351,9 @@ that the app's crash cause was fixed.
    component; external credits retain their original URLs, whose availability is unverified.
    The pause statistics' total-kill label still uses the current battle counter;
    a lifetime counter is not yet recorded. External Museum link availability is unverified.
-5. Bird-rat falling motion is approximate; later enemy hit regions use rendered alpha. Town/search/
-   robbery outcomes use concise English messages rather than all original modals.
-   Searching preserves the source's ineffective Trouble HP expression.
+5. Bird-rat falling motion is approximate; later enemy hit regions use rendered
+   alpha. Searching preserves the source's ineffective Trouble HP expression;
+   its restored original narrative still promises an HP increase.
 6. The veteran late-game hitbox complaint remains unreproduced and **deferred
    until core coverage is complete**. Prior contour/projectile corrections are
    not its diagnosis.

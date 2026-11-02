@@ -4174,7 +4174,7 @@
   "repairDialog": {
     "characterId": 2437,
     "frame": 1,
-    "image": "eventRepair",
+    "image": "eventWindow",
     "cardFrame": 2,
     "children": {
       "okButton": {
@@ -4347,7 +4347,7 @@
   "newTitleDialog": {
     "characterId": 2437,
     "frame": 1,
-    "image": "eventNewTitle",
+    "image": "eventWindow",
     "cardFrame": 3,
     "children": {
       "okButton": {

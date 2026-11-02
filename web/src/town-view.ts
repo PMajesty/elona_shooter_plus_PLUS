@@ -1,14 +1,15 @@
 import { TOWN_ACTIVITIES, museumIncome, type TownActivity, type TownEconomy } from './town-economy.ts';
 import { MEDALS } from './medals.ts';
 import { MAX_CAMPAIGN_DAY } from './missions.ts';
-import { TITLES, nextTitle, type Title } from './titles.ts';
+import { nextTitle, type Title } from './titles.ts';
+import type { TownNotice } from './town-events.ts';
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
 import { CASTLE_UPGRADES, castleDamageMultiplier, castleLootMultiplier, castleRepairAmount, castleStorageLevel, castleTrainerMultiplier, castleUpgradeCost, castleUpkeep, type CastleUpgradeKind } from './castle-upgrades.ts';
 
 export type TownTab = 'mission' | 'castle' | 'shop' | 'characters' | 'equipment' | 'medals' | null;
-export type TownDialog = 'repair' | 'rest' | 'title' | null;
+export type TownDialog = 'repair' | 'rest' | 'title' | TownNotice | null;
 interface Placement {
   x: number; y: number; scaleX: number; scaleY: number; rotationDegrees: number;
   text?: { fontId: number; fontSize: number; bounds: number[]; align: number; color: string; indent?: number };
@@ -34,10 +35,10 @@ interface TownViewState {
   town: { ap: number; preparation: string; mission?: { hire: boolean } } | null; inventory: (Item | null)[];
   pendingPartyAction: { kind: string } | null;
 }
-interface Callbacks { robVisitors(): void; medalPage(page: 0 | 1): void; visitKongregate(): void; medalHint(hint: { id: number; name: string; description: string; bonus: string } | null): void; hire(): void; confirmHire(answer: boolean): void; castlePage(page: 0 | 1): void; activity(action: TownActivity): void; activityAvailable(action: TownActivity): boolean; select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; dismiss(): void; message(value: string): void }
+interface Callbacks { robVisitors(): void; medalPage(page: 0 | 1): void; visitKongregate(): void; medalHint(hint: { id: number; name: string; description: string; bonus: string } | null): void; hire(): void; confirmHire(answer: boolean): void; castlePage(page: 0 | 1): void; activity(action: TownActivity): void; activityAvailable(action: TownActivity): boolean; select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; message(value: string): void }
 
 /** Городские координаты и повороты берутся из исходного кадра 71 и его окон. */
-export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, dialog: TownDialog, castlePage: 0 | 1 = 0, medalPage: 0 | 1 = 0): Phaser.GameObjects.Container {
+export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, castlePage: 0 | 1 = 0, medalPage: 0 | 1 = 0): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName('town-view');
   const image = (key: string, x = 0, y = 0, placement?: Placement) => {
     const asset = manifest.images[key];
@@ -244,19 +245,6 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     for (const [name, answer] of [['yes', true], ['no', false]] as const) {
       button(name === 'yes' ? 'button_dialogYes' : 'button_dialogNo', modal.children[name], () => callbacks.confirmHire(answer));
     }
-  } else if (dialog) {
-    const placement = layout.repairDialog;
-    image(dialog === 'rest' ? 'eventRest' : dialog === 'title' ? 'eventNewTitle' : placement.image);
-    text(placement.children.title, dialog === 'rest' ? 'Resting' : dialog === 'title' ? 'New Title!' : 'Free Repair!');
-    text(placement.children.text, dialog === 'rest'
-      ? 'The day is finally over! You relax for the first time today and settle down to enjoy the warm, cozy bed.'
-      : dialog === 'title' ? `Your remarkable achievements have been acknowledged and you are granted a new title, ${TITLES[state.title].name}! You will receive ${TITLES[state.title].salary} gold pieces every day as a salary.`
-      : 'Citizens acknowledge your hard work and decided to rebuild the castle walls for free!');
-    image('button_eventOk', placement.children.okButton.x, placement.children.okButton.y, placement.children.okButton);
-    // Исходный procEventDialog принимает любое нажатие; отдых начинается только после него.
-    const dismiss = scene.add.zone(0, 0, 620, 380).setOrigin(0).setInteractive({ useHandCursor: true });
-    dismiss.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); callbacks.dismiss(); });
-    root.add(dismiss);
   }
   return root;
 }

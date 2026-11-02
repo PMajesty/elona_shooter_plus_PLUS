@@ -49,6 +49,10 @@ unless you previously enabled it; the mute preference persists between visits.
   Free Repair, all eight honorary promotions/salaries and Rest. Mission Hire contracts a temporary
   Militia henchman with a Rapid Bowgun for half the next mission reward; he joins
   through Rest and leaves at settlement. Sister bombs can be shot to explode.
+- Original event cards and full English outcomes for town activities, all18 search
+  families, visitor robbery, shop/recruit refreshes and Mission Hire. Rest, Free
+  Repair and promotions use the same original window. Dismissing a card does not
+  repeat its effects; Escape, Space and Enter also close these notices.
 - Museum/Medals navigation, both original medal pages and English descriptions;
   robbery for 2 AP with daily diminishing payouts, Robber skill/medal bonuses,
   saved counters and action medals with their next-town AP chances.

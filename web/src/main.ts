@@ -5,6 +5,8 @@ import Phaser from 'phaser';
 import { HERO_CLASSES, heroClassUnlocked, type HeroClass } from './hero-classes.ts';
 import { createProfile, mergeProfile, mergeProfiles, validProfile, type GlobalProfile } from './profile.ts';
 import { MEDALS } from './medals.ts';
+import { createTownEventView } from './town-event-view.ts';
+import { TOWN_NOTICES, townEvent, type TownNotice } from './town-events.ts';
 import { readFlashCollection } from './flash-profile.ts';
 import { TITLES, nextTitle } from './titles.ts';
 import { Simulation, type SimulationState, type EnemyState, type SimulationEvent } from './simulation.ts';
@@ -55,8 +57,9 @@ const status = {
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}assets/${path}`;
 const MENU_X = -15.587619764971691;
 const bootStarted = performance.now();
-const USED_SOUNDS = new Set(['soundClick1', 'soundGun3', 'soundReloading2', 'soundReloaded2', 'soundThrow1', 'soundExp1', 'soundDead3', 'soundDead5', 'soundDead7', 'soundDeadChicken', 'soundDeadBoss1', 'soundDamage1', 'soundPop1', 'soundBattleBegin', 'soundBattleEnd', 'soundKilled', 'soundRampage', 'soundComplete', 'soundGold1', 'soundBgForest']);
+const USED_SOUNDS = new Set(['soundSearch', 'soundEat1', 'soundParty', 'soundClick1', 'soundGun3', 'soundReloading2', 'soundReloaded2', 'soundThrow1', 'soundExp1', 'soundDead3', 'soundDead5', 'soundDead7', 'soundDeadChicken', 'soundDeadBoss1', 'soundDamage1', 'soundPop1', 'soundBattleBegin', 'soundBattleEnd', 'soundKilled', 'soundRampage', 'soundComplete', 'soundGold1', 'soundBgForest']);
 for (let index = 0; index < 5; index++) USED_SOUNDS.add(`soundGoodshot${index}`);
+USED_SOUNDS.add('soundGood');
 USED_SOUNDS.add('soundReloaded1');
 for (const key of ['soundBgTown', 'soundRepair1', 'soundBeep', 'soundScroll1', 'soundPay1', 'soundMod']) USED_SOUNDS.add(key);
 for (let index = 1; index <= 15; index++) USED_SOUNDS.add(`soundGun${index}`);
@@ -108,6 +111,7 @@ class ElonaScene extends Phaser.Scene {
   private volumeIcon?: Phaser.GameObjects.Image;
   private pauseDialog?: Phaser.GameObjects.Container;
   private collectionDialog?: Phaser.GameObjects.Container;
+  private closeTownEvent?: () => void;
   private celebration?: ReturnType<typeof createFireworks>;
   private fireworkMedalChecked = false;
   private flash?: Phaser.GameObjects.Rectangle;
@@ -179,6 +183,10 @@ class ElonaScene extends Phaser.Scene {
         if (event.code === 'Space') event.preventDefault();
         return;
       }
+      if (this.closeTownEvent) {
+        if (['Escape', 'Space', 'Enter'].includes(event.code)) { event.preventDefault(); this.closeTownEvent(); }
+        return;
+      }
       if (event.code === 'Escape') {
         if (this.pauseDialog) { this.pauseDialog.destroy(true); this.pauseDialog = undefined; }
         else if (this.helpLayer) this.closeHelp();
@@ -211,7 +219,7 @@ class ElonaScene extends Phaser.Scene {
     this.root.removeAll(true);
     if (!['loot', 'boss-loot', 'skill', 'result'].includes(screen)) { this.celebration?.destroy(); this.celebration = undefined; this.fireworkMedalChecked = false; }
     this.volumeIcon = undefined; this.pauseDialog = undefined; this.flash = undefined; this.flashFrames = 0; this.flashClock = 0;
-    this.collectionDialog = undefined; delete container.dataset.flashCollection;
+    this.collectionDialog = undefined; this.closeTownEvent = undefined; delete container.dataset.townNotice; delete container.dataset.flashCollection;
     if (!this.celebration) delete container.dataset.fireworkFrames;
     this.helpLayer = undefined; delete container.dataset.helpPage; delete container.dataset.helpScroll;
     this.fireAtWillSprites = undefined; this.castleSisterSprite = undefined; delete container.dataset.fireAtWill; delete container.dataset.castleSister;
@@ -1217,7 +1225,7 @@ class ElonaScene extends Phaser.Scene {
       },
       robVisitors: () => {
         const result = this.sim!.robMuseumVisitors();
-        if (result.outcome === 'done') { this.playSound('soundGun2'); this.saveGame(false); this.showTown('medals'); }
+        if (result.outcome === 'done') { this.playSound(result.notice.sound!); this.saveGame(false); this.showTown('medals', result.notice); }
         else this.playSound('soundBeep');
         status.textContent = result.message;
       },
@@ -1227,7 +1235,7 @@ class ElonaScene extends Phaser.Scene {
       },
       confirmHire: answer => {
         const outcome = this.sim!.resolvePartyAction(answer);
-        this.playSound(outcome === 'contracted' ? 'soundComplete' : 'soundClick1'); this.saveGame(false); this.showTown('mission');
+        this.playSound(outcome === 'contracted' ? 'soundGood' : 'soundClick1'); this.saveGame(false); this.showTown('mission', outcome === 'contracted' ? TOWN_NOTICES.hiredGun : null);
         status.textContent = outcome === 'contracted' ? "Hired Gun: You've hired a henchman for this mission. He will join when you rest." : 'Henchman contract cancelled.';
       },
       select: next => { if (next === 'medals' && this.sim!.visitMuseum(this.profile.bestHardcoreDay ?? 0)) this.saveGame(false); this.playSound('soundScroll1'); this.showTown(next); },
@@ -1237,7 +1245,7 @@ class ElonaScene extends Phaser.Scene {
       activityAvailable: action => this.sim!.townActivityAvailable(action),
       activity: action => {
         const result = this.sim!.performTownActivity(action);
-        if (result.outcome === 'done') { this.playSound('soundComplete'); this.saveGame(false); this.showTown('mission'); }
+        if (result.outcome === 'done') { this.playSound(result.notice.sound!); this.saveGame(false); this.showTown('mission', result.notice); }
         else this.playSound('soundBeep');
         status.textContent = result.message;
       },
@@ -1275,19 +1283,7 @@ class ElonaScene extends Phaser.Scene {
         }
       },
       rest: () => { this.playSound('soundNight'); this.showTown('mission', 'rest'); },
-      dismiss: () => {
-        this.playSound('soundClick1');
-        if (dialog === 'rest') {
-          const checkpoint = this.sim!.toSave();
-          if (this.sim!.startNextDay()) {
-            this.carryCheckpoint = this.sim!.state.mode === 'hardcore' ? undefined : checkpoint;
-            // procEventDialog воспроизводит второй щелчок внутри ветки сна.
-            this.playSound('soundClick1'); this.enterBattle(); this.saveGame(false); this.playSound('soundBattleBegin');
-            status.textContent = `Day ${this.sim!.state.day} begins.`;
-          } else { this.showTown('mission'); status.textContent = 'The next day is not available yet.'; }
-        } else this.showTown(dialog === 'title' ? 'mission' : 'castle');
-      },
-    }, tab, dialog, this.castlePage, this.medalPage));
+    }, tab, this.castlePage, this.medalPage));
     if (tab === 'characters' || tab === 'equipment') this.showPartyPanel(tab);
     if (tab === 'shop' && this.sim.state.town.preparation === 'ready') {
       const changed = (sound = 'soundPay1') => { this.playSound(sound); this.saveGame(false); this.showTown('shop'); };
@@ -1307,7 +1303,7 @@ class ElonaScene extends Phaser.Scene {
         applyToken: (slot, stock) => { if (!this.sim!.applyShopToken(slot, stock)) return false; changed(); return true; },
         refreshStock: () => {
           const outcome = this.sim!.refreshTownStock();
-          if (outcome === 'refreshed') { changed('soundScroll1'); status.textContent = 'New Goods! The shop has new stock.'; }
+          if (outcome === 'refreshed') { this.playSound('soundGood'); this.playSound('soundScroll1'); this.saveGame(false); this.showTown('shop', TOWN_NOTICES.newGoods); }
           else status.textContent = outcome === 'not-enough-ap' ? "You don't have enough action points!" : 'Stock refresh is unavailable.';
         },
         beginUpgradeSelection: () => {
@@ -1345,7 +1341,30 @@ class ElonaScene extends Phaser.Scene {
       container.dataset.pendingTownAction = JSON.stringify(pending);
       container.dataset.upgradePreview = JSON.stringify(pending?.kind === 'upgrade' ? this.sim.state.upgradeReference : null);
     }
+    let eventView: Phaser.GameObjects.Container | undefined;
+    if (dialog) {
+      this.closeTownEvent = () => {
+        this.playSound('soundClick1');
+        if (dialog === 'rest') {
+          const checkpoint = this.sim!.toSave();
+          if (this.sim!.startNextDay()) {
+            this.carryCheckpoint = this.sim!.state.mode === 'hardcore' ? undefined : checkpoint;
+            // procEventDialog воспроизводит второй щелчок внутри ветки сна.
+            this.playSound('soundClick1'); this.enterBattle(); this.saveGame(false); this.playSound('soundBattleBegin');
+            status.textContent = `Day ${this.sim!.state.day} begins.`;
+          } else { this.showTown('mission'); status.textContent = 'The next day is not available yet.'; }
+        } else this.showTown(typeof dialog === 'object' ? tab : dialog === 'title' ? 'mission' : 'castle');
+      };
+      const notice: TownNotice = typeof dialog === 'object' ? dialog : dialog === 'rest'
+        ? TOWN_NOTICES.rest
+        : dialog === 'title' ? townEvent(3, 'New Title!', `Your remarkable achievements have been acknowledged and you are granted a new title, ${TITLES[this.sim.state.title].name}! You will receive ${TITLES[this.sim.state.title].salary} gold pieces every day as a salary.`).notice
+        : TOWN_NOTICES.repair;
+      eventView = createTownEventView(this, manifest, (this.cache.json.get('town-layout') as TownLayout).repairDialog, notice, this.closeTownEvent);
+      this.root.add(eventView);
+      container.dataset.townNotice = JSON.stringify(notice);
+    }
     this.updateHud(); this.drawGameControls();
+    if (eventView) { this.root.bringToTop(eventView); if (this.volumeIcon) this.root.bringToTop(this.volumeIcon); }
     container.dataset.actionPoints = String(this.sim.state.town.ap);
     container.dataset.castleUpgrades = JSON.stringify({ house: this.sim.state.party.capacity, wall: this.sim.state.wallLevel,
       maxHp: this.sim.state.castleMaxHp, upkeep: castleUpkeep(this.sim.state),
@@ -1367,7 +1386,7 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.medalPage = String(this.medalPage);
     container.dataset.earnedMedals = JSON.stringify(this.sim.state.earnedMedals);
     container.dataset.repairDialog = String(dialog === 'repair');
-    container.dataset.townDialog = dialog ?? 'none';
+    container.dataset.townDialog = typeof dialog === 'object' && dialog ? 'event' : dialog ?? 'none';
     container.dataset.inventory = JSON.stringify(this.sim.state.inventory.map(item => isOccupiedItem(item) ? item.id : null));
     container.dataset.party = JSON.stringify(this.sim.state.party.slots.map(slot => ({ slot: slot.slot, exists: slot.exists,
       name: slot.member?.name ?? null, appearance: slot.member?.appearance ?? null, weapon: isOccupiedItem(slot.weapon) ? slot.weapon.id : null,
@@ -1447,7 +1466,7 @@ class ElonaScene extends Phaser.Scene {
       selectCharacter: slot => { this.selectedCharacter = slot; this.playSound('soundClick1'); this.showTown('characters'); },
       refreshCandidate: () => {
         const result = this.sim!.refreshTownRecruit();
-        if (result === 'refreshed') { this.selectedCharacter = 5; changed('soundScroll1'); status.textContent = 'New Recruit! A new traveler has arrived.'; }
+        if (result === 'refreshed') { this.selectedCharacter = 5; this.playSound('soundGood'); this.playSound('soundScroll1'); this.saveGame(false); this.showTown('characters', TOWN_NOTICES.newRecruit); }
         else { this.playSound('soundBeep'); status.textContent = result === 'not-enough-ap' ? "You don't have enough action points!" : 'Recruit refresh is unavailable.'; }
       },
       recruit: () => { const result = this.sim!.requestRecruit(); if (result === 'previewed') changed('soundScroll1'); else failure(result); },
