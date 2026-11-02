@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v38, Flash medal-collection import**.
+Updated 2026-11-02. Current local build: **v38, hero skill focus and persistent AI orders**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -11,6 +11,18 @@ Militia has its starting weapons and periodic grenade. Sniper, Ranger, Duelist
 and Noble unlock through the four original level10 class medals. Sniper's idle
 charge, Ranger's party rampage, Duelist's frenzy and Noble's passive bonuses work
 in combat. The first three use the original adrenaline bar artwork.
+
+The hero's original Barrack controls are connected: focus an owned non-base skill,
+choose Hero Mode or any of seven AI orders, and set Boss/Defend priorities.
+The focused skill receives the source 50% first-choice check when eligible. The
+manual-only placeholder and disabled controls are removed. Saved preferences
+cost no AP/gold/RNG; Rest preserves them and resets the separate F flag. Autonomous
+orders use the existing party AI, aiming cursor, firing/reload/class meters and
+selected hero weapon. Mouse firing is ignored in these orders as in source;
+F remains a separate indicator/toggle. Hero Mode restores manual combat. Old saves
+retain implicit manual/unfocused defaults without migration draws or new fields.
+Source: updateCharaMenu10235, orderClick13051, listTrait2 (11881), battle
+initialization1571, mouseDownFunc12104 and weapon5453.
 
 A separate browser medal collection survives New Game, carries earned medals
 forward and supplies original starting gold, traits, inventory/fame and Gravity
@@ -35,7 +47,7 @@ and reload behavior. It uses the selected inventory gun and preserves hero kill/
 projectile ownership and class meters. Mouse input can cancel manual reload or
 trigger a shot at the AI target. The original Sister line/rage artwork indicates
 the mode. Saves retain its target/counters and Continue remains paused; Rest starts
-the next battle in manual mode. Earlier saves migrate without AI fields/RNG draws.
+the next battle with F off, following the saved town order. Earlier saves migrate without AI fields/RNG draws.
 Source: KeyDown (13190), onEnterFrame (2338), shoot (7812–7883), refreshPlayer (4655).
 The static castle Sister now uses her original damage, critical-kill cheering and
 death artwork/timelines. Ordinary hero/companion hitscan can kill her, including
@@ -149,8 +161,8 @@ Other encodings/types fail before storage changes. Source: saveIndex10961/loadIn
 
 ## Validation and limits
 
-- **532 tests passed**, with typechecking and production build passing. Latest
-  bundle: assets/index-Bg6pomzN.js. Slot checks cover unchanged legacy storage,
+- **540 tests passed**, with typechecking and production build passing. Latest
+  bundle: assets/index-DwePjkFe.js. Slot checks cover unchanged legacy storage,
   eight independent adventures, selection persistence, shared medals/mute,
   deletion/tombstones, Hardcore isolation, corrupt data and failed writes.
   Existing deterministic checks cover classes, campaign, equipment services,
@@ -178,6 +190,11 @@ Other encodings/types fail before storage changes. Source: saveIndex10961/loadIn
   values, non-destructive/idempotent merging, bonuses/JSON replay, and invalid or
   oversized files/records/references. The Elona index test is controlled data;
   no actual player's Flash collection has yet been supplied/verified.
+  Eight hero-control checks cover free/idempotent town mutations and refusals,
+  focus through skill rewards, accepted orders and air-only targeting, F separation
+  and original accuracy penalties, Sniper/Militia JSON replay, manual-mode reset,
+  preserved defaults and corrupt/missing state. Existing party AI tests cover the
+  shared targeting routines; unchanged full campaigns were not replayed.
 - The controlled full40-day campaign completed in96494 simulation frames, with
   all19 enemy kinds, rewards, towns and save boundaries. Its changed frame count
   follows the repeating MOD-sale correction and resulting generation RNG. Strong
@@ -273,6 +290,17 @@ Other encodings/types fail before storage changes. Source: saveIndex10961/loadIn
   after the import action; inspection confirmed success without repeating it.
   Evidence: .build/browser-qa/flash-collection-verification.json, flash-collection-preview.png
   and flash-import-unlocks.png.
+
+- The muted hero-control browser check used slot8 and a controlled town/weapon.
+  Original skill/order/checkbox clicks changed only hero preferences (Fury focus,
+  Always fire at will, Boss/Defend off), with exact town-envelope Continue. Rest
+  started autonomous Day2 with F off. Without firing input, it won with27 kills
+  in1572 frames and reached loot/level-up; the battle used200 attack/10000 accuracy
+  test gear, so this is not difficulty evidence. Its whole outcome envelope survived
+  Continue, and Fury2 appeared among the real level-up offers. The test slot was
+  deleted and the user's whole adventure/profile restored exactly. No console
+  errors/fullscreen. Evidence: .build/browser-qa/hero-town-controls-verification.json
+  and hero-town-controls.png.
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. Historical details are

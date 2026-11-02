@@ -50,7 +50,10 @@ export interface EnemyState {
 export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCount: number }
 export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'> & { hire?: true; ragnarok?: true };
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
+export interface HeroSettings { order: number; focus: number; boss: boolean; wall: boolean }
+const DEFAULT_HERO_SETTINGS: Readonly<HeroSettings> = { order: -1, focus: -1, boss: true, wall: true };
 export interface SimulationState {
+  heroSettings?: HeroSettings;
   castleSister?: CastleSister;
   heroAI?: { enabled: boolean; state: PartyAIState };
   recycleCount?: number;
@@ -166,12 +169,14 @@ export class Simulation {
   }
 
   get fireAtWill(): boolean { return this.state.heroAI?.enabled ?? false; }
+  get heroSettings(): Readonly<HeroSettings> { return this.state.heroSettings ?? DEFAULT_HERO_SETTINGS; }
+  get heroAutomatic(): boolean { return this.heroSettings.order !== -1 || this.fireAtWill; }
   get heroClassState(): SimulationState['player']['classState'] { return this.state.heroAI?.state ?? this.state.player.classState; }
 
   private heroAIActor(): PartyAIActor {
     const player = this.state.player;
     return { slot: 0, exists: true, weapon: this.weapon, member: {
-      traits: player.traits, ai: 6, optBoss: true, optWall: true, aiState: this.state.heroAI?.state ?? null,
+      traits: player.traits, ai: this.heroSettings.order, optBoss: this.heroSettings.boss, optWall: this.heroSettings.wall, aiState: this.state.heroAI?.state ?? null,
       get shootTimer() { return player.shootTimer; }, set shootTimer(value) { player.shootTimer = value; },
       get rampageTicks() { return player.rampageTicks; }, set rampageTicks(value) { player.rampageTicks = value; },
     } };
@@ -183,16 +188,20 @@ export class Simulation {
 
   toggleFireAtWill(): boolean {
     if (this.state.phase !== 'battle' || this.pendingOpeningMission) return false;
+    this.initializeHeroAI();
+    this.state.heroAI!.enabled = !this.state.heroAI!.enabled;
+    return true;
+  }
+
+  private initializeHeroAI(): void {
     if (!this.state.heroAI) {
       const meter = this.state.player.classState;
       this.state.heroAI = { enabled: false, state: createPartyAIState(0) };
       refreshPartyAI(this.heroAIActor(), this.state.partySkills.effects[116]);
       if (meter) Object.assign(this.state.heroAI.state, meter);
-      // После первого F общий AI хранит и классовые счётчики; второй копии в сохранении нет.
+      // AI хранит и классовые счётчики; второй копии в сохранении нет.
       delete this.state.player.classState;
     }
-    this.state.heroAI.enabled = !this.state.heroAI.enabled;
-    return true;
   }
 
   private actor(slot: number): CombatActorState | undefined {
@@ -206,7 +215,7 @@ export class Simulation {
   }
 
   private partyAIContext(): PartyAIContext {
-    return { shared: this.state.partyAI, random: () => this.random(), heroSlot: 0, fireAtWill: this.fireAtWill,
+    return { shared: this.state.partyAI, random: () => this.random(), heroSlot: this.heroSettings.order === -1 ? 0 : -1, fireAtWill: this.fireAtWill,
       getTarget: uid => this.state.enemies.find(enemy => enemy.uid === uid) as PartyAITarget | undefined
         ?? this.state.retainedAITargets.find(enemy => enemy.uid === uid) };
   }
@@ -244,6 +253,7 @@ export class Simulation {
     for (let i = 0; i < e.sisters; i++) e.sisterWaves[1 + int(this.random() * this.state.waves.length)]++;
     this.state.player.grenadeCount = Math.max(100, 325 - (this.state.player.traits[4] ?? 0) * 4);
     this.refreshPartySkills(); this.state.partyAI = createPartyAIShared(); this.state.retainedAITargets = [];
+    if (this.heroSettings.order !== -1) this.initializeHeroAI();
     for (const slot of this.state.party.slots.slice(0, 4)) if (slot.member) {
       slot.member.aiState = createPartyAIState(slot.slot);
       slot.member.rampageTicks = 0;
@@ -320,12 +330,24 @@ export class Simulation {
   }
 
   setCompanionOrder(slot: number, order: number): boolean {
+    if (slot === 0) {
+      if (!this.partyMutationAvailable() || !Number.isInteger(order) || order < -1 || order > 6) return false;
+      if (this.heroSettings.order !== order) this.state.heroSettings = { ...this.heroSettings, order };
+      return true;
+    }
     const member = partySlot(this.state.party, slot)?.member;
     if (!this.partyMutationAvailable() || slot > 3 || !partySlot(this.state.party, slot)?.exists || !member || !Number.isInteger(order) || order < 0 || order > 6) return false;
     member.ai = order; return true;
   }
 
   setCompanionPriorities(slot: number, value: { boss?: boolean; wall?: boolean }): boolean {
+    if (slot === 0) {
+      if (!this.partyMutationAvailable()) return false;
+      const boss = typeof value.boss === 'boolean' ? value.boss : this.heroSettings.boss;
+      const wall = typeof value.wall === 'boolean' ? value.wall : this.heroSettings.wall;
+      if (this.heroSettings.boss !== boss || this.heroSettings.wall !== wall) this.state.heroSettings = { ...this.heroSettings, boss, wall };
+      return true;
+    }
     const member = partySlot(this.state.party, slot)?.member;
     if (!this.partyMutationAvailable() || slot > 3 || !partySlot(this.state.party, slot)?.exists || !member) return false;
     if (typeof value.boss === 'boolean') member.optBoss = value.boss;
@@ -334,6 +356,11 @@ export class Simulation {
   }
 
   setCompanionFocus(slot: number, id: number): boolean {
+    if (slot === 0) {
+      if (!this.partyMutationAvailable() || !Number.isInteger(id) || id !== -1 && (!(this.state.player.traits[id] > 0) || id < 100 || id >= 900)) return false;
+      if (this.heroSettings.focus !== id) this.state.heroSettings = { ...this.heroSettings, focus: id };
+      return true;
+    }
     const member = partySlot(this.state.party, slot)?.member;
     if (!this.partyMutationAvailable() || slot > 3 || !partySlot(this.state.party, slot)?.exists || !member || (id !== -1 && (!(member.traits[id] > 0) || id < 100 || id >= 900))) return false;
     member.focus = id; return true;
@@ -544,7 +571,7 @@ export class Simulation {
     if (input.reload) this.requestReload();
     const weapon = this.weapon;
     const bow = weapon?.id === 24 || weapon?.id === 25;
-    if (this.fireAtWill) {
+    if (this.heroSettings.order === -1 && this.fireAtWill) {
       const ai = this.state.heroAI!.state;
       // MouseDown по-прежнему отменяет ручную перезарядку; выстрел берёт цель AI, не мышь.
       if (firePressed) {
@@ -558,17 +585,17 @@ export class Simulation {
         ai.shooting = false;
       }
     }
-    if (!this.fireAtWill && fireReleased && bow) {
+    if (!this.heroAutomatic && fireReleased && bow) {
       if (player.bowDrawing) this.fireAt(this.state.aimX, this.state.aimY);
       this.state.pendingShot = false;
-    } else if (!this.fireAtWill && firePressed && !(bow && player.bowDrawing)) {
+    } else if (!this.heroAutomatic && firePressed && !(bow && player.bowDrawing)) {
       if (weapon?.reloadTime && weapon.manualReload && !weapon.autoReload) {
         weapon.reloadTime = 0; this.events.push({ type: 'reloaded', weaponId: weapon.id });
         this.state.pendingShot = false;
       } else this.state.pendingShot = true;
-    } else if (!input.fireHeld || this.fireAtWill) this.state.pendingShot = false;
+    } else if (!input.fireHeld || this.heroAutomatic) this.state.pendingShot = false;
     const meter = this.heroClassState;
-    if (!this.fireAtWill) {
+    if (!this.heroAutomatic) {
       if (player.shootTimer > -10000) player.shootTimer -= this.state.inventory[player.selectedSlot]?.shootRate ?? 0;
       if (meter) {
         if (player.traits[COMBAT_TRAIT.DUELIST]) meter.frenzy = Math.max(0, meter.frenzy - 0.12);
@@ -578,12 +605,12 @@ export class Simulation {
     }
     const protection = advanceProtection(this.state.protection.counter, this.state.protection.blueMultiplierAdd);
     this.state.protection = { counter: protection.counter, blueMultiplierAdd: protection.blueMultiplierAdd };
-    if (!this.fireAtWill && player.rampageTicks > 0) player.rampageTicks--;
+    if (!this.heroAutomatic && player.rampageTicks > 0) player.rampageTicks--;
     this.state.itemCooldowns = this.state.itemCooldowns.map(time => Math.max(0, time - 1));
-    if (!this.fireAtWill && this.state.pendingShot && !(weapon?.reloadTime && !weapon.autoReload) && this.fireAt(this.state.aimX, this.state.aimY) && !weapon?.automatic) this.state.pendingShot = false;
+    if (!this.heroAutomatic && this.state.pendingShot && !(weapon?.reloadTime && !weapon.autoReload) && this.fireAt(this.state.aimX, this.state.aimY) && !weapon?.automatic) this.state.pendingShot = false;
     this.state.partyAI.sharedWeaponRange = weapon?.range ?? null;
     const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
-    if (this.fireAtWill) stepPartyAIFrame(this.heroAIActor(), partyContext, partyCallbacks);
+    if (this.heroAutomatic) stepPartyAIFrame(this.heroAIActor(), partyContext, partyCallbacks);
     for (const slot of this.state.party.slots.slice(0, 4)) stepPartyAIFrame(slot, partyContext, partyCallbacks);
     for (const enemy of this.state.enemies) this.tickEnemy(enemy);
     this.tickProjectiles(projectileUidLimit);
@@ -600,7 +627,7 @@ export class Simulation {
   }
 
   fireAt(x: number, y: number): boolean {
-    if (!finite(x) || !finite(y) || this.state.phase !== 'battle' || this.pendingOpeningMission || this.fireAtWill) return false;
+    if (!finite(x) || !finite(y) || this.state.phase !== 'battle' || this.pendingOpeningMission || this.heroAutomatic) return false;
     this.state.aimX = x; this.state.aimY = y;
     return this.fireActorAt(0, x, y);
   }
@@ -608,9 +635,9 @@ export class Simulation {
   private fireActorAt(actorSlot: number, x: number, y: number): boolean {
     const player = this.actor(actorSlot);
     if (!player) return false;
-    const manual = actorSlot === 0 && !this.fireAtWill;
+    const manual = actorSlot === 0 && !this.heroAutomatic;
     const member = actorSlot ? partySlot(this.state.party, actorSlot)!.member! : null;
-    const ai = actorSlot === 0 && this.fireAtWill ? this.state.heroAI!.state : member?.aiState;
+    const ai = actorSlot === 0 && this.heroAutomatic ? this.state.heroAI!.state : member?.aiState;
     const meter = ai ?? (actorSlot === 0 ? this.heroClassState : undefined);
     const position = partyActorPosition(actorSlot);
     const weaponSlot = actorSlot === 0 ? this.state.player.selectedSlot : 0;
@@ -636,7 +663,7 @@ export class Simulation {
       else if (ai) { ai.shooting = false; ai.burst = 0; }
       this.requestActorReload(actorSlot); return false;
     }
-    const spread = shotSpread(item, player.traits, player.accuracyFix, { tight: this.state.mods?.tight, manualControl: manual, fireAtWill: actorSlot === 0 && this.fireAtWill || member?.ai === 6 });
+    const spread = shotSpread(item, player.traits, player.accuracyFix, { tight: this.state.mods?.tight, manualControl: manual, fireAtWill: actorSlot === 0 && (this.heroSettings.order === -1 && this.fireAtWill || this.heroSettings.order === 6) || member?.ai === 6 });
     player.shootTimer = stats.shootTimer;
     if (!manual && !item.automatic) player.shootTimer += int(this.random() * (item.shootRate / 1.5 / ai!.workRate));
     const behavior = weaponBehavior(item);
@@ -817,7 +844,7 @@ export class Simulation {
     if (item && autoReloadReady(item, player.shootTimer)) this.requestReload(false);
     if (item?.reloadTime) {
       this.advanceActorReload(0);
-      if (this.fireAtWill && !item.autoReload) this.heroClassState!.idleCount = Math.max(0, this.heroClassState!.idleCount - 0.15);
+      if (this.heroAutomatic && !item.autoReload) this.heroClassState!.idleCount = Math.max(0, this.heroClassState!.idleCount - 0.15);
     }
     this.state.partyAI.sharedWeaponRange = item?.range ?? null;
     const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
@@ -1565,7 +1592,7 @@ export class Simulation {
   }
 
   private prepareSkillChoices(): void {
-    this.state.skillChoices = this.state.player.skillPoints > 0 ? rollHeroChoices(this.state.player.classId, this.state.player.level, this.state.player.traits, () => this.random()) : [];
+    this.state.skillChoices = this.state.player.skillPoints > 0 ? rollHeroChoices(this.state.player.classId, this.state.player.level, this.state.player.traits, () => this.random(), this.heroSettings.focus) : [];
     this.state.postbattle = this.state.skillChoices.length > 0 ? 'skill' : 'result';
     if (this.state.postbattle === 'result') this.prepareResult();
   }
@@ -1966,6 +1993,11 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
+    if (record(value) && value.heroSettings !== undefined && (!record(value.heroSettings)
+      || !Number.isInteger(value.heroSettings.order) || Number(value.heroSettings.order) < -1 || Number(value.heroSettings.order) > 6
+      || !Number.isInteger(value.heroSettings.focus) || value.heroSettings.focus !== -1 && (Number(value.heroSettings.focus) < 100 || Number(value.heroSettings.focus) >= 900)
+      || typeof value.heroSettings.boss !== 'boolean' || typeof value.heroSettings.wall !== 'boolean')) throw new Error('Invalid hero orders or skill focus.');
+    if (record(value) && record(value.heroSettings) && value.heroSettings.order !== -1 && value.phase !== 'town' && value.heroAI === undefined) throw new Error('Missing automatic hero state.');
     if (record(value) && value.castleSister !== undefined && !validCastleSister(value.castleSister)) throw new Error('Invalid castle Sister state.');
     if (record(value) && value.heroAI !== undefined && (Number(value.version) < 38 || !record(value.heroAI)
       || typeof value.heroAI.enabled !== 'boolean' || !validPartyAIState(value.heroAI.state))) throw new Error('Invalid hero Fire at will state.');
@@ -2250,6 +2282,7 @@ export class Simulation {
     }
     if (!isKnownHeroInitialization(state.hero) || ![TRAIT.BASE_AIMING, TRAIT.BASE_TEAMWORK].every(id => Number.isInteger(state.player.traits[id]) && state.player.traits[id] >= 1)) throw new Error('Invalid hero initialization.');
     if (!record(state.player.traits) || Object.entries(state.player.traits).some(([id, level]) => !Object.hasOwn(ALL_TRAITS, id) || !Number.isInteger(level) || level < 0 || level > ALL_TRAITS[Number(id)].maxLevel) || state.player.traits[HERO_CLASSES[state.player.classId].id] !== state.player.level || Object.entries(HERO_CLASSES[state.player.classId].traits).some(([id, level]) => (state.player.traits[Number(id)] ?? 0) < level) || Object.keys(state.player.traits).some(id => Number(id) < 100 && Number(id) !== HERO_CLASSES[state.player.classId].id && state.player.traits[Number(id)] > 0)) throw new Error('Invalid hero traits.');
+    if (state.heroSettings && state.heroSettings.focus !== -1 && !(state.player.traits[state.heroSettings.focus] > 0)) throw new Error('Invalid hero skill focus.');
     // Пустой список не даёт исходному listTrait2 ни одного допустимого навыка даже до fallback.
     if (state.phase === 'victory' && state.player.skillPoints > 0 && availableHeroTraits(state.player.classId, state.player.level, state.player.traits).length === 0) throw new Error('Pending skill points have no available hero skill.');
     if (!Array.isArray(state.skillChoices) || state.skillChoices.length > 5 || state.skillChoices.some(id => !Number.isInteger(id) || !CLASS_CHOICE_ORDER[HERO_CLASSES[state.player.classId].id].includes(id)) || new Set(state.skillChoices).size !== state.skillChoices.length) throw new Error('Invalid skill choices.');

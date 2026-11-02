@@ -33,8 +33,8 @@ export function availableHeroTraits(classId: HeroClass, characterLevel: number, 
   return availableClassTraits(CLASS_CHOICE_ORDER[HERO_CLASSES[classId].id], ALL_TRAITS, characterLevel, traits);
 }
 
-export function rollHeroChoices(classId: HeroClass, characterLevel: number, traits: Readonly<TraitLevels>, random: () => number): number[] {
-  return rollClassChoices(CLASS_CHOICE_ORDER[HERO_CLASSES[classId].id], ALL_TRAITS, characterLevel, traits, random);
+export function rollHeroChoices(classId: HeroClass, characterLevel: number, traits: Readonly<TraitLevels>, random: () => number, focus = -1): number[] {
+  return rollClassChoices(CLASS_CHOICE_ORDER[HERO_CLASSES[classId].id], ALL_TRAITS, characterLevel, traits, random, focus);
 }
 
 export function applyHeroChoice(classId: HeroClass, traits: TraitLevels, choices: readonly number[], id: number): boolean {

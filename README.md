@@ -24,7 +24,13 @@ unless you previously enabled it; the mute preference persists between visits.
   enemies, bosses and health bars; ordinary/boss loot, skills and settlements.
 - F toggles the original Fire at will mode: the hero acquires targets, fires and
   reloads using the party AI, with its original accuracy penalty and Sister indicator.
-  The mode/target state survives Continue; each new mission starts in manual mode.
+  The mode/target state survives Continue; each new mission resets F and follows
+  the hero's saved town order.
+- The hero's Barrack controls support focused skills, all seven AI orders, and
+  Boss/Defend priorities. An eligible focus has the original 50% first-choice chance
+  when selecting level-up skills. Hero Mode uses manual input and temporary F;
+  persistent town orders independently control later battles. Preferences survive
+  Rest, Continue and JSON backups without spending AP/gold or drawing RNG.
 - The castle Sister reacts to damage and critical kills using her original
   animations. Hero/companion hitscan can kill her, stopping her cheers; saves retain
   her pose/state and Rest revives her. Collision is independent of rendering.

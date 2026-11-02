@@ -88,6 +88,7 @@ class ElonaScene extends Phaser.Scene {
   private enemyArrowSprites = new Map<number, { container: Phaser.GameObjects.Container; body: Phaser.GameObjects.Image; shadow: Phaser.GameObjects.Image }>();
   private playerSprite?: OriginalAlly;
   private castleSisterSprite?: Phaser.GameObjects.Image;
+  private heroAimCursor?: Phaser.GameObjects.Image;
   private companionSprites = new Map<number, OriginalAlly>();
   private companionCursors = new Map<number, Phaser.GameObjects.Image>();
   private companionBowSounds = new Map<number, Phaser.Sound.BaseSound>();
@@ -214,6 +215,7 @@ class ElonaScene extends Phaser.Scene {
     if (!this.celebration) delete container.dataset.fireworkFrames;
     this.helpLayer = undefined; delete container.dataset.helpPage; delete container.dataset.helpScroll;
     this.fireAtWillSprites = undefined; this.castleSisterSprite = undefined; delete container.dataset.fireAtWill; delete container.dataset.castleSister;
+    this.heroAimCursor = undefined; delete container.dataset.heroSettings; delete container.dataset.heroAutomatic;
     for (const arrow of this.enemyArrowSprites.values()) arrow.container.destroy(true);
     this.enemyArrowSprites.clear();
     this.enemySprites.clear(); this.enemyRageSprites.clear(); this.enemyHitSprites.clear(); this.bossFrames.clear(); this.bossBars.clear(); this.projectileSprites.clear(); this.hud.clear(); this.effects = []; this.hotbar = [];
@@ -710,6 +712,13 @@ class ElonaScene extends Phaser.Scene {
     if (!this.sim) return;
     const state = this.sim.state;
     this.paintCastleSister();
+    container.dataset.heroSettings = JSON.stringify(this.sim.heroSettings);
+    container.dataset.heroAutomatic = String(this.sim.heroAutomatic);
+    if (this.sim.heroSettings.order !== -1 && state.heroAI) {
+      const { cursorX, cursorY } = state.heroAI.state, asset = manifest.clips.partyAimCursor;
+      this.heroAimCursor ??= this.clip('partyAimCursor', 1, cursorX, cursorY);
+      this.heroAimCursor?.setPosition(cursorX - asset.originX, cursorY - asset.originY).setVisible(this.screen === 'battle');
+    } else this.heroAimCursor?.setVisible(false);
     const present = new Set<number>();
     for (const enemy of [...state.enemies].sort((a, b) => a.y - b.y)) {
       const key = this.enemyClip(enemy);
@@ -1389,6 +1398,7 @@ class ElonaScene extends Phaser.Scene {
   private showPartyPanel(tab: 'characters' | 'equipment'): void {
     if (!this.sim) return;
     const state = this.sim.state;
+    container.dataset.heroSettings = JSON.stringify(this.sim.heroSettings);
     const traits = (levels: Readonly<Record<number, number>>): PartyViewTrait[] => Object.entries(levels).filter(([, level]) => level > 0).map(([key, level]) => {
       const id = Number(key), definition = ALL_TRAITS[id];
       return { id, name: `${definition?.name ?? `Skill ${id}`} ${level}`, description: definition?.description ?? '',
@@ -1396,7 +1406,7 @@ class ElonaScene extends Phaser.Scene {
     });
     const members: PartyViewMember[] = [{ slot: 0, name: 'You', appearance: this.appearance, level: state.player.level, exp: state.player.exp,
       className: HERO_CLASSES[state.player.classId].name, wageLabel: TITLES[state.title].name, kill: null, earn: null, weapon: this.sim.weapon,
-      traits: traits(state.player.traits), traitLevels: state.player.traits, focusedTrait: -1, order: -1, prioritizeBoss: false, prioritizeWall: false, controlsEnabled: false }];
+      traits: traits(state.player.traits), traitLevels: state.player.traits, focusedTrait: this.sim.heroSettings.focus, order: this.sim.heroSettings.order, prioritizeBoss: this.sim.heroSettings.boss, prioritizeWall: this.sim.heroSettings.wall }];
     for (const slot of state.party.slots) {
       if (!slot.exists || !slot.member) continue;
       const member = slot.member;

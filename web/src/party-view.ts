@@ -30,7 +30,6 @@ export interface PartyViewMember {
   wageLabel: string; kill: number | null; earn: number | null; cost?: number; weapon: Item | null;
   traits: readonly PartyViewTrait[]; traitLevels: Readonly<Record<number, number>>;
   focusedTrait: number; order: number; prioritizeBoss: boolean; prioritizeWall: boolean;
-  controlsEnabled?: boolean;
 }
 export interface PartyEquipmentSlot { kind: 'inventory' | 'companion'; slot: number }
 export interface PartyViewState {
@@ -169,7 +168,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
         button('button_partyDismiss', panel.children.dismissButton, candidate ? callbacks.recruit : callbacks.dismiss);
         text(panel.children.dismissText, candidate ? 'RECRUIT' : 'DISMISS');
       }
-      hint.setText(candidate ? '\nClick "Recruit" to hire this person.' : member.controlsEnabled === false ? 'The hero uses manual controls. Companion orders and skill focus are available on their portraits.' : `Click a skill to set it as a focused skill.\n${hero ? 'It will appear on the list more frequently when leveling.' : 'Your ally will likely gain the skill when leveling.'}`);
+      hint.setText(candidate ? '\nClick "Recruit" to hire this person.' : `Click a skill to set it as a focused skill.\n${hero ? 'It will appear on the list more frequently when leveling.' : 'Your ally will likely gain the skill when leveling.'}`);
       const sort = (trait: PartyViewTrait) => trait.kind === 'class' ? 100000 + trait.id : trait.kind === 'base' ? 70000 + trait.id : trait.kind === 'party' ? 10000 + trait.id : 50000 - trait.id;
       const traits = [...member.traits].filter(value => !(hero && member.order === -1 && [900, 901].includes(value.id))).sort((a, b) => sort(b) - sort(a));
       traits.forEach((trait, index) => {
@@ -183,7 +182,6 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
         area.on('pointerover', () => hint.setText(trait.description));
         area.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
           event.stopPropagation(); if (modal || candidate) return;
-          if (member.controlsEnabled === false) { message('Hero skill focus is not available yet.'); return; }
           if (base) message("Base skills can't be focused."); else callbacks.focus(member.focusedTrait === trait.id ? -1 : trait.id);
         });
         root.add(area); label.setData('trait', trait.id);
@@ -193,14 +191,13 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
         const p = panel.children.order;
         const controls = layout.partyControls;
         const width = controls.componentBaseWidth * p.scaleX, height = controls.componentBaseHeight * p.scaleY;
-        skin('partyOrderSkin', controls.orderGrid, menu.x + p.x, menu.y + p.y, width, height).setAlpha(member.controlsEnabled === false ? 0.5 : 1);
+        skin('partyOrderSkin', controls.orderGrid, menu.x + p.x, menu.y + p.y, width, height);
         const value = scene.add.text(menu.x + p.x + 3, menu.y + p.y + 5, ORDERS.find(order => order.value === member.order)?.label ?? '', { fontFamily: 'Arial', fontSize: '11px', color: '#000000' });
         value.setCrop(0, 0, width - 22, height); root.add(value);
         let list: Phaser.GameObjects.Container | null = null;
         const choose = scene.add.zone(menu.x + p.x, menu.y + p.y, width, height).setOrigin(0).setInteractive({ useHandCursor: true }).setName('party-order'); root.add(choose);
         choose.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
           event.stopPropagation(); if (modal) return;
-          if (member.controlsEnabled === false) { message('The hero uses manual controls. Select a companion to change their orders.'); return; }
           if (list) { list.destroy(); list = null; return; }
           list = scene.add.container(0, 0); root.add(list);
           const options = ORDERS.filter(order => hero || order.value !== -1), listX = menu.x + p.x, listY = menu.y + p.y + height;
