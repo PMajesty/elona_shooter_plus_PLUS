@@ -6,6 +6,7 @@ import { generateEarlyTownRecruit } from './recruits.ts';
 import { generateHenchman } from './party.ts';
 import { MEDALS } from './medals.ts';
 import { nextKillHistory, type KillHistory } from './kill-history.ts';
+import { advanceRatFall, ratDropLocalPoint } from './bird-drop.ts';
 import { advanceChainGunClock, idleChainGun, spinChainGun, type ChainGunState } from './combat-stats.ts';
 import { fixedSearchRandom } from './town-search.ts';
 import { createTownEconomy, validTownEconomy, museumIncome, TOWN_ACTIVITIES, type TownEconomy, type TownActivity } from './town-economy.ts';
@@ -41,6 +42,7 @@ export interface EnemyState {
   deathTicks: number; drop: number; removed: boolean;
   bossAction: number; bossCount: number; bossIdle: number; bossFireNum: number; bossWeapon: number; bossDamage: number; appearance: number;
   behaviorCounter?: number; direction?: number; fallTargetY?: number;
+  dropping?: true; dropY?: number; dropDrift?: number; dropRotation?: number; dropFrame?: number;
   rangedCounter?: number;
   flyCounter?: number;
   alerted?: boolean;
@@ -88,7 +90,7 @@ export interface SimulationState {
   pendingPartyAction: PartyPendingAction | null;
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
-export interface SimulationEvent { actorSlot?: number; type: 'sister-killed' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
+export interface SimulationEvent { actorSlot?: number; type: 'enemy-drop' | 'sister-killed' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
 export interface SimulationOptions { mods?: GameMods; mode?: GameMode; hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
@@ -624,7 +626,7 @@ export class Simulation {
     const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
     if (this.heroAutomatic) stepPartyAIFrame(this.heroAIActor(), partyContext, partyCallbacks);
     for (const slot of this.state.party.slots.slice(0, 4)) stepPartyAIFrame(slot, partyContext, partyCallbacks);
-    for (const enemy of this.state.enemies) this.tickEnemy(enemy);
+    for (const enemy of this.state.enemies) if (enemy.uid < projectileUidLimit) this.tickEnemy(enemy);
     this.tickProjectiles(projectileUidLimit);
     for (const arrow of this.state.enemyArrows) if (arrow.uid < projectileUidLimit) advanceEnemyArrow(arrow);
     this.state.enemyArrows = this.state.enemyArrows.filter(arrow => !arrow.removed);
@@ -783,6 +785,10 @@ export class Simulation {
 
   private hitEnemy(enemy: EnemyState, x: number, y: number): boolean {
     const scale = enemy.large ? 1.25 : 1;
+    if (enemy.dropping && !this.options.hitTest) {
+      const point = ratDropLocalPoint(enemy, x, y);
+      return inside(ENEMIES[enemy.kind].body, point.x - 3.45, point.y - 26.95);
+    }
     return this.options.hitTest?.(enemy, x, y) ?? inside(ENEMIES[enemy.kind].body, (x - enemy.x) / scale, (y - enemy.y) / scale);
   }
 
@@ -924,6 +930,7 @@ export class Simulation {
     const gold = 1 + int(this.random() * definition.power / 10 + 5);
     const bossWeapon = kind === 'boss' ? 1 + int(this.random() * 2) : 0;
     const bossCount = kind === 'boss' ? 100 + int(this.random() * 60) : 0;
+    const dropDrift = kind === 'dropped-rat' ? this.random() > 0.5 ? -0.5 : 0.5 : undefined;
     // Даже при нулевых strength/THREAT исходное умножение и деление влияют на последний бит Number.
     const strength = this.state.activeMission.strength;
     const speed = (definition.speedBase + this.random() * definition.speedRandom) * (100 + strength / 8) / (100 + this.state.partySkills.effects[112]) * (this.state.mods?.laptop ? 0.7 : 1);
@@ -938,6 +945,7 @@ export class Simulation {
     const uid = this.state.nextUid++;
     this.state.enemies.push({ uid, kind, type: definition.airborne ? 1 : definition.armor ? 2 : 0, tag: 0, onMark: false, x: -20, y, hp, maxHp: hp, speed, speedOrg: speed, attack: kind === 'boss' ? (this.state.activeMission.bossDay ? int((1 + int(this.state.activeMission.level / 15)) / 2) + 1 : 1 + int(this.state.activeMission.level / 15)) : definition.attack, gold, exp: 1 + int(definition.power * 0.4), knockBack: 0, disarmed: 0, attacking: false, attacked: false, frame: kind === 'rat' ? 14 : 1, shadowHit: shadowHitAtFrame(kind, kind === 'rat' ? 14 : 1), deathTicks: 0, drop: 0, removed: false, bossAction: kind === 'boss' ? 3 : 0, bossCount, bossIdle: 0, bossFireNum: 0, bossWeapon, bossDamage: 0, appearance, ...(kind === 'boss' ? { bossFacing: -1 as const } : {}), ...(later ? { frame: later.labels.init ?? 1, behaviorCounter, direction } : {}), ...ranged });
     const spawned = this.state.enemies[this.state.enemies.length - 1];
+    if (kind === 'dropped-rat') Object.assign(spawned, { dropping: true, dropY: -spawned.y, dropDrift, dropRotation: 0, dropFrame: 1, frame: 2, shadowHit: false });
     if (kind !== 'boss') spawned.attack = int(spawned.attack * (100 + strength / 2) / 100);
     this.applyLargeVariant(spawned);
     if (kind === 'boss') this.state.partyAI.targetBossUid = uid;
@@ -1070,6 +1078,7 @@ export class Simulation {
     if (int(this.random() * groupSize * 5) === 0 || int(this.random() * 400 * groupSize) < this.state.partySkills.effects[109]) { enemy.drop = 2; this.state.loot.push(definition.loot); }
     if (enemy.kind === 'boss') { enemy.drop = 1; this.state.bossKilled++; }
     enemy.frame = ENEMY_TIMELINES[enemy.kind]?.labels.dead ?? (enemy.kind === 'dropped-rat' ? 93 : enemy.kind === 'sheep' ? 107 : enemy.kind === 'rat' ? 93 : enemy.kind === 'chicken' ? 208 : enemy.kind === 'crow' ? 58 : enemy.kind === 'archer' ? 94 : enemy.kind === 'fly' ? 12 : enemy.kind === 'barbarian' ? 84 : enemy.kind === 'lava' ? 98 : enemy.kind === 'boss' ? 281 : 1);
+    if (enemy.dropping) { enemy.frame = 2; enemy.dropFrame = 16; }
     enemy.shadowHit = shadowHitAtFrame(enemy.kind, enemy.frame, enemy.shadowHit);
     this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'kill', x: enemy.x, y: enemy.y, critical, enemyUid: enemy.uid, goodShotIndex });
   }
@@ -1152,9 +1161,12 @@ export class Simulation {
       return;
     }
     if (enemy.hp <= 0) {
+      const falling = enemy.dropping;
+      if (falling) advanceRatFall(enemy, () => this.random());
       enemy.deathTicks++;
       const deathEnds: Partial<Record<EnemyKind, number>> = { sheep: 129, rat: 128, chicken: 239, crow: 87, archer: 125, fly: 41, barbarian: 119, lava: 128, boss: 403 };
-      if (ENEMY_TIMELINES[enemy.kind]) this.advanceLaterEnemy(enemy, ENEMY_TIMELINES[enemy.kind]);
+      if (falling) { /* В воздухе играет вложенная смерть; родитель стоит на dropping. */ }
+      else if (ENEMY_TIMELINES[enemy.kind]) this.advanceLaterEnemy(enemy, ENEMY_TIMELINES[enemy.kind]);
       else enemy.frame = Math.min(enemy.frame + 1, deathEnds[enemy.kind] ?? ENEMY_TIMELINES[enemy.kind]?.labels.null ?? (enemy.kind === 'dropped-rat' ? 128 : 200));
       if (enemy.kind === 'lava' && enemy.frame === 51) {
         enemy.removed = true; enemy.hp = -1; enemy.frame = 223; enemy.deathTicks = 201;
@@ -1170,11 +1182,6 @@ export class Simulation {
       }
       return;
     }
-    if (enemy.kind === 'dropped-rat' && enemy.fallTargetY !== undefined) {
-      enemy.y = Math.min(enemy.fallTargetY, enemy.y + 4);
-      if (enemy.y >= enemy.fallTargetY) delete enemy.fallTargetY;
-      return;
-    }
     registerPartyTarget(enemy as PartyAITarget, this.state.partyAI);
     // После начала прыжка Lava отменяет отбрасывание, но продолжает обычное движение AI.
     if (enemy.kind === 'lava' && enemy.attacking && enemy.knockBack > 0) enemy.knockBack = 0;
@@ -1188,9 +1195,9 @@ export class Simulation {
       if (enemy.kind === 'archer' || enemy.kind === 'fly' || enemy.kind === 'barbarian' || enemy.kind === 'lava') enemy.x = twipCoordinate(enemy.x);
       const width = enemy.kind === 'archer' ? ARCHER_DISPLAY_WIDTHS[enemy.frame] : enemy.kind === 'fly' ? FLY_DISPLAY_WIDTHS[enemy.frame] : enemy.kind === 'barbarian' ? barbarianParentWidth(enemy.frame, enemy.rageEffectFrame, enemy.hitEffects) : enemy.kind === 'lava' ? lavaParentWidth(enemy.frame, enemy.hitEffects) : 60;
       enemy.x = Math.max(-width, enemy.x);
-      this.advanceEnemyAnimation(enemy);
-      return;
+      if (!enemy.dropping) { this.advanceEnemyAnimation(enemy); return; }
     }
+    if (enemy.dropping) { advanceRatFall(enemy, () => this.random()); return; }
     if (ENEMY_TIMELINES[enemy.kind]) { this.tickLaterEnemy(enemy, ENEMY_TIMELINES[enemy.kind]); return; }
     if (enemy.kind === 'boss') { this.tickBoss(enemy); this.advanceBossAnimation(enemy); return; }
     if (enemy.kind === 'lava') {
@@ -1287,7 +1294,8 @@ export class Simulation {
       if (enemy.x < 350 && this.random() > 0.988 && this.state.enemies.length < 200) {
         this.spawnEnemy('dropped-rat');
         const rat = this.state.enemies[this.state.enemies.length - 1];
-        rat.x = enemy.x; rat.fallTargetY = rat.y; rat.y = enemy.y + 30; rat.frame = 14;
+        rat.x = enemy.x; rat.dropY = enemy.y + 30 - rat.y;
+        this.events.push({ type: 'enemy-drop', x: enemy.x, y: enemy.y });
       }
       if (enemy.x > 640) enemy.removed = true;
     } else if (enemy.kind === 'spider' || enemy.kind === 'ghost') {
@@ -2204,6 +2212,7 @@ export class Simulation {
     }
     // Старый формат не сохранял историю тени; восстанавливаем прежнюю геометрию без новых случайных чисел.
     for (const enemy of simulation.state.enemies) {
+      if (Number(value.version) < 40 && enemy.dropping !== undefined) throw new Error('Unsupported dropped rat state.');
       if (enemy.kind === 'archer' && (Number(value.version) < 10 || !Number.isInteger(enemy.rangedCounter) || enemy.rangedCounter! < 0 || enemy.rangedCounter! > 120 || !Number.isInteger(enemy.frame) || enemy.frame < 1 || enemy.frame > 125)) throw new Error('Invalid archer state.');
       if (enemy.kind === 'fly' && (Number(value.version) < 12 || !Number.isInteger(enemy.flyCounter) || enemy.flyCounter! < 0 || enemy.flyCounter! > 1e9 || !Number.isInteger(enemy.frame) || enemy.frame < 1 || (enemy.frame > 41 && enemy.frame !== 126))) throw new Error('Invalid Fly state.');
       if (enemy.kind === 'barbarian' && (Number(value.version) < 13 || ![0, 100].includes(enemy.rampage!) || !Number.isInteger(enemy.rageEffectFrame) || enemy.rageEffectFrame! < 0 || enemy.rageEffectFrame! > 12 || (enemy.rampage === 0 && enemy.rageEffectFrame !== 0) || !Number.isInteger(enemy.frame) || enemy.frame < 1 || (enemy.frame > 119 && enemy.frame !== 252))) throw new Error('Invalid Barbarian state.');
@@ -2211,7 +2220,19 @@ export class Simulation {
       if (enemy.kind === 'lava' && (Number(value.version) < 23 || Number(value.day) < 8 || typeof enemy.alerted !== 'boolean' || !Number.isInteger(enemy.frame) || enemy.frame < 1 || (enemy.frame > 128 && enemy.frame !== 223))) throw new Error('Invalid Lava state.');
       if (enemy.kind === 'sister-bomb' && (!record(enemy.bomb) || ['startX', 'startY', 'targetX', 'targetY', 'curve', 'counter', 'rotation'].some(key => !finite((enemy.bomb as unknown as Record<string, unknown>)[key])) || !Number.isInteger(enemy.bomb.counter) || enemy.bomb.targetX === enemy.bomb.startX)) throw new Error('Invalid sister bomb.');
       if (ENEMY_TIMELINES[enemy.kind] && (!Number.isInteger(enemy.behaviorCounter) || ![-1, 1].includes(enemy.direction!) || !Number.isInteger(enemy.frame) || enemy.frame < 1 || enemy.frame > ENEMY_TIMELINES[enemy.kind].count)) throw new Error('Invalid campaign enemy behavior.');
-      if (enemy.fallTargetY !== undefined && (!finite(enemy.fallTargetY) || enemy.fallTargetY < WORLD.groundLine || enemy.fallTargetY > WORLD.groundLine + WORLD.groundWidth)) throw new Error('Invalid dropped rat.');
+      if (enemy.fallTargetY !== undefined) {
+        if (Number(value.version) >= 40 || enemy.kind !== 'dropped-rat' || !finite(enemy.fallTargetY) || enemy.fallTargetY < WORLD.groundLine || enemy.fallTargetY > WORLD.groundLine + WORLD.groundWidth) throw new Error('Invalid dropped rat.');
+        // В старом формате не было дрейфа/поворота: восстанавливаем их без броска RNG.
+        Object.assign(enemy, { dropping: true, dropY: enemy.y - enemy.fallTargetY, dropDrift: 0.5, dropRotation: 0, dropFrame: enemy.hp <= 0 ? 16 : 1, frame: 2, y: enemy.fallTargetY, shadowHit: false });
+        delete enemy.fallTargetY;
+      }
+      const dropFields = ['dropY', 'dropDrift', 'dropRotation', 'dropFrame'] as const;
+      if (enemy.dropping !== undefined) {
+        if (enemy.kind !== 'dropped-rat' || enemy.dropping !== true || enemy.frame !== 2 || enemy.shadowHit !== false
+          || !finite(enemy.dropY) || enemy.dropY < -1000 || enemy.dropY >= 17 || ![-0.5, 0.5].includes(enemy.dropDrift!)
+          || !finite(enemy.dropRotation) || Math.abs(enemy.dropRotation) > 10.5 || !Number.isInteger(enemy.dropFrame)
+          || !(enemy.hp > 0 ? enemy.dropFrame! >= 1 && enemy.dropFrame! <= 14 : enemy.dropFrame! >= 16 && enemy.dropFrame! <= 18)) throw new Error('Invalid dropped rat fall.');
+      } else if (dropFields.some(key => enemy[key] !== undefined)) throw new Error('Unexpected dropped rat fields.');
       if (enemy.kind === 'boss') {
         if (enemy.rampage !== undefined && ![0, 100].includes(enemy.rampage) || enemy.bossSpecial !== undefined && !['grenade', 'rocket'].includes(enemy.bossSpecial)) throw new Error('Invalid later boss state.');
         if (value.version < 11) {

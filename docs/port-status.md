@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v39, Chain Gun wind-up and interruption**.
+Updated 2026-11-02. Current local build: **v40, bird-dropped rat behavior**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -43,6 +43,16 @@ Weapon changes/Rest reset spin; F transfers it without duplication. Original
 wind-up/down/loop clips follow the phase and pause/clear with the game. V39 retains
 optional manual spin/clock state; older saves add no spin fields or RNG draws.
 Source: onEnterFrame2477, shoot7896, refreshPlayer4622 and chainSoundLength984.
+Bird-dropped rats now retain a ground anchor while the original parachute/body
+clip falls1.5px/frame, drifts±0.5, tilts and reverses by the source5% check. They
+register for AI targeting in the air and keep falling during knockback. Death
+stops drift/rotation and falls8px/frame before the normal ground death timeline.
+The ground shadow stays fixed below the moving body; browser hits follow that
+body. Source weak points remain relative to the ground parent. Optional saved
+fall fields replay in life/death; legacy straight-fall saves migrate without RNG
+draws. Newly spawned enemies begin moving on the next frame.
+Source: enemy constructor279, rat1353/bird1399/death921, enemy_rat.frame1;
+original body1258/shadow680, extracted with the existing campaign asset tool.
 The original fixed-level cycle controls enemy selection while calendar level
 controls power, rewards and boss counts. Every40 levels adds200 strength: ordinary
 enemy HP/attack and movement speed scale by their source formulas. After Day40,
@@ -199,14 +209,16 @@ historical player SOL compatibility remains unverified.
 
 ## Validation and limits
 
-- **562 tests verified**, with typechecking and production build passing. The full
-  run passed561/562; correcting one new test's mismatched aim setup gave4/4 on its
-  focused rerun, with unrelated passing results reused. Bundle:
-  assets/index-D-xyh3iF.js. Existing deterministic/source comparisons cover hero
+- **565 tests pass**, with typechecking and production build passing. A subsequent
+  test-only knockback assertion passed in the three affected checks; unchanged
+  full-suite/build evidence was reused. Bundle:
+  assets/index-BwVNE_GZ.js. Existing deterministic/source comparisons cover hero
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
-- One controlled40-day campaign reached all19 enemy kinds in96494 frames using
-  strong test gear. This is progression/stability evidence, not difficulty parity.
+- The current controlled40-day campaign reached18 enemy kinds in96827 frames using
+  strong test gear. Dragon was not selected in this random run; separate seeded
+  mission and per-enemy checks cover all kinds. An earlier run encountered all19;
+  this is an observation, not a guarantee for every seed or difficulty-parity evidence.
   Other checks cover later-cycle boundaries/formulas, Day150 medals and Day1000
   saves. Long-session browser performance and later difficulty remain unmeasured.
 - Muted browser evidence covers New Game, combat/reload/F/results/town, original
@@ -240,8 +252,14 @@ historical player SOL compatibility remains unverified.
   recoil, release/resume, AI floor, F/weapon changes, JSON replay and old/invalid saves.
   Evidence: .build/browser-qa/chain-gun-verification.json and chain-gun-browser.png.
 - Disposable slot8 was removed. The user's Sheriff adventure/collection was restored:
-  only envelope/simulation version38→39 changed. Day1, tick674, RNG1744019180, HP40,
+  only envelope/simulation version39→40 changed. Day1, tick674, RNG1744019180, HP40,
   gold209 remain unchanged, paused/muted. No test medals/records, console errors or fullscreen.
+- Falling-rat browser check: a controlled Day26 live fall imported exactly, and
+  an ordinary mouse shot hit the visible body in the air (one bullet, actual kill).
+  Export/reimport of the mid-air death retained the full envelope. Body and ground
+  shadow remained separated. Three source-rule regressions cover drift/rotation,
+  AI acquisition/aiming, knockback, death/landing, replay and legacy/invalid saves.
+  Evidence: .build/browser-qa/bird-drop-verification.json and bird-drop-browser.png.
 - Earlier detailed evidence remains in Git (through146a891), existing
   .build/browser-qa records and historical verification. Reuse it for unchanged
   behavior. The source's inactive card/debug-start functions were audited below.
@@ -280,8 +298,8 @@ that the app's crash cause was fixed.
    component; external credits retain their original URLs, whose availability is unverified.
    External Museum link availability is unverified. Older Day2+ browser saves lack
    earlier kill totals, so their lifetime statistic remains a marked lower bound.
-5. Bird-rat falling motion is approximate; later enemy hit regions use rendered
-   alpha. Searching preserves the source's ineffective Trouble HP expression;
+5. Falling-rat bodies and later enemy hit regions use rendered alpha; exact Flash
+   filter/vector boundary matching remains unverified. Searching preserves the source's ineffective Trouble HP expression;
    its restored original narrative still promises an HP increase.
 6. The veteran late-game hitbox complaint remains unreproduced and **deferred
    until core coverage is complete**. Prior contour/projectile corrections are

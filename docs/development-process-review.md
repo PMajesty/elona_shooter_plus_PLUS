@@ -174,3 +174,10 @@ Confirm actual UI phases before dependent canvas actions; town Return to Title i
 direct and must not be followed by a guessed confirmation click. No product defect
 was established. The transient disposable notice was cleared and the user's whole
 adventure/collection restored exactly.
+
+Falling-rat work exposed two test assumptions. The controlled late-day setup
+aliased battle loot to the previous town's mission; production already copied it.
+Make fixtures follow that copy. A changed valid RNG sequence omitted Dragon in
+one40-day run, disproving the test's every-kind-per-seed requirement. Keep the full
+progression smoke and report its actual encounters; retain separate per-kind and
+seeded mission coverage. Do not search for a seed merely to restore a reassuring count.

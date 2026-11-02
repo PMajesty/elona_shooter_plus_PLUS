@@ -15,6 +15,7 @@ import { readFlashSharedObject } from './flash-shared-object.ts';
 import { TITLES, nextTitle } from './titles.ts';
 import { Simulation, type SimulationState, type EnemyState, type SimulationEvent } from './simulation.ts';
 import { WORLD } from './content.ts';
+import { RAT_DROP_BODY_X, RAT_DROP_SHADOW, ratDropLocalPoint } from './bird-drop.ts';
 import { weaponPresentation } from './combat-stats.ts';
 import { SAVE_SLOTS, readSelectedSlot, selectSaveSlot, deleteSaveSlot, exportSave, readMute, readSave, readProfile, storeProfile, canSaveAdventure, clearSave, storeMute, storeSave } from './storage.ts';
 import { saveSlotLabel } from './save-slots.ts';
@@ -88,6 +89,7 @@ class ElonaScene extends Phaser.Scene {
   private root!: Phaser.GameObjects.Container;
   private hud = new Map<string, Phaser.GameObjects.Text>();
   private enemySprites = new Map<number, Phaser.GameObjects.Image | OriginalAlly>();
+  private ratShadows = new Map<number, Phaser.GameObjects.Image>();
   private enemyRageSprites = new Map<number, Phaser.GameObjects.Image>();
   private enemyHitSprites = new Map<number, Phaser.GameObjects.Image[]>();
   private bossFrames = new Map<number, number>();
@@ -234,6 +236,7 @@ class ElonaScene extends Phaser.Scene {
     this.heroAimCursor = undefined; delete container.dataset.heroSettings; delete container.dataset.heroAutomatic;
     for (const arrow of this.enemyArrowSprites.values()) arrow.container.destroy(true);
     this.enemyArrowSprites.clear();
+    for (const shadow of this.ratShadows.values()) shadow.destroy(); this.ratShadows.clear();
     this.enemySprites.clear(); this.enemyRageSprites.clear(); this.enemyHitSprites.clear(); this.bossFrames.clear(); this.bossBars.clear(); this.projectileSprites.clear(); this.hud.clear(); this.effects = []; this.hotbar = [];
     this.bowSound?.destroy(); this.bowSound = undefined;
     for (const entry of this.chainSounds.values()) entry.sound.destroy();
@@ -695,10 +698,12 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private enemyClip(enemy: Readonly<EnemyState>): string {
+    if (enemy.dropping) return 'droppedRatBody';
     return enemy.kind === 'boss' ? 'charaPic' : enemy.kind === 'dropped-rat' ? 'enemy_rat' : `enemy_${enemy.kind}`;
   }
 
   private enemyFrame(enemy: Readonly<EnemyState>, key: string): string {
+    if (enemy.dropping) return String(enemy.dropFrame ?? 1);
     const texture = this.textures.get(key);
     if (enemy.kind === 'boss') return String(enemy.appearance * 10 + (enemy.bossAction === 2 ? 5 + Math.floor(enemy.frame / 4) % 2 : 1));
     return texture?.has(String(enemy.frame)) ? String(enemy.frame) : '1';
@@ -794,6 +799,7 @@ class ElonaScene extends Phaser.Scene {
       if (!manifest.clips[key]) continue;
       present.add(enemy.uid);
       let sprite = enemy.kind === 'boss' ? this.syncBossActor(enemy) : this.enemySprites.get(enemy.uid);
+      if (sprite instanceof Phaser.GameObjects.Image && sprite.texture.key !== key) { sprite.destroy(); this.enemySprites.delete(enemy.uid); sprite = undefined; }
       if (!sprite) {
         sprite = this.clip(key, enemy.frame, enemy.x, enemy.y);
         if (sprite) this.enemySprites.set(enemy.uid, sprite);
@@ -804,10 +810,20 @@ class ElonaScene extends Phaser.Scene {
         sprite.setFrame(this.enemyFrame(enemy, key));
         const scale = enemy.large ? 1.25 : 1;
         sprite.setScale(scale);
-        if (enemy.bomb) sprite.setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setPosition(enemy.x, enemy.y).setAngle(enemy.bomb.rotation);
+        if (enemy.dropping) sprite.setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setPosition(enemy.x + RAT_DROP_BODY_X, enemy.y + enemy.dropY!).setAngle(enemy.dropRotation!);
+        else if (enemy.bomb) sprite.setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setPosition(enemy.x, enemy.y).setAngle(enemy.bomb.rotation);
         else sprite.setPosition(enemy.x - asset.originX * scale, enemy.y - asset.originY * scale);
       }
       sprite.setAlpha(enemy.hp <= 0 && enemy.deathTicks > 99 ? Math.pow(0.96, enemy.deathTicks - 99) : 1);
+      if (enemy.dropping) {
+        const shadowAsset = manifest.clips.partyShadow;
+        let shadow = this.ratShadows.get(enemy.uid);
+        if (!shadow) { shadow = this.clip('partyShadow', 1, 0, 0)!; this.ratShadows.set(enemy.uid, shadow); }
+        shadow.setOrigin(shadowAsset.originX / shadowAsset.frameWidth, shadowAsset.originY / shadowAsset.frameHeight)
+          .setPosition(enemy.x + RAT_DROP_SHADOW.x, enemy.y + RAT_DROP_SHADOW.y)
+          .setScale(RAT_DROP_SHADOW.scaleX, RAT_DROP_SHADOW.scaleY).setAlpha(sprite.alpha);
+        this.root.bringToTop(shadow);
+      } else { this.ratShadows.get(enemy.uid)?.destroy(); this.ratShadows.delete(enemy.uid); }
       this.root.bringToTop(sprite);
       if (enemy.rageEffectFrame) {
         const rageAsset = manifest.clips.enemyRage;
@@ -839,6 +855,7 @@ class ElonaScene extends Phaser.Scene {
       }
     }
     for (const [uid, sprite] of this.enemySprites) if (!present.has(uid)) { sprite.destroy(); this.enemySprites.delete(uid); }
+    for (const [uid, shadow] of this.ratShadows) if (!present.has(uid)) { shadow.destroy(); this.ratShadows.delete(uid); }
     for (const [uid, sprite] of this.enemyRageSprites) if (!present.has(uid)) { sprite.destroy(); this.enemyRageSprites.delete(uid); }
     for (const [uid, sprites] of this.enemyHitSprites) if (!present.has(uid)) { for (const sprite of sprites) sprite.destroy(); this.enemyHitSprites.delete(uid); }
     this.paintBossBars();
@@ -965,6 +982,10 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private hitTest(enemy: Readonly<EnemyState>, x: number, y: number): boolean {
+    if (enemy.dropping) {
+      const point = ratDropLocalPoint(enemy, x, y), asset = manifest.clips.droppedRatBody;
+      return this.texturePixelHit('droppedRatBody', String(enemy.dropFrame ?? 1), point.x + asset.originX, point.y + asset.originY);
+    }
     if (enemy.kind === 'boss') {
       // Снаряды проверяют цель после её шага AI; поза и поворот должны быть уже текущими.
       const actor = this.syncBossActor(enemy);
@@ -1021,7 +1042,7 @@ class ElonaScene extends Phaser.Scene {
       // cancelReload после последнего автоматического патрона получает уже нулевой таймер.
       if (event.automaticReload && manual) delete sound.reloaded;
     }
-    Object.assign(sound, { 'sister-killed': 'soundKilled', select: 'soundReloaded1', beep: 'soundBeep', repair: 'soundRepair1', protection: 'soundPray1', defend: 'soundDefend', pulse: 'soundPuls', 'enemy-arrow': 'soundBow1', 'enemy-rage': 'soundRampageEnemy', 'lava-explode': 'soundExp1' });
+    Object.assign(sound, { 'enemy-drop': 'soundDrop', 'sister-killed': 'soundKilled', select: 'soundReloaded1', beep: 'soundBeep', repair: 'soundRepair1', protection: 'soundPray1', defend: 'soundDefend', pulse: 'soundPuls', 'enemy-arrow': 'soundBow1', 'enemy-rage': 'soundRampageEnemy', 'lava-explode': 'soundExp1' });
     if (event.message) status.textContent = event.message;
     if (event.type === 'kill') {
       const enemy = this.sim?.state.enemies.find(candidate => candidate.uid === event.enemyUid);

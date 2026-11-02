@@ -10,6 +10,15 @@ import extract_web_assets as assets
 KINDS = ['cata', 'spider', 'ghost', 'ogre', 'knight', 'bird', 'tank', 'dino', 'dragon']
 
 
+def extract_dropped_rat(xml, manifest):
+    symbol = 1258
+    for suffix, directory, extra in [('png', assets.CACHE, []), ('svg', assets.ROOT / '.build/svg-bounds', ['-format', 'sprite:svg'])]:
+        if not list(directory.glob(f'DefineSprite_{symbol}*')):
+            assets.ffdec(['-ignorebackground', '-selectid', symbol, *extra, '-export', 'sprite', directory, assets.SOURCE], 'dropped-rat-' + suffix)
+    sprite = next(tag for tag in xml.find('tags') if tag.get('type') == 'DefineSpriteTag' and tag.get('spriteId') == str(symbol))
+    manifest['clips']['droppedRatBody'] = assets.atlas('droppedRatBody', symbol, sprite)
+
+
 def main():
     if hashlib.sha256(assets.SOURCE.read_bytes()).hexdigest() != assets.ORIGINAL_SHA256:
         raise ValueError('Original SWF differs from the preserved baseline')
@@ -24,6 +33,7 @@ def main():
                           '-export', 'sprite', root, assets.SOURCE], 'campaign-enemies-' + suffix)
     manifest_path = assets.DEST / 'manifest.json'
     manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+    extract_dropped_rat(xml, manifest)
     timelines = {}
     for kind, symbol in symbols.items():
         sprite = sprites[symbol]

@@ -8,6 +8,7 @@ import { ENEMY_TIMELINES } from '../src/enemy-timelines.ts';
 import { prepareEarlyTown } from '../src/town-preparation.ts';
 import { SAVE_VERSION } from '../src/save-version.ts';
 import { generateHenchman } from '../src/party.ts';
+import { RAT_DROP_BODY_X, ratDropLocalPoint } from '../src/bird-drop.ts';
 
 const seeded = (seed: number) => () => {
   seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5;
@@ -21,7 +22,7 @@ function atDay(day: number): Simulation {
   sim.state.activeMission = Object.fromEntries(Object.keys(sim.state.activeMission).map(key => [key, mission[key as keyof typeof mission]])) as SimulationState['activeMission'];
   sim.state.waves = generateLowLevelWaves(mission, day, random).waves;
   sim.state.waveIndex = mission.wave; sim.state.bossWave = mission.bossWave;
-  sim.state.loot = mission.loot;
+  sim.state.loot = [...mission.loot];
   if (day > 1) {
     const town = prepareEarlyTown(random, day - 1);
     town.mission = mission;
@@ -29,6 +30,64 @@ function atDay(day: number): Simulation {
   }
   return sim;
 }
+
+test('bird drops retain ground anchors, drift, tilt and aerial AI targeting from the original enemy rules', () => {
+  const sim = atDay(35); sim.state.spawnTimer = 100000;
+  sim['spawnEnemy']('bird'); const bird = sim.state.enemies[0]; bird.x = 120; bird.y = 70;
+  const originalRandom = sim['random'].bind(sim); sim['random'] = () => 0.99;
+  sim['tickEnemy'](bird); sim['random'] = originalRandom;
+  const rat = sim.state.enemies.find(enemy => enemy.kind === 'dropped-rat')!;
+  assert.ok(rat.dropping); assert.equal(rat.y + rat.dropY!, 100);
+  assert.ok(rat.y >= 170); assert.equal(rat.dropDrift, -0.5); assert.equal(rat.dropFrame, 1);
+  assert.ok(sim.events.some(event => event.type === 'enemy-drop'));
+  const before = { x: rat.x, y: rat.dropY! };
+  sim['random'] = () => 0.96; sim['tickEnemy'](rat); sim['random'] = originalRandom;
+  assert.equal(rat.x, before.x - 0.5); assert.equal(rat.dropY, before.y + 1.5);
+  assert.equal(rat.dropRotation, -0.7); assert.equal(rat.dropDrift, 0.5);
+  assert.equal(sim.state.partyAI.targets[0][0].uid, rat.uid);
+  const local = ratDropLocalPoint(rat, rat.x + RAT_DROP_BODY_X, rat.y + rat.dropY!);
+  assert.ok(Math.abs(local.x) < 1e-10 && Math.abs(local.y) < 1e-10);
+  const knockX = rat.x, knockY = rat.dropY!;
+  rat.knockBack = 2; sim['random'] = () => 0.1; sim['tickEnemy'](rat); sim['random'] = originalRandom;
+  assert.ok(Math.abs(rat.x - (knockX - 1 / 40 - 1.1 / 2 - 0.2 + 0.5)) < 1e-10);
+  assert.equal(rat.knockBack, 1); assert.equal(rat.dropY, knockY + 1.5);
+  sim.toggleFireAtWill(); const ai = sim.state.heroAI!.state;
+  Object.assign(ai, { targetUid: rat.uid, cursorY: 200, aimTime: 10, aimCount: 100, shooting: false });
+  const expectedCursor = Math.trunc((200 + (rat.y + rat.dropY! - 200 + 1.5) / 10) * 20) / 20;
+  sim.tick(); assert.equal(ai.cursorY, expectedCursor);
+  const replay = Simulation.fromSave(JSON.parse(JSON.stringify(sim.toSave())));
+  for (let i = 0; i < 25; i++) { sim.tick(); replay.tick(); }
+  assert.deepEqual(sim.toSave(), replay.toSave());
+});
+
+test('killing an airborne rat stops drift, accelerates its fall and enters ordinary death on landing', () => {
+  const sim = atDay(35); sim['spawnEnemy']('dropped-rat'); const rat = sim.state.enemies[0];
+  rat.x = 220; rat.y = 250; rat.dropY = -6; rat.dropRotation = 7;
+  sim['damageEnemy'](rat, 1000000, false);
+  assert.equal(rat.frame, 2); assert.equal(rat.dropFrame, 16);
+  const rng = sim.state.rng;
+  sim['tickEnemy'](rat); assert.equal(rat.dropY, 2); assert.equal(rat.dropRotation, 0);
+  assert.equal(rat.x, 220); assert.equal(sim.state.rng, rng); assert.equal(rat.dropFrame, 17);
+  const copy = Simulation.fromSave(JSON.parse(JSON.stringify(sim.toSave())));
+  for (let i = 0; i < 2; i++) { sim['tickEnemy'](rat); copy['tickEnemy'](copy.state.enemies[0]); }
+  assert.equal(rat.dropping, undefined); assert.equal(rat.dropY, undefined);
+  assert.equal(rat.frame, 93); assert.equal(rat.deathTicks, 3); assert.equal(rat.shadowHit, false);
+  assert.deepEqual(sim.toSave(), copy.toSave());
+});
+
+test('legacy falling-rat saves migrate without RNG draws and malformed new fall state is refused', () => {
+  const sim = atDay(35); sim['spawnEnemy']('dropped-rat'); const saved = sim.toSave(), old = saved.enemies[0];
+  saved.version = 39; old.y = 100; old.fallTargetY = 250;
+  for (const key of ['dropping', 'dropY', 'dropDrift', 'dropRotation', 'dropFrame'] as const) delete old[key];
+  const migrated = Simulation.fromSave(saved).toSave(), rat = migrated.enemies[0];
+  assert.equal(rat.y, 250); assert.equal(rat.dropY, -150); assert.equal(rat.dropDrift, 0.5);
+  assert.equal(rat.fallTargetY, undefined); assert.equal(migrated.rng, saved.rng);
+  assert.deepEqual(Simulation.fromSave(migrated).toSave(), migrated);
+  for (const patch of [{ dropFrame: 15 }, { dropY: 17 }, { dropDrift: 1 }]) {
+    const bad = structuredClone(migrated); Object.assign(bad.enemies[0], patch);
+    assert.throws(() => Simulation.fromSave(bad), /dropped rat/);
+  }
+});
 
 test('shared mission rules generate every first-cycle encounter and all boss-day groups across seeded runs', () => {
   const kinds = new Set<EnemyKind>();
@@ -221,6 +280,6 @@ test('controlled equipment completes the full 40-day progression with natural wa
   }
   assert.ok(sim.startNextDay());
   assert.equal(sim.state.day, 41);
-  for (const kind of Object.keys(ENEMY_TIMELINES)) assert.ok(encountered.has(kind as EnemyKind), `Campaign never encountered ${kind}`);
-  console.log(`Controlled campaign: ${frames} simulation frames, ${encountered.size} enemy kinds, forty towns and save boundaries.`);
+  // Случайный выбор редких видов не гарантирует каждый вид за один цикл; выше проверены все виды отдельно.
+  console.log(`Controlled campaign: ${frames} simulation frames, ${encountered.size} enemy kinds (${[...encountered].sort().join(', ')}), forty towns and save boundaries.`);
 });

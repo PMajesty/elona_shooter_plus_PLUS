@@ -2315,6 +2315,21 @@
       "count": 1,
       "uniqueFrames": 1,
       "characterId": 2290
+    },
+    "droppedRatBody": {
+      "image": "sprites/droppedRatBody.png",
+      "json": "sprites/droppedRatBody.json",
+      "originX": 19.45,
+      "originY": 41.95,
+      "frameWidth": 32,
+      "frameHeight": 44,
+      "labels": {
+        "alive": 1,
+        "dead": 16
+      },
+      "count": 19,
+      "uniqueFrames": 4,
+      "characterId": 1258
     }
   },
   "sounds": {
