@@ -1,11 +1,12 @@
 import { TOWN_ACTIVITIES, museumIncome, type TownActivity, type TownEconomy } from './town-economy.ts';
+import { MEDALS } from './medals.ts';
 import { MAX_CAMPAIGN_DAY } from './missions.ts';
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
 import { CASTLE_UPGRADES, castleDamageMultiplier, castleLootMultiplier, castleRepairAmount, castleStorageLevel, castleTrainerMultiplier, castleUpgradeCost, castleUpkeep, type CastleUpgradeKind } from './castle-upgrades.ts';
 
-export type TownTab = 'mission' | 'castle' | 'shop' | 'characters' | 'equipment' | null;
+export type TownTab = 'mission' | 'castle' | 'shop' | 'characters' | 'equipment' | 'medals' | null;
 export type TownDialog = 'repair' | 'rest' | 'title' | null;
 interface Placement {
   x: number; y: number; scaleX: number; scaleY: number; rotationDegrees: number;
@@ -21,6 +22,7 @@ export interface TownLayout {
     names: string[]; disabledAlpha: number; affordableColor: string; unavailableColor: string; pageButtons: string[]; hitRect: number[] };
   repairDialog: { image: string; children: Record<string, Placement> };
   saleDialog: { image: string; children: Record<string, Placement> };
+  medals: { image: string; labelsImage: string; children: Record<string, Placement>; rowChildren: Record<string, Placement> };
   claimTitleAction: { x: number; y: number; cardClip: string; cardFrame: number; cardRotation: number; hoverScale: number; pinClip: string; text: string; children: Record<string, Placement> };
 }
 interface TownViewState {
@@ -31,10 +33,10 @@ interface TownViewState {
   town: { ap: number; preparation: string; mission?: { hire: boolean } } | null; inventory: (Item | null)[];
   pendingPartyAction: { kind: string } | null;
 }
-interface Callbacks { hire(): void; confirmHire(answer: boolean): void; castlePage(page: 0 | 1): void; activity(action: TownActivity): void; activityAvailable(action: TownActivity): boolean; select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; dismiss(): void; message(value: string): void }
+interface Callbacks { robVisitors(): void; medalPage(page: 0 | 1): void; hire(): void; confirmHire(answer: boolean): void; castlePage(page: 0 | 1): void; activity(action: TownActivity): void; activityAvailable(action: TownActivity): boolean; select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; dismiss(): void; message(value: string): void }
 
 /** Городские координаты и повороты берутся из исходного кадра 71 и его окон. */
-export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, dialog: TownDialog, castlePage: 0 | 1 = 0): Phaser.GameObjects.Container {
+export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, dialog: TownDialog, castlePage: 0 | 1 = 0, medalPage: 0 | 1 = 0): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName('town-view');
   const image = (key: string, x = 0, y = 0, placement?: Placement) => {
     const asset = manifest.images[key];
@@ -78,8 +80,8 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     if (item.type === ITEM_TYPE.use) root.add(scene.add.text(50 + index * 90, 366, `x${item.ammo}`, { fontFamily: 'Arial', fontSize: '11px', color: '#ffffff' }));
   });
   for (const [name, placement] of Object.entries(layout.navigation)) {
-    const enabled = ['mission', 'castle', 'shop', 'chara', 'equip'].includes(name);
-    const tab = name === 'chara' ? 'characters' : name === 'equip' ? 'equipment' : name as TownTab;
+    const enabled = ['mission', 'castle', 'shop', 'chara', 'equip', 'medal'].includes(name);
+    const tab = name === 'chara' ? 'characters' : name === 'equip' ? 'equipment' : name === 'medal' ? 'medals' : name as TownTab;
     button(placement.image, placement, () => enabled ? callbacks.select(tab) : callbacks.message('This town menu is not available in the current port yet.'), 0, 0, enabled);
   }
   if (tab === 'mission' || tab === 'castle') {
@@ -191,6 +193,30 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
       card.on('pointerout', () => card.setScale(1));
       card.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); if (available) callbacks.claimTitle(); });
     }
+  }
+  if (tab === 'medals') {
+    const panel = layout.medals, { x, y } = layout.menuPosition;
+    image(panel.image, x, 0);
+    button('button_windowClose', panel.children.closeButton, () => callbacks.select(null), x, y);
+    button('button_castlePage1', panel.children.page1, () => callbacks.medalPage(0), x, y);
+    button('button_castlePage2', panel.children.page2, () => callbacks.medalPage(1), x, y);
+    button('button_robVisitors', panel.children.act1, callbacks.robVisitors, x, y, (state.town?.ap ?? 0) >= 2);
+    image(panel.labelsImage, x, 0);
+    text(panel.children.lootText, `${state.earnedMedals.length} medals won`, x, y);
+    text(panel.children.hint2, 'Select a medal to view its requirements and bonus. Global carry-over and class unlocks are still being ported.', x, y);
+    const entries = Object.entries(MEDALS).filter(([id]) => Number(id) < 85 ? medalPage === 0 : medalPage === 1);
+    entries.forEach(([key, info], index) => {
+      const id = Number(key), earned = state.earnedMedals.includes(id);
+      const rowX = x + 145 + Math.trunc(index / 10) * 130;
+      const rowY = y + 130 + index % 10 * 20 + (index >= 20 ? 20 : 0);
+      image('medalRow', rowX, rowY).setAlpha(earned ? 1 : 0.3);
+      text(panel.rowChildren.medalName, info.name, rowX, rowY).setAlpha(earned ? 1 : 0.3);
+      const hit = scene.add.zone(rowX, rowY, 140, 20).setOrigin(0).setInteractive({ useHandCursor: true }).setName(`medal-row-${id}`);
+      root.add(hit);
+      const describe = () => callbacks.message(`${info.name}: ${earned ? info.earned : info.condition} — ${earned ? info.bonus : '????'}`);
+      hit.on('pointerover', describe);
+      hit.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); describe(); });
+    });
   }
   if (state.pendingPartyAction?.kind === 'henchman') {
     const outside = scene.add.zone(0, 0, 620, 380).setOrigin(0).setInteractive(); root.add(outside);

@@ -1,5 +1,6 @@
 import { generateEarlyTownRecruit } from './recruits.ts';
 import { generateHenchman } from './party.ts';
+import { MEDALS } from './medals.ts';
 import { fixedSearchRandom } from './town-search.ts';
 import { createTownEconomy, validTownEconomy, museumIncome, TOWN_ACTIVITIES, type TownEconomy, type TownActivity } from './town-economy.ts';
 import { ENEMY_TIMELINES, type EnemyTimeline } from './enemy-timelines.ts';
@@ -191,6 +192,7 @@ export class Simulation {
   }
 
   private initializePartyBattle(): void {
+    [10, 20, 35].forEach((day, index) => { if (this.state.day >= day) this.awardMedal(41 + index); });
     const e = this.state.economy;
     e.sisterWaves = e.sisters ? Array(this.state.waves.length + 1).fill(0) : [];
     for (let i = 0; i < e.sisters; i++) e.sisterWaves[1 + int(this.random() * this.state.waves.length)]++;
@@ -1289,7 +1291,7 @@ export class Simulation {
       this.state.perfectDays++;
       [1, 4, 7, 10].forEach((count, index) => { if (this.state.perfectDays >= count) this.awardMedal(60 + index); });
     }
-    if (player.level >= 10) this.awardMedal(67);
+    if (player.level >= 10) this.awardMedal({ hunter: 65, rogue: 66, sheriff: 67, militia: 68 }[player.classId]);
     const rewardShare = this.state.activeMission.hire ? 0.5 : 1;
     const fullReward = this.state.activeMission.reward;
     const reward = fullReward * rewardShare;
@@ -1409,9 +1411,10 @@ export class Simulation {
     const shopEngineer = this.state.partySkills.effects[120];
     this.refreshPartySkills();
     // До generateMission лавка использует старого Engineer; миссия и кандидат — новый кэш.
-    const prepared = prepareEarlyTown(() => this.random(), this.state.day, { priorOffers: this.state.lootOffers, recruitSlots, searched: previous?.searched, absorbFix: this.medalAbsorption(),
+    const { bonusAp = 0, ...prepared } = prepareEarlyTown(() => this.random(), this.state.day, { actionMedals: this.state.earnedMedals, priorOffers: this.state.lootOffers, recruitSlots, searched: previous?.searched, absorbFix: this.medalAbsorption(),
       smith: this.state.economy.smith, chickens: this.state.economy.chickens, shopEngineer, missionNegotiator: this.state.partySkills.effects[117], recruitEngineer: this.state.partySkills.effects[120] });
-    this.state.town = { ap: this.state.town.ap, preparation: 'ready', ...prepared };
+    this.state.town = { ap: this.state.town.ap + bonusAp, preparation: 'ready', ...prepared };
+    if (this.state.day >= 40) this.awardMedal(94);
     installCandidate(this.state.party, prepared.recruit);
     this.refreshPartySkills();
     // Общие слоты 0–7 теперь принадлежат лавке; отдельной копии истории трофеев не остаётся.
@@ -1570,7 +1573,36 @@ export class Simulation {
       message = `Enemies will have ${int(increase * 100)}% more HP tomorrow. Your mission reward is now ${town.mission.reward} gold pieces!`;
     }
     town.ap -= info.cost;
+    this.actionMedals();
     return { outcome: 'done', message };
+  }
+
+  private actionMedals(): void {
+    const e = this.state.economy;
+    if (e.prayers >= 15) this.awardMedal(80);
+    if (e.taunts >= 10) this.awardMedal(81);
+    if (e.parties >= 10) this.awardMedal(82);
+    if (e.robberies >= 20) this.awardMedal(84);
+  }
+
+  robMuseumVisitors(): { outcome: 'done' | 'not-enough-ap' | 'unavailable'; message: string } {
+    if (!this.partyMutationAvailable()) return { outcome: 'unavailable', message: 'Museum visitors are only available in town.' };
+    const state = this.state, town = state.town as ReadyTown, e = state.economy;
+    if (town.ap < 2) return { outcome: 'not-enough-ap', message: "You don't have enough action points!" };
+    town.ap -= 2; town.flags.robbed++; e.robberies++;
+    const robber = state.partySkills.effects[122];
+    let amount = (1 + state.day * 5 + this.random() * Math.min(state.day * 10 + 100, 600 + robber * 10)) * (100 + robber) / 100 / town.flags.robbed;
+    // Медаль выдаётся после выплаты: двадцатое ограбление ещё не получает её бонус.
+    if (state.earnedMedals.includes(84)) amount *= 1.25;
+    const gold = int(amount);
+    e.visitorsRobbed += int(amount / 10) + 1;
+    state.gold += gold; state.totalMoney += gold; this.actionMedals();
+    return { outcome: 'done', message: `Slaughter! ${town.flags.robbed > 1 ? "There're only few people left in the museum, but you manage to collect" : 'You collect'} ${gold} gold pieces.` };
+  }
+
+  visitMuseum(): boolean {
+    if (!this.partyMutationAvailable() || this.state.earnedMedals.length < 25 || this.state.earnedMedals.includes(86)) return false;
+    this.awardMedal(86); return true;
   }
 
   private searchTown(): string {
@@ -1755,7 +1787,7 @@ export class Simulation {
       if (!record(mission) || Object.entries({ level, fixedLv: level, strength: 0, powerOrg: 800 + level * 120, ...(value.version < 15 || value.day === 1 ? { reward: 600 + level * 20 } : {}), spawnRate: Math.max(5, 15 - level / 5), ...(Number(value.version) < 27 || value.day === 1 ? { hpFix: 1, dmgFix: 1, expFix: 1 } : {}), bossDay: level % 10 === 9 }).some(([key, expected]) => mission[key] !== expected) || !Number.isInteger(mission.reward) || (Number(value.version) < 27 ? ![0, 0.01, ...(Number(value.day) >= 5 ? [0.02] : []), ...(Number(value.day) >= 8 ? [0.03] : []), ...(Number(value.day) >= 11 ? [0.04] : [])].includes(Number(mission.absorbFix)) : !finite(mission.absorbFix) || mission.absorbFix < 0 || mission.absorbFix > 0.24) || (value.day === 1 && mission.absorbFix !== 0)) throw new Error('Invalid active mission.');
       if (Number(value.version) >= 27 && ['hpFix', 'dmgFix', 'expFix'].some(key => !finite(mission[key]) || Number(mission[key]) < 1 || Number(mission[key]) > 100)) throw new Error('Invalid mission bonuses.');
       if (!finite(value.resultBefore) || !Number.isInteger(value.perfectDays) || Number(value.perfectDays) < 0 || Number(value.perfectDays) > Number(value.day) || !Number.isInteger(value.bossesSpawned) || Number(value.bossesSpawned) < 0 || Number(value.bossesSpawned) > Number(value.day) * 10) throw new Error('Invalid campaign counters.');
-      if (!Array.isArray(value.earnedMedals) || new Set(value.earnedMedals).size !== value.earnedMedals.length || !value.earnedMedals.includes(40) || value.earnedMedals.some(id => ![40, 50, 51, 52, 53, 54, 55, 60, 61, 62, 63, 67, 70, 71, 72, 92, 93].includes(id)) || (value.earnedMedals.includes(62) && (value.version < 14 || Number(value.day) < 7 || Number(value.perfectDays) < 7 || (value.day === 7 && !['victory', 'town'].includes(String(value.phase)))))) throw new Error('Invalid earned medals.');
+      if (!Array.isArray(value.earnedMedals) || new Set(value.earnedMedals).size !== value.earnedMedals.length || !value.earnedMedals.includes(40) || value.earnedMedals.some(id => !Number.isInteger(id) || !Object.hasOwn(MEDALS, id)) || (value.earnedMedals.includes(62) && (value.version < 14 || Number(value.day) < 7 || Number(value.perfectDays) < 7 || (value.day === 7 && !['victory', 'town'].includes(String(value.phase)))))) throw new Error('Invalid earned medals.');
     }
     if (!Array.isArray(value.waves) || value.waves.length !== generateLowLevelMission(Number(value.day) - 1, Number(value.day), () => 0).wave || value.waves.some(wave => !record(wave) || !Array.isArray(wave.enemies) || wave.enemies.length > 1000 || wave.enemies.some(kind => typeof kind !== 'string' || !Object.hasOwn(ENEMIES, kind)) || !Array.isArray(wave.delays) || wave.delays.length !== wave.enemies.length || wave.delays.some(delay => !finite(delay) || delay < 0 || delay > 1000) || !finite(wave.initialCount) || wave.initialCount < wave.enemies.length)) throw new Error('Invalid wave state.');
     if ((Number(value.version) < 23 || Number(value.day) < 8) && (value.waves as unknown as WaveState[]).some(wave => wave.enemies.includes('lava'))) throw new Error('Lava is unavailable in this saved mission.');
@@ -1828,7 +1860,13 @@ export class Simulation {
     if (value.version < 27) simulation.state.economy = createTownEconomy();
     else {
       if (value.version < 28 && record(simulation.state.economy)) Object.assign(simulation.state.economy, { searchTraining: 0, fame: 0 });
+      if (value.version < 30 && record(simulation.state.economy)) Object.assign(simulation.state.economy, { robberies: 0, visitorsRobbed: 0 });
       if (!validTownEconomy(simulation.state.economy)) throw new Error('Invalid town economy.');
+    }
+    // Ранний порт ошибочно выдавал всем героям Sheriff's Award вместо медали их класса.
+    if (value.version < 30 && simulation.state.player.classId !== 'sheriff' && simulation.state.player.level >= 10) {
+      const medal = { hunter: 65, rogue: 66, militia: 68 }[simulation.state.player.classId];
+      simulation.state.earnedMedals = simulation.state.earnedMedals.map(id => id === 67 ? medal : id);
     }
     if (value.version < 22) simulation.state.trainerLevel = 0;
     if (value.version < 25) simulation.state.player.grenadeCount = 325;

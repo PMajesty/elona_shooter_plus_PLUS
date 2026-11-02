@@ -65,6 +65,20 @@
       "originX": 0,
       "originY": 0
     },
+    "townMedals": {
+      "file": "screens/townMedals.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "medalRow": {
+      "file": "screens/medalRow.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
     "gene": {
       "file": "screens/gene.png",
       "width": 620,
@@ -137,6 +151,13 @@
     },
     "townEquipmentLabels": {
       "file": "screens/townEquipmentLabels.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
+    },
+    "townMedalsLabels": {
+      "file": "screens/townMedalsLabels.png",
       "width": 620,
       "height": 380,
       "originX": 0,
@@ -821,6 +842,30 @@
       "originX": 32.45,
       "originY": 31.45,
       "characterId": 1630
+    },
+    "button_robVisitors": {
+      "file": "buttons/button_robVisitors.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1831
+    },
+    "button_robVisitors_over": {
+      "file": "buttons/button_robVisitors_over.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1831
+    },
+    "button_robVisitors_down": {
+      "file": "buttons/button_robVisitors_down.png",
+      "width": 63,
+      "height": 83,
+      "originX": 31.45,
+      "originY": 41.45,
+      "characterId": 1831
     },
     "gameOver": {
       "file": "images/gameOver.png",

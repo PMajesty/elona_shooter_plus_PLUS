@@ -2,11 +2,12 @@ export interface TownEconomy {
   smith: number; museum: number; chickens: number; sisters: number; villa: number; specialTrainer: number;
   eggsCollected: number; sistersExploded: number; heroTraining: number;
   searchTraining: number; fame: number;
+  robberies: number; visitorsRobbed: number;
   prayers: number; parties: number; taunts: number; sisterWaves: number[];
 }
 export function createTownEconomy(): TownEconomy {
   return { smith: 0, museum: 0, chickens: 0, sisters: 0, villa: 0, specialTrainer: 0,
-    eggsCollected: 0, sistersExploded: 0, heroTraining: 0, searchTraining: 0, fame: 0, prayers: 0, parties: 0, taunts: 0, sisterWaves: [] };
+    eggsCollected: 0, sistersExploded: 0, heroTraining: 0, searchTraining: 0, fame: 0, robberies: 0, visitorsRobbed: 0, prayers: 0, parties: 0, taunts: 0, sisterWaves: [] };
 }
 export function validTownEconomy(value: unknown): value is TownEconomy {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;

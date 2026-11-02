@@ -5,6 +5,7 @@ import { generateEarlyTownRecruit, type FirstTownRecruit } from './recruits.ts';
 export interface FirstTownMission extends LowLevelMission {}
 
 export interface FirstTownPreparationInput {
+  actionMedals?: readonly number[];
   smith?: number; chickens?: number; specialSale?: boolean;
   priorOffers?: readonly (Readonly<Item> | null)[];
   recruitSlots?: Readonly<Record<number, Item | null>>;
@@ -28,6 +29,7 @@ export function validTownPreparationEffects(value: unknown): value is TownPrepar
 }
 
 export interface FirstTownPreparation {
+  bonusAp?: number;
   shop: (Item | null)[];
   cards: number[];
   mission: FirstTownMission;
@@ -66,12 +68,13 @@ export function prepareEarlyTown(random: () => number, day: number, input: First
   const retainedRecruitItems: Record<number, Item> = {};
   for (const [slot, item] of Object.entries(input.recruitSlots ?? {})) if (item) retainedRecruitItems[Number(slot)] = { ...item };
   recruit.items = { ...retainedRecruitItems, ...recruit.items };
-  // При выбранных исходных условиях townMedalBonus/startTownMedal не добавляют бросков или эффектов.
+  const bonusAp = [80, 81, 82].reduce((sum, medal) => sum + Number(Boolean(input.actionMedals?.includes(medal)) && random() > 0.6), 0);
+  // Флаги нового дня сбрасываются после выплаты бонусных AP за медали.
   const flags = { specialSale: 0, egg: !(input.chickens && input.chickens > 0), partyHeld: false, prayed: false, robbed: 0, taunted: 0 } as const;
   // В оригинале этот бросок идёт после автоматического сохранения frame71; вызывающий код сохраняет весь готовый результат.
   const searched = input.searched ?? Math.trunc(random() * 1000);
   const explicitEffects = input.shopEngineer !== undefined || input.missionNegotiator !== undefined || input.recruitEngineer !== undefined;
-  return { shop, cards, mission, recruit, flags, searched,
+  return { shop, cards, mission, recruit, flags, searched, ...(bonusAp ? { bonusAp } : {}),
     ...(explicitEffects ? { preparationEffects: effects } : {}) };
 }
 

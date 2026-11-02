@@ -13,7 +13,7 @@ export function validTownPreparation(value: unknown, validItem: (item: unknown) 
   if (!record(value) || !Array.isArray(value.shop) || value.shop.length !== 8 || Array.from(value.shop).some(item => item !== null && !validItem(item))) return false;
   if (!Array.isArray(value.cards) || value.cards.length !== 5 || value.cards.some(id => !integer(id, -7, -1))) return false;
   for (let id = -7; id <= -1; id++) if (value.cards.filter(card => card === id).length > (id === -1 ? 3 : 1)) return false;
-  if (!integer(value.searched, 0, Number.MAX_SAFE_INTEGER - 1) || !record(value.flags) || !fieldsEqual(value.flags, { specialSale: 0, robbed: 0 }) || ['egg', 'partyHeld', 'prayed'].some(key => typeof (value.flags as Record<string, unknown>)[key] !== 'boolean') || !integer(value.flags.taunted, 0, 100)) return false;
+  if (!integer(value.searched, 0, Number.MAX_SAFE_INTEGER - 1) || !record(value.flags) || value.flags.specialSale !== 0 || !integer(value.flags.robbed, 0, 1000000) || ['egg', 'partyHeld', 'prayed'].some(key => typeof (value.flags as Record<string, unknown>)[key] !== 'boolean') || !integer(value.flags.taunted, 0, 100)) return false;
   // Снимок принадлежит моменту подготовки: найм/увольнение позднее не меняют готовую награду.
   if (value.preparationEffects !== undefined && !validTownPreparationEffects(value.preparationEffects)) return false;
   const negotiator = value.preparationEffects?.missionNegotiator ?? 0;

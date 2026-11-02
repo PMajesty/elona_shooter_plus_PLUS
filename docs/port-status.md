@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v29, four starting classes, Days1–40**.
+Updated 2026-11-02. Current local build: **v30, four starting classes, Days1–40**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -35,6 +35,14 @@ Mission Hire now contracts a temporary Militia henchman in the fourth ally slot,
 without occupying a permanent house. He joins at Rest at level10 + the town day,
 uses a Rapid Bowgun and Big Gun40, fires at will and leaves at settlement. The
 mission reward (including the perfect bonus) is halved; source wages also apply.
+Museum navigation now opens both original medal pages with all38 original medal
+descriptions, earned/locked states and selectable details. Rob visitors costs2 AP,
+uses the Robber skill, has diminishing daily payouts and grants medal84 at20
+robberies; its25% bonus begins on the next payout. Prayer/Provoker/Boomer action
+medals grant their original next-town AP chances. Class awards now identify the
+actual hero; older erroneous Sheriff awards migrate without rerolling. Day10/20/35
+and first-cycle Day40 medals are also recorded. Global carry-over and class
+unlocks remain incomplete and the Museum panel labels that boundary.
 
 Sound defaults to muted, remembers the user's preference and displays an explicit
 `Sound: muted` / `Sound: on` state. Browser testing uses one retained tab. The
@@ -42,7 +50,7 @@ interruption closed the earlier temporary tab; the replacement is retained for r
 
 ## Validation
 
-- The complete suite passes **444 tests**. The controlled full-cycle run completed
+- The complete suite passes **451 tests**. The controlled full-cycle run completed
   all40 days, rewards, towns and Rest/save boundaries over97293 simulation frames,
   encountering all19 implemented enemy kinds. Powerful test equipment/HP removes
   difficulty as a test obstacle; this is not a full-campaign balance claim.
@@ -61,6 +69,9 @@ interruption closed the earlier temporary tab; the replacement is retained for r
   a full permanent party, source NPC generation, actual autonomous shooting,
   projectile/state replay, normal/perfect half rewards, wages and departure.
   Search AP above14 now also survives Rest's previous-town save boundary.
+- Museum tests cover original payout formulas, Robber skill, twentieth/next payout
+  medal boundary, daily reset/lifetime counters, refusals preserving RNG/state,
+  action thresholds and AP chances, class-award migration and malformed imports.
 - Class combat restores identical full state/events after JSON restoration,
   including Little Girl's AI and the Militia cooldown. Invalid identities/counters
   are rejected. Prior Sheriff migration preserves inventory and combat RNG.
@@ -88,6 +99,13 @@ interruption closed the earlier temporary tab; the replacement is retained for r
   `.build/browser-qa/henchman-verification.json` and `henchman-battle.png`.
   The user's save is restored paused/muted with every field equal expected
   migration (`henchman-restoration.json`, tick674/HP40/gold209).
+- V30 browser checks opened both medal pages, read earned medal details and
+  performed two actual robbery clicks. Full exports equal expected simulation:
+  AP14→10, gold10000→10035, lifetime robberies19→21 and medal84 awarded.
+  Evidence: `.build/browser-qa/museum-verification.json` and `museum.png`.
+  No console errors; the same muted tab was used. Every restored user-save field
+  equals expected migration (tick674, HP40, gold209). These are source-led checks,
+  not a new instrumented-original comparison or a whole-game parity claim.
 - Natural class smoke tests use rectangle hit regions, like the older opening
   battle tests. They do not prove browser contour/pixel parity, balance across the
   full campaign or a performance advantage over Flash.
@@ -102,7 +120,7 @@ in [historical verification](port-verification.json) and Git history.
 1. Later campaign cycles beyond Day40, strength/large-enemy variants and the
    systems below. Day40 town prepares the next mission, but Rest is guarded until
    those cycles are implemented. This is not an endless-campaign claim.
-2. Event-card actions, museum robbery,
+2. Event-card actions,
    Ragnarok and remaining global economy/medal systems. Museum income currently
    counts the medals known to this port; global medal carry-over is incomplete.
 3. Unlockable hero classes (Sniper, Ranger, Duelist, Noble), original multiple save
@@ -128,6 +146,9 @@ without assignment); its message reports stronger enemies but does not alter HP.
 Search event text is concise English; original event-modal composition is deferred.
 Unspent training XP can exceed1000 until the usual progression check; saved XP/AP
 validation now accepts legitimate search gains instead of early-game-only limits.
+Medal text and art are extracted from the original; descriptions of global
+starting bonuses/class unlocks are retained while those cross-game systems remain
+unported. Robbery outcomes use concise English status text, as other new actions do.
 
 ## Working direction
 

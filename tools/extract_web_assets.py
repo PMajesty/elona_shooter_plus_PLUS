@@ -49,6 +49,7 @@ BUTTONS = {"button_newGame": 2521, "button_continue": 2542, "button_help": 2579,
            "button_partyPortrait": 130, "button_partyDismiss": 1696,
            "button_partyRecycle": 1758, "button_partyRestock": 1762,
            "button_castlePage1": 1625, "button_castlePage2": 1630}
+BUTTONS["button_robVisitors"] = 1831
 FORCE = False
 
 
@@ -579,6 +580,9 @@ def town_layout(xml, sprites):
                         "children": placements(sprites[1995].find("subTags"), 40)},
             "castle": {"characterId": 1995, "frame": 54, "image": "townCastle", "labelsImage": "townCastleLabels",
                        "children": placements(sprites[1995].find("subTags"), 54)},
+            "medals": {"characterId": 1995, "frame": 85, "image": "townMedals", "labelsImage": "townMedalsLabels",
+                       "children": placements(sprites[1995].find("subTags"), 85),
+                       "rowChildren": placements(sprites[2151].find("subTags"), 1)},
             "castleUpgrades": {"characterId": 2192, "clip": "castleUpgradeTiles", "children": upgrade_children,
                                "x": 150, "y": 140, "columns": 4, "stepX": 100, "stepY": 110,
                                "names": ["Fix Wall", "Wall", "Sandbag", "Storage", "House", "Looter", "Repairman", "Trainer", "Smith", "Museum", "Chicken", "Sister", "Villa", "Sp.Trainer", "N/A", "N/A"],
@@ -623,6 +627,23 @@ def town_layout(xml, sprites):
                                  "children": placements(sprites[2431].find("subTags"), 1)},
             "newTitleDialog": {"characterId": 2437, "frame": 1, "image": "eventNewTitle",
                                "cardFrame": 3, "children": placements(sprites[2437].find("subTags"), 1)}}
+
+
+def write_medal_definitions():
+    source = (ROOT / "src/original/MainTimeline.as").read_text(encoding="utf-8")
+    ids = {name: int(value) for name, value in re.findall(r"public const (_medal\w+):int = (\d+);", source)}
+    body = source.split("public function getMedalInfo", 1)[1].split("public function calcParty", 1)[0]
+    medals = {}
+    for name, array in re.findall(r"if\(param1 == (_medal\w+)\)\s*\{\s*_loc2_ = (\[.*?\]);", body, re.S):
+        fields = json.loads(array.replace("\\'", "'"))
+        medals[ids[name]] = dict(zip(("name", "condition", "earned", "bonus"), fields))
+    if len(medals) < 30:
+        raise ValueError("Original medal descriptions were not extracted")
+    text = "// Исходные определения getMedalInfo; генерируется tools/extract_web_assets.py.\n"
+    text += "export interface MedalInfo { name: string; condition: string; earned: string; bonus: string }\n"
+    text += "export const MEDALS: Readonly<Record<number, MedalInfo>> = "
+    text += json.dumps(dict(sorted(medals.items())), ensure_ascii=False, indent=2) + ";\n"
+    (ROOT / "web/src/medals.ts").write_text(text, encoding="utf-8")
 
 
 def main():
@@ -693,6 +714,9 @@ def main():
           "orderText", "recruitText", "dismissText", "costText", "order", "fo", "act1", "actRef1", "optHint", "optBoss", "optWall"}, (0, -22)),
         ("townEquipment", sprites[1995].find("subTags"), 71,
          {"closeButton", "hint2", "popup", "warning", "actHelp", "act1", "act2", "actRef1", "actRef2"}, (0, -22)),
+        ("townMedals", sprites[1995].find("subTags"), 85,
+         {"closeButton", "hint2", "hint", "lootText", "act1", "actRef1", "page1", "page2", "kongMc", "armorbt"}, (0, -22)),
+        ("medalRow", sprites[2151].find("subTags"), 1, {"medalName"}, (0, 0)),
         ("gene", sprites[1995].find("subTags"), 125, omit_gene, (0, -26)),
         ("result", sprites[1995].find("subTags"), 14, omit_result, (0, -26)),
         ("loot", sprites[1995].find("subTags"), 89, omit_loot, (0, -26)),
@@ -705,7 +729,8 @@ def main():
                                 ("townShopRefreshLabel", 80, {"actRef1"}),
                                 ("townShopUpgradeLabel", 80, {"actRef2"}),
                                 ("townCharactersLabels", 63, {"actRef1"}),
-                                ("townEquipmentLabels", 71, {"actRef1", "actRef2"})]:
+                                ("townEquipmentLabels", 71, {"actRef1", "actRef2"}),
+                                ("townMedalsLabels", 85, {"actRef1"})]:
         selected = [tag for tag in placed_frame(sprites[1995].find("subTags"), frame)
                     if tag.get("name") in labels]
         manifest["images"][name] = static_screen(xml, name, selected, offset=(0, -22))
@@ -758,6 +783,7 @@ def main():
     write_display_widths(collision)
     manifest["collisionGeometry"] = "collision-geometry.json"
     (DEST / "town-layout.json").write_text(json.dumps(town_layout(xml, sprites), indent=2) + "\n", encoding="utf-8")
+    write_medal_definitions()
     manifest["townLayout"] = "town-layout.json"
     (DEST / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     summary = {

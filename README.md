@@ -27,7 +27,10 @@ unless you previously enabled it; its button explicitly displays the current sta
   Free Repair, first title/salary and Rest. Mission Hire contracts a temporary
   Militia henchman with a Rapid Bowgun for half the next mission reward; he joins
   through Rest and leaves at settlement. Sister bombs can be shot to explode.
-- One browser save with Continue and JSON import/export. Version29 accepts prior
+- Museum/Medals navigation, both original medal pages and English descriptions;
+  robbery for 2 AP with daily diminishing payouts, Robber skill/medal bonuses,
+  saved counters and action medals with their next-town AP chances.
+- One browser save with Continue and JSON import/export. Version30 accepts prior
   browser saves; original Flash saves require a future converter.
 
 Remaining work and validation limits are in [port status](docs/port-status.md).
@@ -73,6 +76,9 @@ Search checks cover every event family, full inventory, AP/XP boundaries, retain
 random sequence, talent progress and fame income at the next settlement.
 Temporary-hire checks cover confirmation, a full permanent party, actual AI fire,
 projectile replay, half rewards, wages, departure and old-save migration.
+Museum checks cover payouts, medal thresholds, daily resets, action AP bonuses,
+correct hero-class awards and migration. Global medal carry-over between new
+games and unlockable hero classes remain incomplete.
 Test counts do not establish whole-game completeness or full pixel parity.
 
 ## Original assets and recovery

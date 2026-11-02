@@ -67,6 +67,7 @@ class ElonaScene extends Phaser.Scene {
   private companionBowSounds = new Map<number, Phaser.Sound.BaseSound>();
   private selectedCharacter = 0;
   private castlePage: 0 | 1 = 0;
+  private medalPage: 0 | 1 = 0;
   private ammoFill?: Phaser.GameObjects.Image;
   private selection?: Phaser.GameObjects.Rectangle;
   private cursor?: Phaser.GameObjects.Graphics;
@@ -915,6 +916,13 @@ class ElonaScene extends Phaser.Scene {
     }
     this.reset('town');
     this.root.add(createTownView(this, this.sim.state, manifest, this.cache.json.get('town-layout') as TownLayout, {
+      medalPage: page => { this.medalPage = page; this.playSound('soundClick1'); this.showTown('medals'); },
+      robVisitors: () => {
+        const result = this.sim!.robMuseumVisitors();
+        if (result.outcome === 'done') { this.playSound('soundGun2'); this.saveGame(false); this.showTown('medals'); }
+        else this.playSound('soundBeep');
+        status.textContent = result.message;
+      },
       hire: () => {
         if (this.sim!.requestMissionHire() === 'previewed') { this.playSound('soundScroll1'); this.saveGame(false); this.showTown('mission'); }
         else { this.playSound('soundBeep'); status.textContent = 'A henchman is already contracted for this mission.'; }
@@ -924,7 +932,7 @@ class ElonaScene extends Phaser.Scene {
         this.playSound(outcome === 'contracted' ? 'soundComplete' : 'soundClick1'); this.saveGame(false); this.showTown('mission');
         status.textContent = outcome === 'contracted' ? "Hired Gun: You've hired a henchman for this mission. He will join when you rest." : 'Henchman contract cancelled.';
       },
-      select: next => { this.playSound('soundScroll1'); this.showTown(next); },
+      select: next => { if (next === 'medals' && this.sim!.visitMuseum()) this.saveGame(false); this.playSound('soundScroll1'); this.showTown(next); },
       actionHover: () => this.playSound('soundCard1'),
       message: value => { status.textContent = value; },
       castlePage: page => { this.castlePage = page; this.showTown('castle'); },
@@ -979,7 +987,7 @@ class ElonaScene extends Phaser.Scene {
           } else { this.showTown('mission'); status.textContent = 'The next day is not available yet.'; }
         } else this.showTown(dialog === 'title' ? 'mission' : 'castle');
       },
-    }, tab, dialog, this.castlePage));
+    }, tab, dialog, this.castlePage, this.medalPage));
     if (tab === 'characters' || tab === 'equipment') this.showPartyPanel(tab);
     if (tab === 'shop' && this.sim.state.town.preparation === 'ready') {
       const changed = (sound = 'soundPay1') => { this.playSound(sound); this.saveGame(false); this.showTown('shop'); };
@@ -1053,6 +1061,8 @@ class ElonaScene extends Phaser.Scene {
       trainerMultiplier: castleTrainerMultiplier(this.sim.state), trainerExperienceIncreasePercent: Math.trunc(castleTrainerMultiplier(this.sim.state) * 100 - 100) });
     container.dataset.title = String(this.sim.state.title);
     container.dataset.townTab = tab ?? 'none';
+    container.dataset.medalPage = String(this.medalPage);
+    container.dataset.earnedMedals = JSON.stringify(this.sim.state.earnedMedals);
     container.dataset.repairDialog = String(dialog === 'repair');
     container.dataset.townDialog = dialog ?? 'none';
     container.dataset.inventory = JSON.stringify(this.sim.state.inventory.map(item => isOccupiedItem(item) ? item.id : null));
@@ -1064,6 +1074,7 @@ class ElonaScene extends Phaser.Scene {
       this.ambient = this.sound.add('soundBgTown', { volume: 0.3, loop: true }); this.ambient.play();
     }
     status.textContent = pending?.kind === 'upgrade' ? 'Compare the weapon before and after upgrading. Upgrade keeps mounted mods. Yes spends the shown gold and 4 AP.'
+      : tab === 'medals' ? 'Museum: select a medal to read its requirements. Rob visitors costs 2 AP; repeated attempts pay less today.'
       : pending?.kind === 'mod' ? 'Yes mounts the MOD. No or clicking elsewhere swaps these two inventory items.'
       : upgradeSelecting ? 'Choose an owned weapon to upgrade. Click elsewhere to cancel. Upgrade keeps mounted mods.'
       : dialog === 'repair' ? 'The castle walls are repaired. Click to continue.'

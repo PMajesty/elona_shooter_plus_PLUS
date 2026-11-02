@@ -2,33 +2,33 @@
   "schemaVersion": 1,
   "updated": "2026-11-02",
   "currentRelease": {
-    "saveVersion": 29,
+    "saveVersion": 30,
     "verificationStatus": "passed",
-    "implementedCampaign": "Four starting classes, Days1-40, both Castle pages, seven Mission activities and temporary henchman contracts through combat/settlement.",
+    "implementedCampaign": "Four starting classes, Days1-40, both Castle pages, town activities, temporary hire, both Museum medal pages, robbery and action-medal AP bonuses.",
     "publication": {
       "status": "local-build",
       "url": "http://127.0.0.1:5175/elona/",
-      "bundle": "assets/index-JalaLeoF.js",
-      "priorCheckpoint": "3eba640"
+      "bundle": "assets/index-BQTEwRYq.js",
+      "priorCheckpoint": "1ee39f3"
     },
     "automatedVerification": {
-      "testsPassed": 444,
+      "testsPassed": 451,
       "fullSuite": true,
       "controlledCampaignFrames": 97293,
       "controlledCampaignDays": 40,
       "economyTests": 9,
       "releaseBuildPassed": true,
       "searchTests": 6,
-      "temporaryHireTests": 6
+      "temporaryHireTests": 6,
+      "museumTests": 7
     },
     "browserVerification": [
-      "Pending Mission Hire question restored; ordinary Yes and Rest create the source temporary henchman; complete exports match expected state",
-      "Original user save restored paused/muted with full state equal expected migration"
+      "Both Museum pages and earned medal details; two actual robbery clicks match full expected simulation state",
+      "Original user save restored paused/muted with every field equal expected migration"
     ],
     "browserEvidence": [
-      ".build/browser-qa/henchman-verification.json",
-      ".build/browser-qa/henchman-restoration.json",
-      ".build/browser-qa/henchman-battle.png"
+      ".build/browser-qa/museum-verification.json",
+      ".build/browser-qa/museum.png"
     ],
     "knownGaps": "docs/port-status.md"
   },
@@ -740,7 +740,7 @@
         "web/tests/ninth-town-reference.test.ts:Day9 normal/perfect title0/1 settlement"
       ],
       "unverified": [
-        "Museum global medal carry-over and robbery",
+        "Museum global medal carry-over",
         "Full original economy/difficulty comparison",
         "Remaining global achievement bonuses"
       ]
@@ -755,7 +755,7 @@
         "MainTimeline:5410 generateCard"
       ],
       "status": "partial",
-      "implemented": "Mission Prayer, Dinner, Party, Collect eggs, Taunt, Train and Go searching with original AP/formulas, saved search sequence, search event families, talent growth, fame income and next-battle bonuses. Stock/recruit refresh for2 AP. Concise English outcome messages; effects persist without rerolling.",
+      "implemented": "Mission Prayer, Dinner, Party, Collect eggs, Taunt, Train and Go searching with original AP/formulas, saved search sequence, search event families, talent growth, fame income and next-battle bonuses. Stock/recruit refresh for2 AP. Concise English outcome messages; effects persist without rerolling. Museum robbery now applies original AP, skill/counter payout formulas and the Robber medal bonus.",
       "evidence": [
         "web/tests/town-reference.test.ts: original action state/RNG comparisons",
         "web/tests/town.test.ts: action preconditions, AP costs and save/resume",
@@ -784,14 +784,15 @@
         "MainTimeline:11782 difficulty options"
       ],
       "status": "partial",
-      "implemented": "Campaign saves retain earned medal IDs, perfect-day count and cumulative boss-spawn history. Normal battle start awards medal40; critical-kill thresholds 10/30/50 award medals70/71/72; the first perfect day awards medal60 before generating the next mission, adding 0.01 absorption there. Sheriff level10 has the source medal67 condition. These campaign flags do not implement global unlocks or future-start bonuses. Alternative modes and starts remain unavailable. Four perfect days award medal61 before future mission preparation; historical activeMission protection remains unchanged. Seven perfect days award medal62 before future preparation; its additional0.01 absorption does not retroactively alter activeMission. Save validation accepts and preserves this legitimate earned state. Day8 battle preserves the prepared0.03 absorption when medal62 was earned previously; an eighth perfect completion does not grant medal63, whose source threshold is ten. Nine perfect completions still do not grant medal63; the next perfect and day-start milestones require10. Historical prepared absorption remains separate from newly earned flags.",
+      "implemented": "Campaign saves retain earned medal IDs, perfect-day count and cumulative boss-spawn history. Normal battle start awards medal40; critical-kill thresholds 10/30/50 award medals70/71/72; the first perfect day awards medal60 before generating the next mission, adding 0.01 absorption there. Sheriff level10 has the source medal67 condition. These campaign flags do not implement global unlocks or future-start bonuses. Alternative modes and starts remain unavailable. Four perfect days award medal61 before future mission preparation; historical activeMission protection remains unchanged. Seven perfect days award medal62 before future preparation; its additional0.01 absorption does not retroactively alter activeMission. Save validation accepts and preserves this legitimate earned state. Day8 battle preserves the prepared0.03 absorption when medal62 was earned previously; an eighth perfect completion does not grant medal63, whose source threshold is ten. Nine perfect completions still do not grant medal63; the next perfect and day-start milestones require10. Historical prepared absorption remains separate from newly earned flags. V30 displays all38 original medal descriptions on both Museum pages, records day/action/class medals and applies action AP/robbery bonuses. Legacy incorrect class awards migrate to the actual hero. Global carry-over and class unlocks remain incomplete.",
       "evidence": [
         "web/docs/rest-notes.md: source audit of early medal timing, future-start bonuses and fireworks discrepancy",
         "web/tests/day-two.test.ts: a first perfect result on Day 2 changes only the next prepared mission's absorption",
         "web/tests/second-town-reference.test.ts: original medal60 absent/present mission preparation",
         "web/tests/castle-reference.test.ts: original absorption truncation and minimum damage",
         "web/tests/day-seven-save.test.ts:seventh-perfect result/town, historical versus prepared absorption, and save continuity",
-        "web/tests/day-eight-save.test.ts:medal62 historical protection and no medal63 at eight perfect completions"
+        "web/tests/day-eight-save.test.ts:medal62 historical protection and no medal63 at eight perfect completions",
+        "web/tests/museum.test.ts: payouts, thresholds, daily/save boundaries, AP chances and class migration; museum-verification.json: full browser export equality"
       ],
       "unverified": [
         "Global medal/index persistence, playable-class unlocks and inherited bonuses on a later New Game",

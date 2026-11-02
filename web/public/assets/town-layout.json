@@ -922,6 +922,231 @@
       }
     }
   },
+  "medals": {
+    "characterId": 1995,
+    "frame": 85,
+    "image": "townMedals",
+    "labelsImage": "townMedalsLabels",
+    "children": {
+      "page1": {
+        "characterId": 1625,
+        "x": 516.0,
+        "y": 113.0,
+        "matrix": [
+          1.0007935,
+          0.0,
+          0.0,
+          0.99838257,
+          516.0,
+          113.0
+        ],
+        "scaleX": 1.0007935,
+        "scaleY": 0.99838257,
+        "rotationDegrees": 0.0
+      },
+      "page2": {
+        "characterId": 1630,
+        "x": 516.0,
+        "y": 148.0,
+        "matrix": [
+          1.0007935,
+          0.0,
+          0.0,
+          0.99838257,
+          516.0,
+          148.0
+        ],
+        "scaleX": 1.0007935,
+        "scaleY": 0.99838257,
+        "rotationDegrees": 0.0
+      },
+      "lootText": {
+        "characterId": 1827,
+        "x": 224.0,
+        "y": 86.0,
+        "matrix": [
+          1.0006104,
+          0.0,
+          0.0,
+          1.0024109,
+          224.0,
+          86.0
+        ],
+        "scaleX": 1.0006104,
+        "scaleY": 1.0024109,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 12.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            190.85,
+            32.9
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">Visitors make a toast,</font></p><p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">&quot;To our King and brave soldiers!&quot;</font></p>"
+        }
+      },
+      "act1": {
+        "characterId": 1831,
+        "x": 454.0,
+        "y": 99.0,
+        "matrix": [
+          0.96902466,
+          -0.2194519,
+          0.2194519,
+          0.96902466,
+          454.0,
+          99.0
+        ],
+        "scaleX": 0.9935632481637622,
+        "scaleY": 0.9935632481637622,
+        "rotationDegrees": -12.760349401406534
+      },
+      "actRef1": {
+        "characterId": 1834,
+        "x": 453.0,
+        "y": 89.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          453.0,
+          89.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "closeButton": {
+        "characterId": 1497,
+        "x": 528.0,
+        "y": 90.95,
+        "matrix": [
+          0.99790955,
+          0.0,
+          0.0,
+          0.99790955,
+          528.0,
+          90.95
+        ],
+        "scaleX": 0.99790955,
+        "scaleY": 0.99790955,
+        "rotationDegrees": 0.0
+      },
+      "hint2": {
+        "characterId": 1614,
+        "x": 166.0,
+        "y": 348.0,
+        "matrix": [
+          1.000412,
+          0.0,
+          0.0,
+          1.0,
+          166.0,
+          348.0
+        ],
+        "scaleX": 1.000412,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 1535,
+          "fontSize": 11.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            340.85,
+            26.1
+          ],
+          "align": 0,
+          "color": "#330000",
+          "initialHtml": "Click a skill to set as a focused skill.\\rThis is multiline test"
+        }
+      },
+      "hint": {
+        "characterId": 1657,
+        "x": 231.0,
+        "y": 36.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          231.0,
+          36.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "kongMc": {
+        "characterId": 1835,
+        "x": 486.0,
+        "y": 347.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          486.0,
+          347.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      },
+      "armorbt": {
+        "characterId": 1839,
+        "x": 414.65,
+        "y": 334.75,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          414.65,
+          334.75
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0
+      }
+    },
+    "rowChildren": {
+      "medalName": {
+        "characterId": 2144,
+        "x": 33.0,
+        "y": 2.0,
+        "matrix": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          33.0,
+          2.0
+        ],
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "rotationDegrees": 0.0,
+        "text": {
+          "fontId": 682,
+          "fontSize": 13.0,
+          "bounds": [
+            -2.0,
+            -2.0,
+            107.0,
+            18.0
+          ],
+          "align": 0,
+          "color": "#000000",
+          "initialHtml": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"13\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">Reloading</font></p>"
+        }
+      }
+    }
+  },
   "castleUpgrades": {
     "characterId": 2192,
     "clip": "castleUpgradeTiles",
