@@ -3,7 +3,7 @@
 A TypeScript/Phaser browser remake of Elona Shooter Plus 1.3.0.4.
 The current local build supports **all eight original hero classes** and
 **repeating campaign cycles**, including Casual and Hardcore modes. This is an
-incomplete remake; alternative starts, carry-over and remaining systems are still being ported.
+incomplete remake; remaining medal effects, titles and the original save-slot UI are still being ported.
 
 Open [the local game](http://127.0.0.1:5175/elona/).
 Original artwork, English text, audio and credits are retained. Sound starts muted
@@ -97,7 +97,7 @@ Temporary-hire checks cover confirmation, a full permanent party, actual AI fire
 projectile replay, half rewards, wages, departure and old-save migration.
 Museum checks cover payouts, medal thresholds, daily resets, action AP bonuses,
 correct hero-class awards and migration. Unlock checks cover the global collection,
-starting bonuses and actual class combat effects. Alternative starts, some medal effects and
+starting bonuses and actual class combat effects. Some medal effects, later titles and
 the original six save slots remain incomplete.
 Additional controlled combat crosses Day40/80 through ordinary rewards, towns,
 Rest and JSON restores. Source-formula checks cover later cycles and Day1000 save
@@ -108,6 +108,12 @@ Mode checks cover Casual combat/settlement and replay, Hardcore save policy,
 day20/40/80 medals, independent records and unchanged normal-save migration.
 Game MOD checks measure actual movement, spread/recoil, XP, waves, rewards and
 party-based weapon generation limits, plus AP, repeating sales and save replay.
+Carry Over is available after defeat from Day2 outside Hardcore: restore the last
+town, add battle earnings (minimum200 GP) and1 AP, with original medal restrictions.
+Checks cover full restoration, repeated retries, JSON replay and invalid checkpoints.
+Legacy battle saves gain a Carry Over town snapshot at their next Rest.
+The source's alternative-start branches have no reachable player control; see the
+[source audit](docs/port-status.md).
 Test counts do not establish whole-game completeness or full pixel parity.
 
 ## Original assets and recovery

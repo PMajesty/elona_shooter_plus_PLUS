@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v35, eight hero classes, repeating cycles**.
+Updated 2026-11-02. Current local build: **v36, Carry Over, eight hero classes**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -44,6 +44,14 @@ Laptop difficulty and Community Compilation. Their combat, loot, town and saved
 state effects are connected. MOD sale days now repeat every10 days as in source;
 Community Compilation retains the sale for refreshes on that day.
 
+Carry Over is connected to the defeat screen from Day2 outside Hardcore. The first
+use asks the original confirmation; later retries are direct. It restores the full
+town snapshot taken before Rest, adds the hero's battle earnings (minimum200 GP)
+and1 AP, and applies the original medal restrictions. Earned medals remain in the
+independent collection. The town snapshot travels with battle exports/Continue;
+repeated retries do not nest snapshots. Earlier battle saves have no town history,
+so Carry Over becomes available after their next Rest.
+
 Town coverage includes shop buy/sell, upgrades/MOD mounting, permanent companions
 with equipment/orders/AI/growth/wages, temporary Mission Hire, both Castle pages,
 repair, Smith stock, Museum income, chickens/eggs, Sister bombs, Villa/Party and
@@ -58,8 +66,10 @@ Continue and JSON backups work; imported/continued battles open paused.
 
 ## Validation and limits
 
-- **480 tests passed**, with typechecking and production build passing. Latest
-  bundle: assets/index-CvdXBdyD.js. New MOD checks cover selection/reset without
+- **485 tests passed**, with typechecking and production build passing. Latest
+  bundle: assets/index-DmWw82Ak.js. Carry Over checks cover full-town restoration,
+  minimum/earned money, AP, medal restrictions, repeated JSON replay and refusal
+  of Day1/Hardcore/incompatible/malformed checkpoints. Existing MOD checks cover selection/reset without
   hero/RNG rerolls, combined Casual/Intense power, both skipped batch branches,
   actual movement, spread/recoil, range penalty, manual XP, boss rewards, party
   weapon-skill limits, explicit upgrade behavior, fixed Active AP, sale refreshes,
@@ -79,6 +89,11 @@ Continue and JSON backups work; imported/continued battles open paused.
   1175 opening power. Continue retained its entire envelope using observed pointer
   coordinates as input. No console errors. Evidence:
   .build/browser-qa/game-mods-verification.json and game-mods.png.
+- The muted V36 browser check verified Carry Over Cancel preserves the entire
+  envelope, Yes restores the exact expected town, Rest captures it and Continue
+  preserves the battle and checkpoint. Recursive checkpoint import was refused
+  without changing the active envelope. No console errors. Evidence:
+  .build/browser-qa/carry-over-verification.json and carry-over-confirmation.png.
 - Earlier browser evidence covers reload/combat/results/town, activities, hires,
   Museum, class unlocks, Ragnarok and both difficulty modes. Hardcore battle export
   is refused and Continue has no battle save; its town checkpoint loads and Rest
@@ -98,8 +113,8 @@ that the app's crash cause was fixed.
 
 1. Long-session stability/performance and difficulty evidence beyond the first
    cycle; the current Day1000 save safety boundary remains an intentional limit.
-2. Alternative starts, carry-over and remaining medal
-   effects/triggers, including recycling/modding bonuses and decorative fireworks.
+2. Remaining medal effects/triggers, including recycling/modding bonuses and
+   decorative fireworks; later honorary titles and salary progression.
 3. Original six save slots/global slot UI, deletion and Flash save conversion.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
    camera shake, decorative boss reticle, some ranged spell effects/frame sounds,
@@ -118,6 +133,11 @@ player action that reveals those cards or enables cardCount was found. The actua
 Mission board uses actList's activities, already connected here. These dormant
 functions are not treated as missing normal gameplay without contrary evidence;
 the generated records and their RNG draws remain preserved.
+
+Alternative-start audit: optionAltStart is initialized to0 and never assigned a
+different value in the preserved source; no player control was found. Its debug
+branches are not treated as missing normal gameplay without contrary evidence.
+Carry Over is reachable and has been implemented separately.
 
 ## Working direction
 

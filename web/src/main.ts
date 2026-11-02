@@ -5,7 +5,7 @@ import Phaser from 'phaser';
 import { HERO_CLASSES, heroClassUnlocked, isHeroClass, type HeroClass } from './hero-classes.ts';
 import { createProfile, mergeProfile, mergeProfiles, validProfile, type GlobalProfile } from './profile.ts';
 import { MEDALS } from './medals.ts';
-import { Simulation, type EnemyState, type SimulationEvent } from './simulation.ts';
+import { Simulation, type SimulationState, type EnemyState, type SimulationEvent } from './simulation.ts';
 import { WORLD } from './content.ts';
 import { weaponPresentation } from './combat-stats.ts';
 import { exportSave, readMute, readSave, readProfile, storeProfile, canSaveAdventure, clearSave, storeMute, storeSave } from './storage.ts';
@@ -28,7 +28,7 @@ interface ImageAsset { file: string; width: number; height: number; originX: num
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number; frameAlpha?: number[] }
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual }
-interface PortSave { format: 'elona-shooter-browser'; version: number; appearance: number; simulation: unknown; profile?: GlobalProfile }
+interface PortSave { format: 'elona-shooter-browser'; version: number; appearance: number; simulation: unknown; profile?: GlobalProfile; carryCheckpoint?: unknown }
 type Screen = 'title' | 'gene' | 'mods' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
@@ -51,6 +51,7 @@ let gameScene: ElonaScene;
 class ElonaScene extends Phaser.Scene {
   screen: Screen = 'title';
   sim?: Simulation;
+  private carryCheckpoint?: SimulationState;
   appearance = 0;
   paused = false;
   muted = readMute();
@@ -147,7 +148,7 @@ class ElonaScene extends Phaser.Scene {
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Eight hero classes and repeating campaign cycles, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Sniper, Ranger, Duelist and Noble unlock through class medals; the browser medal collection carries into new games and is included in exports. Importing a current-format backup also restores that collection. Casual and Hardcore modes are playable. All seven original Game MODs are selectable at creation. Alternative starts and original multiple save slots are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Eight hero classes and repeating campaign cycles, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Sniper, Ranger, Duelist and Noble unlock through class medals; the browser medal collection carries into new games and is included in exports. Importing a current-format backup also restores that collection. Casual and Hardcore modes are playable. All seven original Game MODs are selectable at creation. Carry Over restores the last town after defeat from Day 2 onward (outside Hardcore); most medals are then restricted. Original multiple save slots are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
     document.querySelector<HTMLButtonElement>('#import-save')!.disabled = false;
   }
@@ -183,6 +184,8 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.pendingTownAction; delete container.dataset.pendingLootAction; delete container.dataset.upgradePreview;
     delete container.dataset.party; delete container.dataset.partySelection; delete container.dataset.pendingPartyAction; delete container.dataset.companionVisuals;
     delete container.dataset.castleUpgrades;
+    delete container.dataset.carryOverAvailable; delete container.dataset.carryOverConfirmation;
+    container.dataset.carryOver = String(Boolean(this.sim?.state.carryOver));
   }
 
   private image(key: string, x = 0, y = 0): Phaser.GameObjects.Image | undefined {
@@ -392,6 +395,7 @@ class ElonaScene extends Phaser.Scene {
   private simulationOptions() { return { hitTest: (enemy: Readonly<EnemyState>, x: number, y: number) => this.hitTest(enemy, x, y) }; }
 
   startGame(): void {
+    this.carryCheckpoint = undefined;
     if (!this.sim?.startOpeningBattle()) this.sim = new Simulation(Date.now(), this.simulationOptions());
     this.enterBattle();
     this.saveGame(false);
@@ -883,10 +887,33 @@ class ElonaScene extends Phaser.Scene {
     } else {
       this.image('gameOver', 300, 205);
       this.zone(120, 175, 400, 70, () => this.showTitle());
-      status.textContent = 'The castle fell. Start a new game to try again.';
+      const available = this.sim.canCarryOver(this.carryCheckpoint);
+      container.dataset.carryOverAvailable = String(available);
+      if (available) this.labelButton(234, 265, 'Carry Over', () => {
+        if (state.carryOver) this.useCarryOver(); else this.showCarryConfirmation();
+      }, 155);
+      status.textContent = available ? 'Carry Over restores the last town, adds earned battle money (at least 200 GP) and 1 AP. Most new medals become unavailable.'
+        : 'The castle fell. Start a new game to try again.';
     }
     this.hud.get('gold')?.setText(String(state.gold)); this.hud.get('hp')?.setText(`${state.castleHp}/${state.castleMaxHp}`);
     container.dataset.phase = state.phase;
+  }
+
+  private showCarryConfirmation(): void {
+    this.showOutcome();
+    container.dataset.carryOverConfirmation = 'true';
+    this.root.add(this.add.rectangle(310, 210, 430, 135, 0xe1d0aa).setStrokeStyle(2, 0x796a4f));
+    this.zone(95, 142, 430, 135, () => {});
+    this.text(119, 160, 'Do you really want to use Carry Over option?', 16).setWordWrapWidth(385);
+    this.originalButton('button_dialogYes', 245, 235, () => this.useCarryOver());
+    this.originalButton('button_dialogNo', 350, 235, () => this.showOutcome());
+  }
+
+  private useCarryOver(): void {
+    if (!this.sim?.carryOver(this.carryCheckpoint)) return;
+    this.carryCheckpoint = this.sim.toSave();
+    this.showTown(); this.saveGame(false);
+    status.textContent = 'Carry Over Mode: town restored, battle earnings (at least 200 GP) and 1 AP added. Most new medals are unavailable.';
   }
 
   private updateHud(): void {
@@ -1065,7 +1092,9 @@ class ElonaScene extends Phaser.Scene {
       dismiss: () => {
         this.playSound('soundClick1');
         if (dialog === 'rest') {
+          const checkpoint = this.sim!.toSave();
           if (this.sim!.startNextDay()) {
+            this.carryCheckpoint = this.sim!.state.mode === 'hardcore' ? undefined : checkpoint;
             // procEventDialog воспроизводит второй щелчок внутри ветки сна.
             this.playSound('soundClick1'); this.enterBattle(); this.saveGame(false); this.playSound('soundBattleBegin');
             status.textContent = `Day ${this.sim!.state.day} begins.`;
@@ -1173,6 +1202,7 @@ class ElonaScene extends Phaser.Scene {
       : tab === 'equipment' ? 'Click an item, then a destination slot. Companions need the weapon’s required skill. Dropping outside cancels the move.'
       : tab === 'shop' ? (saleSlot === null ? 'Click stock, then an empty owned slot to buy. Drop an owned item outside its slots to sell; confirmation is required.' : 'Confirm the sale with Yes, or click elsewhere to keep the item.')
       : `Castle has two upgrade pages. Mission activities prepare bonuses for the next battle; shop and recruit refresh each cost 2 AP. ${this.sim.state.day < MAX_CAMPAIGN_DAY ? `Mission → Rest begins Day ${this.sim.state.day + 1}.` : 'The browser save safety limit has been reached.'}`;
+    if (this.sim.state.carryOver) status.textContent = `Carry Over Mode — most new medals are unavailable. ${status.textContent}`;
   }
 
   private showPartyPanel(tab: 'characters' | 'equipment'): void {
@@ -1270,7 +1300,10 @@ class ElonaScene extends Phaser.Scene {
     if (!this.sim || ['title', 'gene', 'mods'].includes(this.screen)) return undefined;
     this.profile = mergeProfile(this.profile, this.sim.state);
     if (!canSaveAdventure(this.sim.state)) return undefined;
-    return { format: 'elona-shooter-browser', version: SAVE_VERSION, appearance: this.appearance, simulation: this.sim.toSave(), profile: structuredClone(this.profile) };
+    // Город хранится рядом с приключением, поэтому повторные переносы не вкладывают снимки друг в друга.
+    const checkpoint = this.sim.state.phase === 'town' ? undefined : this.carryCheckpoint;
+    return { format: 'elona-shooter-browser', version: SAVE_VERSION, appearance: this.appearance, simulation: this.sim.toSave(), profile: structuredClone(this.profile),
+      ...(checkpoint && this.sim.state.mode !== 'hardcore' ? { carryCheckpoint: structuredClone(checkpoint) } : {}) };
   }
 
   saveGame(notify = true): boolean {
@@ -1289,14 +1322,16 @@ class ElonaScene extends Phaser.Scene {
     return stored;
   }
 
-  private parseSave(raw: unknown, ignoreProfileError = false): { simulation: Simulation; appearance: number; profile?: GlobalProfile } {
+  private parseSave(raw: unknown, ignoreProfileError = false): { simulation: Simulation; appearance: number; profile?: GlobalProfile; carryCheckpoint?: SimulationState } {
     const save = raw as Partial<PortSave> | null;
     if (!save || save.format !== 'elona-shooter-browser' || !supportedSaveVersion(save.version) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
     const validCollection = validProfile(save.profile);
     if (save.profile !== undefined && !validCollection && !ignoreProfileError) throw new Error('This save contains an invalid medal collection.');
     const simulation = Simulation.fromSave(save.simulation, this.simulationOptions());
     if (!canSaveAdventure(simulation.state)) throw new Error('Hardcore games can only be restored in town.');
-    return { simulation, appearance: save.appearance!, ...(validCollection ? { profile: structuredClone(save.profile) } : {}) };
+    const carryCheckpoint = save.carryCheckpoint === undefined ? undefined : simulation.readCarryCheckpoint(save.carryCheckpoint);
+    if (carryCheckpoint && save.version! < 36) throw new Error('Invalid Carry Over save version.');
+    return { simulation, appearance: save.appearance!, ...(validCollection ? { profile: structuredClone(save.profile) } : {}), ...(carryCheckpoint ? { carryCheckpoint } : {}) };
   }
 
   continueGame(): void {
@@ -1311,6 +1346,7 @@ class ElonaScene extends Phaser.Scene {
     if (validated.profile) this.profile = mergeProfiles(this.profile, validated.profile);
     this.profile = mergeProfile(this.profile, validated.simulation.state); if (storeProfile(this.profile)) delete this.profileRead.warning;
     this.sim = validated.simulation; this.appearance = validated.appearance;
+    this.carryCheckpoint = validated.carryCheckpoint;
     if (this.sim.state.phase === 'battle') { this.enterBattle(); this.togglePause(); }
     else this.showOutcome();
     status.textContent = 'Saved game restored.';

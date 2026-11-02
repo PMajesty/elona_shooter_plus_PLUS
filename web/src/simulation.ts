@@ -1,4 +1,4 @@
-import { validGameMods, type GameMods } from './game-mods.ts';
+import { GAME_MODS, validGameMods, type GameMods, type GameMod } from './game-mods.ts';
 import { generateEarlyTownRecruit } from './recruits.ts';
 import { generateHenchman } from './party.ts';
 import { MEDALS } from './medals.ts';
@@ -49,6 +49,7 @@ export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCoun
 export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'> & { hire?: true; ragnarok?: true };
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
 export interface SimulationState {
+  carryOver?: true;
   mods?: GameMods;
   mode?: Exclude<GameMode, 'normal'>;
   version: typeof SAVE_VERSION; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: number; tick: number; timerRemainder: number; rng: number; nextUid: number;
@@ -406,7 +407,37 @@ export class Simulation {
   }
 
   private awardMedal(id: number): void {
+    // В оригинале Carry Over блокирует боевые, классовые и городские награды, но не значки.
+    if (this.state.carryOver && (id < 85 || [92, 94, 95, 96, 97].includes(id))) return;
     if (!this.state.earnedMedals.includes(id)) this.state.earnedMedals.push(id);
+  }
+
+  readCarryCheckpoint(value: unknown): SimulationState {
+    const saved = Simulation.fromSave(value, this.options).state;
+    const day = this.state.day - (this.state.phase === 'town' ? 0 : 1);
+    if (this.state.mode === 'hardcore' || saved.phase !== 'town' || saved.day !== day || saved.town?.preparation !== 'ready'
+      || saved.pendingTownAction || saved.pendingPartyAction || saved.mode !== this.state.mode
+      || saved.player.classId !== this.state.player.classId || JSON.stringify(saved.hero) !== JSON.stringify(this.state.hero)
+      || saved.carryOver !== this.state.carryOver
+      || (Object.keys(GAME_MODS) as GameMod[]).some(key => saved.mods?.[key] !== this.state.mods?.[key])) throw new Error('Invalid Carry Over town checkpoint.');
+    return structuredClone(saved);
+  }
+
+  canCarryOver(checkpoint: unknown): boolean {
+    if (this.state.phase !== 'defeat' || this.state.day < 2 || this.state.mode === 'hardcore') return false;
+    try { this.readCarryCheckpoint(checkpoint); return true; } catch { return false; }
+  }
+
+  carryOver(checkpoint: unknown): boolean {
+    if (!this.canCarryOver(checkpoint)) return false;
+    const saved = this.readCarryCheckpoint(checkpoint);
+    // loadGame возвращает всё состояние города; только заработок героя и один AP переносятся вперёд.
+    saved.gold += Math.max(200, this.state.gold - this.state.resultBefore);
+    saved.town!.ap++;
+    saved.carryOver = true;
+    saved.earnedMedals = [...new Set([...saved.earnedMedals, ...this.state.earnedMedals])];
+    this.state = saved; this.events = [];
+    return true;
   }
 
   private medalAbsorption(): number { return [60, 61, 62, 63].filter(id => this.state.earnedMedals.includes(id)).length / 100; }
@@ -1832,6 +1863,7 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
+    if (record(value) && (value.carryCheckpoint !== undefined || value.carryOver !== undefined && (Number(value.version) < 36 || value.carryOver !== true || value.mode === 'hardcore'))) throw new Error('Invalid Carry Over state.');
     if (!record(value) || !supportedSaveVersion(value.version) || (!validCampaignDay(value.day) || (value.version < 32 && Number(value.day) > 40) || (value.version < 26 && Number(value.day) > 9) || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7) || (value.version < 23 && value.day === 8) || (value.version < 24 && value.day === 9)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
     if (value.mode !== undefined && (Number(value.version) < 34 || !['casual', 'hardcore'].includes(String(value.mode)))) throw new Error('Invalid game mode.');
     if (value.mods !== undefined && (Number(value.version) < 35 || !validGameMods(value.mods))) throw new Error('Invalid Game MODs.');
