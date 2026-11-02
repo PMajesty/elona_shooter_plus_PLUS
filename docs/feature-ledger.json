@@ -5,7 +5,7 @@
     "saveVersion": 15,
     "verificationStatus": "passed",
     "implementedCampaign": "Seven connected Sheriff days plus permanent hiring, equipment, autonomous companions, orders, progression, wages and party persistence. All nine generated classes can be hired and fight; one-companion house capacity remains. Day8 combat is disabled.",
-    "publication": "Corrected v15 published locally and browser-verified at http://127.0.0.1:5175/elona/: all300 candidate, live and archive files match; bundle assets/index-Do-bjyfx.js. Final production New Game and exact actual v14→v15 restoration passed without console errors.",
+    "publication": "Corrected v15 published locally and browser-verified at http://127.0.0.1:5175/elona/: all 300 candidate, live and archive files match; bundle assets/index-Do-bjyfx.js. Final production New Game and exact actual v14→v15 restoration passed without console errors.",
     "automatedVerification": {
       "status": "passed",
       "testsPassed": 288,
@@ -146,13 +146,13 @@
       }
     ],
     "browserVerification": [
-      "Fourteen existing party UI export checks revalidated against the corrected runtime: actual400gold hire with unchangedAP/RNG, pending Continue, order6, equipment roundtrip, Rest,35 combat updates,13 updates inserting one companion shell, wage53, town entry and dismissal cancel/confirm. Full expected envelopes match.",
-      "An earned Day5 early-v15 save at tick9770 imported through the browser with Crow type2→1 repair, unchanged RNG and complete expected-envelope/restore equality. Focused Simulation tests separately cover real Crow/Fly spawns and Air4 versus Armor5 orders.",
+      "Fourteen existing party UI export checks revalidated against the corrected runtime: hiring for 400 gold with unchanged AP/RNG, pending Continue, order 6, equipment round trip, Rest, 35 combat updates, 13 updates inserting one companion shell, wage 53, town entry and dismissal cancel/confirm. Full expected envelopes match.",
+      "An earned Day 5 early-v15 save at tick 9770 imported through the browser with Crow type 2→1 repair, unchanged RNG and complete expected-envelope/restore equality. Focused Simulation tests separately cover real Crow/Fly spawns and Air (4) versus Armor (5) orders.",
       "Import Save was observed disabled during asset loading and enabled after scene creation, preventing premature import before the scene exists.",
-      "Final production bundleDo-bjyfx NewGame export93 reached tick0, HP40, gold200, ammo5. Actual v14 backup import/export94 matched complete v15 migration at tick674, HP40, gold209 with unchanged RNG; paused and no console errors."
+      "Final production bundle Do-bjyfx: New Game export 93 reached tick 0, HP 40, gold 200, ammo 5. Actual v14 backup import/export 94 matched complete v15 migration at tick 674, HP 40, gold 209 with unchanged RNG; paused and no console errors."
     ],
     "evidence": "docs/port-verification.json:browser_checks.party,party_production,party_air_orders",
-    "limits": "Accepted method references do not establish live spawn classification or native full-battle scheduling. Actual-spawn regressions and the final rerun separately cover the corrected integration. The32natural-campaign soak uses production ordinary contours and a boss rectangle; no balance or pixel/audio parity claim. Chain Gun interrupted spin timing retains a counter fallback without source audio-position history. Other hero classes, house upgrades, temporary hiring, many town actions and Day8 onward remain unavailable. The veteran late-game hitbox report remains unreproduced.",
+    "limits": "Accepted method references do not establish live spawn classification or native full-battle scheduling. Actual-spawn regressions and the final rerun separately cover the corrected integration. The 32 natural-campaign soak uses production ordinary contours and a boss rectangle; no balance or pixel/audio parity claim. Chain Gun interrupted spin timing retains a counter fallback without source audio-position history. Other hero classes, house upgrades, temporary hiring, many town actions and Day 8 onward remain unavailable. The veteran late-game hitbox report remains unreproduced.",
     "previousPublished": {
       "saveVersion": 14,
       "implementedCampaign": "Seven connected Sheriff days, missions0–6, rewards and seven prepared towns. Seventh town prepares mission7; Day8 combat remains disabled.",
@@ -308,7 +308,7 @@
       "rollbackDirectory": ".build/browser-before-party",
       "rollbackPackage": ".build/elona-shooter-browser-day7-slice.zip"
     },
-    "nextWork": "House upgrades for companion capacity2/3 and Castle wall upgrades; source costs/effects and validation boundaries are documented in web/docs/castle-upgrades-source.md."
+    "nextWork": "House upgrades for companion capacity 2/3 and Castle wall upgrades; source costs/effects and validation boundaries are documented in web/docs/castle-upgrades-source.md."
   },
   "purpose": "Track the original game's systems and content against implemented behavior and independent evidence. This is an expandable inventory, not an exhaustive specification or a completion percentage.",
   "reference": {
@@ -683,7 +683,7 @@
         "MainTimeline:12996 orderClick"
       ],
       "status": "partial",
-      "implemented": "Characters supports actual candidate inspection, permanent hire/cancel/dismissal at house capacity 1, orders, Boss/Defend priorities and skill focus. Equipment swaps whole records with bidirectional guards and companion-specific MOD No behavior. Rest runs autonomous target acquisition, reload/fire/projectile actions, shared target caches and owner attribution. Whole inactive records, canonical candidate 5, pending dialogs, AI and retained target identities persist. Orders retain observed source quirks, including NoArmor falling through to Normal. Live Crow/Fly spawns and pre-party migration use source Air type1, not Armor type2. Real-spawn Air4/Armor5 regressions cover this port integration correction.",
+      "implemented": "Characters supports actual candidate inspection, permanent hire/cancel/dismissal at house capacity 1, orders, Boss/Defend priorities and skill focus. Equipment swaps whole records with bidirectional guards and companion-specific MOD No behavior. Rest runs autonomous target acquisition, reload/fire/projectile actions, shared target caches and owner attribution. Whole inactive records, canonical candidate 5, pending dialogs, AI and retained target identities persist. Orders retain observed source quirks, including NoArmor falling through to Normal. Live Crow/Fly spawns and pre-party migration use source Air type 1, not Armor type 2. Real-spawn Air (4)/Armor (5) regressions cover this port integration correction.",
       "evidence": [
         "web/tests/town-preparation-reference.test.ts: actual original first-town recruit fields across all nine classes",
         "web/tests/second-town-reference.test.ts: six original second-town preparations with retained recruit slots",
@@ -696,10 +696,10 @@
         "web/tests/party-ai-reference.test.ts:75 AI boundary observations",
         "web/tests/party-combat-reference.test.ts:37 damage/credit/growth observations",
         "web/tests/party-integration.test.ts",
-        "web/scripts/party-soak.ts:corrected32seed run passed482844frames/5024checkpoints;all9classes naturally hired;30Day7wins/2defeats",
+        "web/scripts/party-soak.ts:corrected 32-seed run passed 482844 frames/5024 checkpoints; all nine classes naturally hired; 30 Day 7 wins/two defeats",
         "web/docs/party-integration-status.md",
         "web/tests/party-integration.test.ts:actual Crow/Fly spawn, Air4/Armor5 selection, unambiguous early-v15 repair and mixed-state rejection",
-        ".build/browser-qa/party-air-verification.json:earnedDay5import and Import Save readiness"
+        ".build/browser-qa/party-air-verification.json:earned Day 5 import and Import Save readiness"
       ],
       "unverified": [
         "House upgrades and ordinary capacity 2/3 acquisition",

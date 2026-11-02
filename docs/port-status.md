@@ -439,10 +439,10 @@ unchanged RNG and exact full-envelope migration/restore equality. No console
 errors were observed. Publication hashes and production evidence are in
 `.build/party-publication.json` and `.build/browser-qa/party-production-verification.json`.
 All 14 existing party UI export checks were revalidated against the corrected
-runtime. A separate earned Day5 save at tick9770 repaired Crow type2→1 through
+runtime. A separate earned Day 5 save at tick 9770 repaired Crow type 2→1 through
 browser import with complete expected-state/restore equality and unchanged RNG;
 `.build/browser-qa/party-air-verification.json` records this boundary. Actual
-Crow/Fly spawn and Air4/Armor5 selection have focused Simulation regressions.
+Crow/Fly spawn and Air (4)/Armor (5) selection have focused Simulation regressions.
 Import Save was also observed disabled during asset loading and enabled only after
 scene creation. The final published bundle passed a fresh New Game and actual v14
 backup restoration, with no console errors.
