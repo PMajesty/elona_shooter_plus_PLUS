@@ -1800,10 +1800,18 @@ async function boot(): Promise<void> {
   if (!response.ok) throw new Error('Original assets are missing. Run python tools/extract_web_assets.py from the project folder.');
   manifest = await response.json() as Manifest;
   const families: Record<string, string> = { menu: 'ElonaMenu', menuBold: 'ElonaMenuBold', hud: 'ElonaHud', small: 'ElonaSmall', impact: 'ElonaImpact' };
+  const fontFallbacks: string[] = [];
   await Promise.all(Object.entries(manifest.fonts).map(async ([key, file]) => {
-    const font = new FontFace(families[key] ?? key, `url("${assetUrl(file)}")`);
-    await font.load(); document.fonts.add(font);
+    try {
+      const font = new FontFace(families[key] ?? key, `url("${assetUrl(file)}")`);
+      await font.load(); document.fonts.add(font);
+    } catch (error) {
+      // Шрифт влияет на оформление, но его сбой не должен блокировать всю игру.
+      fontFallbacks.push(key);
+      console.warn(`Original font ${key} is unavailable; using the browser fallback.`, error);
+    }
   }));
+  container.dataset.fontFallbacks = JSON.stringify(fontFallbacks.sort());
   new Phaser.Game({ type: Phaser.WEBGL, parent: 'game', width: 620, height: 380, backgroundColor: '#000000', scene: ElonaScene,
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     render: { antialias: true, roundPixels: false }, audio: { disableWebAudio: false }, fps: { target: 60 },

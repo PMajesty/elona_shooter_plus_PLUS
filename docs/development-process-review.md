@@ -223,3 +223,10 @@ observed counter divergence alone does not justify a balance fix. A short public
 DOM phase wait captured readable moving text without repeated screenshot polling.
 An expiry wait timed out, but the next DOM/screenshot showed both effects cleared;
 record that limit rather than claiming a measured expiry time or rerunning it.
+
+This continuation read keyboard, campaign-limit and soak sections before choosing
+one concrete startup failure. That widened context without delivering behavior.
+Choose one remaining gap from current status for the initial bounded experiment;
+switch once if disproved. The invalid-font experiment produced a real failure,
+fixed with a local catch and verified through ordinary New Game; no loader
+framework, extra harness or unchanged simulation-suite replay was needed.

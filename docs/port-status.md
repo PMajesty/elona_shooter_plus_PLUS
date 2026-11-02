@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v41, original combat announcements and ally rampage feedback**.
+Updated 2026-11-02. Current local build: **v41, resilient font loading for website startup**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -11,6 +11,10 @@ game clicks, including resuming paused combat. Owned bow releases work in both
 the iframe and accessible parent window. Focus loss pauses play. Same-origin
 host-page reload/Continue and direct-route access to the same save slots work;
 the README includes an embed example. Iframe download delivery remains unverified.
+An individual font-load rejection now uses browser fallback fonts while the rest
+of startup proceeds. Previously one bad font prevented the canvas/game from being
+created at all. Original fonts remain the normal path; fallback keys are visible
+in DOM metadata and console warnings, without extra game controls or labels.
 
 All eight original hero classes are connected to ordinary New Game, equipment,
 skill choices, growth, combat and saves. Rogue/Hunter start with Little Girl;
@@ -242,7 +246,8 @@ historical player SOL compatibility remains unverified.
 
 - Last full suite: **572 tests pass**. Four new checks cover critical countdown,
   boss-wave warnings, source notice queue boundaries and extracted feedback assets.
-  Current typecheck/build pass; bundle: assets/index-DCU8Q6NM.js.
+  Current typecheck/build pass; bundle: assets/index-A_4bf3wf.js. The font-loading
+  correction leaves simulation/save code unchanged, so the572-test result is reused.
   Existing source/deterministic checks cover
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
@@ -271,6 +276,7 @@ Reuse it for unchanged behavior rather than repeating whole browser/campaign run
 | Website embedding | `embedding-verification.json`: host input/resizing preserves paused metadata;360px display keeps620×380 buffer and working rifle fire10→9; outside bow release creates an arrow; host reload/Continue retains tick170/selection/ammo. Temporary host removed. Two iframe exports reported success without a file in IAB; direct export worked. Other browser/origin policies remain unverified. |
 | Late enemy attacks | `late-attacks-verification.json`, `late-attacks-browser.png`: actual Cata/Tank/Dragon shots and Tank flash render; all four launch sounds are loaded while muted. A controlled tick6 save with all three flights survives import and actual Return to Title/Continue with the entire envelope unchanged. Source-derived motion/launch timing, flight removal, replay, legacy arrows and invalid kinds have automated checks. Transient flashes are not saved. |
 | Combat feedback | `combat-feedback-verification.json`, `combat-feedback-browser.png`, `combat-level-up.png`: original boss text and both ally auras render; an ordinary shot levels the controlled hero1→2 with original artwork. Active bonuses survive full-envelope Continue, old notices do not replay, and both auras clear on expiry. Companion counter's one-frame acquisition delay follows the source continue; no clock change was made. |
+| Font failure | `font-fallback-verification.json`, `font-failure-before.png`, `font-fallback-browser.png`: a zeroed served ui.ttf aborted the old build before canvas creation. The patched build reached ordinary Sheriff New Game/character creation/combat and fired5→4 rounds with that same fault. Restored font bytes match the source; healthy reload has no fallbacks and Continue preserves the entire tick18 save. User adventure/collection restored exactly. Original Flash/Ruffle startup path is unchanged. |
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. The Codex app crash
@@ -312,7 +318,11 @@ for routine continuation.
    earlier kill totals, so their lifetime statistic remains a marked lower bound.
    One in-app-browser reload showed black canvas screenshots despite title/audio
    readiness; an empty-field focus click restored the title without an error.
-   Cause and ordinary-browser reproduction are unverified; no startup fix is claimed.
+   Cause and ordinary-browser reproduction are unverified; no fix for that rendering
+   observation is claimed.
+   The separately reproduced font-load failure above is fixed; it does not explain
+   that earlier ready-but-black rendering observation. Fallback font appearance
+   can differ; hanging font requests/missing essential artwork remain untested.
 5. Falling-rat bodies and later enemy hit regions use rendered alpha; exact Flash
    filter/vector boundary matching remains unverified. Searching preserves the source's ineffective Trouble HP expression;
    its restored original narrative still promises an HP increase.
