@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v38, persistent lifetime kill statistics**.
+Updated 2026-11-02. Current local build: **v38, Flash town adventure import**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -172,186 +172,61 @@ preview confirms merging known medals and maximum Normal/Hardcore/Casual records
 it preserves adventures, slot selection, mute and options. New Games receive
 imported class unlocks and bonuses; existing adventures retain their saved medal
 set. Unknown flags (including the undefined Beta90) are reported/ignored. Adventure
-files elonas0–7.sol remain unsupported and are refused visibly. No save format
-change was needed. The bounded reader supports the AMF3 primitive/object/array
+files elonas0–7.sol now have a separate native confirmation and town converter.
+No save format change was needed. The bounded reader supports the AMF3 primitive/object/array
 types used by the index, including sparse arrays and string/object/trait references.
 Other encodings/types fail before storage changes. Source: saveIndex10961/loadIndex7052.
 
+Flash adventure import accepts1.3.0.1–1.3.0.4 town checkpoints within Days1–1000.
+It preserves the saved hero/party, owned equipment and stocks, gold/AP, upgrades,
+mission effects, counters, focus/orders and options, without applying New Game
+bonuses again. The selected browser slot is the destination; Cancel changes no
+saved state. Use the matching medal index first: medals are not in adventure files.
+Future RNG starts a deterministic browser stream because Flash did not serialize
+Math.random. Unused past-combat bookkeeping is reconstructed; the saved town and
+next mission are retained. The common save validator refuses unsupported values.
+Source: saveGame6311, loadGame4986, generateMission12144 and source player/inventory
+arrays. Controlled schema files pass; real-player SOL compatibility is unverified.
+
 ## Validation and limits
 
-- **551 tests passed**, with typechecking and production build passing. Latest
-  bundle: assets/index-D7lMl7Ks.js. Slot checks cover unchanged legacy storage,
-  eight independent adventures, selection persistence, shared medals/mute,
-  deletion/tombstones, Hardcore isolation, corrupt data and failed writes.
-  Existing deterministic checks cover classes, campaign, equipment services,
-  medal efficiency, modes/MODs, town economy, titles, Carry Over and JSON replay.
-  Legacy loot generation treats a not-yet-initialized medal collection as empty
-  during migration; it does not consume extra RNG to reconstruct that field.
-  The new help-content check compares every tip/link with the preserved source.
-  Two Python extraction regressions also pass: matrix-only PlaceObject2 moves must
-  retain the earlier PlaceObject3 format/filters. Losing that format broke credits
-  artwork extraction; the corrected exporter produces the original page.
-  Seven Fire at will checks cover autonomous shots/reload/kills, AI/manual JSON
-  replay, bows, class meters, selected-slot projectile ownership, reload cancellation,
-  new-mission reset, v37 migration and invalid/missing AI targets.
-  Five presentation checks cover defaults/JSON validation, independent damage
-  channels, original statistics, deterministic48/60-burst plans and Ha-na-bi
-  eligibility/persistence, including Carry Over. Presentation does not draw combat RNG.
-  Six further medal checks cover every survival threshold, ordinary Rest into
-  Day150 with JSON replay, cumulative starting gold, both Impossible Badge paths,
-  starting Fame, invalid records, Carry Over and the idempotent website medal.
-  Six Sister checks cover source contours, hero/companion hitscan, projectile
-  exclusion, damage/cheer interruption, protection/Defender, death RNG, JSON replay,
-  old/corrupt saves and revival at Rest.
-  Six Flash import checks cover two independent Ruffle SOL samples, source-schema
-  collection conversion, references, Unicode, dense/sparse flags, signed/double
-  values, non-destructive/idempotent merging, bonuses/JSON replay, and invalid or
-  oversized files/records/references. The Elona index test is controlled data;
-  no actual player's Flash collection has yet been supplied/verified.
-  Eight hero-control checks cover free/idempotent town mutations and refusals,
-  focus through skill rewards, accepted orders and air-only targeting, F separation
-  and original accuracy penalties, Sniper/Militia JSON replay, manual-mode reset,
-  preserved defaults and corrupt/missing state. Existing party AI tests cover the
-  shared targeting routines; unchanged full campaigns were not replayed.
-  Three town-event content checks compare fixed English text, activity cards/titles
-  and robbery amounts with the preserved ActionScript, including JSON round trips.
-  The existing18 deterministic search cases also check source narrative prefixes.
-  Four medal-notice checks cover original text/layout, idempotence, slot overflow,
-  frame139/150 reuse/removal, shared/saved award suppression and unchanged JSON/RNG.
-  Four lifetime-kill checks cover real hero/NPC kills, corpse/bomb exclusions,
-  repeated Rest/Carry Over, JSON replay, legacy lower bounds, RNG independence and
-  malformed/unsafe history values.
-- The controlled full40-day campaign completed in96494 simulation frames, with
-  all19 enemy kinds, rewards, towns and save boundaries. Its changed frame count
-  follows the repeating MOD-sale correction and resulting generation RNG. Strong
-  test gear removes difficulty as an obstacle; this is not a balance claim.
-- Existing checks cover all eight heroes through two natural opening battles;
-  controlled Day40/80 cycle crossings; later formulas/Day1000 henchman; economy,
-  search, hire, Museum, projectiles, Ragnarok and Casual/Hardcore. Ragnarok and
-  later-cycle survival tests use controlled gear/HP. Original comparison cases
-  still pass for unchanged defaults. Seeded repeatability is distinct from parity.
-- The muted V35 browser check opened the extracted original MOD panel, toggled an
-  option, verified Back/reset, enabled all seven and started an actual battle with
-  1175 opening power. Continue retained its entire envelope using observed pointer
-  coordinates as input. No console errors. Evidence:
-  .build/browser-qa/game-mods-verification.json and game-mods.png.
-- The muted V36 browser check verified Carry Over Cancel preserves the entire
-  envelope, Yes restores the exact expected town, Rest captures it and Continue
-  preserves the battle and checkpoint. Recursive checkpoint import was refused
-  without changing the active envelope. No console errors. Evidence:
-  .build/browser-qa/carry-over-verification.json and carry-over-confirmation.png.
-- The muted title browser check claimed King in a controlled Day101 town and
-  verified the original dialog,3000 GP salary and character title. Export changed
-  only rank/AP; Continue retained the entire envelope. Evidence:
-  .build/browser-qa/titles-verification.json and title-king.png. No console errors.
-- The revised game-only page was checked muted in the existing tab: bottom toolbar
-  absent, explanation overlay removed, fullscreen icon visible without activation,
-  working keyboard backup and exact full-envelope preservation of the user's save.
-  No console errors. Screenshot: .build/browser-qa/no-extra-toolbar.png.
-- The muted V37 browser check used the original Equipment controls: Cancel retained
-  the full envelope, Recycle awarded the tenth-use medal and Charge Item refilled
-  a grenade stack. Exported states matched the expected simulation; Continue
-  preserved the complete result. No console errors or fullscreen activation.
-  Evidence: .build/browser-qa/equipment-services-verification.json and
-  equipment-recycle-selection.png. The user's full adventure/collection was restored.
-- The muted slot browser check created a real New Game in empty slot8 while slot1
-  remained intact, verified exact-envelope Cancel, selection persistence and
-  Continue of slot8, then deleted only that disposable run and resumed slot1.
-  Both continued exports matched their complete saved envelopes. No console
-  errors/fullscreen activation. Evidence: .build/browser-qa/save-slots-verification.json,
-  save-slots-dropdown.png and save-slot-delete-confirmation.png.
-- The muted help browser check opened all four pages from the title, reached the
-  final tip, used wheel/arrows/thumb dragging, then opened help from paused Continue.
-  Space left combat paused at tick674; Esc returned to pause. Full exported
-  envelopes before/after both flows matched exactly. No console errors/fullscreen.
-  Evidence: .build/browser-qa/help-verification.json and original-help-basic.png.
-- The muted F browser check used disposable slot8: one press enabled the original
-  indicator,820 frames produced9 kills without firing input, and Continue retained
-  the complete exported envelope. One F press returned to manual; F was ignored
-  while paused. Testing exposed repeated queued keyboard delivery in a hidden tab
-  (F toggled twice; Escape later resumed). Combat shortcuts now use direct DOM key
-  events, ignore repeats/modifiers and remained stable in the subsequent check.
-  The test run was deleted; slot1's adventure/profile matched its backup except the
-  two v37→v38 version fields. No console errors or fullscreen activation. Evidence:
-  .build/browser-qa/fire-at-will-verification.json and fire-at-will.png.
-- Earlier browser evidence covers reload/combat/results/town, activities, hires,
-  Museum, class unlocks, Ragnarok and both difficulty modes. Hardcore battle export
-  is refused and Continue has no battle save; its town checkpoint loads and Rest
-  works. These records remain useful for unchanged paths, without repeating all
-  UI flows at every checkpoint.
-- The muted pause/options browser check used slot8: all six toggles changed only
-  the optional settings field, the color-blind cursor reached frame3, and Continue
-  retained the complete envelope. Quit Cancel and invalid-options import retained
-  their complete envelopes. Controlled town/results saves verified original Menu,
-  Save, Help, quit handling, fireworks disable/re-enable and Ha-na-bi without RNG
-  changes. The test slot was deleted and the user's complete adventure/profile
-  restored exactly, including removal of the test medal. No console errors or
-  fullscreen activation. Evidence: .build/browser-qa/pause-options-verification.json,
-  original-pause-options.png and original-fireworks.png.
-- The user's original Sheriff adventure and collection were restored with full
-  exported-envelope equality after migration: day1, tick674, RNG1744019180, HP40,
-  gold209, paused/muted. No test MODs, unlocks or records remain.
-- The muted medal check used slot8 and a controlled Normal-mode town with a saved
-  Hardcore record of100. A Museum visit changed only medal87 in the adventure and
-  collection, Continue retained the whole envelope, and a real New Game started
-  with20 Fame. Original earned/locked hint panels were visibly checked; no external
-  link was opened. The test slot was deleted and the user's whole envelope restored
-  exactly, with no test medals or records left. No console errors/fullscreen.
-  Evidence: .build/browser-qa/medal-completion-verification.json and original-medal-hint.png.
-- The muted Sister browser check used empty slot8: actual New Game rendered the
-  separate living sprite, a controlled ordinary shot killed her, animation stopped
-  at source frame72, and Continue retained the complete exported envelope. The test
-  slot was deleted; slot1 and the shared collection matched their fresh backup
-  exactly. No console errors/fullscreen. The first targeted background regeneration
-  passed the whole timeline instead of its selected frame, producing a black scene;
-  browser inspection caught it and the corrected export was rebuilt/verified.
-  Evidence: .build/browser-qa/castle-sister-verification.json and castle-sister-dead.png.
-
-- The muted Flash import check used a controlled source-schema index. Cancel and
-  an unsupported adventure retained the user's complete envelope; Space left the
-  preview paused. Confirm changed only the shared profile, and an actual New Game
-  selected unlocked Sniper with500 GP/20 Fame. Continue retained its whole envelope.
-  The disposable slot8 was deleted and the user's complete adventure/collection
-  restored exactly. No console errors/fullscreen. A browser-tool deadline occurred
-  after the import action; inspection confirmed success without repeating it.
-  Evidence: .build/browser-qa/flash-collection-verification.json, flash-collection-preview.png
-  and flash-import-unlocks.png.
-
-- The muted hero-control browser check used slot8 and a controlled town/weapon.
-  Original skill/order/checkbox clicks changed only hero preferences (Fury focus,
-  Always fire at will, Boss/Defend off), with exact town-envelope Continue. Rest
-  started autonomous Day2 with F off. Without firing input, it won with27 kills
-  in1572 frames and reached loot/level-up; the battle used200 attack/10000 accuracy
-  test gear, so this is not difficulty evidence. Its whole outcome envelope survived
-  Continue, and Fury2 appeared among the real level-up offers. The test slot was
-  deleted and the user's whole adventure/profile restored exactly. No console
-  errors/fullscreen. Evidence: .build/browser-qa/hero-town-controls-verification.json
-  and hero-town-controls.png.
-
-- The muted town-event check used slot8: Prayer, Search, New Goods, visitor robbery
-  and Rest displayed original cards/text. Prayer and stock-refresh dismissal left
-  the entire exported envelopes unchanged; Continue retained the complete town
-  after robbery. Rest started Day2 combat, then Escape paused it. The disposable
-  run was deleted and the user's whole adventure/collection restored exactly.
-  No console errors or fullscreen activation. Evidence:
-  .build/browser-qa/town-events-verification.json, original-town-prayer.png and
-  original-town-new-goods.png. Unchanged campaigns were not replayed.
-
-- The muted medal-notice check earned Prayer from a controlled14-prayer town in
-  slot8. The original notification appeared above the event card, survived its
-  dismissal, then expired. Dismissal and Continue preserved the entire exported
-  envelope; Continue did not announce saved medals. The disposable run was deleted
-  and the user's full adventure/collection restored exactly. No console errors or
-  fullscreen activation. Evidence: .build/browser-qa/medal-notices-verification.json
-  and original-medal-award.png. Asset loading exceeded the browser tool's wait
-  deadline on two reloads but completed without another reload or a game error.
-
-- The muted lifetime-kill check used a controlled seven-kill Day1 town in slot8.
-  Rest started Day2 with zero current kills; the original Statistics panel still
-  displayed seven total kills. Save/Return to Title/Continue preserved the full
-  envelope, reusing loaded assets. The test run was deleted and the user's whole
-  adventure/collection restored exactly. No console errors or fullscreen.
-  Evidence: .build/browser-qa/kill-history-verification.json and lifetime-kills.png.
+- **556 tests pass**; typechecking and production build pass. Bundle:
+  assets/index-fS9OoWkY.js. Existing deterministic/source comparisons cover hero
+  classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
+  activities/search, Carry Over, saves/migrations and extracted content.
+- One controlled40-day campaign reached all19 enemy kinds in96494 frames using
+  strong test gear. This is progression/stability evidence, not difficulty parity.
+  Other checks cover later-cycle boundaries/formulas, Day150 medals and Day1000
+  saves. Long-session browser performance and later difficulty remain unmeasured.
+- Muted browser evidence covers New Game, combat/reload/F/results/town, original
+  controls/help/options, equipment/services/hires, all eight slots, JSON saves,
+  Carry Over, medal unlocks/Museum, Sister reactions and Flash collection import.
+  The source-schema Elona SOL sample is controlled; an actual player's original
+  Flash collection/adventure has not been verified. Five new adventure checks cover
+  all eight heroes, modes, exact owned/town contents, changed activities/options,
+  inactive recruit cells, later-cycle Hardcore/Rest, deterministic replay and
+  invalid/deleted/unsupported files. The existing AMF encoder fixture is shared.
+- Latest town-card check: Prayer/Search/stock/robbery/Rest displayed original
+  content, dismissal preserved full envelopes, Continue retained town, and Rest
+  started Day2. Evidence: .build/browser-qa/town-events-verification.json.
+- Latest medal-notice check: Prayer appeared, survived town redraw, expired and
+  did not repeat on Continue; full envelopes stayed equal. Evidence:
+  .build/browser-qa/medal-notices-verification.json and original-medal-award.png.
+- Latest lifetime-kill check: controlled seven-kill town, ordinary Rest into Day2,
+  original Statistics showed seven despite zero current kills; Save/Return to
+  Title/Continue retained the full envelope. Evidence:
+  .build/browser-qa/kill-history-verification.json and lifetime-kills.png.
+- Flash adventure browser check: Cancel preserved the user's full envelope;
+  a controlled Hunter Day3 file imported to slot8 matched the entire expected
+  save, Continue stayed equal, and Rest started Day4 with an exact town Carry Over
+  checkpoint. Evidence: .build/browser-qa/flash-adventure-verification.json,
+  flash-adventure-preview.png and flash-adventure-town.png.
+- Disposable slot8 was removed after each check. The user's whole Sheriff
+  adventure/collection was restored exactly: Day1, tick674, RNG1744019180, HP40,
+  gold209, paused/muted. No test medals/records, console errors or fullscreen.
+- Earlier detailed evidence remains in Git (through146a891), existing
+  .build/browser-qa records and historical verification. Reuse it for unchanged
+  behavior. The source's inactive card/debug-start functions were audited below.
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. Historical details are
@@ -367,7 +242,8 @@ that the app's crash cause was fixed.
    source bonus discrepancies: Kongregate advertises a
    wage discount, but wage3610 checks Ragnarok92; medal91 does not add another
    discount. Ha-na-bi's advertised firework bonus likewise differs from startFire.
-3. Flash adventure conversion; medal/index import is implemented. The browser dropdown displays all eight choices at once,
+3. Real-player Flash save compatibility remains unverified; the collection and
+   town-adventure converters use controlled source-schema evidence. The browser dropdown displays all eight choices at once,
    rather than the original ComboBox's five-row scrolling list.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
    camera shake, decorative boss reticle, some ranged spell effects/frame sounds,

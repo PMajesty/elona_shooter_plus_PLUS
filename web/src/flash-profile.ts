@@ -7,7 +7,7 @@ export interface FlashCollection { profile: GlobalProfile; ignoredMedals: number
 /** saveIndex10961/loadIndex7052: idx и разреженный medal хранятся в elonas_idx. */
 export function readFlashCollection(bytes: Uint8Array): FlashCollection {
   const { name, data } = readFlashSharedObject(bytes);
-  if (/^elonas\d+$/.test(name)) throw new Error('Flash adventure conversion is not ready. Select elonas_idx.sol for medals.');
+  if (/^elonas\d+$/.test(name)) throw new Error('This file contains a Flash adventure. Select elonas_idx.sol for the medal collection.');
   const idx = data.idx;
   if (name !== 'elonas_idx' || !idx || typeof idx !== 'object' || Array.isArray(idx) || !Array.isArray(data.medal)) {
     throw new Error('This is not an Elona Shooter collection. Select elonas_idx.sol.');

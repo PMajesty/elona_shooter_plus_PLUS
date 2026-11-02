@@ -3,7 +3,8 @@
 A TypeScript/Phaser browser remake of Elona Shooter Plus 1.3.0.4.
 The current local build supports **all eight original hero classes** and
 **repeating campaign cycles**, including Casual and Hardcore modes. This is an
-incomplete remake; Flash adventure conversion, remaining interactions and presentation details are still being ported.
+incomplete remake; original-save compatibility, remaining interactions and
+presentation/stability evidence still need work.
 
 Open [the local game](http://127.0.0.1:5175/elona/).
 Original artwork, English text, audio and credits are retained. Sound starts muted
@@ -66,7 +67,8 @@ unless you previously enabled it; the mute preference persists between visits.
   starting bonuses. Eight browser save slots with the original title dropdown,
   trash icon and deletion confirmation, plus Continue and JSON import/export.
   Version38 accepts prior browser saves; the original Flash medal/index file can
-  be imported. Flash adventure conversion remains unfinished.
+  be imported. Original Flash town adventures have a validated import path;
+  compatibility with real players' files remains unverified.
 - Casual lowers encounter power/taxes and grants35% more kill XP. Hardcore uses
   normal combat, deletes the resumable save when a battle starts and permits
   saving/export only in town. Each mode has a separate best-day record.
@@ -115,7 +117,7 @@ the shared collection; exporting one does not export all eight adventures.
 The page contains only the centered game and its requested top-right fullscreen
 icon. There is no added bottom toolbar or floating explanatory message overlay.
 Browser shortcuts: Ctrl+S saves, Ctrl+Shift+S exports a JSON backup,
-Ctrl+Shift+O imports JSON or the Flash medal collection; Ctrl+Shift+M toggles mute. Testing stays muted and
+Ctrl+Shift+O imports JSON or Flash saves; Ctrl+Shift+M toggles mute. Testing stays muted and
 never activates native fullscreen, which would take over the user's desktop.
 
 To keep original Flash unlocks, select **elonas_idx.sol** with Ctrl+Shift+O and
@@ -124,8 +126,23 @@ Normal/Hardcore/Casual survival records retain the higher value. Existing advent
 slot selection, sound and game options are preserved. Imported bonuses apply to
 future New Games; existing adventures keep their saved medal set. Unsupported
 flags such as the undefined Beta medal are ignored without granting bonuses.
-Files named elonas0.sol through elonas7.sol contain adventures, whose conversion
-is still pending. Invalid/unsupported imports now show an in-game message.
+Files named **elonas0.sol through elonas7.sol** contain town adventures. Select an
+Empty Save first, then import the file with Ctrl+Shift+O and confirm its class,
+day and destination slot. Import the matching **elonas_idx.sol first** to retain
+the original medal collection and mission defense. The converter currently accepts
+1.3.0.1–1.3.0.4 checkpoints within Days1–1000 and uses the normal browser save validator.
+It preserves saved gold/AP, hero/party progression and equipment, stocks, mission
+bonuses, upgrades, counters, orders and options. Starting bonuses are not applied
+again. The original file is read only; Cancel leaves the selected adventure intact.
+
+Flash did not store its random generator state. Import starts a deterministic
+browser stream; future rolls will differ. Already-finished combat bookkeeping,
+which is not resumable from a Flash town save, is reconstructed for browser save
+validation. Import resumes in town, and the next Rest starts a normal battle.
+Deleted, malformed or unsupported checkpoints are refused visibly. Controlled
+source-schema files cover all eight classes, modes, town changes, customized gear,
+later-cycle towns and save replay; no actual player's Flash adventure has yet been
+verified. Preserve a backup and treat original-file compatibility as provisional.
 Opening the file picker pauses active combat/results; Space cannot dismiss the
 import preview or resume the game underneath it. Escape cancels the preview.
 The reader follows [Adobe's AMF3 specification](https://veovera.org/docs/legacy/amf3-file-format-spec.pdf)

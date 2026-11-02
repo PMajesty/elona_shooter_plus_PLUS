@@ -10,6 +10,8 @@ import { createMedalNoticeView, updateMedalNoticeView, type InfoPopupLayout } fr
 import { createTownEventView } from './town-event-view.ts';
 import { TOWN_NOTICES, townEvent, type TownNotice } from './town-events.ts';
 import { readFlashCollection } from './flash-profile.ts';
+import { readFlashAdventure } from './flash-adventure.ts';
+import { readFlashSharedObject } from './flash-shared-object.ts';
 import { TITLES, nextTitle } from './titles.ts';
 import { Simulation, type SimulationState, type EnemyState, type SimulationEvent } from './simulation.ts';
 import { WORLD } from './content.ts';
@@ -224,7 +226,7 @@ class ElonaScene extends Phaser.Scene {
     this.root.removeAll(true);
     if (!['loot', 'boss-loot', 'skill', 'result'].includes(screen)) { this.celebration?.destroy(); this.celebration = undefined; this.fireworkMedalChecked = false; }
     this.volumeIcon = undefined; this.pauseDialog = undefined; this.flash = undefined; this.flashFrames = 0; this.flashClock = 0;
-    this.collectionDialog = undefined; this.closeTownEvent = undefined; delete container.dataset.townNotice; delete container.dataset.flashCollection;
+    this.collectionDialog = undefined; this.closeTownEvent = undefined; delete container.dataset.townNotice; delete container.dataset.flashCollection; delete container.dataset.flashAdventure;
     if (!this.celebration) delete container.dataset.fireworkFrames;
     this.helpLayer = undefined; delete container.dataset.helpPage; delete container.dataset.helpScroll;
     this.fireAtWillSprites = undefined; this.castleSisterSprite = undefined; delete container.dataset.fireAtWill; delete container.dataset.castleSister;
@@ -1585,7 +1587,7 @@ class ElonaScene extends Phaser.Scene {
 
   private parseSave(raw: unknown, ignoreProfileError = false): { simulation: Simulation; appearance: number; profile?: GlobalProfile; carryCheckpoint?: SimulationState; options: GameOptions } {
     const save = raw as Partial<PortSave> | null;
-    if (!save || save.format !== 'elona-shooter-browser' || !supportedSaveVersion(save.version) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
+    if (!save || save.format !== 'elona-shooter-browser' || !supportedSaveVersion(save.version) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Select an original .sol file to import a Flash adventure.');
     if (save.options !== undefined && !validGameOptions(save.options)) throw new Error('This save contains invalid game options.');
     const validCollection = validProfile(save.profile);
     if (save.profile !== undefined && !validCollection && !ignoreProfileError) throw new Error('This save contains an invalid medal collection.');
@@ -1627,10 +1629,23 @@ class ElonaScene extends Phaser.Scene {
 
   private closeCollectionImport(): void {
     this.collectionDialog?.destroy(true); this.collectionDialog = undefined;
-    delete container.dataset.flashCollection; delete container.dataset.importError;
+    delete container.dataset.flashCollection; delete container.dataset.flashAdventure; delete container.dataset.importError;
   }
 
-  importFlashCollection(bytes: Uint8Array): void {
+  importFlashSave(bytes: Uint8Array): void {
+    const decoded = readFlashSharedObject(bytes);
+    if (/^elonas[0-7]$/.test(decoded.name)) {
+      const imported = readFlashAdventure(bytes, this.profile, decoded);
+      this.closeCollectionImport();
+      const layout = (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog;
+      this.collectionDialog = createModConfirmation(this, manifest, layout, confirm => {
+        this.closeCollectionImport();
+        if (confirm) this.importSave(imported.save);
+      }, 'flash-adventure', `Import ${imported.className}, Day ${imported.day}?\nReplace save slot ${this.saveSlot + 1}.\nFuture rolls differ.`);
+      this.root.add(this.collectionDialog);
+      container.dataset.flashAdventure = JSON.stringify({ day: imported.day, className: imported.className, originalSlot: imported.originalSlot, originalVersion: imported.originalVersion });
+      return;
+    }
     const imported = readFlashCollection(bytes);
     this.closeCollectionImport();
     const layout = (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog;
@@ -1711,7 +1726,7 @@ fileInput.addEventListener('change', async () => {
   try {
     if (file.size > 1_000_000) throw new Error('The save file is too large.');
     const bytes = new Uint8Array(await file.arrayBuffer());
-    if (bytes[0] === 0 && bytes[1] === 0xbf || file.name.toLowerCase().endsWith('.sol')) gameScene.importFlashCollection(bytes);
+    if (bytes[0] === 0 && bytes[1] === 0xbf || file.name.toLowerCase().endsWith('.sol')) gameScene.importFlashSave(bytes);
     else gameScene.importSave(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)));
   }
   catch (error) { gameScene.importFailure(error); }

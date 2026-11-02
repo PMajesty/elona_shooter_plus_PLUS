@@ -58,8 +58,7 @@ fixtures and test counts must never be used as a completion percentage.
 
 Collaboration also creates coordination/context costs, but the available records
 do not establish its share of the spend. Per the user's instruction, all further
-work is solo. No new agents or automatic recurring continuation are authorized by
-this review.
+work is solo. Recurring work was subsequently reauthorized in the current goal.
 
 ## Changed working rules
 
@@ -99,16 +98,13 @@ this review.
    enabled sound; persist that preference. Reuse the existing Codex browser tab.
    Do not open audible original-game diagnostics during routine verification.
 
-## Immediate development order
+## Current development order
 
-- Bring existing class/party capabilities into playable hero creation: Rogue,
-  Hunter, Sheriff and Militia, their original gear, Little Girl where applicable,
-  class-specific earned skill choices, growth and resumable combat.
-- Generalize campaign and save boundaries with the missing enemy/boss behaviors,
-  extending groups of supported encounters rather than one release per day.
-- Complete remaining town/Castle actions, temporary hiring and other class unlocks.
-- Then concentrate on visual/audio fidelity, measured performance and a controlled
-  reproduction of the reported late-game hitbox problem.
+The former class/campaign/town priorities are implemented; use current status for
+their evidence and limits. Verify original Flash save compatibility beyond controlled
+schema files, then address remaining original interactions and
+browser/hosting/stability/performance gaps.
+Defer costly cosmetic/audio matching and the late-game hitbox complaint as directed.
 
 Completion remains the original game's feature coverage with documented intentional
 differences. This is a priority change, not a claim that the current port is close
@@ -124,3 +120,42 @@ tool names before printing descriptions: broad description matches produced
 large irrelevant output during watcher setup. A retained browser session reported
 `browser.user is unavailable`; one runtime reset restored the same tab without
 new windows. Prefer that bounded recovery over repeated handle acquisition.
+
+## Scheduled review — 2026-11-02 16:02 UTC
+
+Observed progress: native save slots/help/options, hero AI/focus/orders, Sister
+reactions, medal paths/import/hints/announcements, full town narratives and lifetime
+statistics now reach ordinary play. Work stayed solo, muted and save-preserving.
+The last three full suites took11.7–13.3 seconds and passed. No new campaign-specific
+harnesses or unchanged full campaign replays were added. Preserve these practices.
+
+The larger remaining Flash adventure import was briefly investigated, then deferred
+for another small statistic fix. Recent narrow slices each repeated browser setup,
+save restoration and release documentation. This is evidence of a selection/overhead
+pattern, not a measured billing allocation. Prioritize that complete import next;
+group connected minor corrections instead of making every detail a new release.
+
+Concrete waste: multiple source reads were truncated; a substring search for kills
+also returned skills. Use exact words/symbols and bounded function ranges, with a
+small result set before expanding. The medal-notice slice built three times as
+minor edits continued after browser QA. Finish implementation first, then run one
+suite/build/browser phase; repeat only checks affected by a necessary correction.
+
+Browser asset waits expired twice but loading completed without another reload or
+console error. This does not diagnose a product stall. The latest statistics check
+successfully used Save/Return to Title/Continue instead of reloading all assets;
+make that the normal save check and reload only to load changed code or test startup.
+Keep one browser phase per integrated slice; the tool's stale-session documentation
+output is fixed overhead, so avoid unnecessary phases rather than layering recovery.
+
+Current status had390 lines, much of it chronological browser evidence. Keep current
+capabilities, active gaps and a compact evidence index; Git retains older detail.
+No test count establishes parity/completion. Billing and the cause of occasional
+browser-tool delays remain unmeasured. No new infrastructure or agents are justified.
+
+Applied this review: compressed current status from390 lines to273 before adding
+the new coverage, and resumed Flash adventure import rather than another cosmetic
+slice. Reused the existing AMF reader/encoder and save validator. The browser check
+exposed clipped preview text, warranting a focused text/build recheck; metadata
+alone did not establish that the rendered prompt was usable. Actual player SOL
+files remain missing evidence, so controlled round trips are not called full parity.

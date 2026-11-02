@@ -57,6 +57,6 @@ export function validTownPreparation(value: unknown, validItem: (item: unknown) 
   const requiredSlots = recruit.devType === 4 ? ['45', '47', '48'] : ['45'];
   // После смены кандидата прежние слоты ополченца остаются частью исходного инвентаря.
   if (Object.keys(items).some(slot => !['45', '47', '48'].includes(slot) || !validItem(items[slot]))
-    || requiredSlots.some(slot => !validItem(items[slot]) || (items[slot] as Item).num !== 1)) return false;
+    || requiredSlots.some(slot => !validItem(items[slot]))) return false;
   return true;
 }
