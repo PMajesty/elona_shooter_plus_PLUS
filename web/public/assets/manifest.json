@@ -913,6 +913,30 @@
       "uniqueFrames": 25,
       "characterId": 910
     },
+    "heroAdrenalineFill": {
+      "image": "sprites/heroAdrenalineFill.png",
+      "json": "sprites/heroAdrenalineFill.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 87,
+      "frameHeight": 17,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2717
+    },
+    "heroAdrenalineFrame": {
+      "image": "sprites/heroAdrenalineFrame.png",
+      "json": "sprites/heroAdrenalineFrame.json",
+      "originX": 64.45,
+      "originY": 14.45,
+      "frameWidth": 100,
+      "frameHeight": 29,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2715
+    },
     "enemy_sister-bomb": {
       "image": "sprites/enemy_sister-bomb.png",
       "json": "sprites/enemy_sister-bomb.json",

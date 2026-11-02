@@ -103,6 +103,15 @@ export function generateHero(random: () => number, classId: HeroClass, previousI
   switch (classId) {
     case 'sheriff': inventory[0] = factory.generate(3, bow); break;
     case 'rogue': inventory[0] = factory.generate(1, bow); break;
+    case 'sniper': inventory[0] = factory.generate(4, bow); break;
+    case 'ranger': inventory[0] = factory.generate(36, bow); break;
+    case 'duelist':
+      inventory[0] = factory.generate(1, bow); inventory[0].modMax = 4;
+      factory.enchant(inventory[0], 7, 3); break;
+    case 'noble':
+      inventory[0] = factory.generate(2, bow);
+      Object.assign(inventory[0], { name: 'PDW', modMax: 2, reqLv: 1 });
+      factory.enchant(inventory[0], 1, 3); break;
     case 'hunter':
       inventory[0] = factory.generate(23, bow);
       Object.assign(inventory[0], { name: "Hunter's Crossbow", shootRate: 32, baseAccuracy: 160, attack: 30, reqLv: 1 });

@@ -1,4 +1,6 @@
 export const SAVE_KEY = 'elona-shooter-plus-plus.port.save.v1';
+import { createProfile, validProfile, type GlobalProfile } from './profile.ts';
+const PROFILE_KEY = 'elona-shooter-plus-plus.port.profile.v1';
 const OPTIONS_KEY = 'elona-shooter-plus-plus.port.options.v1';
 
 export type SaveRead = { kind: 'empty' } | { kind: 'saved'; data: unknown } | { kind: 'error'; message: string };
@@ -19,6 +21,21 @@ export function storeSave(data: unknown): boolean {
   } catch {
     return false;
   }
+}
+
+export function readProfile(): { profile: GlobalProfile; warning?: string } {
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    if (raw === null) return { profile: createProfile() };
+    const profile = JSON.parse(raw);
+    if (validProfile(profile)) return { profile };
+  } catch { /* Повреждённая коллекция не должна блокировать загрузку самой игры. */ }
+  return { profile: createProfile(), warning: 'The medal collection could not be read. Import a backup to restore it.' };
+}
+export function storeProfile(profile: GlobalProfile): boolean {
+  if (!validProfile(profile)) return false;
+  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); return true; }
+  catch { return false; }
 }
 
 export function exportSave(data: unknown): void {

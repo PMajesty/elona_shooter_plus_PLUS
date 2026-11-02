@@ -14,8 +14,8 @@ const seeded = (seed: number) => () => {
   return (seed >>> 0) / 4294967296;
 };
 
-test('all four original starting classes get their class, weapon skills, grenade and original gear', () => {
-  const weaponIds = { rogue: 1, hunter: 23, sheriff: 3, militia: 4 };
+test('all eight original hero classes get their class, weapon skills, grenade and original gear', () => {
+  const weaponIds = { rogue: 1, hunter: 23, sheriff: 3, militia: 4, sniper: 4, ranger: 36, duelist: 1, noble: 2 };
   for (const classId of classes) {
     const hero = generateHero(seeded(123), classId);
     assert.equal(hero.traits[HERO_CLASSES[classId].id], 1);
@@ -135,6 +135,7 @@ for (const classId of classes) test(`${classId}: natural first two battles, earn
       assert.ok(sim.chooseSkill(sim.state.skillChoices[0]));
     }
     assert.equal(sim.state.postbattle, 'result'); assert.ok(sim.enterTown());
+    if (sim.state.castleHp < sim.state.castleMaxHp) assert.equal(sim.freeRepair(), 'repaired');
     sim = Simulation.fromSave(sim.toSave());
     assert.equal(sim.state.player.classId, classId); assert.equal(sim.state.day, day);
     if (day === 1) { assert.ok(sim.startNextDay()); sim = Simulation.fromSave(sim.toSave()); }

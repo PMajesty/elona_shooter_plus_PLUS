@@ -19,6 +19,7 @@ CACHE = ROOT / ".build/export"
 WORK = ROOT / ".build/web-assets"
 DEST = ROOT / "web/public/assets"
 CLIPS = {"charaPic": 677, "enemy_sheep": 910,
+         "heroAdrenalineFill": 2717, "heroAdrenalineFrame": 2715,
          "enemy_sister-bomb": 2272, "enemy_cata": 1020, "enemy_spider": 1164, "enemy_ghost": 1118,
          "enemy_ogre": 1363, "enemy_knight": 1211, "enemy_bird": 964,
          "enemy_tank": 993, "enemy_dino": 1247, "enemy_dragon": 945,

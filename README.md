@@ -1,7 +1,7 @@
 # Elona Shooter Plus PLUS
 
 A TypeScript/Phaser browser remake of Elona Shooter Plus 1.3.0.4.
-The current local build supports **Rogue, Hunter, Sheriff and Militia** through
+The current local build supports **all eight original hero classes** through
 **Days 1–40**. This is an incomplete remake; later campaign cycles and remaining town systems
 are the next substantial work.
 
@@ -11,9 +11,11 @@ unless you previously enabled it; its button explicitly displays the current sta
 
 ## Current capabilities
 
-- All four starting classes: class-specific gear, growth and earned skill choices.
+- All eight hero classes: class-specific gear, growth and earned skill choices.
   Rogue and Hunter start with Little Girl; Militia has its class grenade,
   starting rifle, Simple Flame Thrower and Simple Chain Gun.
+  Sniper, Ranger, Duelist and Noble unlock through the four starting-class medals.
+  Their adrenaline effects and Noble's passive bonuses are connected to combat.
 - The first 40-day encounter cycle: Catapult, Spider, Ghost, Ogre, Knight, Bird,
   Tank, Dino and Dragon, bird-dropped rats, multi-boss days and later boss attacks.
 - Manual/automatic reload, owned firearms, bows, projectile weapons and consumables;
@@ -30,8 +32,9 @@ unless you previously enabled it; its button explicitly displays the current sta
 - Museum/Medals navigation, both original medal pages and English descriptions;
   robbery for 2 AP with daily diminishing payouts, Robber skill/medal bonuses,
   saved counters and action medals with their next-town AP chances.
-- One browser save with Continue and JSON import/export. Version30 accepts prior
-  browser saves; original Flash saves require a future converter.
+- A persistent browser medal collection with class unlocks and original New Game
+  starting bonuses. One browser save with Continue and JSON import/export.
+  Version31 accepts prior browser saves; original Flash saves require a future converter.
 
 Remaining work and validation limits are in [port status](docs/port-status.md).
 The [process review](docs/development-process-review.md) records the correction
@@ -51,7 +54,10 @@ npm.cmd run dev
 Open the Vite URL, choose New Game, select a class/appearance and press Proceed.
 Mouse aims/fires; hold/release for bows. Space reloads, 1–5 select/use items,
 Esc pauses. Losing focus also pauses combat. Continue restores the local save;
-export a backup to transfer it between browsers or websites.
+export a backup to transfer it between browsers or websites. Current-format imports
+restore the saved medal collection as well as the adventure. Legacy imports merge
+their medals into the existing collection; Continue preserves the collection.
+Keep a recent export before restoring an older backup.
 
 ```powershell
 npm.cmd test
@@ -65,8 +71,9 @@ preview at `http://127.0.0.1:5175/elona/` serves `web/dist/`.
 
 The simulation is independent of rendering. Existing original-game comparisons
 remain available through `web/package.json`; rerun those affected by a change.
-New class checks cover gear, growth, skill selection, JSON restore/replay, Militia
-cooldown, and natural battles through the first two towns for each starting class.
+Class checks cover gear, growth, skill selection, JSON restore/replay, Militia
+cooldown, and natural battles through the first two towns for all eight classes.
+The automated player uses ordinary Free Repair between battles when damaged.
 Campaign checks cover all 40 days with controlled powerful equipment, natural wave
 generation, rewards, town/Rest transitions and saves. This verifies progression;
 full difficulty balance is not established by the controlled run. The economy
@@ -77,8 +84,9 @@ random sequence, talent progress and fame income at the next settlement.
 Temporary-hire checks cover confirmation, a full permanent party, actual AI fire,
 projectile replay, half rewards, wages, departure and old-save migration.
 Museum checks cover payouts, medal thresholds, daily resets, action AP bonuses,
-correct hero-class awards and migration. Global medal carry-over between new
-games and unlockable hero classes remain incomplete.
+correct hero-class awards and migration. Unlock checks cover the global collection,
+starting bonuses and actual class combat effects. Modes, some medal effects and
+the original six save slots remain incomplete.
 Test counts do not establish whole-game completeness or full pixel parity.
 
 ## Original assets and recovery

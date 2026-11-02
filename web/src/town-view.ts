@@ -203,7 +203,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     button('button_robVisitors', panel.children.act1, callbacks.robVisitors, x, y, (state.town?.ap ?? 0) >= 2);
     image(panel.labelsImage, x, 0);
     text(panel.children.lootText, `${state.earnedMedals.length} medals won`, x, y);
-    text(panel.children.hint2, 'Select a medal to view its requirements and bonus. Global carry-over and class unlocks are still being ported.', x, y);
+    text(panel.children.hint2, 'Select a medal to view its requirements and bonus. Medals carry over to new games and unlock more classes.', x, y);
     const entries = Object.entries(MEDALS).filter(([id]) => Number(id) < 85 ? medalPage === 0 : medalPage === 1);
     entries.forEach(([key, info], index) => {
       const id = Number(key), earned = state.earnedMedals.includes(id);

@@ -88,9 +88,11 @@ test('the seventh perfect medal affects only new town preparation, and a delayed
     (value: any) => { value.phase = 'battle'; },
   ]) {
     const invalid = structuredClone(before); change(invalid);
+    Object.assign(invalid, { version: 30 }); // До v31 медаль не могла прийти из другого приключения.
     assert.throws(() => Simulation.fromSave(invalid), /Invalid earned medals/);
   }
   const earlier: Record<string, any> = battle(6).toSave(); earlier.earnedMedals.push(62);
+  earlier.version = 30;
   assert.throws(() => Simulation.fromSave(earlier), /Invalid earned medals/);
   earlier.version = 13;
   assert.throws(() => Simulation.fromSave(earlier), /Invalid earned medals/);

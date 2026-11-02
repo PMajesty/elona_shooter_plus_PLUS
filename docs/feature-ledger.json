@@ -2,17 +2,17 @@
   "schemaVersion": 1,
   "updated": "2026-11-02",
   "currentRelease": {
-    "saveVersion": 30,
+    "saveVersion": 31,
     "verificationStatus": "passed",
-    "implementedCampaign": "Four starting classes, Days1-40, both Castle pages, town activities, temporary hire, both Museum medal pages, robbery and action-medal AP bonuses.",
+    "implementedCampaign": "All eight hero classes, Days1-40, global medal collection, original class unlocks and New Game bonuses, both Castle pages, town activities, temporary hire, Museum and robbery.",
     "publication": {
       "status": "local-build",
       "url": "http://127.0.0.1:5175/elona/",
-      "bundle": "assets/index-BQTEwRYq.js",
-      "priorCheckpoint": "1ee39f3"
+      "bundle": "assets/index-C7sJfAxq.js",
+      "priorCheckpoint": "1faea55"
     },
     "automatedVerification": {
-      "testsPassed": 451,
+      "testsPassed": 461,
       "fullSuite": true,
       "controlledCampaignFrames": 97293,
       "controlledCampaignDays": 40,
@@ -20,15 +20,16 @@
       "releaseBuildPassed": true,
       "searchTests": 6,
       "temporaryHireTests": 6,
-      "museumTests": 7
+      "museumTests": 7,
+      "classProfileTests": 6
     },
     "browserVerification": [
-      "Both Museum pages and earned medal details; two actual robbery clicks match full expected simulation state",
-      "Original user save restored paused/muted with every field equal expected migration"
+      "Locked Sniper selection refused; medal-unlocked second-page selection and actual New Game battle with original adrenaline HUD",
+      "Malformed collection import preserves full envelope; original adventure and collection restored exactly, paused/muted"
     ],
     "browserEvidence": [
-      ".build/browser-qa/museum-verification.json",
-      ".build/browser-qa/museum.png"
+      ".build/browser-qa/class-unlocks-verification.json",
+      ".build/browser-qa/unlocked-classes.png"
     ],
     "knownGaps": "docs/port-status.md"
   },
@@ -140,7 +141,7 @@
         "guardian_npc": 9
       },
       "status": "partial",
-      "implemented": "Rogue, Hunter, Sheriff and Militia heroes share class skill choices/descriptions/growth and existing combat effects. Starting Little Girl and Militia weapons/class grenade are integrated. Nine NPC class branches remain implemented.",
+      "implemented": "All eight selectable heroes share class skill choices/descriptions/growth, original starting gear and combat effects. Sniper idle charge, Ranger party rampage, Duelist frenzy and Noble passive bonuses work for the manual hero; original adrenaline HUD is connected. Class medals unlock the second New Game page. Nine NPC class branches remain implemented.",
       "evidence": [
         "web/src/content.ts:STARTING_CLASS",
         "web/src/simulation.ts:constructor",
@@ -148,10 +149,10 @@
         "web/tests/party-ai-reference.test.ts:75 original method snapshots",
         "web/tests/party-combat-reference.test.ts:37 original damage/credit/growth snapshots",
         "web/tests/party-integration.test.ts:production hire/combat/save boundaries across nine classes",
-        "web/tests/hero-classes.test.ts"
+        "web/tests/hero-classes.test.ts",
+        "web/tests/class-unlocks.test.ts: original unlock mapping, real combat effects, profile carry-over and save replay; class-unlocks-verification.json: actual browser selection and battle"
       ],
       "unverified": [
-        "Unlockable Sniper, Ranger, Duelist and Noble heroes",
         "Full campaign class/balance coverage",
         "Exact interrupted Chain Gun spin/audio timing",
         "Town actions whose underlying systems are absent"
@@ -784,7 +785,7 @@
         "MainTimeline:11782 difficulty options"
       ],
       "status": "partial",
-      "implemented": "Campaign saves retain earned medal IDs, perfect-day count and cumulative boss-spawn history. Normal battle start awards medal40; critical-kill thresholds 10/30/50 award medals70/71/72; the first perfect day awards medal60 before generating the next mission, adding 0.01 absorption there. Sheriff level10 has the source medal67 condition. These campaign flags do not implement global unlocks or future-start bonuses. Alternative modes and starts remain unavailable. Four perfect days award medal61 before future mission preparation; historical activeMission protection remains unchanged. Seven perfect days award medal62 before future preparation; its additional0.01 absorption does not retroactively alter activeMission. Save validation accepts and preserves this legitimate earned state. Day8 battle preserves the prepared0.03 absorption when medal62 was earned previously; an eighth perfect completion does not grant medal63, whose source threshold is ten. Nine perfect completions still do not grant medal63; the next perfect and day-start milestones require10. Historical prepared absorption remains separate from newly earned flags. V30 displays all38 original medal descriptions on both Museum pages, records day/action/class medals and applies action AP/robbery bonuses. Legacy incorrect class awards migrate to the actual hero. Global carry-over and class unlocks remain incomplete.",
+      "implemented": "Campaign saves and a separate browser profile retain earned medal IDs and best day. All38 original medal descriptions are shown in the Museum. Critical/perfect/day/action/class medals and action AP/robbery bonuses work. Prepared absorption remains separate from newly earned flags. V31 carries medals into New Game, unlocks four advanced heroes and applies original starting gold, trait, inventory, fame and Gravity Gun bonuses once. Legacy incorrect class awards migrate to the actual hero. Alternative modes/starts and remaining medal effects/triggers remain incomplete.",
       "evidence": [
         "web/docs/rest-notes.md: source audit of early medal timing, future-start bonuses and fireworks discrepancy",
         "web/tests/day-two.test.ts: a first perfect result on Day 2 changes only the next prepared mission's absorption",
@@ -792,13 +793,14 @@
         "web/tests/castle-reference.test.ts: original absorption truncation and minimum damage",
         "web/tests/day-seven-save.test.ts:seventh-perfect result/town, historical versus prepared absorption, and save continuity",
         "web/tests/day-eight-save.test.ts:medal62 historical protection and no medal63 at eight perfect completions",
-        "web/tests/museum.test.ts: payouts, thresholds, daily/save boundaries, AP chances and class migration; museum-verification.json: full browser export equality"
+        "web/tests/museum.test.ts: payouts, thresholds, daily/save boundaries, AP chances and class migration; museum-verification.json: full browser export equality",
+        "web/tests/class-unlocks.test.ts: global collection, New Game bonus boundaries and validation; class-unlocks-verification.json: locked/unlocked UI and exact profile restoration"
       ],
       "unverified": [
-        "Global medal/index persistence, playable-class unlocks and inherited bonuses on a later New Game",
         "Remaining medal triggers, including Clear fireworks93 and Ragnarok92",
         "Hardcore/casual/alternative-start behavior",
-        "Carry-over"
+        "Carry-over",
+        "Remaining medal effects, including recycling/modding bonuses"
       ]
     },
     {
@@ -812,7 +814,7 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot, Continue and JSON import/export. V28 adds persistent search talent/fame, growing search cursor and legitimate town AP/XP gains. V27 adds economy/counters/training, town modifiers and Sister launch/flight state, retaining Day1-40/party/equipment. Earlier saves migrate without rerolling. Battles load paused.",
+      "implemented": "One browser slot, Continue and JSON import/export retain campaign, equipment, party, town, search and hero class state. V31 adds a separate persistent medal collection included in exports. Current-format import restores the collection snapshot; legacy import merges earned medals; Continue preserves it. Invalid collection imports preserve the running game, while corrupted collection storage does not block a valid adventure. Earlier saves migrate without rerolling. Battles load paused.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",
@@ -878,10 +880,11 @@
         ".build/browser-qa/trainer-ui-verification.json: seven full-envelope purchase, restore, growth and transition checks; production v21→v22 restore verified separately",
         "web/tests/day-eight-save.test.ts:v22 migration, Day8 party/upgrades/mission preservation, Lava lifecycle replay and malformed-save rejection",
         ".build/browser-qa/day-eight-ui-verification.json:five complete-envelope Rest/Continue/Lava/result-town/blocked-Day9 checks",
-        "web/tests/day-nine-save.test.ts:legacy version23, prepared mission8, town9 boss-day validation and blockedDay10"
+        "web/tests/day-nine-save.test.ts:legacy version23, prepared mission8, town9 boss-day validation and blockedDay10",
+        "web/tests/class-unlocks.test.ts: profile storage, validation and older-class save migration; class-unlocks-verification.json: rejected import preserves full envelope and original game/profile restoration"
       ],
       "unverified": [
-        "Original multiple/global save slots and medal index",
+        "Original six save slots, slot deletion and global slot UI",
         "Original Flash save conversion"
       ],
       "intentionalDifferences": [

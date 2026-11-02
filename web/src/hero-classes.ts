@@ -6,10 +6,22 @@ export const HERO_CLASSES = {
   hunter: { id: 1, name: 'Hunter', traits: { 103: 1, 104: 1, 105: 1, 109: 1 }, hint: 'Starts with Little Girl.' },
   sheriff: { id: 6, name: 'Sheriff', traits: { 105: 2, 121: 1 }, hint: 'Starts with a shotgun.' },
   militia: { id: 4, name: 'Militia', traits: { 104: 2, 106: 1 }, hint: 'Starts with a rifle.' },
+  sniper: { id: 2, name: 'Sniper', traits: { 104: 2, 119: 1 }, hint: 'Starts with a rifle.', unlockMedal: 68 },
+  ranger: { id: 5, name: 'Ranger', traits: { 103: 1, 106: 2 }, hint: 'Starts with cheap worn HMG.', unlockMedal: 65 },
+  duelist: { id: 7, name: 'Duelist', traits: { 103: 3 }, hint: 'Starts with a modified pistol.', unlockMedal: 66 },
+  noble: { id: 8, name: 'Noble', traits: { 103: 1, 104: 1, 105: 1, 106: 1 }, hint: 'Starts with a modified SMG.', unlockMedal: 67 },
 } as const;
 export type HeroClass = keyof typeof HERO_CLASSES;
 export function isHeroClass(value: unknown): value is HeroClass {
   return typeof value === 'string' && Object.hasOwn(HERO_CLASSES, value);
+}
+export function heroClassUnlocked(classId: HeroClass, medals: readonly number[]): boolean {
+  const definition = HERO_CLASSES[classId];
+  return !('unlockMedal' in definition) || medals.includes(definition.unlockMedal);
+}
+
+export function heroClassMedal(classId: HeroClass): number | undefined {
+  return ({ hunter: 65, rogue: 66, sheriff: 67, militia: 68 } as Partial<Record<HeroClass, number>>)[classId];
 }
 
 export function startingHeroTraits(classId: HeroClass, aiming: number, teamwork: number): TraitLevels {

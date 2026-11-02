@@ -1,11 +1,13 @@
 import { MAX_CAMPAIGN_DAY, validCampaignDay } from './missions.ts';
 import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
 import Phaser from 'phaser';
-import { HERO_CLASSES, isHeroClass, type HeroClass } from './hero-classes.ts';
+import { HERO_CLASSES, heroClassUnlocked, isHeroClass, type HeroClass } from './hero-classes.ts';
+import { createProfile, mergeProfile, validProfile, type GlobalProfile } from './profile.ts';
+import { MEDALS } from './medals.ts';
 import { Simulation, type EnemyState, type SimulationEvent } from './simulation.ts';
 import { WORLD } from './content.ts';
 import { weaponPresentation } from './combat-stats.ts';
-import { exportSave, readMute, readSave, storeMute, storeSave } from './storage.ts';
+import { exportSave, readMute, readSave, readProfile, storeProfile, storeMute, storeSave } from './storage.ts';
 import { OriginalAlly, type OriginalAllyMetadata } from './original-animation.ts';
 import { createLootView } from './loot-view.ts';
 import { createSkillView } from './skill-view.ts';
@@ -25,7 +27,7 @@ interface ImageAsset { file: string; width: number; height: number; originX: num
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number; frameAlpha?: number[] }
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual }
-interface PortSave { format: 'elona-shooter-browser'; version: number; appearance: number; simulation: unknown }
+interface PortSave { format: 'elona-shooter-browser'; version: number; appearance: number; simulation: unknown; profile?: GlobalProfile }
 type Screen = 'title' | 'gene' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
@@ -68,7 +70,10 @@ class ElonaScene extends Phaser.Scene {
   private selectedCharacter = 0;
   private castlePage: 0 | 1 = 0;
   private medalPage: 0 | 1 = 0;
+  private profileRead = readProfile();
+  private profile = this.profileRead.profile;
   private ammoFill?: Phaser.GameObjects.Image;
+  private adrenalineFill?: Phaser.GameObjects.Image;
   private selection?: Phaser.GameObjects.Rectangle;
   private cursor?: Phaser.GameObjects.Graphics;
   private pauseLayer?: Phaser.GameObjects.Container;
@@ -140,7 +145,7 @@ class ElonaScene extends Phaser.Scene {
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Rogue, Hunter, Sheriff and Militia Days 1–40, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Ragnarok, remaining town actions, Day 41 onward and unlockable hero classes are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Rogue, Hunter, Sheriff and Militia Days 1–40, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Sniper, Ranger, Duelist and Noble unlock through class medals; the browser medal collection carries into new games and is included in exports. Importing a current-format backup also restores that collection. Ragnarok, remaining town actions, Day 41 onward and original multiple save slots are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
     document.querySelector<HTMLButtonElement>('#import-save')!.disabled = false;
   }
@@ -252,12 +257,20 @@ class ElonaScene extends Phaser.Scene {
       } else this.labelButton(x + 45, y - 15, key.replace('button_', ''), action);
     }
     const saved = readSave();
+    if (saved.kind === 'saved') {
+      try {
+        const parsed = this.parseSave(saved.data, true);
+        if (parsed.profile) this.profile = mergeProfile(this.profile, { earnedMedals: parsed.profile.medals, day: parsed.profile.bestDay });
+        this.profile = mergeProfile(this.profile, parsed.simulation.state); if (storeProfile(this.profile)) delete this.profileRead.warning;
+      } catch { /* Повреждённое приключение не блокирует создание нового героя. */ }
+    }
     const savedDay = saved.kind === 'saved' ? (saved.data as { simulation?: { day?: unknown } } | null)?.simulation?.day : undefined;
     const savedClass = saved.kind === 'saved' ? (saved.data as { simulation?: { player?: { classId?: unknown } } } | null)?.simulation?.player?.classId : undefined;
     const className = isHeroClass(savedClass) ? HERO_CLASSES[savedClass].name : 'Hero';
     this.text(469, 32, saved.kind === 'saved' ? (validCampaignDay(savedDay) ? `${className} · Day ${savedDay}` : `Saved ${className}`) : 'Empty Save', 12, '#151515', 'Arial').setBackgroundColor('#ede9de').setFixedSize(137, 20);
-    this.text(334, 11, 'Most Days Survived: 0 / 0 (HC) / 0 (Casual)', 12, '#ffffff').setShadow(1, 1, '#000000', 2);
+    this.text(334, 11, `Most Days Survived: ${this.profile.bestDay} / 0 (HC) / 0 (Casual)`, 12, '#ffffff').setShadow(1, 1, '#000000', 2);
     if (saved.kind === 'error') status.textContent = saved.message;
+    else if (this.profileRead.warning) status.textContent = this.profileRead.warning;
   }
 
   private showHelp(): void {
@@ -271,9 +284,9 @@ class ElonaScene extends Phaser.Scene {
     this.labelButton(245, 288, 'Return to Title', () => this.showTitle(), 145);
   }
 
-  showGene(): void {
+  showGene(page: 0 | 1 = 0, keepHero = false): void {
     this.reset('gene');
-    this.sim = new Simulation(Date.now(), { ...this.simulationOptions(), deferOpeningWaves: true });
+    if (!keepHero || !this.sim) this.sim = new Simulation(Date.now(), { ...this.simulationOptions(), medals: this.profile.medals, deferOpeningWaves: true });
     this.image(manifest.images.townHud ? 'townHud' : 'town');
     this.drawHud();
     const background = new Set(this.root.list);
@@ -287,7 +300,7 @@ class ElonaScene extends Phaser.Scene {
     }
     this.selection = this.add.rectangle(0, 0, 28, 29).setStrokeStyle(1, 0x8c3420).setOrigin(0);
     this.root.add(this.selection); this.moveSelection();
-    const classes = Object.keys(HERO_CLASSES) as HeroClass[];
+    const classes = (Object.keys(HERO_CLASSES) as HeroClass[]).slice(page * 4, page * 4 + 4);
     const radios: (Phaser.GameObjects.Image | undefined)[] = [];
     const labels: Phaser.GameObjects.Text[] = [];
     const hint = this.text(280, 205, '', 13, '#2d315b');
@@ -297,26 +310,36 @@ class ElonaScene extends Phaser.Scene {
       classes.forEach((id, index) => {
         radios[index]?.setFrame(id === selected ? '2' : '1');
         labels[index].setColor(id === selected ? '#22170e' : '#514b36');
+        labels[index].setAlpha(heroClassUnlocked(id, this.profile.medals) ? 1 : 0.35);
       });
       hint.setText(definition.hint);
       summary.setText(Object.entries(definition.traits).map(([id, level]) =>
         `${ALL_TRAITS[Number(id)].name}${level > 1 ? ` ${level}` : ''}`).join('\n'));
       this.updateHud();
+      container.dataset.heroClass = selected;
+      container.dataset.classPage = String(page);
+      container.dataset.unlockedClasses = JSON.stringify((Object.keys(HERO_CLASSES) as HeroClass[]).filter(id => heroClassUnlocked(id, this.profile.medals)));
+      status.textContent = ALL_TRAITS[definition.id].description;
     };
     classes.forEach((id, index) => {
       const y = 214 + index * 20;
       radios.push(this.clip('radioButton', id === 'sheriff' ? 2 : 1, 180, y));
       labels.push(this.text(194, y - 7, HERO_CLASSES[id].name, 14));
       this.zone(171, y - 8, 90, 18, () => {
+        if (!heroClassUnlocked(id, this.profile.medals)) {
+          const definition = HERO_CLASSES[id];
+          status.textContent = 'unlockMedal' in definition ? `${definition.name} is locked. Earn ${MEDALS[definition.unlockMedal].name} by reaching level 10 with that starting class.` : 'This class is locked.';
+          this.playSound('soundBeep'); return;
+        }
         this.sim?.rerollOpeningHero(id); refreshClass();
       }).setName(`hero-class-${id}`);
     });
     refreshClass();
     this.originalButton('button_proceed', 267, 301, () => this.startGame());
     this.originalButton('button_gameMods', 408, 301, () => { status.textContent = 'Game MODs will return as their underlying systems are ported.'; });
-    this.text(159, 302, 'Next Page', 13, '#8e8470');
+    this.text(159, 302, 'Next Page', 13, '#2d315b');
     this.text(432, 252, 'Casual Mode\nHardcore Mode', 12, '#8e8470', 'Arial').setLineSpacing(10);
-    this.zone(145, 294, 103, 37, () => { status.textContent = 'Additional classes and their unlocks are still being ported.'; });
+    this.zone(145, 294, 103, 37, () => { this.playSound('soundClick1'); this.showGene(page === 0 ? 1 : 0, true); });
     this.zone(405, 244, 140, 55, () => { status.textContent = 'This comparison build uses the original normal difficulty.'; });
     const menu = this.root.list.filter(object => !background.has(object));
     this.root.add(this.add.container(MENU_X, 0, menu));
@@ -354,6 +377,12 @@ class ElonaScene extends Phaser.Scene {
 
   private drawHud(): void {
     this.ammoFill = this.image('ammo_fill', 290.9, 11);
+    this.adrenalineFill = undefined;
+    if (this.sim && ['sniper', 'ranger', 'duelist'].includes(this.sim.state.player.classId)) {
+      this.clip('heroAdrenalineFrame', 1, 207.25, 19.45)?.setScale(1, 1.000473);
+      this.adrenalineFill = this.clip('heroAdrenalineFill', 1, 148, 9.9);
+      this.text(154, 11.85, 'Adrenaline', 12, '#ffffff', 'ElonaHud').setScale(1.0004883, 0.97636414);
+    }
     const values: [string, number, number, string, number, string][] = [
       ['day', 47, 9, '1/5', 16, 'ElonaHud'], ['ammo', 292, 10, '5/5', 16, 'ElonaHud'],
       ['gold', 427, 9, '200', 16, 'ElonaHud'], ['hp', 531, 9, '40/40', 16, 'ElonaHud'],
@@ -836,6 +865,16 @@ class ElonaScene extends Phaser.Scene {
       cooldown.setVisible(remaining > 0).setScale(Math.max(0, remaining - 1) / timerMax, 1);
     });
     this.ammoFill?.setScale(selected && selected.ammoMax > 0 ? selected.ammo / selected.ammoMax : 0, 1);
+    const meter = state.player.classState;
+    if (meter && this.adrenalineFill) {
+      const level = state.player.traits[HERO_CLASSES[state.player.classId].id];
+      const ratio = state.player.classId === 'ranger' ? meter.frenzy / 1000
+        : state.player.classId === 'duelist' ? meter.frenzy / Math.trunc(40 + Math.sqrt(level) * 1.6 + level)
+        : ALL_TRAITS[2].calculate(level) * meter.idleCount / (Math.trunc(160 + Math.sqrt(level) * 2 + level) - 100);
+      this.adrenalineFill.setScale(Math.max(0, Math.min(1, ratio)), 1.000473);
+    }
+    container.dataset.heroClass = state.player.classId;
+    container.dataset.classState = JSON.stringify(meter ?? null);
     container.dataset.gold = String(state.gold); container.dataset.hp = String(state.castleHp);
     container.dataset.ammo = String(selected?.ammo ?? 0); container.dataset.grenades = String(state.inventory.filter(item => isOccupiedItem(item) && item.id === 11).reduce((total, item) => total + item!.ammo, 0));
     container.dataset.selectedSlot = String(state.player.selectedSlot);
@@ -1182,21 +1221,27 @@ class ElonaScene extends Phaser.Scene {
   }
 
   makeSave(): PortSave | undefined {
-    return this.sim && this.screen !== 'title' && this.screen !== 'gene' ? { format: 'elona-shooter-browser', version: SAVE_VERSION, appearance: this.appearance, simulation: this.sim.toSave() } : undefined;
+    if (!this.sim || this.screen === 'title' || this.screen === 'gene') return undefined;
+    this.profile = mergeProfile(this.profile, this.sim.state);
+    return { format: 'elona-shooter-browser', version: SAVE_VERSION, appearance: this.appearance, simulation: this.sim.toSave(), profile: structuredClone(this.profile) };
   }
 
   saveGame(notify = true): boolean {
     const save = this.makeSave();
     if (!save) { if (notify) status.textContent = 'Start a game before saving.'; return false; }
     const stored = storeSave(save);
+    const profileStored = storeProfile(this.profile);
+    if (!profileStored && stored) { status.textContent = 'The game was saved, but the medal collection could not be stored. Export a backup.'; return true; }
     if (!stored || notify) status.textContent = stored ? 'Game saved in this browser. Export a save to keep a separate backup.' : 'Browser storage is unavailable. Export your save to keep your progress.';
     return stored;
   }
 
-  private parseSave(raw: unknown): { simulation: Simulation; appearance: number } {
+  private parseSave(raw: unknown, ignoreProfileError = false): { simulation: Simulation; appearance: number; profile?: GlobalProfile } {
     const save = raw as Partial<PortSave> | null;
     if (!save || save.format !== 'elona-shooter-browser' || !supportedSaveVersion(save.version) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
-    return { simulation: Simulation.fromSave(save.simulation, this.simulationOptions()), appearance: save.appearance! };
+    const validCollection = validProfile(save.profile);
+    if (save.profile !== undefined && !validCollection && !ignoreProfileError) throw new Error('This save contains an invalid medal collection.');
+    return { simulation: Simulation.fromSave(save.simulation, this.simulationOptions()), appearance: save.appearance!, ...(validCollection ? { profile: structuredClone(save.profile) } : {}) };
   }
 
   continueGame(): void {
@@ -1205,15 +1250,18 @@ class ElonaScene extends Phaser.Scene {
     try { this.loadGame(saved.data); } catch (error) { status.textContent = error instanceof Error ? error.message : 'Unable to read save.'; }
   }
 
-  loadGame(raw: unknown): void {
-    const validated = this.parseSave(raw);
+  loadGame(raw: unknown, restoreCollection = false): void {
+    const validated = this.parseSave(raw, !restoreCollection);
+    if (restoreCollection && validated.profile) this.profile = createProfile();
+    if (validated.profile) this.profile = mergeProfile(this.profile, { earnedMedals: validated.profile.medals, day: validated.profile.bestDay });
+    this.profile = mergeProfile(this.profile, validated.simulation.state); if (storeProfile(this.profile)) delete this.profileRead.warning;
     this.sim = validated.simulation; this.appearance = validated.appearance;
     if (this.sim.state.phase === 'battle') { this.enterBattle(); this.togglePause(); }
     else this.showOutcome();
     status.textContent = 'Saved game restored.';
   }
 
-  importSave(raw: unknown): void { this.parseSave(raw); this.loadGame(raw); this.saveGame(false); status.textContent = 'Save imported and restored.'; }
+  importSave(raw: unknown): void { this.loadGame(raw, true); this.saveGame(false); status.textContent = 'Save imported and restored.'; }
 
   playSound(key: string, volume = 0.7, pan = 0): void { if (this.cache.audio.exists(key)) this.sound.play(key, { volume, pan }); }
   toggleMute(): void { this.muted = !this.muted; this.sound.mute = this.muted; storeMute(this.muted); this.updateSoundButton(); }
