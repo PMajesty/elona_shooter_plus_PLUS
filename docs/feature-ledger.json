@@ -2,17 +2,17 @@
   "schemaVersion": 1,
   "updated": "2026-11-02",
   "currentRelease": {
-    "saveVersion": 33,
+    "saveVersion": 34,
     "verificationStatus": "passed",
-    "implementedCampaign": "All eight heroes and repeating normal campaign cycles, original strength scaling and large variants; browser save safety boundary Day1000. Town activities, Museum, hire and persistent medal unlocks remain integrated. Ragnarok artifact use now spawns real dinosaurs, persists battle state and awards its survivor medal and bonuses.",
+    "implementedCampaign": "All eight heroes and repeating normal campaign cycles, original strength scaling and large variants; browser save safety boundary Day1000. Town activities, Museum, hire and persistent medal unlocks remain integrated. Ragnarok artifact use now spawns real dinosaurs, persists battle state and awards its survivor medal and bonuses. Casual/Hardcore are integrated through New Game, combat, towns, mode-specific records and Hardcore persistence/medals.",
     "publication": {
       "status": "local-build",
       "url": "http://127.0.0.1:5175/elona/",
-      "bundle": "assets/index-BvHbh_z7.js",
-      "priorCheckpoint": "6fef93b"
+      "bundle": "assets/index-Dee9n8Oq.js",
+      "priorCheckpoint": "07c1ffc"
     },
     "automatedVerification": {
-      "testsPassed": 468,
+      "testsPassed": 474,
       "fullSuite": true,
       "controlledCampaignFrames": 97293,
       "controlledCampaignDays": 40,
@@ -23,15 +23,17 @@
       "museumTests": 7,
       "classProfileTests": 6,
       "cycleBoundaryCombatDays": 12,
-      "ragnarokTests": 4
+      "ragnarokTests": 4,
+      "gameModeTests": 6
     },
     "browserVerification": [
-      "Number3 activates the owned Ragnarok, consumes the artifact and exports all30 dinosaurs plus the saved mission flag",
-      "Continue preserves the full state using observed pointer coordinates; original adventure/profile restored exactly after migration, paused/muted, no console errors"
+      "Exclusive mode toggles; actual Casual opening export has500 power",
+      "Hardcore battle export refused and Continue has no save; town checkpoint restores and Rest opens Hardcore Day20",
+      "Original user adventure/profile restored exactly after migration, paused/muted; local preview recovered after Codex crash"
     ],
     "browserEvidence": [
-      ".build/browser-qa/ragnarok-verification.json",
-      ".build/browser-qa/ragnarok.png"
+      ".build/browser-qa/game-modes-verification.json",
+      ".build/browser-qa/game-modes.png"
     ],
     "knownGaps": "docs/port-status.md"
   },
@@ -462,7 +464,7 @@
         "embedded enemy.as:init strength and speed formulas"
       ],
       "status": "partial",
-      "implemented": "Repeating normal encounter cycles use original fixed-level selection, calendar power/rewards/loot, boss groups and strengthened enemies. Ordinary combat/rewards/town/Rest/saves cross the first two cycle boundaries. Day1000 is a browser save safety boundary, not an original ending.",
+      "implemented": "Repeating normal encounter cycles use original fixed-level selection, calendar power/rewards/loot, boss groups and strengthened enemies. Ordinary combat/rewards/town/Rest/saves cross the first two cycle boundaries. Day1000 is a browser save safety boundary, not an original ending. Casual mission generation and both modes carry through Rest and saves.",
       "evidence": [
         "web/tests/simulation.test.ts:first mission and completion",
         "docs/port-verification.json:browser_checks.victory_checkpoint",
@@ -494,7 +496,7 @@
         "web/tests/campaign.test.ts: fixed-level formulas, boss counts, cycle boundaries and Day1000 saves; cycle-transition-verification.json: actual Day40 Rest -> Day41"
       ],
       "unverified": [
-        "Alternative difficulty modifiers",
+        "Game MOD difficulty modifiers",
         "Full native Flash input/timing comparison, later-cycle balance and long-session performance"
       ],
       "campaignUpdate": "V32 connects repeated cycles, original strength scaling and eligible large variants, including rendered size/collision and saved state. Core encounters remain source-led; later-cycle balance and long-session performance are not established."
@@ -771,12 +773,14 @@
         "web/tests/second-town-reference.test.ts: original second-town cards, flags and retained searched",
         "web/tests/sixth-town-reference.test.ts:actual original title eligibility, action, acknowledgment and repeat guard",
         "web/scripts/soak.ts:one earned Day6 town claimed/persisted title before other AP spending and rejected duplicate claim",
-        "web/tests/day-eight-save.test.ts:ordinary Rest7→8 and town8 no-op guard"
+        "web/tests/day-eight-save.test.ts:ordinary Rest7→8 and town8 no-op guard",
+        "src/original/MainTimeline.as:3230 actList,3772 cardEvent,5410 generateCard,6447 inactive cardCount branch,8952 updateMissionMenu and13518 action dispatch"
       ],
       "unverified": [
-        "Special event-card effects; no new original-runtime search comparison (source-led behavior tests only)",
+        "No new original-runtime search comparison (source-led behavior tests only)",
         "Remaining original event dialogs and rare conditions"
-      ]
+      ],
+      "sourceAudit": "generateCard/cardEvent records have no found player reveal path or cardCount activation. The reachable Mission board uses already-implemented actList activities. Retain generated records/RNG for compatibility; exclude dormant card effects from normal coverage unless new evidence establishes reachability."
     },
     {
       "id": "original.progression.medals_modes",
@@ -789,7 +793,7 @@
         "MainTimeline:11782 difficulty options"
       ],
       "status": "partial",
-      "implemented": "Campaign saves and a separate browser profile retain earned medal IDs and best day. All38 original medal descriptions are shown in the Museum. Critical/perfect/day/action/class medals and action AP/robbery bonuses work. Prepared absorption remains separate from newly earned flags. V31 carries medals into New Game, unlocks four advanced heroes and applies original starting gold, trait, inventory, fame and Gravity Gun bonuses once. Legacy incorrect class awards migrate to the actual hero. Alternative modes/starts and remaining medal effects/triggers remain incomplete. V33 awards Ragnarok92 only on victory, before wage settlement; it supplies the existing3% wage denominator bonus and future-start Luck+1.",
+      "implemented": "Campaign saves and a separate browser profile retain earned medal IDs and best day. All38 original medal descriptions are shown in the Museum. Critical/perfect/day/action/class medals and action AP/robbery bonuses work. Prepared absorption remains separate from newly earned flags. V31 carries medals into New Game, unlocks four advanced heroes and applies original starting gold, trait, inventory, fame and Gravity Gun bonuses once. Legacy incorrect class awards migrate to the actual hero. Game MODs, alternative starts/carry-over and remaining medal effects/triggers remain incomplete. V33 awards Ragnarok92 only on victory, before wage settlement; it supplies the existing3% wage denominator bonus and future-start Luck+1. V34 connects Casual/Hardcore selection and exclusive state. Casual uses original encounter power, kill-XP and tax formulas; Hardcore uses town-only browser persistence and original day20/40/80 medals. Profile records are separate by mode.",
       "evidence": [
         "web/docs/rest-notes.md: source audit of early medal timing, future-start bonuses and fireworks discrepancy",
         "web/tests/day-two.test.ts: a first perfect result on Day 2 changes only the next prepared mission's absorption",
@@ -798,11 +802,12 @@
         "web/tests/day-seven-save.test.ts:seventh-perfect result/town, historical versus prepared absorption, and save continuity",
         "web/tests/day-eight-save.test.ts:medal62 historical protection and no medal63 at eight perfect completions",
         "web/tests/museum.test.ts: payouts, thresholds, daily/save boundaries, AP chances and class migration; museum-verification.json: full browser export equality",
-        "web/tests/class-unlocks.test.ts: global collection, New Game bonus boundaries and validation; class-unlocks-verification.json: locked/unlocked UI and exact profile restoration"
+        "web/tests/class-unlocks.test.ts: global collection, New Game bonus boundaries and validation; class-unlocks-verification.json: locked/unlocked UI and exact profile restoration",
+        "web/tests/game-modes.test.ts: mode formulas, replay, persistence, awards and records; game-modes-verification.json: actual New Game/town/Rest/save behavior"
       ],
       "unverified": [
         "Remaining medal triggers, including Clear fireworks93",
-        "Hardcore/casual/alternative-start behavior",
+        "Game MODs and alternative-start behavior",
         "Carry-over",
         "Remaining medal effects, including recycling/modding bonuses"
       ]
@@ -818,7 +823,7 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot, Continue and JSON import/export retain campaign, equipment, party, town, search and hero class state. V31 adds a separate persistent medal collection included in exports. Current-format import restores the collection snapshot; legacy import merges earned medals; Continue preserves it. Invalid collection imports preserve the running game, while corrupted collection storage does not block a valid adventure. Earlier saves migrate without rerolling. Battles load paused. V32 saves retain large-variant flags and validate cycle parameters through Day1000; older adventures migrate without state/RNG changes. V33 preserves the optional active Ragnarok flag and rejects malformed/old-format flags without altering older normal adventures.",
+      "implemented": "One browser slot, Continue and JSON import/export retain campaign, equipment, party, town, search and hero class state. V31 adds a separate persistent medal collection included in exports. Current-format import restores the collection snapshot; legacy import merges earned medals; Continue preserves it. Invalid collection imports preserve the running game, while corrupted collection storage does not block a valid adventure. Earlier saves migrate without rerolling. Battles load paused. V32 saves retain large-variant flags and validate cycle parameters through Day1000; older adventures migrate without state/RNG changes. V33 preserves the optional active Ragnarok flag and rejects malformed/old-format flags without altering older normal adventures. V34 retains optional mode and per-mode global records. Hardcore browser saves/exports/restores are town-only; battle start removes the adventure save while retaining profile/mute settings. Normal/Casual battle saves remain available.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",

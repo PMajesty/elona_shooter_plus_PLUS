@@ -2,12 +2,12 @@ import { MAX_CAMPAIGN_DAY, validCampaignDay } from './missions.ts';
 import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
 import Phaser from 'phaser';
 import { HERO_CLASSES, heroClassUnlocked, isHeroClass, type HeroClass } from './hero-classes.ts';
-import { createProfile, mergeProfile, validProfile, type GlobalProfile } from './profile.ts';
+import { createProfile, mergeProfile, mergeProfiles, validProfile, type GlobalProfile } from './profile.ts';
 import { MEDALS } from './medals.ts';
 import { Simulation, type EnemyState, type SimulationEvent } from './simulation.ts';
 import { WORLD } from './content.ts';
 import { weaponPresentation } from './combat-stats.ts';
-import { exportSave, readMute, readSave, readProfile, storeProfile, storeMute, storeSave } from './storage.ts';
+import { exportSave, readMute, readSave, readProfile, storeProfile, canSaveAdventure, clearSave, storeMute, storeSave } from './storage.ts';
 import { OriginalAlly, type OriginalAllyMetadata } from './original-animation.ts';
 import { createLootView } from './loot-view.ts';
 import { createSkillView } from './skill-view.ts';
@@ -145,7 +145,7 @@ class ElonaScene extends Phaser.Scene {
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Eight hero classes and repeating campaign cycles, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Sniper, Ranger, Duelist and Noble unlock through class medals; the browser medal collection carries into new games and is included in exports. Importing a current-format backup also restores that collection. Remaining town actions, alternative modes and original multiple save slots are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Eight hero classes and repeating campaign cycles, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Sniper, Ranger, Duelist and Noble unlock through class medals; the browser medal collection carries into new games and is included in exports. Importing a current-format backup also restores that collection. Casual and Hardcore modes are playable. Remaining Game MODs, alternative starts and original multiple save slots are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
     document.querySelector<HTMLButtonElement>('#import-save')!.disabled = false;
   }
@@ -260,7 +260,7 @@ class ElonaScene extends Phaser.Scene {
     if (saved.kind === 'saved') {
       try {
         const parsed = this.parseSave(saved.data, true);
-        if (parsed.profile) this.profile = mergeProfile(this.profile, { earnedMedals: parsed.profile.medals, day: parsed.profile.bestDay });
+        if (parsed.profile) this.profile = mergeProfiles(this.profile, parsed.profile);
         this.profile = mergeProfile(this.profile, parsed.simulation.state); if (storeProfile(this.profile)) delete this.profileRead.warning;
       } catch { /* Повреждённое приключение не блокирует создание нового героя. */ }
     }
@@ -268,7 +268,7 @@ class ElonaScene extends Phaser.Scene {
     const savedClass = saved.kind === 'saved' ? (saved.data as { simulation?: { player?: { classId?: unknown } } } | null)?.simulation?.player?.classId : undefined;
     const className = isHeroClass(savedClass) ? HERO_CLASSES[savedClass].name : 'Hero';
     this.text(469, 32, saved.kind === 'saved' ? (validCampaignDay(savedDay) ? `${className} · Day ${savedDay}` : `Saved ${className}`) : 'Empty Save', 12, '#151515', 'Arial').setBackgroundColor('#ede9de').setFixedSize(137, 20);
-    this.text(334, 11, `Most Days Survived: ${this.profile.bestDay} / 0 (HC) / 0 (Casual)`, 12, '#ffffff').setShadow(1, 1, '#000000', 2);
+    this.text(334, 11, `Most Days Survived: ${this.profile.bestDay} / ${this.profile.bestHardcoreDay ?? 0} (HC) / ${this.profile.bestCasualDay ?? 0} (Casual)`, 12, '#ffffff').setShadow(1, 1, '#000000', 2);
     if (saved.kind === 'error') status.textContent = saved.message;
     else if (this.profileRead.warning) status.textContent = this.profileRead.warning;
   }
@@ -338,9 +338,17 @@ class ElonaScene extends Phaser.Scene {
     this.originalButton('button_proceed', 267, 301, () => this.startGame());
     this.originalButton('button_gameMods', 408, 301, () => { status.textContent = 'Game MODs will return as their underlying systems are ported.'; });
     this.text(159, 302, 'Next Page', 13, '#2d315b');
-    this.text(432, 252, 'Casual Mode\nHardcore Mode', 12, '#8e8470', 'Arial').setLineSpacing(10);
+    const modeNames = [['casual', 'Casual Mode'], ['hardcore', 'Hardcore Mode']] as const;
+    const modeMarkers = modeNames.map(([mode, name], index) => this.text(413, 252 + index * 22, '', 12, '#2d315b', 'Arial'));
+    const refreshMode = () => modeNames.forEach(([mode, name], index) => modeMarkers[index].setText(`${this.sim!.state.mode === mode ? '[x]' : '[ ]'} ${name}`));
+    refreshMode();
+    modeNames.forEach(([mode], index) => this.zone(405, 244 + index * 22, 142, 21, () => {
+      this.sim!.setOpeningMode(this.sim!.state.mode === mode ? 'normal' : mode); refreshMode();
+      status.textContent = this.sim!.state.mode === 'hardcore' ? 'In Hardcore Mode, your save file is deleted at the start of each battle. You can save and export only in town.'
+        : this.sim!.state.mode === 'casual' ? 'Casual Mode: fewer enemies, 35% more kill experience and lower taxes.' : 'Normal Mode.';
+      container.dataset.gameMode = this.sim!.state.mode ?? 'normal';
+    }));
     this.zone(145, 294, 103, 37, () => { this.playSound('soundClick1'); this.showGene(page === 0 ? 1 : 0, true); });
-    this.zone(405, 244, 140, 55, () => { status.textContent = 'This comparison build uses the original normal difficulty.'; });
     const menu = this.root.list.filter(object => !background.has(object));
     this.root.add(this.add.container(MENU_X, 0, menu));
   }
@@ -877,6 +885,7 @@ class ElonaScene extends Phaser.Scene {
         : ALL_TRAITS[2].calculate(level) * meter.idleCount / (Math.trunc(160 + Math.sqrt(level) * 2 + level) - 100);
       this.adrenalineFill.setScale(Math.max(0, Math.min(1, ratio)), 1.000473);
     }
+    container.dataset.gameMode = state.mode ?? 'normal';
     container.dataset.heroClass = state.player.classId;
     container.dataset.classState = JSON.stringify(meter ?? null);
     container.dataset.gold = String(state.gold); container.dataset.hp = String(state.castleHp);
@@ -1227,12 +1236,19 @@ class ElonaScene extends Phaser.Scene {
   makeSave(): PortSave | undefined {
     if (!this.sim || this.screen === 'title' || this.screen === 'gene') return undefined;
     this.profile = mergeProfile(this.profile, this.sim.state);
+    if (!canSaveAdventure(this.sim.state)) return undefined;
     return { format: 'elona-shooter-browser', version: SAVE_VERSION, appearance: this.appearance, simulation: this.sim.toSave(), profile: structuredClone(this.profile) };
   }
 
   saveGame(notify = true): boolean {
     const save = this.makeSave();
-    if (!save) { if (notify) status.textContent = 'Start a game before saving.'; return false; }
+    if (!save) {
+      if (this.sim && !canSaveAdventure(this.sim.state)) {
+        const cleared = clearSave(); storeProfile(this.profile);
+        if (notify || !cleared) status.textContent = cleared ? 'Hardcore Mode: you can only save or export the game in town.' : 'The Hardcore save could not be cleared from browser storage.';
+      } else if (notify) status.textContent = 'Start a game before saving.';
+      return false;
+    }
     const stored = storeSave(save);
     const profileStored = storeProfile(this.profile);
     if (!profileStored && stored) { status.textContent = 'The game was saved, but the medal collection could not be stored. Export a backup.'; return true; }
@@ -1245,7 +1261,9 @@ class ElonaScene extends Phaser.Scene {
     if (!save || save.format !== 'elona-shooter-browser' || !supportedSaveVersion(save.version) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Original Flash saves require a separate converter.');
     const validCollection = validProfile(save.profile);
     if (save.profile !== undefined && !validCollection && !ignoreProfileError) throw new Error('This save contains an invalid medal collection.');
-    return { simulation: Simulation.fromSave(save.simulation, this.simulationOptions()), appearance: save.appearance!, ...(validCollection ? { profile: structuredClone(save.profile) } : {}) };
+    const simulation = Simulation.fromSave(save.simulation, this.simulationOptions());
+    if (!canSaveAdventure(simulation.state)) throw new Error('Hardcore games can only be restored in town.');
+    return { simulation, appearance: save.appearance!, ...(validCollection ? { profile: structuredClone(save.profile) } : {}) };
   }
 
   continueGame(): void {
@@ -1257,7 +1275,7 @@ class ElonaScene extends Phaser.Scene {
   loadGame(raw: unknown, restoreCollection = false): void {
     const validated = this.parseSave(raw, !restoreCollection);
     if (restoreCollection && validated.profile) this.profile = createProfile();
-    if (validated.profile) this.profile = mergeProfile(this.profile, { earnedMedals: validated.profile.medals, day: validated.profile.bestDay });
+    if (validated.profile) this.profile = mergeProfiles(this.profile, validated.profile);
     this.profile = mergeProfile(this.profile, validated.simulation.state); if (storeProfile(this.profile)) delete this.profileRead.warning;
     this.sim = validated.simulation; this.appearance = validated.appearance;
     if (this.sim.state.phase === 'battle') { this.enterBattle(); this.togglePause(); }
@@ -1294,6 +1312,9 @@ async function boot(): Promise<void> {
 document.querySelector('#fullscreen')!.addEventListener('click', () => { void container.requestFullscreen().catch(() => { status.textContent = 'Full screen is unavailable in this browser view.'; }); });
 document.querySelector('#sound')!.addEventListener('click', () => gameScene?.toggleMute());
 document.querySelector('#export-save')!.addEventListener('click', () => {
+  if (gameScene?.sim && !['title', 'gene'].includes(gameScene.screen) && !canSaveAdventure(gameScene.sim.state)) {
+    status.textContent = 'Hardcore Mode: you can only save or export the game in town.'; return;
+  }
   const current = gameScene?.makeSave(), saved = readSave();
   const data = current ?? (saved.kind === 'saved' ? saved.data : undefined);
   if (data) { exportSave(data); status.textContent = 'Save exported.'; } else status.textContent = 'Start a game before exporting a save.';

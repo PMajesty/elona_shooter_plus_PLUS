@@ -2,6 +2,12 @@ export const SAVE_KEY = 'elona-shooter-plus-plus.port.save.v1';
 import { createProfile, validProfile, type GlobalProfile } from './profile.ts';
 const PROFILE_KEY = 'elona-shooter-plus-plus.port.profile.v1';
 const OPTIONS_KEY = 'elona-shooter-plus-plus.port.options.v1';
+export function canSaveAdventure(state: { mode?: string; phase: string }): boolean {
+  return state.mode !== 'hardcore' || state.phase === 'town';
+}
+export function clearSave(): boolean {
+  try { localStorage.removeItem(SAVE_KEY); return true; } catch { return false; }
+}
 
 export type SaveRead = { kind: 'empty' } | { kind: 'saved'; data: unknown } | { kind: 'error'; message: string };
 

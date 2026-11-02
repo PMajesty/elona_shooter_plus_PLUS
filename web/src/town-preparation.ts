@@ -5,6 +5,7 @@ import { generateEarlyTownRecruit, type FirstTownRecruit } from './recruits.ts';
 export interface FirstTownMission extends LowLevelMission {}
 
 export interface FirstTownPreparationInput {
+  casual?: boolean;
   actionMedals?: readonly number[];
   smith?: number; chickens?: number; specialSale?: boolean;
   priorOffers?: readonly (Readonly<Item> | null)[];
@@ -61,7 +62,7 @@ export function prepareEarlyTown(random: () => number, day: number, input: First
   }
 
   // Уровень следующей миссии равен текущему дню; календарная добыча определяется до Rest.
-  const mission = generateLowLevelMission(day, day, random, { absorbFix: input.absorbFix, negotiator: effects.missionNegotiator }) as FirstTownMission;
+  const mission = generateLowLevelMission(day, day, random, { absorbFix: input.absorbFix, negotiator: effects.missionNegotiator, casual: input.casual }) as FirstTownMission;
   // generatePlayer вызывает initPartySkill до выдачи оружия; кандидат5 не входит в активные0–4.
   const recruit = generateEarlyTownRecruit(random, day, { previousSlots: input.recruitSlots, itemContext: { engineer: effects.recruitEngineer } });
   // Смена кандидата не стирает неиспользованные слоты прежнего ополченца.

@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v33, eight hero classes, repeating cycles**.
+Updated 2026-11-02. Current local build: **v34, eight hero classes, repeating cycles**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -33,6 +33,11 @@ Ragnarok now uses the ordinary inventory controls: its artifact is consumed,
 30 real dinosaur spawns are attempted and the next spawn timer gains200 ticks.
 Winning the battle awards medal92, including its wage reduction and future-start
 Luck bonus. The battle flag survives saves and resets at Rest for the next mission.
+Casual and Hardcore are selectable on New Game and remain exclusive. Casual uses
+source encounter power,35% more kill XP and lower taxes. Hardcore uses normal
+combat, removes the browser adventure save at battle start and permits saving,
+export and Continue only in town. Medal collection and separate mode day records
+persist independently; Hardcore medals are awarded at original day20/40/80 boundaries.
 
 Town coverage includes shop buy/sell, upgrades/MOD mounting, permanent companions
 with equipment/orders/AI/growth/wages, temporary Mission Hire, both Castle pages,
@@ -48,8 +53,8 @@ Continue and JSON backups work; imported/continued battles open paused.
 
 ## Validation and limits
 
-- **468 tests passed**, with typechecking and production build passing.
-  Latest bundle: `assets/index-BvHbh_z7.js`.
+- **474 tests passed**, with typechecking and production build passing.
+  Latest bundle: `assets/index-Dee9n8Oq.js`.
 - New checks cover unlock requirements, global profile validation/storage, carried
   medals, starting bonuses applied once, actual Sniper/Duelist damage, Ranger
   rampage, Noble XP, reload/decay, save replay and older-save migration. All eight
@@ -87,6 +92,18 @@ Continue and JSON backups work; imported/continued battles open paused.
   This controlled survival run does not establish unassisted Ragnarok balance.
   An actual crash from killing an enemy before the first wave's timer boundary
   is fixed: missing group size follows the source's int(NaN)→0 drop calculation.
+- V34 checks cover actual Casual XP/tax/mission power, two controlled battles and
+  Rest/save replay, creation-mode changes without hero/RNG rerolls, Hardcore medal
+  boundaries and bonuses, town-only save policy, preserved medals/mute settings,
+  independent profile records and corrupt/old-mode rejection. Muted browser New
+  Game exercised exclusive Casual/Hardcore toggles; Casual exports show500 opening
+  power. Hardcore battle export was refused and Continue reported no save. Its
+  town19 checkpoint restored and Rest opened a paused Hardcore Day20 battle.
+  Original user adventure/profile restoration is exact after migration. Evidence:
+  `.build/browser-qa/game-modes-verification.json` and `game-modes.png`.
+  The app crash stopped the preview and invalidated the retained tab; Vite preview
+  was restored at the same address and one muted replacement tab retained. No
+  cause or fix for the Codex app crash itself is established by this recovery.
 - The user's original Sheriff adventure **and collection** were restored with full
   exported-envelope equality: day1, tick674, RNG1744019180, HP40, gold209, paused
   and muted. No test unlocks remain in the collection.
@@ -99,7 +116,7 @@ Historical details are in Git and [historical verification](port-verification.js
 
 1. Long-session stability/performance and difficulty evidence beyond the first
    cycle; the current Day1000 save safety boundary remains an intentional limit.
-2. Event-card systems, alternative modes/starts and remaining medal
+2. Game MODs, alternative starts, carry-over and remaining medal
    effects/triggers, including recycling/modding bonuses and decorative fireworks.
 3. Original six save slots/global slot UI, deletion and Flash save conversion.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
@@ -112,6 +129,13 @@ Historical details are in Git and [historical verification](port-verification.js
 6. The veteran late-game hitbox complaint remains unreproduced and **deferred
    until core coverage is complete**. Prior contour/projectile corrections are
    not its diagnosis.
+
+Source audit corrected the event-card inventory: generateCard/cardEvent and their
+five saved negative card records remain in the preserved source, but no reachable
+player action that reveals those cards or enables cardCount was found. The actual
+Mission board uses actList's activities, already connected here. These dormant
+functions are not treated as missing normal gameplay without contrary evidence;
+the generated records and their RNG draws remain preserved.
 
 ## Working direction
 

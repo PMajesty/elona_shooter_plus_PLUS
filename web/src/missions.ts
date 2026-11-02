@@ -1,4 +1,5 @@
 import { ENEMIES, type EnemyKind } from './content.ts';
+export type GameMode = 'normal' | 'casual' | 'hardcore';
 
 export interface LowLevelMission {
   level: number; fixedLv: number; strength: number; power: number; powerOrg: number; reward: number;
@@ -12,7 +13,7 @@ export interface GeneratedWave { enemies: EnemyKind[]; delays: number[]; initial
 export interface GeneratedWaves { waves: GeneratedWave[]; power: number; group: number[] }
 
 // Миссия готовится до Rest; календарный день определяет гарантированный предмет.
-export function generateLowLevelMission(level: number, calendarDay: number, random: () => number, options: { absorbFix?: number; negotiator?: number } = {}): LowLevelMission {
+export function generateLowLevelMission(level: number, calendarDay: number, random: () => number, options: { absorbFix?: number; negotiator?: number; casual?: boolean } = {}): LowLevelMission {
   if (!Number.isInteger(level) || level < 0 || level > MAX_CAMPAIGN_DAY || !validCampaignDay(calendarDay)) throw new RangeError('Unsupported campaign mission preparation.');
   const absorbFix = options.absorbFix ?? 0;
   if (![0, 0.01, 0.02, 0.03, 0.04].includes(absorbFix)) throw new RangeError('Unsupported medal absorption.');
@@ -25,7 +26,7 @@ export function generateLowLevelMission(level: number, calendarDay: number, rand
   const bossDay = fixedLv % 10 === 9;
   const wave = bossDay ? 6 + Math.trunc(fixedLv / 10) : 5 + Number(fixedLv > 10) + Number(fixedLv > 20) + Number(fixedLv > 30) + Number(fixedLv > 35);
   const rolledBossWave = bossDay ? wave - 1 : 2 + Math.trunc(random() * wave / 3);
-  const power = 800 + fixedLv * 50 + level * 70;
+  const power = options.casual ? 500 + fixedLv * 30 + level * 60 : 800 + fixedLv * 50 + level * 70;
   return {
     // generateMission обновляет PARTY перед расчётом; округление происходит после деления.
     level, fixedLv, strength, power, powerOrg: power, reward: Math.trunc((600 + level * 20) * (100 + negotiator) / 100),

@@ -8,7 +8,7 @@ const integer = (value: unknown, low: number, high: number): value is number => 
 const fieldsEqual = (value: Record<string, unknown>, fields: Record<string, unknown>) => Object.entries(fields).every(([key, expected]) => value[key] === expected);
 
 /** Проверяем сохранённые результаты генерации, не повторяя случайные броски при загрузке. */
-export function validTownPreparation(value: unknown, validItem: (item: unknown) => item is Item, day: number = 1, expectedAbsorbFix?: number, absorbMode: 'base' | 'active' = 'active'): value is FirstTownPreparation {
+export function validTownPreparation(value: unknown, validItem: (item: unknown) => item is Item, day: number = 1, expectedAbsorbFix?: number, absorbMode: 'base' | 'active' = 'active', casual = false): value is FirstTownPreparation {
   if (!validCampaignDay(day)) return false;
   if (!record(value) || !Array.isArray(value.shop) || value.shop.length !== 8 || Array.from(value.shop).some(item => item !== null && !validItem(item))) return false;
   if (!Array.isArray(value.cards) || value.cards.length !== 5 || value.cards.some(id => !integer(id, -7, -1))) return false;
@@ -18,7 +18,7 @@ export function validTownPreparation(value: unknown, validItem: (item: unknown) 
   if (value.preparationEffects !== undefined && !validTownPreparationEffects(value.preparationEffects)) return false;
   const negotiator = value.preparationEffects?.missionNegotiator ?? 0;
   const mission = value.mission;
-  const expected = generateLowLevelMission(day, day, () => 0, { negotiator });
+  const expected = generateLowLevelMission(day, day, () => 0, { negotiator, casual });
   const { loot: _loot, group: _group, bossWave: _bossWave, hire: _hire, absorbFix: _absorb, hpFix: _hp, dmgFix: _dmg, expFix: _exp, reward: _reward, ...fixed } = expected;
   if (!record(mission) || typeof mission.hire !== 'boolean' || !fieldsEqual(mission, fixed) || !Array.isArray(mission.group) || mission.group.length !== 0
     || (expected.bossDay ? mission.bossWave !== expected.wave - 1 : !integer(mission.bossWave, 2, 2 + Math.ceil(expected.wave / 3) - 1))) return false;
