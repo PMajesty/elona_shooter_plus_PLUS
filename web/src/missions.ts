@@ -4,7 +4,7 @@ export interface LowLevelMission {
   level: number; fixedLv: number; strength: number; power: number; powerOrg: number; reward: number;
   hire: false; ragnarok: false; wave: number; spawnRate: number; group: number[];
   waveType: 0; loot: number[]; newWave: true; time: 30; bossDay: boolean; bossWave: number;
-  note: ''; hpFix: 1; dmgFix: 1; expFix: 1; absorbFix: number; bossKilled: 0;
+  note: ''; hpFix: number; dmgFix: number; expFix: number; absorbFix: number; bossKilled: 0;
   noDamage: true; criticalCount: 0; resultOther: 0;
 }
 

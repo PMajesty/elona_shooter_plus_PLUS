@@ -2,29 +2,34 @@
   "schemaVersion": 1,
   "updated": "2026-11-02",
   "currentRelease": {
-    "saveVersion": 26,
+    "saveVersion": 27,
     "verificationStatus": "passed",
-    "implementedCampaign": "Four starting classes, connected Days1-40, nineteen enemy kinds including nine later families and bird-dropped rats. Multi-boss days and later shields/rage/rockets. Later cycles and remaining town systems are incomplete.",
+    "implementedCampaign": "Four starting classes, Days1-40. Both Castle pages, six new economy upgrades, six Mission activities, stock/recruit refresh and shootable Sister bombs are integrated.",
     "publication": {
       "status": "local-build",
       "url": "http://127.0.0.1:5175/elona/",
-      "bundle": "assets/index-DSoK-_2o.js",
-      "priorCheckpoint": "9588b35"
+      "bundle": "assets/index-DynCdqrs.js",
+      "priorCheckpoint": "1c603a8"
     },
     "automatedVerification": {
-      "testsPassed": 423,
+      "testsPassed": 432,
       "fullSuite": true,
       "controlledCampaignFrames": 97293,
       "controlledCampaignDays": 40,
-      "enemyKindsEncountered": 19,
-      "seededWaveCampaigns": 12,
+      "economyTests": 9,
       "releaseBuildPassed": true
     },
     "browserVerification": [
-      "Controlled Day26 later-enemy rendering, no console errors",
-      "Muted, original save restored paused with full state equal to migration"
+      "Castle page2 and Smith purchase/expanded stock",
+      "Prayer, Training, Party, both refreshes and Rest into Day2",
+      "Rotated stationary Sister bomb visible-body click: one shot/one explosion",
+      "Original save restored paused and muted, all fields equal expected migration"
     ],
-    "browserEvidence": ".build/browser-qa/campaign-restoration.json",
+    "browserEvidence": [
+      ".build/browser-qa/town-economy-verification.json",
+      ".build/browser-qa/sister-rotation-verification.json",
+      ".build/browser-qa/economy-restoration.json"
+    ],
     "knownGaps": "docs/port-status.md"
   },
   "purpose": "Track the original game's systems and content against implemented behavior and independent evidence. This is an expandable inventory, not an exhaustive specification or a completion percentage.",
@@ -319,7 +324,8 @@
       "intentionalDifferences": [
         "Original Fly initialization retains pooled dirCounter and resKnock. New port Fly actors reset the counter to0 and resistance to1. The accepted original fixture records fresh/explicit-reset behavior separately from73 raw reuse observations; this fixes a demonstrated state leak, not the reported late-game hitbox defect."
       ],
-      "campaignUpdate": "v26 extends ordinary progression through Day40, full first-cycle enemy selection, nine later families/bird drops, source frame-command attacks and multi-boss days. New collision uses rendered alpha; later cycles remain guarded. See web/tests/campaign.test.ts and docs/port-status.md."
+      "campaignUpdate": "v26 extends ordinary progression through Day40, full first-cycle enemy selection, nine later families/bird drops, source frame-command attacks and multi-boss days. New collision uses rendered alpha; later cycles remain guarded. See web/tests/campaign.test.ts and docs/port-status.md.",
+      "sisterUpdate": "Sister upgrades distribute bombs across battle waves. Bombs fly/settle, can be shot, chain explosions, and apply Love compensation/medal damage. Their original sprite rotates with matching inverse-transform pixel hit testing."
     },
     {
       "id": "original.ui.health",
@@ -579,7 +585,8 @@
         "Every modifier/weapon combination beyond sampled ally equipment",
         "Generation with nondefault party skills and contexts beyond the nine enabled days",
         "Unsampled weapon combat behavior; projectile-family evidence is recorded separately"
-      ]
+      ],
+      "economyUpdate": "Smith immediately regenerates stock and expands it to eight items; manual stock refresh costs2 AP and preserves ownership/equipment/mission. Recruit refresh likewise costs2 AP and preserves the active party."
     },
     {
       "id": "original.progression.skills",
@@ -684,7 +691,7 @@
         "MainTimeline:12629 Sandbag price and12673 cap"
       ],
       "status": "partial",
-      "implemented": "All nine enabled battles settle rewards, perfect bonus, default upkeep, tax and available salary once after reward choices, with original fame/AP/AP draws. Base rewards are600/620/640/660/680/700/720/740/760 on Days1–9; perfect bonus is30% and default upkeep40. Tax is zero through Day5 and10 on Day6, giving normal/perfect Day6 net650/860 before other income. Claim Title in town6 spends4AP and grants Honorary Citizen with daily salary100; it spends no gold/RNG and does not alter the settled Day6 result. The claimed title carries into the Day7 result: tax45, salary100, default upkeep40 and base reward720 produce normal/perfect net735/951 (635/851 without a title). The original settlement-method comparison and the separate focused headless campaign cover these boundaries. Free Repair costs2AP, fully heals and spends no gold/RNG. Legacy early-paid results retain their final balance. Purchases deduct integer stored value; sale loot receives full value and other items one fifth. Sales, battle gold, Insurance and settlement update cumulative earned money; purchases do not reduce it. Rest spends no AP/gold and does not heal. These listed net figures are solo baselines. Active companions add positive wage deductions after growth; cached Accountant affects wages and refreshed Negotiator affects the next prepared mission, without retroactively changing settled rewards. Castle House/Wall purchases are immediate, spend gold only and do not reroll or hire automatically. House1→2 costs2000 and2→3 costs5000, capped3; Wall cost is int(maxHP²/2.5−400), adds5 current/maxHP and preserves damage deficit. Current Wall level and maxHP are distinct. House adds50 recurring upkeep per level and Wall adds10 per purchase; already-settled results retain their historical amounts. Paid Fix Wall costs int(8×missingHP), fillsHP and increments its saved purchase count; cost0 at fullHP disables it. Repairman costs level²×250+700, adds60 recurring upkeep per level and heals2HP/level at opening and ordinary new-wave boundaries before perfect-wave evaluation. It does not heal on purchase, Rest acknowledgment, ordinary elapsed frames or the final battle-completion boundary. A previously lost perfect flag remains false. No repair sound/effect is added to the silent source HP update. Sandbag costs level²×240+1000, caps at10 with cost0 and adds40 recurring upkeep per level. Purchase spends gold only, does not heal and does not reprice settled results. Storage purchases append one owned slot up to 16; cost is (slots−4)²×30+250, derived level is slots−5 and upkeep is 40 per level. No duplicate stored Storage level. Cap/denial preserve state. Looter now costs level²×125+300 without a source cap, adds 5 recurring upkeep per level and spends no AP/RNG. Purchase changes no existing items or paid result. Trainer costs level²×180+250 with no source cap, upkeep, AP or RNG cost. Purchases leave existing XP, prepared state and settled results unchanged; the live level applies to later kill XP. All eight first-page tiles are connected. Page 2 remains disabled. Day8 tax80 plus default upkeep40 produces normal/perfect solo net620/842 without a title or720/942 with first-title salary100. Existing upgrade upkeep, party wages and historical settlement rules still apply. No second title tier opens before day>10. Day9 tax115/default upkeep40 gives solo normal/perfect net605/833 without title or705/933 with salary100. Existing purchased upkeep and party wages remain additional; no second title rank opens at day9.",
+      "implemented": "All fourteen Castle purchases on both original pages: first-page upgrades plus Smith stock, Museum medal income/upkeep, Chickens/eggs, Sisters/bombs, Villa/Party and Sp.Trainer sessions. Prices/caps and immediate/deferred effects persist through saves.",
       "evidence": [
         "web/tests/simulation.test.ts:first-battle reward plan",
         "web/tests/town.test.ts: delayed once-only settlement, legacy balances and repair guards/persistence",
@@ -734,9 +741,9 @@
         "web/tests/ninth-town-reference.test.ts:Day9 normal/perfect title0/1 settlement"
       ],
       "unverified": [
-        "Second-page upgrades",
-        "Integrated economy after Day9 and later title ranks",
-        "Wage/party combinations beyond sampled cases and town income beyond the first-title salary"
+        "Museum global medal carry-over and robbery",
+        "Full original economy/difficulty comparison",
+        "Remaining global achievement bonuses"
       ]
     },
     {
@@ -749,7 +756,7 @@
         "MainTimeline:5410 generateCard"
       ],
       "status": "partial",
-      "implemented": "All nine enabled towns initialize AP and expose Free Repair with original dialog/any-click acknowledgment. Full HP is checked before insufficient AP; repeated full-HP repair spends nothing. Mission → Rest in towns1–8 opens the Resting dialog and begins the next day through Day9, resetting battle counters, refilling non-use items, preserving finite consumables and using the saved mission. Town6 Claim Title requires4AP and no pending equipment dialog, grants Honorary Citizen once and presents the original New Title! card. Cards, searched and flags are generated/persisted; card/search and other town actions remain unavailable. Rest into Day10 is disabled. Existing title holders cannot claim it again in towns7–9.",
+      "implemented": "Mission Prayer, Dinner, Party, Collect eggs, Taunt and Train with original AP/formulas, daily limits and next-battle bonuses. Stock/recruit refresh for2 AP. English outcome messages and guarded state changes persist without rerolling.",
       "evidence": [
         "web/tests/town-reference.test.ts: original action state/RNG comparisons",
         "web/tests/town.test.ts: action preconditions, AP costs and save/resume",
@@ -763,9 +770,8 @@
         "web/tests/day-eight-save.test.ts:ordinary Rest7→8 and town8 no-op guard"
       ],
       "unverified": [
-        "Search, cards and other town action triggers, choices, costs and outcomes",
-        "Nondefault entry effects beyond the enabled early medal conditions",
-        "Matched Rest dialog rendering, native Begin timing and optional Hardcore/hired-companion branches"
+        "Searching and special event-card effects",
+        "Remaining original event dialogs and rare conditions"
       ]
     },
     {
@@ -806,7 +812,7 @@
         "MainTimeline:1378 deleteGame"
       ],
       "status": "partial",
-      "implemented": "One browser slot, Continue, JSON import/export, v26 supports Day1-40 waves/towns, later enemy AI/armor and boss projectiles. Older saves migrate without rerolling; loaded battles pause. Flash conversion and original multiple/global slots remain incomplete.",
+      "implemented": "One browser slot, Continue and JSON import/export. V27 adds economy/counters/training, town modifiers and Sister launch/flight state, retaining Day1-40/party/equipment. Earlier saves receive zeroed economy without rerolling. Battles load paused.",
       "evidence": [
         "web/tests/simulation.test.ts:JSON resume and corrupt-save rejection",
         "docs/port-verification.json:browser_checks.export_and_reload",
@@ -875,9 +881,8 @@
         "web/tests/day-nine-save.test.ts:legacy version23, prepared mission8, town9 boss-day validation and blockedDay10"
       ],
       "unverified": [
-        "Original six save-slot interface parity",
-        "Original Flash/Ruffle save conversion",
-        "Global medals/index and future content migrations"
+        "Original multiple/global save slots and medal index",
+        "Original Flash save conversion"
       ],
       "intentionalDifferences": [
         "Current JSON format accepts only browser-port saves; it is not Flash SharedObject-compatible.",

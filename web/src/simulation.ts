@@ -1,3 +1,5 @@
+import { generateEarlyTownRecruit } from './recruits.ts';
+import { createTownEconomy, validTownEconomy, museumIncome, TOWN_ACTIVITIES, type TownEconomy, type TownActivity } from './town-economy.ts';
 import { ENEMY_TIMELINES, type EnemyTimeline } from './enemy-timelines.ts';
 import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
 import { HERO_CLASSES, isHeroClass, applyHeroChoice, availableHeroTraits, rollHeroChoices, type HeroClass } from './hero-classes.ts';
@@ -6,7 +8,7 @@ import { generateLowLevelMission, generateLowLevelWaves, validCampaignDay, MAX_C
 import { generateHero, isKnownHeroInitialization, levelUpHero, reconstructSheriffHero, type KnownHeroInitialization } from './hero.ts';
 import { advanceReload, autoReloadReady, COMBAT_TRAIT, combatTrait, criticalType, hitscanHit, hitscanShotModifiers, criticalKillCooldown, duelistHitFrenzy, livingWeaponKill, rampageDuration, recoverAccuracy, reloadTimer, shotDamage, shotSpread, weaponBehavior, weaponHitDamage, weaponHitEffects, weaponStats } from './combat-stats.ts';
 import { BASE_ITEM_FIELDS, ITEM_TYPE, ItemFactory, collectLoot as collectLootItem, createStartingInventory, isOccupiedItem, itemPrice, swapInventorySlots, type Item } from './items.ts';
-import { prepareEarlyTown, type FirstTownPreparation } from './town-preparation.ts';
+import { prepareEarlyTown, generateTownShop, type FirstTownPreparation } from './town-preparation.ts';
 import { validTownPreparation } from './town-save.ts';
 import { TRAIT, createSheriffTraits, type TraitLevels } from './progression.ts';
 import { shadowHitAtFrame } from './collision.ts';
@@ -16,12 +18,13 @@ import { createUpgradePreview, modMountFailure, upgradeCost, type TownEquipmentA
 import { advanceEnemyArrow, createEnemyArrow, type EnemyArrowState } from './enemy-arrows.ts';
 import { ARCHER_DISPLAY_WIDTHS, FLY_DISPLAY_WIDTHS, barbarianParentWidth, lavaParentWidth } from './enemy-display-bounds.ts';
 import { createPartyState, addStartingLittleGirl, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
-import { ALL_TRAITS, CLASS_CHOICE_ORDER, partySkills, gainCompanionTrait, levelUpCompanion, companionWage, type PartySkillState } from './party-progression.ts';
+import { ALL_TRAITS, CLASS_CHOICE_ORDER, availableCompanionTraits, partySkills, gainCompanionTrait, levelUpCompanion, companionWage, type PartySkillState } from './party-progression.ts';
 import { createPartyAIShared, createPartyAIState, selectPartyTarget, refreshPartyAI, partyActorPosition, registerPartyTarget, alertParty, clearPartyTargetCache, clearPartyAITarget, stepPartyAIFrame, stepPartyAITimer, type PartyAIShared, type PartyAITarget, type PartyAIContext, type PartyAICallbacks } from './party-ai.ts';
 import { repairEarlyV15AirTargets, validatePartySave } from './party-save.ts';
-import { castleUpgradeCost, castleUpkeep, castleRepairAmount, castleDamageMultiplier, castleTrainerMultiplier, type CastleUpgradeKind, type CastleUpgradeOutcome } from './castle-upgrades.ts';
+import { CASTLE_UPGRADES, castleUpgradeCost, castleUpkeep, castleRepairAmount, castleDamageMultiplier, castleTrainerMultiplier, type CastleUpgradeKind, type CastleUpgradeOutcome } from './castle-upgrades.ts';
 
 export interface EnemyState {
+  bomb?: { startX: number; startY: number; targetX: number; targetY: number; curve: number; counter: number; rotation: number };
   uid: number; kind: EnemyKind; x: number; y: number; hp: number; maxHp: number;
   speed: number; speedOrg: number; attack: number; gold: number; exp: number;
   knockBack: number; disarmed: number; attacking: boolean; attacked: boolean; frame: number; shadowHit: boolean;
@@ -43,6 +46,7 @@ export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready
 export interface SimulationState {
   version: typeof SAVE_VERSION; phase: 'battle' | 'victory' | 'defeat' | 'town'; day: number; tick: number; timerRemainder: number; rng: number; nextUid: number;
   activeMission: ActiveMission; resultBefore: number; earnedMedals: number[]; perfectDays: number; bossesSpawned: number;
+  economy: TownEconomy;
   hero: KnownHeroInitialization; title: 0 | 1;
   castleHp: number; castleMaxHp: number; wallLevel: number; wallFixCount: number; repairmanLevel: number; sandbagLevel: number; looterLevel: number; trainerLevel: number; gold: number; totalMoney: number; kills: number; criticalKills: number;
   aimX: number; aimY: number; fireHeld: boolean; pendingShot: boolean;
@@ -54,7 +58,7 @@ export interface SimulationState {
   inventory: (Item | null)[]; lootOffers: (Item | null)[]; postbattle: 'none' | 'loot' | 'boss-loot' | 'skill' | 'result';
   inventoryProvenance: 'original-generation' | 'legacy-v1-reconstructed'; legacyReconstructionSeed?: number;
   bossKilled: number; skillChoices: number[]; traitsProvenance: 'known-starting-traits' | 'legacy-reconstructed'; bossKilledProvenance: 'observed' | 'legacy-inferred';
-  result: { reward: number; perfectBonus: number; upkeep: number; tax: number; salary: number; wages: number; netReward: number };
+  result: { museum?: number; reward: number; perfectBonus: number; upkeep: number; tax: number; salary: number; wages: number; netReward: number };
   town: null | { ap: number; preparation: 'pending' } | ReadyTown;
   previousTown: ReadyTown | null;
   upgradeReference: Item | null;
@@ -117,7 +121,7 @@ export class Simulation {
     const classId = options.heroClass ?? 'sheriff';
     const generated = generateHero(random, classId);
     this.state = {
-      version: SAVE_VERSION, phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
+      version: SAVE_VERSION, economy: createTownEconomy(), phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
       activeMission: this.missionParameters(this.pendingOpeningMission), resultBefore: STARTING_CLASS.money, earnedMedals: [40], perfectDays: 0, bossesSpawned: 0,
       castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, wallLevel: 1, wallFixCount: 0, repairmanLevel: 0, sandbagLevel: 0, looterLevel: 0, trainerLevel: 0, gold: STARTING_CLASS.money, totalMoney: 0, kills: 0, criticalKills: 0,
       aimX: 300, aimY: 240, fireHeld: false, pendingShot: false,
@@ -185,6 +189,9 @@ export class Simulation {
   }
 
   private initializePartyBattle(): void {
+    const e = this.state.economy;
+    e.sisterWaves = e.sisters ? Array(this.state.waves.length + 1).fill(0) : [];
+    for (let i = 0; i < e.sisters; i++) e.sisterWaves[1 + int(this.random() * this.state.waves.length)]++;
     this.state.player.grenadeCount = Math.max(100, 325 - (this.state.player.traits[4] ?? 0) * 4);
     this.refreshPartySkills(); this.state.partyAI = createPartyAIShared(); this.state.retainedAITargets = [];
     for (const slot of this.state.party.slots.slice(0, 4)) if (slot.member) {
@@ -654,6 +661,9 @@ export class Simulation {
     }
     for (const slot of this.state.party.slots.slice(0, 4)) stepPartyAITimer(slot, partyContext, partyCallbacks);
     if (state.newWave) {
+      const sisters = state.economy.sisterWaves[state.waveIndex] ?? 0;
+      for (let i = 0; i < Math.min(sisters, 200); i++) this.spawnEnemy('sister-bomb');
+      if (state.economy.sisterWaves.length) state.economy.sisterWaves[state.waveIndex] = 0;
       state.newWave = false;
       // Последняя граница завершает бой до Repairman, поэтому остаточный урон уже не исправить.
       if (state.waveIndex <= 0) {
@@ -688,6 +698,17 @@ export class Simulation {
   private spawnEnemy(kind: EnemyKind): void {
     if (this.state.enemies.length >= 200) return;
     const definition = ENEMIES[kind];
+    if (kind === 'sister-bomb') {
+      const targetX = 190 + this.random() * 325, targetY = 200 + this.random() * 100;
+      const speed = 12 * Math.atan2(Math.abs(targetX - 650) * 2, Math.abs(targetY - 240)) * 2 / Math.PI + 0.1;
+      const bonus = 1 + Number(this.state.earnedMedals.includes(53)) * 0.1 + Number(this.state.earnedMedals.includes(54)) * 0.2 + Number(this.state.earnedMedals.includes(55)) * 0.3;
+      this.state.enemies.push({ uid: this.state.nextUid++, kind, x: 650, y: 240, hp: 1, maxHp: 1, speed, speedOrg: speed,
+        attack: int((100 + this.state.day * 5) * bonus), gold: 0, exp: 0, knockBack: 0, disarmed: 0,
+        attacking: false, attacked: false, frame: 1, shadowHit: false, deathTicks: 0, drop: 0, removed: false,
+        bossAction: 0, bossCount: 0, bossIdle: 0, bossFireNum: 0, bossWeapon: 0, bossDamage: 0, appearance: 0, type: 0, tag: 0, onMark: false,
+        bomb: { startX: 650, startY: 240, targetX, targetY, curve: 0.003, counter: int(Math.abs(targetX - 650) / speed) + 1, rotation: 0 } });
+      return;
+    }
     const gold = 1 + int(this.random() * definition.power / 10 + 5);
     const bossWeapon = kind === 'boss' ? 1 + int(this.random() * 2) : 0;
     const bossCount = kind === 'boss' ? 100 + int(this.random() * 60) : 0;
@@ -695,7 +716,7 @@ export class Simulation {
     const speed = (definition.speedBase + this.random() * definition.speedRandom) * 100 / (100 + this.state.partySkills.effects[112]);
     const yRoll = this.random();
     const y = int(kind === 'fly' ? yRoll * 70 / 1.5 + 80 : yRoll * (kind === 'boss' ? 105 : definition.airborne ? 70 : WORLD.groundWidth) + (kind === 'boss' ? 195 : definition.airborne ? 40 : WORLD.groundLine));
-    const hp = kind === 'boss' ? 150 + this.state.activeMission.level * 25 : definition.hp;
+    const hp = kind === 'boss' ? 150 + this.state.activeMission.level * 25 : int(definition.hp * this.state.activeMission.hpFix);
     const ranged = kind === 'archer' ? { rangedCounter: 120 } : kind === 'fly' ? { flyCounter: 0 } : kind === 'barbarian' ? { rampage: 0 as const, rageEffectFrame: 0, hitEffects: [] } : kind === 'lava' ? { alerted: false, hitEffects: [] } : {};
     const later = ENEMY_TIMELINES[kind];
     const behaviorCounter = kind === 'dino' ? 50 + int(this.random() * 70) : kind === 'dragon' ? 80 + int(this.random() * 50) : 0;
@@ -709,6 +730,13 @@ export class Simulation {
   private damageEnemy(enemy: EnemyState, raw: number, criticalValue: number | boolean, weaponSlot: number | null, x: number, y: number, actorSlot = 0): void {
     const player = this.actor(actorSlot);
     if (enemy.hp <= 0 || !player) return;
+    if (enemy.kind === 'sister-bomb') {
+      enemy.hp = -1; enemy.removed = true;
+      const gold = this.state.partySkills.effects[138];
+      this.state.gold += gold; this.state.totalMoney += gold; this.state.economy.sistersExploded++;
+      this.explodeProjectile(x, y, enemy.attack, null, 'grenade', actorSlot);
+      return;
+    }
     const member = actorSlot ? partySlot(this.state.party, actorSlot)!.member! : null;
     const critical = Boolean(criticalValue);
     const definition = ENEMIES[enemy.kind];
@@ -877,6 +905,20 @@ export class Simulation {
 
   private tickEnemyBehavior(enemy: EnemyState): void {
     if (enemy.removed) return;
+    if (enemy.kind === 'sister-bomb') {
+      const b = enemy.bomb!;
+      b.counter--; enemy.x -= enemy.speed;
+      const slope = (b.targetY - b.startY - b.curve * b.targetX ** 2 + b.curve * b.startX ** 2) / (b.targetX - b.startX);
+      enemy.y = b.curve * enemy.x ** 2 + slope * enemy.x + b.targetY - b.curve * b.targetX ** 2 - slope * b.targetX;
+      if (b.counter === 0) { b.startX -= 50; b.curve = 0; enemy.speed /= 2; }
+      if (b.counter < 0) {
+        if (enemy.speed <= 0) { enemy.speed = 0; return; }
+        if (enemy.speed < 0.5) { const rotation = Math.abs(b.rotation) % 360; if (rotation > 180 || rotation < 90) enemy.speed -= 0.2; }
+        else enemy.speed = enemy.speed / 1.05 - 0.01;
+        b.rotation -= enemy.speed * 6.7;
+      } else b.rotation -= 4;
+      return;
+    }
     if (enemy.hp <= 0) {
       enemy.deathTicks++;
       const deathEnds: Partial<Record<EnemyKind, number>> = { sheep: 129, rat: 128, chicken: 239, crow: 87, archer: 125, fly: 41, barbarian: 119, lava: 128, boss: 403 };
@@ -1242,7 +1284,8 @@ export class Simulation {
     const salary = this.state.title === 1 ? 100 : 0;
     const wages = this.state.party.slots.slice(0, 4).reduce((total, slot) => total + (slot.exists && slot.member ? companionWage(slot.member, this.state.partySkills.effects[127], this.state.earnedMedals.includes(92)) : 0), 0);
     const upkeep = castleUpkeep(this.state);
-    this.state.result = { reward, perfectBonus, upkeep, tax, salary, wages, netReward: reward + perfectBonus + salary - upkeep - tax - wages };
+    const museum = museumIncome(this.state.economy.museum, this.state.earnedMedals);
+    this.state.result = { reward, perfectBonus, upkeep, tax, salary, wages, ...(museum ? { museum } : {}), netReward: reward + perfectBonus + salary + museum - upkeep - tax - wages };
     this.state.phase = 'victory';
     this.prepareOrdinaryLoot(() => this.random());
     this.events.push({ type: 'victory' });
@@ -1332,7 +1375,7 @@ export class Simulation {
     this.random();
     const extraAp = int(this.random() * this.random() * (this.state.partySkills.effects[123] + 1));
     this.state.gold += this.state.result.netReward;
-    this.state.totalMoney += this.state.result.reward + this.state.result.perfectBonus + this.state.result.salary;
+    this.state.totalMoney += this.state.result.reward + this.state.result.perfectBonus + this.state.result.salary + (this.state.result.museum ?? 0);
     this.state.town = { ap: 4 + extraAp, preparation: 'pending' };
   }
 
@@ -1351,7 +1394,7 @@ export class Simulation {
     this.refreshPartySkills();
     // До generateMission лавка использует старого Engineer; миссия и кандидат — новый кэш.
     const prepared = prepareEarlyTown(() => this.random(), this.state.day, { priorOffers: this.state.lootOffers, recruitSlots, searched: previous?.searched, absorbFix: this.medalAbsorption(),
-      shopEngineer, missionNegotiator: this.state.partySkills.effects[117], recruitEngineer: this.state.partySkills.effects[120] });
+      smith: this.state.economy.smith, chickens: this.state.economy.chickens, shopEngineer, missionNegotiator: this.state.partySkills.effects[117], recruitEngineer: this.state.partySkills.effects[120] });
     this.state.town = { ap: this.state.town.ap, preparation: 'ready', ...prepared };
     installCandidate(this.state.party, prepared.recruit);
     this.refreshPartySkills();
@@ -1395,7 +1438,7 @@ export class Simulation {
   }
 
   buyCastleUpgrade(kind: CastleUpgradeKind): CastleUpgradeOutcome {
-    if (!this.partyMutationAvailable() || !['house', 'wall', 'fix-wall', 'repairman', 'sandbag', 'storage', 'looter', 'trainer'].includes(kind)) return 'unavailable';
+    if (!this.partyMutationAvailable() || !CASTLE_UPGRADES.includes(kind)) return 'unavailable';
     const state = this.state, cost = castleUpgradeCost(kind, state);
     if (cost === 0) return 'capped';
     if (state.gold < cost) return 'not-enough-gold';
@@ -1411,9 +1454,102 @@ export class Simulation {
     else if (kind === 'sandbag') state.sandbagLevel++;
     else if (kind === 'looter') state.looterLevel++;
     else if (kind === 'trainer') state.trainerLevel++;
-    else state.inventory.push(null);
+    else if (kind === 'storage') state.inventory.push(null);
+    else {
+      const field = { smith: 'smith', museum: 'museum', chicken: 'chickens', sister: 'sisters', villa: 'villa', 'special-trainer': 'specialTrainer' }[kind] as keyof TownEconomy;
+      (state.economy[field] as number)++;
+      if (kind === 'smith') this.regenerateShop();
+      [30, 60, 120].forEach((count, index) => { if (state.economy.chickens >= count) this.awardMedal(50 + index); });
+      [10, 20, 30].forEach((count, index) => { if (state.economy.sisters >= count) this.awardMedal(53 + index); });
+    }
     // Исходный одиночный щелчок не тратит AP, не обновляет кеш навыков и уже оплаченный итог.
     return 'purchased';
+  }
+
+  private regenerateShop(): void {
+    const town = this.state.town;
+    if (town?.preparation !== 'ready') return;
+    town.shop = generateTownShop(() => this.random(), this.state.day, { priorOffers: town.shop,
+      smith: this.state.economy.smith, shopEngineer: this.state.partySkills.effects[120], specialSale: false });
+  }
+
+  refreshTownStock(): 'refreshed' | 'not-enough-ap' | 'unavailable' {
+    if (!this.partyMutationAvailable()) return 'unavailable';
+    if (this.state.town!.ap < 2) return 'not-enough-ap';
+    this.state.town!.ap -= 2; this.regenerateShop(); return 'refreshed';
+  }
+
+  refreshTownRecruit(): 'refreshed' | 'not-enough-ap' | 'unavailable' {
+    if (!this.partyMutationAvailable()) return 'unavailable';
+    if (this.state.town!.ap < 2) return 'not-enough-ap';
+    const town = this.state.town! as ReadyTown;
+    town.ap -= 2;
+    town.recruit = generateEarlyTownRecruit(() => this.random(), this.state.day, {
+      previousSlots: { ...town.recruit.items, 45: this.state.party.slots[4].weapon }, itemContext: { engineer: this.state.partySkills.effects[120] } });
+    installCandidate(this.state.party, town.recruit); return 'refreshed';
+  }
+
+  townActivityAvailable(action: TownActivity): boolean {
+    if (!this.partyMutationAvailable()) return false;
+    const town = this.state.town! as ReadyTown, e = this.state.economy;
+    if (action === 'pray') return !town.flags.prayed;
+    if (action === 'dinner') return town.mission.expFix === 1;
+    if (action === 'party') return e.villa > 0 && !town.flags.partyHeld;
+    if (action === 'eggs') return e.chickens > 0 && !town.flags.egg;
+    if (action === 'taunt') return this.state.partySkills.effects[125] > 0;
+    return e.specialTrainer > 0 && (e.heroTraining < e.specialTrainer
+      || this.state.party.slots.slice(0, 3).some(slot => slot.exists && slot.member!.trained < e.specialTrainer));
+  }
+
+  performTownActivity(action: TownActivity): { outcome: 'done' | 'not-enough-ap' | 'unavailable'; message: string } {
+    if (!Object.hasOwn(TOWN_ACTIVITIES, action) || !this.townActivityAvailable(action)) return { outcome: 'unavailable', message: 'This activity is unavailable.' };
+    const state = this.state, town = state.town as ReadyTown, e = state.economy, info = TOWN_ACTIVITIES[action];
+    if (town.ap < info.cost) return { outcome: 'not-enough-ap', message: "You don't have enough action points!" };
+    let message = '';
+    if (action === 'train') {
+      const actors = [{ slot: 0, actor: state.player, devType: HERO_CLASSES[state.player.classId].id },
+        ...state.party.slots.slice(0, 3).filter(slot => slot.exists).map(slot => ({ slot: slot.slot, actor: slot.member!, devType: slot.member!.devType }))];
+      let index = 0;
+      for (let i = 0; i < 10; i++) index = int(this.random() * actors.length);
+      const trained = (i: number) => i === 0 ? e.heroTraining : state.party.slots[actors[i].slot - 1].member!.trained;
+      if (trained(index) >= e.specialTrainer) index = actors.findIndex((_, i) => trained(i) < e.specialTrainer);
+      if (index < 0) return { outcome: 'unavailable', message: 'For more training, you need an upgrade.' };
+      const selected = actors[index];
+      const pool = selected.slot === 0 ? availableHeroTraits(state.player.classId, selected.actor.level, selected.actor.traits)
+        : availableCompanionTraits({ ...selected.actor, devType: selected.devType } as Parameters<typeof availableCompanionTraits>[0]);
+      if (!pool.length) return { outcome: 'unavailable', message: 'No skills are available for training.' };
+      const skill = pool[int(this.random() * pool.length)];
+      selected.actor.traits[skill] = (selected.actor.traits[skill] ?? 0) + 1;
+      if (selected.slot === 0) e.heroTraining++; else state.party.slots[selected.slot - 1].member!.trained++;
+      this.refreshPartySkills();
+      message = `${selected.slot === 0 ? 'You gain' : state.party.slots[selected.slot - 1].member!.name + ' gains'} ${ALL_TRAITS[skill].name}!`;
+    } else if (action === 'pray') {
+      town.baseAbsorbFix ??= town.mission.absorbFix;
+      town.mission.absorbFix += int(this.random() * 15 + 5) / 100;
+      town.flags.prayed = true; e.prayers++;
+      message = `A holy aura surrounds your castle. The wall will absorb ${int(town.mission.absorbFix * 100)}% damage during the next battle.`;
+    } else if (action === 'dinner') {
+      town.mission.expFix = 1.05 + this.random() / 4 + state.partySkills.effects[126] / 100;
+      message = `You and your troops will get ${int(town.mission.expFix * 100 - 100)}% more exp in the next battle.`;
+    } else if (action === 'party') {
+      town.flags.partyHeld = true; e.parties++;
+      town.mission.dmgFix += e.villa / 10;
+      message = `Everyone celebrates the victory! You and your troops deal ${e.villa * 10}% more damage tomorrow.`;
+    } else if (action === 'eggs') {
+      const eggs = 2 + int(e.chickens / 2 + int(this.random() * e.chickens / 2) * (100 + state.partySkills.effects[124]) / 100);
+      const bonus = 1 + Number(state.earnedMedals.includes(50)) * 0.05 + Number(state.earnedMedals.includes(51)) * 0.15 + Number(state.earnedMedals.includes(52)) * 0.3;
+      const gold = int(eggs * 12 * bonus);
+      e.eggsCollected += eggs; town.flags.egg = true; state.gold += gold; state.totalMoney += gold;
+      message = `Your chickens produced ${eggs} eggs today! You sold them and received ${gold} gold pieces.`;
+    } else {
+      town.flags.taunted++; e.taunts++;
+      const increase = 0.3 + this.random() / 4;
+      town.mission.hpFix += increase;
+      town.mission.reward = int(town.mission.reward * (100 + state.partySkills.effects[125] / town.flags.taunted) / 100);
+      message = `Enemies will have ${int(increase * 100)}% more HP tomorrow. Your mission reward is now ${town.mission.reward} gold pieces!`;
+    }
+    town.ap -= info.cost;
+    return { outcome: 'done', message };
   }
 
   freeRepair(): RepairOutcome {
@@ -1527,9 +1663,10 @@ export class Simulation {
       if (!Array.isArray(value.itemCooldowns) || value.itemCooldowns.length !== 5 || value.itemCooldowns.some(time => !Number.isInteger(time) || time < 0 || time > 2001)) throw new Error('Invalid item cooldowns.');
       if (!record(value.protection) || !Number.isInteger(value.protection.counter) || Number(value.protection.counter) < -99 || Number(value.protection.counter) > 250 || !finite(value.protection.blueMultiplierAdd) || value.protection.blueMultiplierAdd < -0.2 || value.protection.blueMultiplierAdd > 1.4) throw new Error('Invalid protection effect.');
       const mission = value.activeMission, level = Number(value.day) - 1;
-      if (!record(mission) || Object.entries({ level, fixedLv: level, strength: 0, powerOrg: 800 + level * 120, ...(value.version < 15 || value.day === 1 ? { reward: 600 + level * 20 } : {}), spawnRate: Math.max(5, 15 - level / 5), hpFix: 1, dmgFix: 1, expFix: 1, bossDay: level % 10 === 9 }).some(([key, expected]) => mission[key] !== expected) || !Number.isInteger(mission.reward) || (![0, 0.01, ...(Number(value.day) >= 5 ? [0.02] : []), ...(Number(value.day) >= 8 ? [0.03] : []), ...(Number(value.day) >= 11 ? [0.04] : [])].includes(Number(mission.absorbFix)) || typeof mission.absorbFix !== 'number') || (value.day === 1 && mission.absorbFix !== 0)) throw new Error('Invalid active mission.');
+      if (!record(mission) || Object.entries({ level, fixedLv: level, strength: 0, powerOrg: 800 + level * 120, ...(value.version < 15 || value.day === 1 ? { reward: 600 + level * 20 } : {}), spawnRate: Math.max(5, 15 - level / 5), ...(Number(value.version) < 27 || value.day === 1 ? { hpFix: 1, dmgFix: 1, expFix: 1 } : {}), bossDay: level % 10 === 9 }).some(([key, expected]) => mission[key] !== expected) || !Number.isInteger(mission.reward) || (Number(value.version) < 27 ? ![0, 0.01, ...(Number(value.day) >= 5 ? [0.02] : []), ...(Number(value.day) >= 8 ? [0.03] : []), ...(Number(value.day) >= 11 ? [0.04] : [])].includes(Number(mission.absorbFix)) : !finite(mission.absorbFix) || mission.absorbFix < 0 || mission.absorbFix > 0.24) || (value.day === 1 && mission.absorbFix !== 0)) throw new Error('Invalid active mission.');
+      if (Number(value.version) >= 27 && ['hpFix', 'dmgFix', 'expFix'].some(key => !finite(mission[key]) || Number(mission[key]) < 1 || Number(mission[key]) > 100)) throw new Error('Invalid mission bonuses.');
       if (!finite(value.resultBefore) || !Number.isInteger(value.perfectDays) || Number(value.perfectDays) < 0 || Number(value.perfectDays) > Number(value.day) || !Number.isInteger(value.bossesSpawned) || Number(value.bossesSpawned) < 0 || Number(value.bossesSpawned) > Number(value.day) * 10) throw new Error('Invalid campaign counters.');
-      if (!Array.isArray(value.earnedMedals) || new Set(value.earnedMedals).size !== value.earnedMedals.length || !value.earnedMedals.includes(40) || value.earnedMedals.some(id => ![40, 60, 61, 62, 63, 67, 70, 71, 72, 92, 93].includes(id)) || (value.earnedMedals.includes(62) && (value.version < 14 || Number(value.day) < 7 || Number(value.perfectDays) < 7 || (value.day === 7 && !['victory', 'town'].includes(String(value.phase)))))) throw new Error('Invalid earned medals.');
+      if (!Array.isArray(value.earnedMedals) || new Set(value.earnedMedals).size !== value.earnedMedals.length || !value.earnedMedals.includes(40) || value.earnedMedals.some(id => ![40, 50, 51, 52, 53, 54, 55, 60, 61, 62, 63, 67, 70, 71, 72, 92, 93].includes(id)) || (value.earnedMedals.includes(62) && (value.version < 14 || Number(value.day) < 7 || Number(value.perfectDays) < 7 || (value.day === 7 && !['victory', 'town'].includes(String(value.phase)))))) throw new Error('Invalid earned medals.');
     }
     if (!Array.isArray(value.waves) || value.waves.length !== generateLowLevelMission(Number(value.day) - 1, Number(value.day), () => 0).wave || value.waves.some(wave => !record(wave) || !Array.isArray(wave.enemies) || wave.enemies.length > 1000 || wave.enemies.some(kind => typeof kind !== 'string' || !Object.hasOwn(ENEMIES, kind)) || !Array.isArray(wave.delays) || wave.delays.length !== wave.enemies.length || wave.delays.some(delay => !finite(delay) || delay < 0 || delay > 1000) || !finite(wave.initialCount) || wave.initialCount < wave.enemies.length)) throw new Error('Invalid wave state.');
     if ((Number(value.version) < 23 || Number(value.day) < 8) && (value.waves as unknown as WaveState[]).some(wave => wave.enemies.includes('lava'))) throw new Error('Lava is unavailable in this saved mission.');
@@ -1599,6 +1736,8 @@ export class Simulation {
     if (value.version < 18) simulation.state.sandbagLevel = 0;
     if (value.version < 20) simulation.state.pendingLootAction = null;
     if (value.version < 21) simulation.state.looterLevel = 0;
+    if (value.version < 27) simulation.state.economy = createTownEconomy();
+    else if (!validTownEconomy(value.economy)) throw new Error('Invalid town economy.');
     if (value.version < 22) simulation.state.trainerLevel = 0;
     if (value.version < 25) simulation.state.player.grenadeCount = 325;
     else if (!Number.isInteger(player.grenadeCount) || Number(player.grenadeCount) < 0 || Number(player.grenadeCount) > 325) throw new Error('Invalid Militia grenade counter.');
@@ -1657,6 +1796,7 @@ export class Simulation {
       if (enemy.kind === 'barbarian' && (Number(value.version) < 13 || ![0, 100].includes(enemy.rampage!) || !Number.isInteger(enemy.rageEffectFrame) || enemy.rageEffectFrame! < 0 || enemy.rageEffectFrame! > 12 || (enemy.rampage === 0 && enemy.rageEffectFrame !== 0) || !Number.isInteger(enemy.frame) || enemy.frame < 1 || (enemy.frame > 119 && enemy.frame !== 252))) throw new Error('Invalid Barbarian state.');
       if ((enemy.kind === 'barbarian' || enemy.kind === 'lava') && (!Array.isArray(enemy.hitEffects) || enemy.hitEffects.length > 2000 || enemy.hitEffects.some(effect => !record(effect) || !Number.isInteger(effect.frame) || !((effect.frame >= 50 && effect.frame <= 62) || (effect.frame >= 70 && effect.frame <= 75)) || !finite(effect.x) || !finite(effect.y)))) throw new Error('Invalid enemy hit effects.');
       if (enemy.kind === 'lava' && (Number(value.version) < 23 || Number(value.day) < 8 || typeof enemy.alerted !== 'boolean' || !Number.isInteger(enemy.frame) || enemy.frame < 1 || (enemy.frame > 128 && enemy.frame !== 223))) throw new Error('Invalid Lava state.');
+      if (enemy.kind === 'sister-bomb' && (!record(enemy.bomb) || ['startX', 'startY', 'targetX', 'targetY', 'curve', 'counter', 'rotation'].some(key => !finite((enemy.bomb as unknown as Record<string, unknown>)[key])) || !Number.isInteger(enemy.bomb.counter) || enemy.bomb.targetX === enemy.bomb.startX)) throw new Error('Invalid sister bomb.');
       if (ENEMY_TIMELINES[enemy.kind] && (!Number.isInteger(enemy.behaviorCounter) || ![-1, 1].includes(enemy.direction!) || !Number.isInteger(enemy.frame) || enemy.frame < 1 || enemy.frame > ENEMY_TIMELINES[enemy.kind].count)) throw new Error('Invalid campaign enemy behavior.');
       if (enemy.fallTargetY !== undefined && (!finite(enemy.fallTargetY) || enemy.fallTargetY < WORLD.groundLine || enemy.fallTargetY > WORLD.groundLine + WORLD.groundWidth)) throw new Error('Invalid dropped rat.');
       if (enemy.kind === 'boss') {
@@ -1734,7 +1874,7 @@ export class Simulation {
       if (!Number.isInteger(state.legacyReconstructionSeed) || state.legacyReconstructionSeed! < 1 || state.legacyReconstructionSeed! > 0xffffffff) throw new Error('Invalid legacy inventory provenance.');
     } else if (state.inventoryProvenance !== 'original-generation' || state.legacyReconstructionSeed !== undefined) throw new Error('Invalid inventory provenance.');
     if (state.day > 1) {
-      if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > (value.version < 15 ? 4 : 14) || !validTownPreparation(state.previousTown, validItem, state.day - 1, state.activeMission.absorbFix) || state.activeMission.reward !== state.previousTown.mission.reward) throw new Error('Invalid previous town.');
+      if (!record(state.previousTown) || state.previousTown.preparation !== 'ready' || !Number.isInteger(state.previousTown.ap) || state.previousTown.ap < 0 || state.previousTown.ap > (value.version < 15 ? 4 : 14) || !validTownPreparation(state.previousTown, validItem, state.day - 1, state.activeMission.absorbFix) || ['reward', 'hpFix', 'dmgFix', 'expFix', 'absorbFix'].some(key => state.activeMission[key as keyof ActiveMission] !== state.previousTown!.mission[key as keyof LowLevelMission])) throw new Error('Invalid previous town.');
     } else if (state.previousTown !== null) throw new Error('Unexpected previous town.');
     if (Number(value.version) < 3) {
       state.version = SAVE_VERSION;
@@ -1769,7 +1909,7 @@ export class Simulation {
       const town = state.town as unknown;
       if (!record(town) || !Number.isInteger(town.ap) || Number(town.ap) < 0 || Number(town.ap) > (value.version < 15 ? 4 : 14) || (state.phase === 'victory' && (Number(town.ap) < 4 || town.preparation !== 'pending')) || state.castleHp <= 0) throw new Error('Invalid first-town state.');
       if (town.preparation === 'ready') {
-        if (value.version < 5 || state.phase !== 'town' || !validTownPreparation(town, validItem, state.day, simulation.medalAbsorption()) || state.lootOffers.some(item => item !== null)) throw new Error('Invalid prepared town.');
+        if (value.version < 5 || state.phase !== 'town' || !validTownPreparation(town, validItem, state.day, simulation.medalAbsorption(), 'base') || state.lootOffers.some(item => item !== null)) throw new Error('Invalid prepared town.');
       } else if (town.preparation !== 'pending' || (value.version >= 5 && state.phase === 'town')) throw new Error('Missing town preparation.');
     } else if (state.town !== null) throw new Error('Town preparation precedes completed rewards.');
     // После боя исходные слоты могут быть переставлены; замороженные снаряды не возобновляются.

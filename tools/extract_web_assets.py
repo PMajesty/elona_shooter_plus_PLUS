@@ -19,7 +19,7 @@ CACHE = ROOT / ".build/export"
 WORK = ROOT / ".build/web-assets"
 DEST = ROOT / "web/public/assets"
 CLIPS = {"charaPic": 677, "enemy_sheep": 910,
-         "enemy_cata": 1020, "enemy_spider": 1164, "enemy_ghost": 1118,
+         "enemy_sister-bomb": 2272, "enemy_cata": 1020, "enemy_spider": 1164, "enemy_ghost": 1118,
          "enemy_ogre": 1363, "enemy_knight": 1211, "enemy_bird": 964,
          "enemy_tank": 993, "enemy_dino": 1247, "enemy_dragon": 945,
          "enemy_chicken": 1063, "enemy_rat": 1295, "enemy_crow": 981, "enemy_archer": 1092, "enemy_fly": 952,
@@ -395,15 +395,15 @@ def effect_segment_asset(xml, sprite, name, cache_name, start, end, alpha):
 
 def castle_upgrade_tiles(xml, sprites):
     """Запекает исходные фильтры/размещения плитки; название и цена остаются динамическими."""
-    directory, svg_directory = WORK / "castle-tiles", WORK / "castle-tiles-svg"
+    directory, svg_directory = WORK / "castle-tiles-v2", WORK / "castle-tiles-v2-svg"
     derived = copy.deepcopy(xml)
     tags = derived.find("tags")
     target = next(tag for tag in tags if tag.get("spriteId") == "2192")
     target_index = list(tags).index(target)
     existing = {tag.get(key) for tag in tags for key in ("spriteId", "buttonId", "characterID") if tag.get(key)}
-    assert not existing.intersection(str(value) for value in range(30000, 30009))
+    assert not existing.intersection(str(value) for value in range(30000, 30017))
     # Кадр upgradePic выбирается кодом. Отдельные однокадровые копии не запускают его временную шкалу.
-    for index in range(8):
+    for index in range(16):
         picture = copy.deepcopy(sprites[2191])
         picture.set("spriteId", str(30000 + index))
         picture.set("frameCount", "1")
@@ -416,7 +416,7 @@ def castle_upgrade_tiles(xml, sprites):
         target_index += 1
     # Состояние over содержит собственные исходные alpha/blur, а не прибавленную браузером заливку.
     hover_button = copy.deepcopy(next(tag for tag in tags if tag.get("buttonId") == "2159"))
-    hover_button.set("buttonId", "30008")
+    hover_button.set("buttonId", "30016")
     records = hover_button.find("characters")
     for record in list(records):
         if record.get("buttonStateOver") != "true":
@@ -430,7 +430,7 @@ def castle_upgrade_tiles(xml, sprites):
     source = [tag for tag in placed_frame(sprites[2192].find("subTags"), 1)
               if tag.get("name") not in {"upgradeName", "upgradeCost"}]
     depths = []
-    for index in range(8):
+    for index in range(16):
         for hover in (False, True):
             for depth in depths:
                 timeline.append(ET.Element("item", type="RemoveObject2Tag", depth=depth, forceWriteAsLong="false"))
@@ -439,12 +439,12 @@ def castle_upgrade_tiles(xml, sprites):
                 if tag.get("name") == "upgradePic":
                     tag.set("characterId", str(30000 + index))
                 elif tag.get("name") == "upgradeButton" and hover:
-                    tag.set("characterId", "30008")
+                    tag.set("characterId", "30016")
             timeline.extend(selected)
             depths = [tag.get("depth") for tag in selected]
             timeline.append(ET.Element("item", type="ShowFrameTag", forceWriteAsLong="false"))
     timeline.append(ET.Element("item", type="EndTag", forceWriteAsLong="false"))
-    target.set("frameCount", "16")
+    target.set("frameCount", "32")
     if FORCE or not list(directory.glob("DefineSprite_2192*")):
         path, swf_path = WORK / "castle-tiles.xml", WORK / "castle-tiles.swf"
         ET.ElementTree(derived).write(path, encoding="utf-8", xml_declaration=True)
@@ -453,7 +453,7 @@ def castle_upgrade_tiles(xml, sprites):
         ffdec(["-ignorebackground", "-selectid", "2192", "-format", "sprite:svg", "-export", "sprite", svg_directory, swf_path], "castle-tiles-svg")
     return {**atlas("castleUpgradeTiles", 2192, target, directory, svg_directory),
             "coordinateSpace": "upgrades-parent", "placementBaked": True,
-            "sourcePictureId": 2191, "sourcePictureFrames": list(range(2, 10)),
+            "sourcePictureId": 2191, "sourcePictureFrames": list(range(2, 18)),
             "framesPerTile": 2, "states": ["up", "over"]}
 
 
@@ -581,7 +581,7 @@ def town_layout(xml, sprites):
                        "children": placements(sprites[1995].find("subTags"), 54)},
             "castleUpgrades": {"characterId": 2192, "clip": "castleUpgradeTiles", "children": upgrade_children,
                                "x": 150, "y": 140, "columns": 4, "stepX": 100, "stepY": 110,
-                               "names": ["Fix Wall", "Wall", "Sandbag", "Storage", "House", "Looter", "Repairman", "Trainer"],
+                               "names": ["Fix Wall", "Wall", "Sandbag", "Storage", "House", "Looter", "Repairman", "Trainer", "Smith", "Museum", "Chicken", "Sister", "Villa", "Sp.Trainer", "N/A", "N/A"],
                                "disabledAlpha": 0.3, "affordableColor": "#0000cc", "unavailableColor": "#cc0000",
                                "pageButtons": ["button_castlePage1", "button_castlePage2"], "hitRect": hit_rect},
             "characters": {"characterId": 1995, "frame": 63, "image": "townCharacters", "labelsImage": "townCharactersLabels",

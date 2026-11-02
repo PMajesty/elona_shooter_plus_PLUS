@@ -1,6 +1,10 @@
 import { lootValueMultiplier } from './items.ts';
+import type { TownEconomy } from './town-economy.ts';
 
-export type CastleUpgradeKind = 'house' | 'wall' | 'fix-wall' | 'repairman' | 'sandbag' | 'storage' | 'looter' | 'trainer';
+export type CastleUpgradeKind = 'house' | 'wall' | 'fix-wall' | 'repairman' | 'sandbag' | 'storage' | 'looter' | 'trainer'
+  | 'smith' | 'museum' | 'chicken' | 'sister' | 'villa' | 'special-trainer';
+export const CASTLE_UPGRADES: readonly CastleUpgradeKind[] = ['fix-wall', 'wall', 'sandbag', 'storage', 'house', 'looter', 'repairman', 'trainer',
+  'smith', 'museum', 'chicken', 'sister', 'villa', 'special-trainer'];
 export type CastleUpgradeOutcome = 'purchased' | 'not-enough-gold' | 'capped' | 'unavailable';
 export interface CastleUpgradeState {
   party: { capacity: 1 | 2 | 3 };
@@ -11,9 +15,17 @@ export interface CastleUpgradeState {
   looterLevel: number;
   trainerLevel: number;
   inventory: readonly unknown[];
+  economy?: TownEconomy;
 }
 
 export function castleUpgradeCost(kind: CastleUpgradeKind, state: CastleUpgradeState): number {
+  const e = state.economy;
+  if (kind === 'smith') return (e?.smith ?? 0) >= 6 ? 0 : (e?.smith ?? 0) ** 2 * 80 + 200;
+  if (kind === 'museum') return (e?.museum ?? 0) * 150 + 2000;
+  if (kind === 'chicken') { const n = e?.chickens ?? 0; return Math.trunc(Math.trunc(Math.sqrt(n * n * 20)) + 20 + n * 2.5); }
+  if (kind === 'sister') return (e?.sisters ?? 0) * 100 + 250;
+  if (kind === 'villa') return (e?.villa ?? 0) ** 2 * 180 + 2500;
+  if (kind === 'special-trainer') return (e?.specialTrainer ?? 0) >= 9 ? 0 : (e?.specialTrainer ?? 0) ** 2 * 400 + 2500;
   // Main.getUpgradeCost: цена стены зависит от максимального HP, а не от её уровня.
   if (kind === 'house') return state.party.capacity >= 3 ? 0 : state.party.capacity * state.party.capacity * 1000 + 1000;
   if (kind === 'fix-wall') return Math.trunc(8 * (state.castleMaxHp - state.castleHp));
@@ -27,7 +39,7 @@ export function castleUpgradeCost(kind: CastleUpgradeKind, state: CastleUpgradeS
 
 export function castleUpkeep(state: CastleUpgradeState): number {
   // Main.calcUnkeep: не перенесённые улучшения исходные; Hard Badge пока отсутствует.
-  return Math.max(0, (state.party.capacity - 1) * 50 + state.repairmanLevel * 60 + (state.castleMaxHp - 40) * 2 + state.sandbagLevel * 40 + castleStorageLevel(state) * 40 + state.looterLevel * 5);
+  return Math.max(0, (state.party.capacity - 1) * 50 + state.repairmanLevel * 60 + (state.castleMaxHp - 40) * 2 + state.sandbagLevel * 40 + castleStorageLevel(state) * 40 + state.looterLevel * 5 + (state.economy?.museum ?? 0) * 15);
 }
 
 export function castleLootMultiplier(state: Pick<CastleUpgradeState, 'looterLevel'>): number {

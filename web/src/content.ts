@@ -18,7 +18,7 @@ export const SHOTGUN = {
 export const GRENADE = { id: 11, name: "Soldier's Grenade", damage: 45, quantity: 5, cooldownFrames: 100, radiusX: 60, radiusY: 50, speed: 12 } as const;
 
 export type EnemyKind = 'sheep' | 'rat' | 'chicken' | 'crow' | 'archer' | 'fly' | 'barbarian' | 'lava' | 'boss'
-  | 'cata' | 'spider' | 'ghost' | 'ogre' | 'knight' | 'bird' | 'tank' | 'dino' | 'dragon' | 'dropped-rat';
+  | 'cata' | 'spider' | 'ghost' | 'ogre' | 'knight' | 'bird' | 'tank' | 'dino' | 'dragon' | 'dropped-rat' | 'sister-bomb';
 export type Rect = readonly [left: number, right: number, top: number, bottom: number];
 export interface EnemyDefinition {
   kind: EnemyKind; id: number; name: string; level: number; power: number;
@@ -29,6 +29,8 @@ export interface EnemyDefinition {
 
 // Числа перенесены из enemy.init и MainTimeline.setEnemy. Границы body — временная замена силуэтов Flash.
 export const ENEMIES: Readonly<Record<EnemyKind, EnemyDefinition>> = {
+  'sister-bomb': { kind: 'sister-bomb', id: 11, name: 'Sister', level: 9999, power: 50, hp: 1, attack: 100, speedBase: 0, speedRandom: 0,
+    critical: [-50, -50, 50, 50], body: [-10, 10, -12, 12], knockResistance: 0, flags: [], loot: 6 },
   sheep: { kind: 'sheep', id: 3, name: 'Sheep', level: 0, power: 70, hp: 42, attack: 1, speedBase: 0.7, speedRandom: 0.4, critical: [4, 19, -1, 9], body: [-20, 20, -17, 12], knockResistance: 0.9, flags: ['BATCH'], loot: 6 },
   rat: { kind: 'rat', id: 17, name: 'Rat', level: 1, power: 50, hp: 16, attack: 2, speedBase: 2.7, speedRandom: 1.3, critical: [-6, 9, -11, 1], body: [-19, 17, -14, 8], knockResistance: 1.1, flags: ['BATCH', 'MASS'], loot: 28 },
   archer: { kind: 'archer', id: 2, name: 'Archer', level: 4, power: 100, hp: 38, attack: 3, speedBase: 0.8, speedRandom: 0.7, critical: [-7, 9, -20, -8], body: [-18, 18, -27, 12], knockResistance: 0.8, flags: ['RANGED'], loot: 29 },

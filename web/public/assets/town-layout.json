@@ -1032,7 +1032,15 @@
       "House",
       "Looter",
       "Repairman",
-      "Trainer"
+      "Trainer",
+      "Smith",
+      "Museum",
+      "Chicken",
+      "Sister",
+      "Villa",
+      "Sp.Trainer",
+      "N/A",
+      "N/A"
     ],
     "disabledAlpha": 0.3,
     "affordableColor": "#0000cc",

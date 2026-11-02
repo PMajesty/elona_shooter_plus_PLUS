@@ -5,6 +5,7 @@ import { generateEarlyTownRecruit, type FirstTownRecruit } from './recruits.ts';
 export interface FirstTownMission extends LowLevelMission {}
 
 export interface FirstTownPreparationInput {
+  smith?: number; chickens?: number; specialSale?: boolean;
   priorOffers?: readonly (Readonly<Item> | null)[];
   recruitSlots?: Readonly<Record<number, Item | null>>;
   searched?: number;
@@ -31,7 +32,8 @@ export interface FirstTownPreparation {
   cards: number[];
   mission: FirstTownMission;
   recruit: FirstTownRecruit;
-  flags: { specialSale: 0; egg: true; partyHeld: false; prayed: false; robbed: 0; taunted: 0 };
+  flags: { specialSale: number; egg: boolean; partyHeld: boolean; prayed: boolean; robbed: number; taunted: number };
+  baseAbsorbFix?: number;
   searched: number;
   preparationEffects?: TownPreparationEffects;
 }
@@ -45,23 +47,7 @@ export function prepareEarlyTown(random: () => number, day: number, input: First
   const effects: TownPreparationEffects = { shopEngineer: input.shopEngineer ?? 0,
     missionNegotiator: input.missionNegotiator ?? 0, recruitEngineer: input.recruitEngineer ?? 0 };
   if (!validTownPreparationEffects(effects)) throw new RangeError('Invalid original town preparation effects.');
-  // frame71 генерирует лавку до generateMission/initPartySkill: здесь действует прежний кэш.
-  const factory = new ItemFactory(random, { day, engineer: effects.shopEngineer });
-  // clearGameInv сохраняет поля даже у пустых слотов; первая лавка использует только 0 и 1.
-  const shop = Array.from({ length: 8 }, (_, index) => input.priorOffers?.[index] ? { ...input.priorOffers[index], num: 0 } as Item : null);
-  for (let index = 0; index < 2; index++) {
-    shop[index] = factory.randomItem(Math.trunc(random() * day * 250) + 200, 0, shop[index] ?? undefined);
-  }
-  // Исходный generateShop сначала тратит броски слота 0, затем заменяет его гарантированным оружием.
-  shop[0] = factory.randomItem(Math.trunc(random() * day * 200) + 200, 4, shop[0]!);
-  if (day === 4) {
-    // Распродажа заменяет уже созданный товар: исходные броски и поля слотов остаются значимыми.
-    for (let index = 0; index < 2; index++) {
-      shop[index] = factory.randomItem(Math.trunc(random() * day * 75) + 500, 3, shop[index]!);
-    }
-    shop[0] = factory.generate(8, shop[0]!);
-    factory.setMod(shop[0], 10);
-  }
+  const shop = generateTownShop(random, day, input);
 
   const cardPool = [1, 1, 1, 2, 3, 4, 5, 6, 7];
   const cards: number[] = [];
@@ -81,10 +67,32 @@ export function prepareEarlyTown(random: () => number, day: number, input: First
   for (const [slot, item] of Object.entries(input.recruitSlots ?? {})) if (item) retainedRecruitItems[Number(slot)] = { ...item };
   recruit.items = { ...retainedRecruitItems, ...recruit.items };
   // При выбранных исходных условиях townMedalBonus/startTownMedal не добавляют бросков или эффектов.
-  const flags = { specialSale: 0, egg: true, partyHeld: false, prayed: false, robbed: 0, taunted: 0 } as const;
+  const flags = { specialSale: 0, egg: !(input.chickens && input.chickens > 0), partyHeld: false, prayed: false, robbed: 0, taunted: 0 } as const;
   // В оригинале этот бросок идёт после автоматического сохранения frame71; вызывающий код сохраняет весь готовый результат.
   const searched = input.searched ?? Math.trunc(random() * 1000);
   const explicitEffects = input.shopEngineer !== undefined || input.missionNegotiator !== undefined || input.recruitEngineer !== undefined;
   return { shop, cards, mission, recruit, flags, searched,
     ...(explicitEffects ? { preparationEffects: effects } : {}) };
+}
+
+export function generateTownShop(random: () => number, day: number, input: FirstTownPreparationInput = {}): (Item | null)[] {
+  // frame71 генерирует лавку до generateMission/initPartySkill: здесь действует прежний кэш.
+  const factory = new ItemFactory(random, { day, engineer: input.shopEngineer ?? 0 });
+  // clearGameInv сохраняет поля даже у пустых слотов; первая лавка использует только 0 и 1.
+  const shop = Array.from({ length: 8 }, (_, index) => input.priorOffers?.[index] ? { ...input.priorOffers[index], num: 0 } as Item : null);
+  for (let index = 0; index < 2 + (input.smith ?? 0); index++) {
+    shop[index] = factory.randomItem(Math.trunc(random() * day * 250) + 200, 0, shop[index] ?? undefined);
+  }
+  // Исходный generateShop сначала тратит броски слота 0, затем заменяет его гарантированным оружием.
+  shop[0] = factory.randomItem(Math.trunc(random() * day * 200) + 200, 4, shop[0]!);
+  if (input.specialSale ?? day === 4) {
+    // Распродажа заменяет уже созданный товар: исходные броски и поля слотов остаются значимыми.
+    for (let index = 0; index < 2 + (input.smith ?? 0); index++) {
+      shop[index] = factory.randomItem(Math.trunc(random() * day * 75) + 500, 3, shop[index]!);
+    }
+    shop[0] = factory.generate(8, shop[0]!);
+    factory.setMod(shop[0], 10);
+  }
+
+  return shop;
 }

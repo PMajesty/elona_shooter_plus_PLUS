@@ -868,6 +868,183 @@
       "uniqueFrames": 25,
       "characterId": 910
     },
+    "enemy_sister-bomb": {
+      "image": "sprites/enemy_sister-bomb.png",
+      "json": "sprites/enemy_sister-bomb.json",
+      "originX": 7.7,
+      "originY": 16.55,
+      "frameWidth": 26,
+      "frameHeight": 31,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2272
+    },
+    "enemy_cata": {
+      "image": "sprites/enemy_cata.png",
+      "json": "sprites/enemy_cata.json",
+      "originX": 28.0,
+      "originY": 35.0,
+      "frameWidth": 66,
+      "frameHeight": 58,
+      "labels": {
+        "init": 1,
+        "alive": 3,
+        "attack": 14,
+        "dead": 163,
+        "null": 279
+      },
+      "count": 279,
+      "uniqueFrames": 16,
+      "characterId": 1020
+    },
+    "enemy_spider": {
+      "image": "sprites/enemy_spider.png",
+      "json": "sprites/enemy_spider.json",
+      "originX": 21.5,
+      "originY": 28.5,
+      "frameWidth": 49,
+      "frameHeight": 48,
+      "labels": {
+        "init": 1,
+        "alive": 3,
+        "stop": 25,
+        "attack": 30,
+        "dead": 80,
+        "null": 251
+      },
+      "count": 265,
+      "uniqueFrames": 28,
+      "characterId": 1164
+    },
+    "enemy_ghost": {
+      "image": "sprites/enemy_ghost.png",
+      "json": "sprites/enemy_ghost.json",
+      "originX": 16.95,
+      "originY": 59.05,
+      "frameWidth": 47,
+      "frameHeight": 70,
+      "labels": {
+        "init": 1,
+        "alive": 3,
+        "stop": 25,
+        "attack": 30,
+        "dead": 80,
+        "null": 251
+      },
+      "count": 265,
+      "uniqueFrames": 43,
+      "characterId": 1118
+    },
+    "enemy_ogre": {
+      "image": "sprites/enemy_ogre.png",
+      "json": "sprites/enemy_ogre.json",
+      "originX": 20.85,
+      "originY": 39.15,
+      "frameWidth": 49,
+      "frameHeight": 66,
+      "labels": {
+        "init": 1,
+        "alive": 6,
+        "attack": 29,
+        "dead": 76,
+        "null": 235
+      },
+      "count": 249,
+      "uniqueFrames": 21,
+      "characterId": 1363
+    },
+    "enemy_knight": {
+      "image": "sprites/enemy_knight.png",
+      "json": "sprites/enemy_knight.json",
+      "originX": 24.0,
+      "originY": 19.45,
+      "frameWidth": 43,
+      "frameHeight": 49,
+      "labels": {
+        "init": 1,
+        "alive": 3,
+        "attack": 33,
+        "dead": 83,
+        "null": 254
+      },
+      "count": 268,
+      "uniqueFrames": 30,
+      "characterId": 1211
+    },
+    "enemy_bird": {
+      "image": "sprites/enemy_bird.png",
+      "json": "sprites/enemy_bird.json",
+      "originX": 24.95,
+      "originY": 22.95,
+      "frameWidth": 56,
+      "frameHeight": 177,
+      "labels": {
+        "init": 1,
+        "alive": 3,
+        "dead": 30,
+        "null": 144
+      },
+      "count": 161,
+      "uniqueFrames": 24,
+      "characterId": 964
+    },
+    "enemy_tank": {
+      "image": "sprites/enemy_tank.png",
+      "json": "sprites/enemy_tank.json",
+      "originX": 34.0,
+      "originY": 32.0,
+      "frameWidth": 81,
+      "frameHeight": 55,
+      "labels": {
+        "init": 1,
+        "alive": 3,
+        "attack": 20,
+        "attack2": 74,
+        "dead": 174,
+        "null": 290
+      },
+      "count": 307,
+      "uniqueFrames": 68,
+      "characterId": 993
+    },
+    "enemy_dino": {
+      "image": "sprites/enemy_dino.png",
+      "json": "sprites/enemy_dino.json",
+      "originX": 59.0,
+      "originY": 53.95,
+      "frameWidth": 711,
+      "frameHeight": 102,
+      "labels": {
+        "init": 1,
+        "alive": 3,
+        "attack": 26,
+        "dead": 194,
+        "null": 358
+      },
+      "count": 375,
+      "uniqueFrames": 157,
+      "characterId": 1247
+    },
+    "enemy_dragon": {
+      "image": "sprites/enemy_dragon.png",
+      "json": "sprites/enemy_dragon.json",
+      "originX": 57.45,
+      "originY": 81.55,
+      "frameWidth": 115,
+      "frameHeight": 224,
+      "labels": {
+        "init": 1,
+        "alive": 3,
+        "stand": 25,
+        "attack": 43,
+        "dead": 107,
+        "null": 225
+      },
+      "count": 225,
+      "uniqueFrames": 65,
+      "characterId": 945
+    },
     "enemy_chicken": {
       "image": "sprites/enemy_chicken.png",
       "json": "sprites/enemy_chicken.json",
@@ -1362,8 +1539,8 @@
       "frameWidth": 148,
       "frameHeight": 152,
       "labels": {},
-      "count": 16,
-      "uniqueFrames": 16,
+      "count": 32,
+      "uniqueFrames": 30,
       "characterId": 2192,
       "coordinateSpace": "upgrades-parent",
       "placementBaked": true,
@@ -1376,7 +1553,15 @@
         6,
         7,
         8,
-        9
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
       ],
       "framesPerTile": 2,
       "states": [
@@ -1575,171 +1760,6 @@
       "count": 189,
       "uniqueFrames": 9,
       "characterId": 981
-    },
-    "enemy_cata": {
-      "image": "sprites/enemy_cata.png",
-      "json": "sprites/enemy_cata.json",
-      "originX": 28.0,
-      "originY": 35.0,
-      "frameWidth": 66,
-      "frameHeight": 58,
-      "labels": {
-        "init": 1,
-        "alive": 3,
-        "attack": 14,
-        "dead": 163,
-        "null": 279
-      },
-      "count": 279,
-      "uniqueFrames": 16,
-      "characterId": 1020
-    },
-    "enemy_spider": {
-      "image": "sprites/enemy_spider.png",
-      "json": "sprites/enemy_spider.json",
-      "originX": 21.5,
-      "originY": 28.5,
-      "frameWidth": 49,
-      "frameHeight": 48,
-      "labels": {
-        "init": 1,
-        "alive": 3,
-        "stop": 25,
-        "attack": 30,
-        "dead": 80,
-        "null": 251
-      },
-      "count": 265,
-      "uniqueFrames": 28,
-      "characterId": 1164
-    },
-    "enemy_ghost": {
-      "image": "sprites/enemy_ghost.png",
-      "json": "sprites/enemy_ghost.json",
-      "originX": 16.95,
-      "originY": 59.05,
-      "frameWidth": 47,
-      "frameHeight": 70,
-      "labels": {
-        "init": 1,
-        "alive": 3,
-        "stop": 25,
-        "attack": 30,
-        "dead": 80,
-        "null": 251
-      },
-      "count": 265,
-      "uniqueFrames": 43,
-      "characterId": 1118
-    },
-    "enemy_ogre": {
-      "image": "sprites/enemy_ogre.png",
-      "json": "sprites/enemy_ogre.json",
-      "originX": 20.85,
-      "originY": 39.15,
-      "frameWidth": 49,
-      "frameHeight": 66,
-      "labels": {
-        "init": 1,
-        "alive": 6,
-        "attack": 29,
-        "dead": 76,
-        "null": 235
-      },
-      "count": 249,
-      "uniqueFrames": 21,
-      "characterId": 1363
-    },
-    "enemy_knight": {
-      "image": "sprites/enemy_knight.png",
-      "json": "sprites/enemy_knight.json",
-      "originX": 24.0,
-      "originY": 19.45,
-      "frameWidth": 43,
-      "frameHeight": 49,
-      "labels": {
-        "init": 1,
-        "alive": 3,
-        "attack": 33,
-        "dead": 83,
-        "null": 254
-      },
-      "count": 268,
-      "uniqueFrames": 30,
-      "characterId": 1211
-    },
-    "enemy_bird": {
-      "image": "sprites/enemy_bird.png",
-      "json": "sprites/enemy_bird.json",
-      "originX": 24.95,
-      "originY": 22.95,
-      "frameWidth": 56,
-      "frameHeight": 177,
-      "labels": {
-        "init": 1,
-        "alive": 3,
-        "dead": 30,
-        "null": 144
-      },
-      "count": 161,
-      "uniqueFrames": 24,
-      "characterId": 964
-    },
-    "enemy_tank": {
-      "image": "sprites/enemy_tank.png",
-      "json": "sprites/enemy_tank.json",
-      "originX": 34.0,
-      "originY": 32.0,
-      "frameWidth": 81,
-      "frameHeight": 55,
-      "labels": {
-        "init": 1,
-        "alive": 3,
-        "attack": 20,
-        "attack2": 74,
-        "dead": 174,
-        "null": 290
-      },
-      "count": 307,
-      "uniqueFrames": 68,
-      "characterId": 993
-    },
-    "enemy_dino": {
-      "image": "sprites/enemy_dino.png",
-      "json": "sprites/enemy_dino.json",
-      "originX": 59.0,
-      "originY": 53.95,
-      "frameWidth": 711,
-      "frameHeight": 102,
-      "labels": {
-        "init": 1,
-        "alive": 3,
-        "attack": 26,
-        "dead": 194,
-        "null": 358
-      },
-      "count": 375,
-      "uniqueFrames": 157,
-      "characterId": 1247
-    },
-    "enemy_dragon": {
-      "image": "sprites/enemy_dragon.png",
-      "json": "sprites/enemy_dragon.json",
-      "originX": 57.45,
-      "originY": 81.55,
-      "frameWidth": 115,
-      "frameHeight": 224,
-      "labels": {
-        "init": 1,
-        "alive": 3,
-        "stand": 25,
-        "attack": 43,
-        "dead": 107,
-        "null": 225
-      },
-      "count": 225,
-      "uniqueFrames": 65,
-      "characterId": 945
     }
   },
   "sounds": {

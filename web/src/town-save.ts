@@ -8,21 +8,34 @@ const integer = (value: unknown, low: number, high: number): value is number => 
 const fieldsEqual = (value: Record<string, unknown>, fields: Record<string, unknown>) => Object.entries(fields).every(([key, expected]) => value[key] === expected);
 
 /** Проверяем сохранённые результаты генерации, не повторяя случайные броски при загрузке. */
-export function validTownPreparation(value: unknown, validItem: (item: unknown) => item is Item, day: number = 1, expectedAbsorbFix?: number): value is FirstTownPreparation {
+export function validTownPreparation(value: unknown, validItem: (item: unknown) => item is Item, day: number = 1, expectedAbsorbFix?: number, absorbMode: 'base' | 'active' = 'active'): value is FirstTownPreparation {
   if (!validCampaignDay(day)) return false;
   if (!record(value) || !Array.isArray(value.shop) || value.shop.length !== 8 || Array.from(value.shop).some(item => item !== null && !validItem(item))) return false;
   if (!Array.isArray(value.cards) || value.cards.length !== 5 || value.cards.some(id => !integer(id, -7, -1))) return false;
   for (let id = -7; id <= -1; id++) if (value.cards.filter(card => card === id).length > (id === -1 ? 3 : 1)) return false;
-  if (!integer(value.searched, 0, 999) || !record(value.flags) || !fieldsEqual(value.flags, { specialSale: 0, egg: true, partyHeld: false, prayed: false, robbed: 0, taunted: 0 })) return false;
+  if (!integer(value.searched, 0, 999) || !record(value.flags) || !fieldsEqual(value.flags, { specialSale: 0, robbed: 0 }) || ['egg', 'partyHeld', 'prayed'].some(key => typeof (value.flags as Record<string, unknown>)[key] !== 'boolean') || !integer(value.flags.taunted, 0, 100)) return false;
   // Снимок принадлежит моменту подготовки: найм/увольнение позднее не меняют готовую награду.
   if (value.preparationEffects !== undefined && !validTownPreparationEffects(value.preparationEffects)) return false;
   const negotiator = value.preparationEffects?.missionNegotiator ?? 0;
   const mission = value.mission;
   const expected = generateLowLevelMission(day, day, () => 0, { negotiator });
-  const { loot: _loot, group: _group, bossWave: _bossWave, absorbFix: _absorb, ...fixed } = expected;
+  const { loot: _loot, group: _group, bossWave: _bossWave, absorbFix: _absorb, hpFix: _hp, dmgFix: _dmg, expFix: _exp, reward: _reward, ...fixed } = expected;
   if (!record(mission) || !fieldsEqual(mission, fixed) || !Array.isArray(mission.group) || mission.group.length !== 0
     || (expected.bossDay ? mission.bossWave !== expected.wave - 1 : !integer(mission.bossWave, 2, 2 + Math.ceil(expected.wave / 3) - 1))) return false;
-  if (![0, 0.01, 0.02, 0.03, 0.04].includes(Number(mission.absorbFix)) || typeof mission.absorbFix !== 'number' || (expectedAbsorbFix !== undefined && mission.absorbFix !== expectedAbsorbFix)) return false;
+  const baseline = value.baseAbsorbFix ?? mission.absorbFix;
+  if (typeof baseline !== 'number' || ![0, 0.01, 0.02, 0.03, 0.04].includes(baseline)
+    || typeof mission.absorbFix !== 'number' || !Number.isFinite(mission.absorbFix)
+    || (value.flags.prayed ? value.baseAbsorbFix === undefined || mission.absorbFix < baseline + 0.05 - 1e-9 || mission.absorbFix > baseline + 0.19 + 1e-9 : mission.absorbFix !== baseline)
+    || (expectedAbsorbFix !== undefined && (absorbMode === 'base' ? baseline : mission.absorbFix) !== expectedAbsorbFix)) return false;
+  if (typeof mission.hpFix !== 'number' || !Number.isFinite(mission.hpFix) || mission.hpFix < 1 || mission.hpFix > 100
+    || typeof mission.dmgFix !== 'number' || !Number.isFinite(mission.dmgFix) || mission.dmgFix < 1 || mission.dmgFix > 100
+    || typeof mission.expFix !== 'number' || !Number.isFinite(mission.expFix) || !(mission.expFix === 1 || mission.expFix >= 1.05 && mission.expFix <= 1.63)
+    || (!value.flags.taunted && (mission.hpFix !== 1 || mission.reward !== expected.reward))
+    || (!value.flags.partyHeld && mission.dmgFix !== 1)
+    || (value.flags.partyHeld && mission.dmgFix <= 1)
+    || (value.flags.taunted > 0 && (mission.hpFix < 1 + value.flags.taunted * 0.3 - 1e-9 || mission.hpFix > 1 + value.flags.taunted * 0.55 + 1e-9))
+    || !integer(mission.reward, expected.reward, 1000000000)) return false;
+
   // В городе9 две гарантии идут после необязательного Ragnarok; порядок важен для выдачи слотов.
   const guaranteed = calendarLoot(day);
   if (!Array.isArray(mission.loot) || !(guaranteed.join() === mission.loot.join() || [1038, ...guaranteed].join() === mission.loot.join()) || mission.loot.some(id => typeof id !== 'number')) return false;

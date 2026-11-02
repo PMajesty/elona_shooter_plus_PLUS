@@ -31,6 +31,7 @@ export interface ShopViewState {
   upgradeReference: Item | null;
 }
 export interface ShopViewCallbacks {
+  refreshStock?(): void;
   buy(stock: number, inventory: number): boolean;
   swap(from: number, to: number): boolean;
   requestSell(index: number): void;
@@ -155,9 +156,9 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
     return true;
   };
   button('button_windowClose', panel.children.closeButton, () => { if (upgradeSelecting) callbacks.cancelUpgradeSelection(); else if (!dropOutside()) callbacks.close?.(); }, menu.x, menu.y);
-  button('button_shopRefresh', panel.children.act1, () => { if (upgradeSelecting) callbacks.cancelUpgradeSelection(); else if (!dropOutside()) message('Refresh Stock is not available yet. No AP has been spent.'); }, menu.x, menu.y, false);
+  button('button_shopRefresh', panel.children.act1, () => { if (upgradeSelecting) callbacks.cancelUpgradeSelection(); else if (!dropOutside()) callbacks.refreshStock?.(); }, menu.x, menu.y, Boolean(callbacks.refreshStock) && state.ap >= 2);
   button('button_shopUpgrade', panel.children.act2, () => { if (!dropOutside()) callbacks.beginUpgradeSelection(); }, menu.x, menu.y, state.ap >= 4);
-  image(panel.refreshLabelsImage, menu.x, 0).setAlpha(0.35);
+  image(panel.refreshLabelsImage, menu.x, 0).setAlpha(state.ap >= 2 ? 1 : 0.35);
   image(panel.upgradeLabelsImage, menu.x, 0).setAlpha(state.ap >= 4 ? 1 : 0.35);
 
   const addSlot = (area: Area, index: number, rawItem: Item | null, x: number, y: number) => {

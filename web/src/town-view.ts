@@ -1,8 +1,9 @@
+import { TOWN_ACTIVITIES, museumIncome, type TownActivity, type TownEconomy } from './town-economy.ts';
 import { MAX_CAMPAIGN_DAY } from './missions.ts';
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
-import { castleDamageMultiplier, castleLootMultiplier, castleRepairAmount, castleStorageLevel, castleTrainerMultiplier, castleUpgradeCost, castleUpkeep, type CastleUpgradeKind } from './castle-upgrades.ts';
+import { CASTLE_UPGRADES, castleDamageMultiplier, castleLootMultiplier, castleRepairAmount, castleStorageLevel, castleTrainerMultiplier, castleUpgradeCost, castleUpkeep, type CastleUpgradeKind } from './castle-upgrades.ts';
 
 export type TownTab = 'mission' | 'castle' | 'shop' | 'characters' | 'equipment' | null;
 export type TownDialog = 'repair' | 'rest' | 'title' | null;
@@ -22,15 +23,16 @@ export interface TownLayout {
   claimTitleAction: { x: number; y: number; cardClip: string; cardFrame: number; cardRotation: number; hoverScale: number; pinClip: string; text: string; children: Record<string, Placement> };
 }
 interface TownViewState {
+  economy: TownEconomy; earnedMedals: number[];
   day: number; gold: number; castleHp: number; castleMaxHp: number; title: 0 | 1;
   wallLevel: number; wallFixCount: number; repairmanLevel: number; sandbagLevel: number; looterLevel: number; trainerLevel: number; party: { capacity: 1 | 2 | 3 };
   player: { level: number; exp: number; selectedSlot: number };
   town: { ap: number; preparation: string } | null; inventory: (Item | null)[];
 }
-interface Callbacks { select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; dismiss(): void; message(value: string): void }
+interface Callbacks { castlePage(page: 0 | 1): void; activity(action: TownActivity): void; activityAvailable(action: TownActivity): boolean; select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; dismiss(): void; message(value: string): void }
 
 /** Городские координаты и повороты берутся из исходного кадра 71 и его окон. */
-export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, dialog: TownDialog): Phaser.GameObjects.Container {
+export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, dialog: TownDialog, castlePage: 0 | 1 = 0): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName('town-view');
   const image = (key: string, x = 0, y = 0, placement?: Placement) => {
     const asset = manifest.images[key];
@@ -88,19 +90,20 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
       text(panel.children.unkeep, String(castleUpkeep(state)), x, y);
       button('button_freeRepair', panel.children.act1, callbacks.repair, x, y);
       const tile = layout.castleUpgrades, asset = manifest.clips[tile.clip];
-      const notice = 'Page 2 purchases are not available yet.';
+      const notice = castlePage ? 'Castle improvements and daily activities.' : 'Improve your castle and equipment.';
       const hint = text(panel.children.hint2, notice, x, y);
-      button(tile.pageButtons[0], panel.children.page1, () => {}, x, y);
-      button(tile.pageButtons[1], panel.children.page2, () => callbacks.message('These Castle upgrades are not available yet.'), x, y, false).setAlpha(tile.disabledAlpha);
-      // Все восемь исходных плиток первой страницы используют общие проверки покупки.
-      const levels = [state.wallFixCount, state.wallLevel, state.sandbagLevel, castleStorageLevel(state), state.party.capacity, state.looterLevel, state.repairmanLevel, state.trainerLevel];
-      const costs = [castleUpgradeCost('fix-wall', state), castleUpgradeCost('wall', state), castleUpgradeCost('sandbag', state),
-        castleUpgradeCost('storage', state), castleUpgradeCost('house', state), castleUpgradeCost('looter', state), castleUpgradeCost('repairman', state), castleUpgradeCost('trainer', state)];
-      tile.names.forEach((name, index) => {
-        const kind: CastleUpgradeKind | undefined = index === 0 ? 'fix-wall' : index === 1 ? 'wall' : index === 2 ? 'sandbag' : index === 3 ? 'storage' : index === 4 ? 'house' : index === 5 ? 'looter' : index === 6 ? 'repairman' : index === 7 ? 'trainer' : undefined;
+      button(tile.pageButtons[0], panel.children.page1, () => callbacks.castlePage(0), x, y);
+      button(tile.pageButtons[1], panel.children.page2, () => callbacks.castlePage(1), x, y);
+      // Восемь плиток выбранной страницы используют общие проверки покупки.
+      const e = state.economy;
+      const levels = [state.wallFixCount, state.wallLevel, state.sandbagLevel, castleStorageLevel(state), state.party.capacity, state.looterLevel, state.repairmanLevel, state.trainerLevel,
+        e.smith, e.museum, e.chickens, e.sisters, e.villa, e.specialTrainer, 0, 0];
+      const costs = [...CASTLE_UPGRADES.map(kind => castleUpgradeCost(kind, state)), 0, 0];
+      tile.names.slice(castlePage * 8, castlePage * 8 + 8).forEach((name, slotIndex) => {
+        const index = slotIndex + castlePage * 8, kind = CASTLE_UPGRADES[index];
         const possible = Boolean(kind && costs[index] > 0 && state.gold >= costs[index]);
-        const tileX = x + tile.x + index % tile.columns * tile.stepX;
-        const tileY = y + tile.y + Math.floor(index / tile.columns) * tile.stepY;
+        const tileX = x + tile.x + slotIndex % tile.columns * tile.stepX;
+        const tileY = y + tile.y + Math.floor(slotIndex / tile.columns) * tile.stepY;
         const group = scene.add.container(tileX, tileY).setName(`castle-upgrade-${index}`).setAlpha(possible ? 1 : tile.disabledAlpha);
         root.add(group);
         const upFrame = index * 2 + 1;
@@ -110,7 +113,13 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         const label = text(tile.children.upgradeName, name + (index !== 0 && levels[index] > 0 ? ` Lv ${levels[index]}` : ''));
         const cost = text(tile.children.upgradeCost, String(costs[index])).setColor(possible ? tile.affordableColor : tile.unavailableColor);
         group.add([art, label, cost]);
-        const description = kind === 'fix-wall' ? 'This will completely fix the castle wall.'
+        const description = kind === 'smith' ? `The shop produces ${2 + e.smith} items. Upgrading Smith immediately supplies new stock.`
+          : kind === 'museum' ? `Your medals generate ${museumIncome(e.museum, state.earnedMedals)} GP per day. Museum upkeep is ${e.museum * 15} GP.`
+          : kind === 'chicken' ? `You have ${e.chickens} chickens. From the next town, collect eggs once a day in Mission for 1 AP.`
+          : kind === 'sister' ? `You have ${e.sisters} sisters to launch each battle. Shoot the flying or landed bombs to explode them among enemies.`
+          : kind === 'villa' ? `Unlocks Party in Mission for 3 AP: +${e.villa * 10}% troop damage in the next battle.`
+          : kind === 'special-trainer' ? `Unlocks Train in Mission for 4 AP. Each troop can take ${e.specialTrainer} total training sessions.`
+          : kind === 'fix-wall' ? 'This will completely fix the castle wall.'
           // Сохраняем порядок Number-арифметики и int исходного текста, не заменяем его на level*5.
           : kind === 'sandbag' ? 'Stronger sandbags will absorb more damage done to the wall. '
             + (state.sandbagLevel > 0 ? `(Currently, sandbag will absorb ${Math.trunc(100 - castleDamageMultiplier(state) * 100)}% damage)` : "[ You haven't acquired this upgrade yet ]")
@@ -148,6 +157,22 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     }
     image(panel.labelsImage, x, 0).setAlpha(tab === 'mission' && !canRest ? 0.35 : 1);
     if (tab === 'mission') {
+      const template = layout.claimTitleAction;
+      for (const [key, info] of Object.entries(TOWN_ACTIVITIES)) {
+        const activity = key as TownActivity, enabled = callbacks.activityAvailable(activity);
+        const ax = x + 145 + info.index % 5 * 80, ay = y + 150 + Math.floor(info.index / 5) * 105;
+        const cardAsset = manifest.clips[template.cardClip], pinAsset = manifest.clips[template.pinClip];
+        const card = scene.add.image(ax + template.children.card.x, ay + template.children.card.y, template.cardClip, String(info.frame))
+          .setOrigin(cardAsset.originX / cardAsset.frameWidth, cardAsset.originY / cardAsset.frameHeight).setAlpha(enabled ? 1 : 0.35)
+          .setInteractive({ useHandCursor: enabled, pixelPerfect: true, alphaTolerance: 100 }).setName(`town-activity-${key}`);
+        root.add(card);
+        root.add(scene.add.image(ax + template.children.pin.x, ay + template.children.pin.y, template.pinClip, '1')
+          .setOrigin(pinAsset.originX / pinAsset.frameWidth, pinAsset.originY / pinAsset.frameHeight).setAlpha(enabled ? 1 : 0.35));
+        text({ ...template.children.text }, `${info.cost} AP\n${info.name}`, ax, ay).setAlpha(enabled ? 1 : 0.35);
+        card.on('pointerdown', (_pointer: Phaser.Input.Pointer, _lx: number, _ly: number, event: Phaser.Types.Input.EventData) => {
+          event.stopPropagation(); if (enabled) callbacks.activity(activity);
+        });
+      }
       const action = layout.claimTitleAction;
       const available = state.day >= 6 && state.title === 0;
       const actionX = x + action.x, actionY = y + action.y;

@@ -66,6 +66,7 @@ class ElonaScene extends Phaser.Scene {
   private companionCursors = new Map<number, Phaser.GameObjects.Image>();
   private companionBowSounds = new Map<number, Phaser.Sound.BaseSound>();
   private selectedCharacter = 0;
+  private castlePage: 0 | 1 = 0;
   private ammoFill?: Phaser.GameObjects.Image;
   private selection?: Phaser.GameObjects.Rectangle;
   private cursor?: Phaser.GameObjects.Graphics;
@@ -138,7 +139,7 @@ class ElonaScene extends Phaser.Scene {
     });
     this.game.events.on(Phaser.Core.Events.BLUR, () => { if (this.screen === 'battle' && !this.paused) this.togglePause(); });
     this.showTitle();
-    document.querySelector('#scope-note')!.textContent = 'Rogue, Hunter, Sheriff and Militia Days 1–40, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Ragnarok, Castle page 2, remaining town actions, Day 41 onward and unlockable hero classes are still being ported. Original game and artwork by Noa; original credits retained.';
+    document.querySelector('#scope-note')!.textContent = 'Rogue, Hunter, Sheriff and Militia Days 1–40, companion recruitment, party equipment and orders, House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, town activities, paid Fix Wall, rewards, the shop, weapon upgrades, MOD mounting in town and loot, Free Repair, Claim Title and Rest are playable. Storage expands inventory to 16 slots; number keys 1–5 use the first five owned slots. Hold and release the mouse to draw and fire a bow. Ragnarok, remaining town actions, Day 41 onward and unlockable hero classes are still being ported. Original game and artwork by Noa; original credits retained.';
     this.updateSoundButton();
     document.querySelector<HTMLButtonElement>('#import-save')!.disabled = false;
   }
@@ -484,7 +485,8 @@ class ElonaScene extends Phaser.Scene {
       const asset = manifest.clips[key];
       if (!(sprite instanceof OriginalAlly)) {
         sprite.setFrame(this.enemyFrame(enemy, key));
-        sprite.setPosition(enemy.x - asset.originX, enemy.y - asset.originY);
+        if (enemy.bomb) sprite.setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setPosition(enemy.x, enemy.y).setAngle(enemy.bomb.rotation);
+        else sprite.setPosition(enemy.x - asset.originX, enemy.y - asset.originY);
       }
       sprite.setAlpha(enemy.hp <= 0 && enemy.deathTicks > 99 ? Math.pow(0.96, enemy.deathTicks - 99) : 1);
       this.root.bringToTop(sprite);
@@ -650,7 +652,9 @@ class ElonaScene extends Phaser.Scene {
     const geometry = this.cache.json.get('collision-geometry') as CollisionGeometry;
     if (!geometry.enemies[enemy.kind]) {
       const key = this.enemyClip(enemy), asset = manifest.clips[key];
-      return this.texturePixelHit(key, this.enemyFrame(enemy, key), x - enemy.x + asset.originX, y - enemy.y + asset.originY);
+      const dx = x - enemy.x, dy = y - enemy.y, angle = -(enemy.bomb?.rotation ?? 0) * Math.PI / 180;
+      return this.texturePixelHit(key, this.enemyFrame(enemy, key), dx * Math.cos(angle) - dy * Math.sin(angle) + asset.originX,
+        dx * Math.sin(angle) + dy * Math.cos(angle) + asset.originY);
     }
     return ordinaryEnemyHit({ kind: enemy.kind, x: enemy.x, y: enemy.y, frame: enemy.frame, shadowHit: enemy.shadowHit }, x, y, this.cache.json.get('collision-geometry') as CollisionGeometry);
   }
@@ -698,7 +702,7 @@ class ElonaScene extends Phaser.Scene {
     if (event.message) status.textContent = event.message;
     if (event.type === 'kill') {
       const enemy = this.sim?.state.enemies.find(candidate => candidate.uid === event.enemyUid);
-      if (enemy) sound.kill = { sheep: 'soundDead3', rat: 'soundDead7', chicken: 'soundDeadChicken', crow: 'soundDead5', archer: 'soundDead2', fly: 'soundDead6', barbarian: 'soundDead2', lava: 'soundDead1', boss: 'soundDeadBoss1', cata: 'soundDead4', spider: 'soundDead2', ghost: 'soundDead2', ogre: 'soundDead1', knight: 'soundDead2', bird: 'soundDead8', tank: 'soundDead4', dino: 'soundDead9', dragon: 'soundDead9', 'dropped-rat': 'soundDead7' }[enemy.kind];
+      if (enemy) sound.kill = { sheep: 'soundDead3', rat: 'soundDead7', chicken: 'soundDeadChicken', crow: 'soundDead5', archer: 'soundDead2', fly: 'soundDead6', barbarian: 'soundDead2', lava: 'soundDead1', boss: 'soundDeadBoss1', cata: 'soundDead4', spider: 'soundDead2', ghost: 'soundDead2', ogre: 'soundDead1', knight: 'soundDead2', bird: 'soundDead8', tank: 'soundDead4', dino: 'soundDead9', dragon: 'soundDead9', 'dropped-rat': 'soundDead7', 'sister-bomb': 'soundExp1' }[enemy.kind];
       // Выбор реплики уже сделан симуляцией в исходном порядке случайных вызовов.
       if (event.goodShotIndex !== undefined) this.playSound(`soundGoodshot${event.goodShotIndex}`, 0.65);
     }
@@ -793,7 +797,7 @@ class ElonaScene extends Phaser.Scene {
     if (state.phase === 'victory') {
       const background = new Set(this.root.list);
       this.image('result');
-      const values = [state.resultBefore, state.gold - state.resultBefore - state.result.netReward, state.result.reward + state.result.perfectBonus, state.result.salary, 0, -state.result.wages, -(state.result.upkeep + state.result.tax), state.gold];
+      const values = [state.resultBefore, state.gold - state.resultBefore - state.result.netReward, state.result.reward + state.result.perfectBonus, state.result.salary + (state.result.museum ?? 0), 0, -state.result.wages, -(state.result.upkeep + state.result.tax), state.gold];
       values.forEach((value, index) => this.text(252, 128 + index * 20 + (index === 7 ? 10 : 0), String(value), 12, value < 0 ? '#b02020' : '#14248d', 'Arial'));
       this.text(335, 145, `Day ${state.day} completed.\n\nEnemies defeated: ${state.kills}\nCritical kills: ${state.criticalKills}\nCastle: ${state.castleHp}/${state.castleMaxHp}`, 13).setWordWrapWidth(185);
       this.originalButton('button_proceed', 160, 301, () => {
@@ -914,9 +918,17 @@ class ElonaScene extends Phaser.Scene {
       select: next => { this.playSound('soundScroll1'); this.showTown(next); },
       actionHover: () => this.playSound('soundCard1'),
       message: value => { status.textContent = value; },
+      castlePage: page => { this.castlePage = page; this.showTown('castle'); },
+      activityAvailable: action => this.sim!.townActivityAvailable(action),
+      activity: action => {
+        const result = this.sim!.performTownActivity(action);
+        if (result.outcome === 'done') { this.playSound('soundComplete'); this.saveGame(false); this.showTown('mission'); }
+        else this.playSound('soundBeep');
+        status.textContent = result.message;
+      },
       castleUpgrade: kind => {
         const outcome = this.sim!.buyCastleUpgrade(kind);
-        const upgradeName = { house: 'House', wall: 'Wall', 'fix-wall': 'Fix Wall', repairman: 'Repairman', sandbag: 'Sandbag', storage: 'Storage', looter: 'Looter', trainer: 'Trainer' }[kind];
+        const upgradeName = { house: 'House', wall: 'Wall', 'fix-wall': 'Fix Wall', repairman: 'Repairman', sandbag: 'Sandbag', storage: 'Storage', looter: 'Looter', trainer: 'Trainer', smith: 'Smith', museum: 'Museum', chicken: 'Chicken', sister: 'Sister', villa: 'Villa', 'special-trainer': 'Sp.Trainer' }[kind];
         if (outcome === 'purchased') {
           this.playSound('soundPay1'); this.saveGame(false); this.showTown('castle');
           status.textContent = kind === 'fix-wall' ? 'The castle walls are repaired.'
@@ -958,7 +970,7 @@ class ElonaScene extends Phaser.Scene {
           } else { this.showTown('mission'); status.textContent = 'The next day is not available yet.'; }
         } else this.showTown(dialog === 'title' ? 'mission' : 'castle');
       },
-    }, tab, dialog));
+    }, tab, dialog, this.castlePage));
     if (tab === 'characters' || tab === 'equipment') this.showPartyPanel(tab);
     if (tab === 'shop' && this.sim.state.town.preparation === 'ready') {
       const changed = (sound = 'soundPay1') => { this.playSound(sound); this.saveGame(false); this.showTown('shop'); };
@@ -976,6 +988,11 @@ class ElonaScene extends Phaser.Scene {
         confirmSell: slot => { if (this.sim!.sellTownItem(slot) === null) return false; changed(); return true; },
         cancelSale: () => this.showTown('shop'),
         applyToken: (slot, stock) => { if (!this.sim!.applyShopToken(slot, stock)) return false; changed(); return true; },
+        refreshStock: () => {
+          const outcome = this.sim!.refreshTownStock();
+          if (outcome === 'refreshed') { changed('soundScroll1'); status.textContent = 'New Goods! The shop has new stock.'; }
+          else status.textContent = outcome === 'not-enough-ap' ? "You don't have enough action points!" : 'Stock refresh is unavailable.';
+        },
         beginUpgradeSelection: () => {
           if (this.sim!.state.town!.ap < 4) { this.playSound('soundBeep'); status.textContent = "You don't have enough action points!"; return; }
           this.playSound('soundClick1'); this.showTown('shop', null, null, true);
@@ -1049,7 +1066,7 @@ class ElonaScene extends Phaser.Scene {
       : tab === 'characters' ? 'Select a portrait to inspect skills, wages and orders. Select the available candidate, then Recruit, to hire a companion.'
       : tab === 'equipment' ? 'Click an item, then a destination slot. Companions need the weapon’s required skill. Dropping outside cancels the move.'
       : tab === 'shop' ? (saleSlot === null ? 'Click stock, then an empty owned slot to buy. Drop an owned item outside its slots to sell; confirmation is required.' : 'Confirm the sale with Yes, or click elsewhere to keep the item.')
-      : `Shop buys and sells items. Castle offers paid Fix Wall or Free Repair for 2 AP, plus House, Wall, Sandbag, Storage, Looter, Repairman and Trainer upgrades. ${this.sim.state.day < MAX_CAMPAIGN_DAY ? `Mission → Rest begins Day ${this.sim.state.day + 1}.` : 'The next campaign cycle is not available yet.'}`;
+      : `Castle has two upgrade pages. Mission activities prepare bonuses for the next battle; shop and recruit refresh each cost 2 AP. ${this.sim.state.day < MAX_CAMPAIGN_DAY ? `Mission → Rest begins Day ${this.sim.state.day + 1}.` : 'The next campaign cycle is not available yet.'}`;
   }
 
   private showPartyPanel(tab: 'characters' | 'equipment'): void {
@@ -1095,6 +1112,11 @@ class ElonaScene extends Phaser.Scene {
     this.root.add(createPartyView(this, { selectedSlot: this.selectedCharacter, members, inventory: state.inventory, gold: state.gold, capacity: state.party.capacity,
       dialog: pending?.kind === 'hire' ? 'recruit' : pending?.kind === 'dismiss' ? 'dismiss' : pending ? 'mod' : null }, manifest, this.cache.json.get('town-layout') as PartyLayout, {
       selectCharacter: slot => { this.selectedCharacter = slot; this.playSound('soundClick1'); this.showTown('characters'); },
+      refreshCandidate: () => {
+        const result = this.sim!.refreshTownRecruit();
+        if (result === 'refreshed') { this.selectedCharacter = 5; changed('soundScroll1'); status.textContent = 'New Recruit! A new traveler has arrived.'; }
+        else { this.playSound('soundBeep'); status.textContent = result === 'not-enough-ap' ? "You don't have enough action points!" : 'Recruit refresh is unavailable.'; }
+      },
       recruit: () => { const result = this.sim!.requestRecruit(); if (result === 'previewed') changed('soundScroll1'); else failure(result); },
       dismiss: () => { if (this.sim!.requestDismiss(this.selectedCharacter)) changed('soundScroll1'); else failure('unavailable'); },
       confirm: answer => {

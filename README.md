@@ -20,9 +20,11 @@ unless you previously enabled it; its button explicitly displays the current sta
   enemies, bosses and health bars; ordinary/boss loot, skills and settlements.
 - Prepared towns, shop buy/sell, weapon upgrades and MOD mounting; permanent
   companions, equipment, orders, autonomous combat, growth and wages.
-- Castle House, Wall, Sandbag, Storage, Looter, Fix Wall, Repairman and Trainer;
-  Free Repair, first title/salary and Rest across the supported days.
-- One browser save with Continue and JSON import/export. Version26 accepts prior
+- Both Castle pages: House, Wall, Sandbag, Storage, Looter, Fix Wall, Repairman,
+  Trainer, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, with their effects.
+- Prayer, Dinner, Party, egg collection, Taunt and training; shop/recruit refresh,
+  Free Repair, first title/salary and Rest. Sister bombs can be shot to explode.
+- One browser save with Continue and JSON import/export. Version27 accepts prior
   browser saves; original Flash saves require a future converter.
 
 Remaining work and validation limits are in [port status](docs/port-status.md).
@@ -61,7 +63,9 @@ New class checks cover gear, growth, skill selection, JSON restore/replay, Milit
 cooldown, and natural battles through the first two towns for each starting class.
 Campaign checks cover all 40 days with controlled powerful equipment, natural wave
 generation, rewards, town/Rest transitions and saves. This verifies progression;
-full difficulty balance is not established by the controlled run. All423 tests pass.
+full difficulty balance is not established by the controlled run. The economy
+checks cover purchases/caps, daily limits, income, AP, bonuses, training, refreshes,
+bomb launches/chains, saved actions and actual damage/XP effects.
 Test counts do not establish whole-game completeness or full pixel parity.
 
 ## Original assets and recovery
