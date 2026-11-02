@@ -96,7 +96,7 @@ test('boss MOD drops and weapon-level limits reach actual rewards, shops and pai
   assert.ok(modded.state.lootOffers.filter(isOccupiedItem).every(item => item.type === ITEM_TYPE.mod));
   assert.ok(normal.state.lootOffers.some(item => isOccupiedItem(item) && item.type === ITEM_TYPE.gun));
   const limited = town(80, { weaponLevel: true });
-  const skills = limited['weaponLevelContext']().weaponSkillLevels;
+  const skills = limited['itemGenerationContext']().weaponSkillLevels;
   const stock = limited.state.town!.shop.filter(isOccupiedItem).filter(item => item.type === ITEM_TYPE.gun);
   assert.ok(stock.length > 0); assert.ok(stock.every(item => item.reqLv! <= skills[item.reqTrait!] + 2));
   limited.state.gold = 100000; limited.state.town!.ap = 10;

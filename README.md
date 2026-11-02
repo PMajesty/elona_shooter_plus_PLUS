@@ -22,6 +22,10 @@ unless you previously enabled it; its button explicitly displays the current sta
   The current browser save safety boundary is Day1000; this is not an endless-play claim.
 - Manual/automatic reload, owned firearms, bows, projectile weapons and consumables;
   enemies, bosses and health bars; ordinary/boss loot, skills and settlements.
+- Equipment's original Recycle Gun and Charge Item actions: turn an owned gun into
+  a random MOD for5 AP, or refill an eligible usable item for3 AP. Ten recycles earn
+  Gun Mania, including its +15% MOD efficiency in mounting, generated weapons,
+  living-weapon growth and upgrades. Carry Over retains its medal restrictions.
   Ragnarok consumes its artifact, attempts30 real dinosaur spawns and extends the
   spawn timer; surviving awards its original medal and bonuses.
 - Prepared towns, shop buy/sell, weapon upgrades and MOD mounting; permanent

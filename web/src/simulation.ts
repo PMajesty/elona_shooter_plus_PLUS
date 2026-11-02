@@ -19,7 +19,7 @@ import { TRAIT, createSheriffTraits, type TraitLevels } from './progression.ts';
 import { shadowHitAtFrame } from './collision.ts';
 import { advanceProtection, explosionContains, explosionStats, planConsumableUse } from './consumables.ts';
 import { advanceProjectile, createProjectile, type ExplosionKind, type ProjectileState } from './projectiles.ts';
-import { createUpgradePreview, modMountFailure, upgradeCost, type TownEquipmentAction, type TownEquipmentOutcome, type LootItemAddress, type LootEquipmentAction } from './equipment.ts';
+import { EQUIPMENT_SERVICE_COST, equipmentServiceEligible, createUpgradePreview, modMountFailure, upgradeCost, type EquipmentService, type TownEquipmentAction, type TownEquipmentOutcome, type LootItemAddress, type LootEquipmentAction } from './equipment.ts';
 import { advanceEnemyArrow, createEnemyArrow, type EnemyArrowState } from './enemy-arrows.ts';
 import { ARCHER_DISPLAY_WIDTHS, FLY_DISPLAY_WIDTHS, barbarianParentWidth, lavaParentWidth } from './enemy-display-bounds.ts';
 import { createPartyState, addStartingLittleGirl, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
@@ -50,6 +50,7 @@ export interface WaveState { enemies: EnemyKind[]; delays: number[]; initialCoun
 export type ActiveMission = Pick<LowLevelMission, 'level' | 'fixedLv' | 'strength' | 'powerOrg' | 'reward' | 'spawnRate' | 'hpFix' | 'dmgFix' | 'expFix' | 'absorbFix' | 'bossDay'> & { hire?: true; ragnarok?: true };
 export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready' };
 export interface SimulationState {
+  recycleCount?: number;
   carryOver?: true;
   mods?: GameMods;
   mode?: Exclude<GameMode, 'normal'>;
@@ -370,9 +371,9 @@ export class Simulation {
     return this.setOpeningMode(this.state.mode ?? 'normal');
   }
 
-  private weaponLevelContext() {
+  private itemGenerationContext() {
     const troops = [this.state.player, ...this.state.party.slots.slice(0, 4).flatMap(slot => slot.exists && slot.member ? [slot.member] : [])];
-    return { weaponLevelMode: Boolean(this.state.mods?.weaponLevel),
+    return { recycleMedal: Boolean(this.state.earnedMedals?.includes(83)), weaponLevelMode: Boolean(this.state.mods?.weaponLevel),
       weaponSkillLevels: Object.fromEntries([103, 104, 105, 106].map(id => [id, Math.max(...troops.map(troop => troop.traits[id] ?? 0))])) };
   }
 
@@ -920,7 +921,7 @@ export class Simulation {
       }
     }
     if (item && item.livingWeapon > 0) {
-      Object.assign(item, livingWeaponKill(item, () => this.random(), { day: this.state.day, engineer: this.state.partySkills.effects[120] }));
+      Object.assign(item, livingWeaponKill(item, () => this.random(), { day: this.state.day, engineer: this.state.partySkills.effects[120], recycleMedal: this.state.earnedMedals.includes(83) }));
     }
     let experience = int(enemy.exp * this.state.activeMission.expFix);
     if (this.state.mode === 'casual') experience = int(experience * 1.35);
@@ -1519,7 +1520,7 @@ export class Simulation {
     const shopEngineer = this.state.partySkills.effects[120];
     this.refreshPartySkills();
     // До generateMission лавка использует старого Engineer; миссия и кандидат — новый кэш.
-    const { bonusAp = 0, ...prepared } = prepareEarlyTown(() => this.random(), this.state.day, { ...this.weaponLevelContext(), intense: this.state.mods?.intense, community: this.state.mods?.community, casual: this.state.mode === 'casual', actionMedals: this.state.earnedMedals, priorOffers: this.state.lootOffers, recruitSlots, searched: previous?.searched, absorbFix: this.medalAbsorption(),
+    const { bonusAp = 0, ...prepared } = prepareEarlyTown(() => this.random(), this.state.day, { ...this.itemGenerationContext(), intense: this.state.mods?.intense, community: this.state.mods?.community, casual: this.state.mode === 'casual', actionMedals: this.state.earnedMedals, priorOffers: this.state.lootOffers, recruitSlots, searched: previous?.searched, absorbFix: this.medalAbsorption(),
       smith: this.state.economy.smith, chickens: this.state.economy.chickens, shopEngineer, missionNegotiator: this.state.partySkills.effects[117], recruitEngineer: this.state.partySkills.effects[120] });
     this.state.town = { ap: this.state.town.ap + bonusAp, preparation: 'ready', ...prepared };
     if (this.state.day >= 40) { this.awardMedal(94); if (this.state.mode === 'hardcore') this.awardMedal(96); }
@@ -1596,7 +1597,7 @@ export class Simulation {
   private regenerateShop(): void {
     const town = this.state.town;
     if (town?.preparation !== 'ready') return;
-    town.shop = generateTownShop(() => this.random(), this.state.day, { ...this.weaponLevelContext(), priorOffers: town.shop,
+    town.shop = generateTownShop(() => this.random(), this.state.day, { ...this.itemGenerationContext(), priorOffers: town.shop,
       smith: this.state.economy.smith, shopEngineer: this.state.partySkills.effects[120], specialSale: Boolean(town.flags.specialSale) });
   }
 
@@ -1612,7 +1613,7 @@ export class Simulation {
     const town = this.state.town! as ReadyTown;
     town.ap -= 2;
     town.recruit = generateEarlyTownRecruit(() => this.random(), this.state.day, {
-      previousSlots: { ...town.recruit.items, 45: this.state.party.slots[4].weapon }, itemContext: { ...this.weaponLevelContext(), engineer: this.state.partySkills.effects[120] } });
+      previousSlots: { ...town.recruit.items, 45: this.state.party.slots[4].weapon }, itemContext: { ...this.itemGenerationContext(), engineer: this.state.partySkills.effects[120] } });
     installCandidate(this.state.party, town.recruit); return 'refreshed';
   }
 
@@ -1802,7 +1803,22 @@ export class Simulation {
   }
 
   private equipmentFactory(random = () => this.random()): ItemFactory {
-    return new ItemFactory(random, { ...this.weaponLevelContext(), day: this.state.day, engineer: this.state.partySkills.effects[120], looter: this.state.looterLevel });
+    return new ItemFactory(random, { ...this.itemGenerationContext(), day: this.state.day, engineer: this.state.partySkills.effects[120], looter: this.state.looterLevel });
+  }
+
+  serviceTownItem(service: EquipmentService, slot: number): 'recycled' | 'restocked' | 'not-enough-ap' | 'unavailable' {
+    if (!this.partyMutationAvailable() || !Object.hasOwn(EQUIPMENT_SERVICE_COST, service) || !Number.isInteger(slot) || slot < 0 || slot >= this.state.inventory.length) return 'unavailable';
+    const item = this.state.inventory[slot];
+    if (!equipmentServiceEligible(service, item)) return 'unavailable';
+    const town = this.state.town as ReadyTown, cost = EQUIPMENT_SERVICE_COST[service];
+    if (town.ap < cost) return 'not-enough-ap';
+    town.ap -= cost;
+    if (service === 'restock') { item!.ammo = item!.ammoMax; return 'restocked'; }
+    // invDrag выдаёт медаль до randomStuff и заменяет оружие в том же слоте, не выдавая золото.
+    this.state.recycleCount = (this.state.recycleCount ?? 0) + 1;
+    if (this.state.recycleCount >= 10) this.awardMedal(83);
+    this.state.inventory[slot] = this.equipmentFactory().randomItem(item!.value / 2 + 250, 3, item!);
+    return 'recycled';
   }
 
   beginWeaponUpgrade(slot: number): TownEquipmentOutcome {
@@ -1865,6 +1881,7 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
+    if (record(value) && value.recycleCount !== undefined && (Number(value.version) < 37 || !Number.isSafeInteger(value.recycleCount) || Number(value.recycleCount) < 0 || Number(value.recycleCount) > 1000000)) throw new Error('Invalid recycling count.');
     if (record(value) && (value.carryCheckpoint !== undefined || value.carryOver !== undefined && (Number(value.version) < 36 || value.carryOver !== true || value.mode === 'hardcore'))) throw new Error('Invalid Carry Over state.');
     if (!record(value) || !supportedSaveVersion(value.version) || (!validCampaignDay(value.day) || (value.version < 32 && Number(value.day) > 40) || (value.version < 26 && Number(value.day) > 9) || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7) || (value.version < 23 && value.day === 8) || (value.version < 24 && value.day === 9)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
     if (value.mode !== undefined && (Number(value.version) < 34 || !['casual', 'hardcore'].includes(String(value.mode)))) throw new Error('Invalid game mode.');

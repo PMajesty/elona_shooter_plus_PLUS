@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
 import type { LootViewManifest } from './loot-view.ts';
 import { GRAPHIC_WIDTH, GRAPHIC_HEIGHT } from './shop-view.ts';
+import { EQUIPMENT_SERVICE_COST, equipmentServiceEligible, type EquipmentService } from './equipment.ts';
 
 interface Placement {
   x: number; y: number; scaleX: number; scaleY: number; rotationDegrees: number;
@@ -35,6 +36,7 @@ export interface PartyEquipmentSlot { kind: 'inventory' | 'companion'; slot: num
 export interface PartyViewState {
   selectedSlot: number; members: readonly PartyViewMember[]; inventory: readonly (Item | null)[];
   gold: number; capacity: number; dialog: 'recruit' | 'dismiss' | 'mod' | null;
+  ap: number;
 }
 export interface PartyViewCallbacks {
   selectCharacter(slot: number): void;
@@ -43,6 +45,7 @@ export interface PartyViewCallbacks {
   swapEquipment(from: PartyEquipmentSlot, to: PartyEquipmentSlot): boolean;
   requestModMount?(from: PartyEquipmentSlot, to: PartyEquipmentSlot): void;
   refreshCandidate?(): void;
+  serviceItem(service: EquipmentService, slot: number): string;
   message(value: string): void;
 }
 
@@ -229,9 +232,21 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
   } else {
     const spec = layout.equipment;
     const warning = text(panel.children.warning, '');
-    button('button_partyRecycle', panel.children.act1, () => message('Recycling is not available yet.'), false);
-    button('button_partyRestock', panel.children.act2, () => message('Restocking usable items is not available yet.'), false);
-    image(panel.labelsImage, menu.x, 0).setAlpha(0.35);
+    let service: EquipmentService | null = null;
+    const help = text(panel.children.actHelp, 'Choose an item to apply. Click nowhere to cancel.').setVisible(false);
+    const canService = (slot: Slot) => slot.address.kind === 'inventory' && service !== null && equipmentServiceEligible(service, slot.item);
+    const startService = (action: EquipmentService) => {
+      if (modal || carrying) return;
+      if (state.ap < EQUIPMENT_SERVICE_COST[action]) { message("You don't have enough action points!"); return; }
+      service = action; root.setData('equipmentService', action); help.setVisible(true);
+      hint.setText('Click an item to apply.');
+      slots.forEach(slot => slot.plate.setAlpha(canService(slot) ? 1 : 0.5));
+    };
+    button('button_partyRecycle', panel.children.act1, () => startService('recycle'), state.ap >= 5)
+      .on('pointerover', () => { if (!service) hint.setText('You can turn a weapon into a random Mod.'); });
+    button('button_partyRestock', panel.children.act2, () => startService('restock'), state.ap >= 3)
+      .on('pointerover', () => { if (!service) hint.setText('You can recharge item like grenades and repair kits.'); });
+    image(panel.labelsImage, menu.x, 0);
     interface Slot { address: PartyEquipmentSlot; item: Item | null; plate: Phaser.GameObjects.Image; icon?: Phaser.GameObjects.Container; x: number; y: number; width: number; height: number }
     const slots: Slot[] = [];
     let carrying: Slot | null = null;
@@ -252,6 +267,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
       if (carrying?.icon) carrying.icon.setPosition(carrying.x, carrying.y);
       carrying = null; root.setData('carrying', null); warning.setText('');
       slots.forEach(slot => slot.plate.setAlpha(1)); scene.input.setDefaultCursor('default');
+      service = null; root.setData('equipmentService', null); help.setVisible(false); hint.setText(EQUIP_HINT);
     };
     const move = (pointer: Phaser.Input.Pointer) => { if (carrying?.icon) carrying.icon.setPosition(pointer.worldX - carrying.width / 2, pointer.worldY - carrying.height / 2); };
     const slot = (address: PartyEquipmentSlot, item: Item | null, x: number, y: number) => {
@@ -268,14 +284,23 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
       const area = scene.add.zone(x, y, 48, 44).setOrigin(0).setInteractive({ useHandCursor: true }).setName(`equipment-${address.kind}-${address.slot}`);
       area.setData({ ...address, itemId: item?.id ?? null }); root.add(area);
       area.on('pointerover', () => {
+        if (service) return;
         if (isOccupiedItem(item) && !carrying) {
           hint.setText(`${item.name}${item.type === ITEM_TYPE.gun ? ` — Damage ${item.attack}, Ammo ${item.ammoMax}, Mods ${item.mod}/${item.modMax}` : ''}`);
           warning.setText(address.kind === 'inventory' && item.type === ITEM_TYPE.gun && !canUse(state.members.find(member => member.slot === 0), item) ? SKILL_WARNING : '');
         }
       });
-      area.on('pointerout', () => { if (!carrying) { hint.setText(EQUIP_HINT); warning.setText(''); } });
+      area.on('pointerout', () => { if (!carrying && !service) { hint.setText(EQUIP_HINT); warning.setText(''); } });
       area.on('pointerdown', (pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => {
         e.stopPropagation(); if (modal) return;
+        if (service) {
+          const action = service, valid = canService(record); clear();
+          if (valid) {
+            const outcome = callbacks.serviceItem(action, address.slot);
+            if (outcome === 'not-enough-ap') message("You don't have enough action points!");
+          }
+          return;
+        }
         if (!carrying) {
           if (!isOccupiedItem(item)) return;
           carrying = record; root.setData('carrying', address); slots.forEach(other => other.plate.setAlpha(eligible(record, other) ? 1 : 0.5));
@@ -303,7 +328,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
       slot({ kind: 'inventory', slot: index }, item, menu.x + p.x + index % p.columns * p.stepX, menu.y + p.y + Math.floor(index / p.columns) * p.stepY);
     });
     // В Equipment бросок вне слота отменяет перенос; продажа есть только в Shop.
-    const outside = () => { if (carrying && !modal) { clear(); callbacks.cancel(); } };
+    const outside = () => { if ((carrying || service) && !modal) { clear(); callbacks.cancel(); } };
     scene.input.on('pointerdown', outside);
     scene.input.on('pointermove', move);
     root.once('destroy', () => { scene.input.off('pointerdown', outside); scene.input.off('pointermove', move); scene.input.setDefaultCursor('default'); });

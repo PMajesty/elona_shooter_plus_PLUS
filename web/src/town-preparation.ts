@@ -6,7 +6,7 @@ export interface FirstTownMission extends LowLevelMission {}
 
 export interface FirstTownPreparationInput {
   intense?: boolean; community?: boolean;
-  weaponLevelMode?: boolean; weaponSkillLevels?: ItemContext['weaponSkillLevels'];
+  weaponLevelMode?: boolean; weaponSkillLevels?: ItemContext['weaponSkillLevels']; recycleMedal?: boolean;
   casual?: boolean;
   actionMedals?: readonly number[];
   smith?: number; chickens?: number; specialSale?: boolean;
@@ -66,7 +66,7 @@ export function prepareEarlyTown(random: () => number, day: number, input: First
   // Уровень следующей миссии равен текущему дню; календарная добыча определяется до Rest.
   const mission = generateLowLevelMission(day, day, random, { absorbFix: input.absorbFix, negotiator: effects.missionNegotiator, casual: input.casual, intense: input.intense }) as FirstTownMission;
   // generatePlayer вызывает initPartySkill до выдачи оружия; кандидат5 не входит в активные0–4.
-  const recruit = generateEarlyTownRecruit(random, day, { previousSlots: input.recruitSlots, itemContext: { engineer: effects.recruitEngineer, weaponLevelMode: input.weaponLevelMode, weaponSkillLevels: input.weaponSkillLevels ?? {} } });
+  const recruit = generateEarlyTownRecruit(random, day, { previousSlots: input.recruitSlots, itemContext: { engineer: effects.recruitEngineer, recycleMedal: input.recycleMedal, weaponLevelMode: input.weaponLevelMode, weaponSkillLevels: input.weaponSkillLevels ?? {} } });
   // Смена кандидата не стирает неиспользованные слоты прежнего ополченца.
   const retainedRecruitItems: Record<number, Item> = {};
   for (const [slot, item] of Object.entries(input.recruitSlots ?? {})) if (item) retainedRecruitItems[Number(slot)] = { ...item };
@@ -83,7 +83,7 @@ export function prepareEarlyTown(random: () => number, day: number, input: First
 
 export function generateTownShop(random: () => number, day: number, input: FirstTownPreparationInput = {}): (Item | null)[] {
   // frame71 генерирует лавку до generateMission/initPartySkill: здесь действует прежний кэш.
-  const factory = new ItemFactory(random, { day, engineer: input.shopEngineer ?? 0, weaponLevelMode: input.weaponLevelMode, weaponSkillLevels: input.weaponSkillLevels ?? {} });
+  const factory = new ItemFactory(random, { day, engineer: input.shopEngineer ?? 0, recycleMedal: input.recycleMedal, weaponLevelMode: input.weaponLevelMode, weaponSkillLevels: input.weaponSkillLevels ?? {} });
   // clearGameInv сохраняет поля даже у пустых слотов; первая лавка использует только 0 и 1.
   const shop = Array.from({ length: 8 }, (_, index) => input.priorOffers?.[index] ? { ...input.priorOffers[index], num: 0 } as Item : null);
   for (let index = 0; index < 2 + (input.smith ?? 0); index++) {

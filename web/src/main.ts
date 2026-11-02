@@ -125,6 +125,7 @@ class ElonaScene extends Phaser.Scene {
     loadStatus.hidden = true;
     container.dataset.loadMs = (performance.now() - bootStarted).toFixed(0);
     this.sound.mute = this.muted;
+    container.dataset.muted = String(this.muted);
     this.root = this.add.container(0, 0);
     this.input.mouse?.disableContextMenu();
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
@@ -1263,7 +1264,13 @@ class ElonaScene extends Phaser.Scene {
       failure(result); return false;
     };
     this.root.add(createPartyView(this, { selectedSlot: this.selectedCharacter, members, inventory: state.inventory, gold: state.gold, capacity: state.party.capacity,
-      dialog: pending?.kind === 'hire' ? 'recruit' : pending?.kind === 'dismiss' ? 'dismiss' : pending ? 'mod' : null }, manifest, this.cache.json.get('town-layout') as PartyLayout, {
+      ap: state.town!.ap, dialog: pending?.kind === 'hire' ? 'recruit' : pending?.kind === 'dismiss' ? 'dismiss' : pending ? 'mod' : null }, manifest, this.cache.json.get('town-layout') as PartyLayout, {
+      serviceItem: (service, slot) => {
+        const outcome = this.sim!.serviceTownItem(service, slot);
+        if (outcome === 'recycled' || outcome === 'restocked') changed('soundMod');
+        else failure(outcome);
+        return outcome;
+      },
       selectCharacter: slot => { this.selectedCharacter = slot; this.playSound('soundClick1'); this.showTown('characters'); },
       refreshCandidate: () => {
         const result = this.sim!.refreshTownRecruit();
@@ -1372,7 +1379,7 @@ class ElonaScene extends Phaser.Scene {
   importSave(raw: unknown): void { this.loadGame(raw, true); this.saveGame(false); status.textContent = 'Save imported and restored.'; }
 
   playSound(key: string, volume = 0.7, pan = 0): void { if (this.cache.audio.exists(key)) this.sound.play(key, { volume, pan }); }
-  toggleMute(): void { this.muted = !this.muted; this.sound.mute = this.muted; storeMute(this.muted); }
+  toggleMute(): void { this.muted = !this.muted; this.sound.mute = this.muted; container.dataset.muted = String(this.muted); storeMute(this.muted); }
 }
 
 async function boot(): Promise<void> {

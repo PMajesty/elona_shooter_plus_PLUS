@@ -1,5 +1,11 @@
 import { ITEM_TYPE, MODS, ItemFactory, isOccupiedItem, type Item } from './items.ts';
 
+export type EquipmentService = 'recycle' | 'restock';
+export const EQUIPMENT_SERVICE_COST = { recycle: 5, restock: 3 } as const;
+export function equipmentServiceEligible(service: EquipmentService, item: Item | null | undefined): boolean {
+  return isOccupiedItem(item) && (service === 'recycle' ? item.type === ITEM_TYPE.gun : item.type === ITEM_TYPE.use && item.ammoMax > 0);
+}
+
 export type TownEquipmentAction = { kind: 'upgrade'; slot: number; cost: number }
   | { kind: 'mod'; modSlot: number; gunSlot: number };
 export type LootItemAddress = { area: 'offers' | 'inventory'; index: number };

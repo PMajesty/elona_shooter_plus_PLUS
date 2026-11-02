@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-02. Current local build: **v36, all honorary titles and Carry Over**.
+Updated 2026-11-02. Current local build: **v37, Equipment Recycle and Charge Item**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -59,6 +59,14 @@ Sp.Trainer training. Prayer, Dinner, Taunt, searches and paid shop/recruit refre
 apply their source effects. Searches retain their own saved random sequence.
 Both original Museum medal pages show all38 English descriptions and earned states;
 visitor robbery, action-medal AP bonuses and class/day/perfect-day medals work.
+Equipment's original Recycle Gun and Charge Item buttons are connected with their
+selection prompt, eligible-slot dimming and cancellation. Recycle costs5 AP and
+replaces an owned gun with a random MOD using value/2+250; Charge Item costs3 AP
+and fills eligible usable-item ammo. Neither spends gold. Ten recycles award Gun
+Mania outside Carry Over; its +15% MOD efficiency reaches hero/companion/loot
+mounting, upgrades, living-weapon growth and generated weapons. The optional
+recycle counter is saved; earlier saves migrate without adding a counter or RNG draws.
+Source: invDrag (2900), menu_equip input (13683), actionMedal (5474).
 Claim title supports all eight promotions through King, on days6/11/16/26/41/61/
 81/101, with salaries100/200/400/700/1000/1500/2000/3000 GP. Delayed claims advance
 one rank per4 AP; the new salary pays from the next settlement. Mission availability,
@@ -79,9 +87,13 @@ Never activate native fullscreen in testing: it takes over the user's desktop.
 
 ## Validation and limits
 
-- **489 tests passed** at the latest gameplay checkpoint; the page cleanup leaves
-  simulation/saves unchanged. Current typechecking and production build pass. Latest
-  bundle: assets/index-BNk-Q6Gy.js. Title checks cover every unlock day, sequential
+- **495 tests covered**: the latest full run passed494; its remaining renamed
+  test-helper call was corrected and the12 affected service/MOD tests then passed.
+  Typechecking and production build pass. Latest bundle: assets/index-CnSL4HP9.js.
+  Service checks cover costs, exact generation, no-op failures, reload fields,
+  medal thresholds/efficiency, Carry Over and JSON replay. The full run caught
+  legacy loot generation reading medals before migration initialized them; the
+  context now treats that missing legacy collection as empty. Title checks cover every unlock day, sequential
   late claims, AP refusal, settlement credits, rank limits and save/Carry Over
   restoration. Carry Over checks cover full-town restoration,
   minimum/earned money, AP, medal restrictions, repeated JSON replay and refusal
@@ -118,6 +130,12 @@ Never activate native fullscreen in testing: it takes over the user's desktop.
   absent, explanation overlay removed, fullscreen icon visible without activation,
   working keyboard backup and exact full-envelope preservation of the user's save.
   No console errors. Screenshot: .build/browser-qa/no-extra-toolbar.png.
+- The muted V37 browser check used the original Equipment controls: Cancel retained
+  the full envelope, Recycle awarded the tenth-use medal and Charge Item refilled
+  a grenade stack. Exported states matched the expected simulation; Continue
+  preserved the complete result. No console errors or fullscreen activation.
+  Evidence: .build/browser-qa/equipment-services-verification.json and
+  equipment-recycle-selection.png. The user's full adventure/collection was restored.
 - Earlier browser evidence covers reload/combat/results/town, activities, hires,
   Museum, class unlocks, Ragnarok and both difficulty modes. Hardcore battle export
   is refused and Continue has no battle save; its town checkpoint loads and Rest
@@ -137,8 +155,7 @@ that the app's crash cause was fixed.
 
 1. Long-session stability/performance and difficulty evidence beyond the first
    cycle; the current Day1000 save safety boundary remains an intentional limit.
-2. Remaining medal effects/triggers, including recycling/modding bonuses and
-   decorative fireworks.
+2. Remaining medal effects/triggers and decorative fireworks.
 3. Original six save slots/global slot UI, deletion and Flash save conversion.
 4. Measured performance, rendering sharpness and remaining visual/audio details:
    camera shake, decorative boss reticle, some ranged spell effects/frame sounds,
