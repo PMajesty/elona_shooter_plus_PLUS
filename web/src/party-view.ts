@@ -1,3 +1,5 @@
+import { createItemPopupView, type ItemPopupLayout } from './item-popup-view.ts';
+import type { ItemPopupInfo } from './item-popup-values.ts';
 import Phaser from 'phaser';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
 import type { LootViewManifest } from './loot-view.ts';
@@ -11,6 +13,7 @@ interface Placement {
 interface Panel { image: string; labelsImage: string; children: Record<string, Placement> }
 interface Portrait { children: Record<string, Placement>; shadow: { clip: string; x: number; y: number; scaleX: number; scaleY: number } }
 export interface PartyLayout {
+  itemPopup: ItemPopupLayout;
   menuPosition: { x: number; y: number };
   characters: Panel & { portraits: { x: number; y: number; stepX: number; candidateIndex: number; candidateExtraX: number } };
   equipment: Panel & {
@@ -38,6 +41,7 @@ export interface PartyViewState {
   ap: number;
 }
 export interface PartyViewCallbacks {
+  itemPopup?(info: ItemPopupInfo | null): void;
   selectCharacter(slot: number): void;
   recruit(): void; dismiss(): void; confirm(value: boolean): void; cancel(): void; close(): void;
   focus(trait: number): void; order(value: number): void; prioritizeBoss(value: boolean): void; prioritizeWall(value: boolean): void;
@@ -229,13 +233,15 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
   } else {
     const spec = layout.equipment;
     const warning = text(panel.children.warning, '');
+    const tooltip = createItemPopupView(scene, manifest, layout.itemPopup, state.members.find(member => member.slot === 0)?.traitLevels ?? {}, callbacks.itemPopup);
+    tooltip.root.setPosition(menu.x + panel.children.popup.x, menu.y + panel.children.popup.y); root.add(tooltip.root);
     let service: EquipmentService | null = null;
     const help = text(panel.children.actHelp, 'Choose an item to apply. Click nowhere to cancel.').setVisible(false);
     const canService = (slot: Slot) => slot.address.kind === 'inventory' && service !== null && equipmentServiceEligible(service, slot.item);
     const startService = (action: EquipmentService) => {
       if (modal || carrying) return;
       if (state.ap < EQUIPMENT_SERVICE_COST[action]) { message("You don't have enough action points!"); return; }
-      service = action; root.setData('equipmentService', action); help.setVisible(true);
+      tooltip.hide(); service = action; root.setData('equipmentService', action); help.setVisible(true);
       hint.setText('Click an item to apply.');
       slots.forEach(slot => slot.plate.setAlpha(canService(slot) ? 1 : 0.5));
     };
@@ -264,7 +270,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
       if (carrying?.icon) carrying.icon.setPosition(carrying.x, carrying.y);
       carrying = null; root.setData('carrying', null); warning.setText('');
       slots.forEach(slot => slot.plate.setAlpha(1)); scene.input.setDefaultCursor('default');
-      service = null; root.setData('equipmentService', null); help.setVisible(false); hint.setText(EQUIP_HINT);
+      tooltip.hide(); service = null; root.setData('equipmentService', null); help.setVisible(false); hint.setText(EQUIP_HINT);
     };
     const move = (pointer: Phaser.Input.Pointer) => { if (carrying?.icon) carrying.icon.setPosition(pointer.worldX - carrying.width / 2, pointer.worldY - carrying.height / 2); };
     const slot = (address: PartyEquipmentSlot, item: Item | null, x: number, y: number) => {
@@ -281,13 +287,13 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
       const area = scene.add.zone(x, y, 48, 44).setOrigin(0).setInteractive({ useHandCursor: true }).setName(`equipment-${address.kind}-${address.slot}`);
       area.setData({ ...address, itemId: item?.id ?? null }); root.add(area);
       area.on('pointerover', () => {
-        if (service) return;
+        if (service || modal) return;
         if (isOccupiedItem(item) && !carrying) {
-          hint.setText(`${item.name}${item.type === ITEM_TYPE.gun ? ` — Damage ${item.attack}, Ammo ${item.ammoMax}, Mods ${item.mod}/${item.modMax}` : ''}`);
+          tooltip.show(item);
           warning.setText(address.kind === 'inventory' && item.type === ITEM_TYPE.gun && !canUse(state.members.find(member => member.slot === 0), item) ? SKILL_WARNING : '');
         }
       });
-      area.on('pointerout', () => { if (!carrying && !service) { hint.setText(EQUIP_HINT); warning.setText(''); } });
+      area.on('pointerout', () => { if (!carrying && !service) { tooltip.hide(); hint.setText(EQUIP_HINT); warning.setText(''); } });
       area.on('pointerdown', (pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => {
         e.stopPropagation(); if (modal) return;
         if (service) {
@@ -301,7 +307,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
         if (!carrying) {
           if (!isOccupiedItem(item)) return;
           carrying = record; root.setData('carrying', address); slots.forEach(other => other.plate.setAlpha(eligible(record, other) ? 1 : 0.5));
-          if (record.icon) root.bringToTop(record.icon); scene.input.setDefaultCursor('grabbing'); move(pointer);
+          if (record.icon) root.bringToTop(record.icon); scene.input.setDefaultCursor('grabbing'); move(pointer); tooltip.show(item);
           return;
         }
         const from = carrying;

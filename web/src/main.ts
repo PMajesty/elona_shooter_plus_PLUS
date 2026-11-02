@@ -4,6 +4,7 @@ import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
 import Phaser from 'phaser';
 import { HERO_CLASSES, heroClassUnlocked, type HeroClass } from './hero-classes.ts';
 import { createGeneInfoView } from './gene-info-view.ts';
+import type { ItemPopupInfo } from './item-popup-values.ts';
 import { createProfile, mergeProfile, mergeProfiles, validProfile, type GlobalProfile } from './profile.ts';
 import { MEDALS } from './medals.ts';
 import { MedalNotices, type MedalNotice } from './medal-notices.ts';
@@ -74,6 +75,9 @@ function showStartupFailure(message: string): void {
   retry.addEventListener('click', () => window.location.reload());
   panel.append(explanation, retry); loadStatus.replaceChildren(panel); loadStatus.hidden = false;
   container.dataset.startupError = message;
+}
+function inspectItemPopup(info: ItemPopupInfo | null): void {
+  if (info) container.dataset.itemPopup = JSON.stringify(info); else delete container.dataset.itemPopup;
 }
 const USED_SOUNDS = new Set(['soundSearch', 'soundEat1', 'soundParty', 'soundClick1', 'soundGun3', 'soundReloading2', 'soundReloaded2', 'soundThrow1', 'soundExp1', 'soundDead3', 'soundDead5', 'soundDead7', 'soundDeadChicken', 'soundDeadBoss1', 'soundDamage1', 'soundPop1', 'soundBattleBegin', 'soundBattleEnd', 'soundKilled', 'soundRampage', 'soundComplete', 'soundGold1', 'soundBgForest']);
 for (let index = 0; index < 5; index++) USED_SOUNDS.add(`soundGoodshot${index}`);
@@ -328,6 +332,7 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.titleName; delete container.dataset.titleSalary; delete container.dataset.claimTitleAvailable;
     delete container.dataset.medalHint;
     delete container.dataset.geneHint; delete container.dataset.geneTraits; delete container.dataset.geneClassLabels;
+    delete container.dataset.itemPopup;
     delete container.dataset.carryOverAvailable; delete container.dataset.carryOverConfirmation;
     container.dataset.carryOver = String(Boolean(this.sim?.state.carryOver));
   }
@@ -1349,6 +1354,7 @@ class ElonaScene extends Phaser.Scene {
     this.drawBattleBackground(); this.drawHud();
     this.updateHud();
     this.root.add(createLootView(this, this.sim.state, manifest, {
+      itemPopup: inspectItemPopup,
       move: (fromArea, from, toArea, to) => {
         const moved = this.sim!.moveLootItem(fromArea, from, toArea, to);
         if (moved) { this.playSound(this.sim!.state.pendingLootAction ? 'soundScroll1' : 'soundClick1'); this.saveGame(false); this.showLoot(); }
@@ -1370,7 +1376,7 @@ class ElonaScene extends Phaser.Scene {
         if (errors[outcome]) { this.playSound('soundBeep'); status.textContent = errors[outcome]; }
       },
       message: value => { status.textContent = value; },
-    }, (this.cache.json.get('town-layout') as ShopLayout).saleDialog, bossReward ? 'boss' : 'ordinary'));
+    }, (this.cache.json.get('town-layout') as ShopLayout).saleDialog, (this.cache.json.get('town-layout') as ShopLayout).itemPopup, bossReward ? 'boss' : 'ordinary'));
     container.dataset.phase = 'victory';
     container.dataset.lootOffers = JSON.stringify(this.sim.state.lootOffers.map(item => isOccupiedItem(item) ? item.id : null));
     container.dataset.inventory = JSON.stringify(this.sim.state.inventory.map(item => isOccupiedItem(item) ? item.id : null));
@@ -1484,6 +1490,7 @@ class ElonaScene extends Phaser.Scene {
       const changed = (sound = 'soundPay1') => { this.playSound(sound); this.saveGame(false); this.showTown('shop'); };
       this.root.add(createShopView(this, { inventory: this.sim.state.inventory, shop: this.sim.state.town.shop, gold: this.sim.state.gold, traits: this.sim.state.player.traits,
         ap: this.sim.state.town.ap, pendingTownAction: pending, upgradeReference: this.sim.state.upgradeReference }, manifest, this.cache.json.get('town-layout') as ShopLayout, {
+        itemPopup: inspectItemPopup,
         buy: (stock, slot) => {
           const outcome = this.sim!.buyStock(stock, slot);
           if (outcome === 'purchased') { changed(); return true; }
@@ -1652,6 +1659,7 @@ class ElonaScene extends Phaser.Scene {
     };
     this.root.add(createPartyView(this, { selectedSlot: this.selectedCharacter, members, inventory: state.inventory, gold: state.gold, capacity: state.party.capacity,
       ap: state.town!.ap, dialog: pending?.kind === 'hire' ? 'recruit' : pending?.kind === 'dismiss' ? 'dismiss' : pending ? 'mod' : null }, manifest, this.cache.json.get('town-layout') as PartyLayout, {
+      itemPopup: inspectItemPopup,
       serviceItem: (service, slot) => {
         const outcome = this.sim!.serviceTownItem(service, slot);
         if (outcome === 'recycled' || outcome === 'restocked') changed('soundMod');

@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-03. Current local build: **v41, original New Game class/skill information**.
+Updated 2026-11-03. Current local build: **v41, original item-information panels**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -169,6 +169,13 @@ with equipment/orders/AI/growth/wages, temporary Mission Hire, both Castle pages
 repair, Smith stock, Museum income, chickens/eggs, Sister bombs, Villa/Party and
 Sp.Trainer training. Prayer, Dinner, Taunt, searches and paid shop/recruit refreshes
 apply their source effects. Searches retain their own saved random sequence.
+
+Loot, shop and equipment now share the original itemPop1791 information panel,
+including requirements, damage/air/armor, rate/reload, modifications, living progress
+and original English item/MOD descriptions. The two custom tooltip rectangles and
+partial equipment summary are removed. Upgrade comparisons reuse the same renderer.
+VALUE follows source full item value; transaction prices/rules are unchanged.
+
 Town activities now show the original event window, card artwork and complete
 English narratives: all six activities, all18 search families and their talent/gift
 variants, first/repeated robbery, shop/recruit refreshes and Mission Hire. Rest,
@@ -273,13 +280,11 @@ historical player SOL compatibility remains unverified.
 
 ## Validation and limits
 
-- Last full suite: **572 tests pass**. Four new checks cover critical countdown,
-  boss-wave warnings, source notice queue boundaries and extracted feedback assets.
-  Current typecheck/build pass; bundle: assets/index-CFtqDa6w.js. Sixteen affected
-  class/original-reference checks pass. The572-test baseline is reused: New Game
-  information changes no simulation, storage format or gameplay rules. Ordinary
-  creation, hints, locked/unlocked classes and full-envelope Continue pass in a
-  muted isolated browser; controlled medals exercise the advanced classes.
+- Last full suite: **575 tests pass** in10.71s. Three new item-panel checks cover
+  source value versus sale proceeds, manual reload/shells, bow versus Gravity Gun
+  dash fields, living progress and non-weapon English descriptions. Current
+  typecheck/build pass; bundle: assets/index-Dp4CYC5J.js. Original comparison,
+  deterministic gameplay and save tests pass without simulation/format changes.
   Existing source/deterministic checks cover
   classes, campaign/enemies, party AI, equipment/economy, medals/modes/MODs,
   activities/search, Carry Over, saves/migrations and extracted content.
@@ -289,8 +294,8 @@ historical player SOL compatibility remains unverified.
   This establishes progression, not natural difficulty balance or hours-long play.
 - Muted browser checks cover New Game, combat/reload/F/results/town, original
   controls/help/options, equipment/services/hires, all eight slots, JSON saves,
-  Carry Over, medals/Museum, Sister reactions and Flash imports. Current user's
-  entire adventure/collection is restored exactly at v41:
+  Carry Over, medals/Museum, Sister reactions and Flash imports. The user's last
+  verified adventure/collection was restored exactly at v41:
   Day1, tick674, RNG1744019180, HP40, gold209. Slot8 is empty; slot1 is
   selected, paused/muted. No console errors or fullscreen during the latest check.
 
@@ -328,6 +333,7 @@ Reuse it for unchanged behavior rather than repeating whole browser/campaign run
 | Edge cross-origin embed | `edge-cross-site-verification.json`, `edge-cross-site-browser.png`: actual HTTP host/game origins differ; default-policy Edge156 supports input isolation, scaled shooting, delivered export and exact full-envelope host reload/Continue. No script errors/failed requests or fullscreen. The first intercepted-host experiment was blocked before game loading by local-network checks; a real host response passed without changing security settings. Temporary host removed; user profile untouched. |
 | Graphics loss | `context-loss-before.json`, `context-recovery-verification.json`, `context-recovery-browser.png`: actual WEBGL_lose_context previously advanced tick681→697 while invisible. Patched combat stays at681 through loss/resume attempts, restores paused, preserves the full frozen save across reload/Continue, tolerates loss while already paused and resumes normal shooting5→4. No game script/console errors; a separately attributed favicon404 remains. User profile untouched. |
 | New Game information | `gene-info-verification.json`, `gene-{class-hint,locked,noble}-browser.png`: class skill/starting skills and original English hover text render; locked names/requirement match source. A controlled medal collection unlocks all four advanced labels; Noble proceeds into combat and its full save survives Continue exactly. Source medal bonuses apply only on Proceed; the check confirms Luck is absent before and present afterward. No script errors; user profile untouched. |
+| Item information | `item-popup-verification.json`, `item-popup-{equipment,shop,upgrade,loot}-browser.png`: original panel fields/artwork render across equipment, shop, loot and upgrade comparison. Red requirements, modified living-weapon progress and non-gun descriptions are readable. Hover/carry preserve the full save; equipment moves, purchase cost, loot collection and upgrade Cancel work. Final full-envelope Continue matches. Controlled fixture variants, muted isolated Chrome, no script errors or user-profile changes. |
 
 Current evidence does not establish whole-game parity, native Flash timing, full
 pixel/contour parity or a measured performance advantage. The Codex app crash
@@ -377,6 +383,8 @@ for routine continuation.
    deterministic time; sample-perfect audio/native SoundChannel scheduling is unverified.
    Firework timing/tint/audio and screen flashes approximate the Flash presentation;
    medal notification glow/filter transitions are approximate.
+   Item-information hover delay/fade remain approximate; its original fields/artwork
+   and fixed panel placement are restored. Long detail text can extend the paper panel.
    Low quality uses nearest filtering/pixel rounding rather than rerasterizing
    original vectors. The right pause panel shifts50px left and statistics panel15px
    up to fit620×380. Statistics

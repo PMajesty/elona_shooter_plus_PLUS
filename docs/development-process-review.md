@@ -97,6 +97,15 @@ on Proceed; correct the assumption and preserve that timing rather than adding
 another preview mechanism. Sixteen existing class/reference checks and actual
 creation/Continue pass. Exact camera motion remains deferred.
 
+The next integrated slice restored the source item panel across loot, shop,
+equipment and upgrade comparison. Shared field formatting and existing English
+descriptions replace duplicated custom tooltip code. The full575-test suite ran
+once because several ordinary callers changed, not once per view. One browser
+phase verified state-preserving hover/carry, moves, purchase, collection, upgrade
+Cancel and Continue. A navigation click initially landed in transparent image
+padding; inspecting the asset identified an opaque icon point. No product/input
+change was justified by that failed test click.
+
 An intermittent ready-but-black screenshot recurred once; Continue rendered the
 battle correctly. Its cause is unresolved. Loader recovery does not establish a
 fix for that observation. An unchanged iframe download path twice reported success

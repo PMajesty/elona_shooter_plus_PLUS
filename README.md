@@ -48,6 +48,9 @@ unless you previously enabled it; the mute preference persists between visits.
   spawn timer; surviving awards its original medal and bonuses.
 - Prepared towns, shop buy/sell, weapon upgrades and MOD mounting; permanent
   companions, equipment, orders, autonomous combat, growth and wages.
+  Loot/shop/equipment use the original item-information panel, with weapon
+  requirements, full stats, modifications and living-weapon progress. English item
+  and MOD descriptions are retained, and upgrade comparisons use the same panel.
 - Both Castle pages: House, Wall, Sandbag, Storage, Looter, Fix Wall, Repairman,
   Trainer, Smith, Museum, Chicken, Sister, Villa and Sp.Trainer, with their effects.
 - Prayer, Dinner, Party, egg collection, Taunt and training; Go searching with
