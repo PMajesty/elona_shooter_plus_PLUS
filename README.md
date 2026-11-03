@@ -31,8 +31,8 @@ Sound starts muted and remembers your choice.
   starting rifle, Simple Flame Thrower and Simple Chain Gun.
   Sniper, Ranger, Duelist and Noble unlock through the four starting-class medals.
   Their adrenaline effects and Noble's passive bonuses are connected to combat.
-  Creation portraits play the source stand loop. Linked mute/fullscreen icons and
-  integer large-screen scaling keep manual play controls inside the game.
+  Creation portraits play the source stand loop. The game fits the browser window
+  and scales up on large monitors. The battle crosshair scales with the playfield.
 - Repeating 40-level encounter cycles: Catapult, Spider, Ghost, Ogre, Knight, Bird,
   Tank, Dino and Dragon, bird-dropped rats, multi-boss days and later boss attacks.
   Later cycles increase enemy strength and can spawn the original larger variants.
@@ -140,8 +140,8 @@ Continue, save and JSON import/export use that selected slot; existing browser
 adventures remain in the first slot. Medals/day records are shared across slots
 and survive deleting an adventure. Each JSON backup contains one adventure and
 the shared collection; exporting one does not export all eight adventures.
-The page contains only the centered game and its requested top-right fullscreen
-icon. There is no added bottom toolbar or floating explanatory message overlay.
+The page centers the game with fullscreen and mute controls in its upper-right
+corner. Browser zoom enlarges the game up to the available window height or width.
 Browser shortcuts: Ctrl+S saves, Ctrl+Shift+S exports a JSON backup,
 Ctrl+Shift+O imports JSON or Flash saves; Ctrl+Shift+M toggles mute. Testing stays muted and
 never activates native fullscreen, which would take over the user's desktop.
@@ -215,7 +215,7 @@ To restore that preview after an app restart, run
 For a responsive embed on the same website:
 
 ```html
-<div style="width:100%;max-width:620px;aspect-ratio:31/19">
+<div style="width:100%;max-width:1240px;aspect-ratio:31/19">
   <iframe src="/elona/" title="Elona Shooter Plus"
     width="620" height="380" allow="fullscreen"
     style="display:block;width:100%;height:100%;border:0"></iframe>

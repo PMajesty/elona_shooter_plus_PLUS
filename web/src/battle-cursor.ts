@@ -1,92 +1,115 @@
 import type Phaser from 'phaser';
 
-export const BATTLE_CURSOR = 'var(--battle-cursor, crosshair)';
-const NATIVE_LIMIT = 128;
-
-interface CursorBitmap { url: string; x: number; y: number; width: number; height: number }
+export const BATTLE_CURSOR = 'none';
 
 /** В SWF красное свечение наложено на размещённый customCursor, уже после масштабирования символа. */
-function renderCursor(frame: Phaser.Textures.Frame, width: number, height: number, blur: number,
-  alpha: number, originX: number, originY: number): CursorBitmap {
-  const bitmap = document.createElement('canvas');
-  bitmap.width = width + 2 * blur;
-  bitmap.height = height + 2 * blur;
+function renderCursor(bitmap: HTMLCanvasElement, frame: Phaser.Textures.Frame, width: number, height: number,
+  blur: number, alpha: number): void {
+  bitmap.width = Math.ceil(width + 2 * blur);
+  bitmap.height = Math.ceil(height + 2 * blur);
   const ctx = bitmap.getContext('2d')!;
   ctx.shadowColor = '#ff0000';
   ctx.shadowBlur = blur;
   ctx.globalAlpha = alpha;
   ctx.drawImage(frame.source.image as CanvasImageSource, frame.cutX, frame.cutY,
     frame.cutWidth, frame.cutHeight, blur, blur, width, height);
-  return { url: bitmap.toDataURL(), x: blur + Math.round(originX * width / frame.cutWidth),
-    y: blur + Math.round(originY * height / frame.cutHeight), width: bitmap.width, height: bitmap.height };
 }
 
 export class BattleCursor {
-  private readonly variants = new Map<string, CursorBitmap>();
   private readonly overlay = document.createElement('div');
-  private readonly image = new Image();
+  private readonly image = document.createElement('canvas');
   private current = '';
-  private oversized = false;
   private hotspot = { x: 0, y: 0 };
+  private pointer: { x: number; y: number; density: number } | null = null;
 
   constructor(private readonly scene: Phaser.Scene) {
     this.overlay.className = 'battle-reticle';
     this.overlay.setAttribute('aria-hidden', 'true');
-    this.image.alt = '';
     this.overlay.append(this.image);
     this.hide();
     const canvas = scene.game.canvas;
     canvas.after(this.overlay);
-    // Большой указатель не помещается в системный курсор. Его движение тоже не ждёт кадра боя.
+    // Движение мыши не ждёт следующего кадра боя.
     const move = (event: PointerEvent) => {
-      if (this.oversized && canvas.style.cursor === BATTLE_CURSOR) this.position(event.offsetX, event.offsetY);
+      this.pointer = { x: event.clientX, y: event.clientY, density: window.devicePixelRatio };
+      this.position();
     };
-    const leave = () => this.hide();
+    const leave = () => { this.pointer = null; this.hide(); };
+    // При Ctrl+колесе мышь может остаться на месте, а её координаты в CSS уже другие.
+    const resize = () => {
+      const p = this.pointer;
+      if (!p) return;
+      const ratio = p.density / window.devicePixelRatio;
+      p.x *= ratio;
+      p.y *= ratio;
+      p.density = window.devicePixelRatio;
+      const { manager, activePointer } = this.scene.input;
+      manager.transformPointer(activePointer, p.x + window.scrollX, p.y + window.scrollY, false);
+      this.position();
+    };
+    canvas.addEventListener('pointerenter', move);
     canvas.addEventListener('pointermove', move);
+    canvas.addEventListener('pointerdown', move);
+    canvas.addEventListener('pointerup', move);
     canvas.addEventListener('pointerleave', leave);
+    canvas.addEventListener('pointercancel', leave);
+    window.addEventListener('blur', leave);
+    scene.scale.on('resize', resize);
     scene.events.once('shutdown', () => {
+      canvas.removeEventListener('pointerenter', move);
       canvas.removeEventListener('pointermove', move);
+      canvas.removeEventListener('pointerdown', move);
+      canvas.removeEventListener('pointerup', move);
       canvas.removeEventListener('pointerleave', leave);
+      canvas.removeEventListener('pointercancel', leave);
+      window.removeEventListener('blur', leave);
+      scene.scale.off('resize', resize);
       this.overlay.remove();
     });
   }
 
-  hide(): void { this.overlay.hidden = true; }
+  hide(): void {
+    this.overlay.hidden = true;
+  }
 
-  private position(x: number, y: number): void {
+  private position(): void {
+    const canvas = this.scene.game.canvas;
+    const p = this.pointer;
+    const rect = canvas.getBoundingClientRect();
+    // Над кнопками HUD Phaser показывает обычную руку.
+    if (!p || !this.current || canvas.style.cursor !== BATTLE_CURSOR ||
+      rect.width <= 0 || rect.height <= 0 ||
+      p.x < rect.left || p.x >= rect.right || p.y < rect.top || p.y >= rect.bottom) {
+      this.overlay.hidden = true;
+      return;
+    }
+    const x = (p.x - rect.left) * canvas.clientWidth / rect.width;
+    const y = (p.y - rect.top) * canvas.clientHeight / rect.height;
     this.image.style.transform = `translate(${x - this.hotspot.x}px, ${y - this.hotspot.y}px)`;
     this.overlay.hidden = false;
   }
 
   update(frameName: string, size: number, alpha: number, originX: number, originY: number, stageWidth: number): void {
-    const { game, input, scale, cameras, textures } = this.scene;
+    const { game, textures } = this.scene;
     const frame = textures.getFrame('originalCrosshair', frameName);
-    const zoom = scale.displaySize.width / stageWidth;
-    if (zoom <= 0) return;
-    const w = frame.cutWidth * size, h = frame.cutHeight * size;
-    this.oversized = Math.round(Math.max(w, h) * zoom) + 2 * Math.ceil(2 * zoom) > NATIVE_LIMIT;
-    const density = this.oversized ? Math.min(2, zoom) : zoom;
-    const width = Math.max(1, Math.round(w * density)), height = Math.max(1, Math.round(h * density));
-    const blur = Math.ceil(2 * density);
-    const key = `${frameName}/${width}/${height}/${blur}/${alpha}`;
-    const presentation = `${key}/${zoom}/${this.oversized}`;
+    // Размер задаёт сцена. Плотность экрана влияет только на разрешение рисунка.
+    const zoom = game.canvas.clientWidth / stageWidth;
+    if (!Number.isFinite(zoom) || zoom <= 0) {
+      this.overlay.hidden = true;
+      return;
+    }
+    const pixelRatio = Math.max(1, window.devicePixelRatio || 1);
+    const density = zoom * pixelRatio;
+    const width = frame.cutWidth * size * density, height = frame.cutHeight * size * density;
+    const blur = 2 * density;
+    const presentation = `${frameName}/${size}/${alpha}/${zoom}/${pixelRatio}/${originX}/${originY}`;
     if (presentation !== this.current) {
-      let art = this.variants.get(key);
-      if (!art) {
-        art = renderCursor(frame, width, height, blur, alpha, originX, originY);
-        this.variants.set(key, art);
-      }
-      const factor = zoom / density;
-      this.image.src = art.url;
-      this.image.style.width = `${art.width * factor}px`;
-      this.image.style.height = `${art.height * factor}px`;
-      this.hotspot = { x: art.x * factor, y: art.y * factor };
-      game.canvas.style.setProperty('--battle-cursor', this.oversized ? 'none' : `url("${art.url}") ${art.x} ${art.y}, crosshair`);
+      renderCursor(this.image, frame, width, height, blur, alpha);
+      this.image.style.width = `${this.image.width / pixelRatio}px`;
+      this.image.style.height = `${this.image.height / pixelRatio}px`;
+      this.hotspot = { x: (2 + originX * size) * zoom, y: (2 + originY * size) * zoom };
       this.current = presentation;
     }
-    const p = input.activePointer;
-    if ((this.oversized || p.wasTouch) && input.manager.isOver && game.canvas.style.cursor === BATTLE_CURSOR) {
-      this.position(p.x * zoom / cameras.main.zoom, p.y * zoom / cameras.main.zoom);
-    } else this.hide();
+    this.position();
   }
 }
