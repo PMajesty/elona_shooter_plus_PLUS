@@ -1,3 +1,4 @@
+import { buttonInput } from './button-input.ts';
 import { createItemPopupView, type ItemPopupLayout } from './item-popup-view.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
 import Phaser from 'phaser';
@@ -64,6 +65,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
     const asset = manifest.images[key];
     const object = scene.add.image(x, y, key).setOrigin(asset.originX / asset.width, asset.originY / asset.height);
     if (placement) object.setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees);
+    else object.setDisplaySize(asset.width, asset.height);
     root.add(object); return object;
   };
   const text = (placement: Placement, value: string, x = 0, y = 0) => {
@@ -79,7 +81,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
   };
   const button = (key: string, placement: Placement, action: () => void, x = 0, y = 0, enabled = true) => {
     const object = image(key, x + placement.x, y + placement.y, placement).setName(key);
-    object.setAlpha(enabled ? 1 : 0.35).setInteractive({ useHandCursor: enabled, pixelPerfect: true, alphaTolerance: 100 });
+    object.setAlpha(enabled ? 1 : 0.35).setInteractive(buttonInput(manifest.images[key], enabled));
     if (enabled) {
       object.on('pointerover', () => { if (manifest.images[`${key}_over`]) object.setTexture(`${key}_over`); });
       object.on('pointerout', () => object.setTexture(key));
@@ -264,7 +266,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
   scene.input.on('pointermove', moveCarried);
   root.once(Phaser.GameObjects.Events.DESTROY, () => {
     scene.input.off('pointerdown', outsideClick); scene.input.off('pointermove', moveCarried);
-    scene.input.setDefaultCursor('default');
+    if (carrying) scene.input.setDefaultCursor('default');
   });
   return root;
 }

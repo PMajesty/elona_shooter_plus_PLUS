@@ -1,3 +1,4 @@
+import { buttonInput } from './button-input.ts';
 import Phaser from 'phaser';
 import { describeTrait, type TraitLevels } from './progression.ts';
 import { ALL_TRAITS } from './party-progression.ts';
@@ -26,7 +27,7 @@ export function createSkillView(scene: Phaser.Scene, state: SkillViewState, mani
   const radios: Phaser.GameObjects.Image[] = [];
   let selected: number | undefined;
   const proceed = image('button_proceed', 259, 252).setVisible(false);
-  proceed.setName('skill-proceed').setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 });
+  proceed.setName('skill-proceed').setInteractive(buttonInput(manifest.images.button_proceed));
   proceed.on('pointerover', () => { if (manifest.images.button_proceed_over) proceed.setTexture('button_proceed_over'); });
   proceed.on('pointerout', () => proceed.setTexture('button_proceed'));
   proceed.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {

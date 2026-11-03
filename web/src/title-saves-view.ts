@@ -1,3 +1,4 @@
+import { buttonInput } from './button-input.ts';
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
 
@@ -52,7 +53,7 @@ export function createTitleSavesView(scene: Phaser.Scene, manifest: LootViewMani
   scene.input.keyboard?.on('keydown', keyboard);
   root.once('destroy', () => scene.input.keyboard?.off('keydown', keyboard));
   const asset = manifest.images.button_deleteSave, trash = scene.add.image(placement.trash.x, placement.trash.y, 'button_deleteSave').setOrigin(asset.originX / asset.width, asset.originY / asset.height)
-    .setScale(placement.trash.scaleX, placement.trash.scaleY).setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 }); root.add(trash);
+    .setScale(placement.trash.scaleX, placement.trash.scaleY).setInteractive(buttonInput(asset)); root.add(trash);
   trash.on('pointerover', () => trash.setTexture('button_deleteSave_over')); trash.on('pointerout', () => trash.setTexture('button_deleteSave'));
   trash.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); close(); remove(); });
   return root;

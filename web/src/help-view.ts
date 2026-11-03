@@ -1,3 +1,4 @@
+import { buttonInput, refreshMenuHover } from './button-input.ts';
 import Phaser from 'phaser';
 import { originalTextArea } from './original-text-area.ts';
 import type { LootViewManifest } from './loot-view.ts';
@@ -25,7 +26,7 @@ export function createHelpView(scene: Phaser.Scene, manifest: LootViewManifest, 
     content.add(object); return object;
   };
   const button = (key: string, p: Placement, action: () => void) => {
-    const object = image(key, p).setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 });
+    const object = image(key, p).setInteractive(buttonInput(manifest.images[key]));
     object.on('pointerover', () => object.setTexture(`${key}_over`)); object.on('pointerout', () => object.setTexture(key));
     object.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => {
       e.stopPropagation(); click(); action();
@@ -36,10 +37,6 @@ export function createHelpView(scene: Phaser.Scene, manifest: LootViewManifest, 
     content.removeAll(true); page = next;
     const data = layout.pages[page - 1];
     image(data.image, { x: 0, y: 0, scaleX: 1, scaleY: 1 });
-    for (const [part, key, number] of [['help1', 'button_helpBattle', 1], ['help2', 'button_helpTown', 2],
-      ['help3', 'button_helpCredits', 3], ['help4', 'button_helpTips', 4]] as const) {
-      button(key, data.children[part], () => draw(number)).setName(`help-page-${number}`);
-    }
     if (page === 3) {
       content.add(scene.add.text(layout.position.x + 146, layout.position.y + 308,
         'Game by Noa · Plus by its contributors · AI vibe-ported · Always free',
@@ -56,6 +53,12 @@ export function createHelpView(scene: Phaser.Scene, manifest: LootViewManifest, 
       content.add(originalTextArea(scene, 'help-tips-text', layout.tips.join(''), x, y, width, height, scroll => changed(page, scroll)));
     }
     changed(page, 0);
+    refreshMenuHover(scene);
   };
-  draw(4); return root;
+  draw(4);
+  for (const [part, key, number] of [['help1', 'button_helpBattle', 1], ['help2', 'button_helpTown', 2],
+    ['help3', 'button_helpCredits', 3], ['help4', 'button_helpTips', 4]] as const) {
+    root.add(button(key, layout.pages[0].children[part], () => draw(number)).setName(`help-page-${number}`));
+  }
+  return root;
 }

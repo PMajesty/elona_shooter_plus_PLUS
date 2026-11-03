@@ -1,3 +1,4 @@
+import { buttonInput } from './button-input.ts';
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
 
@@ -37,7 +38,7 @@ export function createModConfirmation(scene: Phaser.Scene, manifest: LootViewMan
     const key = acknowledge ? 'button_eventOk' : confirm ? 'button_dialogYes' : 'button_dialogNo';
     const placement = acknowledge ? { ...layout.children.yes, x: (layout.children.yes.x + layout.children.no.x) / 2 } : layout.children[part];
     const button = image(key, placement).setName(`${name}-${part}`)
-      .setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 });
+      .setInteractive(buttonInput(manifest.images[key]));
     button.on('pointerover', () => { if (manifest.images[`${key}_over`]) button.setTexture(`${key}_over`); });
     button.on('pointerout', () => button.setTexture(key));
     button.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {

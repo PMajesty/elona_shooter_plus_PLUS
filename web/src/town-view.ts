@@ -1,3 +1,4 @@
+import { buttonInput } from './button-input.ts';
 import { TOWN_ACTIVITIES, museumIncome, type TownActivity, type TownEconomy } from './town-economy.ts';
 import { MEDALS } from './medals.ts';
 import { MAX_CAMPAIGN_DAY } from './missions.ts';
@@ -38,12 +39,13 @@ interface TownViewState {
 interface Callbacks { robVisitors(): void; medalPage(page: 0 | 1): void; visitKongregate(): void; medalHint(hint: { id: number; name: string; description: string; bonus: string } | null): void; hire(): void; confirmHire(answer: boolean): void; castlePage(page: 0 | 1): void; activity(action: TownActivity): void; activityAvailable(action: TownActivity): boolean; select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; message(value: string): void }
 
 /** Городские координаты и повороты берутся из исходного кадра 71 и его окон. */
-export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, castlePage: 0 | 1 = 0, medalPage: 0 | 1 = 0): Phaser.GameObjects.Container {
+export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, navigation: Phaser.GameObjects.Container, castlePage: 0 | 1 = 0, medalPage: 0 | 1 = 0): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName('town-view');
   const image = (key: string, x = 0, y = 0, placement?: Placement) => {
     const asset = manifest.images[key];
     const object = scene.add.image(x, y, key).setOrigin(asset.originX / asset.width, asset.originY / asset.height);
     if (placement) object.setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees);
+    else object.setDisplaySize(asset.width, asset.height);
     root.add(object); return object;
   };
   const text = (placement: Placement, value: string, x = 0, y = 0) => {
@@ -58,12 +60,13 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     if (field.color === '#ffffff') object.setShadow(1, 1, '#000000', 2);
     root.add(object); return object;
   };
-  const button = (key: string, placement: Placement, action: () => void, x = 0, y = 0, enabled = true) => {
+  const button = (key: string, placement: Placement, action: () => void, x = 0, y = 0, enabled = true, parent = root) => {
     const shadow = manifest.images[`${key}_shadow`] ? image(`${key}_shadow`, x + placement.x, y + placement.y, placement) : undefined;
     const object = image(key, x + placement.x, y + placement.y, placement).setName(key);
-    object.setAlpha(enabled ? 1 : 0.35).setInteractive({ useHandCursor: enabled, pixelPerfect: true, alphaTolerance: 100 });
+    if (parent !== root) { if (shadow) parent.add(shadow); parent.add(object); }
+    object.setAlpha(enabled ? 1 : 0.35).setInteractive(buttonInput(manifest.images[key], enabled));
     if (enabled) {
-      object.on('pointerover', () => object.setTexture(`${key}_over`));
+      object.on('pointerover', () => { object.setTexture(`${key}_over`); shadow?.setTexture(`${key}_over_shadow`); });
       object.on('pointerout', () => { object.setTexture(key); shadow?.setTexture(`${key}_shadow`); });
     }
     object.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); action(); });
@@ -82,10 +85,11 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     root.add(scene.add.image(25 + index * 90 - icon.originX, 343 - icon.originY, 'itemPicture', String(item.graphic)).setOrigin(0));
     if (item.type === ITEM_TYPE.use) root.add(scene.add.text(50 + index * 90, 366, `x${item.ammo}`, { fontFamily: 'Arial', fontSize: '11px', color: '#ffffff' }));
   });
-  for (const [name, placement] of Object.entries(layout.navigation)) {
+  root.add(navigation);
+  if (!navigation.length) for (const [name, placement] of Object.entries(layout.navigation)) {
     const enabled = ['mission', 'castle', 'shop', 'chara', 'equip', 'medal'].includes(name);
     const tab = name === 'chara' ? 'characters' : name === 'equip' ? 'equipment' : name === 'medal' ? 'medals' : name as TownTab;
-    button(placement.image, placement, () => enabled ? callbacks.select(tab) : callbacks.message('This town menu is not available in the current port yet.'), 0, 0, enabled);
+    button(placement.image, placement, () => enabled ? callbacks.select(tab) : callbacks.message('This town menu is not available in the current port yet.'), 0, 0, enabled, navigation);
   }
   if (tab === 'mission' || tab === 'castle') {
     const panel = layout[tab], { x, y } = layout.menuPosition;

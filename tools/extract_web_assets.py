@@ -1,5 +1,6 @@
 """Извлекает исходную графику и звуки SWF для браузерной версии."""
 import argparse
+import base64
 import copy
 import hashlib
 import json
@@ -131,9 +132,30 @@ def clip_labels(sprite):
     return labels
 
 
+TOWN_PANELS = {"townMission", "townCastle", "townShop", "townCharacters", "townEquipment", "townMedals",
+               "townMissionLabels", "townCastleLabels", "townShopRefreshLabel", "townShopUpgradeLabel",
+               "townCharactersLabels", "townEquipmentLabels", "townMedalsLabels"}
+
+
+def save_town_panel(name, frame):
+    # FFDec рисует глифы SWF в двойном разрешении. Пустые поля не занимают память видеокарты.
+    image = Image.open(frame).convert("RGBA")
+    assert image.size == (1240, 760)
+    left, top, right, bottom = image.getbbox()
+    out = DEST / "screens" / (name + ".webp")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    image.crop((left, top, right, bottom)).save(out, lossless=True)
+    return {"file": out.relative_to(DEST).as_posix(), "width": (right - left) / 2,
+            "height": (bottom - top) / 2, "originX": -left / 2, "originY": -top / 2}
+
+
 def static_screen(xml, name, tags, omit=(), offset=(0, 0), sprite_frames=None, sprite_omit=None):
+    high_res = name in TOWN_PANELS
+    frames = WORK / (name + "-2x" if high_res else name)
+    if high_res and (frames / "1.png").exists() and not FORCE:
+        return save_town_panel(name, frames / "1.png")
     out = DEST / "screens" / (name + ".png")
-    if out.exists() and not FORCE:
+    if not high_res and out.exists() and not FORCE:
         image = Image.open(out)
         return {"file": str(out.relative_to(DEST)).replace("\\", "/"), "width": image.width,
                 "height": image.height, "originX": 0, "originY": 0}
@@ -192,8 +214,10 @@ def static_screen(xml, name, tags, omit=(), offset=(0, 0), sprite_frames=None, s
     ET.ElementTree(output).write(xml_path, encoding="utf-8", xml_declaration=True)
     swf_path = WORK / (name + ".swf")
     ffdec(["-xml2swf", xml_path, swf_path], name + "-swf")
-    ffdec(["-ignorebackground", "-export", "frame", WORK / name, swf_path], name + "-png")
-    image = Image.open(WORK / name / "1.png").convert("RGBA")
+    ffdec(["-ignorebackground", "-zoom", "2" if high_res else "1", "-export", "frame", frames, swf_path], name + "-png")
+    if high_res:
+        return save_town_panel(name, frames / "1.png")
+    image = Image.open(frames / "1.png").convert("RGBA")
     out = DEST / "screens" / (name + ".png")
     out.parent.mkdir(parents=True, exist_ok=True)
     image.save(out, optimize=True)
@@ -544,7 +568,7 @@ def buttons(manifest, tags):
             (svg_dir, "svg", ["-format", "button:svg"], "buttons-svg")]:
         needed = [value for value in BUTTONS.values()
                   if FORCE or any(not (directory / f"DefineButton2_{value}" / (state + "." + extension)).exists()
-                                  for state in ("1_up", "2_over", "3_down"))]
+                                  for state in ("1_up", "2_over", "3_down", "4_hittest"))]
         if needed:
             ffdec(["-ignorebackground", "-selectid", ",".join(map(str, needed)), *format_args,
                    "-export", "button", directory, SOURCE], log)
@@ -580,6 +604,11 @@ def buttons(manifest, tags):
                 a = manifest["images"][key]
                 manifest["images"][shadow_key] = {**a, "file": f"buttons/{shadow_key}.png",
                     "width": shadow.width, "height": shadow.height, "originX": a["originX"] + pad, "originY": a["originY"] + pad}
+        # Область нажатия SimpleButton не зависит от текущего рисунка Up/Over/Down.
+        hit = Image.open(png_dir / f"DefineButton2_{button_id}" / "4_hittest.png").convert("RGBA")
+        assert hit.size == (manifest["images"][name]["width"], manifest["images"][name]["height"])
+        mask = hit.getchannel("A").point(lambda value: 255 if value >= 100 else 0, "1")
+        manifest["images"][name]["hitMask"] = base64.b64encode(mask.tobytes()).decode("ascii")
 
 
 

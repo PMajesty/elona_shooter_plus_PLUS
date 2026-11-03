@@ -1,3 +1,4 @@
+import { buttonInput } from './button-input.ts';
 import { createItemPopupView, type ItemPopupLayout } from './item-popup-view.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
 import Phaser from 'phaser';
@@ -137,7 +138,7 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
     root.bringToTop(pendingModIcon.icon);
   }
 
-  const proceed = image('button_proceed', 271, 301).setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 });
+  const proceed = image('button_proceed', 271, 301).setInteractive(buttonInput(manifest.images.button_proceed));
   proceed.setName('loot-proceed');
   proceed.on('pointerover', () => { if (!modal && !carrying && manifest.images.button_proceed_over) proceed.setTexture('button_proceed_over'); });
   proceed.on('pointerout', () => proceed.setTexture('button_proceed'));

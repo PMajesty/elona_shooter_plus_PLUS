@@ -1,3 +1,4 @@
+import { buttonInput } from './button-input.ts';
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
 import type { GameOptions } from './game-options.ts';
@@ -35,7 +36,7 @@ export function createPauseView(scene: Phaser.Scene, manifest: LootViewManifest,
   block.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => e.stopPropagation());
   for (const [part, key, action] of [['returnTitleButton', 'button_pauseTitle', callbacks.title], ['saveGameButton', 'button_pauseSave', callbacks.save], ['helpButton', 'button_pauseHelp', callbacks.help]] as const) {
     const p = layout.children[part], a = manifest.images[key];
-    const button = scene.add.image(p.x, p.y, key).setOrigin(a.originX / a.width, a.originY / a.height).setScale(p.scaleX, p.scaleY).setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 }); root.add(button);
+    const button = scene.add.image(p.x, p.y, key).setOrigin(a.originX / a.width, a.originY / a.height).setScale(p.scaleX, p.scaleY).setInteractive(buttonInput(a)); root.add(button);
     button.on('pointerover', () => button.setTexture(`${key}_over`)); button.on('pointerout', () => button.setTexture(key));
     button.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); callbacks.click(); action(); });
   }

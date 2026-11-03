@@ -1,3 +1,4 @@
+import { buttonInput } from './button-input.ts';
 import { createItemPopupView, type ItemPopupLayout } from './item-popup-view.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
 import { createOriginalHintView } from './original-hint-view.ts';
@@ -81,6 +82,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
     const asset = manifest.images[key];
     const object = scene.add.image(x, y, key).setOrigin(asset.originX / asset.width, asset.originY / asset.height);
     if (placement) object.setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees);
+    else object.setDisplaySize(asset.width, asset.height);
     root.add(object); return object;
   };
   const clip = (key: string, frame: number, x: number, y: number) => {
@@ -105,7 +107,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
   };
   const button = (key: string, p: Placement, action: () => void, enabled = true, x = menu.x, y = menu.y) => {
     const object = image(key, x + p.x, y + p.y, p).setAlpha(enabled ? 1 : 0.35)
-      .setName(key).setInteractive({ useHandCursor: enabled, pixelPerfect: true, alphaTolerance: 100 });
+      .setName(key).setInteractive(buttonInput(manifest.images[key], enabled));
     object.on('pointerover', () => { if (enabled && !modal && manifest.images[`${key}_over`]) object.setTexture(`${key}_over`); });
     object.on('pointerout', () => object.setTexture(key));
     object.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
@@ -338,7 +340,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
     const outside = () => { if ((carrying || service) && !modal) { clear(); callbacks.cancel(); } };
     scene.input.on('pointerdown', outside);
     scene.input.on('pointermove', move);
-    root.once('destroy', () => { scene.input.off('pointerdown', outside); scene.input.off('pointermove', move); scene.input.setDefaultCursor('default'); });
+    root.once('destroy', () => { scene.input.off('pointerdown', outside); scene.input.off('pointermove', move); if (carrying) scene.input.setDefaultCursor('default'); });
   }
   if (state.dialog) {
     const member = state.members.find(value => value.slot === state.selectedSlot);
@@ -351,7 +353,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
     text(layout.saleDialog.children.question, question, 0, 0);
     for (const [name, key, answer] of [['yes', 'button_dialogYes', true], ['no', 'button_dialogNo', false]] as const) {
       const p = layout.saleDialog.children[name];
-      const object = image(key, p.x, p.y, p).setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 });
+      const object = image(key, p.x, p.y, p).setInteractive(buttonInput(manifest.images[key]));
       object.on('pointerover', () => object.setTexture(`${key}_over`)); object.on('pointerout', () => object.setTexture(key));
       object.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); callbacks.confirm(answer); });
     }

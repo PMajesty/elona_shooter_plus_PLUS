@@ -1,3 +1,4 @@
+import { buttonInput, refreshMenuHover } from './button-input.ts';
 import { createTitleSequence, playOpening } from './title-sequence.ts';
 import { MAX_CAMPAIGN_DAY } from './missions.ts';
 import { COMMUNITY_MOD_DETAILS, GAME_MODS, type GameMod } from './game-mods.ts';
@@ -7,6 +8,7 @@ import { HERO_CLASSES, heroClassUnlocked, type HeroClass } from './hero-classes.
 import { createGeneInfoView } from './gene-info-view.ts';
 import { animateStandingPortraits } from './portrait-animation.ts';
 import { configureDisplaySizing } from './display-sizing.ts';
+import { BattleCursor, BATTLE_CURSOR } from './battle-cursor.ts';
 import { ScreenShake } from './screen-shake.ts';
 import { battleLightColor, battleCloudX } from './battle-lighting.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
@@ -166,7 +168,9 @@ class ElonaScene extends Phaser.Scene {
   private enemyFrameAudio = new Map<number, { frame: number; crowPlayed: boolean }>();
   private frameSoundCues: { key: string; uid: number; frame: number }[] = [];
   private adrenalineFill?: Phaser.GameObjects.Image;
-  private cursor?: Phaser.GameObjects.Image;
+  private readonly battleCursor = new BattleCursor();
+  private touchCursor?: Phaser.GameObjects.Image;
+  private townNavigation?: Phaser.GameObjects.Container;
   private pauseLayer?: Phaser.GameObjects.Container;
   private helpLayer?: Phaser.GameObjects.Container;
   private fireAtWillSprites?: { fire: Phaser.GameObjects.Image; rage: Phaser.GameObjects.Image };
@@ -328,6 +332,8 @@ class ElonaScene extends Phaser.Scene {
     this.combatNoticeViews.clear(); delete container.dataset.combatNotices;
     delete container.dataset.rampageEffects;
     const keepTownAmbience = this.screen === 'town' && screen === 'town';
+    if (keepTownAmbience && this.townNavigation) this.townNavigation.parentContainer?.remove(this.townNavigation);
+    else this.townNavigation = undefined;
     this.screen = screen;
     this.titleSequence = undefined;
     this.closeOpening?.(); this.closeOpening = undefined;
@@ -343,7 +349,7 @@ class ElonaScene extends Phaser.Scene {
     this.accumulator = 0;
     this.firePressed = this.fireReleased = this.reloadRequested = false; this.slotRequested = undefined;
     this.firingGesture = this.firingReleaseOwned = false;
-    this.input.setDefaultCursor('default');
+    if (!keepTownAmbience || this.input.manager.defaultCursor !== 'default') this.input.setDefaultCursor('default');
     // Эффекты, добавленные в stage над HUD, тоже принадлежат текущему экрану.
     for (const effect of this.effects) effect.object.destroy();
     this.root.removeAll(true);
@@ -364,7 +370,7 @@ class ElonaScene extends Phaser.Scene {
     for (const sound of this.companionBowSounds.values()) sound.destroy();
     this.companionBowSounds.clear(); this.companionSprites.clear(); this.companionCursors.clear();
     this.reloadAnimations = 0;
-    this.pauseLayer = undefined; this.playerSprite = undefined; this.cursor = undefined; this.ammoFill = undefined;
+    this.pauseLayer = undefined; this.playerSprite = undefined; this.touchCursor = undefined; this.ammoFill = undefined;
     if (!keepTownAmbience) { this.ambient?.destroy(); this.ambient = undefined; }
     container.dataset.screen = screen;
     container.dataset.saveSlot = String(this.saveSlot);
@@ -434,7 +440,7 @@ class ElonaScene extends Phaser.Scene {
   private originalButton(key: string, x: number, y: number, action: () => void, sound = 'soundClick1', pixelPerfect = true): void {
     const button = this.image(key, x, y);
     if (!button) return;
-    button.setInteractive({ useHandCursor: true, pixelPerfect, alphaTolerance: 100 });
+    button.setInteractive(pixelPerfect ? buttonInput(manifest.images[key]) : { useHandCursor: true });
     button.on('pointerover', () => { if (manifest.images[`${key}_over`]) button.setTexture(`${key}_over`); });
     button.on('pointerout', () => button.setTexture(key));
     button.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); this.playSound(sound); action(); });
@@ -690,8 +696,10 @@ class ElonaScene extends Phaser.Scene {
     this.syncCompanionActors();
     this.drawHud();
     const crosshair = manifest.clips.originalCrosshair;
-    this.cursor = this.add.image(0, 0, 'originalCrosshair', '1').setOrigin(crosshair.originX / crosshair.frameWidth, crosshair.originY / crosshair.frameHeight); this.root.add(this.cursor);
-    this.input.setDefaultCursor('none');
+    this.touchCursor = this.add.image(0, 0, 'originalCrosshair', '1').setVisible(false)
+      .setOrigin(crosshair.originX / crosshair.frameWidth, crosshair.originY / crosshair.frameHeight);
+    this.root.add(this.touchCursor);
+    this.input.setDefaultCursor(BATTLE_CURSOR);
     if (this.cache.audio.exists('soundBgForest')) this.ambient = this.sound.add('soundBgForest', { volume: 0.3, loop: true });
     this.ambient?.play();
     this.syncEnemyFrameAudio(announce);
@@ -1096,15 +1104,19 @@ class ElonaScene extends Phaser.Scene {
     this.updateHud();
     for (const text of this.hud.values()) this.root.bringToTop(text);
     const pointer = this.input.activePointer;
-    this.cursor?.setVisible(false);
-    const aimX = pointer.x / this.cameras.main.zoom, aimY = pointer.y / this.cameras.main.zoom;
-    if (this.input.manager.isOver && aimX >= 0 && aimX < WORLD.width && aimY >= 0 && aimY < WORLD.height) {
-      this.cursor?.setVisible(true).setPosition(aimX, aimY)
-        .setFrame(this.options.colorBlind ? '3' : state.waveIndex < 3 ? '2' : '1')
-        .setScale(0.3 + Math.min(0.6, state.player.accuracyFix)).setAlpha(state.player.shootTimer > 0 && !this.sim.weapon?.automatic ? 0.7 : 1);
-      if (this.cursor) this.root.bringToTop(this.cursor);
+    const frame = this.options.colorBlind ? '3' : state.waveIndex < 3 ? '2' : '1';
+    const size = 0.3 + Math.min(0.6, state.player.accuracyFix);
+    const alpha = state.player.shootTimer > 0 && !this.sim.weapon?.automatic ? 0.7 : 1;
+    const crosshair = manifest.clips.originalCrosshair;
+    this.battleCursor.update(this, frame, size * this.scale.displaySize.width / WORLD.width, alpha, crosshair.originX, crosshair.originY);
+    const x = pointer.x / this.cameras.main.zoom, y = pointer.y / this.cameras.main.zoom;
+    const showTouch = pointer.wasTouch && this.input.manager.isOver && x >= 0 && x < WORLD.width && y >= 0 && y < WORLD.height;
+    this.touchCursor?.setVisible(showTouch);
+    if (showTouch && this.touchCursor) {
+      this.touchCursor.setPosition(x, y).setFrame(frame).setScale(size).setAlpha(alpha);
+      this.root.bringToTop(this.touchCursor);
     }
-    container.dataset.crosshairFrame = this.cursor?.frame.name ?? '';
+    container.dataset.crosshairFrame = frame;
     container.dataset.playerFrame = String(this.playerSprite?.currentOriginalFrame ?? '');
     container.dataset.reloadTicks = String(this.sim.weapon?.reloadTime ?? 0);
     container.dataset.reloadAnimations = String(this.reloadAnimations);
@@ -1595,6 +1607,7 @@ class ElonaScene extends Phaser.Scene {
     }
     if (this.screen !== 'town' && this.sim.state.day === 1) this.medalNotices.add('Make sure to repair your walls!', false);
     this.reset('town');
+    this.townNavigation ??= this.add.container(0, 0);
     this.root.add(createTownView(this, this.sim.state, manifest, this.cache.json.get('town-layout') as TownLayout, {
       medalPage: page => { this.medalPage = page; this.playSound('soundClick1'); this.showTown('medals'); },
       medalHint: hint => { if (hint) container.dataset.medalHint = JSON.stringify(hint); else delete container.dataset.medalHint; },
@@ -1662,7 +1675,8 @@ class ElonaScene extends Phaser.Scene {
         }
       },
       rest: () => { this.playSound('soundNight'); this.showTown('mission', 'rest'); },
-    }, tab, this.castlePage, this.medalPage));
+    }, tab, this.townNavigation, this.castlePage, this.medalPage));
+    refreshMenuHover(this);
     if (tab === 'characters' || tab === 'equipment') this.showPartyPanel(tab);
     if (tab === 'shop' && this.sim.state.town.preparation === 'ready') {
       const changed = (sound = 'soundPay1') => { this.playSound(sound); this.saveGame(false); this.showTown('shop'); };
@@ -1881,14 +1895,14 @@ class ElonaScene extends Phaser.Scene {
     // Пока графический контекст потерян, игрок не должен возобновить невидимый бой.
     if (this.paused && this.graphicsLost) return;
     this.paused = !this.paused; this.accumulator = 0; this.firePressed = this.fireReleased = false; this.firingGesture = this.firingReleaseOwned = false;
-    if (this.screen === 'battle') this.input.setDefaultCursor(this.paused ? 'default' : 'none');
+    if (this.screen === 'battle') this.input.setDefaultCursor(this.paused ? 'default' : BATTLE_CURSOR);
     container.dataset.paused = String(this.paused);
     this.celebration?.root.setVisible(!this.paused);
     if (!this.paused) { status.hide(); this.pauseLayer?.destroy(true); this.pauseLayer = undefined; this.saveGame(false); this.ambient?.resume(); this.bowSound?.resume(); for (const sound of this.companionBowSounds.values()) sound.resume(); for (const entry of this.chainSounds.values()) entry.sound.resume(); return; }
     for (const sound of this.companionBowSounds.values()) sound.pause();
     for (const entry of this.chainSounds.values()) entry.sound.pause();
     this.ambient?.pause(); this.bowSound?.pause(); this.saveGame(false);
-    this.cursor?.setVisible(false);
+    this.touchCursor?.setVisible(false);
     const data = this.cache.json.get('town-layout') as { pause: PauseLayout };
     this.pauseLayer = createPauseView(this, manifest, data.pause, this.options, pauseStatistics(this.sim!.state), {
       close: () => this.togglePause(), save: () => this.saveGame(), help: () => this.showHelp(),
