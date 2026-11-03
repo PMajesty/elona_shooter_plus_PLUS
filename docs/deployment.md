@@ -9,8 +9,8 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- The current game is `/srv/elona/releases/review-DMuRZUK8/elona/` (save v45,
-  code `73bd70d`). The previous v45 release is `releases/review-1shtHcPP`
+- The current game is `/srv/elona/releases/review-BC9fe8ER/elona/` (save v45,
+  code `b2e71af`). The previous v45 release is `releases/review-DMuRZUK8`
   and the previous v43 release is `releases/release-By__DLWU`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
@@ -23,7 +23,12 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
 
-Muted Chrome 156 verified the public bundle's SHA-256, started a new Rogue,
+Muted Chrome checked the public bundle hash and imported two isolated saves
+immediately before the recorded hits. The Rogue companion's Long Bow killed
+the sheep with 10 HP left. The Crossbow reduced its target from 42 HP to 6.
+Both outcomes were read from the game's exported saves.
+
+On the preceding zoom release, muted Chrome 156 verified the public bundle's SHA-256, started a new Rogue,
 and fired at 100% and 200% browser zoom. The exported aim and the visible
 cursor agreed after zooming with the mouse stationary. Clicking Menu at 200%
 paused combat and preserved ammunition. The [fidelity review](fidelity-review.md)

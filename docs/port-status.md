@@ -2,7 +2,7 @@
 
 Updated 2026-11-03. **Desktop-browser release, save v45.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-The production bundle is `index-DMuRZUK8.js` from `73bd70d`. The documented
+The production bundle is `index-BC9fe8ER.js` from `b2e71af`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
@@ -160,6 +160,9 @@ port-verification.json; do not reread trace archives for routine work.
 4. The source's ineffective Trouble HP expression, medal93 source-count text,
    Ragnarok/Kongregate wage discrepancy and Ha-na-bi/firework discrepancy are
    preserved. Do not silently rebalance them to match their descriptions.
+   The [fidelity review](fidelity-review.md) also records the No Armor order
+   and the bolt collision gap at an adjusted aim height of 135. Ground-target
+   bows and crossbows now recover missed contacts between eligible updates.
 5. Native fullscreen is left for the user to operate. Automated expanded-layout
    checks cover sizing/input; native fullscreen was deliberately not entered.
    Mobile/touch, restrictive/sandboxed embeds, public CDN policies and IAB iframe
