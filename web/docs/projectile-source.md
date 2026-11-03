@@ -80,6 +80,17 @@ One Hit Kill roll in this path. It returns whether any target was alive before
 damage. A successful call consumes one penetration regardless of the number of
 overlapping enemies; targets are not deduplicated across successive updates.
 
+The browser corrects a reproduced ground-target miss for bows and crossbows.
+When the usual tip check misses every living enemy, the simulation follows the
+arc from the preceding eligible tip, accounting for target translation during
+the update and using the current collision pose. It probes at half-pixel
+intervals or finer in ordinary flight, capped at 256 subdivisions per target.
+The earliest detected crossing uses the existing damage and penetration rules.
+High bow arcs and gaps between eligible checks do not acquire ground hits.
+Saves retain the previous tip during eligible flight. Older saves resume
+sampling from their first eligible point. The separate bolt gap at adjusted
+target height 135 remains reproducible.
+
 `explode` (3042) and `explode_puls` (6158) check living enemies' registration
 points in a strict rectangle, without falloff or silhouette collision. Stored
 gun slot is passed to ordinary damage; hand grenades pass no weapon. DA_BOMB

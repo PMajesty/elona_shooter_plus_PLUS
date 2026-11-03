@@ -24,7 +24,7 @@ import { validTownPreparation } from './town-save.ts';
 import { TRAIT, createSheriffTraits, type TraitLevels } from './progression.ts';
 import { shadowHitAtFrame } from './collision.ts';
 import { advanceProtection, explosionContains, explosionStats, planConsumableUse } from './consumables.ts';
-import { advanceProjectile, createProjectile, type ExplosionKind, type ProjectileState } from './projectiles.ts';
+import { advanceProjectile, createProjectile, type ArrowSweep, type ExplosionKind, type ProjectileState } from './projectiles.ts';
 import { EQUIPMENT_SERVICE_COST, equipmentServiceEligible, createUpgradePreview, modMountFailure, upgradeCost, type EquipmentService, type TownEquipmentAction, type TownEquipmentOutcome, type LootItemAddress, type LootEquipmentAction } from './equipment.ts';
 import { advanceEnemyArrow, createEnemyArrow, createEnemyShot, type EnemyArrowState } from './enemy-arrows.ts';
 import { advanceBattleLighting, type BattleLighting } from './battle-lighting.ts';
@@ -100,6 +100,7 @@ export interface SimulationState {
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
 export interface SimulationEvent { actorSlot?: number; enemyKind?: EnemyKind; type: 'info' | 'combat-notice' | 'enemy-attack' | 'enemy-drop' | 'sister-killed' | 'sister-launch' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; resisted?: true; pellets?: { x: number; y: number; specialHitType?: number; groundImpact?: true }[]; explosionKind?: ExplosionKind; scale?: number; oneShot?: true }
 export interface SimulationOptions { mods?: GameMods; mode?: GameMode; hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
+type EnemyOrigins = ReadonlyMap<number, { x: number; y: number }>;
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
 export type PurchaseOutcome = 'purchased' | 'occupied' | 'not-enough-gold' | 'unavailable';
@@ -638,8 +639,10 @@ export class Simulation {
     const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
     if (this.heroAutomatic) stepPartyAIFrame(this.heroAIActor(), partyContext, partyCallbacks);
     for (const slot of this.state.party.slots.slice(0, 4)) stepPartyAIFrame(slot, partyContext, partyCallbacks);
+    const beforeMove = this.state.projectiles.some(p => p.previousArrowPoint)
+      ? new Map(this.state.enemies.map(e => [e.uid, { x: e.x, y: e.y + (e.dropY ?? 0) }])) : undefined;
     for (const enemy of this.state.enemies) if (enemy.uid < projectileUidLimit) this.tickEnemy(enemy);
-    this.tickProjectiles(projectileUidLimit);
+    this.tickProjectiles(projectileUidLimit, beforeMove);
     for (const arrow of this.state.enemyArrows) if (arrow.uid < projectileUidLimit) advanceEnemyArrow(arrow);
     this.state.enemyArrows = this.state.enemyArrows.filter(arrow => !arrow.removed);
     this.retainAITargets();
@@ -789,17 +792,51 @@ export class Simulation {
     return true;
   }
 
-  private processPellet(x: number, y: number, damage: number, weaponSlot = this.state.player.selectedSlot, actorSlot = 0): boolean {
+  private arrowContactFraction(sweep: ArrowSweep, x: number, y: number, beforeMove: EnemyOrigins): number {
+    // При обычном попадании сохраняем исходную точку удара, критическую зону и расход пробития.
+    if (this.state.enemies.some(e => !e.removed && e.hp > 0 && this.hitEnemy(e, x, y))) return 1;
+    const dx = x - sweep.x, dy = y - sweep.y, bend = sweep.curve * dx * dx;
+    let fraction = 1;
+    for (const enemy of this.state.enemies) {
+      const previous = beforeMove.get(enemy.uid);
+      if (!previous || enemy.removed || enemy.hp <= 0) continue;
+      const mx = enemy.x - previous.x, my = enemy.y + (enemy.dropY ?? 0) - previous.y;
+      // Стрела с пробитием уже проверила начало отрезка на предыдущем кадре.
+      if (this.hitEnemy(enemy, sweep.x + mx, sweep.y + my)) continue;
+      const steps = Math.min(256, Math.ceil(2 * (Math.hypot(dx - mx, dy - my) + Math.abs(bend))));
+      for (let i = 1; i < steps * fraction; i++) {
+        const t = i / steps;
+        if (this.hitEnemy(enemy, sweep.x + dx * t + mx * (1 - t), sweep.y + dy * t - bend * t * (1 - t) + my * (1 - t))) {
+          fraction = t;
+          break;
+        }
+      }
+    }
+    return fraction;
+  }
+
+  private processPellet(x: number, y: number, damage: number, weaponSlot = this.state.player.selectedSlot, actorSlot = 0,
+    sweep?: ArrowSweep, beforeMove?: EnemyOrigins): boolean {
     const actor = this.actor(actorSlot);
     if (!actor) return false;
     const member = actorSlot ? partySlot(this.state.party, actorSlot)!.member! : null;
+    const fraction = sweep && beforeMove ? this.arrowContactFraction(sweep, x, y, beforeMove) : 1;
+    if (sweep && fraction < 1) {
+      const dx = x - sweep.x;
+      y = sweep.y + (y - sweep.y) * fraction - sweep.curve * dx * dx * fraction * (1 - fraction);
+      x = sweep.x + dx * fraction;
+    }
     let hitLivingEnemy = false;
     for (const enemy of this.state.enemies) {
       if (enemy.removed) continue;
-      const hit = this.hitEnemy(enemy, x, y);
-      if (!hit) continue;
+      const previous = fraction < 1 ? beforeMove?.get(enemy.uid) : undefined;
+      if (fraction < 1 && (!previous || enemy.hp <= 0)) continue;
+      const mx = previous ? enemy.x - previous.x : 0, my = previous ? enemy.y + (enemy.dropY ?? 0) - previous.y : 0;
+      if (previous && sweep && this.hitEnemy(enemy, sweep.x + mx, sweep.y + my)) continue;
+      const hitX = x + mx * (1 - fraction), hitY = y + my * (1 - fraction);
+      if (!this.hitEnemy(enemy, hitX, hitY)) continue;
       // Исходный procHit проверяет SENSE даже у начального шерифа с нулевым навыком.
-      const critical = criticalType(actor.traits, this.random(), inside(ENEMIES[enemy.kind].critical, x - enemy.x, y - enemy.y), enemy.hp > 0);
+      const critical = criticalType(actor.traits, this.random(), inside(ENEMIES[enemy.kind].critical, hitX - enemy.x, hitY - enemy.y), enemy.hp > 0);
       if (enemy.hp > 0) hitLivingEnemy = true;
       enemy.knockBack = combatTrait(TRAIT.SHERIFF, actor.traits);
       const item = this.actorWeapon(actorSlot, weaponSlot);
@@ -854,9 +891,9 @@ export class Simulation {
     return true;
   }
 
-  private tickProjectiles(uidLimit = Infinity): void {
+  private tickProjectiles(uidLimit = Infinity, beforeMove?: EnemyOrigins): void {
     for (const projectile of this.state.projectiles) if (projectile.uid < uidLimit) advanceProjectile(projectile, {
-      hit: (x, y, damage, slot) => this.processPellet(x, y, damage, slot, projectile.actorSlot ?? 0),
+      hit: (x, y, damage, slot, sweep) => this.processPellet(x, y, damage, slot, projectile.actorSlot ?? 0, sweep, beforeMove),
       explode: (x, y, damage, slot, kind) => this.explodeProjectile(x, y, damage, slot, kind, projectile.actorSlot ?? 0),
     });
     this.state.projectiles = this.state.projectiles.filter(projectile => !projectile.removed);
@@ -2204,6 +2241,12 @@ export class Simulation {
       if (['uid', 'damage', 'penetrations', 'frame', 'pulseFrame'].some(key => !Number.isInteger(actor[key]) || Number(actor[key]) < (key === 'uid' || key === 'pulseFrame' ? 1 : key === 'damage' && bossGrenade ? -1 : 0)) || !Number.isInteger(actor.count) || actor.pulseFrame > actor.frame + 1 || actor.damage > 1e9) throw new Error('Invalid projectile counters.');
       if (actor.verticalProgress === null ? Math.abs(actor.targetX - actor.startX) < 0.001 : !finite(actor.verticalProgress) || actor.verticalProgress < 0 || actor.targetX !== actor.startX || actor.x !== actor.startX) throw new Error('Invalid vertical projectile path.');
       if (actor.speed === 0 || actor.direction !== (actor.targetX > actor.startX ? -1 : 1) || actor.scale <= 0 || actor.scale > 10 || actor.alpha < -0.125 || actor.alpha > 1 || actor.shadowAlpha < -0.1 || actor.shadowAlpha > 1 || actor.acceleration < 0) throw new Error('Invalid projectile geometry.');
+      const previous = actor.previousArrowPoint;
+      if (previous !== undefined && (!record(previous) || !finite(previous.x) || !finite(previous.y)
+        || !(actor.kind === 'bolt' && actor.targetY > 135 && actor.count >= 2
+          || actor.kind === 'arrow' && actor.targetY >= 135 && actor.count >= 1 && actor.count <= 3)
+        || actor.frame < 2 || (actor.verticalProgress === null && (previous.x < -14 || previous.x > 636))
+        || Math.abs(previous.x - (actor.x - 4)) > Math.abs(actor.speed) + 0.051)) throw new Error('Invalid previous arrow point.');
       if (actor.kind === 'hand-grenade' || bossGrenade ? actor.weaponSlot !== null : !Number.isInteger(actor.weaponSlot) || Number(actor.weaponSlot) < 0 || Number(actor.weaponSlot) >= 5) throw new Error('Invalid projectile weapon slot.');
       if ((actor.kind === 'rocket' ? actor.speed <= 0 : Math.sign(actor.speed) !== actor.direction)
         || (actor.kind !== 'rocket' && actor.acceleration !== 0)

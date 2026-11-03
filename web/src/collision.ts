@@ -87,6 +87,24 @@ export function placedShapeHit(shape: OriginalShape, placement: OriginalPlacemen
   return localX >= left && localX <= right && localY >= top && localY <= bottom && shape.fills.some(edges => fillHit(edges, localX, localY));
 }
 
+const poseRadii = new WeakMap<OriginalPlacement[], number>();
+
+function poseRadius(placements: OriginalPlacement[], geometry: CollisionGeometry): number {
+  const cached = poseRadii.get(placements);
+  if (cached !== undefined) return cached;
+  let radius = 0;
+  for (const { shape, matrix: [a, b, c, d, tx, ty] } of placements) {
+    const [left, top, right, bottom] = geometry.shapes[shape].bounds;
+    const w = Math.max(Math.abs(left), Math.abs(right)), h = Math.max(Math.abs(top), Math.abs(bottom));
+    radius = Math.max(radius, Math.abs(tx) + Math.abs(a) * w + Math.abs(c) * h,
+      Math.abs(ty) + Math.abs(b) * w + Math.abs(d) * h);
+  }
+  // Запас в один пиксель учитывает округление матриц. Точный контур проверяется ниже.
+  radius += 20;
+  poseRadii.set(placements, radius);
+  return radius;
+}
+
 /** Flash проверяет заполненные контуры bitmap-fill, включая прозрачные пиксели внутри них. */
 export function ordinaryEnemyHit(
   enemy: Readonly<OrdinaryEnemyGeometry>, x: number, y: number, geometry: CollisionGeometry,
@@ -97,6 +115,7 @@ export function ordinaryEnemyHit(
   // предварительным вычитанием его позиции: порядок округления меняет края. Не учитываем здесь корневое смещение экрана.
   const localX = Math.trunc(x * 20), ox = Math.trunc(enemy.x * 20);
   const localY = Math.trunc(y * 20), oy = Math.trunc(enemy.y * 20);
+  if (!enemy.rageEffectFrame && Math.max(Math.abs(localX - ox), Math.abs(localY - oy)) > poseRadius(placements, geometry)) return false;
   const excludeShadow = !enemy.shadowHit;
   let bodyHit = false;
   for (const placement of placements) {

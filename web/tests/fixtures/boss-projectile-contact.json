@@ -76,8 +76,8 @@
             9
           ],
           "atlasPixel": [
-            165,
-            265
+            178,
+            282
           ],
           "insideFrame": true,
           "alpha": 0,
@@ -163,8 +163,8 @@
             7
           ],
           "atlasPixel": [
-            123,
-            263
+            134,
+            280
           ],
           "insideFrame": true,
           "alpha": 255,
@@ -192,7 +192,7 @@
     "sprites/allyBack.png": "7490e93a41c6b62cdb7e70799ff75f1484f2de8a0023b67c26b3dc967d6abb3c",
     "sprites/allyFront.json": "3edcce5ddae85d8b339457fe5c9bc3f63a769d9f20cd9b3b111dc58c6c9006a6",
     "sprites/allyFront.png": "2178f3a6d684e1ff26a0e5219189e0369f8295626521a61e020f588776bba0ab",
-    "sprites/charaPic.json": "f0304c8f13a49ee918daf05d97ec141571fa0efa835c0241644a528a39dae296",
-    "sprites/charaPic.png": "33736cfff6ceb3c156b4f31097b3de25677bf50f391a8f1d5081183c5676f784"
+    "sprites/charaPic.json": "f4ad1fe638778b043f1c31ffbe5ddb247cbf1292d899a0d6460b53f9aaf12faf",
+    "sprites/charaPic.png": "60c688baa42170fe881dac08a500dcb6c342dfad5ebc0c90af5b648bc0819da6"
   }
 }

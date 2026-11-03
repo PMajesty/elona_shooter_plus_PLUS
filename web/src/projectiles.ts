@@ -1,6 +1,9 @@
 export type ProjectileKind = 'hand-grenade' | 'grenade' | 'rocket' | 'bolt' | 'arrow' | 'gravity' | 'flame';
 export type ExplosionKind = 'grenade' | 'rocket' | 'gravity' | 'flame';
 
+// Предыдущий проверенный кончик (x - 4, y); кривизна сегмента, 0 для вертикали.
+export interface ArrowSweep { x: number; y: number; curve: number; }
+
 export interface ProjectileState {
   actorSlot?: number;
   uid: number; kind: ProjectileKind; weaponSlot: number | null; damage: number;
@@ -10,6 +13,7 @@ export interface ProjectileState {
   shadowY: number; shadowAlpha: number; shadowVisible: boolean;
   frame: number; pulseFrame: number; acceleration: number; direction: number; removed: boolean;
   verticalProgress: number | null;
+  previousArrowPoint?: { x: number; y: number };
 }
 
 export interface ProjectileLaunch {
@@ -20,7 +24,7 @@ export interface ProjectileLaunch {
 }
 
 export interface ProjectileCallbacks {
-  hit(x: number, y: number, damage: number, weaponSlot: number): boolean;
+  hit(x: number, y: number, damage: number, weaponSlot: number, sweep?: ArrowSweep): boolean;
   explode(x: number, y: number, damage: number, weaponSlot: number | null, kind: ExplosionKind): void;
 }
 
@@ -114,16 +118,32 @@ function shadow(state: ProjectileState, offset: number): void {
   state.shadowY = position(state.shadowY + state.startY + offset);
 }
 
-function hit(state: ProjectileState, callbacks: ProjectileCallbacks): boolean {
-  if (state.weaponSlot === null || !callbacks.hit(state.x - 4, state.y, state.damage, state.weaponSlot)) return false;
+function hit(state: ProjectileState, callbacks: ProjectileCallbacks, sweep?: ArrowSweep): boolean {
+  if (state.weaponSlot === null) return false;
+  const didHit = sweep
+    ? callbacks.hit(state.x - 4, state.y, state.damage, state.weaponSlot, sweep)
+    : callbacks.hit(state.x - 4, state.y, state.damage, state.weaponSlot);
+  if (!didHit) return false;
   if (state.penetrations <= 0) { state.removed = true; return true; }
   state.penetrations--;
   return false;
 }
 
+function arrowHit(state: ProjectileState, callbacks: ProjectileCallbacks, eligible: boolean): boolean {
+  // Первый кадр ещё проверяет стартовую позу, а не точку реальной траектории.
+  eligible = eligible && state.frame > 1 && state.weaponSlot !== null;
+  const previous = eligible ? state.previousArrowPoint : undefined;
+  const stopped = hit(state, callbacks, previous
+    ? { ...previous, curve: state.verticalProgress === null ? state.curve : 0 }
+    : undefined);
+  if (eligible && !state.removed) state.previousArrowPoint = { x: state.x - 4, y: state.y };
+  else delete state.previousArrowPoint;
+  return stopped;
+}
+
 /** Один вызов оригинального onEnterFrame_bullet. Попадания выполняются в исходном порядке. */
 export function advanceProjectile(state: ProjectileState, callbacks: ProjectileCallbacks): void {
-  if (state.removed) return;
+  if (state.removed) { delete state.previousArrowPoint; return; }
   state.frame++;
   state.pulseFrame++;
   if (state.kind === 'hand-grenade' || state.kind === 'grenade') {
@@ -156,11 +176,12 @@ export function advanceProjectile(state: ProjectileState, callbacks: ProjectileC
   }
   if (state.kind === 'arrow') {
     state.count--;
-    if (outside(state, 0)) { state.removed = true; return; }
+    if (outside(state, 0)) { delete state.previousArrowPoint; state.removed = true; return; }
     if (state.count >= 0 && state.count < 4 || state.targetY < 135 && state.y > 0 && state.y < 135) {
-      if (hit(state, callbacks)) return;
-    }
+      if (arrowHit(state, callbacks, state.targetY >= 135 && state.count >= 0 && state.count < 4)) return;
+    } else delete state.previousArrowPoint;
     if (state.count <= 0) {
+      delete state.previousArrowPoint;
       state.shadowVisible = false; state.alpha = opacity(state.alpha - 0.025);
       if (state.count < -40) state.removed = true;
       return;
@@ -174,15 +195,16 @@ export function advanceProjectile(state: ProjectileState, callbacks: ProjectileC
     return;
   }
   if (state.kind === 'bolt') {
-    if (outside(state, -10)) { state.removed = true; return; }
+    if (outside(state, -10)) { delete state.previousArrowPoint; state.removed = true; return; }
     if (state.targetY > 135 && state.y < 135 && state.count > 2) {
+      delete state.previousArrowPoint;
       state.speed /= 2.5 - Math.abs(state.x - state.startX) / 450;
       state.rotation = rotation(state.rotation - state.rotationStep * 10);
       state.scale -= 0.1;
       if (state.scale <= 0) { state.removed = true; return; }
     } else if (state.targetY > 135 || state.targetY < 135 && state.y < 135) {
-      if (hit(state, callbacks)) return;
-    }
+      if (arrowHit(state, callbacks, state.targetY > 135)) return;
+    } else delete state.previousArrowPoint;
     state.count++;
     move(state, state.speed);
     state.rotation = rotation(state.rotation - state.rotationStep);

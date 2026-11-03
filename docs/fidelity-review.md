@@ -212,7 +212,7 @@ preserved the selected MOD and started battle.
 
 ## Codex findings
 
-- **Long Bow arrows can skip a moving sheep between hit checks.** In a Day 1
+- **Fixed ground bow and crossbow shots skipping moving targets.** In a Day 1
   Rogue simulation with seed 12, one ordinary sheep, no further spawns and no
   player fire, the companion's arrow 3 missed at ticks 153 and 154. Its two hit
   points were (129.7, 269) and (120, 281.65). Between them the arc entered the
@@ -220,8 +220,19 @@ preserved the selected MOD and started battle.
   and excluding the shadow. Both ticks were inside the ground-hit window.
   Across seeds 1–24 this accounted for one of 29 misses in 74 resolved arrows.
   The original SWF's `bullet_arrow2.onEnterFrame_bullet` likewise tests a
-  single point per eligible update. A correction could sweep the arc against
-  target motion within that window while preserving spread and high-arc flight.
+  single point per eligible update. A Crossbow given to the same companion
+  reproduced the defect on seed 1 at ticks 55–56. Ground-target Long/Wind Bow
+  arrows and Crossbow/Repeating Crossbow bolts now check the intervening path on a point
+  miss. Both saved scenarios deal damage when replayed across contact.
+
+Other source behaviors confirmed during this check:
+
+| Behavior | What the player encounters |
+| --- | --- |
+| Crossbow sky/ground boundary | The bolt adds 4 to its rolled aim height. At exactly 135, neither original collision branch runs. Direct launches at adjusted heights 134, 135 and 136 made 10, 0 and 21 hit checks on the same trajectory setup. This separate issue remains open. |
+| Companion “Don't attack armored mobs” order | The original target selector falls through to Normal. It can choose an armored enemy. |
+| Town search, Trouble | The message announces more enemy HP tomorrow. The original calculation never assigns the increase to the mission. |
+| Medal descriptions | The Kongregate medal advertises a 3% wage discount, but the game tests the Ragnarok medal. Ha-na-bi advertises extra fireworks, but the display tests Hunter's Award. |
 
 - **Rogue pistol at browser zoom.** Flash moves `customCursor` to the mouse
   in `MouseMove` and scales it by `0.3 + accuracyFix` in `onTick`. In the

@@ -1,7 +1,40 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Simulation } from '../src/simulation.ts';
+import { readFileSync } from 'node:fs';
+import { Simulation, type EnemyState } from '../src/simulation.ts';
 import { ItemFactory } from '../src/items.ts';
+import { ordinaryEnemyHit, type CollisionGeometry } from '../src/collision.ts';
+
+for (const shot of [{ seed: 12, bow: 24, uid: 3, tick: 153 }, { seed: 1, bow: 23, uid: 2, tick: 55 }]) {
+  test(`weapon ${shot.bow} hits the moving sheep between checks, including after Continue`, () => {
+    const geometry: CollisionGeometry = JSON.parse(readFileSync(new URL('../public/assets/collision-geometry.json', import.meta.url), 'utf8'));
+    const options = { heroClass: 'rogue' as const, hitTest: (e: Readonly<EnemyState>, x: number, y: number) =>
+      e.kind === 'sheep' && ordinaryEnemyHit({ ...e, kind: e.kind }, x, y, geometry) };
+    const sim = new Simulation(shot.seed, options);
+    if (shot.bow === 23) {
+      const slot = sim.state.party.slots[0], weapon = new ItemFactory(() => 0.5).generate(23);
+      slot.weapon = weapon;
+      slot.member!.traits[weapon.reqTrait!] = weapon.reqLv!;
+    }
+    sim.state.newWave = false; sim.state.waveIndex--; sim.state.spawnTimer = 1000;
+    sim['spawnEnemy']('sheep');
+    while (sim.state.tick < shot.tick) sim.tick();
+    const sheep = sim.state.enemies[0], arrow = sim.state.projectiles.find(p => p.uid === shot.uid)!;
+    const hp = sheep.hp, penetrations = arrow.penetrations;
+    const checkpoint = sim.toSave(), resumed = Simulation.fromSave(checkpoint, options);
+    const legacy = structuredClone(checkpoint);
+    delete legacy.projectiles.find(p => p.uid === shot.uid)!.previousArrowPoint;
+    const oldSave = Simulation.fromSave(legacy, options);
+    oldSave.tick();
+    assert.equal(oldSave.state.enemies[0].hp, hp);
+    sim.tick(); resumed.tick();
+    assert.ok(sheep.hp < hp);
+    if (penetrations) assert.equal(arrow.penetrations, penetrations - 1);
+    else assert.ok(!sim.state.projectiles.includes(arrow));
+    assert.deepEqual(resumed.toSave(), sim.toSave());
+    assert.deepEqual(resumed.events, sim.events);
+  });
+}
 
 function prepared(id: number): Simulation {
   const simulation = new Simulation(42);
