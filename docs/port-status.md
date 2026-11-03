@@ -2,14 +2,26 @@
 
 Updated 2026-11-03. **Desktop-browser release, save v45.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-The production bundle is `index-LKqIYVgT.js` from `f71b9bb`. The documented
+The production bundle is `index-bcVpujZq.js` from `018fe25`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
-The opening logo leads into the moving title scene. Clicking the logo skips it.
+The opening logo leads into the animated title. The Sister uses the original
+right-panned reload and gunfire cues on her title timeline. Clicking the logo skips it.
 The character picker has the original foot shadows and isolated sprite frames.
 Inventory and hotbar items use the original drop-shadow settings rounded to
-raster pixels. Victory fireworks now use the rocket and both spark symbols.
+raster pixels. All six town navigation buildings use their source placement
+shadows. Sheep frames have transparent gutters around the original art.
+Victory fireworks use the rocket and both spark symbols.
+
+Enlarged and high-density displays can draw at 1240 × 760, with 620 × 380
+game and input coordinates. Dynamic menu labels use the extracted fonts at
+higher resolution. Inventory icons retain their source bitmap pixels.
+Low Quality uses the smaller drawing buffer. In a short headless Chrome sample
+using the same 150-enemy battle save at 1× and 2×, the 95th-percentile frame
+interval was 16.8 ms at both sizes. The README and Help credits
+identify this as an unofficial, free, AI-assisted port of Noa’s game and the
+Plus release. Its source repository is private.
 
 Both review passes are complete. Claude reproduced five discrepancies and
 independently rechecked four fixes. Codex verified the fifth on public HTTPS by
