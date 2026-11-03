@@ -123,6 +123,38 @@ the departing henchman's cached contribution before the source does.
   Mission Hire, a departing henchman's party contribution, and Continue from the
   skill screen. Preserve existing original wage/reward timing while fixing this.
 
+### C5 — Sister upgrade makes valid later-campaign saves unloadable
+
+**Status:** Fixed. The loader bounds the schedule by the saved mission's
+validated wave count plus its index-zero slot. Battle and town round-trips pass
+on Days 198 and 998 with 11 and 17 entries, followed by Rest and another
+round-trip. An extra entry beyond the mission's capacity is still rejected.
+**Impact:** With at least one Sister owned, Day198 battle and town saves cannot
+be restored (`Invalid town economy.`). This is inside the documented Day1–1000
+supported range and can strand a normal or Hardcore campaign after closing it.
+
+- **Original:** `src/original/MainTimeline.as:12147,12192–12195` computes fixed
+  level `level%40 + int(level/40)*3` and boss-day wave count
+  `6 + int(fixedLevel/10)`. `updateAlly:1552–1564` builds `sisterList` through
+  `mission.wave` inclusively and assigns Sisters to indices1…wave. On calendar
+  Day198, mission level197 gives fixedLv49 and **10 waves**, hence11 entries.
+- **Port:** `web/src/simulation.ts:272–273` correctly allocates
+  `Array(state.waves.length + 1)` when Sisters are owned, but
+  `web/src/town-economy.ts:17–19` (`validTownEconomy`) rejects arrays longer
+  than10. The same schedule remains in the town snapshot after settlement.
+- **Minimal repro:** `Simulation(42)`; complete the first day through
+  `finishDay`, `finishLoot`/`chooseSkill`, `enterTown`, provide fixture gold and
+  call `buyCastleUpgrade('sister')` once. Repeat `startNextDay()` and controlled
+  settlement through Day198. At every day attempt
+  `Simulation.fromSave(sim.toSave())`. First failure is Day198 battle:
+  `waves.length=10`, `economy.sisterWaves.length=11`. Settling that day and
+  restoring its town save fails with the same error. The probe used actual
+  mission generation and Rest transitions, not a manually enlarged array.
+- **Suggested regression:** Sister-owned campaign at Day198 and a later larger
+  boss-day schedule within Day1000; battle/town Continue and following Rest.
+  Validate against campaign-derived schedule bounds rather than the first-cycle
+  ten-entry assumption; do not change original wave counts to satisfy validation.
+
 ## Claude verification checkpoint
 
 Reviewed Codex's fixes in `1eaba02` against the original conditions and the
@@ -138,6 +170,36 @@ suite had passed30/30 before these fixes. This pass used source inspection and
 headless simulation only: Claude did not run a new browser/SWF session, modify
 game files, deploy, or touch user saves. These results establish the three fixes,
 not complete game equivalence or an exhaustive late-game balance review.
+
+## Claude outside-combat pass — 2026-11-03
+
+**Scope completed:** Bounded source/control-flow inspection of ordinary/boss
+loot and MOD confirmation; hero choices and automatic companion growth;
+settlement reward/perfect bonus/wages/upkeep/Museum/Active timing; shop buying,
+selling, tokens, stock refresh and weapon upgrades; companion hiring/dismissal,
+equipment and orders/focus; Prayer, Dinner, Party, eggs, Taunt, special training,
+search outcomes, title claims, repair and Rest. Compared the corresponding
+MainTimeline branches with the production simulation and view callbacks. This
+was not a pixel-by-pixel UI or exhaustive formula/RNG audit.
+
+**Findings:** C4 (premature hired-party cache refresh) and C5 (Sister schedule
+save rejection starting Day198). Codex fixed C4 in `bd58b16`; Claude inspected
+the one-line correction and independently ran **7/7 Mission Hire checks**, with
+skill/result Continue and departing-party Active coverage. C4 is closed for the
+reported scenarios. C5 remains open pending executor response.
+
+**Validation:** The focused equipment-services, loot-mod, party, titles,
+town-economy, town-search and mission-hire files pass **44/44 tests** on the
+checkout after C4. Those existing tests did not cover C5: a separate controlled
+Day1–198 progression probe reproduced the actual save rejection in battle and
+town. Controlled day completion deliberately skipped combat difficulty; the
+probe does not claim a natural198-day playthrough. Test helpers regenerate
+ignored QA fixtures; no user saves or game source were edited by Claude.
+
+No new browser or original-SWF runtime session was run in this pass. Browser
+verification/release remains Codex's responsibility. No other confirmed material
+difference was established in the inspected paths; that is not a whole-port
+parity certification. Review game files remain read-only for Claude.
 
 ## Next independent pass
 

@@ -2236,7 +2236,7 @@ export class Simulation {
     else {
       if (value.version < 28 && record(simulation.state.economy)) Object.assign(simulation.state.economy, { searchTraining: 0, fame: 0 });
       if (value.version < 30 && record(simulation.state.economy)) Object.assign(simulation.state.economy, { robberies: 0, visitorsRobbed: 0 });
-      if (!validTownEconomy(simulation.state.economy)) throw new Error('Invalid town economy.');
+      if (!validTownEconomy(simulation.state.economy, simulation.state.waves.length)) throw new Error('Invalid town economy.');
     }
     // Ранний порт ошибочно выдавал всем героям Sheriff's Award вместо медали их класса.
     if (value.version < 30 && simulation.state.player.classId !== 'sheriff' && simulation.state.player.level >= 10) {

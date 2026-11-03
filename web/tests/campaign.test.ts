@@ -50,6 +50,35 @@ function atDay(day: number): Simulation {
   return sim;
 }
 
+test('Sister schedules restore in battle and town on late boss days and survive Rest', () => {
+  function enterTown(sim: Simulation): void {
+    sim['finishDay']();
+    while (['loot', 'boss-loot'].includes(sim.state.postbattle)) assert.ok(sim.finishLoot());
+    while (sim.state.postbattle === 'skill') assert.ok(sim.chooseSkill(sim.state.skillChoices[0]));
+    assert.ok(sim.enterTown());
+  }
+  for (const [day, waveCount] of [[198, 10], [998, 16]]) {
+    const sim = atDay(day - 1);
+    enterTown(sim);
+    sim.state.gold = 10000;
+    assert.equal(sim.buyCastleUpgrade('sister'), 'purchased');
+    assert.ok(sim.startNextDay());
+    const save = sim.toSave();
+    assert.equal(save.waves.length, waveCount);
+    assert.equal(save.economy.sisterWaves.length, waveCount + 1);
+    assert.equal(save.economy.sisterWaves.reduce((a, b) => a + b, 0), 1);
+    const restored = Simulation.fromSave(save);
+    assert.deepEqual(restored.toSave(), save);
+    const tooLong = structuredClone(save); tooLong.economy.sisterWaves.push(0);
+    assert.throws(() => Simulation.fromSave(tooLong), /town economy/);
+    enterTown(restored);
+    const town = restored.toSave(), next = Simulation.fromSave(town);
+    assert.deepEqual(next.toSave(), town);
+    assert.ok(next.startNextDay()); assert.equal(next.state.day, day + 1);
+    assert.deepEqual(Simulation.fromSave(next.toSave()).toSave(), next.toSave());
+  }
+});
+
 test('late ranged enemies launch original visible attacks at the damage frame, with resumable flights and no impact damage', () => {
   for (const [kind, frame, shotKind] of [['cata', 113, 'bolt'], ['tank', 102, 'tank-bolt'], ['dino', 146, null], ['dragon', 66, 'fireball']] as const) {
     const sim = atDay(35); sim.state.spawnTimer = 100000;
