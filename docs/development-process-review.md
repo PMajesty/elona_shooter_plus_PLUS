@@ -1,18 +1,24 @@
 # Development process review
 
-Current review: 2026-11-02, scheduled23:09 UTC; cadence checked23:25 UTC
-(2026-11-03 locally).
+Current review: 2026-11-03, scheduled02:09 UTC. Previous review23:09 UTC;
+continuation cadence corrected23:25 UTC on2026-11-02.
 Earlier detail remains in Git. Follow the [goal](long-term-goal.md) and
 [current coverage/evidence/limits](port-status.md).
 
 ## Evidence since the previous review
 
-Nine checkpoints followed the19:37 review: seven delivered required-asset Retry,
-explicit-save backup, WebGL-loss pause, original creation/item/skill information,
-and visible Continue/import failures. Two recorded Chrome iframe/stability and
-Edge cross-origin evidence. Changes reached ordinary play and reused existing
-renderers, simulation, validators and save flows. Work stayed solo and muted;
-isolated headless browsers left the user's adventure/collection untouched.
+The preceding review completed plain static-host verification (1d295c9); the
+continuation interval was then corrected from10 to30 minutes (151b8b4). No gameplay
+changes followed. Five heartbeats from23:57 through01:57 UTC repeated the same Git
+status/log/document-mtime inspection and found the same clean151b8b4 checkpoint.
+No tests, builds or browser runs were repeated. The website URL/platform question
+remains unanswered; no new independent failure or changed direction was supplied.
+
+The present constraint is missing deployment information. Rechecking unchanged
+files does not resolve it. Both active automation prompts now skip tools and
+repeat reviews while that exact known input wait remains unchanged. They resume
+on an answer, changed direction or demonstrated independent gap. Cadences remain
+30 minutes and three hours; neither the port nor its goal is marked complete.
 
 The last full suite passed578 checks in11.236s. The last UI-only save-recovery
 change reused it and ran the affected browser flows plus build/typecheck.
@@ -30,6 +36,7 @@ Repository evidence cannot allocate billing or exact time percentages.
 | Several combined reads were truncated; one emitted6070 tokens despite a4900-token output budget. The review document again accumulated chronological continuations | Use a file/line inventory followed by one relevant function or short section. Budget the whole batch. Replace this document with current findings; Git preserves history. |
 | Three consecutive information slices followed the stability/hosting work while the completion gate still mixed release questions and cosmetic differences | Treat restored information as delivered. Next address a finite hosting gap: serve the production dist from a plain static server at a nested path and exercise the documented embed. Defer exact filters/audio/camera work. |
 | The saved continuation schedule was every10 minutes despite the user's30-minute request, confirmed in its automation.toml | Updated the existing heartbeat through the native automation tool to30 minutes, preserving its prompt, active status and chat. The workflow-review schedule already matches three hours. No billing/time savings are inferred. |
+| Five subsequent idle heartbeats repeated unchanged workspace inspection while the same human-input request was pending | Added an explicit unchanged-input branch to both existing automation prompts: return quietly without tools or rewriting docs, and resume on relevant new information. Schedules remain active as requested. |
 
 The full-suite runtime is small; repeated orientation, setup and unfocused source
 reads are the demonstrated process concerns. No time/cost percentage follows.
