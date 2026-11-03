@@ -9,8 +9,8 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- The current game is `/srv/elona/releases/review-1shtHcPP/elona/` (save v45,
-  code `2194edd`). The previous v45 release is `releases/review-DOP2ZYdB`
+- The current game is `/srv/elona/releases/review-DMuRZUK8/elona/` (save v45,
+  code `73bd70d`). The previous v45 release is `releases/review-1shtHcPP`
   and the previous v43 release is `releases/release-By__DLWU`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
@@ -23,9 +23,11 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
 
-Muted Chrome verified the current bundle hash and the reticle's red edge and
-hotspot at 1× and 2×. At 4× the recoil reticle reached 206 pixels, followed the
-pointer, hid on pause and returned to the native cursor as recoil settled.
+Muted Chrome 156 verified the public bundle's SHA-256, started a new Rogue,
+and fired at 100% and 200% browser zoom. The exported aim and the visible
+cursor agreed after zooming with the mouse stationary. Clicking Menu at 200%
+paused combat and preserved ammunition. The [fidelity review](fidelity-review.md)
+records the comparison with the Flash reference.
 
 On the preceding cursor and town-lettering build, muted Chrome verified the public bundle hash, the aiming
 point at 1× and 2×, the native reticle hotspot and the colorblind frame. The

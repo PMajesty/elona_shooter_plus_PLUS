@@ -2,7 +2,7 @@
 
 Updated 2026-11-03. **Desktop-browser release, save v45.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-The production bundle is `index-1shtHcPP.js` from `2194edd`. The documented
+The production bundle is `index-DMuRZUK8.js` from `73bd70d`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
@@ -19,8 +19,9 @@ game and input coordinates. Dynamic menu labels use the extracted fonts at
 higher resolution. The six town panels and their action labels now use 2×
 renders from the original SWF. Inventory icons retain their source bitmap pixels.
 The mouse crosshair uses the original artwork, red outer glow, recoil scale and
-firing opacity. Larger reticles that exceed the native cursor limit follow
-pointer movement in a separate layer. The ring signals recoil and range penalty.
+firing opacity. The reticle follows pointer events in a layer clipped to the
+battlefield. Browser zoom scales both together, including when the mouse stays
+still. The ring signals recoil and range penalty.
 Weapon accuracy determines how far pellets can scatter beyond it. Town
 navigation and Help tabs retain their hover artwork when their panels change.
 Low Quality uses the smaller drawing buffer. In a short headless Chrome sample
@@ -53,7 +54,7 @@ ordinary browser storage are the measured browser scope.
 | Town activities | Prayer, Dinner, Party, eggs, Taunt/training, all18 search families and talent/gift variants, visitor robbery and source English event narratives/artwork. Outcomes persist once; closing notices repeats no effects/RNG. |
 | Medals/collection | All38 defined awards, both Museum pages/hints, action/class/day/perfect/Hardcore/Ragnarok/recycling awards, original medal bonuses and independent collection/day records across slots/New Game. Source bonus/text discrepancies remain preserved. |
 | Saves/website | Eight slots, deletion confirmation, Continue, actual JSON import/export/download, native Flash SOL collection/adventure conversion, invalid/write-failure recovery, same-origin/cross-origin input isolation, static nested-folder hosting and public HTTPS embedding. Hardcore retains town-only saving. |
-| Presentation | Original extracted artwork/fonts/audio/English/credits, original item/skill/medal/help/event panels, creation/Barracks idles, class/rampage auras and notices, boss bars/entrance reticle, original combat shake/hotbar/frame cues, moving clouds/dusk/night all three special-shot trails and the friendly Sister launch cue. Linked mute/fullscreen icons and crisp integer scaling are integrated. |
+| Presentation | Original extracted artwork/fonts/audio/English/credits, original item/skill/medal/help/event panels, creation/Barracks idles, class/rampage auras and notices, boss bars/entrance reticle, original combat shake/hotbar/frame cues, moving clouds/dusk/night all three special-shot trails and the friendly Sister launch cue. Mute and fullscreen controls stay inside the responsive game window. |
 
 Source review includes the MainTimeline public-function inventory, original
 reachable menu/input paths and the earlier finite trait/content audits. Dormant
@@ -85,9 +86,12 @@ now starts once per wave with one or multiple bombs, following onTick8364.
 
 Creation uses ally4 stand poses5/6 for four reference frames each, with original
 selection/hover transparency. Mute works on title/creation/gameplay and persists.
-Large displays use integer scaling/letterboxing;1080p gives1240×760 at2×. Smaller
-windows shrink proportionally. The native buffer and input remain620×380.
-Native fullscreen was never activated during automated testing.
+At 100% page zoom the preferred field is 1240 × 760 on a 1920 × 1080 desktop.
+Larger monitors get a wider field. The available window or iframe limits both
+dimensions. In isolated Chromium desktop tests the field measured 1240, 1600
+and 2400 physical pixels wide at 100% on FHD, QHD and 4K virtual displays.
+At 200% it measured 1607, 2194 and 3369 respectively. Browser chrome and OS
+display scaling affect these sizes. Automated checks used windowed mode.
 
 ## Evidence retained
 

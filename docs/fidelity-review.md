@@ -212,6 +212,18 @@ preserved the selected MOD and started battle.
 
 ## Codex findings
 
+- **Rogue pistol at browser zoom.** Flash moves `customCursor` to the mouse
+  in `MouseMove` and scales it by `0.3 + accuracyFix` in `onTick`. In the
+  startup-fixed SWF running in Ruffle, the resting pistol ring and visible glow
+  measured about 18 × 19 pixels on the 620 × 380 stage. Earlier port checks
+  resized the canvas without changing the browser's tab zoom. Opus implemented
+  the pointer-driven layer and Codex integrated it with display and aim resizing.
+  At true 100% and 200% tab zoom the resting ring measured about 19 × 19 stage
+  pixels, including glow. The comparison uses a five-level RGB difference
+  threshold, so the faint outer edge can vary by a pixel. At both zoom levels
+  one shot spent one round and the exported aim was within one stage pixel of
+  the requested point.
+
 - **Community Compilation details.** The Game MODs menu now opens the original
   explanation of sale-day shop refreshes and Active AP. It uses the Flash
   button, panel and checkbox art. The link accepts a click anywhere inside its
