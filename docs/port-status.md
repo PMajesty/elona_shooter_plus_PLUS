@@ -2,7 +2,7 @@
 
 Updated 2026-11-03. **Desktop and touch browser release, save v45.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-The production bundle is `index-7YZuhYO9.js` from `2d63bd0`. The documented
+The production bundle is `index-B_k9m-G9.js` from `e1ba324`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
@@ -10,7 +10,8 @@ Phone and tablet browsers have touch aiming, a second-finger reload, Fire at
 will, hotbar selection, pause and save-file controls. The portrait menu can be
 enlarged and panned without cropping combat. Muted Chromium and WebKit on
 Windows exercised the phone-sized viewport, rotation, combat, save/Continue
-and the loot-to-town transition. Physical iOS and Android hardware was unavailable.
+and the loot-to-town transition. Layout checks also covered a 320-pixel phone,
+a landscape cutout and a 768-pixel tablet. Physical iOS and Android hardware was unavailable.
 The dinosaur atlas uses about 8 MiB decoded instead of 44 MiB. All 375 poses
 were compared after restoring their original transparent margins.
 

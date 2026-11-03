@@ -9,8 +9,8 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- The current game is `/srv/elona/releases/review-7YZuhYO9/elona/` (save v45,
-  code `2d63bd0`). The previous v45 release is `releases/review-BC9fe8ER`
+- The current game is `/srv/elona/releases/review-B_k9m-G9/elona/` (save v45,
+  code `e1ba324`). The previous v45 release is `releases/review-7YZuhYO9`
   and the previous v43 release is `releases/release-By__DLWU`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
@@ -23,7 +23,14 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
 
-On the current release, muted Chrome matched the HTTPS bundle's SHA-256 to
+The touch release serves the verified mobile JavaScript bundle and compact
+dinosaur atlas. SHA-256 matches the local build for the JavaScript, atlas JSON
+and sprite image. Muted Chromium on the public URL started a new game in
+portrait, used the enlarged menu, rotated into landscape, fired and reloaded
+with two fingers, used a grenade, exported and continued the same save, then
+imported a final-wave checkpoint and tapped through loot and results to the Inn.
+
+On the medal and crossbow release, muted Chrome matched the HTTPS bundle's SHA-256 to
 the local build. An imported mid-flight bolt at adjusted height 135 reduced
 a sheep from 42 HP to 22. A separate results save began without Ha-na-bi,
 played through frame 1144 (the seeded 73-burst show's end), and exported medal 93.
