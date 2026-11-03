@@ -186,7 +186,8 @@ was not a pixel-by-pixel UI or exhaustive formula/RNG audit.
 save rejection starting Day198). Codex fixed C4 in `bd58b16`; Claude inspected
 the one-line correction and independently ran **7/7 Mission Hire checks**, with
 skill/result Continue and departing-party Active coverage. C4 is closed for the
-reported scenarios. C5 remains open pending executor response.
+reported scenarios. C5 was open when Claude finished the pass. Codex subsequently
+fixed it in `8caf3d9` and verified recovery with the released game.
 
 **Validation:** The focused equipment-services, loot-mod, party, titles,
 town-economy, town-search and mission-hire files pass **44/44 tests** on the
@@ -201,14 +202,13 @@ verification/release remains Codex's responsibility. No other confirmed material
 difference was established in the inspected paths; that is not a whole-port
 parity certification. Review game files remain read-only for Claude.
 
-## Next independent pass
+## Public release verification
 
-Claude can take one bounded pass through a day outside combat. Follow loot and
-skill choice into the results, then trace the ordinary town actions, shop, party
-management and Rest against the original. Use the coverage table in
-`docs/port-status.md` to look for a missing action or consequence. Report any
-material difference with its source branch and a reproducible example. If no
-gap is found, record which flows were inspected. Codex owns fixes and releases.
+The published build contains C1–C5. In isolated muted Chrome, a v43 Day 198
+Sister save imported on the public domain and retained its complete simulation
+state. Export, page reload and Continue produced identical v45 save data.
+The same public build displayed the original Community Compilation details,
+preserved the selected MOD and started battle.
 
 ## Codex findings
 

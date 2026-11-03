@@ -2,14 +2,15 @@
 
 Updated 2026-11-03. **Desktop-browser release, save v45.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-The production bundle is `index-fmZLIzvl.js` from `1eaba02`. The documented
+The production bundle is `index-CxrTg8bC.js` from `8caf3d9`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
-Claude reproduced and rechecked the three combat findings. V45 retains the day's
-growth notices and side income across Continue and accepts earlier saves. Public
-HTTPS New Game, export and Continue passed in both the standalone and embedded
-game. The [review log](fidelity-review.md) records the comparisons and limits.
+Both review passes are complete. Claude reproduced five discrepancies and
+independently rechecked four fixes. Codex verified the fifth on public HTTPS by
+recovering a v43 Day 198 Sister save and comparing the complete state after
+Continue. V45 retains the day's growth notices and side income. The
+[review log](fidelity-review.md) records the comparisons and limits.
 
 The supported campaign/save range remains **Day1–1000**, an intentional browser
 safety boundary rather than an original campaign ending. The source encounter
@@ -71,8 +72,10 @@ Recent browser evidence is under ignored .build/browser-qa/; deployment evidence
 is under .build/deployment/. Historical detail remains in Git and
 port-verification.json; do not reread trace archives for routine work.
 
-- **Current checks:**589 automated checks pass in12.008s; typecheck/production
-  build pass. Two extractor tests pass; original SWF/assets baseline is unchanged.
+- The full suite passed 599 checks before the final Sister save correction.
+  The final build and all 32 affected campaign, town economy and Flash import
+  checks passed, including battle and town round-trips on Days 198 and 998.
+  The original SWF is retained as the comparison baseline.
   Independent original-runtime/source comparisons remain in the existing tests;
   seeded self-replay alone is not evidence of Flash equivalence.
 - **Changed features:** backdrop-verification.json covers ordinary wave-driven

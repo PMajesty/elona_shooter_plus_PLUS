@@ -9,8 +9,9 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- The current game is `/srv/elona/releases/review-fmZLIzvl/elona/` (save v45,
-  code `1eaba02`). The previous v43 release is `releases/release-By__DLWU`.
+- The current game is `/srv/elona/releases/review-CxrTg8bC/elona/` (save v45,
+  code `8caf3d9`). The previous v45 release is `releases/review-fmZLIzvl`
+  and the previous v43 release is `releases/release-By__DLWU`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
 - Both domain certificates were issued successfully by Let's Encrypt. Caddy's
@@ -22,10 +23,12 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
 
-For v45, isolated muted Chrome passed New Game and a shot on the public domain.
-The complete exported v45 state matched after Continue in a fresh page and a
-same-origin iframe. The check used the workstation HTTPS proxy and normal TLS
-validation. Evidence is in `.build/deployment/https-review-verification.json`.
+On the current public bundle, isolated muted Chrome displayed the MOD details,
+started battle, imported an older Day 198 Sister save and verified full state
+equality after Continue. Evidence is in
+`.build/deployment/https-town-review-verification.json`. The preceding v45
+build also passed standalone and same-origin iframe Continue via the workstation
+HTTPS proxy with normal TLS validation.
 
 An earlier isolated muted Chrome156.0.8078.80 check passed actual New Game, shooting5→4,
 loot/boss loot/skill selection/results/town, delivered JSON export and exact full
