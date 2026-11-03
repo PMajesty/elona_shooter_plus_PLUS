@@ -9,8 +9,8 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- The current game is `/srv/elona/releases/review-CxrTg8bC/elona/` (save v45,
-  code `8caf3d9`). The previous v45 release is `releases/review-fmZLIzvl`
+- The current game is `/srv/elona/releases/review-LKqIYVgT/elona/` (save v45,
+  code `f71b9bb`). The previous v45 release is `releases/review-CxrTg8bC`
   and the previous v43 release is `releases/release-By__DLWU`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
@@ -23,7 +23,13 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
 
-On the current public bundle, isolated muted Chrome displayed the MOD details,
+On the current public bundle, a muted, isolated Chrome session skipped the logo,
+entered New Game through the animated menu, selected an appearance and reached
+battle. It restored a victory save, displayed fireworks and opened the town
+shop. The served JavaScript, logo, portrait, inventory, rocket and spark assets
+matched the verified local build by SHA-256.
+
+On the previous public bundle, isolated muted Chrome displayed the MOD details,
 started battle, imported an older Day 198 Sister save and verified full state
 equality after Continue. Evidence is in
 `.build/deployment/https-town-review-verification.json`. The preceding v45

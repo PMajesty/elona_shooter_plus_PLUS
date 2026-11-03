@@ -2,9 +2,14 @@
 
 Updated 2026-11-03. **Desktop-browser release, save v45.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-The production bundle is `index-CxrTg8bC.js` from `8caf3d9`. The documented
+The production bundle is `index-LKqIYVgT.js` from `f71b9bb`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
+
+The opening logo leads into the moving title scene. Clicking the logo skips it.
+The character picker has the original foot shadows and isolated sprite frames.
+Inventory and hotbar items use the original drop-shadow settings rounded to
+raster pixels. Victory fireworks now use the rocket and both spark symbols.
 
 Both review passes are complete. Claude reproduced five discrepancies and
 independently rechecked four fixes. Codex verified the fifth on public HTTPS by
@@ -118,9 +123,9 @@ port-verification.json; do not reread trace archives for routine work.
 ## Accepted differences and support limits
 
 1. Exact cosmetic/audio/incidental RNG matching is deferred by user direction.
-   Raster/filter/subpixel differences, text glows, title-intro shake/impact cues,
-   precise sound mixing/sample scheduling, fireworks and some transient phases
-   differ. Camera shake and new trails remain separate from collision/game RNG.
+   Raster/filter/subpixel differences, text glows, decorative particle positions,
+   title animation subframes and precise sound mixing/sample scheduling differ.
+   Camera shake and new trails remain separate from collision/game RNG.
 2. Browser UI replaces Flash components: eight visible save choices instead of
    a five-row scrolling ComboBox; help/statistics use canvas/wheel scrolling.
    Pause/statistics panels shift to fit620×380. Hover delay/fade and long item
