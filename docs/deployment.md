@@ -9,8 +9,8 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- The current game is `/srv/elona/releases/review-bcVpujZq/elona/` (save v45,
-  code `018fe25`). The previous v45 release is `releases/review-LKqIYVgT`
+- The current game is `/srv/elona/releases/review-DOP2ZYdB/elona/` (save v45,
+  code `2d63dc4`). The previous v45 release is `releases/review-bcVpujZq`
   and the previous v43 release is `releases/release-By__DLWU`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
@@ -23,7 +23,12 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
 
-On the current build, isolated Chrome loaded the public game at native size,
+On the current build, muted Chrome verified the public bundle hash, the aiming
+point at 1× and 2×, the native reticle hotspot and the colorblind frame. The
+Tower and Help → Credits buttons kept their hover artwork during a held click.
+The enlarged Inn used 376 × 145 source pixels for a 188 × 72.5 label layer.
+
+On the preceding credits and title-audio build, isolated Chrome loaded the public game at native size,
 displayed Help → Credits, played the title reload and gunfire through Web Audio
 with desktop output silenced, selected an appearance and fired at the requested
 world coordinates. Restoring a victory save reached the results and town shop.
