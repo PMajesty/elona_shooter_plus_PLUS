@@ -2,7 +2,7 @@
 
 Updated 2026-11-03. **Desktop-browser release, save v45.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-The production bundle is `index-DOP2ZYdB.js` from `2d63dc4`. The documented
+The production bundle is `index-1shtHcPP.js` from `2194edd`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
@@ -18,8 +18,10 @@ Enlarged and high-density displays can draw at 1240 × 760, with 620 × 380
 game and input coordinates. Dynamic menu labels use the extracted fonts at
 higher resolution. The six town panels and their action labels now use 2×
 renders from the original SWF. Inventory icons retain their source bitmap pixels.
-The browser positions the mouse crosshair independently of scene frames, using
-the original reticle artwork, spread, firing opacity and aiming point. Town
+The mouse crosshair uses the original artwork, red outer glow, recoil scale and
+firing opacity. Larger reticles that exceed the native cursor limit follow
+pointer movement in a separate layer. The ring signals recoil and range penalty.
+Weapon accuracy determines how far pellets can scatter beyond it. Town
 navigation and Help tabs retain their hover artwork when their panels change.
 Low Quality uses the smaller drawing buffer. In a short headless Chrome sample
 using the same 150-enemy battle save at 1× and 2×, the 95th-percentile frame

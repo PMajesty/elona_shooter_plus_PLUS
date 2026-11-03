@@ -36,6 +36,8 @@ Sound starts muted and remembers your choice.
 - Repeating 40-level encounter cycles: Catapult, Spider, Ghost, Ogre, Knight, Bird,
   Tank, Dino and Dragon, bird-dropped rats, multi-boss days and later boss attacks.
   Later cycles increase enemy strength and can spawn the original larger variants.
+  Defend the castle until the final wave's spawn delay expires. Enemies can
+  still be on the field when the day ends.
   The current browser save safety boundary is Day1000; this is not an endless-play claim.
 - Manual/automatic reload, owned firearms, bows, projectile weapons and consumables;
   Chain Gun wind-up, release/resume and saved spin state work in manual and AI control.
