@@ -7,6 +7,7 @@ import { createGeneInfoView } from './gene-info-view.ts';
 import { animateStandingPortraits } from './portrait-animation.ts';
 import { configureDisplaySizing } from './display-sizing.ts';
 import { ScreenShake } from './screen-shake.ts';
+import { battleLightColor, battleCloudX } from './battle-lighting.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
 import { traitHintValues, type OriginalHintInfo } from './trait-hint.ts';
 import { sniperDamageLimit, duelistDamageLimit } from './class-limits.ts';
@@ -97,6 +98,7 @@ const USED_SOUNDS = new Set(['soundSearch', 'soundEat1', 'soundParty', 'soundCli
 for (let index = 0; index < 5; index++) USED_SOUNDS.add(`soundGoodshot${index}`);
 USED_SOUNDS.add('soundGood');
 USED_SOUNDS.add('soundMedal');
+USED_SOUNDS.add('soundLaunch');
 for (const key of ['soundChicken', 'soundChickenAttack', 'soundCrow', 'soundCata', 'soundTank', 'soundDeadBoss2']) USED_SOUNDS.add(key);
 USED_SOUNDS.add('soundReloaded1');
 for (const key of ['soundBgTown', 'soundRepair1', 'soundBeep', 'soundScroll1', 'soundPay1', 'soundMod']) USED_SOUNDS.add(key);
@@ -151,6 +153,8 @@ class ElonaScene extends Phaser.Scene {
   private profile = this.profileRead.profile;
   private ammoFill?: Phaser.GameObjects.Image;
   private bottomBarSprite?: Phaser.GameObjects.Image;
+  private battleBackdropSprite?: Phaser.GameObjects.Image;
+  private battleCloudSprite?: Phaser.GameObjects.Image;
   private screenShake = new ScreenShake();
   private bossReticles = new Map<number, { image: Phaser.GameObjects.Image; frame: number }>();
   private bossReticleSeen = new Set<number>();
@@ -178,7 +182,7 @@ class ElonaScene extends Phaser.Scene {
   private reloadAnimations = 0;
   private slotRequested?: number;
   private hotbar: { icon: Phaser.GameObjects.Image; count: Phaser.GameObjects.Text; cooldown: Phaser.GameObjects.Image }[] = [];
-  private effects: { object: Phaser.GameObjects.GameObject; ticks: number; moveY?: number; clip?: string; frame?: number; enemyOffset?: { uid: number; x: number; y: number } }[] = [];
+  private effects: { object: Phaser.GameObjects.GameObject; ticks: number; moveY?: number; clip?: string; frame?: number; trail?: true; enemyOffset?: { uid: number; x: number; y: number } }[] = [];
   private ambient?: Phaser.Sound.BaseSound;
   private bowSound?: Phaser.Sound.BaseSound;
   private chainSounds = new Map<number, { mode: number; sound: Phaser.Sound.BaseSound }>();
@@ -310,9 +314,12 @@ class ElonaScene extends Phaser.Scene {
     this.screen = screen;
     this.screenShake.reset(); this.cameras.main.setScroll(0, 0);
     this.bottomBarSprite = undefined;
+    this.battleBackdropSprite = this.battleCloudSprite = undefined;
+    delete container.dataset.battleBackdrop;
     this.bossReticles.clear(); this.bossReticleSeen.clear(); this.enemyFrameAudio.clear(); this.frameSoundCues = [];
     delete container.dataset.screenShake; delete container.dataset.bossReticles; delete container.dataset.frameSounds;
     delete container.dataset.rampageBar;
+    delete container.dataset.specialTrails; delete container.dataset.flashFrames;
     this.paused = false;
     this.accumulator = 0;
     this.firePressed = this.fireReleased = this.reloadRequested = false; this.slotRequested = undefined;
@@ -636,8 +643,19 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private drawBattleBackground(): void {
+    this.battleBackdropSprite = this.clip('battleBackdrop', 1, -5, -15);
+    this.battleCloudSprite = this.clip('battleCloud', 1, 160, -35)?.setScale(1.0000305, 1.000412);
+    this.paintBattleBackdrop();
     this.image('battle');
     this.paintCastleSister();
+  }
+
+  private paintBattleBackdrop(): void {
+    const color = battleLightColor(this.sim?.state.battleLighting);
+    const x = battleCloudX(this.sim?.state.tick ?? 0);
+    this.battleBackdropSprite?.setTint(color);
+    this.battleCloudSprite?.setTint(color).setX(x);
+    container.dataset.battleBackdrop = JSON.stringify({ color, cloudX: x, lighting: this.sim?.state.battleLighting ?? null });
   }
 
   private paintCastleSister(): void {
@@ -918,6 +936,9 @@ class ElonaScene extends Phaser.Scene {
   private paintBattle(): void {
     if (!this.sim) return;
     const state = this.sim.state;
+    this.paintBattleBackdrop();
+    container.dataset.specialTrails = JSON.stringify(this.effects.filter(effect => effect.trail).map(effect => ({ key: (effect.object as Phaser.GameObjects.Image).texture.key, ticks: effect.ticks, alpha: (effect.object as Phaser.GameObjects.Image).alpha })));
+    container.dataset.flashFrames = String(this.options.disableFlash ? 0 : this.flashFrames);
     this.bottomBarSprite?.setFrame(state.player.rampageTicks > 0 ? '2' : '1');
     container.dataset.rampageBar = String(state.player.rampageTicks > 0);
     this.syncChainSounds();
@@ -1009,7 +1030,7 @@ class ElonaScene extends Phaser.Scene {
     this.cursor?.setVisible(false);
     if (pointer.x >= 0 && pointer.x < 620 && pointer.y > 30 && pointer.y < 345) {
       this.cursor?.setVisible(true).setPosition(pointer.x, pointer.y)
-        .setFrame(this.options.colorBlind ? '3' : state.waveIndex <= 3 ? '2' : '1')
+        .setFrame(this.options.colorBlind ? '3' : state.waveIndex < 3 ? '2' : '1')
         .setScale(0.3 + Math.min(0.6, state.player.accuracyFix)).setAlpha(state.player.shootTimer > 0 && !this.sim.weapon?.automatic ? 0.7 : 1);
       if (this.cursor) this.root.bringToTop(this.cursor);
     }
@@ -1162,10 +1183,11 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private renderEvent(event: SimulationEvent): void {
+    if (event.type === 'sister-launch') this.playSound('soundLaunch', 0.9, 0.72);
     if (event.type === 'explosion') this.screenShake.start(10, 5, 0.9);
     if (event.type === 'ragnarok') this.screenShake.start(150, 1.5, 1);
     if (event.type === 'rampage' && !event.actorSlot) this.screenShake.start(40, 1.5, 1);
-    if (event.type === 'shot' && event.oneShot) this.screenShake.start(5, 1.5, 1);
+    if (event.type === 'shot' && event.oneShot) { this.screenShake.start(5, 1.5, 1); this.flashFrames += 15; }
     if (event.type === 'enemy-attack') {
       const key = { cata: 'soundBow1', tank: 'soundTank2', dino: 'soundLightning', dragon: 'soundFireball' }[event.enemyKind as 'cata' | 'tank' | 'dino' | 'dragon'];
       const pan = Phaser.Math.Clamp(Math.trunc(Math.trunc(event.x ?? 0) / 25), 0, 19) * 0.08 - 0.8;
@@ -1214,6 +1236,15 @@ class ElonaScene extends Phaser.Scene {
     if (sound[event.type]) this.playSound(sound[event.type]!, event.type === 'kill' ? 0.4 : actorSound ? actorAudio.volume : 0.65, actorSound ? actorAudio.pan : 0);
     if (event.type === 'shot') {
       actor?.playOriginal(weaponPresentation(event.weaponId ?? 0).shootFrame);
+      for (const pellet of event.pellets ?? []) {
+        const key = ['', 'powerShotTrail', 'oneShotTrail', 'lethalShotTrail'][pellet.specialHitType ?? 0];
+        if (!key) continue;
+        const asset = manifest.clips[key], x = (event.x ?? 0) - 10, y = event.y ?? 0;
+        const trail = this.add.image(x, y, key, '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight)
+          .setScale(Math.hypot(pellet.x - x, pellet.y - y) / asset.frameWidth, 1)
+          .setRotation(Math.atan2(pellet.y - y, pellet.x - x)).setAlpha(0);
+        this.root.add(trail); this.effects.push({ object: trail, ticks: 16, trail: true });
+      }
     }
     if (event.type === 'bow-draw') {
       actor?.playOriginal(86);
@@ -1296,6 +1327,10 @@ class ElonaScene extends Phaser.Scene {
       effect.ticks--;
       if (effect.ticks <= 0) { effect.object.destroy(); return false; }
       if (effect.moveY && effect.object instanceof Phaser.GameObjects.Text) effect.object.y += effect.moveY;
+      if (effect.trail && effect.object instanceof Phaser.GameObjects.Image) {
+        const age = 16 - effect.ticks;
+        effect.object.setAlpha(age < 3 ? age * 0.4 : Math.max(0, 0.8 - (age - 2) * 0.06));
+      }
       if (effect.clip && effect.object instanceof Phaser.GameObjects.Image) {
         effect.object.setFrame(String(++effect.frame!));
         const alpha = manifest.clips[effect.clip].frameAlpha?.[effect.frame! - 1];

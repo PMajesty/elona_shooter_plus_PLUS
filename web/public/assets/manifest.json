@@ -2436,6 +2436,66 @@
       "count": 2,
       "uniqueFrames": 2,
       "characterId": 2675
+    },
+    "battleBackdrop": {
+      "image": "sprites/battleBackdrop.png",
+      "json": "sprites/battleBackdrop.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 640,
+      "frameHeight": 400,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2493
+    },
+    "battleCloud": {
+      "image": "sprites/battleCloud.png",
+      "json": "sprites/battleCloud.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 1920,
+      "frameHeight": 120,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2496
+    },
+    "powerShotTrail": {
+      "image": "sprites/powerShotTrail.png",
+      "json": "sprites/powerShotTrail.json",
+      "originX": -2.95,
+      "originY": 0.05,
+      "frameWidth": 670,
+      "frameHeight": 1,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2408
+    },
+    "oneShotTrail": {
+      "image": "sprites/oneShotTrail.png",
+      "json": "sprites/oneShotTrail.json",
+      "originX": -2.95,
+      "originY": 0.05,
+      "frameWidth": 670,
+      "frameHeight": 1,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2407
+    },
+    "lethalShotTrail": {
+      "image": "sprites/lethalShotTrail.png",
+      "json": "sprites/lethalShotTrail.json",
+      "originX": -2.95,
+      "originY": 0.05,
+      "frameWidth": 670,
+      "frameHeight": 1,
+      "labels": {},
+      "count": 1,
+      "uniqueFrames": 1,
+      "characterId": 2406
     }
   },
   "sounds": {

@@ -107,6 +107,7 @@ test('Sister upgrades assign launches to waves; bombs fly, explode when shot and
   assert.equal(sim.state.economy.sisterWaves.reduce((a, b) => a + b, 0), 1);
   sim.state.waveIndex = sim.state.economy.sisterWaves.findIndex(n => n > 0);
   sim['timerTick']();
+  assert.equal(sim.events.filter(event => event.type === 'sister-launch').length, 1);
   const bomb = sim.state.enemies.find(e => e.kind === 'sister-bomb')!;
   assert.ok(bomb); sim['tickEnemy'](bomb); assert.ok(bomb.x < 650);
   sim = restore(sim);
@@ -172,6 +173,7 @@ test('multiple Sister launches chain safely and earn their upgrade medal damage 
   sim.state.waveIndex = waves.indexOf(Math.max(...waves));
   const count = waves[sim.state.waveIndex]; assert.ok(count >= 2);
   sim['timerTick']();
+  assert.equal(sim.events.filter(event => event.type === 'sister-launch').length, 1);
   const bombs = sim.state.enemies.filter(enemy => enemy.kind === 'sister-bomb');
   assert.equal(bombs.length, count); assert.equal(bombs[0].attack, Math.trunc(110 * 1.1));
   sim['damageEnemy'](bombs[0], 1, false, null, bombs[0].x, bombs[0].y);

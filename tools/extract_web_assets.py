@@ -67,7 +67,8 @@ BUTTONS.update({"button_pauseTitle": 1487, "button_pauseSave": 1490, "button_gam
 FORCE = False
 
 
-CLIPS.update({"bossReticle": 2425, "hotbarBackground": 2675})
+CLIPS.update({"bossReticle": 2425, "hotbarBackground": 2675, "battleBackdrop": 2493, "battleCloud": 2496})
+CLIPS.update({"powerShotTrail": 2408, "oneShotTrail": 2407, "lethalShotTrail": 2406})
 
 
 def ffdec(args, log_name):
@@ -810,7 +811,7 @@ def main():
     omit_level = {"closeButton", "procButton", "itemDesc", "itemDesc2", "now"}
     omit_town_nav = {"missionButton", "shopButton", "castleButton", "charaButton", "equipButton", "medalButton"}
     for name, timeline, frame, omit, offset in [
-        ("title", tags, 22, omit_title, (0, 0)), ("battle", tags, 27, omit_battle | {"sister"}, (0, 0)),
+        ("title", tags, 22, omit_title, (0, 0)), ("battle", tags, 27, omit_battle | {"sister", "bg", "cloud"}, (0, 0)),
         ("townHud", tags, 65, omit_battle | omit_town_nav, (0, 0)),
         ("townScene", tags, 71, omit_battle | omit_town_nav | {"textCarryOver"}, (0, 0)),
         ("townMission", sprites[1995].find("subTags"), 40,
@@ -835,7 +836,11 @@ def main():
         ("loot", sprites[1995].find("subTags"), 89, omit_loot, (0, -26)),
         ("lootBoss", sprites[1995].find("subTags"), 100, omit_loot | {"lootText"}, (0, -26)),
         ("level", sprites[1995].find("subTags"), 148, omit_level, (0, -26))]:
-        manifest["images"][name] = static_screen(xml, name, placed_frame(timeline, frame), omit, offset)
+        selected = placed_frame(timeline, frame)
+        # Текст2672 скрыт под bg в SWF; он не должен оказаться поверх отделённого фона.
+        if name == "battle":
+            selected = [tag for tag in selected if tag.get("characterId") != "2672"]
+        manifest["images"][name] = static_screen(xml, name, selected, omit, offset)
     # Подписи лежат выше карточек-действий в исходной временной шкале.
     for name, frame, labels in [("townMissionLabels", 40, {"actRef1", "actRef2"}),
                                 ("townCastleLabels", 54, {"actRef1"}),

@@ -4,6 +4,7 @@ import { Simulation } from '../src/simulation.ts';
 import { ItemFactory } from '../src/items.ts';
 import type { HeroClass } from '../src/hero-classes.ts';
 import { COMBAT_TRAIT, criticalKillCooldown } from '../src/combat-stats.ts';
+import { SAVE_VERSION } from '../src/save-version.ts';
 
 function manual(classId: HeroClass, weapon = 1): Simulation {
   const sim = new Simulation(20261103, { heroClass: classId, hitTest: () => true });
@@ -21,6 +22,7 @@ test('all four base classes apply One Shot through the actual manual-fire path',
     sim.tick({ firePressed: true, aimX: 300, aimY: 70 });
     const shot = sim.events.find(event => event.type === 'shot' && !event.actorSlot);
     assert.equal(shot?.oneShot, true, classId);
+    assert.ok(shot?.pellets?.every(pellet => pellet.specialHitType === 2));
     assert.equal(sim.state.inventory[0]!.ammo, 0);
   }
 });
@@ -34,9 +36,24 @@ test('Power Shot changes actual manual-hit damage on a base class', () => {
     (sim as unknown as { spawnEnemy(kind: string): void }).spawnEnemy('rat');
     Object.assign(sim.state.enemies.at(-1)!, { x: 400, y: 220, hp: 10000, maxHp: 10000, speed: 0 });
     sim.tick({ firePressed: true, aimX: 400, aimY: 220 });
+    const shot = sim.events.find(event => event.type === 'shot');
+    assert.ok(shot?.pellets?.every(pellet => pellet.specialHitType === (skill ? 1 : undefined)));
     return sim.events.find(event => event.type === 'hit' && !event.actorSlot)!.amount!;
   };
   assert.ok(damage(1) > damage(0));
+});
+
+test('One Hit Kill retains its source trail type on subsequent pellets in the actual shot', () => {
+  const sim = manual('hunter');
+  (sim as unknown as { random(): number }).random = () => 0;
+  Object.assign(sim.state.inventory[0]!, { typeMinor: 1, shell: 2 });
+  sim.state.player.traits[COMBAT_TRAIT.ONE_HIT_KILL] = 1;
+  (sim as unknown as { spawnEnemy(kind: string): void }).spawnEnemy('rat');
+  Object.assign(sim.state.enemies.at(-1)!, { x: 400, y: 220, hp: 10000, maxHp: 10000, speed: 0 });
+  sim.tick({ firePressed: true, aimX: 400, aimY: 220 });
+  const shot = sim.events.find(event => event.type === 'shot');
+  assert.equal(shot?.pellets?.length, 2);
+  assert.ok(shot?.pellets?.every(pellet => pellet.specialHitType === 3));
 });
 
 test('Killer reduces the actual cooldown after a manual base-class critical kill', () => {
@@ -85,7 +102,7 @@ test('v41 manual saves change only version; optional v42 Burst state is validate
   const legacy = structuredClone(manual('rogue').toSave()) as unknown as Record<string, any>;
   legacy.version = 41; delete legacy.player.classState;
   const before = structuredClone(legacy), upgraded = Simulation.fromSave(legacy).toSave();
-  assert.equal(upgraded.version, 42);
+  assert.equal(upgraded.version, SAVE_VERSION);
   assert.equal(upgraded.player.classState, undefined);
   const comparable = structuredClone(upgraded) as unknown as Record<string, any>;
   comparable.version = 41; delete comparable.player.classState;

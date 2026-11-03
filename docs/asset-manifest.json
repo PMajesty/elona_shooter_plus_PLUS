@@ -9,7 +9,7 @@
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
     "images": 152,
-    "clips": 84,
+    "clips": 89,
     "sounds": 89,
     "fonts": 6
   },

@@ -4,13 +4,14 @@ Updated2026-11-03. Domain:
 [Elona Shooter Plus](https://pastalapizza.site/elona/).
 The root URL redirects to /elona/; www redirects to the apex domain.
 The [HTTP IP address](http://151.241.155.138/elona/) remains available.
-Some recursive DNS paths still cache the previous host; see the boundary below.
+The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- Release: /srv/elona/releases/combat-ei1CwovT/elona/ (save v42).
-  Prior display-sPGHzc2d (3d732fd) remains available for rollback.
+- Release: /srv/elona/releases/release-By__DLWU/elona/ (save v43).
+  Prior feedback-C0xS2vSY, combat-ei1CwovT (b95e02a) and display-sPGHzc2d remain
+  for rollback.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
 - Both domain certificates were issued successfully by Let's Encrypt. Caddy's
@@ -19,8 +20,9 @@ Some recursive DNS paths still cache the previous host; see the boundary below.
 - Browser saves stay on each visitor's device. No account/gameplay backend exists.
   Export/import a backup to move a run between localhost, IP and domain origins.
 - The gameplay update archive was checked by SHA-256 before extraction and the
-  current symlink switched atomically. It includes manual shared-skill corrections
-  and the restored combat feedback. V42 retains optional manual Burst state.
+  current symlink switched atomically. It includes the manual shared-skill fixes,
+  day/night/cloud transitions and original special-shot trails/flash. V43 saves
+  lighting transitions; existing supported saves migrate without losing progress.
 - SSH credentials are not stored in this repository or deployment files.
 
 An isolated muted Chrome156.0.8078.80 check passed actual New Game, shooting5→4,
@@ -37,24 +39,29 @@ fullscreen. Evidence: .build/deployment/display-public-verification.json.
 ## DNS and HTTPS verification
 
 Reg.ru authoritative apex/www answers point to151.241.155.138. Both Let's Encrypt
-certificates are issued. On2026-11-03 at07:03UTC, ordinary curl HTTPS reached Caddy
-with200; Chrome156's ordinary route still failed with
-ERR_SSL_VERSION_OR_CIPHER_MISMATCH. These paths are distinct observations;
-global DNS propagation is not established.
+certificates are issued. The remaining failure was a local Windows DNS-client
+cache entry for95.163.244.138 with77475s TTL: direct DNS queries already returned
+the VPS while normal socket lookup still returned the old IP. One local cache
+refresh changed socket resolution to151.241.155.138. DNS settings were unchanged.
 
-The current ei1CwovT release passes a public browser check using the real domain
-mapped to the VPS only inside its isolated process: TLS1.3/YE1 and secure context,
-New Game/fire, delivered export, exact full-envelope Continue, HTTPS iframe
-Continue, HTTP-to-HTTPS, www-to-apex and root-to-/elona/ redirects. No TLS bypass,
-script errors, failed requests or HTTP errors. The embed parent HTML is a
-client-side fixture; the game/assets are actual public HTTPS responses. Muted
-headless Chrome leaves the user's profile and native fullscreen untouched.
+The C0xS2vSY release before the final launch-audio-only addition passes **ordinary Chrome DNS/network routing**:
+TLS1.3/YE1, secure context, New Game/fire, delivered export, exact full-envelope
+Continue, HTTPS iframe Continue, HTTP-to-HTTPS, www-to-apex and root-to-/elona/
+redirects. No host mappings, proxy override, TLS bypass, script errors, failed
+requests or HTTP errors. The parent embed HTML is a client fixture; game/assets
+are actual public HTTPS responses. Muted headless Chrome leaves the user's
+profile and native fullscreen untouched. This establishes the measured route,
+not the instantaneous contents of every recursive cache worldwide.
 
-Evidence: ignored .build/deployment/https-combat-verification.json and
-https-default-verification.json. The earlier mapped check and default failure
-remain separate. Check the ordinary route once on a later continuation; after
-it refreshes, confirm the default-network browser flow. Do not rebuild, reissue
-certificates or repeatedly flush caches for unchanged propagation. Caddy handles
+The final By__DLWU bundle separately passes the affected public audio flow:
+two Sister bombs, one original WebAudio launch start, correct loaded sample and
+normal TLS1.3 with the published domain. Sound output remains muted.
+
+Evidence: ignored .build/deployment/https-release-verification.json and
+.build/browser-qa/sister-cue-public-verification.json. Earlier
+mapped checks/default-route failures remain historical evidence and are not
+current blockers. Do not repeat cache flushes or certificate issuance without a
+new demonstrated failure. Caddy handles
 [automatic renewal](https://caddyserver.com/docs/automatic-https/).
 
 ## Updates and recovery
@@ -65,7 +72,9 @@ release for rollback; do not overwrite it in place. Keep index and original asse
 together. no-cache permits revalidation of original, non-hashed artwork after an
 update, and gzip compresses text responses. Directory browsing is disabled.
 
-For content rollback, repoint current to the retained release. For a bad HTTPS
+For content rollback, repoint current to the retained release. An older build
+may reject saves from a newer schema (v43 lighting, v42 manual Burst); preserve
+exports and use a matching pre-update checkpoint rather than editing live saves. For a bad HTTPS
 configuration, restore /srv/elona/staging/Caddyfile.http-active and reload Caddy.
 The original package configuration is saved as
 /srv/elona/staging/Caddyfile.before-elona. Do not restart unrelated services.

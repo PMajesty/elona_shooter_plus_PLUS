@@ -36,6 +36,7 @@ export function withLegacyPartyDefaults(value: Record<string, any>): Record<stri
 
 export function asLegacyV21Save(state: SimulationState): Record<string, any> {
   const value: Record<string, any> = structuredClone(state);
+  delete value.battleLighting;
   assert.equal(value.trainerLevel, 0);
   delete value.trainerLevel;
   value.version = 21;

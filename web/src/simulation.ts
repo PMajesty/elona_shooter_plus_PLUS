@@ -26,6 +26,7 @@ import { advanceProtection, explosionContains, explosionStats, planConsumableUse
 import { advanceProjectile, createProjectile, type ExplosionKind, type ProjectileState } from './projectiles.ts';
 import { EQUIPMENT_SERVICE_COST, equipmentServiceEligible, createUpgradePreview, modMountFailure, upgradeCost, type EquipmentService, type TownEquipmentAction, type TownEquipmentOutcome, type LootItemAddress, type LootEquipmentAction } from './equipment.ts';
 import { advanceEnemyArrow, createEnemyArrow, createEnemyShot, type EnemyArrowState } from './enemy-arrows.ts';
+import { advanceBattleLighting, type BattleLighting } from './battle-lighting.ts';
 import { CRITICAL_STREAK_MESSAGES } from './combat-notices.ts';
 import { ARCHER_DISPLAY_WIDTHS, FLY_DISPLAY_WIDTHS, barbarianParentWidth, lavaParentWidth } from './enemy-display-bounds.ts';
 import { createPartyState, addStartingLittleGirl, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
@@ -75,6 +76,7 @@ export interface SimulationState {
   aimX: number; aimY: number; fireHeld: boolean; pendingShot: boolean;
   player: { classId: HeroClass; classState?: { frenzy: number; idleCount: number; burst: number }; chainGun?: ChainGunState; grenadeCount: number; level: number; exp: number; skillPoints: number; traits: TraitLevels; weaponExp: number[]; selectedSlot: number; shootTimer: number; accuracyFix: number; rampageTicks: number; bowDrawing: boolean };
   waveIndex: number; waves: WaveState[]; bossWave: number; newWave: boolean; spawnTimer: number; noDamage: boolean;
+  battleLighting?: BattleLighting;
   enemies: EnemyState[]; projectiles: ProjectileState[]; enemyArrows: EnemyArrowState[]; loot: number[];
   itemCooldowns: number[];
   protection: { counter: number; blueMultiplierAdd: number };
@@ -91,7 +93,7 @@ export interface SimulationState {
   pendingPartyAction: PartyPendingAction | null;
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
-export interface SimulationEvent { actorSlot?: number; enemyKind?: EnemyKind; type: 'combat-notice' | 'enemy-attack' | 'enemy-drop' | 'sister-killed' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number; oneShot?: true }
+export interface SimulationEvent { actorSlot?: number; enemyKind?: EnemyKind; type: 'combat-notice' | 'enemy-attack' | 'enemy-drop' | 'sister-killed' | 'sister-launch' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number; specialHitType?: number }[]; explosionKind?: ExplosionKind; scale?: number; oneShot?: true }
 export interface SimulationOptions { mods?: GameMods; mode?: GameMode; hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
@@ -252,6 +254,7 @@ export class Simulation {
   }
 
   private initializePartyBattle(): void {
+    delete this.state.battleLighting;
     delete this.state.player.chainGun;
     if (this.state.heroAI) {
       delete this.state.heroAI;
@@ -730,12 +733,14 @@ export class Simulation {
     if (meter) meter.burst = modified.burst;
     player.accuracyFix = modified.accuracyFix;
     if (modified.specialHitType === 2) { this.random(); this.random(); oneShot = true; }
+    let specialHitType = modified.specialHitType;
     let hasHitAnything = false, hasHitAnyEnemy = false, hasKillAnyEnemy = false, hasCritHit = false;
-    const pellets: { x: number; y: number }[] = [];
+    const pellets: NonNullable<SimulationEvent['pellets']> = [];
     for (let i = 0; i < stats.shells; i++) {
       let hitX = int(x + this.random() * spread - this.random() * spread);
       const hitY = int(y + this.random() * spread - this.random() * spread);
-      pellets.push({ x: hitX, y: hitY });
+      const pellet: NonNullable<SimulationEvent['pellets']>[number] = { x: hitX, y: hitY };
+      pellets.push(pellet);
       const sister = this.state.castleSister ?? STANDING_SISTER;
       if (!sister.dead && castleSisterHit(sister.frame, hitX, hitY)) {
         this.state.castleSister = { ...sister, frame: 45, dead: true };
@@ -747,9 +752,9 @@ export class Simulation {
         const hit = hitscanHit(item, player.traits, damage, {
           senseRoll: this.random(), oneHitRoll: this.random(), shells: stats.shells,
           weakPoint: inside(ENEMIES[enemy.kind].critical, hitX - enemy.x, hitY - enemy.y),
-          alive: enemy.hp > 0, boss: enemy.kind === 'boss',
+          alive: enemy.hp > 0, boss: enemy.kind === 'boss', specialHitType,
         });
-        damage = hit.damage;
+        damage = hit.damage; specialHitType = hit.specialHitType;
         if (enemy.hp > 0) hasHitAnyEnemy = true;
         if (hit.critical) hasCritHit = true;
         if (meter) meter.frenzy = duelistHitFrenzy(item, player.traits, meter.frenzy, 'hitscan');
@@ -757,6 +762,7 @@ export class Simulation {
         this.damageEnemy(enemy, damage, hit.critical, weaponSlot, hitX, hitY, actorSlot);
         if (hasHitAnyEnemy && enemy.hp <= 0) hasKillAnyEnemy = true;
       }
+      if (specialHitType) pellet.specialHitType = specialHitType;
       if (meter && !hasHitAnything) meter.idleCount = 0;
     }
     if (hasCritHit && hasKillAnyEnemy) player.shootTimer = criticalKillCooldown(player.shootTimer, player.traits);
@@ -858,6 +864,7 @@ export class Simulation {
 
   private timerTick(): void {
     const state = this.state;
+    let lightBoundary: BattleLighting['phase'] | undefined;
     const player = state.player;
     if (state.castleHp <= 0) { state.phase = 'defeat'; player.bowDrawing = false; this.events.push({ type: 'defeat' }); return; }
     const item = this.weapon;
@@ -882,9 +889,12 @@ export class Simulation {
     for (const slot of this.state.party.slots.slice(0, 4)) stepPartyAITimer(slot, partyContext, partyCallbacks);
     if (state.newWave) {
       const sisters = state.economy.sisterWaves[state.waveIndex] ?? 0;
+      if (sisters > 0) this.events.push({ type: 'sister-launch' });
       for (let i = 0; i < Math.min(sisters, 200); i++) this.spawnEnemy('sister-bomb');
       if (state.economy.sisterWaves.length) state.economy.sisterWaves[state.waveIndex] = 0;
       state.newWave = false;
+      if (state.waveIndex === 3) lightBoundary = 'dusk';
+      if (state.waveIndex === 1) lightBoundary = 'night';
       // Последняя граница завершает бой до Repairman, поэтому остаточный урон уже не исправить.
       if (state.waveIndex <= 0) {
         if (state.castleHp < state.castleMaxHp) state.noDamage = false;
@@ -912,6 +922,8 @@ export class Simulation {
         }
       }
     }
+    const lighting = advanceBattleLighting(state.battleLighting, lightBoundary);
+    if (lighting) state.battleLighting = lighting;
     const selected = state.inventory[player.selectedSlot];
     if (selected?.baseAccuracy !== undefined && selected.range !== undefined) player.accuracyFix = recoverAccuracy(selected, player.traits, player.accuracyFix, state.aimX, state.mods?.tight);
   }
@@ -2074,6 +2086,9 @@ export class Simulation {
       || !Number.isInteger(player.chainGun.chainMode) || Number(player.chainGun.chainMode) < 0 || Number(player.chainGun.chainMode) > 3
       || !Number.isInteger(player.chainGun.chainPos) || Number(player.chainGun.chainPos) < 0 || Number(player.chainGun.chainPos) > 86
       || player.chainGun.chainTime !== undefined && (!finite(player.chainGun.chainTime) || player.chainGun.chainTime < 0 || player.chainGun.chainTime > 2462))) throw new Error('Invalid Chain Gun state.');
+    if (value.battleLighting !== undefined && (value.version < 43 || !record(value.battleLighting)
+      || !['dusk', 'night'].includes(String(value.battleLighting.phase)) || !Number.isInteger(value.battleLighting.step)
+      || Number(value.battleLighting.step) < 1 || Number(value.battleLighting.step) > 100)) throw new Error('Invalid battle lighting.');
     const advancedHero = ['sniper', 'ranger', 'duelist', 'noble'].includes(player.classId);
     const control = record(value.heroAI) ? value.heroAI : undefined;
     const meter = control ? control.state as Record<string, unknown> : player.classState;
@@ -2162,6 +2177,10 @@ export class Simulation {
     if (!Array.isArray(value.loot) || value.loot.length > 200 || value.loot.some(item => !Number.isInteger(item) || !Object.hasOwn(BASE_ITEM_FIELDS, item > 1000 ? item - 1000 : item)) || !record(value.result) || ['reward', 'perfectBonus', 'upkeep', 'netReward'].some(key => !finite((value.result as Record<string, unknown>)[key]))) throw new Error('Invalid results.');
     const simulation = new Simulation(1, { ...options, deferOpeningWaves: false });
     simulation.state = structuredClone(value) as unknown as SimulationState;
+    // Старые боевые сохранения не знают фазу перехода; восстанавливаем достигнутое освещение без RNG.
+    if (value.version < 43 && simulation.state.phase === 'battle' && simulation.state.waveIndex < 3) {
+      simulation.state.battleLighting = { phase: simulation.state.waveIndex === 0 ? 'night' : 'dusk', step: 100 };
+    }
     // В v1–v15 покупок стен не было; неизвестное поле старого формата не становится улучшением.
     if (value.version < 16) simulation.state.wallLevel = 1;
     if (value.version < 17) { simulation.state.wallFixCount = 0; simulation.state.repairmanLevel = 0; }

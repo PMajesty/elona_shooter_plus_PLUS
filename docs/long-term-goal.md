@@ -1,5 +1,12 @@
 # Long-term browser-port goal
 
+**Completion boundary reached2026-11-03:** the v43 desktop-browser release is
+live on the ordinary HTTPS domain. Original reachable systems, browser/saves/
+hosting and proportionate correctness/stability evidence are documented in
+[port status](port-status.md), together with the finite differences and explicit
+Day1–1000/browser scope. This records feature completion, not literal perfection.
+Both recurring watchers are confirmed paused through the native automation tool.
+
 Updated 2026-11-02 at the user's request. This replaces older clock-rate,
 watcher-pause and hitbox-priority wording in stored goals and historical notes.
 
@@ -46,6 +53,7 @@ required original systems are missing.
   apply justified corrections and continue. Preserve successful practices.
   Automation: `elona-shooter-workflow-meta-review`.
 
-Both watchers are active. Stay quiet when nothing meaningful or actionable has
-changed; report useful completions, failures or necessary human decisions.
-Respect later user pauses/stops and pause both schedules when the goal is done.
+Both watchers are paused after the documented completion boundary. Their
+existing prompts/cadences/chat destinations are preserved for a requested resume.
+Do not resume recurring work or recreate the cleared native app goal on a stale
+heartbeat. Follow later user direction for a concrete defect or new feature.

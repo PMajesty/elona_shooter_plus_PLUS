@@ -1,12 +1,13 @@
 # Elona Shooter Plus PLUS
 
 A TypeScript/Phaser browser remake of Elona Shooter Plus 1.3.0.4.
-The current local build supports **all eight original hero classes** and
-**repeating campaign cycles**, including Casual and Hardcore modes. This is an
-incomplete remake; original-save compatibility, remaining interactions and
-presentation/stability evidence still need work.
+The desktop-browser release covers **all eight original hero classes**,
+**repeating campaign cycles**, Casual/Hardcore modes and the original playable
+systems. The supported save/campaign range is Day1–1000. The finite differences,
+verification evidence and browser limits are in [port status](docs/port-status.md);
+this is not a claim of pixel identity or bug-free software.
 
-Open [the local game](http://127.0.0.1:5175/elona/).
+Play [online](https://pastalapizza.site/elona/) or open [the local game](http://127.0.0.1:5175/elona/).
 Original artwork, English text, audio and credits are retained. Sound starts muted
 unless you previously enabled it; the mute preference persists between visits.
 
@@ -19,6 +20,8 @@ unless you previously enabled it; the mute preference persists between visits.
   starting rifle, Simple Flame Thrower and Simple Chain Gun.
   Sniper, Ranger, Duelist and Noble unlock through the four starting-class medals.
   Their adrenaline effects and Noble's passive bonuses are connected to combat.
+  Creation portraits play the source stand loop. Linked mute/fullscreen icons and
+  integer large-screen scaling keep manual play controls inside the game.
 - Repeating 40-level encounter cycles: Catapult, Spider, Ghost, Ogre, Knight, Bird,
   Tank, Dino and Dragon, bird-dropped rats, multi-boss days and later boss attacks.
   Later cycles increase enemy strength and can spawn the original larger variants.
@@ -28,6 +31,8 @@ unless you previously enabled it; the mute preference persists between visits.
   Bird-dropped rats drift and fall with separate original body/shadow artwork;
   troops can acquire them in the air, and mid-air deaths/save restores are connected.
   enemies, bosses and health bars; ordinary/boss loot, skills and settlements.
+  Shared firing skills apply in manual and AI control; original special-shot
+  trails/flash, dusk/night/cloud motion and friendly Sister launch audio work.
 - F toggles the original Fire at will mode: the hero acquires targets, fires and
   reloads using the party AI, with its original accuracy penalty and Sister indicator.
   The mode/target state survives Continue; each new mission resets F and follows
