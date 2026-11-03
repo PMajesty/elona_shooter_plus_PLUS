@@ -1,9 +1,28 @@
 # Browser port status
 
-Updated 2026-11-03. Current build: **v41, domain HTTPS deployed; ordinary DNS-path confirmation pending**.
+Updated 2026-11-03. Current build: **v41, source creation animation, linked mute and crisp large-screen scaling**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
+
+All22 creation choices now play the source ally4 stand loop: poses5/6 for four
+reference frames each. Selected/hover/other alpha is1/0.8/0.5; the invented outline
+is removed. Source stand placement is restored. The existing Barracks portraits
+reuse the same animation helper; owned timers are removed when their view closes.
+A mute icon sits immediately below fullscreen, preserving the health counter.
+It works on title/creation as well as gameplay and stays synchronized with the
+original volume icon, hotkey and stored mute setting. Testing remains muted.
+Large displays use the largest fitting integer scale with pixelated canvas
+resampling and letterboxing:1080p now displays1240×760 at2× instead of1762×1080
+at2.84×. Smaller windows still shrink proportionally; the render buffer/game
+coordinates remain620×380. Controls stay anchored to the displayed game.
+This sharpens the existing raster art; it does not add high-resolution detail.
+Build/typecheck pass, bundle index-sPGHzc2d.js. Focused browser evidence in
+display-verification.json (passing audio/animation observations before a sizing
+failure), display-sizing-verification.json (passing large-size observations) and
+display-small-verification.json covers final small-size fire, unchanged full save
+through resize and exact Continue. Native fullscreen was never activated; the
+ordinary expanded layout was exercised in an isolated muted browser.
 
 The unchanged Cn5tm2du build is now live at http://151.241.155.138/elona/ on Caddy.
 An isolated muted public-network browser check passes New Game, shooting,

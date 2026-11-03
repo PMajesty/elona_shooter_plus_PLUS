@@ -1,6 +1,7 @@
 import { createItemPopupView, type ItemPopupLayout } from './item-popup-view.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
 import { createOriginalHintView } from './original-hint-view.ts';
+import { animateStandingPortraits } from './portrait-animation.ts';
 import { traitHintValues, type OriginalHintInfo } from './trait-hint.ts';
 import type { TownLayout } from './town-view.ts';
 import Phaser from 'phaser';
@@ -150,13 +151,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
       selection!.on('pointerout', () => group.setAlpha(member.slot === state.selectedSlot ? 1 : 0.6));
     }
   };
-  // ally2/ally3: кадры8–11 показывают pic*10+5, кадры12–15 — pic*10+6.
-  let pose = 5;
-  const animate = scene.time.addEvent({ delay: 1000 * 4 / 30, loop: true, callback: () => {
-    pose = pose === 5 ? 6 : 5;
-    for (const body of portraitBodies) body.image.setFrame(String(body.appearance * 10 + pose));
-  } });
-  root.once('destroy', () => animate.remove());
+  animateStandingPortraits(scene, root, portraitBodies);
 
   if (tab === 'characters') {
     const traitHint = createOriginalHintView(scene, manifest, layout.medals, callbacks.traitHint);

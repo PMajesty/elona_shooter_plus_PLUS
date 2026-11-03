@@ -20,6 +20,9 @@ icon for the user to operate. Do not add browser toolbars below the hotbar or
 floating explanatory labels over the game. Preserve original in-game tooltips.
 Use original extracted assets. Do not replace original behavior with invented
 mechanics merely to make a demo work. Record intentional fixes and differences.
+User amendment on 2026-11-03: finish remaining port gaps independently of DNS;
+restore creation animation, improve fullscreen graphics and add an adjacent mute
+button. Native fullscreen remains forbidden during automated testing.
 
 For SWF compatibility changes, edit `src/shootem_fla/MainTimeline.as`. Keep `original/elonashooter1.3.swf` and
 `src/original/MainTimeline.as` unchanged as recovery and comparison baselines.

@@ -25,6 +25,11 @@ user's desktop. Keep the requested fullscreen icon for manual use, and do not
 add browser toolbars below the hotbar or floating explanatory labels.
 Keep current-state documentation concise and push useful integrated checkpoints.
 
+User direction on2026-11-03: finish remaining port gaps while DNS catches up.
+Restore source character-creation animation, improve large-screen graphics and
+provide a mute button next to fullscreen. DNS/cache delays must not stop useful
+independent port work. Keep native fullscreen out of automated testing.
+
 Completion requires original feature/content coverage with a finite documented
 list of intentional differences, usable browser/save/hosting flows, and measured
 correctness, stability and performance evidence. Tests alone do not establish

@@ -4,6 +4,8 @@ import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
 import Phaser from 'phaser';
 import { HERO_CLASSES, heroClassUnlocked, type HeroClass } from './hero-classes.ts';
 import { createGeneInfoView } from './gene-info-view.ts';
+import { animateStandingPortraits } from './portrait-animation.ts';
+import { configureDisplaySizing } from './display-sizing.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
 import { traitHintValues, type OriginalHintInfo } from './trait-hint.ts';
 import { sniperDamageLimit, duelistDamageLimit } from './class-limits.ts';
@@ -57,6 +59,12 @@ interface PortSave { format: 'elona-shooter-browser'; version: number; appearanc
 type Screen = 'title' | 'gene' | 'mods' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
+const muteButton = document.querySelector<HTMLButtonElement>('#mute')!;
+function updateMuteControl(muted: boolean): void {
+  muteButton.disabled = false;
+  muteButton.setAttribute('aria-pressed', String(muted));
+  muteButton.setAttribute('aria-label', muted ? 'Unmute' : 'Mute');
+}
 const loadStatus = document.querySelector<HTMLDivElement>('#load-status')!;
 const statusElement = document.querySelector<HTMLParagraphElement>('#save-status')!;
 const status = {
@@ -141,7 +149,6 @@ class ElonaScene extends Phaser.Scene {
   private profile = this.profileRead.profile;
   private ammoFill?: Phaser.GameObjects.Image;
   private adrenalineFill?: Phaser.GameObjects.Image;
-  private selection?: Phaser.GameObjects.Rectangle;
   private cursor?: Phaser.GameObjects.Image;
   private pauseLayer?: Phaser.GameObjects.Container;
   private helpLayer?: Phaser.GameObjects.Container;
@@ -204,6 +211,8 @@ class ElonaScene extends Phaser.Scene {
     loadStatus.hidden = true;
     container.dataset.loadMs = (performance.now() - bootStarted).toFixed(0);
     this.sound.mute = this.muted;
+    updateMuteControl(this.muted);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, configureDisplaySizing(this.scale, container));
     container.dataset.loadedSounds = JSON.stringify([...USED_SOUNDS].filter(key => this.cache.audio.exists(key)));
     container.dataset.muted = String(this.muted);
     this.root = this.add.container(0, 0);
@@ -316,7 +325,7 @@ class ElonaScene extends Phaser.Scene {
     for (const sound of this.companionBowSounds.values()) sound.destroy();
     this.companionBowSounds.clear(); this.companionSprites.clear(); this.companionCursors.clear();
     this.reloadAnimations = 0;
-    this.pauseLayer = undefined; this.playerSprite = undefined; this.cursor = undefined; this.selection = undefined; this.ammoFill = undefined;
+    this.pauseLayer = undefined; this.playerSprite = undefined; this.cursor = undefined; this.ammoFill = undefined;
     if (!keepTownAmbience) { this.ambient?.destroy(); this.ambient = undefined; }
     container.dataset.screen = screen;
     container.dataset.saveSlot = String(this.saveSlot);
@@ -337,6 +346,7 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.titleName; delete container.dataset.titleSalary; delete container.dataset.claimTitleAvailable;
     delete container.dataset.medalHint;
     delete container.dataset.geneHint; delete container.dataset.geneTraits; delete container.dataset.geneClassLabels;
+    delete container.dataset.genePose; delete container.dataset.geneAppearance;
     delete container.dataset.itemPopup;
     delete container.dataset.traitHint;
     delete container.dataset.carryOverAvailable; delete container.dataset.carryOverConfirmation;
@@ -475,14 +485,24 @@ class ElonaScene extends Phaser.Scene {
     const background = new Set(this.root.list);
     this.image('gene');
     this.appearance = Math.max(0, Math.min(21, this.appearance));
+    const portraits = this.add.container(0, 0); this.root.add(portraits);
+    const bodies: { image: Phaser.GameObjects.Image; appearance: number }[] = [];
+    let hovered = -1;
+    const updatePortraits = () => {
+      for (const body of bodies) body.image.setAlpha(body.appearance === this.appearance ? 1 : body.appearance === hovered ? 0.8 : 0.5);
+      container.dataset.geneAppearance = String(this.appearance);
+    };
     for (let index = 0; index < 22; index++) {
       const x = 176 + index % 11 * 32;
       const y = 131 + Math.floor(index / 11) * 30;
-      this.clip('charaPic', index * 10 + 5, x - 11.95, y - 14.7)?.setScale(1, 0.9530487);
-      this.zone(x - 14, y - 17, 30, 31, () => { this.appearance = index; this.sim?.rerollOpeningHero(); this.moveSelection(); refreshClass(); });
+      const body = this.clip('charaPic', index * 10 + 5, x - 12.45, y - 15.45)!.setScale(1, 0.9530487);
+      portraits.add(body); bodies.push({ image: body, appearance: index });
+      this.zone(x - 14, y - 17, 30, 31, () => { this.appearance = index; this.sim?.rerollOpeningHero(); updatePortraits(); refreshClass(); })
+        .on('pointerover', () => { hovered = index; updatePortraits(); })
+        .on('pointerout', () => { hovered = -1; updatePortraits(); });
     }
-    this.selection = this.add.rectangle(0, 0, 28, 29).setStrokeStyle(1, 0x8c3420).setOrigin(0);
-    this.root.add(this.selection); this.moveSelection();
+    updatePortraits();
+    animateStandingPortraits(this, portraits, bodies, pose => { container.dataset.genePose = String(pose); });
     const classes = (Object.keys(HERO_CLASSES) as HeroClass[]).slice(page * 4, page * 4 + 4);
     const radios: (Phaser.GameObjects.Image | undefined)[] = [];
     const labels: Phaser.GameObjects.Text[] = [];
@@ -538,10 +558,6 @@ class ElonaScene extends Phaser.Scene {
     this.zone(145, 294, 103, 37, () => { this.playSound('soundClick1'); this.showGene(page === 0 ? 1 : 0, true); });
     const menu = this.root.list.filter(object => !background.has(object));
     this.root.add(this.add.container(MENU_X, 0, menu));
-  }
-
-  private moveSelection(): void {
-    this.selection?.setPosition(162 + this.appearance % 11 * 32, 114 + Math.floor(this.appearance / 11) * 30);
   }
 
   private leaveGameMods(): void {
@@ -1876,7 +1892,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   playSound(key: string, volume = 0.7, pan = 0): void { if (this.cache.audio.exists(key)) this.sound.play(key, { volume, pan }); }
-  toggleMute(): void { this.muted = !this.muted; this.sound.mute = this.muted; this.volumeIcon?.setFrame(this.muted ? '2' : '1'); container.dataset.muted = String(this.muted); storeMute(this.muted); }
+  toggleMute(): void { this.muted = !this.muted; this.sound.mute = this.muted; this.volumeIcon?.setFrame(this.muted ? '2' : '1'); container.dataset.muted = String(this.muted); updateMuteControl(this.muted); storeMute(this.muted); }
 }
 
 async function boot(): Promise<void> {
@@ -1903,12 +1919,14 @@ async function boot(): Promise<void> {
 }
 
 const fullscreenButton = document.querySelector<HTMLButtonElement>('#fullscreen')!;
+muteButton.addEventListener('click', () => gameScene?.toggleMute());
 fullscreenButton.addEventListener('click', () => {
   const change = document.fullscreenElement === container ? document.exitFullscreen() : container.requestFullscreen();
   void change.catch(() => { status.textContent = 'Full screen is unavailable in this browser view.'; });
 });
 document.addEventListener('fullscreenchange', () => {
   const active = document.fullscreenElement === container;
+  container.classList.toggle('game-expanded', active);
   fullscreenButton.setAttribute('aria-pressed', String(active));
   fullscreenButton.setAttribute('aria-label', active ? 'Exit fullscreen' : 'Enter fullscreen');
 });
