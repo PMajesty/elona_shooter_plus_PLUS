@@ -13,7 +13,8 @@ test('a boss turn updates the geometry seen by an existing projectile, with a st
   // Не принимаем старую точку после замены атласов или исходных матриц без повторного извлечения.
   for (const [path, expected] of Object.entries(contact.assetSha256)) {
     const data = readFileSync(new URL(`../public/assets/${path}`, import.meta.url));
-    assert.equal(createHash('sha256').update(data).digest('hex'), expected, path);
+    const bytes = path.endsWith('.json') ? data.toString('utf8').replaceAll('\r\n', '\n') : data;
+    assert.equal(createHash('sha256').update(bytes).digest('hex'), expected, path);
   }
   assert.deepEqual(contact.samples.map((sample: {hit: boolean}) => sample.hit), [false, true]);
   assert.equal(contact.stableNeighborSamples, 9);

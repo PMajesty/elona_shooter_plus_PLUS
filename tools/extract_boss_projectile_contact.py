@@ -59,12 +59,18 @@ def main():
     assert [sample['hit'] for sample in samples] == [False, True]
     stable = sum(not evaluate(before, point['x']+dx, point['y']+dy)['hit'] and evaluate(after, point['x']+dx, point['y']+dy)['hit'] for dx in [-.2, 0, .2] for dy in [-.2, 0, .2])
     assert stable == 9
+    def asset_hash(file):
+        data = (ASSETS / file).read_bytes()
+        if file.endswith('.json'):
+            data = data.replace(b'\r\n', b'\n')
+        return hashlib.sha256(data).hexdigest()
+
     report = {
         'format': 'elona-boss-projectile-contact', 'version': 1, 'originalSha256': ORIGINAL_SHA256,
         'boundary': 'Original extracted atlas alpha and ally1 placement matrices at one known contact; no Flash vector or native scheduler parity claim.',
         'regenerate': 'python tools/extract_boss_projectile_contact.py',
         'appearance': 54, 'point': point, 'samples': samples, 'stableNeighborSamples': stable,
-        'assetSha256': {file: hashlib.sha256((ASSETS / file).read_bytes()).hexdigest() for file in sorted(files)},
+        'assetSha256': {file: asset_hash(file) for file in sorted(files)},
     }
     OUTPUT.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     print(json.dumps({'output': str(OUTPUT.relative_to(ROOT)), 'beforeHit': samples[0]['hit'], 'afterHit': samples[1]['hit'], 'stableNeighborSamples': stable}))

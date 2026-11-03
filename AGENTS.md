@@ -26,6 +26,9 @@ button. Native fullscreen remains forbidden during automated testing.
 Project checkpoint on2026-11-03: the documented v43 desktop-release boundary is
 met; both recurring watchers are confirmed paused. Follow later user direction
 for new work; see docs/port-status.md for the finite supported scope/differences.
+For the user-requested joint fidelity review, Claude in the existing Cursor
+session reviews and Codex implements. Share source-backed findings and their
+disposition in `docs/fidelity-review.md`.
 
 For SWF compatibility changes, edit `src/shootem_fla/MainTimeline.as`. Keep `original/elonashooter1.3.swf` and
 `src/original/MainTimeline.as` unchanged as recovery and comparison baselines.

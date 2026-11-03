@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import { Simulation } from '../src/simulation.ts';
 import { ItemFactory } from '../src/items.ts';
 import type { HeroClass } from '../src/hero-classes.ts';
-import { COMBAT_TRAIT, criticalKillCooldown } from '../src/combat-stats.ts';
+import { COMBAT_TRAIT, combatTrait, criticalKillCooldown } from '../src/combat-stats.ts';
 import { SAVE_VERSION } from '../src/save-version.ts';
+import { sniperDamageLimit } from '../src/class-limits.ts';
 
 function manual(classId: HeroClass, weapon = 1): Simulation {
   const sim = new Simulation(20261103, { heroClass: classId, hitTest: () => true });
@@ -114,4 +115,32 @@ test('v41 manual saves change only version; optional v42 Burst state is validate
   assert.doesNotThrow(() => Simulation.fromSave(invalid));
   invalid.version = 41;
   assert.throws(() => Simulation.fromSave(invalid), /Invalid hero class state/);
+});
+
+test('reselecting a gun starts a fresh Burst and Militia grenade countdown', () => {
+  const sim = manual('militia', 5);
+  sim.state.player.traits[COMBAT_TRAIT.BURST] = 1;
+  sim.tick({ fireHeld: true, aimX: 300, aimY: 160 });
+  assert.equal(sim.heroClassState!.burst, 1);
+  sim.state.player.grenadeCount = 2;
+  const restored = Simulation.fromSave(sim.toSave());
+  for (const game of [sim, restored]) {
+    assert.equal(game.useSlot(0), true);
+    assert.equal(game.heroClassState!.burst, 0);
+    assert.equal(game.state.player.grenadeCount, 321);
+  }
+  assert.deepEqual(restored.toSave(), sim.toSave());
+});
+
+test('a manual Sniper can fill the adrenaline bar but spends charge while reloading', () => {
+  const sim = manual('sniper');
+  const traits = sim.state.player.traits;
+  const cap = (sniperDamageLimit(traits[COMBAT_TRAIT.SNIPER]) - 100) / combatTrait(COMBAT_TRAIT.SNIPER, traits);
+  sim.heroClassState!.idleCount = cap - 0.01;
+  for (let i = 0; i < 3; i++) sim.tick({});
+  assert.equal(sim.heroClassState!.idleCount, cap);
+  sim.state.inventory[0]!.ammo--;
+  sim.tick({ reload: true });
+  sim.tick({});
+  assert.ok(Math.abs(sim.heroClassState!.idleCount - (cap + 0.066 - 0.15)) < 1e-8);
 });

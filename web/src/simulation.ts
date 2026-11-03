@@ -27,6 +27,7 @@ import { advanceProjectile, createProjectile, type ExplosionKind, type Projectil
 import { EQUIPMENT_SERVICE_COST, equipmentServiceEligible, createUpgradePreview, modMountFailure, upgradeCost, type EquipmentService, type TownEquipmentAction, type TownEquipmentOutcome, type LootItemAddress, type LootEquipmentAction } from './equipment.ts';
 import { advanceEnemyArrow, createEnemyArrow, createEnemyShot, type EnemyArrowState } from './enemy-arrows.ts';
 import { advanceBattleLighting, type BattleLighting } from './battle-lighting.ts';
+import { sniperDamageLimit } from './class-limits.ts';
 import { CRITICAL_STREAK_MESSAGES } from './combat-notices.ts';
 import { ARCHER_DISPLAY_WIDTHS, FLY_DISPLAY_WIDTHS, barbarianParentWidth, lavaParentWidth } from './enemy-display-bounds.ts';
 import { createPartyState, addStartingLittleGirl, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
@@ -77,6 +78,7 @@ export interface SimulationState {
   player: { classId: HeroClass; classState?: { frenzy: number; idleCount: number; burst: number }; chainGun?: ChainGunState; grenadeCount: number; level: number; exp: number; skillPoints: number; traits: TraitLevels; weaponExp: number[]; selectedSlot: number; shootTimer: number; accuracyFix: number; rampageTicks: number; bowDrawing: boolean };
   waveIndex: number; waves: WaveState[]; bossWave: number; newWave: boolean; spawnTimer: number; noDamage: boolean;
   battleLighting?: BattleLighting;
+  reloadHintShown?: true;
   enemies: EnemyState[]; projectiles: ProjectileState[]; enemyArrows: EnemyArrowState[]; loot: number[];
   itemCooldowns: number[];
   protection: { counter: number; blueMultiplierAdd: number };
@@ -93,7 +95,7 @@ export interface SimulationState {
   pendingPartyAction: PartyPendingAction | null;
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
-export interface SimulationEvent { actorSlot?: number; enemyKind?: EnemyKind; type: 'combat-notice' | 'enemy-attack' | 'enemy-drop' | 'sister-killed' | 'sister-launch' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number; specialHitType?: number }[]; explosionKind?: ExplosionKind; scale?: number; oneShot?: true }
+export interface SimulationEvent { actorSlot?: number; enemyKind?: EnemyKind; type: 'info' | 'combat-notice' | 'enemy-attack' | 'enemy-drop' | 'sister-killed' | 'sister-launch' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number; specialHitType?: number }[]; explosionKind?: ExplosionKind; scale?: number; oneShot?: true }
 export interface SimulationOptions { mods?: GameMods; mode?: GameMode; hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
@@ -409,8 +411,10 @@ export class Simulation {
     if (previous) previous.reloadTime = 0;
     this.state.player.bowDrawing = false;
     this.state.player.selectedSlot = slot;
+    this.state.player.grenadeCount = Math.max(100, 325 - (this.state.player.traits[COMBAT_TRAIT.MILITIA] ?? 0) * 4);
     delete this.state.player.chainGun;
     if (this.state.heroAI) refreshPartyAI(this.heroAIActor(), this.state.partySkills.effects[116]);
+    else if (this.state.player.classState) this.state.player.classState.burst = 0;
     this.events.push({ type: 'select', weaponId: item.id });
     return true;
   }
@@ -704,7 +708,10 @@ export class Simulation {
       player.bowDrawing = false;
       if (ai) ai.chainMode = 0;
     } else player.accuracyFix += stats.recoil;
-    if (stats.consumesAmmo) item.ammo--;
+    if (stats.consumesAmmo && --item.ammo === 0 && actorSlot === 0 && !this.state.reloadHintShown) {
+      this.state.reloadHintShown = true;
+      this.events.push({ type: 'info', message: 'Reload your gun by pressing Space Key!' });
+    }
     let damage = shotDamage(item, player.traits, { missionDamage: this.state.activeMission.dmgFix, rampage: player.rampageTicks > 0, frenzy: meter?.frenzy, idleCount: meter?.idleCount });
     if (behavior.projectile) {
       let hitX = int(x + this.random() * spread - this.random() * spread);
@@ -871,7 +878,8 @@ export class Simulation {
     if (item && autoReloadReady(item, player.shootTimer)) this.requestReload(false);
     if (item?.reloadTime) {
       this.advanceActorReload(0);
-      if (this.heroAutomatic && !item.autoReload) this.heroClassState!.idleCount = Math.max(0, this.heroClassState!.idleCount - 0.15);
+      const meter = this.heroClassState;
+      if (meter && !item.autoReload) meter.idleCount = Math.max(0, meter.idleCount - 0.15);
     }
     this.state.partyAI.sharedWeaponRange = item?.range ?? null;
     const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
@@ -901,6 +909,8 @@ export class Simulation {
         this.finishDay(); return;
       }
       state.waveIndex--;
+      if (state.day === 1 && state.waveIndex === 3) this.events.push({ type: 'info', message: 'You can throw a powerful grenade by pressing 2.' });
+      if (state.day === 1 && state.waveIndex === 2) this.events.push({ type: 'info', message: 'Throw grenades at the boss to deal major damage!' });
       this.events.push({ type: 'wave', amount: state.waves.length - state.waveIndex,
         ...(state.waveIndex === state.bossWave ? { message: 'Incoming Boss!!' } : {}) });
       if (state.repairmanLevel) state.castleHp = Math.min(state.castleMaxHp, state.castleHp + castleRepairAmount(state));
@@ -924,6 +934,12 @@ export class Simulation {
     }
     const lighting = advanceBattleLighting(state.battleLighting, lightBoundary);
     if (lighting) state.battleLighting = lighting;
+    const sniperLevel = player.traits[COMBAT_TRAIT.SNIPER];
+    const meter = this.heroClassState;
+    if (sniperLevel && meter && !player.traits[COMBAT_TRAIT.RANGER]) {
+      const maxIdle = (sniperDamageLimit(sniperLevel) - 100) / combatTrait(COMBAT_TRAIT.SNIPER, player.traits);
+      meter.idleCount = Math.min(meter.idleCount, maxIdle);
+    }
     const selected = state.inventory[player.selectedSlot];
     if (selected?.baseAccuracy !== undefined && selected.range !== undefined) player.accuracyFix = recoverAccuracy(selected, player.traits, player.accuracyFix, state.aimX, state.mods?.tight);
   }
@@ -2066,6 +2082,7 @@ export class Simulation {
     if (!record(value) || !supportedSaveVersion(value.version) || (!validCampaignDay(value.day) || (value.version < 32 && Number(value.day) > 40) || (value.version < 26 && Number(value.day) > 9) || (value.version < 7 && value.day !== 1) || (value.version < 10 && value.day === 3) || (value.version < 11 && value.day === 4) || (value.version < 12 && value.day === 5) || (value.version < 13 && value.day === 6) || (value.version < 14 && value.day === 7) || (value.version < 23 && value.day === 8) || (value.version < 24 && value.day === 9)) || typeof value.phase !== 'string' || !['battle', 'victory', 'defeat', 'town'].includes(value.phase) || (value.version < 4 && value.phase === 'town')) throw new Error('Unsupported or invalid save.');
     if (value.mode !== undefined && (Number(value.version) < 34 || !['casual', 'hardcore'].includes(String(value.mode)))) throw new Error('Invalid game mode.');
     if (value.mods !== undefined && (Number(value.version) < 35 || !validGameMods(value.mods))) throw new Error('Invalid Game MODs.');
+    if (value.reloadHintShown !== undefined && (value.version < 44 || value.reloadHintShown !== true)) throw new Error('Invalid reload hint.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || !Number.isInteger(value.bossWave) || Number(value.bossWave) < 2 || Number(value.bossWave) >= (Array.isArray(value.waves) ? value.waves.length : 0) || (Array.isArray(value.waves) && value.waveIndex === value.waves.length && value.newWave !== true)) throw new Error('Invalid counters.');

@@ -130,6 +130,7 @@ export function readFlashAdventure(bytes: Uint8Array, profile: GlobalProfile, de
   });
   if (!TITLES[state.title] || gn('titleMoney') !== TITLES[state.title].salary) return failure('title salary');
   if (bool(game.carryOver, 'Carry Over')) state.carryOver = true;
+  if (bool(game.hintReload, 'reload hint')) state.reloadHintShown = true;
   if (gn('recycleCount')) state.recycleCount = gn('recycleCount');
   const size = gn('invSlot');
   if (!Number.isInteger(size) || size < 6 || size > 16) return failure('inventory capacity');

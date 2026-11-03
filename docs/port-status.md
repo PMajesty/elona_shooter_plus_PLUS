@@ -8,6 +8,10 @@ correctness/stability evidence is retained. No known disconnected original
 normal-play system remains after the source-flow review. This is not a claim of
 bug-free software, pixel identity or proof of every late-game balance outcome.
 
+The follow-up [independent fidelity review](fidelity-review.md) tracks fixes
+after that public release. The reviewed source uses save v44 for the one-time
+reload hint and accepts saves from the published v43 build.
+
 The supported campaign/save range remains **Day1–1000**, an intentional browser
 safety boundary rather than an original campaign ending. The source encounter
 cycles repeat within this range. Wider numerical ranges and new content are

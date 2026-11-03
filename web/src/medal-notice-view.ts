@@ -10,7 +10,7 @@ export interface InfoPopupLayout {
 /** Исходная плашка infoPop2291. Она не принимает ввод и переживает перерисовку городского меню. */
 export function createMedalNoticeView(scene: Phaser.Scene, manifest: LootViewManifest, layout: InfoPopupLayout,
   notice: MedalNotice): Phaser.GameObjects.Container {
-  const root = scene.add.container(0, 0).setDepth(1000).setName(`medal-${notice.id}`);
+  const root = scene.add.container(0, 0).setDepth(1000).setName(notice.id === undefined ? 'info' : `medal-${notice.id}`);
   const asset = manifest.clips.infoPopup;
   root.add(scene.add.image(-asset.originX, -asset.originY, 'infoPopup', '1').setOrigin(0));
   const p = layout.children.infoText, field = p.text, width = field.bounds[2] - field.bounds[0];

@@ -59,3 +59,22 @@ test('notice layout retains source text geometry, artwork and animation lifetime
   assert.equal(layout.children.infoText.text.fontId, 1608);
   assert.equal(layout.children.infoText.text.fontSize, 15);
 });
+
+test('the first empty magazine explains Space once across reloads and Continue', () => {
+  const sim = new Simulation(42);
+  sim.weapon!.ammo = 1;
+  sim.tick({ firePressed: true });
+  const hint = sim.events.find(e => e.type === 'info');
+  assert.equal(hint?.message, 'Reload your gun by pressing Space Key!');
+  const notices = new MedalNotices();
+  assert.equal(notices.add(hint!.message!, true)?.slot, 0);
+  assert.equal(notices.observe([70], true)[0].slot, 1);
+  const restored = Simulation.fromSave(sim.toSave());
+  restored.state.player.shootTimer = 0;
+  restored.tick({ reload: true });
+  while (restored.weapon!.reloadTime > 0) restored.tick({});
+  restored.weapon!.ammo = 1;
+  restored.tick({ firePressed: true });
+  assert.equal(restored.weapon!.ammo, 0);
+  assert.ok(!restored.events.some(e => e.type === 'info' && e.message === hint!.message));
+});
