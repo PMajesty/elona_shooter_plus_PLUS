@@ -76,14 +76,21 @@ test('Museum badge checks preserve Carry Over allowance and reject invalid recor
   assert.equal(pending.visitMuseum(100), false); assert.deepEqual(pending.toSave(), before);
 });
 
-test('the source Kongregate link award persists, stays idempotent and does not invent a wage bonus', () => {
+test('the source Kongregate link award persists, stays idempotent and discounts the next quoted and settled wages', () => {
   const sim = town(), rng = sim.state.rng;
   assert.ok(sim.visitKongregate()); assert.equal(sim.visitKongregate(), false);
   assert.equal(sim.state.rng, rng); assert.ok(sim.state.earnedMedals.includes(91));
   assert.deepEqual(Simulation.fromSave(sim.toSave()).toSave(), sim.toSave());
-  const girl = new Simulation(42, { heroClass: 'hunter', medals: [40, 91] }).state.party.slots[0].member!;
-  assert.equal(companionWage(girl, 0, sim.state.earnedMedals.includes(92)), companionWage(girl, 0, false));
-  const experienced = { ...girl, level: 50 };
-  assert.ok(companionWage(experienced, 0, true) < companionWage(experienced, 0, false));
+  for (const medal of [91, 92]) {
+    const run = new Simulation(42, { heroClass: 'hunter', medals: [40, medal] });
+    const member = run.state.party.slots[0].member!;
+    member.level = member.traits[member.devType] = 50;
+    const loaded = Simulation.fromSave(run.toSave()), girl = loaded.state.party.slots[0].member!;
+    const expected = companionWage(girl, loaded.state.partySkills.effects[127], medal === 91);
+    assert.ok(companionWage(girl, 0, true) < companionWage(girl, 0, false));
+    assert.equal(loaded.wageFor(girl), expected);
+    loaded['finishDay']();
+    assert.equal(loaded.state.result.wages, expected);
+  }
   assert.equal(new Simulation(42).visitKongregate(), false);
 });

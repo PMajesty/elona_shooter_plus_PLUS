@@ -225,14 +225,14 @@ preserved the selected MOD and started battle.
   arrows and Crossbow/Repeating Crossbow bolts now check the intervening path on a point
   miss. Both saved scenarios deal damage when replayed across contact.
 
-Other source behaviors confirmed during this check:
+The user requested these additional corrections to confirmed Flash behavior.
 
-| Behavior | What the player encounters |
+| Behavior | Browser rule and evidence |
 | --- | --- |
-| Crossbow sky/ground boundary | The bolt adds 4 to its rolled aim height. At exactly 135, neither original collision branch runs. Direct launches at adjusted heights 134, 135 and 136 made 10, 0 and 21 hit checks on the same trajectory setup. This separate issue remains open. |
-| Companion “Don't attack armored mobs” order | The original target selector falls through to Normal. It can choose an armored enemy. |
-| Town search, Trouble | The message announces more enemy HP tomorrow. The original calculation never assigns the increase to the mission. |
-| Medal descriptions | The Kongregate medal advertises a 3% wage discount, but the game tests the Ragnarok medal. Ha-na-bi advertises extra fireworks, but the display tests Hunter's Award. |
+| Crossbow and Repeating Crossbow | An adjusted aim height of exactly 135 uses the ground collision and flight rules. The same bolt hit a moving sheep after a mid-flight save and Continue. Flash tested strictly above or below 135 and skipped collisions at equality. |
+| Don't attack armored mobs | Opus implemented armor exclusion across ordinary targeting, retained targets, Boss/Defend and automatic grenade targeting. The original trace chooses armored target 101. With the same inputs the port chooses flying target 103 and leaves 101 in the cache for other allies. Splash and penetration can still hit bystanders. |
+| Trouble | Search adds the displayed whole percentage to the next mission's enemy HP multiplier. It stacks with Taunt. A save across Rest verifies a spawned sheep's maximum HP. Historical saves retain the mission stats already recorded. |
+| Medal rewards | Kongregate supplies the original three-point wage denominator bonus in the Barracks quote and daily settlement. Ragnarok still grants starting Luck. Ha-na-bi adds 25 bursts to the base 48, including the show where it is first earned. Hunter's Award still unlocks Ranger. |
 
 - **Rogue pistol at browser zoom.** Flash moves `customCursor` to the mouse
   in `MouseMove` and scales it by `0.3 + accuracyFix` in `onTick`. In the

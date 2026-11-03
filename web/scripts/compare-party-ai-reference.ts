@@ -16,11 +16,11 @@ const output = {
   traceSha256: createHash('sha256').update(JSON.stringify(report.runs[0])).digest('hex'),
   boundary: 'Original updateAlly/refreshPlayer, target selectors, manually called root frame/timer handlers and actual shoot, versus party-ai and Simulation.fireActorAt',
   checks: ['all nine original initialization profiles', 'target/cache consumption and tag mutation', 'cursor twips, aiming, skipped frame cooldown/rampage/frenzy', 'reload progression and Militia free-grenade inputs', 'all nine initial weapons: actual cooldown, recoil, ammo and launch lead', 'shared RNG count and state'],
-  matchedSnapshots: result.matchedSnapshots, comparisons: result.comparisons,
+  matchedSnapshots: result.matchedSnapshots, correctedSnapshots: result.correctedSnapshots, comparisons: result.comparisons,
   limits: ['Controller scenarios record shoot callbacks without executing weapon damage', 'Actual shoot scenarios have an empty enemy collision world; they do not prove companion kill/XP attribution', 'Generated traits/items are captured inputs; recruit generation is independently tested elsewhere', 'Manual root callbacks do not establish native listener scheduling or audio/timeline advancement', 'Observed current animation frame is retained but not compared by the AI adapter'],
 };
 writeFileSync(resolve('../.build/oracle/party-ai-comparison-report.json'), JSON.stringify(output, null, 2) + '\n');
 const before = resolve('../.build/oracle/party-ai-comparison-before.json');
 if (result.status === 'failed' && !existsSync(before)) writeFileSync(before, JSON.stringify(output, null, 2) + '\n');
-console.log(JSON.stringify({ status: result.status, matchedSnapshots: result.matchedSnapshots, differences: result.comparisons.filter(row => !row.matched) }, null, 2));
+console.log(JSON.stringify({ status: result.status, matchedSnapshots: result.matchedSnapshots, correctedSnapshots: result.correctedSnapshots, differences: result.comparisons.filter(row => !row.matched) }, null, 2));
 assert.equal(result.status, 'passed', 'Party AI differs; inspect .build/oracle/party-ai-comparison-report.json.');

@@ -42,10 +42,12 @@ test('the packaged firework clips have the SWF timelines for the rocket and both
   }
 });
 
-test('source firework counts, delays and particle families use an independent deterministic stream', () => {
-  const sim = new Simulation(42), before = sim.toSave(), plan = fireworkPlan(sim.state.rng, false);
-  assert.equal(plan.length, 48); assert.equal(fireworkPlan(42, true).length, 60);
-  assert.deepEqual(fireworkPlan(sim.state.rng, false), plan); assert.notDeepEqual(fireworkPlan(43, false), plan);
+test('medal firework counts, delays and particle families use an independent deterministic stream', () => {
+  const sim = new Simulation(42), before = sim.toSave(), plan = fireworkPlan(sim.state.rng, []);
+  assert.equal(plan.length, 48); const bonus = fireworkPlan(sim.state.rng, [93]);
+  assert.equal(bonus.length, 73); assert.deepEqual(bonus.slice(0, 48), plan);
+  assert.deepEqual(fireworkPlan(sim.state.rng, [65]), plan);
+  assert.deepEqual(fireworkPlan(sim.state.rng, []), plan); assert.notDeepEqual(fireworkPlan(43, []), plan);
   assert.deepEqual(sim.toSave(), before);
   for (const [index, burst] of plan.entries()) {
     assert.ok(burst.x >= 50 && burst.x <= 600 && burst.y >= 10 && burst.y <= 50);

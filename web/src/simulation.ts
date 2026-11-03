@@ -31,7 +31,7 @@ import { advanceBattleLighting, type BattleLighting } from './battle-lighting.ts
 import { sniperDamageLimit } from './class-limits.ts';
 import { CRITICAL_STREAK_MESSAGES } from './combat-notices.ts';
 import { ARCHER_DISPLAY_WIDTHS, FLY_DISPLAY_WIDTHS, barbarianParentWidth, lavaParentWidth } from './enemy-display-bounds.ts';
-import { createPartyState, addStartingLittleGirl, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
+import { createPartyState, addStartingLittleGirl, installCandidate, partySlot, hireFailure, hireCandidate, dismissCompanion, movePartyEquipment, resolvePartyMod, type CombatActorState, type PartyMember, type PartyState, type PartyPendingAction, type PartyEquipmentAddress } from './party.ts';
 import { ALL_TRAITS, CLASS_CHOICE_ORDER, availableCompanionTraits, partySkills, gainCompanionTrait, levelUpCompanion, companionWage, type PartySkillState } from './party-progression.ts';
 import { createPartyAIShared, createPartyAIState, validPartyAIState, selectPartyTarget, refreshPartyAI, partyActorPosition, registerPartyTarget, alertParty, clearPartyTargetCache, clearPartyAITarget, stepPartyAIFrame, stepPartyAITimer, type PartyAIState, type PartyAIActor, type PartyAIShared, type PartyAITarget, type PartyAIContext, type PartyAICallbacks } from './party-ai.ts';
 import { repairEarlyV15AirTargets, validatePartySave } from './party-save.ts';
@@ -501,6 +501,10 @@ export class Simulation {
     // В оригинале Carry Over блокирует боевые, классовые и городские награды, но не значки.
     if (this.state.carryOver && (id < 85 || [92, 94, 95, 96, 97].includes(id))) return;
     if (!this.state.earnedMedals.includes(id)) this.state.earnedMedals.push(id);
+  }
+
+  wageFor(member: PartyMember): number {
+    return companionWage(member, this.state.partySkills.effects[127], this.state.earnedMedals.includes(91));
   }
 
   watchFireworks(): boolean {
@@ -1633,7 +1637,7 @@ export class Simulation {
     const perfectBonus = this.state.noDamage ? (Math.trunc(fullReward * 1.3) - fullReward) * rewardShare : 0;
     const tax = Math.max(0, this.state.mode === 'casual' ? this.state.day * 20 - 400 : this.state.day * 35 - 200);
     const salary = TITLES[this.state.title].salary;
-    const wages = this.state.party.slots.slice(0, 4).reduce((total, slot) => total + (slot.exists && slot.member ? companionWage(slot.member, this.state.partySkills.effects[127], this.state.earnedMedals.includes(92)) : 0), 0);
+    const wages = this.state.party.slots.slice(0, 4).reduce((total, slot) => total + (slot.exists && slot.member ? this.wageFor(slot.member) : 0), 0);
     const upkeep = castleUpkeep(this.state);
     const museum = museumIncome(this.state.economy.museum, this.state.earnedMedals);
     this.state.result = { reward, perfectBonus, upkeep, tax, salary, wages, ...(museum ? { museum } : {}), netReward: reward + perfectBonus + salary + museum - upkeep - tax - wages };
@@ -1907,7 +1911,7 @@ export class Simulation {
       message = `Your lovely chickens produced ${eggs} eggs today! You sold them and received ${gold} gold pieces.`;
     } else {
       town.flags.taunted++; e.taunts++;
-      const increase = 0.3 + this.random() / 4;
+      const increase = Math.min(0.3 + this.random() / 4, 100 - town.mission.hpFix);
       const before = town.mission.reward;
       town.mission.hpFix += increase;
       town.mission.reward = int(town.mission.reward * (100 + state.partySkills.effects[125] / town.flags.taunted) / 100);
@@ -1965,9 +1969,10 @@ export class Simulation {
     const random = () => fixedSearchRandom(town.searched++);
     if (random() * (100 + state.partySkills.effects[137]) < 35) {
       if (random() < 0.15) {
-        const increase = 0.1 + random() / 5;
-        // В исходном search стоит hpFix + value без присваивания; не исправляем баланс молча.
-        return result('Trouble', `A fool taunted the enemies and rose their morale. The enemies will have ${int(increase * 100)}% more HP tomorrow.`);
+        const percent = Math.min(int((0.1 + random() / 5) * 100), Math.floor((100 - town.mission.hpFix) * 100));
+        town.flags.troubleHpPercent = (town.flags.troubleHpPercent ?? 0) + percent;
+        town.mission.hpFix += percent / 100;
+        return result('Trouble', `A fool taunted the enemies and rose their morale. The enemies will have ${percent}% more HP tomorrow.`);
       }
       if (random() < 0.2) { town.ap = Math.max(0, town.ap - 2); return result('Chatterbox', 'An old lady stops you and delays you with deadly endless chatter. You lose 2 action point.'); }
       if (random() < 0.05 && e.chickens > 2) {
@@ -2243,7 +2248,7 @@ export class Simulation {
       if (actor.speed === 0 || actor.direction !== (actor.targetX > actor.startX ? -1 : 1) || actor.scale <= 0 || actor.scale > 10 || actor.alpha < -0.125 || actor.alpha > 1 || actor.shadowAlpha < -0.1 || actor.shadowAlpha > 1 || actor.acceleration < 0) throw new Error('Invalid projectile geometry.');
       const previous = actor.previousArrowPoint;
       if (previous !== undefined && (!record(previous) || !finite(previous.x) || !finite(previous.y)
-        || !(actor.kind === 'bolt' && actor.targetY > 135 && actor.count >= 2
+        || !(actor.kind === 'bolt' && actor.targetY >= 135 && actor.count >= 2
           || actor.kind === 'arrow' && actor.targetY >= 135 && actor.count >= 1 && actor.count <= 3)
         || actor.frame < 2 || (actor.verticalProgress === null && (previous.x < -14 || previous.x > 636))
         || Math.abs(previous.x - (actor.x - 4)) > Math.abs(actor.speed) + 0.051)) throw new Error('Invalid previous arrow point.');

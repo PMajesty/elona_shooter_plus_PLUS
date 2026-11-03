@@ -157,12 +157,10 @@ port-verification.json; do not reread trace archives for routine work.
    old announcements/spawn/entrance cues. Historical player SOL variants beyond
    the independent/controlled evidence remain unverified. Old Day2+ browser saves
    without earlier kill totals show a marked lifetime lower bound.
-4. The source's ineffective Trouble HP expression, medal93 source-count text,
-   Ragnarok/Kongregate wage discrepancy and Ha-na-bi/firework discrepancy are
-   preserved. Do not silently rebalance them to match their descriptions.
-   The [fidelity review](fidelity-review.md) also records the No Armor order
-   and the bolt collision gap at an adjusted aim height of 135. Ground-target
-   bows and crossbows now recover missed contacts between eligible updates.
+4. Intentional gameplay fixes include ground bow and bolt contacts between
+   frames, the crossbow boundary at height 135, the No Armor order, Trouble's
+   next-day enemy HP, Kongregate's wage discount and Ha-na-bi's extra fireworks.
+   The [fidelity review](fidelity-review.md) records their Flash behavior and tests.
 5. Native fullscreen is left for the user to operate. Automated expanded-layout
    checks cover sizing/input; native fullscreen was deliberately not entered.
    Mobile/touch, restrictive/sandboxed embeds, public CDN policies and IAB iframe

@@ -3,18 +3,18 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { comparePartyAITrace, type PartyAIRecord } from './party-ai-reference-support.ts';
-import { selectPartyTarget, stepPartyAIFrame } from '../src/party-ai.ts';
+import { alertParty, searchNextPartyAlert, selectPartyTarget, stepPartyAIFrame, type PartyAICallbacks } from '../src/party-ai.ts';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/original-party-ai-trace.json', import.meta.url), 'utf8'));
 const records = fixture.records as PartyAIRecord[];
 const sample = (name: string, step: number) => records.find(row => row.scenario === name && row.step === step)!;
 
-test('party AI and all nine initial weapons match 75 captured original snapshots', () => {
+test('party AI and all nine initial weapons match 74 Flash snapshots and the corrected No Armor selection', () => {
   assert.equal(fixture.format, 'elona-original-party-ai-trace');
   assert.equal(fixture.originalSha256, '4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663');
   assert.equal(createHash('sha256').update(JSON.stringify(records)).digest('hex'), fixture.traceSha256);
   const result = comparePartyAITrace(records);
-  assert.equal(result.status, 'passed'); assert.equal(result.matchedSnapshots, 75);
+  assert.equal(result.status, 'passed'); assert.equal(result.matchedSnapshots, 74); assert.equal(result.correctedSnapshots, 1);
   // Проверяется реально достигнутая ветвь, а не название сценария.
   assert.equal(sample('order_2', 1).events[0].uid, 101);
   assert.equal(sample('order_3', 1).events[0].uid, null);
@@ -40,13 +40,35 @@ test('original AI trace rejects changing acquisition to advance cooldown in the 
   assert.ok(result.comparisons.some(row => row.scenario === 'acquire_skips_common' && row.step === 1 && !row.matched));
 });
 
-test('original AI trace detects both a missing shared RNG draw and repaired NoArmor semantics', () => {
+test('original AI trace detects both a missing shared RNG draw and a regression in No Armor selection', () => {
   const missingDraw = comparePartyAITrace(records, { frame: (actor, context, callbacks) =>
     stepPartyAIFrame(actor, { ...context, random: () => 0 }, callbacks) });
   assert.equal(missingDraw.status, 'failed');
   assert.ok(missingDraw.comparisons.some(row => row.differences.some(difference => difference.field === 'drawCount')));
   const changedOrder = comparePartyAITrace(records, { selector: (actor, range, context, order) =>
-    selectPartyTarget(actor, range, context, order === 2 ? 3 : order) });
+    order === 2 ? selectPartyTarget({ ...actor, member: { ...actor.member!, ai: 0 } }, range, context) : selectPartyTarget(actor, range, context, order) });
   assert.equal(changedOrder.status, 'failed');
   assert.ok(changedOrder.comparisons.some(row => row.scenario === 'order_2' && row.step === 1 && !row.matched));
+});
+
+test('No Armor releases a retained target and respects boss priority, Defend and automatic grenade selection', () => {
+  const { actor, world } = structuredClone(sample('order_2', 0));
+  const context = { shared: world.shared, getTarget: (uid: number) => world.targets.find(t => t.uid === uid),
+    random: () => 0, heroSlot: 0, fireAtWill: false };
+  const armor = world.targets.find(t => t.type === 2)!, ai = actor.member.aiState!;
+  actor.member.optBoss = actor.member.optWall = true;
+  Object.assign(ai, { targetUid: armor.uid, onMark: true, shooting: true, burst: 2, workRate: 1 });
+  world.shared.targetBossUid = armor.uid;
+  const unexpected = () => assert.fail('unexpected shot or reload');
+  const callbacks: PartyAICallbacks = { shoot: unexpected, reload: unexpected, reloading: unexpected, throwMilitiaGrenade: unexpected };
+  assert.equal(stepPartyAIFrame(actor, context, callbacks), 'acquired');
+  assert.equal(ai.targetUid, 103); assert.equal(world.shared.targetBossUid, armor.uid);
+  world.shared.nextAlertUid = armor.uid;
+  searchNextPartyAlert(actor, context); assert.equal(ai.targetUid, null);
+  const ally = structuredClone(actor); ally.slot = 2; ally.member.ai = 0;
+  alertParty(armor, [actor, ally], context);
+  assert.equal(ai.targetUid, null); assert.equal(ally.member.aiState!.targetUid, armor.uid);
+  assert.equal(selectPartyTarget(actor, 2, context, 6)?.uid, 102);
+  assert.equal(selectPartyTarget(actor, 2, context, 6), null);
+  assert.equal(selectPartyTarget(ally, 2, context, 6)?.uid, armor.uid);
 });

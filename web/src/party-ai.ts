@@ -90,6 +90,10 @@ function target(context: PartyAIContext, uid: number): PartyAITarget {
   return enemy;
 }
 
+function canAutoTarget(actor: PartyAIActor, enemy: PartyAITarget): boolean {
+  return actor.member!.ai !== 2 || enemy.type !== 2;
+}
+
 export function partyActorPosition(slot: number): { x: number; y: number } {
   return { x: 510 + slot * 2 - (slot === 3 ? 8 : 0), y: PLAYER_Y[slot] };
 }
@@ -136,7 +140,7 @@ export function startingPartyAim(actor: PartyAIActor, enemy: PartyAITarget, rang
   return Math.max(asInt(s.aimTime * multiplier), 2);
 }
 
-/** Намеренно сохраняет ранние return и отсутствие проверки NoArmor исходной aiNormal. */
+/** Сохраняет ранние return остальных приказов исходной aiNormal. */
 export function selectPartyTarget(actor: PartyAIActor, range: number, context: PartyAIContext, forcedOrder?: number): PartyAITarget | null {
   const order = forcedOrder ?? actor.member!.ai;
   const bands = RANGE_ORDER[range];
@@ -145,6 +149,7 @@ export function selectPartyTarget(actor: PartyAIActor, range: number, context: P
     const cell = context.shared.targets[type][band];
     if (cell.uid === null) return null;
     const enemy = target(context, cell.uid);
+    if (!canAutoTarget(actor, enemy) || (order === 2 && enemy.type === 2)) return null;
     cell.uid = null; cell.x = 1000; enemy.tag = 60;
     return enemy;
   };
@@ -169,7 +174,7 @@ export function selectPartyTarget(actor: PartyAIActor, range: number, context: P
 export function searchNextPartyAlert(actor: PartyAIActor, context: PartyAIContext): void {
   const uid = context.shared.nextAlertUid;
   const enemy = uid === null ? null : target(context, uid);
-  if (!enemy || enemy.hp <= 0) { clearPartyAITarget(actor); return; }
+  if (!enemy || enemy.hp <= 0 || !canAutoTarget(actor, enemy)) { clearPartyAITarget(actor); return; }
   const s = actor.member!.aiState!;
   Object.assign(s, { shooting: false, burst: 0, targetUid: enemy.uid, onMark: true });
   enemy.onMark = true;
@@ -179,7 +184,7 @@ export function searchNextPartyAlert(actor: PartyAIActor, context: PartyAIContex
 export function alertParty(enemy: PartyAITarget, actors: readonly PartyAIActor[], context: PartyAIContext, defenseLine = 455): void {
   if (enemy.onMark) return;
   for (const actor of actors) {
-    if (!active(actor) || !actor.member.optWall || actor.member.aiState.onMark || (actor.slot === context.heroSlot && !context.fireAtWill)) continue;
+    if (!active(actor) || !actor.member.optWall || actor.member.aiState.onMark || (actor.slot === context.heroSlot && !context.fireAtWill) || !canAutoTarget(actor, enemy)) continue;
     const s = actor.member.aiState;
     Object.assign(s, { shooting: false, burst: 0, targetUid: enemy.uid, onMark: true });
     enemy.onMark = true; s.aimCount = startingPartyAim(actor, enemy, actor.weapon?.range ?? null);
@@ -197,15 +202,16 @@ export function stepPartyAIFrame(actor: PartyAIActor, context: PartyAIContext, c
   if (actor.weapon?.id === 16) advanceChainGunClock(s);
   const manual = actor.slot === context.heroSlot && !context.fireAtWill;
   if (!manual) {
+    if (member.ai === 2 && s.targetUid !== null && !canAutoTarget(actor, target(context, s.targetUid))) clearPartyAITarget(actor);
     if (member.optBoss && context.shared.targetBossUid !== null && !s.onMark) {
       const boss = target(context, context.shared.targetBossUid);
-      if (boss.hp <= 0) { context.shared.targetBossUid = null; clearPartyAITarget(actor); }
-      else {
+      if (boss.hp <= 0) { context.shared.targetBossUid = null; clearPartyAITarget(actor); return 'boss-mark'; }
+      if (canAutoTarget(actor, boss)) {
         Object.assign(s, { shooting: false, burst: 0, targetUid: boss.uid, onMark: true });
         // Main:2357 использует предыдущее глобальное w, до weapon(index).
         s.aimCount = startingPartyAim(actor, boss, context.shared.sharedWeaponRange);
+        return 'boss-mark';
       }
-      return 'boss-mark';
     }
     context.shared.sharedWeaponRange = actor.weapon?.range ?? null;
     if (s.targetUid === null) {

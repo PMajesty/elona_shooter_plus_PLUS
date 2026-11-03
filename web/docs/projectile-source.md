@@ -61,7 +61,8 @@ establish native interleaving for every actor throughout a battle.
 
 Bow speed's sky boost tests the unadjusted targetY<150, then targetY gains 6.
 Bow initialization and later collision gates use that adjusted value. Bolts
-add 4. Exact adjusted targetY 135 falls between the bolt collision branches.
+add 4. Flash skipped both collision branches at exactly 135. The port assigns
+that adjusted height to the ground branch, consistent with its shadow.
 Gravity/flame remove an out-of-bounds actor without returning: the same source
 callback still finishes its possible pulse and movement. Bounds use root y0,
 not child `mc.y`; for ordinary nonvertical trajectories, a body outside the
@@ -88,8 +89,7 @@ intervals or finer in ordinary flight, capped at 256 subdivisions per target.
 The earliest detected crossing uses the existing damage and penetration rules.
 High bow arcs and gaps between eligible checks do not acquire ground hits.
 Saves retain the previous tip during eligible flight. Older saves resume
-sampling from their first eligible point. The separate bolt gap at adjusted
-target height 135 remains reproducible.
+sampling from their first eligible point, including at bolt target height 135.
 
 `explode` (3042) and `explode_puls` (6158) check living enemies' registration
 points in a strict rectangle, without falloff or silhouette collision. Stored

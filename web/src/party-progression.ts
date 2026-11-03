@@ -195,8 +195,8 @@ export function levelUpCompanion(member: CompanionProgress, random: () => number
   if (random() < member.potentialTeam) member.traits[901]++;
 }
 
-export function companionWage(member: { level: number; appearance: number; potentialAim: number; potentialTeam: number }, accountant = 0, ragnarokMedal = false): number {
+export function companionWage(member: { level: number; appearance: number; potentialAim: number; potentialTeam: number }, accountant = 0, kongregateMedal = false): number {
   let wage = Math.max(0, member.level * 6 + 50 - Number(member.appearance === 50) * 50);
   wage = wage * (75 + member.potentialAim * member.potentialTeam * 100) / 100;
-  return Math.trunc(wage * 100 / (100 + accountant + Number(ragnarokMedal) * 3));
+  return Math.trunc(wage * 100 / (100 + accountant + Number(kongregateMedal) * 3));
 }

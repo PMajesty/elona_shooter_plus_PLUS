@@ -59,7 +59,7 @@ test('Ragnarok respects the shared enemy capacity and saves replay actual dinosa
   assert.deepEqual(resumed.toSave(), sim.toSave());
 });
 
-test('surviving Ragnarok awards its medal before wages, carries the bonus into New Game and resets only the battle flag', () => {
+test('surviving Ragnarok awards its medal without a wage discount, carries Luck into New Game and resets only the battle flag', () => {
   let sim = equipped();
   sim.state.castleHp = sim.state.castleMaxHp = 100000;
   sim.state.inventory[0] = new ItemFactory(() => 0.5).generate(3);
@@ -78,7 +78,7 @@ test('surviving Ragnarok awards its medal before wages, carries the bonus into N
   assert.equal(sim.state.phase, 'victory');
   assert.ok(sim.state.earnedMedals.includes(92));
   const wage = (medal: boolean) => sim.state.party.slots.slice(0, 4).reduce((sum, slot) => sum + (slot.exists && slot.member ? companionWage(slot.member, sim.state.partySkills.effects[127], medal) : 0), 0);
-  assert.equal(sim.state.result.wages, wage(true));
+  assert.equal(sim.state.result.wages, wage(false));
   assert.ok(wage(true) < wage(false));
   sim = Simulation.fromSave(sim.toSave());
   while (['loot', 'boss-loot'].includes(sim.state.postbattle)) assert.ok(sim.finishLoot());

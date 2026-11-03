@@ -37,7 +37,7 @@ export interface FirstTownPreparation {
   cards: number[];
   mission: FirstTownMission;
   recruit: FirstTownRecruit;
-  flags: { specialSale: number; egg: boolean; partyHeld: boolean; prayed: boolean; robbed: number; taunted: number };
+  flags: { specialSale: number; egg: boolean; partyHeld: boolean; prayed: boolean; robbed: number; taunted: number; troubleHpPercent?: number };
   baseAbsorbFix?: number;
   searched: number;
   preparationEffects?: TownPreparationEffects;

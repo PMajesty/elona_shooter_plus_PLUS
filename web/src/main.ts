@@ -47,7 +47,7 @@ import { createSkillView } from './skill-view.ts';
 import { createTownView, type TownLayout, type TownTab, type TownDialog } from './town-view.ts';
 import { createShopView, type ShopLayout } from './shop-view.ts';
 import { createPartyView, type PartyLayout, type PartyViewMember, type PartyViewTrait, type PartyEquipmentSlot } from './party-view.ts';
-import { ALL_TRAITS, companionWage } from './party-progression.ts';
+import { ALL_TRAITS } from './party-progression.ts';
 import { partyActorPosition } from './party-ai.ts';
 import { castleDamageMultiplier, castleLootMultiplier, castleRepairAmount, castleStorageLevel, castleTrainerMultiplier, castleUpgradeCost, castleUpkeep } from './castle-upgrades.ts';
 import { ITEM_TYPE, isOccupiedItem } from './items.ts';
@@ -833,7 +833,10 @@ class ElonaScene extends Phaser.Scene {
       container.dataset.fireworkFrames = String(this.celebration.frame);
       if (!this.fireworkMedalChecked && this.celebration.frame >= FIREWORK_MEDAL_FRAMES) {
         this.fireworkMedalChecked = true;
-        if (this.sim?.watchFireworks()) this.saveGame(false);
+        if (this.sim?.watchFireworks()) {
+          this.celebration.grantBonus();
+          this.saveGame(false);
+        }
       }
       if (this.celebration.finished) { this.celebration.destroy(); this.celebration = undefined; }
     }
@@ -848,7 +851,7 @@ class ElonaScene extends Phaser.Scene {
   private startCelebration(): void {
     if (this.options.disableFireworks || this.celebration || this.screen !== 'result' || !this.sim) return;
     const state = this.sim.state;
-    this.celebration = createFireworks(this, manifest, state.rng ^ state.day, state.earnedMedals.includes(65));
+    this.celebration = createFireworks(this, manifest, state.rng ^ state.day, state.earnedMedals);
     this.fireworkMedalChecked = false; this.playSound('soundFirework', 0.25);
   }
 
@@ -1811,7 +1814,7 @@ class ElonaScene extends Phaser.Scene {
     for (const slot of state.party.slots) {
       if (!slot.exists || !slot.member) continue;
       const member = slot.member;
-      const wage = companionWage(member, state.partySkills.effects[127] ?? 0, state.earnedMedals.includes(92));
+      const wage = this.sim.wageFor(member);
       members.push({ slot: slot.slot, name: member.name, appearance: member.appearance, level: member.level, exp: member.exp,
         className: ALL_TRAITS[member.devType].name, wageLabel: wage === 0 ? 'Free' : `${wage} GP`, kill: member.kills, earn: member.earnedGold,
         cost: member.cost, weapon: slot.weapon, traits: traits(member.traits), traitLevels: member.traits, focusedTrait: member.focus,

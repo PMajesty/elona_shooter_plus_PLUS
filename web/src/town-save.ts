@@ -28,13 +28,17 @@ export function validTownPreparation(value: unknown, validItem: (item: unknown) 
     || typeof mission.absorbFix !== 'number' || !Number.isFinite(mission.absorbFix)
     || (value.flags.prayed ? value.baseAbsorbFix === undefined || mission.absorbFix < baseline + 0.05 - 1e-9 || mission.absorbFix > baseline + 0.19 + 1e-9 : mission.absorbFix !== baseline)
     || (expectedAbsorbFix !== undefined && (absorbMode === 'base' ? baseline : mission.absorbFix) !== expectedAbsorbFix)) return false;
+  const trouble = value.flags.troubleHpPercent === undefined ? 0 : value.flags.troubleHpPercent;
+  if (!integer(trouble, 0, 9900)) return false;
+  const baseHp = 1 + trouble / 100;
   if (typeof mission.hpFix !== 'number' || !Number.isFinite(mission.hpFix) || mission.hpFix < 1 || mission.hpFix > 100
     || typeof mission.dmgFix !== 'number' || !Number.isFinite(mission.dmgFix) || mission.dmgFix < 1 || mission.dmgFix > 100
     || typeof mission.expFix !== 'number' || !Number.isFinite(mission.expFix) || !(mission.expFix === 1 || mission.expFix >= 1.05 && mission.expFix <= 1.63)
-    || (!value.flags.taunted && (mission.hpFix !== 1 || mission.reward !== expected.reward))
+    || (!value.flags.taunted && mission.reward !== expected.reward)
     || (!value.flags.partyHeld && mission.dmgFix !== 1)
     || (value.flags.partyHeld && mission.dmgFix <= 1)
-    || (value.flags.taunted > 0 && (mission.hpFix < 1 + value.flags.taunted * 0.3 - 1e-9 || mission.hpFix > 1 + value.flags.taunted * 0.55 + 1e-9))
+    || mission.hpFix < Math.min(100, baseHp + value.flags.taunted * 0.3) - 1e-9
+    || mission.hpFix > Math.min(100, baseHp + value.flags.taunted * 0.55) + 1e-9
     || !integer(mission.reward, expected.reward, 1000000000)) return false;
 
   // В городе9 две гарантии идут после необязательного Ragnarok; порядок важен для выдачи слотов.

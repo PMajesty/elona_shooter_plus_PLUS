@@ -6,7 +6,7 @@ The tested bundle is `assets/index-Do-bjyfx.js`; all 300 published/archive files
 
 ## Integrated behavior
 
-In **Characters**, the player can inspect the actual generated candidate, confirm or cancel recruitment, select companion orders and Boss/Defend priorities, focus an eligible skill, and dismiss an owned companion. The original house level permits **one permanent companion**. All nine generated classes can be hired and fight; complete class-mechanic parity is not claimed. Orders preserve observed source quirks: NoArmor falls through to Normal targeting instead of imposing the exclusion its label suggests. Hiring spends the displayed gold, costs no AP, and does not reroll the prepared mission or immediately generate another candidate.
+In **Characters**, the player can inspect the actual generated candidate, confirm or cancel recruitment, select companion orders and Boss/Defend priorities, focus an eligible skill, and dismiss an owned companion. The original house level permits **one permanent companion**. All nine generated classes can be hired and fight; complete class-mechanic parity is not claimed. The No Armor order skips armored targets, including Boss and Defend overrides. Hiring spends the displayed gold, costs no AP, and does not reroll the prepared mission or immediately generate another candidate.
 
 **Equipment** transfers complete weapon records between the hero inventory and companion, checking both directions of a swap. Companion MOD mounting uses a confirmation; No returns the MOD without exchanging it for the gun. Companion weapons can be moved into hero inventory for the existing shop upgrade path. Inactive character and weapon records remain preserved after dismissal.
 

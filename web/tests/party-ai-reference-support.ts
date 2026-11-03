@@ -114,16 +114,25 @@ export function comparePartyAITrace(records: PartyAIRecord[], implementation: Pa
     };
     // Захваченные начальные предметы/traits — вход. Далее состояние меняют только функции продукта.
     const actualMember = Object.fromEntries(Object.keys(row.actor.member).map(key => [key, actor.member[key as keyof typeof actor.member]]));
-    check('actor', { ...actor, member: actualMember }, row.actor); check('world', world!, row.world);
+    const correctedOrder = row.scenario === 'order_2' && row.step === 1;
+    let expectedWorld = row.world, expectedEvents = row.events;
+    if (correctedOrder) {
+      // Исходник взял броню 101. По приказу берём летающую цель 103 в той же полосе.
+      expectedWorld = structuredClone(snapshots.find(r => r.scenario === 'order_2' && r.step === 0)!.world);
+      expectedWorld.shared.targets[1][2] = { uid: null, x: 1000 };
+      expectedWorld.targets.find(t => t.uid === 103)!.tag = 60;
+      expectedEvents = [{ type: 'selected', uid: 103 }];
+    }
+    check('actor', { ...actor, member: actualMember }, row.actor); check('world', world!, expectedWorld);
     if (row.boundary === 'shoot') {
       check('events', events, row.events.filter(event => event.type !== 'projectile'));
       check('launched', launched, row.events.filter(event => event.type === 'projectile').map(event => event.launched));
-    } else check('events', events, row.events);
+    } else check('events', events, expectedEvents);
     check('drawCount', drawCount, row.drawCount); check('rngState', rngState, row.rngState);
     const stats = weaponStats(actor.weapon!, actor.member.traits, { manualControl: false });
     check('derivedDisplay', { ...partyActorPosition(actor.slot), accuracyDiv: stats.accuracyDiv, shells: stats.shells },
       { x: row.display.x, y: row.display.y, accuracyDiv: row.display.accuracyDiv, shells: row.display.shells });
-    return { scenario: row.scenario, step: row.step, matched: differences.length === 0, originalDrawCount: row.drawCount, portDrawCount: drawCount, differences };
+    return { scenario: row.scenario, step: row.step, correctedOrder, matched: differences.length === 0, originalDrawCount: row.drawCount, portDrawCount: drawCount, differences };
   });
-  return { status: comparisons.every(row => row.matched) ? 'passed' as const : 'failed' as const, matchedSnapshots: comparisons.filter(row => row.matched).length, comparisons };
+  return { status: comparisons.every(row => row.matched) ? 'passed' as const : 'failed' as const, matchedSnapshots: comparisons.filter(row => row.matched && !row.correctedOrder).length, correctedSnapshots: comparisons.filter(row => row.matched && row.correctedOrder).length, comparisons };
 }

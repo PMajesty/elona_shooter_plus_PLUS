@@ -196,14 +196,15 @@ export function advanceProjectile(state: ProjectileState, callbacks: ProjectileC
   }
   if (state.kind === 'bolt') {
     if (outside(state, -10)) { delete state.previousArrowPoint; state.removed = true; return; }
-    if (state.targetY > 135 && state.y < 135 && state.count > 2) {
+    const groundTarget = state.targetY >= 135;
+    if (groundTarget && state.y < 135 && state.count > 2) {
       delete state.previousArrowPoint;
       state.speed /= 2.5 - Math.abs(state.x - state.startX) / 450;
       state.rotation = rotation(state.rotation - state.rotationStep * 10);
       state.scale -= 0.1;
       if (state.scale <= 0) { state.removed = true; return; }
-    } else if (state.targetY > 135 || state.targetY < 135 && state.y < 135) {
-      if (arrowHit(state, callbacks, state.targetY > 135)) return;
+    } else if (groundTarget || state.y < 135) {
+      if (arrowHit(state, callbacks, groundTarget)) return;
     } else delete state.previousArrowPoint;
     state.count++;
     move(state, state.speed);

@@ -90,11 +90,11 @@ not reported as twelve independently compared port states.
   Their Luck/Sense/Accuracy bonuses apply only in a later `gameStart` through
   `geneMedalBonus`, not immediately to the current hero.
 - Clear's fireworks countdown begins at 650; when it becomes negative,
-  medal 93 is awarded. No original behavior reads medal 93, despite the bonus
-  described in its text. Do not invent an effect.
+  medal 93 is awarded. The browser adds the advertised 25 fireworks to that
+  show and to later shows while the medal is held.
 - Surviving Ragnarok awards 92 when leaving Clear; its Luck bonus applies
-  to future starts. The original wage formula also uses it for a 3% discount,
-  which does not change a solo party's zero wages.
+  to future starts. The browser keys the wage discount to Kongregate (91),
+  as the Museum describes.
 - Sheriff level 10 awards 67 and unlocks Noble. Action, upgrade, badge and
   day-10-plus medals are outside the enabled first-two-day actions.
 

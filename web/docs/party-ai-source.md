@@ -76,7 +76,7 @@ classes0/1/2 (Main:9012–9015). Source order behavior is:
 |---|---|
 |Normal0|For each of the first two preferred bands: ordinary, armor, air.|
 |NoAir1|Normal function; returns undefined immediately after an empty ordinary/armor check in the first band, rather than trying a second band.|
-|NoArmor2|Mapped to Normal; no NoArmor conditional exists in that function. The UI promises an armor exclusion that this code does not perform.|
+|NoArmor2|Flash falls through to Normal. The port implements the displayed armor exclusion, including Boss/Defend and automatic grenade targeting.|
 |Neither3|Returns undefined immediately after an empty ordinary check in the first band.|
 |Air4|Air only, all three bands in weapon preference order.|
 |Armor5|Armor only, all three preferred bands.|
@@ -277,10 +277,10 @@ The separate `tools/build_party_ai_oracle.py` diagnostic preserves the original
 AI method bodies and all non-code SWF resources. Two Ruffle runs produced the
 same 75 snapshots. `web/tests/fixtures/original-party-ai-trace.json` retains the
 accepted observations; `web/tests/party-ai-reference.test.ts` compares the new
-AI functions and the production `Simulation.fireActorAt` boundary. All 75
-snapshots match. Three focused tests also verify that the comparison rejects
+AI functions and the production `Simulation.fireActorAt` boundary. 74 snapshots match Flash. The remaining snapshot requires flying target 103
+and preserves armored target 101 for other allies under NoArmor. Three focused tests also verify that the comparison rejects
 same-frame cooldown advancement after target acquisition, omission of the
-shared work-roll draw, and changing the source's NoArmor selector behavior.
+shared work-roll draw, and restoring the original NoArmor bug.
 
 The fixture covers nine real recruit initialization profiles, all seven target
 orders, target-cache consumption, cursor twips, acquisition/dead-target/boss

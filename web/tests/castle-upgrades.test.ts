@@ -170,7 +170,7 @@ test('House purchases unlock actual generated candidates in all three permanent 
   }
   settle(simulation);
   assert.equal(simulation.state.result.upkeep, 140);
-  const wages = simulation.state.party.slots.slice(0, 3).reduce((sum, slot) => sum + companionWage(slot.member!, simulation.state.partySkills.effects[127], simulation.state.earnedMedals.includes(92)), 0);
+  const wages = simulation.state.party.slots.slice(0, 3).reduce((sum, slot) => sum + companionWage(slot.member!, simulation.state.partySkills.effects[127], simulation.state.earnedMedals.includes(91)), 0);
   assert.equal(simulation.state.result.wages, wages); assert.ok(wages > 0);
   restore(simulation);
 });

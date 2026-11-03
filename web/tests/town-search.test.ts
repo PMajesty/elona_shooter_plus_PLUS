@@ -62,8 +62,24 @@ test('search applies money, wall and chicken changes, AP gains/losses and nonfat
     assert.deepEqual(restore(sim).toSave(), sim.toSave());
   }
   const chatter = town(37); chatter.state.town!.ap = 1; search(chatter); assert.equal(chatter.state.town!.ap, 0);
-  const trouble = town(0), mission = structuredClone((trouble.state.town as ReadyTown).mission); search(trouble);
-  assert.deepEqual((trouble.state.town as ReadyTown).mission, mission, 'source Trouble expression has no assignment');
+});
+
+test('Trouble adds the displayed HP bonus to the next mission, including after Continue', () => {
+  const sim = town(0), mission = (sim.state.town as ReadyTown).mission;
+  sim.state.player.traits[125] = 1; sim['refreshPartySkills']();
+  assert.equal(sim.performTownActivity('taunt').outcome, 'done');
+  const afterTaunt = mission.hpFix;
+  const message = search(sim);
+  const percent = Number(/(\d+)% more HP tomorrow/.exec(message)![1]);
+  assert.ok(percent >= 10 && percent < 30);
+  assert.equal(mission.hpFix, afterTaunt + percent / 100);
+  const restored = restore(sim);
+  assert.ok(restored.startNextDay());
+  const active = restored.state.activeMission;
+  assert.equal(active.hpFix, mission.hpFix);
+  restored['spawnEnemy']('sheep');
+  assert.equal(restored.state.enemies.at(-1)!.maxHp, Math.trunc(42 * active.hpFix * (100 + active.strength * 1.2) / 100));
+  assert.deepEqual(restore(restored).toSave(), restored.toSave());
 });
 
 test('search gifts obey inventory capacity, sales refresh stock and preserve owned equipment', () => {

@@ -2,11 +2,11 @@ export interface FireworkParticle { clip: 'fireworkBit1' | 'fireworkBit2'; angle
 export interface FireworkBurst { delay: number; x: number; y: number; particles: FireworkParticle[] }
 
 /** Декоративный поток отделён от боя: настройки эффектов не меняют добычу и повторы. */
-export function fireworkPlan(seed: number, classMedal: boolean): FireworkBurst[] {
+export function fireworkPlan(seed: number, medals: readonly number[]): FireworkBurst[] {
   let rng = seed >>> 0 || 1;
   const random = () => { rng ^= rng << 13; rng ^= rng >>> 17; rng ^= rng << 5; return (rng >>> 0) / 4294967296; };
   let delay = 0;
-  return Array.from({ length: 48 + Number(classMedal) * 12 }, () => {
+  return Array.from({ length: medals.includes(93) ? 73 : 48 }, () => {
     const x = 50 + random() * 550, y = 10 + random() * 40, start = delay * 5;
     delay += Math.trunc(random() * 3) + 2;
     const type = Math.trunc(random() * 3), base = 0.3 + random() / 3, size = random() + 0.7;
