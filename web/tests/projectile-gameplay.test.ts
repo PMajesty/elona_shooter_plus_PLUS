@@ -104,3 +104,27 @@ test('Gravity Gun begins reloading immediately while its projectile remains acti
   assert.ok(simulation.weapon!.reloadTime < remaining);
   assert.ok(simulation.state.projectiles.some(actor => actor.kind === 'gravity'));
 });
+
+test('a Duelist arrow builds adrenaline from its launch bow after switching and resuming', () => {
+  const hitTest = () => true;
+  const sim = new Simulation(42, { heroClass: 'duelist', hitTest });
+  const factory = new ItemFactory(() => 0.5);
+  sim.state.inventory[0] = factory.generate(24);
+  sim.state.inventory[2] = factory.generate(1);
+  sim.state.inventory[3] = factory.generate(117);
+  sim.state.player.traits[sim.weapon!.reqTrait!] = 20;
+  sim.state.newWave = false; sim.state.waveIndex = 4; sim.state.spawnTimer = 100;
+  sim['spawnEnemy']('rat');
+  Object.assign(sim.state.enemies[0], { x: 250, y: 230, speed: 0, speedOrg: 0, hp: 10000, maxHp: 10000 });
+  sim['random'] = () => 0.5;
+  assert.ok(sim.fireAt(250, 230)); assert.ok(sim.fireAt(250, 230));
+  const flight = sim.toSave();
+  for (const slot of [2, 3]) {
+    const switching = Simulation.fromSave(flight, { hitTest });
+    assert.ok(switching.useSlot(slot));
+    const run = Simulation.fromSave(switching.toSave(), { hitTest });
+    run['random'] = () => 0.5;
+    for (let frame = 0; frame < 60 && !run.heroClassState!.frenzy; frame++) run.tick();
+    assert.equal(run.heroClassState!.frenzy, 7 / (55 * 0.03) + 0.1);
+  }
+});

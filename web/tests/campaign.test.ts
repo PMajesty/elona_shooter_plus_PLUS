@@ -8,8 +8,26 @@ import { ENEMY_TIMELINES } from '../src/enemy-timelines.ts';
 import { prepareEarlyTown } from '../src/town-preparation.ts';
 import { SAVE_VERSION } from '../src/save-version.ts';
 import { generateHenchman } from '../src/party.ts';
+import { ItemFactory } from '../src/items.ts';
 import { RAT_DROP_BODY_X, ratDropLocalPoint } from '../src/bird-drop.ts';
 import { createEnemyArrow, createEnemyShot, advanceEnemyArrow } from '../src/enemy-arrows.ts';
+
+test('Disarm truncates attack before a boss pistol volley, including an older in-flight save', () => {
+  const hitTest = () => true;
+  const sim = new Simulation(42, { heroClass: 'sniper', hitTest });
+  sim.state.player.traits[130] = 1;
+  sim.state.inventory[0] = new ItemFactory(() => 0.5).generate(1);
+  sim.state.player.traits[sim.weapon!.reqTrait!] = 20;
+  sim['random'] = () => 0.5; sim['spawnEnemy']('boss');
+  const boss = sim.state.enemies[0];
+  Object.assign(boss, { x: 250, y: 230, attack: 3, hp: 10000, maxHp: 10000, bossAction: 1, bossWeapon: 1, bossIdle: 0, bossFireNum: 1 });
+  assert.ok(sim.fireAt(250, 230)); assert.equal(boss.attack, 2);
+  const old = sim.toSave(); old.version = 44; old.enemies[0].attack = 2.5;
+  for (const run of [sim, Simulation.fromSave(old, { hitTest })]) {
+    run.tick();
+    assert.equal(run.events.find(event => event.type === 'castle-hit')?.amount, 8);
+  }
+});
 
 const seeded = (seed: number) => () => {
   seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5;

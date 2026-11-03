@@ -177,13 +177,14 @@ export class Simulation {
     return item?.type === ITEM_TYPE.gun ? item : null;
   }
 
-  actorWeapon(slot: number): Item | null {
-    const item = slot === 0 ? this.weapon : partySlot(this.state.party, slot)?.weapon;
+  actorWeapon(slot: number, weaponSlot = this.state.player.selectedSlot): Item | null {
+    const item = slot === 0 ? this.state.inventory[weaponSlot] : partySlot(this.state.party, slot)?.weapon;
     return isOccupiedItem(item) && item.type === ITEM_TYPE.gun ? item : null;
   }
 
   get fireAtWill(): boolean { return this.state.heroAI?.enabled ?? false; }
   get heroSettings(): Readonly<HeroSettings> { return this.state.heroSettings ?? DEFAULT_HERO_SETTINGS; }
+  private get heroSlot(): number { return this.heroSettings.order === -1 ? 0 : -1; }
   get heroAutomatic(): boolean { return this.heroSettings.order !== -1 || this.fireAtWill; }
   get heroClassState(): SimulationState['player']['classState'] { return this.state.heroAI?.state ?? this.state.player.classState; }
   get heroChainState(): ChainGunState | undefined { return this.state.heroAI?.state ?? this.state.player.chainGun; }
@@ -232,7 +233,7 @@ export class Simulation {
   }
 
   private partyAIContext(): PartyAIContext {
-    return { shared: this.state.partyAI, random: () => this.random(), heroSlot: this.heroSettings.order === -1 ? 0 : -1, fireAtWill: this.fireAtWill,
+    return { shared: this.state.partyAI, random: () => this.random(), heroSlot: this.heroSlot, fireAtWill: this.fireAtWill,
       getTarget: uid => this.state.enemies.find(enemy => enemy.uid === uid) as PartyAITarget | undefined
         ?? this.state.retainedAITargets.find(enemy => enemy.uid === uid) };
   }
@@ -250,7 +251,7 @@ export class Simulation {
       throwMilitiaGrenade: (actor, launch) => {
         const position = partyActorPosition(actor.slot);
         const uid = actor.member?.aiState?.targetUid;
-        const targetSpeed = uid ? this.partyAIContext().getTarget(uid)?.speed : undefined;
+        const targetSpeed = actor.slot !== this.heroSlot && uid ? this.partyAIContext().getTarget(uid)?.speed : undefined;
         this.state.projectiles.push(createProjectile({ uid: this.state.nextUid++, kind: 'hand-grenade', weaponSlot: null, actorSlot: actor.slot,
           startX: position.x, startY: position.y, targetX: launch.x, targetY: launch.y, speedBase: launch.speedBase, damage: launch.damage, targetSpeed }));
         this.events.push({ type: 'grenade', actorSlot: actor.slot, x: position.x, y: position.y });
@@ -720,8 +721,8 @@ export class Simulation {
       let hitX = int(x + this.random() * spread - this.random() * spread);
       const hitY = int(y + this.random() * spread - this.random() * spread);
       if (meter && [23, 24, 25, 26].includes(item.id)) meter.idleCount *= 0.5;
-      if (!manual && item.id === 27) hitX -= 200;
-      const target = ai?.targetUid ? this.partyAIContext().getTarget(ai.targetUid) : undefined;
+      if (actorSlot !== this.heroSlot && item.id === 27) hitX -= 200;
+      const target = actorSlot !== this.heroSlot && ai?.targetUid ? this.partyAIContext().getTarget(ai.targetUid) : undefined;
       const launch = (startOffset = 0, targetOffset = 0) => this.state.projectiles.push(createProjectile({
         uid: this.state.nextUid++, kind: behavior.projectile!, weaponSlot, damage, actorSlot, targetSpeed: target?.speed,
         startX: position.x + startOffset, startY: position.y, targetX: hitX + targetOffset, targetY: hitY,
@@ -801,7 +802,7 @@ export class Simulation {
       const critical = criticalType(actor.traits, this.random(), inside(ENEMIES[enemy.kind].critical, x - enemy.x, y - enemy.y), enemy.hp > 0);
       if (enemy.hp > 0) hitLivingEnemy = true;
       enemy.knockBack = combatTrait(TRAIT.SHERIFF, actor.traits);
-      const item = this.actorWeapon(actorSlot);
+      const item = this.actorWeapon(actorSlot, weaponSlot);
       const meter = member?.aiState ?? (actorSlot === 0 ? this.heroClassState : undefined);
       if (meter && item) meter.frenzy = duelistHitFrenzy(item, actor.traits, meter.frenzy, 'projectile');
       this.damageEnemy(enemy, damage, critical, weaponSlot, int(x), int(y), actorSlot);
@@ -2335,6 +2336,7 @@ export class Simulation {
       if (legacyEquipment) enemy.appearance = enemy.kind === 'boss' ? 51 : 0;
       if (!Number.isInteger(enemy.appearance) || (enemy.kind === 'boss' ? enemy.appearance < 51 || enemy.appearance > (Number(value.version) < 26 ? 50 + Number(value.day) : 65) : enemy.appearance !== 0)) throw new Error('Invalid enemy appearance.');
       if (!finite(enemy.bossDamage) || enemy.bossDamage < 0 || !finite(enemy.disarmed) || enemy.disarmed < 0) throw new Error('Invalid boss damage accumulator.');
+      if (enemy.disarmed > 0 && finite(enemy.attack)) enemy.attack = int(enemy.attack);
     }
     if (Number(value.version) < 3) {
       const state = simulation.state;

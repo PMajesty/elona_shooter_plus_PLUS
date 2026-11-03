@@ -81,6 +81,29 @@ test('new missions reset F and its AI, restoring the ordinary advanced-class met
   assert.deepEqual(Simulation.fromSave(sim.toSave()).toSave(), sim.toSave());
 });
 
+test('F in Hero Mode aims at the target, while a persistent order leads rockets and offsets gravity shots', () => {
+  for (const weapon of [22, 27]) for (const heroMode of [true, false]) {
+    const sim = new Simulation(42);
+    sim.state.inventory[0] = new ItemFactory(() => 0.5).generate(weapon);
+    sim.state.player.traits[sim.weapon!.reqTrait!] = 20;
+    if (heroMode) sim.toggleFireAtWill();
+    else { sim.state.heroSettings = { ...sim.heroSettings, order: 0 }; sim['initializeHeroAI'](); }
+    sim['spawnEnemy']('rat');
+    const rat = sim.state.enemies[0];
+    Object.assign(rat, { x: 250, y: 230, speed: 3, speedOrg: 3, hp: 10000, maxHp: 10000 });
+    Object.assign(sim.state.heroAI!.state, { targetUid: rat.uid, shooting: true, aimCount: 0 });
+    const restored = Simulation.fromSave(sim.toSave());
+    for (const run of [sim, restored]) {
+      run['random'] = () => 0.5;
+      run.tick();
+      const shot = run.state.projectiles[0];
+      assert.ok(shot);
+      const expected = heroMode ? 250 : weapon === 27 ? 50 : 250 + 3 * ((shot.startX - 250) / (shot.speed * 0.9));
+      assert.equal(shot.targetX, expected);
+    }
+  }
+});
+
 test('mouse input in AI mode cancels a manual reload and triggers the AI target before aim completes', () => {
   const sim = new Simulation(42); sim.toggleFireAtWill(); sim['spawnEnemy']('sheep');
   const enemy = sim.state.enemies[0], ai = sim.state.heroAI!.state;

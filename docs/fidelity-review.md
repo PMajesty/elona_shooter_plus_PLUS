@@ -13,7 +13,10 @@ finding for reproduction. Keep save files and deployment access out of this log.
 
 ### C1 — Hero Mode + F incorrectly leads moving targets with projectile weapons
 
-**Status:** Confirmed in production `Simulation.tick`; awaiting Codex disposition.
+**Status:** Fixed. The original hero slot now controls projectile lead, the
+Gravity Gun offset and Militia grenade lead. A deterministic moving target at
+x=250 stays at 250 under F before and after Continue. A persistent order still
+leads the rocket and aims the Gravity Gun at x=50.
 **Impact:** Rockets, launcher grenades, arrows/bolts and flame shots land ahead of
 where the original hero would shoot while F is enabled. This changes hit rate,
 not just the drawn cursor or incidental RNG.
@@ -40,8 +43,9 @@ not just the drawn cursor or incidental RNG.
 
 ### C2 — Duelist projectile adrenaline uses the selected gun instead of the launched weapon
 
-**Status:** Confirmed through ordinary bow launch, weapon selection and ticks;
-awaiting Codex disposition.
+**Status:** Fixed. The hit reads the launch slot. A saved arrow in flight earns
+4.342424242424242 adrenaline after switching to either a Pistol or a MOD and
+continuing. The recorded companion combat comparison also passes.
 **Impact:** Switching weapons while an arrow/bolt is in flight changes how much
 Duelist adrenaline that shot earns. A slower selected gun can inflate charge;
 a faster one reduces it. This affects the next shots' damage bonus.
@@ -66,8 +70,9 @@ a faster one reduces it. This affects the next shots' damage bonus.
 
 ### C3 — Disarm retains fractional attack damage that Flash truncates
 
-**Status:** Confirmed using a real Disarm hit followed by a production boss shot;
-awaiting Codex disposition.
+**Status:** Fixed. A Disarm hit reduces attack 3 to 2 before the boss multiplies
+it. The pistol now takes 8 castle HP. Loading a disarmed enemy from an older
+save with attack 2.5 produces the same 8 HP hit.
 **Impact:** Disarmed enemies can deal more castle damage than in Flash. The
 integer conversion at `damageCastle` is too late for boss attacks that multiply
 attack by 3/4/5, and for Sandbag/Prayer absorption.

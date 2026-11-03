@@ -119,7 +119,8 @@ export function weaponHitEffects(item: Readonly<Item>, traits: CombatTraits, tar
   const result = { ...target, castleHp: context.castleHp };
   if (item.leech && result.castleHp > 0 && roll(context.leechRoll, 'LEECH') * (item.shootRate + 50) < 10) result.castleHp = Math.min(context.castleMaxHp, result.castleHp + int(context.damageBeforeGuard * item.leech / 100) + 1);
   if (level(traits, COMBAT_TRAIT.DISARM) && result.disarmed === 0) {
-    result.disarmed = combatTrait(COMBAT_TRAIT.DISARM, traits); result.attack = result.attack * 100 / (100 + result.disarmed);
+    result.disarmed = combatTrait(COMBAT_TRAIT.DISARM, traits);
+    result.attack = int(result.attack * 100 / (100 + result.disarmed));
   }
   if (level(traits, TRAIT.CRIPPLE_SHOT)) {
     result.speedOrg = Math.max(0.4, result.speedOrg * 100 / (100 + combatTrait(TRAIT.CRIPPLE_SHOT, traits)));
