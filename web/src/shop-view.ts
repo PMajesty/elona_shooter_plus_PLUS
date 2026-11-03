@@ -71,7 +71,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
     const fonts: Record<number, string> = { 682: 'ElonaMenu', 1608: 'ElonaMenuBold', 2681: 'ElonaHud', 1392: 'ElonaSmall', 1535: 'ui', 2116: 'Arial' };
     const width = field.bounds[2] - field.bounds[0];
     const object = scene.add.text(x + placement.x, y + placement.y, value, {
-      fontFamily: fonts[field.fontId] ?? 'Arial', fontSize: `${field.fontSize}px`, color: field.color,
+      resolution: 2, fontFamily: fonts[field.fontId] ?? 'Arial', fontSize: `${field.fontSize}px`, color: field.color,
       wordWrap: { width }, align: field.align === 2 ? 'center' : 'left', padding: { x: 1, y: 1 },
     }).setFixedSize(width, 0).setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees);
     if (field.color === '#ffffff') object.setShadow(1, 1, '#000000', 2);
@@ -155,7 +155,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
       const iconX = x - (width - 48) / 2 - 4;
       const icon = scene.add.container(iconX, y);
       icon.add(scene.add.image(-asset.originX, -asset.originY, 'itemPicture', String(item.graphic)).setOrigin(0));
-      if (item.type === ITEM_TYPE.use && item.ammoMax > 0) icon.add(scene.add.text(30.95, 2, `x ${item.ammo}`, { fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
+      if (item.type === ITEM_TYPE.use && item.ammoMax > 0) icon.add(scene.add.text(30.95, 2, `x ${item.ammo}`, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
       root.add(icon);
       slotView = { area, index, item, icon, originalX: iconX, originalY: y, width, height: GRAPHIC_HEIGHT[item.graphic] ?? asset.frameHeight };
       if (pending?.kind === 'mod' && area === 'inventory' && pending.modSlot === index) pendingModIcon = slotView;

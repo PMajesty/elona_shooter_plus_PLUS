@@ -30,7 +30,7 @@ export function createGeneInfoView(scene: Phaser.Scene, manifest: LootViewManife
       rows.add(scene.add.image(x + icon.x, y + icon.y, 'partyTraitIcon', base ? '2' : definition.party ? '3' : '1')
         .setOrigin(atlas.originX / atlas.frameWidth, atlas.originY / atlas.frameHeight).setScale(icon.scaleX, icon.scaleY));
       rows.add(scene.add.text(x + part.traitName.x, y + part.traitName.y, `${definition.name}${level > 1 ? ` ${level}` : ''}`,
-        { fontFamily: 'ElonaMenu', fontSize: '13px', color: base ? '#044010' : '#000000', padding: { x: 1, y: 1 } }));
+        { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '13px', color: base ? '#044010' : '#000000', padding: { x: 1, y: 1 } }));
       const hit = scene.add.zone(x, y, 130, 18).setOrigin(0).setInteractive().setName(`gene-trait-${id}`); rows.add(hit);
       hit.on('pointerover', () => show(traitHintValues(id, traits)));
       hit.on('pointerout', hide);

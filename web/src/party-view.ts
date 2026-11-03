@@ -98,7 +98,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
     const width = field.bounds[2] - field.bounds[0];
     const fonts: Record<number, string> = { 682: 'ElonaMenu', 1608: 'ElonaMenuBold', 1653: 'ElonaImpact', 1535: 'ui', 2681: 'ElonaHud', 1392: 'ElonaSmall' };
     const object = scene.add.text(x + placement.x, y + placement.y, value, {
-      fontFamily: fonts[field.fontId] ?? 'Arial', fontSize: `${field.fontSize}px`, color: field.color,
+      resolution: 2, fontFamily: fonts[field.fontId] ?? 'Arial', fontSize: `${field.fontSize}px`, color: field.color,
       wordWrap: { width }, align: field.align === 1 ? 'right' : field.align === 2 ? 'center' : 'left', padding: { x: 1, y: 1 },
     }).setFixedSize(width, 0).setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees);
     root.add(object); return object;
@@ -286,7 +286,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
       if (isOccupiedItem(item)) {
         record.icon = scene.add.container(record.x, y); root.add(record.icon);
         record.icon.add(scene.add.image(-asset.originX, -asset.originY, 'itemPicture', String(item.graphic)).setOrigin(0));
-        if (item.type === ITEM_TYPE.use && item.ammoMax > 0) record.icon.add(scene.add.text(30.95, 2, `x ${item.ammo}`, { fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
+        if (item.type === ITEM_TYPE.use && item.ammoMax > 0) record.icon.add(scene.add.text(30.95, 2, `x ${item.ammo}`, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
       }
       const area = scene.add.zone(x, y, 48, 44).setOrigin(0).setInteractive({ useHandCursor: true }).setName(`equipment-${address.kind}-${address.slot}`);
       area.setData({ ...address, itemId: item?.id ?? null }); root.add(area);

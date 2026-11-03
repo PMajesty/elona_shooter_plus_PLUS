@@ -20,7 +20,7 @@ export function createItemPopupView(scene: Phaser.Scene, manifest: LootViewManif
   for (const [key, p] of Object.entries(layout.children)) {
     if (!p.text) continue;
     const spec = p.text, width = spec.bounds[2] - spec.bounds[0];
-    const object = scene.add.text(p.x, p.y, '', { fontFamily: 'ElonaMenu', fontSize: `${spec.fontSize}px`, color: spec.color,
+    const object = scene.add.text(p.x, p.y, '', { resolution: 2, fontFamily: 'ElonaMenu', fontSize: `${spec.fontSize}px`, color: spec.color,
       wordWrap: { width }, align: spec.align === 1 ? 'right' : spec.align === 2 ? 'center' : 'left', padding: { x: 1, y: 1 } })
       .setFixedSize(width, key === 'detailText' ? 0 : spec.bounds[3] - spec.bounds[1]).setScale(p.scaleX, p.scaleY)
       .setAngle(p.rotationDegrees).setName(`${name}-${key}`);

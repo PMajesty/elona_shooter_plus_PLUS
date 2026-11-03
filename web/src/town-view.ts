@@ -52,18 +52,19 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     const indent = field.indent ?? 0;
     const width = field.bounds[2] - field.bounds[0] - indent;
     const object = scene.add.text(x + placement.x + indent, y + placement.y, value, {
-      fontFamily: fonts[field.fontId] ?? 'Arial', fontSize: `${field.fontSize}px`, color: field.color,
+      resolution: 2, fontFamily: fonts[field.fontId] ?? 'Arial', fontSize: `${field.fontSize}px`, color: field.color,
       wordWrap: { width }, align: field.align === 2 ? 'center' : 'left', padding: { x: 1, y: 1 },
     }).setFixedSize(width, 0).setScale(placement.scaleX, placement.scaleY);
     if (field.color === '#ffffff') object.setShadow(1, 1, '#000000', 2);
     root.add(object); return object;
   };
   const button = (key: string, placement: Placement, action: () => void, x = 0, y = 0, enabled = true) => {
+    const shadow = manifest.images[`${key}_shadow`] ? image(`${key}_shadow`, x + placement.x, y + placement.y, placement) : undefined;
     const object = image(key, x + placement.x, y + placement.y, placement).setName(key);
     object.setAlpha(enabled ? 1 : 0.35).setInteractive({ useHandCursor: enabled, pixelPerfect: true, alphaTolerance: 100 });
     if (enabled) {
       object.on('pointerover', () => object.setTexture(`${key}_over`));
-      object.on('pointerout', () => object.setTexture(key));
+      object.on('pointerout', () => { object.setTexture(key); shadow?.setTexture(`${key}_shadow`); });
     }
     object.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); action(); });
     return object;

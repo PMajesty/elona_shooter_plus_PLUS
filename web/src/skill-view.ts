@@ -16,7 +16,7 @@ export function createSkillView(scene: Phaser.Scene, state: SkillViewState, mani
     root.add(object); return object;
   };
   const text = (x: number, y: number, value: string, width: number, color = '#000000') => {
-    const object = scene.add.text(x, y, value, { fontFamily: 'ElonaMenu', fontSize: '12px', color, wordWrap: { width }, padding: { x: 1, y: 1 } }).setLineSpacing(2);
+    const object = scene.add.text(x, y, value, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color, wordWrap: { width }, padding: { x: 1, y: 1 } }).setLineSpacing(2);
     root.add(object); return object;
   };
   image('level', 0, 0);
@@ -39,7 +39,7 @@ export function createSkillView(scene: Phaser.Scene, state: SkillViewState, mani
     const asset = manifest.clips.radioButton;
     const radio = scene.add.image(158 - asset.originX, y - asset.originY, 'radioButton', '1').setOrigin(0);
     radios.push(radio); root.add(radio);
-    const label = scene.add.text(172, y - 7, info.name, { fontFamily: 'ElonaMenu', fontSize: '13px', color: '#000000', padding: { x: 1, y: 1 } }).setFixedSize(89, 20);
+    const label = scene.add.text(172, y - 7, info.name, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '13px', color: '#000000', padding: { x: 1, y: 1 } }).setFixedSize(89, 20);
     root.add(label);
     if (!info.canImprove) { radio.setAlpha(0.5); label.setAlpha(0.5); }
     const hit = scene.add.zone(148, y - 9, 113, 20).setOrigin(0).setInteractive({ useHandCursor: true });

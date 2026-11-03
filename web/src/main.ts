@@ -225,13 +225,14 @@ class ElonaScene extends Phaser.Scene {
     // Все 273 изображения charaPic в SWF используют несглаживаемую заливку 0x43.
     // Сохраняем дробные исходные координаты, но исключаем размытие соседних пикселей тела.
     this.textures.get('charaPic').setFilter(Phaser.Textures.FilterMode.NEAREST);
+    this.textures.get('itemPicture').setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.game.canvas.tabIndex = 0;
     this.game.canvas.setAttribute('aria-label', 'Elona Shooter battlefield');
     loadStatus.hidden = true;
     container.dataset.loadMs = (performance.now() - bootStarted).toFixed(0);
     this.sound.mute = this.muted;
     updateMuteControl(this.muted);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, configureDisplaySizing(this.scale, container));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, configureDisplaySizing(this, container, () => this.options.lowQuality));
     container.dataset.loadedSounds = JSON.stringify([...USED_SOUNDS].filter(key => this.cache.audio.exists(key)));
     container.dataset.muted = String(this.muted);
     this.root = this.add.container(0, 0);
@@ -409,7 +410,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private text(x: number, y: number, content: string, size = 13, color = '#322316', font = 'ElonaMenu'): Phaser.GameObjects.Text {
-    const object = this.add.text(x, y, content, { fontFamily: font, fontSize: `${size}px`, color, padding: { x: 1, y: 1 } });
+    const object = this.add.text(x, y, content, { resolution: 2, fontFamily: font, fontSize: `${size}px`, color, padding: { x: 1, y: 1 } });
     this.root.add(object);
     return object;
   }
@@ -473,7 +474,17 @@ class ElonaScene extends Phaser.Scene {
     const art = this.add.container(0, 0); this.root.add(art);
     this.titleSequence = createTitleSequence((key, frame, x, y) => {
       const image = this.clip(key, frame, x, y)!; art.add(image); return image;
-    }, actors, cloud, buttons, frame, (x, y) => this.cameras.main.setScroll(-x, -y), () => this.playSound('soundImpact1'));
+    }, actors, cloud, buttons, frame, (x, y) => this.cameras.main.setScroll(-x, -y), key => {
+      if (key === 'soundImpact1') this.playSound(key);
+      else if (!this.sound.locked && this.cache.audio.exists(key)) {
+        if (key === 'soundReloaded1') this.playSound(key, 1, 0.42);
+        else if (!this.sound.isPlaying(key)) {
+          // DefineSound 87: пропустить задержку MP3 и ограничить выстрел длиной из SWF.
+          this.sound.play(key, { name: 'title-shot', start: 1633 / 22050, duration: 1607 / 22050,
+            config: { volume: 0.74, pan: 0.42 } });
+        }
+      }
+    });
     const saved = readSave(this.saveSlot);
     if (saved.kind === 'saved') {
       try {
@@ -489,6 +500,7 @@ class ElonaScene extends Phaser.Scene {
       if (slot !== this.saveSlot && !selectSaveSlot(slot)) { status.textContent = 'The selected save slot could not be stored.'; return; }
       this.saveSlot = slot; this.showTitle();
     }, () => this.confirmDeleteSave()));
+    this.text(119, 21, 'Unofficial browser port', 12, '#ffffff').setShadow(1, 1, '#000000', 2);
     this.text(334, 11, `Most Days Survived: ${this.profile.bestDay} / ${this.profile.bestHardcoreDay ?? 0} (HC) / ${this.profile.bestCasualDay ?? 0} (Casual)`, 12, '#ffffff').setShadow(1, 1, '#000000', 2);
     if (saved.kind === 'error') status.textContent = saved.message;
     else if (this.profileRead.warning) status.textContent = this.profileRead.warning;
@@ -761,9 +773,10 @@ class ElonaScene extends Phaser.Scene {
 
   private applyRenderingOptions(): void {
     for (const key of [...Object.keys(manifest.images), ...Object.keys(manifest.clips)]) {
-      if (this.textures.exists(key)) this.textures.get(key).setFilter(this.options.lowQuality || key === 'charaPic' ? Phaser.Textures.FilterMode.NEAREST : Phaser.Textures.FilterMode.LINEAR);
+      if (this.textures.exists(key)) this.textures.get(key).setFilter(this.options.lowQuality || key === 'charaPic' || key === 'itemPicture' ? Phaser.Textures.FilterMode.NEAREST : Phaser.Textures.FilterMode.LINEAR);
     }
     this.cameras.main.roundPixels = this.options.lowQuality;
+    this.events.emit('display-quality');
     container.dataset.options = JSON.stringify(this.options);
     if (this.options.disableFireworks) { this.celebration?.destroy(); this.celebration = undefined; delete container.dataset.fireworkFrames; }
     if (this.options.disableFlash) { this.flashFrames = 0; this.flash?.setVisible(false); }
@@ -865,7 +878,7 @@ class ElonaScene extends Phaser.Scene {
     if (this.fpsSamples.length > 300) this.fpsSamples.shift();
     // Кадр Flash и Timer(50) рассчитываются отдельно внутри симуляции; частота монитора не меняет баланс.
     while (this.accumulator >= 1000 / 30 && this.sim.state.phase === 'battle') {
-      this.sim.tick({ aimX: pointer.x, aimY: pointer.y, firePressed: this.firePressed, fireReleased: this.fireReleased, fireHeld: this.firingGesture && pointer.isDown && pointer.leftButtonDown(), reload: this.reloadRequested, slot: this.slotRequested });
+      this.sim.tick({ aimX: pointer.x / this.cameras.main.zoom, aimY: pointer.y / this.cameras.main.zoom, firePressed: this.firePressed, fireReleased: this.fireReleased, fireHeld: this.firingGesture && pointer.isDown && pointer.leftButtonDown(), reload: this.reloadRequested, slot: this.slotRequested });
       this.firePressed = this.fireReleased = this.reloadRequested = false; this.slotRequested = undefined;
       if (!this.sim.state.player.bowDrawing && this.bowSound) { this.bowSound.destroy(); this.bowSound = undefined; }
       this.accumulator -= 1000 / 30;
@@ -1084,8 +1097,9 @@ class ElonaScene extends Phaser.Scene {
     for (const text of this.hud.values()) this.root.bringToTop(text);
     const pointer = this.input.activePointer;
     this.cursor?.setVisible(false);
-    if (this.input.manager.isOver && pointer.x >= 0 && pointer.x < WORLD.width && pointer.y >= 0 && pointer.y < WORLD.height) {
-      this.cursor?.setVisible(true).setPosition(pointer.x, pointer.y)
+    const aimX = pointer.x / this.cameras.main.zoom, aimY = pointer.y / this.cameras.main.zoom;
+    if (this.input.manager.isOver && aimX >= 0 && aimX < WORLD.width && aimY >= 0 && aimY < WORLD.height) {
+      this.cursor?.setVisible(true).setPosition(aimX, aimY)
         .setFrame(this.options.colorBlind ? '3' : state.waveIndex < 3 ? '2' : '1')
         .setScale(0.3 + Math.min(0.6, state.player.accuracyFix)).setAlpha(state.player.shootTimer > 0 && !this.sim.weapon?.automatic ? 0.7 : 1);
       if (this.cursor) this.root.bringToTop(this.cursor);

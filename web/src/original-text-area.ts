@@ -26,7 +26,7 @@ export function originalTextArea(scene: Phaser.Scene, name: string, text: string
   };
   const track = scene.add.zone(scrollX, trackTop, 15, trackHeight).setOrigin(0).setInteractive(); content.addAt(track, content.getIndex(thumb));
   track.on('pointerdown', (pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => {
-    e.stopPropagation(); setScroll(scroll + (pointer.y < thumb.y ? -1 : 1) * (height - 12));
+    e.stopPropagation(); setScroll(scroll + (pointer.worldY < thumb.y ? -1 : 1) * (height - 12));
   });
   scene.input.setDraggable(thumb);
   thumb.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => e.stopPropagation());
@@ -36,7 +36,7 @@ export function originalTextArea(scene: Phaser.Scene, name: string, text: string
     arrow.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); setScroll(scroll + direction * 36); });
   }
   const wheel = (pointer: Phaser.Input.Pointer, _over: Phaser.GameObjects.GameObject[], _dx: number, dy: number) => {
-    if (zone.getBounds().contains(pointer.x, pointer.y)) setScroll(scroll + dy);
+    if (zone.getBounds().contains(pointer.worldX, pointer.worldY)) setScroll(scroll + dy);
   };
   const keyboard = (event: KeyboardEvent) => {
     if (!['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(event.key)) return;

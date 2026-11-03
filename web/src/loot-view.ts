@@ -30,7 +30,7 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
   const modal = state.pendingLootAction !== null;
   root.setName(mode === 'boss' ? 'boss-loot-view' : 'ordinary-loot-view').setData('pendingLootAction', state.pendingLootAction);
   const text = (x: number, y: number, value: string, size = 13, color = '#322316') => {
-    const object = scene.add.text(x, y, value, { fontFamily: 'ElonaMenu', fontSize: `${size}px`, color, padding: { x: 1, y: 1 } });
+    const object = scene.add.text(x, y, value, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: `${size}px`, color, padding: { x: 1, y: 1 } });
     root.add(object); return object;
   };
   const image = (key: string, x: number, y: number) => {
@@ -91,7 +91,7 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
       const frame = scene.textures.get('itemPicture').has(String(item.graphic)) ? String(item.graphic) : '1';
       icon.add(scene.add.image(-asset.originX, -asset.originY, 'itemPicture', frame).setOrigin(0));
       if (item.type === ITEM_TYPE.use && item.ammoMax > 0) {
-        icon.add(scene.add.text(30.95, 2, `x ${item.ammo}`, { fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
+        icon.add(scene.add.text(30.95, 2, `x ${item.ammo}`, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
       }
       root.add(icon);
       slotView = { area, index, item, icon, originalX: iconX, originalY: y, width, height: GRAPHIC_HEIGHT[item.graphic] ?? asset.frameHeight };

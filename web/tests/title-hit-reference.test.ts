@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { titleButtonOffset, titleRunner } from '../src/title-sequence.ts';
+import { titleAudioCue, titleButtonOffset, titleRunner } from '../src/title-sequence.ts';
 import { titlePointerHit, titleStateBounds, titleStateHit, type TitleButtonKey, type TitleButtonState } from '../src/title-hit.ts';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/original-title-hit-trace.json', import.meta.url), 'utf8'));
@@ -70,4 +70,10 @@ test('title buttons arrive in sequence and runners change direction, fall and st
     assert.equal(titleRunner(400, i).frame % 120, 0);
     assert.deepEqual(titleRunner(401, i), titleRunner(400, i));
   }
+});
+
+test('title sound tags use both reloads and all 42 authored gunfire cues', () => {
+  const frames = Array.from({ length: 307 }, (_, i) => i + 1);
+  assert.deepEqual(frames.filter(f => titleAudioCue(f) === 'soundReloaded1'), [94, 287]);
+  assert.deepEqual(frames.filter(f => titleAudioCue(f) === 'soundGun2'), Array.from({ length: 42 }, (_, i) => 152 + 2 * i));
 });

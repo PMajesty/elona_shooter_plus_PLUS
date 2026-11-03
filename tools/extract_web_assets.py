@@ -235,7 +235,7 @@ def atlas(name, character_id, sprite, png_root=CACHE, svg_root=ROOT / ".build/sv
         indices[path.stem] = unique[digest]
     columns = max(1, math.ceil(math.sqrt(len(images) * height / width)))
     # Межкадровый зазор исключает выборку соседней ячейки при дробном масштабе портретов.
-    gutter = 1 if name == "charaPic" else 0
+    gutter = 1 if name in {"charaPic", "enemy_sheep"} else 0
     stride_x, stride_y = width + 2 * gutter, height + 2 * gutter
     sheet = Image.new("RGBA", (columns * stride_x, math.ceil(len(images) / columns) * stride_y))
     for index, image in enumerate(images):
@@ -535,7 +535,10 @@ def castle_upgrade_tiles(xml, sprites):
             "framesPerTile": 2, "states": ["up", "over"]}
 
 
-def buttons(manifest):
+def buttons(manifest, tags):
+    nav_shadows = {int(t.get("characterId")): t.find("surfaceFilterList/item")
+                   for t in placed_frame(tags, 71) if t.get("name") in
+                   {"missionButton", "castleButton", "charaButton", "equipButton", "shopButton", "medalButton"}}
     png_dir, svg_dir = ROOT / ".build/buttons", ROOT / ".build/buttons-svg"
     for directory, extension, format_args, log in [(png_dir, "png", [], "buttons"),
             (svg_dir, "svg", ["-format", "button:svg"], "buttons-svg")]:
@@ -560,6 +563,24 @@ def buttons(manifest):
             manifest["images"][key] = {"file": f"buttons/{key}.png", "width": image.width,
                 "height": image.height, "originX": float(shift[1]) + (image.width - math.ceil(width)) / 2,
                 "originY": float(shift[2]) + (image.height - math.ceil(height)) / 2, "characterId": button_id}
+            if button_id in nav_shadows and state != "3_down":
+                # Тень принадлежит размещению кнопки в городе. Отдельный слой сохраняет исходную область клика.
+                filt = nav_shadows[button_id]
+                assert filt.get("type") == "DROPSHADOWFILTER"
+                radius = float(filt.get("blurX")) / 2
+                distance, angle = float(filt.get("distance")), float(filt.get("angle"))
+                pad = math.ceil(radius + distance)
+                alpha = Image.new("L", (image.width + 2 * pad, image.height + 2 * pad))
+                alpha.paste(image.getchannel("A"), (pad + round(distance * math.cos(angle)), pad + round(distance * math.sin(angle))))
+                strength = float(filt.get("strength")) * int(filt.find("dropShadowColor").get("alpha")) / 255
+                shadow = Image.new("RGBA", alpha.size)
+                shadow.putalpha(alpha.filter(ImageFilter.BoxBlur(radius)).point(lambda v: round(v * strength)))
+                shadow_key = key + "_shadow"
+                shadow.save(DEST / "buttons" / (shadow_key + ".png"), optimize=True)
+                a = manifest["images"][key]
+                manifest["images"][shadow_key] = {**a, "file": f"buttons/{shadow_key}.png",
+                    "width": shadow.width, "height": shadow.height, "originX": a["originX"] + pad, "originY": a["originY"] + pad}
+
 
 
 def runtime_clips(xml, sprites, manifest):
@@ -912,7 +933,7 @@ def main():
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, dest)
         manifest["sounds"][name] = f"sounds/{dest.name}"
-    buttons(manifest)
+    buttons(manifest, tags)
     manifest["images"]["pauseMenu"] = pause_screen(xml, sprites)
     manifest["images"]["medalHint"] = static_screen(xml, "medalHint", placed_frame(sprites[1657].find("subTags"), 1),
         {"itemName", "itemDesc", "itemDesc2", "maxText", "typeText"})
@@ -953,7 +974,7 @@ def main():
                    "sounds": len(manifest["sounds"]), "fonts": len(manifest["fonts"])},
         "runtimeAdjustments": [
             "Static screens omit runtime text placeholders and separately rendered controls",
-            "Opening logo uses frames 1–171 of symbol 2473. The title animates its own actors, buttons and clouds. itemPicture includes the default inventory drop shadow, and charaPic cells have a transparent gutter.",
+            "Opening logo uses frames 1–171 of symbol 2473. The title animates its own actors, buttons and clouds. itemPicture includes the default inventory drop shadow, and both hero and sheep frames have transparent gutters. Town navigation shadows use the six original placement filters.",
             "Town Sister is frozen at stand frame4; battle Sister is rendered separately with original reactions and hidden sisterFire",
             "townHud applies the original eventGene bgAlpha.alpha=1",
             "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",

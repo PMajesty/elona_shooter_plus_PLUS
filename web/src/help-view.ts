@@ -41,6 +41,9 @@ export function createHelpView(scene: Phaser.Scene, manifest: LootViewManifest, 
       button(key, data.children[part], () => draw(number)).setName(`help-page-${number}`);
     }
     if (page === 3) {
+      content.add(scene.add.text(layout.position.x + 146, layout.position.y + 308,
+        'Game by Noa · Plus by its contributors · AI vibe-ported · Always free',
+        { resolution: 2, fontFamily: 'Arial', fontSize: '12px', color: '#352317' }));
       for (const [index, url] of Object.entries(layout.links)) {
         const p = data.children[`link${index}`];
         if (p) button('button_helpLink', p, () => window.open(url, '_blank', 'noopener,noreferrer')).setName(`help-credit-${index}`);

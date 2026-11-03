@@ -20,7 +20,7 @@ export function createTownEventView(scene: Phaser.Scene, manifest: LootViewManif
     .setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees));
   for (const [name, value] of [['title', notice.title], ['text', notice.text]] as const) {
     const position = layout.children[name], field = position.text!, width = field.bounds[2] - field.bounds[0];
-    root.add(scene.add.text(position.x, position.y, value, { fontFamily: field.fontId === 1608 ? 'ElonaMenuBold' : 'ElonaMenu',
+    root.add(scene.add.text(position.x, position.y, value, { resolution: 2, fontFamily: field.fontId === 1608 ? 'ElonaMenuBold' : 'ElonaMenu',
       fontSize: `${field.fontSize}px`, color: field.color, wordWrap: { width },
       align: field.align === 2 ? 'center' : 'left', padding: { x: 1, y: 1 } })
       .setFixedSize(width, 0).setScale(position.scaleX, position.scaleY).setName(`town-event-${name}`));

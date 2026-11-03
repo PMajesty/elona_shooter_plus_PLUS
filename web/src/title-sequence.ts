@@ -32,11 +32,18 @@ export function titleButtonOffset(frame: number, index: number): number {
   return 25 * Math.min(0, Math.max(-11 - index * 4, frame - (30 + index * 9)));
 }
 
+// Кадры StartSound клипа 2637. Gun2 помечен syncNoMultiple в исходном SWF.
+export function titleAudioCue(sourceFrame: number) {
+  if (sourceFrame === 94 || sourceFrame === 287) return 'soundReloaded1';
+  if (sourceFrame >= 152 && sourceFrame <= 234 && sourceFrame % 2 === 0) return 'soundGun2';
+  return undefined;
+}
+
 type Image = Phaser.GameObjects.Image;
 type Clip = (key: string, frame: number, x: number, y: number) => Image;
 
 export function createTitleSequence(clip: Clip, actorsLayer: Phaser.GameObjects.Container, cloud: Image, buttons: Image[], start: number,
-  shakeView: (x: number, y: number) => void, impactSound: () => void) {
+  shakeView: (x: number, y: number) => void, playCue: (key: string) => void) {
   const actors = ([
     ['titleBoy', 253, 190.4, 50], ['titleGirl', 304.9, 253, 58], ['titleCat', 302.9, 305, 71],
     ['titleLady', 261, 305, 70], ['titleSister', 596, 99, 307],
@@ -72,6 +79,8 @@ export function createTitleSequence(clip: Clip, actorsLayer: Phaser.GameObjects.
       while (clock >= 1000 / 30) {
         clock -= 1000 / 30; frame++;
         paint();
+        const cue = titleAudioCue(frame + 1);
+        if (cue) playCue(cue);
         if (frame > 400) continue;
         for (let i = bursts.length - 1; i >= 0; i--) {
           const b = bursts[i];
@@ -79,7 +88,7 @@ export function createTitleSequence(clip: Clip, actorsLayer: Phaser.GameObjects.
           else b.image.setFrame(String(b.age + 1)).setAlpha(Math.min(1, (b.limit - b.age) / 5));
         }
         for (const [i, impact] of [29, 38, 47].entries()) {
-          if (frame === impact) { shake.start(i === 2 ? 30 : 20, 5, 0.9); impactSound(); }
+          if (frame === impact) { shake.start(i === 2 ? 30 : 20, 5, 0.9); playCue('soundImpact1'); }
           if (frame >= impact && frame <= impact + 10) burst('groundImpact', 250 + Math.random() * (i === 2 ? 80 : 100), 245 + 50 * i + Math.random() * 10, 17);
         }
         if (frame >= 150 && frame < 230 && frame % 2 === 0) burst('groundImpact', 480 - (frame - 150) * 5 + Math.random() * 15, 160 + Math.random() * 200, 17);

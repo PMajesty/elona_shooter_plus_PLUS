@@ -1,15 +1,26 @@
-# Elona Shooter Plus PLUS
+# Elona Shooter Plus — unofficial browser port
 
-A TypeScript/Phaser browser remake of Elona Shooter Plus 1.3.0.4.
-The desktop-browser release covers **all eight original hero classes**,
-**repeating campaign cycles**, Casual/Hardcore modes and the original playable
-systems. The supported save/campaign range is Day1–1000. The finite differences,
-verification evidence and browser limits are in [port status](docs/port-status.md);
-this is not a claim of pixel identity or bug-free software.
+**Elona Shooter is a game by Noa.** This port is based on the Flash release of
+**Elona Shooter Plus 1.3.0.4**. Credit for the game and the Plus release goes
+to their original developers and contributors. Open **Help → Credits** in the
+game for the original artists, sound contributors, testers and links.
 
-Play [online](https://pastalapizza.site/elona/) or open [the local game](http://127.0.0.1:5175/elona/).
-Original artwork, English text, audio and credits are retained. Sound starts muted
-unless you previously enabled it; the mute preference persists between visits.
+This is a fan preservation project, openly *vibe-ported* from Flash to
+TypeScript and Phaser with AI coding tools. I wanted a game I love to stay
+playable in a browser. I claim no personal credit for the game or its content.
+This port will always be free to play and will never be monetized.
+
+[Play in your browser](https://pastalapizza.site/elona/) · [Original Flash game by Noa on Kongregate](https://www.kongregate.com/games/noanoa/elona-shooter)
+
+The source repository is private while permission for a public release is pending.
+The MIT license covers newly written port code only. The original game, artwork,
+audio, fonts, scripts and other upstream material retain their own terms.
+[License scope](LICENSE.md)
+
+The desktop release includes all eight hero classes, repeating campaign cycles
+and Casual and Hardcore modes. The supported save range is days 1–1000.
+Sound starts muted and remembers your choice.
+[Coverage and known differences](docs/port-status.md)
 
 ## Current capabilities
 
@@ -79,7 +90,7 @@ unless you previously enabled it; the mute preference persists between visits.
 - A persistent browser medal collection with class unlocks and original New Game
   starting bonuses. Eight browser save slots with the original title dropdown,
   trash icon and deletion confirmation, plus Continue and JSON import/export.
-  Version41 accepts prior browser saves; the original Flash medal/index file can
+  The current format accepts prior browser saves; the original Flash medal/index file can
   be imported. Original Flash town adventures have a validated import path;
   compatibility with real players' files remains unverified.
 - Casual lowers encounter power/taxes and grants35% more kill XP. Hardcore uses
@@ -285,7 +296,6 @@ python tools/extract_web_assets.py
 Use `--refresh` to regenerate intermediate FFDec exports. They stay in ignored
 `.build/`; extraction verifies the original SWF hash. See
 [asset provenance](docs/asset-manifest.json) and [UI reference](docs/ui-reference.md).
-Original game/artwork credits belong to **Noa** and the supplied release's contributors.
 The extractor also generates the later enemy atlases and source frame-command
 table through `tools/extract_campaign_enemies.py`. Later enemy collision currently
 uses rendered alpha; early enemies retain source filled contours.

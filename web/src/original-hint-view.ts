@@ -11,7 +11,7 @@ export function createOriginalHintView(scene: Phaser.Scene, manifest: LootViewMa
   root.add(scene.add.image(-asset.originX, -asset.originY, layout.hintImage).setOrigin(0));
   const field = (key: string) => {
     const p = layout.hintChildren[key], spec = p.text!;
-    const object = scene.add.text(p.x, p.y, '', { fontFamily: spec.fontId === 1653 ? 'ElonaImpact' : 'ElonaMenu',
+    const object = scene.add.text(p.x, p.y, '', { resolution: 2, fontFamily: spec.fontId === 1653 ? 'ElonaImpact' : 'ElonaMenu',
       fontSize: `${spec.fontSize}px`, color: spec.color, wordWrap: { width: spec.bounds[2] - spec.bounds[0] },
       padding: { x: 1, y: 1 } }).setScale(p.scaleX, p.scaleY);
     root.add(object); return object;

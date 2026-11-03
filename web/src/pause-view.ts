@@ -26,7 +26,7 @@ export function createPauseView(scene: Phaser.Scene, manifest: LootViewManifest,
   area.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => e.stopPropagation());
   let offset = 0;
   const wheel = (pointer: Phaser.Input.Pointer, _over: unknown, _dx: number, dy: number) => {
-    if (pointer.x < x || pointer.x > x + width || pointer.y < y || pointer.y > y + height) return;
+    if (pointer.worldX < x || pointer.worldX > x + width || pointer.worldY < y || pointer.worldY > y + height) return;
     offset = Phaser.Math.Clamp(offset + dy, 0, Math.max(0, field.height - height + 8)); field.y = y + 4 - offset;
     field.setCrop(0, offset, width - 8, height - 8);
   };
