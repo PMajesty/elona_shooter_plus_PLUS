@@ -95,7 +95,7 @@ export interface SimulationState {
   pendingPartyAction: PartyPendingAction | null;
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
-export interface SimulationEvent { actorSlot?: number; enemyKind?: EnemyKind; type: 'info' | 'combat-notice' | 'enemy-attack' | 'enemy-drop' | 'sister-killed' | 'sister-launch' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number; specialHitType?: number }[]; explosionKind?: ExplosionKind; scale?: number; oneShot?: true }
+export interface SimulationEvent { actorSlot?: number; enemyKind?: EnemyKind; type: 'info' | 'combat-notice' | 'enemy-attack' | 'enemy-drop' | 'sister-killed' | 'sister-launch' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; resisted?: true; pellets?: { x: number; y: number; specialHitType?: number; groundImpact?: true }[]; explosionKind?: ExplosionKind; scale?: number; oneShot?: true }
 export interface SimulationOptions { mods?: GameMods; mode?: GameMode; hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
@@ -743,6 +743,8 @@ export class Simulation {
     let specialHitType = modified.specialHitType;
     let hasHitAnything = false, hasHitAnyEnemy = false, hasKillAnyEnemy = false, hasCritHit = false;
     const pellets: NonNullable<SimulationEvent['pellets']> = [];
+    // Вспышка One Shot предшествует проверке крита; точки дроби готовы к моменту отрисовки.
+    this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'shot', weaponId: item.id, x: position.x, y: position.y, pellets, ...(oneShot ? { oneShot } : {}) });
     for (let i = 0; i < stats.shells; i++) {
       let hitX = int(x + this.random() * spread - this.random() * spread);
       const hitY = int(y + this.random() * spread - this.random() * spread);
@@ -770,14 +772,16 @@ export class Simulation {
         if (hasHitAnyEnemy && enemy.hp <= 0) hasKillAnyEnemy = true;
       }
       if (specialHitType) pellet.specialHitType = specialHitType;
-      if (meter && !hasHitAnything) meter.idleCount = 0;
+      if (!hasHitAnything) {
+        if (meter) meter.idleCount = 0;
+        if (hitY > 150) pellet.groundImpact = true;
+      }
     }
     if (hasCritHit && hasKillAnyEnemy) player.shootTimer = criticalKillCooldown(player.shootTimer, player.traits);
     if (meter) {
       if (!hasHitAnything) meter.idleCount = 0;
       meter.idleCount *= 0.8;
     }
-    this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'shot', weaponId: item.id, x: position.x, y: position.y, pellets, ...(oneShot ? { oneShot } : {}) });
     return true;
   }
 
@@ -1026,7 +1030,7 @@ export class Simulation {
       if (critical) enemy.hitEffects!.push({ frame: 70, ...local });
     }
     enemy.hp -= damage;
-    this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'hit', x, y, amount: damage, critical, criticalType: Number(criticalValue), enemyUid: enemy.uid, ...(enemy.kind === 'boss' && enemy.bossAction === 6 ? { bossGuard: true } : {}) });
+    this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'hit', x, y, amount: damage, critical, criticalType: Number(criticalValue), enemyUid: enemy.uid, ...(hit.lowDamage ? { resisted: true } : {}) });
     if (enemy.hp > 0) {
       if (enemy.kind === 'barbarian' && enemy.rampage === 0 && this.random() > 0.75) {
         enemy.rampage = 100;

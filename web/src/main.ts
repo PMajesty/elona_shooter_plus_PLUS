@@ -956,6 +956,12 @@ class ElonaScene extends Phaser.Scene {
       this.heroAimCursor ??= this.clip('partyAimCursor', 1, cursorX, cursorY);
       this.heroAimCursor?.setPosition(cursorX - asset.originX, cursorY - asset.originY).setVisible(this.screen === 'battle');
     } else this.heroAimCursor?.setVisible(false);
+    const attached = new Map<number, typeof this.effects>();
+    for (const effect of this.effects) {
+      if (!effect.enemyOffset) continue;
+      const uid = effect.enemyOffset.uid, group = attached.get(uid);
+      if (group) group.push(effect); else attached.set(uid, [effect]);
+    }
     const present = new Set<number>();
     for (const enemy of [...state.enemies].sort((a, b) => a.y - b.y)) {
       const key = this.enemyClip(enemy);
@@ -1012,8 +1018,10 @@ class ElonaScene extends Phaser.Scene {
         this.enemyHitSprites.set(enemy.uid, sprites);
       }
       // Эффект попадания — ребёнок исходного enemy, но не отражённого mc.
-      for (const effect of this.effects) if (effect.enemyOffset?.uid === enemy.uid && effect.object instanceof Phaser.GameObjects.Image) {
-        effect.object.setPosition(enemy.x + effect.enemyOffset.x, enemy.y + effect.enemyOffset.y);
+      for (const effect of attached.get(enemy.uid) ?? []) {
+        const image = effect.object as Phaser.GameObjects.Image, offset = effect.enemyOffset!;
+        image.setPosition(enemy.x + offset.x, enemy.y + offset.y);
+        image.setAlpha(sprite.alpha * (manifest.clips[effect.clip!].frameAlpha?.[effect.frame! - 1] ?? 1));
         this.root.bringToTop(effect.object);
       }
     }
@@ -1244,6 +1252,7 @@ class ElonaScene extends Phaser.Scene {
     if (event.type === 'shot') {
       actor?.playOriginal(weaponPresentation(event.weaponId ?? 0).shootFrame);
       for (const pellet of event.pellets ?? []) {
+        if (pellet.groundImpact) this.playImpact('groundImpact', pellet.x, pellet.y + 4);
         const key = ['', 'powerShotTrail', 'oneShotTrail', 'lethalShotTrail'][pellet.specialHitType ?? 0];
         if (!key) continue;
         const asset = manifest.clips[key], x = (event.x ?? 0) - 10, y = event.y ?? 0;
@@ -1274,15 +1283,14 @@ class ElonaScene extends Phaser.Scene {
       actor?.playOriginal('reload'); if (actorSlot === 0) this.reloadAnimations++;
     }
     if (event.type === 'hit') {
-      if (event.bossGuard) {
-        const enemy = this.sim?.state.enemies.find(candidate => candidate.uid === event.enemyUid);
-        const asset = manifest.clips.shieldHit;
-        const effect = this.clip('shieldHit', 1, event.x ?? 0, event.y ?? 0);
-        if (effect) {
-          effect.setAlpha(asset.frameAlpha![0]);
-          this.effects.push({ object: effect, ticks: asset.count, clip: 'shieldHit', frame: 1,
-            ...(enemy ? { enemyOffset: { uid: enemy.uid, x: (event.x ?? 0) - enemy.x - asset.originX, y: (event.y ?? 0) - enemy.y - asset.originY } } : {}) });
-        }
+      const enemy = this.sim?.state.enemies.find(candidate => candidate.uid === event.enemyUid);
+      if (enemy && enemy.kind !== 'barbarian' && enemy.kind !== 'lava') {
+        const key = event.resisted ? 'shieldHit' : enemy.kind === 'cata' || enemy.kind === 'tank' ? 'machineHit' : 'bloodHit';
+        this.playImpact(key, event.x!, event.y!, enemy);
+        if (event.critical) this.playImpact('criticalHit', event.x!, event.y!, enemy);
+      }
+      if (event.critical && actorSlot === 0 && !this.flashFrames) this.flashFrames = 7;
+      if (event.resisted) {
         const pan = Phaser.Math.Clamp(Math.trunc(Math.trunc(enemy?.x ?? event.x ?? 0) / 25), 0, 19) * 0.08 - 0.8;
         this.playSound('soundLow', 0.9, pan);
       }
@@ -1311,8 +1319,8 @@ class ElonaScene extends Phaser.Scene {
         .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setDepth(1);
       this.effects.push({ object: effect, ticks: asset.count, clip: 'levelUp', frame: 1 });
     }
-    if (event.type === 'rampage' && actorSlot === 0) { this.flashFrames = 15; this.announceCombat('Rampage!!'); }
-    if (event.type === 'ragnarok') { this.flashFrames = 15; this.announceCombat(event.message!); }
+    if (event.type === 'rampage' && actorSlot === 0) { this.flashFrames += 15; this.announceCombat('Rampage!!'); }
+    if (event.type === 'ragnarok') { this.flashFrames += 15; this.announceCombat(event.message!); }
     if ((event.type === 'wave' || event.type === 'combat-notice') && event.message) this.announceCombat(event.message);
   }
 
@@ -1323,6 +1331,15 @@ class ElonaScene extends Phaser.Scene {
     updateCombatNoticeView(view, layout, notice);
     this.combatNoticeViews.set(notice, view);
     container.dataset.combatNotices = JSON.stringify(this.combatNotices.active);
+  }
+
+  private playImpact(key: string, x: number, y: number, enemy?: EnemyState): void {
+    const asset = manifest.clips[key];
+    const image = this.clip(key, 1, x, y);
+    if (!image) return;
+    image.setAlpha(asset.frameAlpha?.[0] ?? 1);
+    this.effects.push({ object: image, ticks: asset.count, clip: key, frame: 1,
+      ...(enemy ? { enemyOffset: { uid: enemy.uid, x: image.x - enemy.x, y: image.y - enemy.y } } : {}) });
   }
 
   private animateEffects(): void {

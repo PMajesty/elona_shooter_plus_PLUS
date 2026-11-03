@@ -2496,6 +2496,63 @@
       "count": 1,
       "uniqueFrames": 1,
       "characterId": 2406
+    },
+    "machineHit": {
+      "image": "sprites/machineHit.png",
+      "json": "sprites/machineHit.json",
+      "originX": 26.25,
+      "originY": 29.2,
+      "frameWidth": 53,
+      "frameHeight": 57,
+      "labels": {},
+      "count": 10,
+      "uniqueFrames": 7,
+      "characterId": 1459,
+      "sourceFrameStart": 125,
+      "frameAlpha": [
+        1,
+        1,
+        1,
+        1,
+        0.7,
+        0.7,
+        0.5,
+        0.5,
+        0.2,
+        0.2
+      ]
+    },
+    "groundImpact": {
+      "image": "sprites/groundImpact.png",
+      "json": "sprites/groundImpact.json",
+      "originX": 23.85,
+      "originY": 31.8,
+      "frameWidth": 48,
+      "frameHeight": 43,
+      "labels": {},
+      "count": 17,
+      "uniqueFrames": 8,
+      "characterId": 1459,
+      "sourceFrameStart": 20,
+      "frameAlpha": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0.8,
+        0.8,
+        0.6,
+        0.6,
+        0.4,
+        0.4,
+        0.1,
+        0.1,
+        0.1
+      ]
     }
   },
   "sounds": {

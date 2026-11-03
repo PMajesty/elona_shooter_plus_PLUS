@@ -141,7 +141,11 @@ export function compareShootTrace(records: ShootReferenceRecord[]) {
     const differences: { field: string; expected: unknown; actual: unknown }[] = [];
     const check = (field: string, observed: unknown, expected: unknown) => { if (!isDeepStrictEqual(observed, expected)) differences.push({ field, expected, actual: observed }); };
     check('fired', actual.fired, true); check('stats', actual.stats, record.stats);
-    check('pellets', actual.pellets, record.pellets!.map(({ x, y }) => ({ x, y })));
+    let hitSoFar = false;
+    check('pellets', actual.pellets, record.pellets!.map(({ x, y, targets }) => {
+      hitSoFar ||= targets.some(target => target.shapeHit && !target.shadowExcluded);
+      return { x, y, ...(!hitSoFar && y > 150 ? { groundImpact: true } : {}) };
+    }));
     check('points', actual.points, record.pellets!.map(({ index, x, y, drawCount }) => ({ index, x, y, drawCount })));
     check('damageEvents', actual.damageEvents, record.damageEvents);
     check('draws', actual.draws, record.draws); check('drawCount', actual.drawCount, record.drawCount); check('rngState', actual.rngState, record.rngState);

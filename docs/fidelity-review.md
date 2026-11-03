@@ -26,3 +26,9 @@ finding for reproduction. Keep save files and deployment access out of this log.
   browser run emptied the magazine, observed the reload hint, exported v44,
   restored it and loaded a shell with Space. Old browser saves can see the
   reload tip once. Flash imports keep the original `game.hintReload` flag.
+- **Reading a hit.** The original `enemy.damage` signals a poor anti-armor or
+  anti-air rating below 60 with a spark and sound. Muted Chrome now shows the
+  spark at 59 and the original mechanical hit at 60 on the same Tank. Ground
+  misses, blood and critical hit artwork also appear through normal firing.
+  The 22 recorded Flash shooting cases check impact eligibility from their
+  original pellet coordinates and shape contacts.

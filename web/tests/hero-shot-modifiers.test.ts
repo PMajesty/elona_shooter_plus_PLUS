@@ -144,3 +144,21 @@ test('a manual Sniper can fill the adrenaline bar but spends charge while reload
   sim.tick({});
   assert.ok(Math.abs(sim.heroClassState!.idleCount - (cap + 0.066 - 0.15)) < 1e-8);
 });
+
+test('a pellet sparks below 60 armor rating and raises dust only on a ground miss', () => {
+  const sim = manual('sheriff');
+  const fire = (y: number) => {
+    sim.state.player.shootTimer = 0;
+    sim.tick({ firePressed: true, aimX: 300, aimY: y });
+    return sim.events.find(event => event.type === 'shot' && !event.actorSlot)!.pellets![0];
+  };
+  assert.equal(fire(70).groundImpact, undefined);
+  assert.equal(fire(240).groundImpact, true);
+  sim['spawnEnemy']('tank');
+  sim.state.enemies[0].hp = sim.state.enemies[0].maxHp = 10000;
+  for (const rating of [59, 60]) {
+    sim.weapon!.dmgArmor = rating;
+    assert.equal(fire(240).groundImpact, undefined);
+    assert.equal(sim.events.find(event => event.type === 'hit')?.resisted, rating < 60 ? true : undefined);
+  }
+});

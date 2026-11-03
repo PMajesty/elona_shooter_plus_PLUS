@@ -792,6 +792,8 @@ def main():
     manifest["clips"]["partyPortraitBackground"] = party_portrait_background(xml, sprites[685])
     manifest["clips"]["castleUpgradeTiles"] = castle_upgrade_tiles(xml, sprites)
     manifest["clips"]["shieldHit"] = effect_segment_asset(xml, sprites[1459], "shieldHit", "shield-hit", 140, 146, [0.7, 0.7, 0.5, 0.5, 0.2, 0.2])
+    manifest["clips"]["machineHit"] = effect_segment_asset(xml, sprites[1459], "machineHit", "machine-hit", 125, 135, [1] * 4 + [0.7, 0.7, 0.5, 0.5, 0.2, 0.2])
+    manifest["clips"]["groundImpact"] = effect_segment_asset(xml, sprites[1459], "groundImpact", "ground-impact", 20, 37, [1] * 8 + [0.8, 0.8, 0.6, 0.6, 0.4, 0.4, 0.1, 0.1, 0.1])
     # Наблюдаемые значения alpha хранятся Flash с точностью 1/256.
     manifest["clips"]["bloodHit"] = effect_segment_asset(xml, sprites[1459], "bloodHit", "enemy-hit-blood", 50, 63, [1, 1, 1, 1, 204/256, 204/256, 153/256, 153/256, 102/256, 102/256, 25/256, 25/256, 25/256])
     manifest["clips"]["criticalHit"] = effect_segment_asset(xml, sprites[1459], "criticalHit", "enemy-hit-critical", 70, 76, [1] * 6)
