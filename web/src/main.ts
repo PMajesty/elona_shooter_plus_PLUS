@@ -168,8 +168,7 @@ class ElonaScene extends Phaser.Scene {
   private enemyFrameAudio = new Map<number, { frame: number; crowPlayed: boolean }>();
   private frameSoundCues: { key: string; uid: number; frame: number }[] = [];
   private adrenalineFill?: Phaser.GameObjects.Image;
-  private readonly battleCursor = new BattleCursor();
-  private touchCursor?: Phaser.GameObjects.Image;
+  private battleCursor!: BattleCursor;
   private townNavigation?: Phaser.GameObjects.Container;
   private pauseLayer?: Phaser.GameObjects.Container;
   private helpLayer?: Phaser.GameObjects.Container;
@@ -226,6 +225,7 @@ class ElonaScene extends Phaser.Scene {
       return;
     }
     gameScene = this;
+    this.battleCursor = new BattleCursor(this);
     // Все 273 изображения charaPic в SWF используют несглаживаемую заливку 0x43.
     // Сохраняем дробные исходные координаты, но исключаем размытие соседних пикселей тела.
     this.textures.get('charaPic').setFilter(Phaser.Textures.FilterMode.NEAREST);
@@ -370,7 +370,7 @@ class ElonaScene extends Phaser.Scene {
     for (const sound of this.companionBowSounds.values()) sound.destroy();
     this.companionBowSounds.clear(); this.companionSprites.clear(); this.companionCursors.clear();
     this.reloadAnimations = 0;
-    this.pauseLayer = undefined; this.playerSprite = undefined; this.touchCursor = undefined; this.ammoFill = undefined;
+    this.pauseLayer = undefined; this.playerSprite = undefined; this.battleCursor.hide(); this.ammoFill = undefined;
     if (!keepTownAmbience) { this.ambient?.destroy(); this.ambient = undefined; }
     container.dataset.screen = screen;
     container.dataset.saveSlot = String(this.saveSlot);
@@ -695,10 +695,6 @@ class ElonaScene extends Phaser.Scene {
     if (this.sim?.weapon?.reloadTime && !this.sim.weapon.autoReload) this.playerSprite.playOriginal('reload');
     this.syncCompanionActors();
     this.drawHud();
-    const crosshair = manifest.clips.originalCrosshair;
-    this.touchCursor = this.add.image(0, 0, 'originalCrosshair', '1').setVisible(false)
-      .setOrigin(crosshair.originX / crosshair.frameWidth, crosshair.originY / crosshair.frameHeight);
-    this.root.add(this.touchCursor);
     this.input.setDefaultCursor(BATTLE_CURSOR);
     if (this.cache.audio.exists('soundBgForest')) this.ambient = this.sound.add('soundBgForest', { volume: 0.3, loop: true });
     this.ambient?.play();
@@ -1103,19 +1099,11 @@ class ElonaScene extends Phaser.Scene {
     this.paintProjectiles();
     this.updateHud();
     for (const text of this.hud.values()) this.root.bringToTop(text);
-    const pointer = this.input.activePointer;
     const frame = this.options.colorBlind ? '3' : state.waveIndex < 3 ? '2' : '1';
     const size = 0.3 + Math.min(0.6, state.player.accuracyFix);
     const alpha = state.player.shootTimer > 0 && !this.sim.weapon?.automatic ? 0.7 : 1;
     const crosshair = manifest.clips.originalCrosshair;
-    this.battleCursor.update(this, frame, size * this.scale.displaySize.width / WORLD.width, alpha, crosshair.originX, crosshair.originY);
-    const x = pointer.x / this.cameras.main.zoom, y = pointer.y / this.cameras.main.zoom;
-    const showTouch = pointer.wasTouch && this.input.manager.isOver && x >= 0 && x < WORLD.width && y >= 0 && y < WORLD.height;
-    this.touchCursor?.setVisible(showTouch);
-    if (showTouch && this.touchCursor) {
-      this.touchCursor.setPosition(x, y).setFrame(frame).setScale(size).setAlpha(alpha);
-      this.root.bringToTop(this.touchCursor);
-    }
+    if (this.screen === 'battle' && !this.paused) this.battleCursor.update(frame, size, alpha, crosshair.originX, crosshair.originY, WORLD.width);
     container.dataset.crosshairFrame = frame;
     container.dataset.playerFrame = String(this.playerSprite?.currentOriginalFrame ?? '');
     container.dataset.reloadTicks = String(this.sim.weapon?.reloadTime ?? 0);
@@ -1902,7 +1890,7 @@ class ElonaScene extends Phaser.Scene {
     for (const sound of this.companionBowSounds.values()) sound.pause();
     for (const entry of this.chainSounds.values()) entry.sound.pause();
     this.ambient?.pause(); this.bowSound?.pause(); this.saveGame(false);
-    this.touchCursor?.setVisible(false);
+    this.battleCursor.hide();
     const data = this.cache.json.get('town-layout') as { pause: PauseLayout };
     this.pauseLayer = createPauseView(this, manifest, data.pause, this.options, pauseStatistics(this.sim!.state), {
       close: () => this.togglePause(), save: () => this.saveGame(), help: () => this.showHelp(),
