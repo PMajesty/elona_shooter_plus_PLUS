@@ -66,6 +66,22 @@ interface PortSave { format: 'elona-shooter-browser'; version: number; appearanc
 type Screen = 'intro' | 'title' | 'gene' | 'mods' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
+const playfield = document.querySelector<HTMLDivElement>('#playfield')!;
+const stageViewport = document.querySelector<HTMLDivElement>('#stage-viewport')!;
+const panMenu = document.querySelector<HTMLInputElement>('#touch-pan input')!;
+function positionMenuView(): void {
+  stageViewport.scrollLeft = (stageViewport.scrollWidth - stageViewport.clientWidth) * Number(panMenu.value) / 100;
+  gameScene?.scale.updateBounds();
+}
+panMenu.addEventListener('input', positionMenuView);
+const enlargeButton = document.querySelector<HTMLButtonElement>('#touch-enlarge')!;
+enlargeButton.addEventListener('click', () => {
+  const enlarged = container.dataset.menuZoom !== 'true';
+  container.dataset.menuZoom = String(enlarged);
+  enlargeButton.setAttribute('aria-pressed', String(enlarged));
+  enlargeButton.textContent = enlarged ? 'Fit' : 'Enlarge';
+  positionMenuView();
+});
 const muteButton = document.querySelector<HTMLButtonElement>('#mute')!;
 function updateMuteControl(muted: boolean): void {
   muteButton.disabled = false;
@@ -188,6 +204,14 @@ class ElonaScene extends Phaser.Scene {
   private fireReleased = false;
   private firingGesture = false;
   private firingReleaseOwned = false;
+  private touchAimPointer?: Phaser.Input.Pointer;
+  private touchAim = { x: 300, y: 240 };
+  private touchInput = false;
+  private touchAimSprite?: Phaser.GameObjects.Image;
+  private touchGestureSim?: Simulation;
+  private touchGestureState?: Simulation['state'];
+  private touchControlsState = '';
+  private touchControlEpoch = 0;
   private reloadRequested = false;
   private reloadAnimations = 0;
   private slotRequested?: number;
@@ -197,7 +221,7 @@ class ElonaScene extends Phaser.Scene {
   private bowSound?: Phaser.Sound.BaseSound;
   private chainSounds = new Map<number, { mode: number; sound: Phaser.Sound.BaseSound }>();
   private fpsSamples: number[] = [];
-  private maskCache = new Map<string, { width: number; height: number; data: Uint8ClampedArray }>();
+  private maskCache = new Map<string, { x: number; y: number; width: number; height: number; data: Uint8ClampedArray }>();
 
   constructor() { super('Elona'); }
 
@@ -236,7 +260,7 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.loadMs = (performance.now() - bootStarted).toFixed(0);
     this.sound.mute = this.muted;
     updateMuteControl(this.muted);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, configureDisplaySizing(this, container, () => this.options.lowQuality));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, configureDisplaySizing(this, container, playfield, () => this.options.lowQuality, positionMenuView));
     container.dataset.loadedSounds = JSON.stringify([...USED_SOUNDS].filter(key => this.cache.audio.exists(key)));
     container.dataset.muted = String(this.muted);
     this.root = this.add.container(0, 0);
@@ -246,34 +270,160 @@ class ElonaScene extends Phaser.Scene {
     const mouse = this.input.mouse;
     const mouseWindow = mouse?.isTop ? window.top : window;
     if (mouse) mouseWindow?.removeEventListener('mousedown', mouse.onMouseDownWindow as EventListener);
+    // Указатели HUD независимы: цель принадлежит первому пальцу, нажавшему на поле.
+    this.input.addPointer(2);
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      if (this.screen !== 'battle' || this.paused || pointer.event.target !== this.game.canvas) return;
-      if (pointer.button === 0 && pointer.leftButtonDown()) { this.firePressed = true; this.firingGesture = this.firingReleaseOwned = true; }
+      if (this.screen !== 'battle' || this.paused || this.helpLayer || pointer.event.target !== this.game.canvas) return;
+      if (this.firingReleaseOwned || this.touchAimPointer || this.fireReleased) return;
+      if (pointer.wasTouch) {
+        this.touchAimPointer = pointer;
+        this.touchGestureSim = this.sim;
+        this.touchGestureState = this.sim?.state;
+        this.touchInput = true;
+        this.touchAim = { x: pointer.x / this.cameras.main.zoom, y: pointer.y / this.cameras.main.zoom };
+        this.battleCursor.hide();
+      } else {
+        if (pointer.button !== 0 || !pointer.leftButtonDown()) return;
+        this.touchInput = false;
+      }
+      this.firePressed = true;
+      this.firingGesture = this.firingReleaseOwned = true;
     });
-    const releaseFire = (pointer: { button: number }) => {
-      // Отпускание другой кнопки не выпускает стрелу при удерживаемой левой.
-      if (pointer.button !== 0) return;
+    const releaseFire = (pointer: Phaser.Input.Pointer) => {
+      if (pointer.wasTouch) {
+        if (pointer !== this.touchAimPointer) return;
+        if (pointer.event.type.includes('cancel')) { this.cancelBattleGesture(); return; }
+        this.touchAim = { x: pointer.x / this.cameras.main.zoom, y: pointer.y / this.cameras.main.zoom };
+        this.touchAimPointer = undefined;
+      } else if (this.touchInput || pointer.button !== 0) return;
       if (this.firingReleaseOwned) this.fireReleased = true;
       this.firingGesture = this.firingReleaseOwned = false;
+      this.touchAimSprite?.setVisible(false);
     };
     this.input.on('pointerup', releaseFire);
     this.input.on('pointerupoutside', releaseFire);
-    // Отпускание приходит из окна игры или родителя; завершаем только собственный жест.
-    const outsideRelease = (event: MouseEvent) => releaseFire(event);
+    // DOM сохраняет последнюю точку и различает отмену даже вне canvas.
+    const trackTouch = (event: TouchEvent) => {
+      const owner = this.touchAimPointer;
+      if (!owner) return;
+      const touch = Array.from(event.changedTouches).find(t => t.identifier === owner.identifier);
+      if (!touch) return;
+      if (event.type === 'touchcancel') { this.cancelBattleGesture(); return; }
+      const rect = this.game.canvas.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) { this.cancelBattleGesture(); return; }
+      this.touchAim = {
+        x: (touch.clientX - rect.left) * this.scale.width / rect.width / this.cameras.main.zoom,
+        y: (touch.clientY - rect.top) * this.scale.height / rect.height / this.cameras.main.zoom,
+      };
+      if (event.type === 'touchend') {
+        this.touchAimPointer = undefined;
+        if (this.firingReleaseOwned) this.fireReleased = true;
+        this.firingGesture = this.firingReleaseOwned = false;
+        this.touchAimSprite?.setVisible(false);
+      }
+    };
+    for (const type of ['touchmove', 'touchend', 'touchcancel']) window.addEventListener(type, trackTouch as EventListener, true);
+    const outsideRelease = (event: MouseEvent) => {
+      if (this.touchInput || event.button !== 0) return;
+      if (this.firingReleaseOwned) this.fireReleased = true;
+      this.firingGesture = this.firingReleaseOwned = false;
+    };
     const releaseWindows = new Set([window, ...(mouseWindow ? [mouseWindow] : [])]);
     for (const releaseWindow of releaseWindows) releaseWindow.addEventListener('mouseup', outsideRelease, true);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      for (const releaseWindow of releaseWindows) releaseWindow.removeEventListener('mouseup', outsideRelease, true);
+    const cursorInput = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse' && !this.touchAimPointer && !this.firingReleaseOwned && !this.fireReleased) this.touchInput = false;
+      else this.battleCursor.hide();
+    };
+    for (const type of ['pointerdown', 'pointermove', 'pointerup']) this.game.canvas.addEventListener(type, cursorInput as EventListener);
+    const suspend = () => {
+      this.cancelBattleGesture();
+      if (this.screen === 'battle' && !this.paused) this.togglePause();
+    };
+    const visibility = () => { if (document.hidden) suspend(); };
+    window.addEventListener('blur', suspend);
+    window.addEventListener('pagehide', suspend);
+    document.addEventListener('visibilitychange', visibility);
+    // Touch не полагается на synthetic click: второй палец не всегда получает его от браузера.
+    const controlSelector = '#touch-reload, #touch-fire-at-will';
+    const controlFrom = (target: EventTarget | null) => target instanceof Element ? target.closest<HTMLButtonElement>(controlSelector) : null;
+    const controlTouches = new Map<number, { button: HTMLButtonElement; epoch: number }>();
+    const recentTouchControls = new WeakMap<HTMLButtonElement, number>();
+    const activateControl = (button: HTMLButtonElement) => {
+      if (button.disabled || this.screen !== 'battle' || this.paused || this.helpLayer || this.pauseDialog || this.graphicsLost) return;
+      if (button.id === 'touch-reload') this.reloadRequested = true;
+      else this.toggleBattleFireAtWill();
+      this.syncTouchBattleControls();
+    };
+    const controlTouchStart = (event: TouchEvent) => {
+      const button = controlFrom(event.target);
+      if (!button || button.disabled) return;
+      // Отмена стандартного действия убирает совместимый mouse/click, но не мешает первому пальцу.
+      event.preventDefault();
+      for (const touch of Array.from(event.changedTouches)) controlTouches.set(touch.identifier, { button, epoch: this.touchControlEpoch });
+    };
+    const controlTouchEnd = (event: TouchEvent) => {
+      for (const touch of Array.from(event.changedTouches)) {
+        const contact = controlTouches.get(touch.identifier);
+        if (!contact) continue;
+        const { button, epoch } = contact;
+        controlTouches.delete(touch.identifier);
+        event.preventDefault();
+        recentTouchControls.set(button, performance.now());
+        const rect = button.getBoundingClientRect();
+        if (epoch === this.touchControlEpoch && event.type !== 'touchcancel' && button.isConnected && touch.clientX >= rect.left && touch.clientX < rect.right && touch.clientY >= rect.top && touch.clientY < rect.bottom) activateControl(button);
+      }
+    };
+    const controlMouseDown = (event: PointerEvent) => {
+      // Настоящая мышь после touch не должна попасть под защиту от совместимого click.
+      const button = controlFrom(event.target);
+      if (button && event.pointerType === 'mouse') recentTouchControls.delete(button);
+    };
+    const touchControl = (event: MouseEvent) => {
+      const button = controlFrom(event.target);
+      if (!button) return;
+      event.preventDefault();
+      // Запасная защита от отложенного совместимого click; клавиатурный click (detail=0) сохраняем.
+      if (event.detail !== 0 && performance.now() - (recentTouchControls.get(button) ?? -Infinity) < 1000) return;
+      activateControl(button);
+    };
+    document.addEventListener('touchstart', controlTouchStart, { capture: true, passive: false });
+    document.addEventListener('touchend', controlTouchEnd, { capture: true, passive: false });
+    document.addEventListener('touchcancel', controlTouchEnd, { capture: true, passive: false });
+    document.addEventListener('pointerdown', controlMouseDown, true);
+    document.addEventListener('click', touchControl);
+    // Новые HTML-кнопки получают текущее состояние один раз при добавлении, не каждый кадр.
+    const controlsObserver = new MutationObserver(records => {
+      const changed = records.some(record => [...Array.from(record.addedNodes), ...Array.from(record.removedNodes)]
+        .some(node => node instanceof Element && (node.matches(controlSelector) || node.querySelector(controlSelector))));
+      if (changed) { this.touchControlsState = ''; this.syncTouchBattleControls(); }
     });
-    // За пределами поля удерживаемый огонь прекращается, но MouseUp ещё принадлежит этому нажатию.
-    this.input.on('gameout', () => { this.firingGesture = false; });
+    controlsObserver.observe(document.body, { childList: true, subtree: true });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.cancelBattleGesture();
+      for (const releaseWindow of releaseWindows) releaseWindow.removeEventListener('mouseup', outsideRelease, true);
+      for (const type of ['touchmove', 'touchend', 'touchcancel']) window.removeEventListener(type, trackTouch as EventListener, true);
+      for (const type of ['pointerdown', 'pointermove', 'pointerup']) this.game.canvas.removeEventListener(type, cursorInput as EventListener);
+      window.removeEventListener('blur', suspend);
+      window.removeEventListener('pagehide', suspend);
+      document.removeEventListener('visibilitychange', visibility);
+      document.removeEventListener('pointerdown', controlMouseDown, true);
+      document.removeEventListener('click', touchControl);
+      document.removeEventListener('touchstart', controlTouchStart, true);
+      document.removeEventListener('touchend', controlTouchEnd, true);
+      document.removeEventListener('touchcancel', controlTouchEnd, true);
+      controlsObserver.disconnect();
+      controlTouches.clear();
+    });
+    this.input.on('gameout', () => { if (!this.touchInput) this.firingGesture = false; });
     this.input.on('gameover', (_time: number, event: MouseEvent | TouchEvent) => {
-      if (this.firingReleaseOwned && 'buttons' in event && (event.buttons & 1) !== 0) this.firingGesture = true;
+      if (!this.touchInput && this.firingReleaseOwned && 'buttons' in event && (event.buttons & 1) !== 0) this.firingGesture = true;
     });
     // В фоновой вкладке очередь Phaser повторно доставляла Escape/F после следующего кадра.
     // Прямое событие DOM выполняет переключение один раз и не зависит от частоты рендеринга.
     const combatKey = (event: KeyboardEvent) => {
       if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+      // Space/Enter на HTML-кнопке выполняет её нативный click, а не боевую перезарядку.
+      if (['Space', 'Enter'].includes(event.code) && controlFrom(event.target)) return;
       if (this.collectionDialog) {
         if (event.code === 'Escape') this.closeCollectionImport();
         if (event.code === 'Space') event.preventDefault();
@@ -296,11 +446,7 @@ class ElonaScene extends Phaser.Scene {
         if (this.helpLayer || this.pauseDialog) return;
         if (this.paused) this.togglePause(); else if (this.screen === 'battle') this.reloadRequested = true;
       } else if (this.screen === 'battle' && !this.paused && !this.helpLayer) {
-        if (event.code === 'KeyF' && this.sim?.toggleFireAtWill()) {
-          this.playSound('soundReloaded2');
-          if (this.sim.fireAtWill) this.flashFrames = 8;
-          this.paintBattle();
-        }
+        if (event.code === 'KeyF') this.toggleBattleFireAtWill();
         else if (/^Digit[1-5]$/.test(event.code)) this.slotRequested = Number(event.code.slice(-1)) - 1;
       }
     };
@@ -320,13 +466,69 @@ class ElonaScene extends Phaser.Scene {
     });
     container.dataset.webglContext = 'ready';
     this.reset('intro');
-    const cleanup = playOpening(container, assetUrl('screens/opening.webp'), () => this.showTitle());
+    const cleanup = playOpening(playfield, assetUrl('screens/opening.webp'), () => this.showTitle());
     this.closeOpening = cleanup;
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, cleanup);
     this.ready = true;
   }
 
+  private cancelBattleGesture(): void {
+    // Незавершённое касание HTML-кнопки тоже не переживает паузу или смену экрана.
+    this.touchControlEpoch++;
+    // Локальные флаги сбрасываются всегда; симуляция — только у незавершённого touch-жеста.
+    this.touchAimPointer = undefined;
+    this.firePressed = this.fireReleased = false;
+    this.firingGesture = this.firingReleaseOwned = false;
+    this.touchAimSprite?.setVisible(false);
+    this.battleCursor.hide();
+    const owner = this.touchGestureSim;
+    const ownedState = this.touchGestureState;
+    this.touchGestureSim = this.touchGestureState = undefined;
+    // Импорт мог уже заменить sim или state: чужое сохранение и мышиный заряд не трогаем.
+    if (!owner || owner !== this.sim || owner.state !== ownedState) return;
+    this.reloadRequested = false;
+    this.slotRequested = undefined;
+    const state = owner.state;
+    state.fireHeld = state.pendingShot = false;
+    if (state.player.bowDrawing) {
+      state.player.bowDrawing = false;
+      this.playerSprite?.stopOriginal(weaponPresentation(this.sim.selectedItem?.id ?? 0).idleFrame);
+      this.bowSound?.destroy(); this.bowSound = undefined;
+    }
+    if (state.heroAI && this.sim.heroSettings.order === -1) {
+      state.heroAI.state.shooting = false;
+      state.heroAI.state.burst = 0;
+    }
+  }
+
+  private toggleBattleFireAtWill(): void {
+    if (!this.sim?.toggleFireAtWill()) return;
+    this.playSound('soundReloaded2');
+    if (this.sim.fireAtWill) this.flashFrames = 8;
+    this.paintBattle();
+    this.syncTouchBattleControls();
+  }
+
+  private syncTouchBattleControls(): void {
+    const active = this.screen === 'battle' && !this.paused && !this.helpLayer && !this.pauseDialog && !this.graphicsLost && this.sim?.state.phase === 'battle';
+    const pressed = Boolean(this.sim?.fireAtWill);
+    const readyToReload = active && this.sim!.canReload();
+    const state = `${Boolean(active)}/${pressed}/${Boolean(readyToReload)}`;
+    // Проверка состояния дешева; поиск DOM и запись атрибутов нужны лишь при изменении.
+    if (this.touchControlsState === state) return;
+    this.touchControlsState = state;
+    const reload = document.querySelector<HTMLButtonElement>('#touch-reload');
+    const fire = document.querySelector<HTMLButtonElement>('#touch-fire-at-will');
+    if (reload) reload.disabled = !readyToReload;
+    if (fire) {
+      fire.disabled = !active;
+      fire.setAttribute('aria-pressed', String(pressed));
+    }
+  }
+
   private reset(screen: Screen): void {
+    this.cancelBattleGesture();
+    this.touchAimSprite = undefined;
     this.combatNotices.reset();
     for (const view of this.combatNoticeViews.values()) view.destroy(true);
     this.combatNoticeViews.clear(); delete container.dataset.combatNotices;
@@ -335,7 +537,7 @@ class ElonaScene extends Phaser.Scene {
     if (keepTownAmbience && this.townNavigation) this.townNavigation.parentContainer?.remove(this.townNavigation);
     else this.townNavigation = undefined;
     this.screen = screen;
-    this.titleSequence = undefined;
+    this.titleSequence = undefined; delete container.dataset.titleButtonsReady;
     this.closeOpening?.(); this.closeOpening = undefined;
     this.screenShake.reset(); this.cameras.main.setScroll(0, 0);
     this.bottomBarSprite = undefined;
@@ -761,6 +963,15 @@ class ElonaScene extends Phaser.Scene {
         .setOrigin((timer.originX + 38.95) / timer.frameWidth, (timer.originY + 6.5) / timer.frameHeight);
       this.root.add(cooldown);
       this.hotbar.push({ icon, count, cooldown });
+      if (this.screen === 'battle') {
+        const hit = this.add.zone(slot * 90, 343, 90, 37).setOrigin(0).setInteractive();
+        this.root.add(hit);
+        hit.on('pointerdown', (pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => {
+          if (!pointer.wasTouch || this.paused) return;
+          e.stopPropagation();
+          this.slotRequested = slot;
+        });
+      }
     }
     this.updateHud();
     this.drawGameControls();
@@ -812,7 +1023,10 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private updatePresentation(delta: number): void {
-    this.titleSequence?.advance(delta);
+    if (this.titleSequence) {
+      this.titleSequence.advance(delta);
+      if (this.titleSequence.frame >= 48 && !container.dataset.titleButtonsReady) container.dataset.titleButtonsReady = 'true';
+    }
     this.updateMedalNotices(delta);
     this.combatNotices.advance(Math.min(delta, 250));
     const layout = (this.cache.json.get('town-layout') as { combatNotices: CombatNoticeLayout }).combatNotices;
@@ -876,17 +1090,23 @@ class ElonaScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
+    this.syncTouchBattleControls();
     if (!this.ready || this.graphicsLost) return;
     this.updatePresentation(delta);
     if (this.screen !== 'battle' || !this.sim || this.paused) return;
-    const pointer = this.input.activePointer;
+    const pointer = this.input.mousePointer;
     this.accumulator += Math.min(delta, 250);
     this.fpsSamples.push(delta);
     if (this.fpsSamples.length > 300) this.fpsSamples.shift();
     // Кадр Flash и Timer(50) рассчитываются отдельно внутри симуляции; частота монитора не меняет баланс.
     while (this.accumulator >= 1000 / 30 && this.sim.state.phase === 'battle') {
-      this.sim.tick({ aimX: pointer.x / this.cameras.main.zoom, aimY: pointer.y / this.cameras.main.zoom, firePressed: this.firePressed, fireReleased: this.fireReleased, fireHeld: this.firingGesture && pointer.isDown && pointer.leftButtonDown(), reload: this.reloadRequested, slot: this.slotRequested });
-      this.firePressed = this.fireReleased = this.reloadRequested = false; this.slotRequested = undefined;
+      // Короткое касание лука между тиками: сначала натягиваем, затем отпускаем.
+      const deferBowRelease = this.touchInput && this.firePressed && this.fireReleased && [24, 25].includes(this.sim.weapon?.id ?? 0);
+      const aim = this.touchInput ? this.touchAim : { x: pointer.x / this.cameras.main.zoom, y: pointer.y / this.cameras.main.zoom };
+      const held = this.touchInput ? Boolean(this.touchAimPointer && this.firingGesture) : this.firingGesture && pointer.isDown && pointer.leftButtonDown();
+      this.sim.tick({ aimX: aim.x, aimY: aim.y, firePressed: this.firePressed, fireReleased: this.fireReleased && !deferBowRelease, fireHeld: held || deferBowRelease, reload: this.reloadRequested, slot: this.slotRequested });
+      this.firePressed = this.reloadRequested = false; this.fireReleased = deferBowRelease; this.slotRequested = undefined;
+      if (!this.touchAimPointer && !this.fireReleased) this.touchGestureSim = this.touchGestureState = undefined;
       if (!this.sim.state.player.bowDrawing && this.bowSound) { this.bowSound.destroy(); this.bowSound = undefined; }
       this.accumulator -= 1000 / 30;
       this.playerSprite?.stepOriginal();
@@ -1106,7 +1326,16 @@ class ElonaScene extends Phaser.Scene {
     const size = 0.3 + Math.min(0.6, state.player.accuracyFix);
     const alpha = state.player.shootTimer > 0 && !this.sim.weapon?.automatic ? 0.7 : 1;
     const crosshair = manifest.clips.originalCrosshair;
-    if (this.screen === 'battle' && !this.paused) this.battleCursor.update(frame, size, alpha, crosshair.originX, crosshair.originY, WORLD.width);
+    if (this.screen === 'battle' && !this.paused && !this.touchInput) this.battleCursor.update(frame, size, alpha, crosshair.originX, crosshair.originY, WORLD.width);
+    else this.battleCursor.hide();
+    if (this.touchAimPointer && this.touchInput && !this.paused) {
+      // Тот же кадр, регистрационная точка и отдача, что у мышиного originalCrosshair.
+      this.touchAimSprite ??= this.add.image(0, 0, 'originalCrosshair', frame);
+      if (!this.touchAimSprite.parentContainer) this.root.add(this.touchAimSprite);
+      this.touchAimSprite.setFrame(frame).setOrigin(crosshair.originX / crosshair.frameWidth, crosshair.originY / crosshair.frameHeight)
+        .setPosition(this.touchAim.x, this.touchAim.y).setScale(size).setAlpha(alpha).setVisible(true);
+      this.root.bringToTop(this.touchAimSprite);
+    } else this.touchAimSprite?.setVisible(false);
     container.dataset.crosshairFrame = frame;
     container.dataset.playerFrame = String(this.playerSprite?.currentOriginalFrame ?? '');
     container.dataset.reloadTicks = String(this.sim.weapon?.reloadTime ?? 0);
@@ -1249,10 +1478,10 @@ class ElonaScene extends Phaser.Scene {
       const canvas = document.createElement('canvas'); canvas.width = frame.cutWidth; canvas.height = frame.cutHeight;
       const context = canvas.getContext('2d', { willReadFrequently: true })!;
       context.drawImage(frame.source.image as CanvasImageSource, frame.cutX, frame.cutY, frame.cutWidth, frame.cutHeight, 0, 0, frame.cutWidth, frame.cutHeight);
-      mask = { width: canvas.width, height: canvas.height, data: context.getImageData(0, 0, canvas.width, canvas.height).data };
+      mask = { x: frame.x, y: frame.y, width: canvas.width, height: canvas.height, data: context.getImageData(0, 0, canvas.width, canvas.height).data };
       this.maskCache.set(cacheKey, mask);
     }
-    return alphaMaskHit(mask, x, y);
+    return alphaMaskHit(mask, x - mask.x, y - mask.y);
   }
 
   private renderEvent(event: SimulationEvent): void {
@@ -1881,11 +2110,17 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.partySelection = String(this.selectedCharacter);
   }
 
+  toggleTouchPause(): void {
+    if (!this.pauseDialog && !this.helpLayer && !this.collectionDialog && !this.closeTownEvent) this.togglePause();
+  }
+
   togglePause(): void {
     if (!['battle', 'town', 'result'].includes(this.screen)) return;
     // Пока графический контекст потерян, игрок не должен возобновить невидимый бой.
     if (this.paused && this.graphicsLost) return;
-    this.paused = !this.paused; this.accumulator = 0; this.firePressed = this.fireReleased = false; this.firingGesture = this.firingReleaseOwned = false;
+    this.cancelBattleGesture();
+    this.paused = !this.paused; this.accumulator = 0;
+    this.syncTouchBattleControls();
     if (this.screen === 'battle') this.input.setDefaultCursor(this.paused ? 'default' : BATTLE_CURSOR);
     container.dataset.paused = String(this.paused);
     this.celebration?.root.setVisible(!this.paused);
@@ -2102,7 +2337,7 @@ async function boot(): Promise<void> {
     }
   }));
   container.dataset.fontFallbacks = JSON.stringify(fontFallbacks.sort());
-  new Phaser.Game({ type: Phaser.WEBGL, parent: 'game', width: 620, height: 380, backgroundColor: '#000000', scene: ElonaScene,
+  new Phaser.Game({ type: Phaser.WEBGL, parent: 'playfield', width: 620, height: 380, backgroundColor: '#000000', scene: ElonaScene,
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     render: { antialias: true, roundPixels: false }, audio: { disableWebAudio: false }, fps: { target: 60 },
   });
@@ -2110,6 +2345,7 @@ async function boot(): Promise<void> {
 
 const fullscreenButton = document.querySelector<HTMLButtonElement>('#fullscreen')!;
 muteButton.addEventListener('click', () => gameScene?.toggleMute());
+fullscreenButton.disabled = !document.fullscreenEnabled || typeof container.requestFullscreen !== 'function';
 fullscreenButton.addEventListener('click', () => {
   const change = document.fullscreenElement === container ? document.exitFullscreen() : container.requestFullscreen();
   void change.catch(() => { status.textContent = 'Full screen is unavailable in this browser view.'; });
@@ -2129,7 +2365,24 @@ function exportAdventure(): void {
   if (data) { exportSave(data); status.textContent = 'Save exported.'; } else status.textContent = 'Start a game before exporting a save.';
 }
 const fileInput = document.querySelector<HTMLInputElement>('#save-file')!;
-// Служебные функции сохранения доступны без дополнительных кнопок поверх игры.
+const touchGuide = document.querySelector<HTMLDialogElement>('#touch-guide-dialog')!;
+touchGuide.addEventListener('keydown', event => event.stopPropagation());
+document.querySelector('#touch-pause')!.addEventListener('click', () => {
+  gameScene?.toggleTouchPause();
+});
+document.querySelector('#touch-guide')!.addEventListener('click', () => {
+  if (!gameScene || !['title', 'battle', 'town', 'result'].includes(gameScene.screen)) return;
+  const canExport = gameScene.screen === 'title' ? readSave(gameScene.saveSlot).kind === 'saved'
+    : !!gameScene.sim && canSaveAdventure(gameScene.sim.state);
+  document.querySelector<HTMLButtonElement>('#touch-export')!.disabled = !canExport;
+  touchGuide.showModal();
+});
+document.querySelector('#touch-import')!.addEventListener('click', () => {
+  if (!gameScene?.prepareImport()) return;
+  touchGuide.close();
+  fileInput.click();
+});
+document.querySelector('#touch-export')!.addEventListener('click', () => { touchGuide.close(); exportAdventure(); });
 window.addEventListener('keydown', event => {
   if (!(event.ctrlKey || event.metaKey) || !gameScene || event.altKey) return;
   if (event.code === 'KeyS') {

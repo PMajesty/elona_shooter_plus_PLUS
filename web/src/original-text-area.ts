@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { bindTouchScroll } from './touch-scroll.ts';
 
 /** Исходное поле Flash с прокруткой в координатах игрового окна. */
 export function originalTextArea(scene: Phaser.Scene, name: string, text: string, x: number, y: number, width: number, height: number,
@@ -10,9 +11,9 @@ export function originalTextArea(scene: Phaser.Scene, name: string, text: string
     fontFamily: 'Arial', fontSize: '12px', color: '#000000', wordWrap: { width: width - 25 },
   }).setName(name).setCrop(0, 0, width - 22, height - 8); content.add(field);
   const maxScroll = Math.max(0, field.height - height + 8);
-  if (!maxScroll) return content;
   const zone = scene.add.zone(x, y, width, height).setOrigin(0).setInteractive(); content.add(zone);
   zone.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => e.stopPropagation());
+  if (!maxScroll) return content;
   const scrollX = x + width - 15, trackTop = y + 15, trackHeight = height - 30;
   content.add(scene.add.rectangle(scrollX, trackTop, 15, trackHeight, 0xe6e6e6).setOrigin(0));
   const thumbHeight = Math.min(trackHeight, Math.max(18, trackHeight * height / (height + maxScroll)));
@@ -24,6 +25,7 @@ export function originalTextArea(scene: Phaser.Scene, name: string, text: string
     field.setCrop(0, scroll, width - 22, height - 8);
     thumb.y = trackTop + (maxScroll ? travel * scroll / maxScroll : 0); changed?.(scroll);
   };
+  bindTouchScroll(scene, content, zone, () => scroll, setScroll);
   const track = scene.add.zone(scrollX, trackTop, 15, trackHeight).setOrigin(0).setInteractive(); content.addAt(track, content.getIndex(thumb));
   track.on('pointerdown', (pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => {
     e.stopPropagation(); setScroll(scroll + (pointer.worldY < thumb.y ? -1 : 1) * (height - 12));
@@ -36,7 +38,8 @@ export function originalTextArea(scene: Phaser.Scene, name: string, text: string
     arrow.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); setScroll(scroll + direction * 36); });
   }
   const wheel = (pointer: Phaser.Input.Pointer, _over: Phaser.GameObjects.GameObject[], _dx: number, dy: number) => {
-    if (zone.getBounds().contains(pointer.worldX, pointer.worldY)) setScroll(scroll + dy);
+    const point = (pointer.camera ?? scene.cameras.main).getWorldPoint(pointer.x, pointer.y);
+    if (zone.getBounds().contains(point.x, point.y)) setScroll(scroll + dy);
   };
   const keyboard = (event: KeyboardEvent) => {
     if (!['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(event.key)) return;
@@ -45,6 +48,10 @@ export function originalTextArea(scene: Phaser.Scene, name: string, text: string
       : scroll + (event.key === 'ArrowUp' ? -36 : event.key === 'ArrowDown' ? 36 : event.key === 'PageUp' ? -height : height));
   };
   scene.input.on('wheel', wheel); scene.input.keyboard?.on('keydown', keyboard);
-  content.once('destroy', () => { scene.input.off('wheel', wheel); scene.input.keyboard?.off('keydown', keyboard); });
+  const cleanup = () => {
+    scene.input.off('wheel', wheel); scene.input.keyboard?.off('keydown', keyboard);
+    scene.events.off('shutdown', cleanup); content.off('destroy', cleanup);
+  };
+  content.once('destroy', cleanup); scene.events.once('shutdown', cleanup);
   return content;
 }

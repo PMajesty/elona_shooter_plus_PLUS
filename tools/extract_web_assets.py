@@ -231,6 +231,40 @@ def sprite_directory(root, symbol):
     return plain if plain.is_dir() else next(root.glob(f"DefineSprite_{symbol}_*"), None)
 
 
+def compact_dino_atlas(sheet, frames):
+    # В дальних кадрах частицы расширяют общий кадр до 711 px. Храним видимую
+    # область каждой позы и её смещение, сохраняя исходную точку регистрации.
+    poses = {}
+    for entry in frames.values():
+        x, y, w, h = (entry["frame"][k] for k in ("x", "y", "w", "h"))
+        if (x, y) not in poses:
+            cell = sheet.crop((x, y, x + w, y + h))
+            box = cell.getchannel("A").getbbox() or (0, 0, 1, 1)
+            poses[x, y] = (cell.crop(box), box[:2])
+
+    width = 1536
+    locations = {}
+    x = y = row_height = 0
+    for key in sorted(poses, key=lambda key: -poses[key][0].height):
+        cell = poses[key][0]
+        if x + cell.width + 2 > width:
+            y += row_height
+            x = row_height = 0
+        locations[key] = (x + 1, y + 1)
+        x += cell.width + 2
+        row_height = max(row_height, cell.height + 2)
+    packed = Image.new("RGBA", (width, y + row_height))
+    for key, (cell, _) in poses.items():
+        packed.paste(cell, locations[key])
+    for entry in frames.values():
+        key = entry["frame"]["x"], entry["frame"]["y"]
+        cell, (left, top) = poses[key]
+        x, y = locations[key]
+        entry.update(frame={"x": x, "y": y, "w": cell.width, "h": cell.height}, trimmed=True,
+                     spriteSourceSize={"x": left, "y": top, "w": cell.width, "h": cell.height})
+    return packed
+
+
 def atlas(name, character_id, sprite, png_root=CACHE, svg_root=ROOT / ".build/svg-bounds", *, drop_shadow=False):
     folder = sprite_directory(png_root, character_id)
     if folder is None:
@@ -266,12 +300,14 @@ def atlas(name, character_id, sprite, png_root=CACHE, svg_root=ROOT / ".build/sv
         sheet.paste(image, ((index % columns) * stride_x + gutter, (index // columns) * stride_y + gutter))
     directory = DEST / "sprites"
     directory.mkdir(parents=True, exist_ok=True)
-    sheet.save(directory / (name + ".png"), optimize=True)
     frames = {frame: {"frame": {"x": (index % columns) * stride_x + gutter, "y": (index // columns) * stride_y + gutter,
                                 "w": width, "h": height}, "rotated": False, "trimmed": False,
                       "spriteSourceSize": {"x": 0, "y": 0, "w": width, "h": height},
                       "sourceSize": {"w": width, "h": height}}
               for frame, index in indices.items()}
+    if name == "enemy_dino":
+        sheet = compact_dino_atlas(sheet, frames)
+    sheet.save(directory / (name + ".png"), optimize=True)
     (directory / (name + ".json")).write_text(json.dumps({"frames": frames, "meta": {
         "app": "Elona original SWF extraction", "image": name + ".png", "scale": "1"}},
         separators=(",", ":")), encoding="utf-8")

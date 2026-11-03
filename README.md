@@ -22,6 +22,20 @@ and Casual and Hardcore modes. The supported save range is days 1–1000.
 Sound starts muted and remembers your choice.
 [Coverage and known differences](docs/port-status.md)
 
+## Playing on a phone
+
+Open the same game link. Landscape gives the largest view of the battlefield.
+Tap to shoot, hold and drag to aim an automatic weapon, and lift your finger to
+release a drawn bow. Tap a hotbar slot to select a weapon or use an item. Reload
+lights up when the equipped weapon can reload. A second finger can use it while
+your aiming finger stays on the field.
+
+In portrait, **Enlarge** and the **View** slider let you read and use menus at a
+larger size. Combat fits the full field. Swipe text to scroll. **Guide** on the
+title or pause screen includes touch instructions and save import/export.
+Saves stay in the browser where you played. Export on one device and import
+on the other to move an adventure.
+
 ## Current capabilities
 
 - All eight hero classes: class-specific gear, growth and earned skill choices.

@@ -1,9 +1,12 @@
 :root { color-scheme: dark; background: #000; font-family: system-ui, sans-serif; }
 * { box-sizing: border-box; }
 html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
-main { width: 100%; height: 100%; display: grid; place-items: center; }
+main { width: 100%; height: 100%; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); place-items: center; }
 #game { position: relative; width: min(100vw, var(--preferred-width, 1240px), calc(100dvh * 31 / 19)); aspect-ratio: 31 / 19; background: #000; }
-#game > canvas { display: block; image-rendering: pixelated; }
+#stage-viewport, #playfield { position: absolute; inset: 0; }
+#stage-viewport { overflow: hidden; }
+#touch-pan { display: none; }
+#playfield > canvas { position: absolute; top: 0; left: 0; display: block; image-rendering: pixelated; }
 .battle-reticle { position: absolute; inset: 0; margin: auto; width: var(--canvas-width); height: var(--canvas-height); overflow: hidden; pointer-events: none; }
 .battle-reticle canvas { position: absolute; top: 0; left: 0; image-rendering: auto; }
 #game:fullscreen, #game.game-expanded { width: 100vw; height: 100dvh; aspect-ratio: auto; }
@@ -18,6 +21,7 @@ button:focus-visible { outline: 2px solid #e6d5a6; outline-offset: 1px; }
 #game-controls button { width: 25px; height: 25px; padding: 3px; background: #171711a6; border-color: #e6dac066; }
 #game-controls button:hover { background: #171711ed; }
 #game-controls button:disabled { opacity: 0.5; cursor: default; }
+#game-controls .touch-action { display: none; }
 #game-controls svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: square; }
 #mute[aria-pressed="true"] .sound-waves, #mute[aria-pressed="false"] .sound-muted { display: none; }
 
@@ -25,3 +29,48 @@ button:focus-visible { outline: 2px solid #e6d5a6; outline-offset: 1px; }
 
 #game .opening-movie { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 0; border: 0; background: black; }
 .opening-movie img { width: var(--canvas-width, 100%); height: var(--canvas-height, 100%); object-fit: contain; }
+
+#touch-guide-dialog { width: min(30rem, 92vw); max-height: 90dvh; overflow: auto; border: 1px solid #947c52; border-radius: 4px; background: #29231b; color: #f2ead7; padding: 1rem 1.2rem; font: 15px/1.45 system-ui, sans-serif; }
+#touch-guide-dialog::backdrop { background: #000b; }
+#touch-guide-dialog h2 { margin: 0; font-size: 1.2rem; }
+#touch-guide-dialog p { margin: .7rem 0; }
+#touch-guide-dialog button { min-height: 44px; padding: 0 .9rem; }
+.touch-files { display: flex; gap: 8px; margin: .8rem 0; }
+
+@media (any-pointer: coarse) {
+  #game, #game:fullscreen {
+    --usable-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    width: 100%; height: 100dvh; aspect-ratio: auto;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  #stage-viewport { position: relative; inset: auto; flex: none; width: min(calc(100% - 56px), calc(var(--usable-height) * 31 / 19)); }
+  #playfield { position: relative; inset: auto; width: 100%; aspect-ratio: 31 / 19; }
+  #playfield > canvas { touch-action: none; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+  #game-controls { position: static; width: 52px; flex: none; align-items: center; justify-content: center; gap: 4px; }
+  #game-controls button { width: 48px; height: 44px; padding: 3px; line-height: 1.05; touch-action: manipulation; }
+  #game-controls svg { width: 22px; height: 22px; margin: auto; }
+  #game-controls #fullscreen:disabled { display: none; }
+  #game[data-screen="battle"][data-paused="false"] :is(#touch-reload, #touch-fire-at-will),
+  #game:is([data-screen="battle"], [data-screen="town"], [data-screen="result"]):not([data-help-page]) #touch-pause,
+  #game:is([data-screen="title"], [data-paused="true"]):not([data-help-page]) #touch-guide { display: block; }
+  #game[data-paused="true"] .pause-label, #game:not([data-paused="true"]) .resume-label { display: none; }
+  #touch-fire-at-will[aria-pressed="true"] { background: #6c552e; border-color: #f6dc9a; }
+}
+@media (any-pointer: coarse) and (orientation: portrait) {
+  #game, #game:fullscreen { flex-direction: column; }
+  #stage-viewport { width: min(100%, calc((var(--usable-height) - 52px) * 31 / 19)); }
+  #game-controls { order: -2; width: 100%; height: 48px; flex-direction: row; }
+}
+
+@media (any-pointer: coarse) and (orientation: portrait) and (max-width: 600px) {
+  #game[data-screen]:not([data-screen="intro"]):not([data-screen="battle"]) #touch-enlarge,
+  #game[data-paused="true"] #touch-enlarge { display: block; }
+  #game[data-menu-zoom="true"]:is(:not([data-screen="battle"]), [data-paused="true"]) #playfield {
+    width: max(100%, min(720px, calc((var(--usable-height) - 100px) * 31 / 19)));
+  }
+  #game[data-menu-zoom="true"]:is(:not([data-screen="battle"]), [data-paused="true"]) #touch-pan {
+    display: flex; order: -1; align-items: center; gap: 8px; color: #e6dac0; font-size: 14px;
+  }
+  #touch-pan input { width: min(64vw, 300px); height: 44px; margin: 0; }
+}

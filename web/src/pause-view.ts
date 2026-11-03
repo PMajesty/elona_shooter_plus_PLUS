@@ -1,5 +1,7 @@
 import { buttonInput } from './button-input.ts';
 import Phaser from 'phaser';
+import { originalTextArea } from './original-text-area.ts';
+import { bindTouchSafeDismiss } from './touch-scroll.ts';
 import type { LootViewManifest } from './loot-view.ts';
 import type { GameOptions } from './game-options.ts';
 
@@ -16,22 +18,12 @@ export function createPauseView(scene: Phaser.Scene, manifest: LootViewManifest,
   statistics: string, callbacks: { close(): void; save(): void; title(): void; help(): void; option(key: keyof GameOptions): void; click(): void }): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName('original-pause');
   const shade = scene.add.rectangle(0, 0, 620, 380, 0, 0.45).setOrigin(0).setInteractive(); root.add(shade);
-  shade.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); callbacks.close(); });
+  bindTouchSafeDismiss(scene, root, shade, callbacks.close);
   root.add(scene.add.image(0, 0, layout.image).setOrigin(0));
   const parent = layout.children.options;
   const stats = layout.options.stats;
   const x = parent.x + stats.x, y = parent.y + stats.y, width = stats.scaleX * 100, height = stats.scaleY * 44;
-  root.add(scene.add.nineslice(x, y, 'helpTextAreaSkin', '1', width, height, 2, 2, 2, 2).setOrigin(0));
-  const field = scene.add.text(x + 4, y + 4, statistics, { fontFamily: 'Arial', fontSize: '12px', color: '#000000', wordWrap: { width: width - 22 } }).setCrop(0, 0, width - 8, height - 8); root.add(field);
-  const area = scene.add.zone(x, y, width, height).setOrigin(0).setInteractive(); root.add(area);
-  area.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => e.stopPropagation());
-  let offset = 0;
-  const wheel = (pointer: Phaser.Input.Pointer, _over: unknown, _dx: number, dy: number) => {
-    if (pointer.worldX < x || pointer.worldX > x + width || pointer.worldY < y || pointer.worldY > y + height) return;
-    offset = Phaser.Math.Clamp(offset + dy, 0, Math.max(0, field.height - height + 8)); field.y = y + 4 - offset;
-    field.setCrop(0, offset, width - 8, height - 8);
-  };
-  scene.input.on('wheel', wheel); root.once('destroy', () => scene.input.off('wheel', wheel));
+  root.add(originalTextArea(scene, 'pause-statistics-text', statistics, x, y, width, height));
   const block = scene.add.zone(parent.x - 85, parent.y - 125, 350, 290).setOrigin(0).setInteractive(); root.addAt(block, 2);
   block.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => e.stopPropagation());
   for (const [part, key, action] of [['returnTitleButton', 'button_pauseTitle', callbacks.title], ['saveGameButton', 'button_pauseSave', callbacks.save], ['helpButton', 'button_pauseHelp', callbacks.help]] as const) {

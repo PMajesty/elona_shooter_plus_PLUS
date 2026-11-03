@@ -1,5 +1,6 @@
 import { buttonInput, refreshMenuHover } from './button-input.ts';
 import Phaser from 'phaser';
+import { bindTouchSafeDismiss } from './touch-scroll.ts';
 import { originalTextArea } from './original-text-area.ts';
 import type { LootViewManifest } from './loot-view.ts';
 
@@ -16,7 +17,7 @@ export function createHelpView(scene: Phaser.Scene, manifest: LootViewManifest, 
   close: () => void, changed: (page: number, scroll: number) => void, click: () => void): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName('original-help');
   const shade = scene.add.rectangle(0, 0, 620, 380, 0, 0.45).setOrigin(0).setInteractive(); root.add(shade);
-  shade.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); click(); close(); });
+  bindTouchSafeDismiss(scene, root, shade, () => { click(); close(); });
   const content = scene.add.container(0, 0); root.add(content);
   let page = 4;
   const image = (key: string, p: Placement) => {

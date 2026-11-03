@@ -1,10 +1,24 @@
 # Browser port status
 
-Updated 2026-11-03. **Desktop-browser release, save v45.**
+Updated 2026-11-03. **Desktop and touch browser release, save v45.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
 The production bundle is `index-7YZuhYO9.js` from `2d63bd0`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
+
+Phone and tablet browsers have touch aiming, a second-finger reload, Fire at
+will, hotbar selection, pause and save-file controls. The portrait menu can be
+enlarged and panned without cropping combat. Muted Chromium and WebKit on
+Windows exercised the phone-sized viewport, rotation, combat, save/Continue
+and the loot-to-town transition. Physical iOS and Android hardware was unavailable.
+The dinosaur atlas uses about 8 MiB decoded instead of 44 MiB. All 375 poses
+were compared after restoring their original transparent margins.
+
+The phone smoke check uses an isolated browser profile and the production
+build served locally. Install Playwright Core under `.tools/browser-qa` and its
+Chromium or WebKit browser, then run
+`node --experimental-strip-types web/scripts/mobile-smoke.mjs chromium` or
+substitute `webkit`. A third argument selects another game URL.
 
 The opening logo leads into the animated title. The Sister uses the original
 right-panned reload and gunfire cues on her title timeline. Clicking the logo skips it.
@@ -163,7 +177,7 @@ port-verification.json; do not reread trace archives for routine work.
    The [fidelity review](fidelity-review.md) records their Flash behavior and tests.
 5. Native fullscreen is left for the user to operate. Automated expanded-layout
    checks cover sizing/input; native fullscreen was deliberately not entered.
-   Mobile/touch, restrictive/sandboxed embeds, public CDN policies and IAB iframe
+   Physical phone performance, restrictive/sandboxed embeds, public CDN policies and IAB iframe
    download delivery remain outside the verified scope. External credit/Museum
    URLs are preserved; their ongoing availability is unverified.
 6. One IAB ready-but-black screenshot observation remains undiagnosed and has no

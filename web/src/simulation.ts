@@ -860,10 +860,14 @@ export class Simulation {
     return this.options.hitTest?.(enemy, x, y) ?? inside(ENEMIES[enemy.kind].body, (x - enemy.x) / scale, (y - enemy.y) / scale);
   }
 
-  requestReload(manual = true): boolean {
+  canReload(manual = true): boolean {
     const item = this.weapon;
-    if (this.state.phase !== 'battle' || !item || this.state.player.shootTimer > 0 || item.reloadTime > 0 || item.ammo >= item.ammoMax || (manual && item.autoReload > 0)) return false;
-    return this.requestActorReload(0);
+    return this.state.phase === 'battle' && !!item && this.state.player.shootTimer <= 0
+      && item.reloadTime === 0 && item.ammo < item.ammoMax && !(manual && item.autoReload > 0);
+  }
+
+  requestReload(manual = true): boolean {
+    return this.canReload(manual) && this.requestActorReload(0);
   }
 
   private requestActorReload(actorSlot: number): boolean {
