@@ -1,9 +1,18 @@
 # Browser port status
 
-Updated 2026-11-03. Current local build: **v41, save recovery and plain static hosting verified**.
+Updated 2026-11-03. Current build: **v41, public VPS HTTP deployment verified; domain DNS/TLS pending**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
+
+The unchanged Cn5tm2du build is now live at http://151.241.155.138/elona/ on Caddy.
+An isolated muted public-network browser check passes New Game, shooting,
+loot/boss loot/skill/results/town and exact full-envelope battle/town Continue.
+There are no script errors, failed requests or HTTP errors; JavaScript uses gzip.
+The existing server workloads and user's browser profile were not changed.
+pastalapizza.site still points elsewhere; the user was asked for the Reg.ru A-record
+change. Its prepared HTTPS config validates but has not been activated. See
+[deployment](deployment.md) for paths, recovery and the next DNS/TLS step.
 
 Website embedding now isolates new mouse presses to the game canvas. Phaser's
 parent-window mousedown listener had interpreted surrounding website controls as
@@ -374,8 +383,9 @@ for routine continuation.
 - **Website and saves:** ordinary startup, New Game, combat/results/town,
   Continue, imports/exports and embedding must remain usable with preserved saves.
   Direct-route, same-origin static-folder/iframe and Edge cross-origin input/save
-  evidence exists. The actual website URL/platform is still needed for its HTTPS
-  deployment check; unrelated browser/policy variants are support limits.
+  evidence exists, including the public VPS HTTP flow. Domain DNS must now point
+  to the VPS before enabling and checking HTTPS; unrelated browser/policy variants
+  are support limits.
 - **Correctness and stability:** retain affected source comparisons/deterministic
   checks and sustained real browser operation with raw stall/memory observations.
   The hour above passes with stated outliers/limits. Passing tests alone is insufficient.
@@ -385,9 +395,10 @@ for routine continuation.
 
 ## Remaining features and differences
 
-1. Verify the actual website deployment once its URL/platform is supplied; that
-   information was requested. Plain static nested-folder hosting and same-origin
-   embedding now pass. The measured desktop scope is stock Windows Chrome156 and
+1. Complete domain DNS/TLS and verify HTTPS at pastalapizza.site. The public VPS
+   HTTP flow now passes; the user was asked to point the apex A record to the VPS.
+   Plain static nested-folder hosting and same-origin embedding pass. The measured
+   desktop scope is stock Windows Chrome156 and
    Edge156 with JavaScript, WebGL and ordinary browser storage. Mobile/touch,
    sandboxed/restrictive-policy embeds, public CDN policies and IAB iframe download
    delivery remain unverified support cases. The completed one-hour Chrome check

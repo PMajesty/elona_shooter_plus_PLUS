@@ -83,6 +83,16 @@ No Vite/backend, failed/error requests or script errors. The local1099ms load an
 12,986,070 transferred bytes are recorded without a public-network speed claim.
 README now has plain static-preview/upload steps. Browser/server closed afterward.
 
-The actual website URL/platform was requested for its HTTPS deployment check.
-Continue independent useful work where available; do not replace this missing
-input with an invented policy matrix, another unchanged soak or cosmetic churn.
+The user supplied a VPS/domain on2026-11-03. Gateway had no connection for this
+host, so a bounded direct SSH fallback inspected it; no web listener existed.
+The distribution Caddy package and a hash-verified versioned dist now serve the
+game publicly. One browser phase covers New Game through results/town and exact
+battle/town Continue. An upload helper initially decoded the Cyrillic local path
+using Windows' default encoding; explicit UTF-8 fixed the transfer before activation.
+The initial tool discovery was also too broad and emitted a large schema dump;
+keep Gateway discovery to exact tool names, with names-only inventories first.
+
+DNS still points elsewhere and the user was asked to change its A record. While
+waiting, check DNS once per continuation and reuse passed HTTP/gameplay evidence.
+Enable the validated TLS config and verify the actual HTTPS origin when DNS is
+ready. Do not rebuild, rerun the public HTTP phase or broaden the hosting matrix.
