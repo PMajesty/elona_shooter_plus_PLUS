@@ -212,6 +212,17 @@ preserved the selected MOD and started battle.
 
 ## Codex findings
 
+- **Long Bow arrows can skip a moving sheep between hit checks.** In a Day 1
+  Rogue simulation with seed 12, one ordinary sheep, no further spawns and no
+  player fire, the companion's arrow 3 missed at ticks 153 and 154. Its two hit
+  points were (129.7, 269) and (120, 281.65). Between them the arc entered the
+  moving sheep's body shape near (125.76, 274.07), using either animation pose
+  and excluding the shadow. Both ticks were inside the ground-hit window.
+  Across seeds 1–24 this accounted for one of 29 misses in 74 resolved arrows.
+  The original SWF's `bullet_arrow2.onEnterFrame_bullet` likewise tests a
+  single point per eligible update. A correction could sweep the arc against
+  target motion within that window while preserving spread and high-arc flight.
+
 - **Rogue pistol at browser zoom.** Flash moves `customCursor` to the mouse
   in `MouseMove` and scales it by `0.3 + accuracyFix` in `onTick`. In the
   startup-fixed SWF running in Ruffle, the resting pistol ring and visible glow
