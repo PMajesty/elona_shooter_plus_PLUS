@@ -15,6 +15,30 @@ function town(): Simulation { const sim = new Simulation(42); settle(sim); sim.s
 const restore = (sim: Simulation) => Simulation.fromSave(JSON.parse(JSON.stringify(sim.toSave())));
 function contract(sim: Simulation): void { assert.equal(sim.requestMissionHire(), 'previewed'); assert.equal(sim.resolvePartyAction(true), 'contracted'); }
 
+test('settlement uses the battle party for Active until town, including a hired fighter and resumed skill choice', () => {
+  for (const hiredActive of [null, 0, 2]) {
+    const sim = new Simulation(42, { heroClass: 'rogue' }); settle(sim);
+    if (hiredActive !== null) contract(sim);
+    assert.ok(sim.startNextDay());
+    if (hiredActive !== null) {
+      sim.state.party.slots[3].member!.traits[123] = hiredActive;
+      sim['refreshPartySkills']();
+    }
+    const battleActive = sim.state.partySkills.effects[123];
+    sim.state.player.skillPoints = 1; sim['finishDay']();
+    while (['loot', 'boss-loot'].includes(sim.state.postbattle)) assert.ok(sim.finishLoot());
+    if (!sim.state.skillChoices.includes(123)) sim.state.skillChoices[0] = 123;
+    const run = restore(sim); run['random'] = () => 0.9;
+    assert.ok(run.chooseSkill(123));
+    assert.equal(run.state.postbattle, 'result');
+    assert.equal(run.state.partySkills.effects[123], battleActive);
+    assert.equal(run.state.town!.ap, 4 + Math.trunc(0.9 * 0.9 * (battleActive + 1)));
+    const result = restore(run); assert.ok(result.enterTown());
+    assert.equal(result.state.partySkills.effects[123], 1);
+    assert.ok(!result.state.partySkills.guardianSlots.includes(4));
+  }
+});
+
 test('temporary hire confirms/cancels without upfront AP, gold, RNG or candidate changes and restores its pending question', () => {
   const sim = town(), before = sim.toSave();
   assert.equal(sim.requestMissionHire(), 'previewed');

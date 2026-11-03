@@ -8,6 +8,9 @@ export const GAME_MODS = {
   community: { name: 'Community Compilation', label: 'Community Compilation Mod.' },
 } as const;
 export type GameMod = keyof typeof GAME_MODS;
+// Текст исходного окна detailwin_287 относится именно к Community Compilation.
+export const COMMUNITY_MOD_DETAILS = "-In mod sales day, the blacksmith will still sell mods after refreshing his inventory. \n\n"
+  + "-You will get 1/2 AP from your Active Skill. But you always get full AP.";
 export type GameMods = Partial<Record<GameMod, true>>;
 export function validGameMods(value: unknown): value is GameMods {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)

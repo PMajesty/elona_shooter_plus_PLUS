@@ -93,6 +93,36 @@ attack by 3/4/5, and for Sandbag/Prayer absorption.
 - **Suggested regression:** Cover fractional Disarm division before multiplied
   boss attacks and fractional absorption; keep the source minimum-one damage.
 
+### C4 — Mission Hire refreshes party bonuses too early during settlement
+
+**Status:** Fixed. The contract ends at settlement, but the battle party's
+cached skills still determine AP and the next shop's Engineer bonus. The test
+resumes at skill choice and at results with no hire, an ordinary hire and a
+hire contributing Active. All seven Mission Hire cases pass.
+**Impact:** Hiring a temporary henchman changes when newly learned party skills
+start working. Active learned after this battle can grant extra AP immediately,
+unlike both Flash and the browser's own non-hired flow. The refresh also removes
+the departing henchman's cached contribution before the source does.
+
+- **Original:** `src/original/MainTimeline.as:3411–3452` (`renewResult`) hides
+  the henchman at3433–3434, but does **not** call `initPartySkill` before
+  `townEvent()`. `townEvent:6425–6437` rolls AP with the old `PARTY.ACTIVE`.
+  The next town refreshes skills during `generateMission`/frame71. Hero skill
+  selection increments the trait without refreshing PARTY.
+- **Port:** `web/src/simulation.ts:1686–1695` (`prepareResult`) calls
+  `refreshPartySkills()` when removing the henchman, before rolling extra AP.
+  Without Mission Hire, the port correctly keeps the old cache here.
+- **Minimal repro:** Start Rogue `Simulation(42)`, finish the first day into
+  town, contract Mission Hire and Rest. Give the hero one earned skill point
+  (controlled fixture), finish the next day through loot, and make Active123 an
+  available choice. With `random=()=>0.9`, call `chooseSkill(123)`. Before the
+  choice cached Active is0; the hired result refreshes it to1 and grants **5AP**.
+  Original cached Active0 gives `int(.9*.9*(0+1))=0`, hence **4AP**. Repeating
+  without the contract correctly gives4AP in the current browser code.
+- **Suggested regression:** Newly learned hero/companion Active with and without
+  Mission Hire, a departing henchman's party contribution, and Continue from the
+  skill screen. Preserve existing original wage/reward timing while fixing this.
+
 ## Claude verification checkpoint
 
 Reviewed Codex's fixes in `1eaba02` against the original conditions and the
@@ -120,6 +150,11 @@ gap is found, record which flows were inspected. Codex owns fixes and releases.
 
 ## Codex findings
 
+- **Community Compilation details.** The Game MODs menu now opens the original
+  explanation of sale-day shop refreshes and Active AP. It uses the Flash
+  button, panel and checkbox art. The link accepts a click anywhere inside its
+  bounds. Muted Chrome opened and closed it with the MOD enabled, confirmed
+  that clicking a covered row had no effect and proceeded into battle.
 - **Day results and Hard Badge.** The settlement now displays the original
   growth, reward, museum, salary, MOD sale and extra AP notices. Insurance and
   Sister earnings appear under Other. The Hard Badge reduces daily upkeep by

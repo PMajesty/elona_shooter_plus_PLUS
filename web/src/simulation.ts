@@ -1685,7 +1685,7 @@ export class Simulation {
 
   private prepareResult(): void {
     if (this.state.phase !== 'victory' || this.state.postbattle !== 'result' || this.state.town !== null) return;
-    if (this.state.activeMission.hire) { this.state.party.slots[3].exists = false; this.refreshPartySkills(); }
+    if (this.state.activeMission.hire) this.state.party.slots[3].exists = false;
     // renewResult тратит бросок fame даже при fame=0; townEvent использует прежний кэш ACTIVE.
     const fame = int(this.state.economy.fame * this.random() * 15);
     if (fame) { this.state.result.fame = fame; this.state.result.netReward += fame; }

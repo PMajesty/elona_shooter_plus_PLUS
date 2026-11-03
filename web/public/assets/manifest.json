@@ -1179,6 +1179,37 @@
       "height": 380,
       "originX": 0,
       "originY": 0
+    },
+    "button_modDetails": {
+      "file": "buttons/button_modDetails.png",
+      "width": 103,
+      "height": 25,
+      "originX": -0.5499999999999998,
+      "originY": 5.1,
+      "characterId": 1898
+    },
+    "button_modDetails_over": {
+      "file": "buttons/button_modDetails_over.png",
+      "width": 103,
+      "height": 25,
+      "originX": -0.5499999999999998,
+      "originY": 5.1,
+      "characterId": 1898
+    },
+    "button_modDetails_down": {
+      "file": "buttons/button_modDetails_down.png",
+      "width": 103,
+      "height": 25,
+      "originX": -0.5499999999999998,
+      "originY": 5.1,
+      "characterId": 1898
+    },
+    "modDetails": {
+      "file": "screens/modDetails.png",
+      "width": 620,
+      "height": 380,
+      "originX": 0,
+      "originY": 0
     }
   },
   "clips": {

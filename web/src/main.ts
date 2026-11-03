@@ -1,5 +1,5 @@
 import { MAX_CAMPAIGN_DAY } from './missions.ts';
-import { GAME_MODS, type GameMod } from './game-mods.ts';
+import { COMMUNITY_MOD_DETAILS, GAME_MODS, type GameMod } from './game-mods.ts';
 import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
 import Phaser from 'phaser';
 import { HERO_CLASSES, heroClassUnlocked, type HeroClass } from './hero-classes.ts';
@@ -147,6 +147,7 @@ class ElonaScene extends Phaser.Scene {
   private companionBowSounds = new Map<number, Phaser.Sound.BaseSound>();
   private selectedCharacter = 0;
   private modsClassPage: 0 | 1 = 0;
+  private modDetailsOpen = false;
   private castlePage: 0 | 1 = 0;
   private medalPage: 0 | 1 = 0;
   private medalNotices = new MedalNotices();
@@ -278,7 +279,9 @@ class ElonaScene extends Phaser.Scene {
         else if (this.helpLayer) this.closeHelp();
         else if (['battle', 'town', 'result'].includes(this.screen)) this.togglePause();
         else if (this.screen === 'gene') this.showTitle();
-        else if (this.screen === 'mods') this.leaveGameMods();
+        else if (this.screen === 'mods') {
+          if (this.modDetailsOpen) this.showGameMods(this.modsClassPage); else this.leaveGameMods();
+        }
       } else if (event.code === 'Space') {
         event.preventDefault();
         if (this.helpLayer || this.pauseDialog) return;
@@ -418,13 +421,13 @@ class ElonaScene extends Phaser.Scene {
     zone.on('pointerout', () => plate.setFillStyle(0xcdb98f));
   }
 
-  private originalButton(key: string, x: number, y: number, action: () => void): void {
+  private originalButton(key: string, x: number, y: number, action: () => void, sound = 'soundClick1', pixelPerfect = true): void {
     const button = this.image(key, x, y);
     if (!button) return;
-    button.setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 });
+    button.setInteractive({ useHandCursor: true, pixelPerfect, alphaTolerance: 100 });
     button.on('pointerover', () => { if (manifest.images[`${key}_over`]) button.setTexture(`${key}_over`); });
     button.on('pointerout', () => button.setTexture(key));
-    button.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); this.playSound('soundClick1'); action(); });
+    button.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); this.playSound(sound); action(); });
   }
 
   showTitle(): void {
@@ -591,25 +594,38 @@ class ElonaScene extends Phaser.Scene {
     status.textContent = 'Game MODs have been reset.';
   }
 
-  private showGameMods(page: 0 | 1): void {
+  private showGameMods(page: 0 | 1, details = false): void {
     this.modsClassPage = page;
+    this.modDetailsOpen = details;
     this.reset('mods'); this.image('townHud'); this.drawHud();
     const background = new Set(this.root.list);
     this.image('gameMods');
     const rows: [GameMod, number][] = [['bossMods', 104], ['intense', 123], ['tight', 142], ['laptop', 161], ['community', 181], ['skipHard', 220], ['weaponLevel', 239]];
-    const labels = rows.map(([key, y]) => this.text(150, y, '', 12, '#24221a', 'ElonaSmall').setWordWrapWidth(390));
+    const checks = rows.map(([key, y]) => {
+      this.text(168, y, GAME_MODS[key].label, 12, '#24221a', 'Arial');
+      return this.clip('partyCheckOff', 1, 150, y + 2)!;
+    });
     const refresh = () => {
-      rows.forEach(([key], index) => labels[index].setText(`${this.sim!.state.mods?.[key] ? '[x]' : '[ ]'} ${GAME_MODS[key].label}`));
+      rows.forEach(([key], index) => checks[index].setTexture(this.sim!.state.mods?.[key] ? 'partyCheckOn' : 'partyCheckOff', '1'));
       container.dataset.gameMods = JSON.stringify(this.sim!.state.mods ?? {});
     };
-    rows.forEach(([key, y]) => this.zone(145, y - 2, 405, 19, () => {
+    rows.forEach(([key, y]) => this.zone(150, y, key === 'community' ? 190 : 390, 19, () => {
       const mods = { ...this.sim!.state.mods };
       if (mods[key]) delete mods[key]; else mods[key] = true;
-      this.sim!.setOpeningMods(mods); this.playSound('soundClick1'); refresh();
+      this.sim!.setOpeningMods(mods); refresh();
       status.textContent = key === 'community' ? 'Community Compilation: Active grants fixed bonus AP; MOD sales remain active for shop refreshes on sale days.' : GAME_MODS[key].label;
     }));
-    this.originalButton('button_modBack', 132.35, 310, () => this.leaveGameMods());
     this.originalButton('button_proceed', 269.05, 310, () => this.startGame());
+    this.originalButton('button_modDetails', 341.8, 182.95, () => this.showGameMods(page, true), 'soundScroll1', false);
+    if (details) {
+      for (const object of this.root.list) if (!background.has(object) && object.input) object.disableInteractive();
+    }
+    this.originalButton('button_modBack', 132.35, 310, () => this.leaveGameMods());
+    if (details) {
+      this.image('modDetails');
+      this.root.add(originalTextArea(this, 'community-mod-details', COMMUNITY_MOD_DETAILS, 160.05, 166.1, 358, 154));
+      this.originalButton('button_windowClose', 503.9, 135, () => this.showGameMods(page));
+    }
     refresh();
     const menu = this.root.list.filter(object => !background.has(object));
     this.root.add(this.add.container(MENU_X, 0, menu));

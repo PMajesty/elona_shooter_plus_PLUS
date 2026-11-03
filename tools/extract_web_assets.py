@@ -52,6 +52,7 @@ BUTTONS = {"button_newGame": 2521, "button_continue": 2542, "button_help": 2579,
            "button_castlePage1": 1625, "button_castlePage2": 1630}
 BUTTONS["button_robVisitors"] = 1831
 BUTTONS["button_modBack"] = 1893
+BUTTONS["button_modDetails"] = 1898
 BUTTONS["button_deleteSave"] = 2644
 BUTTONS.update({"button_helpBattle": 1936, "button_helpTown": 1938,
                 "button_helpCredits": 1941, "button_helpTips": 1943,
@@ -857,6 +858,8 @@ def main():
     (DEST / "screens/townShopLabels.png").unlink(missing_ok=True)
     manifest["images"]["eventWindow"] = static_screen(xml, "eventWindow",
         placed_frame(sprites[2437].find("subTags"), 1), {"title", "text", "okButton", "card"})
+    manifest["images"]["modDetails"] = static_screen(xml, "modDetails",
+        placed_frame(sprites[1901].find("subTags"), 1), {"info", "closeButton"}, offset=(145, 108))
     manifest["images"]["shopSaleDialog"] = static_screen(xml, "shopSaleDialog",
         placed_frame(sprites[2131].find("subTags"), 1), {"question", "yes", "no", "pop1", "pop2", "poparrow"})
     for name, image_id in {"background": 2491, "clouds": 2494, "town": 2743, "parchment": 1477}.items():

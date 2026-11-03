@@ -55,7 +55,10 @@ export function validatePartySave(state: SimulationState, validItem: (value: unk
   if (state.pendingPartyAction !== null && (state.phase !== 'town' || state.town?.preparation !== 'ready' || state.pendingTownAction !== null
     || !validPartyPendingAction(state.pendingPartyAction, state.party, state.inventory, state.gold))) throw new Error('Invalid pending party action.');
   const liveSlots = [0, ...state.party.slots.slice(0, 4).filter(slot => slot.exists).map(slot => slot.slot)];
-  if (liveSlots.join() !== state.partySkills.guardianSlots.join()) throw new Error('Invalid Guardian party list.');
+  const cached = state.partySkills.guardianSlots.join();
+  // В итогах найма кэш ещё содержит слот 4. Ранние сохранения уже обновляли его.
+  const hiredResult = activeHire && state.phase === 'victory' && state.postbattle === 'result';
+  if (cached !== liveSlots.join() && !(hiredResult && cached === [...liveSlots, 4].join())) throw new Error('Invalid Guardian party list.');
   const shared = state.partyAI;
   if (!record(shared) || !Array.isArray(shared.targets) || shared.targets.length !== 3
     || shared.targets.some(row => !Array.isArray(row) || row.length !== 3 || row.some(cell => !record(cell) || !finite(cell.x)))
