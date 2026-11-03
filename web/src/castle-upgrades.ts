@@ -37,9 +37,9 @@ export function castleUpgradeCost(kind: CastleUpgradeKind, state: CastleUpgradeS
   return Math.trunc(state.castleMaxHp * state.castleMaxHp / 2.5 - 400);
 }
 
-export function castleUpkeep(state: CastleUpgradeState): number {
-  // Main.calcUnkeep: не перенесённые улучшения исходные; Hard Badge пока отсутствует.
-  return Math.max(0, (state.party.capacity - 1) * 50 + state.repairmanLevel * 60 + (state.castleMaxHp - 40) * 2 + state.sandbagLevel * 40 + castleStorageLevel(state) * 40 + state.looterLevel * 5 + (state.economy?.museum ?? 0) * 15);
+export function castleUpkeep(state: CastleUpgradeState & { earnedMedals: readonly number[] }): number {
+  const badgeDiscount = state.earnedMedals.includes(86) ? 40 : 0;
+  return Math.max(0, (state.party.capacity - 1) * 50 + state.repairmanLevel * 60 + (state.castleMaxHp - 40) * 2 + state.sandbagLevel * 40 + castleStorageLevel(state) * 40 + state.looterLevel * 5 + (state.economy?.museum ?? 0) * 15 - badgeDiscount);
 }
 
 export function castleLootMultiplier(state: Pick<CastleUpgradeState, 'looterLevel'>): number {

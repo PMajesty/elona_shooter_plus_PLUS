@@ -5,6 +5,7 @@ import { TITLES, isTitle, nextTitle, type Title } from './titles.ts';
 import { generateEarlyTownRecruit } from './recruits.ts';
 import { generateHenchman } from './party.ts';
 import { MEDALS } from './medals.ts';
+import { traitHintValues } from './trait-hint.ts';
 import { nextKillHistory, type KillHistory } from './kill-history.ts';
 import { advanceRatFall, ratDropLocalPoint } from './bird-drop.ts';
 import { advanceChainGunClock, idleChainGun, spinChainGun, type ChainGunState } from './combat-stats.ts';
@@ -86,6 +87,8 @@ export interface SimulationState {
   inventoryProvenance: 'original-generation' | 'legacy-v1-reconstructed'; legacyReconstructionSeed?: number;
   bossKilled: number; skillChoices: number[]; traitsProvenance: 'known-starting-traits' | 'legacy-reconstructed'; bossKilledProvenance: 'observed' | 'legacy-inferred';
   result: { museum?: number; fame?: number; reward: number; perfectBonus: number; upkeep: number; tax: number; salary: number; wages: number; netReward: number };
+  battleNews?: string[];
+  otherBattleGold?: number;
   town: null | { ap: number; preparation: 'pending' } | ReadyTown;
   previousTown: ReadyTown | null;
   upgradeReference: Item | null;
@@ -1004,7 +1007,7 @@ export class Simulation {
     if (enemy.kind === 'sister-bomb') {
       enemy.hp = -1; enemy.removed = true;
       const gold = this.state.partySkills.effects[138];
-      this.state.gold += gold; this.state.totalMoney += gold; this.state.economy.sistersExploded++;
+      this.gainOtherBattleGold(gold); this.state.economy.sistersExploded++;
       this.explodeProjectile(x, y, enemy.attack, null, 'grenade', actorSlot);
       return;
     }
@@ -1129,6 +1132,7 @@ export class Simulation {
     const growth = levelUpHero(this.state.player, this.state.hero, () => this.random(), this.state.player.classId);
     Object.assign(this.state.player, { level: growth.level, exp: growth.exp, skillPoints: growth.skillPoints, traits: growth.traits });
     this.events.push({ type: 'level-up', amount: growth.level });
+    (this.state.battleNews ??= []).push(`You are now level ${growth.level}!`);
   }
 
   private levelUpActor(actorSlot: number): void {
@@ -1137,6 +1141,14 @@ export class Simulation {
     if (!member) return;
     levelUpCompanion(member, () => this.random());
     this.events.push({ type: 'level-up', actorSlot, amount: member.level });
+    (this.state.battleNews ??= []).push(`${member.name} is now level ${member.level}!`);
+  }
+
+  private gainOtherBattleGold(amount: number): void {
+    if (!amount) return;
+    this.state.gold += amount;
+    this.state.totalMoney += amount;
+    this.state.otherBattleGold = (this.state.otherBattleGold ?? 0) + amount;
   }
 
   private damageCastle(amount: number, attacker?: EnemyState): void {
@@ -1147,7 +1159,7 @@ export class Simulation {
       this.damageEnemy(attacker, party.guardian, false, null, attacker.x, attacker.y, slot);
     }
     const insurance = party.effects[TRAIT.INSURANCE];
-    this.state.gold += insurance; this.state.totalMoney += insurance;
+    this.gainOtherBattleGold(insurance);
     if (this.random() * 100 < party.effects[TRAIT.DEFENDER]) { this.events.push({ type: 'defend' }); return; }
     const sister = this.state.castleSister ?? STANDING_SISTER;
     if (sister.free && !sister.dead) this.state.castleSister = { frame: 7, free: false, dead: false };
@@ -1551,14 +1563,20 @@ export class Simulation {
       const actor = this.actor(slot);
       if (!actor) continue;
       for (const [index, skill] of WEAPON_SKILLS.entries()) {
-        if (actor.weaponExp[index] > int(((actor.traits[skill] ?? 0) * 12 + 20) * (slot === 0 ? 1 : 0.5))) {
+        const threshold = (actor.traits[skill] ?? 0) * 12 + 20;
+        if (actor.weaponExp[index] > int(threshold * (slot === 0 ? 1 : 0.5))) {
           actor.traits[skill] = (actor.traits[skill] ?? 0) + 1; actor.weaponExp[index] = 0;
+          const skillName = traitHintValues(skill, actor.traits).name;
+          const line = slot === 0 ? `You have earned total of ${threshold} weapon exp and gain ${skillName}.`
+            : `${partySlot(this.state.party, slot)!.member!.name} has earned total of ${threshold} weapon exp and gains ${skillName}.`;
+          (this.state.battleNews ??= []).push(line);
         }
       }
       if (slot) {
         const member = partySlot(this.state.party, slot)!.member!;
         while (member.skillPoints > 0) {
-          gainCompanionTrait(member, this.state.partySkills, () => this.random(), slot);
+          const skill = gainCompanionTrait(member, this.state.partySkills, () => this.random(), slot);
+          (this.state.battleNews ??= []).push(`${member.name} gains ${traitHintValues(skill, member.traits).name}.`);
           member.skillPoints--;
         }
       }
@@ -1680,6 +1698,8 @@ export class Simulation {
     if (this.state.phase !== 'victory' || this.state.postbattle !== 'result' || this.state.town === null) return false;
     this.prepareTown();
     this.state.phase = 'town';
+    delete this.state.battleNews;
+    delete this.state.otherBattleGold;
     return true;
   }
 
@@ -2087,6 +2107,9 @@ export class Simulation {
     if (value.mode !== undefined && (Number(value.version) < 34 || !['casual', 'hardcore'].includes(String(value.mode)))) throw new Error('Invalid game mode.');
     if (value.mods !== undefined && (Number(value.version) < 35 || !validGameMods(value.mods))) throw new Error('Invalid Game MODs.');
     if (value.reloadHintShown !== undefined && (value.version < 44 || value.reloadHintShown !== true)) throw new Error('Invalid reload hint.');
+    if (value.battleNews !== undefined && (!Array.isArray(value.battleNews)
+      || !value.battleNews.every(line => typeof line === 'string' && line.length > 0 && line.length <= 512))) throw new Error('Invalid day news.');
+    if (value.otherBattleGold !== undefined && (!Number.isSafeInteger(value.otherBattleGold) || Number(value.otherBattleGold) < 0)) throw new Error('Invalid battle income.');
     const numeric = ['tick', 'timerRemainder', 'rng', 'nextUid', 'castleHp', 'castleMaxHp', 'gold', 'kills', 'criticalKills', 'waveIndex', 'bossWave', 'spawnTimer', 'aimX', 'aimY'];
     if (numeric.some(key => !finite(value[key]))) throw new Error('Invalid save numbers.');
     if (['tick', 'timerRemainder', 'nextUid', 'kills', 'criticalKills'].some(key => !Number.isInteger(value[key]) || Number(value[key]) < 0) || !Number.isInteger(value.bossWave) || Number(value.bossWave) < 2 || Number(value.bossWave) >= (Array.isArray(value.waves) ? value.waves.length : 0) || (Array.isArray(value.waves) && value.waveIndex === value.waves.length && value.newWave !== true)) throw new Error('Invalid counters.');

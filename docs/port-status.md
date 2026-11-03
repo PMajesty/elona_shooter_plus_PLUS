@@ -9,8 +9,8 @@ normal-play system remains after the source-flow review. This is not a claim of
 bug-free software, pixel identity or proof of every late-game balance outcome.
 
 The follow-up [independent fidelity review](fidelity-review.md) tracks fixes
-after that public release. The reviewed source uses save v44 for the one-time
-reload hint and accepts saves from the published v43 build.
+after that public release. The reviewed source uses save v45 to retain the
+day's growth notices and side income across Continue. It accepts earlier saves.
 
 The supported campaign/save range remains **Day1–1000**, an intentional browser
 safety boundary rather than an original campaign ending. The source encounter

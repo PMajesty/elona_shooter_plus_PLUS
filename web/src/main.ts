@@ -31,6 +31,8 @@ import { SAVE_SLOTS, readSelectedSlot, selectSaveSlot, deleteSaveSlot, exportSav
 import { saveSlotLabel } from './save-slots.ts';
 import { createTitleSavesView, type TitleSavesLayout } from './title-saves-view.ts';
 import { createHelpView, type HelpLayout } from './help-view.ts';
+import { originalTextArea } from './original-text-area.ts';
+import { dayReport } from './day-report.ts';
 import { createPauseView, type PauseLayout } from './pause-view.ts';
 import { DEFAULT_GAME_OPTIONS, validGameOptions, savedGameOptions, showDamageNumber, pauseStatistics, type GameOptions } from './game-options.ts';
 import { createFireworks } from './fireworks-view.ts';
@@ -1381,9 +1383,9 @@ class ElonaScene extends Phaser.Scene {
     if (state.phase === 'victory') {
       const background = new Set(this.root.list);
       this.image('result');
-      const values = [state.resultBefore, state.gold - state.resultBefore - state.result.netReward, state.result.reward + state.result.perfectBonus, state.result.salary + (state.result.museum ?? 0) + (state.result.fame ?? 0), 0, -state.result.wages, -(state.result.upkeep + state.result.tax), state.gold];
-      values.forEach((value, index) => this.text(252, 128 + index * 20 + (index === 7 ? 10 : 0), String(value), 12, value < 0 ? '#b02020' : '#14248d', 'Arial'));
-      this.text(335, 145, `Day ${state.day} completed.\n\nEnemies defeated: ${state.kills}\nCritical kills: ${state.criticalKills}\nCastle: ${state.castleHp}/${state.castleMaxHp}`, 13).setWordWrapWidth(185);
+      const report = dayReport(state);
+      report.rows.forEach((value, index) => this.text(252, 128 + index * 20 + (index === 7 ? 10 : 0), String(value), 12, value < 0 ? '#b02020' : '#14248d', 'Arial'));
+      this.root.add(originalTextArea(this, 'result-news', report.news, 326, 132, 200, 155));
       this.originalButton('button_proceed', 160, 301, () => {
         if (this.sim!.enterTown()) { this.saveGame(false); this.showTown(); }
       });

@@ -3,6 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Simulation } from '../src/simulation.ts';
 import { castleUpgradeCost, castleUpkeep } from '../src/castle-upgrades.ts';
+import { dayReport } from '../src/day-report.ts';
 import { companionWage } from '../src/party-progression.ts';
 import { asLegacyV15Save } from './legacy-save-support.ts';
 
@@ -27,6 +28,41 @@ function restore(simulation: Simulation): Simulation {
   assert.deepEqual(resumed.toSave(), checkpoint);
   return resumed;
 }
+
+test('Hard Badge waives 40 GP of daily upkeep, including the extra starting slot', () => {
+  const ordinary = new Simulation(42), badge = new Simulation(42, { medals: [86] });
+  assert.equal(badge.state.inventory.length, ordinary.state.inventory.length + 1);
+  settle(ordinary); settle(badge);
+  assert.equal(ordinary.state.result.upkeep, 40);
+  assert.equal(badge.state.result.upkeep, 40);
+  assert.equal(dayReport(badge.state).rows[6], -40);
+  ordinary.state.earnedMedals.push(86);
+  assert.equal(castleUpkeep(ordinary.state), 0);
+});
+
+test('the daily report retains growth and separates insurance from enemy coins across Continue', () => {
+  const sim = new Simulation(42);
+  sim.state.player.traits[118] = 2; sim['refreshPartySkills']();
+  sim['damageCastle'](1);
+  for (let i = 0; i < 240 && sim.state.noDamage; i++) sim.tick();
+  assert.equal(sim.state.noDamage, false);
+  sim.state.player.exp = 800;
+  sim.state.player.weaponExp[0] = 100;
+  const resumed = restore(sim);
+  settle(sim); settle(resumed);
+  const report = dayReport(resumed.state);
+  assert.deepEqual(dayReport(sim.state), report);
+  assert.deepEqual(report.rows.slice(0, 2), [sim.state.resultBefore, 0]);
+  assert.equal(report.rows[4], 3);
+  assert.equal(report.rows.slice(0, 7).reduce((sum, n) => sum + n, 0), report.rows[7]);
+  assert.match(report.news, /You are now level 2!/);
+  assert.match(report.news, /You have earned total of \d+ weapon exp and gain Small Gun/);
+  assert.doesNotMatch(report.news, /perfect game/);
+  assert.deepEqual(dayReport(restore(resumed).state), report);
+  assert.ok(resumed.enterTown()); assert.ok(resumed.startNextDay());
+  assert.equal(resumed.state.otherBattleGold, undefined);
+  assert.equal(resumed.state.battleNews, undefined);
+});
 
 test('House buys are immediate at AP0, preserve settled state and stop at capacity three', () => {
   const simulation = town(); simulation.state.town!.ap = 0;
