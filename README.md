@@ -173,10 +173,13 @@ production build has been checked at /games/elona/ on a plain Python static serv
 New Game, combat, iframe export and exact save/Continue restoration pass. This is
 a local HTTP check; the actual website's HTTPS/CDN policies still need verification.
 
-The current build is also live at [the VPS](http://151.241.155.138/elona/).
-Public New Game/combat/results/town and full save/Continue checks pass. Domain
-HTTPS awaits the DNS change for pastalapizza.site; see [deployment](docs/deployment.md)
-for the active release, configuration and recovery steps.
+The current build is deployed at [pastalapizza.site](https://pastalapizza.site/elona/),
+with the [HTTP IP address](http://151.241.155.138/elona/) also available. Public
+New Game/combat/results/town and full save/Continue checks pass. Both domain
+certificates are issued; a direct HTTPS browser check with the published IP and
+normal certificate validation also passes. Some recursive DNS paths still reach
+the old host; default-network HTTPS confirmation remains pending. See
+[deployment](docs/deployment.md) for the exact evidence and recovery steps.
 
 For an independent static preview, run this from the repository root:
 

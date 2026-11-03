@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-03. Current build: **v41, public VPS HTTP deployment verified; domain DNS/TLS pending**.
+Updated 2026-11-03. Current build: **v41, domain HTTPS deployed; ordinary DNS-path confirmation pending**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
@@ -10,9 +10,14 @@ An isolated muted public-network browser check passes New Game, shooting,
 loot/boss loot/skill/results/town and exact full-envelope battle/town Continue.
 There are no script errors, failed requests or HTTP errors; JavaScript uses gzip.
 The existing server workloads and user's browser profile were not changed.
-pastalapizza.site still points elsewhere; the user was asked for the Reg.ru A-record
-change. Its prepared HTTPS config validates but has not been activated. See
-[deployment](deployment.md) for paths, recovery and the next DNS/TLS step.
+Reg.ru's authoritative DNS now points apex/www to the VPS. Both Let's Encrypt
+certificates are issued and the HTTPS config is active. A direct public-IP browser
+check using the real domain and normal certificate validation passes New Game,
+shooting, exact Continue/export, iframe Continue and all domain/root redirects.
+The default DNS/network path still reaches the old host and fails TLS; that
+failure is retained separately. System DNS settings are unchanged and certificate
+checks remain enabled; the passing browser maps names inside its isolated process. See
+[deployment](deployment.md) for the precise boundary and next ordinary-DNS check.
 
 Website embedding now isolates new mouse presses to the game canvas. Phaser's
 parent-window mousedown listener had interpreted surrounding website controls as
@@ -383,9 +388,9 @@ for routine continuation.
 - **Website and saves:** ordinary startup, New Game, combat/results/town,
   Continue, imports/exports and embedding must remain usable with preserved saves.
   Direct-route, same-origin static-folder/iframe and Edge cross-origin input/save
-  evidence exists, including the public VPS HTTP flow. Domain DNS must now point
-  to the VPS before enabling and checking HTTPS; unrelated browser/policy variants
-  are support limits.
+  evidence exists, including public HTTP and trusted HTTPS with explicit IP routing.
+  The ordinary DNS path must refresh before its final browser confirmation;
+  unrelated browser/policy variants are support limits.
 - **Correctness and stability:** retain affected source comparisons/deterministic
   checks and sustained real browser operation with raw stall/memory observations.
   The hour above passes with stated outliers/limits. Passing tests alone is insufficient.
@@ -395,8 +400,8 @@ for routine continuation.
 
 ## Remaining features and differences
 
-1. Complete domain DNS/TLS and verify HTTPS at pastalapizza.site. The public VPS
-   HTTP flow now passes; the user was asked to point the apex A record to the VPS.
+1. Confirm the ordinary HTTPS network path after stale recursive DNS refreshes.
+   Domain DNS/TLS are configured; public HTTP and explicitly routed trusted HTTPS pass.
    Plain static nested-folder hosting and same-origin embedding pass. The measured
    desktop scope is stock Windows Chrome156 and
    Edge156 with JavaScript, WebGL and ordinary browser storage. Mobile/touch,

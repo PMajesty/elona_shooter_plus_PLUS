@@ -1,17 +1,20 @@
 # VPS deployment
 
-Updated2026-11-03. Public HTTP build:
-[Elona Shooter Plus](http://151.241.155.138/elona/).
-The root URL redirects to /elona/. Only the game is served.
+Updated2026-11-03. Domain:
+[Elona Shooter Plus](https://pastalapizza.site/elona/).
+The root URL redirects to /elona/; www redirects to the apex domain.
+The [HTTP IP address](http://151.241.155.138/elona/) remains available.
+Some recursive DNS paths still cache the previous host; see the boundary below.
 
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
 - Release: /srv/elona/releases/39c0c50-Cn5tm2du/elona/.
 - /srv/elona/current points to that release's parent directory.
-- Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.http.
-- Prepared TLS config: /srv/elona/staging/Caddyfile.https, from
-  deploy/Caddyfile.https. Both configurations pass Caddy validation.
+- Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
+- Both domain certificates were issued successfully by Let's Encrypt. Caddy's
+  enabled service manages renewal. HTTP redirects to HTTPS for the domain;
+  www preserves the path while redirecting to the apex. Config validation passes.
 - Browser saves stay on each visitor's device. No account/gameplay backend exists.
   Export/import a backup to move a run between localhost, IP and domain origins.
 - The archive was checked by SHA-256 before extraction. Its build is unchanged
@@ -26,30 +29,32 @@ this single public-network observation was3649ms; this is not a loading-speed SL
 Evidence: ignored .build/deployment/public-verification.json and screenshots.
 The user's existing browser profile/adventure/collection were not used or changed.
 
-## Connect the domain
+## DNS and HTTPS verification
 
-The authoritative DNS zone uses ns1.reg.ru / ns2.reg.ru. On inspection, the apex
-A record still pointed to95.163.244.138; no apex AAAA record was returned.
-The user has been asked to change the @ A record to151.241.155.138.
-No registrar access is available in this session.
+The authoritative DNS zone uses ns1.reg.ru / ns2.reg.ru. Both now return
+151.241.155.138 for the apex and www. The user's screenshot confirms the matching
+records. Google DNS also returns the new address. No further DNS edits are needed.
 
-While waiting, check that DNS answer once per continuation; do not repeat the
-game build, server inspection or successful HTTP browser phase. When the apex
-resolves to this VPS, validate and activate the prepared config:
+The initial default-network HTTPS check still reached the previous host and failed
+with ERR_SSL_VERSION_OR_CIPHER_MISMATCH; HTTP showed OpenResty rather than Caddy.
+A bounded VPS resolver-cache flush did not remove the upstream stale answer.
+Do not treat that as a game/TLS configuration failure or repeatedly flush/reload.
 
-```sh
-caddy validate --config /srv/elona/staging/Caddyfile.https --adapter caddyfile
-cp -p /etc/caddy/Caddyfile /srv/elona/staging/Caddyfile.http-active
-install -m 644 /srv/elona/staging/Caddyfile.https /etc/caddy/Caddyfile
-systemctl reload caddy
-```
+A direct public-IP connection using the real domain names passes normal Chrome
+certificate validation: TLS1.3, issuer YE1, subject pastalapizza.site, secure context.
+New Game/fire, actual export, exact Continue, HTTPS iframe Continue, HTTP-to-HTTPS,
+www-to-apex and root-to-/elona/ redirects all pass without script/request errors.
+The parent embed HTML is a client-side fixture; game files come from the public
+HTTPS server. This check maps both names to151.241.155.138 only inside the isolated
+browser and bypasses its proxy; it does not disable TLS checks or alter system DNS.
+It does not establish that every recursive DNS cache has refreshed.
 
-Then verify a publicly trusted certificate, HTTP-to-HTTPS redirect and actual
-New Game/save/Continue at https://pastalapizza.site/elona/. Do not bypass browser
-certificate checks. If issuance fails, inspect the exact Caddy error and DNS/ports;
-do not repeatedly reload or request certificates. The HTTP IP site remains in the
-TLS configuration. Caddy documents the DNS, port and automatic-renewal behavior
-in its [automatic HTTPS guide](https://caddyserver.com/docs/automatic-https).
+Evidence: .build/deployment/https-verification.json; the default-DNS failure is
+retained separately as https-default-dns-failure.json. Next continuation should
+check the ordinary HTTPS URL once. When that path reaches Caddy, perform a focused
+default-network browser confirmation; reuse the passing gameplay evidence. Do not
+rebuild or reissue certificates while waiting for cached DNS. Caddy documents
+renewal in its [automatic HTTPS guide](https://caddyserver.com/docs/automatic-https).
 
 ## Updates and recovery
 

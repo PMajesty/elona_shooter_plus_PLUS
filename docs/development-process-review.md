@@ -92,7 +92,12 @@ using Windows' default encoding; explicit UTF-8 fixed the transfer before activa
 The initial tool discovery was also too broad and emitted a large schema dump;
 keep Gateway discovery to exact tool names, with names-only inventories first.
 
-DNS still points elsewhere and the user was asked to change its A record. While
-waiting, check DNS once per continuation and reuse passed HTTP/gameplay evidence.
-Enable the validated TLS config and verify the actual HTTPS origin when DNS is
-ready. Do not rebuild, rerun the public HTTP phase or broaden the hosting matrix.
+The user updated DNS, then authoritative apex/www answers changed to the VPS.
+Caddy issued both certificates successfully. The default test route still reached
+the old OpenResty host and failed TLS; one VPS cache flush left the stale upstream
+answer unchanged. A browser mapped to the published IP, with ordinary certificate
+checks enabled, passes actual HTTPS play/save/embedding and redirects. Preserve
+the default-route failure separately; do not attribute it to game code or claim
+global cache propagation from the mapped test. Next check the ordinary HTTPS URL
+once per continuation, then verify that route when it refreshes. No rebuild,
+certificate reissue, repeated cache flushing or HTTP gameplay replay is warranted.

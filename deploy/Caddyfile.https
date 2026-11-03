@@ -12,6 +12,10 @@ pastalapizza.site {
 	import elona_files
 }
 
+www.pastalapizza.site {
+	redir https://pastalapizza.site{uri} 308
+}
+
 http://151.241.155.138 {
 	import elona_files
 }
