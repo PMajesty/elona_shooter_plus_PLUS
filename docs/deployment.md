@@ -9,8 +9,8 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- The current game is `/srv/elona/releases/review-BC9fe8ER/elona/` (save v45,
-  code `b2e71af`). The previous v45 release is `releases/review-DMuRZUK8`
+- The current game is `/srv/elona/releases/review-7YZuhYO9/elona/` (save v45,
+  code `2d63bd0`). The previous v45 release is `releases/review-BC9fe8ER`
   and the previous v43 release is `releases/release-By__DLWU`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
@@ -23,7 +23,12 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
 
-Muted Chrome checked the public bundle hash and imported two isolated saves
+On the current release, muted Chrome matched the HTTPS bundle's SHA-256 to
+the local build. An imported mid-flight bolt at adjusted height 135 reduced
+a sheep from 42 HP to 22. A separate results save began without Ha-na-bi,
+played through frame 1144 (the seeded 73-burst show's end), and exported medal 93.
+
+On the previous release, muted Chrome checked the public bundle hash and imported two isolated saves
 immediately before the recorded hits. The Rogue companion's Long Bow killed
 the sheep with 10 HP left. The Crossbow reduced its target from 42 HP to 6.
 Both outcomes were read from the game's exported saves.
