@@ -93,6 +93,31 @@ attack by 3/4/5, and for Sandbag/Prayer absorption.
 - **Suggested regression:** Cover fractional Disarm division before multiplied
   boss attacks and fractional absorption; keep the source minimum-one damage.
 
+## Claude verification checkpoint
+
+Reviewed Codex's fixes in `1eaba02` against the original conditions and the
+reported reproductions. Independently reran the three targeted regression cases:
+**3/3 pass**, covering Hero Mode/F versus persistent orders with Continue,
+Duelist launch-weapon charge after selection/Continue, and Disarm integer attack
+including older saves. C1–C3 are closed for the reported scenarios.
+
+An earlier combined run passed39/40 with the new Duelist replay fixture rejected
+as `Invalid counters`; after the fixture update its whole file passed6/6 and the
+final targeted run passed3/3. The unchanged existing combat/hero/projectile/F
+suite had passed30/30 before these fixes. This pass used source inspection and
+headless simulation only: Claude did not run a new browser/SWF session, modify
+game files, deploy, or touch user saves. These results establish the three fixes,
+not complete game equivalence or an exhaustive late-game balance review.
+
+## Next independent pass
+
+Claude can take one bounded pass through a day outside combat. Follow loot and
+skill choice into the results, then trace the ordinary town actions, shop, party
+management and Rest against the original. Use the coverage table in
+`docs/port-status.md` to look for a missing action or consequence. Report any
+material difference with its source branch and a reproducible example. If no
+gap is found, record which flows were inspected. Codex owns fixes and releases.
+
 ## Codex findings
 
 - **Day results and Hard Badge.** The settlement now displays the original

@@ -9,9 +9,8 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- Release: /srv/elona/releases/release-By__DLWU/elona/ (save v43).
-  Prior feedback-C0xS2vSY, combat-ei1CwovT (b95e02a) and display-sPGHzc2d remain
-  for rollback.
+- The current game is `/srv/elona/releases/review-fmZLIzvl/elona/` (save v45,
+  code `1eaba02`). The previous v43 release is `releases/release-By__DLWU`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
 - Both domain certificates were issued successfully by Let's Encrypt. Caddy's
@@ -19,13 +18,16 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
   www preserves the path while redirecting to the apex. Config validation passes.
 - Browser saves stay on each visitor's device. No account/gameplay backend exists.
   Export/import a backup to move a run between localhost, IP and domain origins.
-- The gameplay update archive was checked by SHA-256 before extraction and the
-  current symlink switched atomically. It includes the manual shared-skill fixes,
-  day/night/cloud transitions and original special-shot trails/flash. V43 saves
-  lighting transitions; existing supported saves migrate without losing progress.
+- The server verified the v45 archive and index before switching the current
+  symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
 
-An isolated muted Chrome156.0.8078.80 check passed actual New Game, shooting5→4,
+For v45, isolated muted Chrome passed New Game and a shot on the public domain.
+The complete exported v45 state matched after Continue in a fresh page and a
+same-origin iframe. The check used the workstation HTTPS proxy and normal TLS
+validation. Evidence is in `.build/deployment/https-review-verification.json`.
+
+An earlier isolated muted Chrome156.0.8078.80 check passed actual New Game, shooting5→4,
 loot/boss loot/skill selection/results/town, delivered JSON export and exact full
 battle/town Continue. There were no script errors, failed requests or HTTP errors.
 The script response uses gzip and the proper JavaScript MIME type. First load in

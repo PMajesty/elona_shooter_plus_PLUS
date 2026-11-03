@@ -1,16 +1,15 @@
 # Browser port status
 
-Updated2026-11-03. **Feature-complete desktop-browser release, save v43.**
+Updated 2026-11-03. **Desktop-browser release, save v45.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-Production bundle: index-By__DLWU.js. The documented completion boundary is met:
-original reachable systems are connected, ordinary hosting/save flows pass and
-correctness/stability evidence is retained. No known disconnected original
-normal-play system remains after the source-flow review. This is not a claim of
-bug-free software, pixel identity or proof of every late-game balance outcome.
+The production bundle is `index-fmZLIzvl.js` from `1eaba02`. The documented
+desktop completion boundary was reached in v43. The subsequent joint review
+found and corrected differences in combat and end-of-day settlement.
 
-The follow-up [independent fidelity review](fidelity-review.md) tracks fixes
-after that public release. The reviewed source uses save v45 to retain the
-day's growth notices and side income across Continue. It accepts earlier saves.
+Claude reproduced and rechecked the three combat findings. V45 retains the day's
+growth notices and side income across Continue and accepts earlier saves. Public
+HTTPS New Game, export and Continue passed in both the standalone and embedded
+game. The [review log](fidelity-review.md) records the comparisons and limits.
 
 The supported campaign/save range remains **Day1–1000**, an intentional browser
 safety boundary rather than an original campaign ending. The source encounter
