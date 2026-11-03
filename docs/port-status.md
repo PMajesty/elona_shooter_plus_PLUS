@@ -1,9 +1,28 @@
 # Browser port status
 
-Updated 2026-11-03. Current build: **v41, source creation animation, linked mute and crisp large-screen scaling**.
+Updated 2026-11-03. Current build: **v42, manual skill fixes and restored combat presentation**.
 [Play locally](http://127.0.0.1:5175/elona/). This is an incomplete remake.
 
 ## Current coverage
+
+Manual Hunter/Rogue/Sheriff/Militia now apply Burst, Power Shot, One Shot and
+Killer through ordinary firing. The prior path incorrectly put these shared
+skills behind the optional advanced-class meter. V42 adds an optional manual
+Burst counter only when needed; v41 imports otherwise change only version.
+Five integrated tests cover actual shots/damage/cooldown, control transfer,
+45-frame deterministic continuation and save validation. All585 tests pass
+(12.248s); build/typecheck pass, bundle index-ei1CwovT.js.
+Source shoot8085–8205 applies these skills independently of class.
+
+Combat now uses the source shake triggers for explosions, One Shot, hero Rampage
+and Ragnarok, the boss entrance reticle, the second hotbar frame during Rampage,
+and missing Cata/Tank/Chicken/Crow/boss frame cues. These presentation effects
+leave collision coordinates and gameplay RNG independent. Pause freezes them;
+Continue suppresses stale entrance/spawn cues. Source shake11703/12815,
+rampageOn12360, rectile2425 and original enemy frame scripts provide the rules.
+Muted browser evidence presentation-verification.json covers the reticle, both
+bar states, cues, shake ending and exact full-envelope Continue. Native fullscreen
+was never activated. Exact audio mix/filter matching remains approximate.
 
 All22 creation choices now play the source ally4 stand loop: poses5/6 for four
 reference frames each. Selected/hover/other alpha is1/0.8/0.5; the invented outline
@@ -24,7 +43,7 @@ display-small-verification.json covers final small-size fire, unchanged full sav
 through resize and exact Continue. Native fullscreen was never activated; the
 ordinary expanded layout was exercised in an isolated muted browser.
 
-The unchanged Cn5tm2du build is now live at http://151.241.155.138/elona/ on Caddy.
+The v42 ei1CwovT build is live at https://pastalapizza.site/elona/ on Caddy.
 An isolated muted public-network browser check passes New Game, shooting,
 loot/boss loot/skill/results/town and exact full-envelope battle/town Continue.
 There are no script errors, failed requests or HTTP errors; JavaScript uses gzip.
@@ -33,9 +52,11 @@ Reg.ru's authoritative DNS now points apex/www to the VPS. Both Let's Encrypt
 certificates are issued and the HTTPS config is active. A direct public-IP browser
 check using the real domain and normal certificate validation passes New Game,
 shooting, exact Continue/export, iframe Continue and all domain/root redirects.
-The default DNS/network path still reaches the old host and fails TLS; that
-failure is retained separately. System DNS settings are unchanged and certificate
-checks remain enabled; the passing browser maps names inside its isolated process. See
+The latest default curl path reaches Caddy over HTTPS, but Chrome
+still fails TLS on its ordinary route. The v42 public browser check passes
+New Game/fire, full Continue/export, iframe Continue and redirects with the real
+domain mapped only inside its isolated process; certificate checks remain enabled.
+Default-route failure is retained separately. System DNS settings are unchanged. See
 [deployment](deployment.md) for the precise boundary and next ordinary-DNS check.
 
 Website embedding now isolates new mouse presses to the game canvas. Phaser's
@@ -107,8 +128,8 @@ when its saved bonus expires. Six original critical-kill countdown lines lead to
 field, font, motion/fade and waiting queue. Generic Wave/Level Up overlays are
 removed; level-up uses its original separate animation. Continue restores active
 auras without replaying old announcements. No save fields, format bump or combat
-RNG changes were required. Aura phase follows saved tick; exact filters and the
-original rampage bottom-bar tint remain differences.
+RNG changes were required for these effects. Aura phase follows saved tick; exact
+filters remain approximate. The original rampage bottom bar is now connected.
 Source: rampage7284/rampageOn12299/endRampage12472, textEffect2390,
 levelUp10480/effect2 symbol1411 frames20–50, onTick8363 and battle-start1549.
 
@@ -437,9 +458,9 @@ for routine continuation.
    converter has controlled source-schema evidence; adventure import additionally
    has an independent original-game/Ruffle save and search comparison. The browser dropdown displays all eight choices at once,
    rather than the original ComboBox's five-row scrolling list.
-4. Measured performance, rendering sharpness and remaining visual/audio details:
-   camera shake, decorative boss reticle, other enemy frame sounds,
-   rampage bottom-bar tint and raster/filter/subpixel differences. Ally aura phase
+4. Measured performance and remaining raster/filter/subpixel details. Combat shake,
+   boss reticle, hotbar tint and the identified missing enemy cues are now connected;
+   title-intro shake and exact audio mixing remain approximate. Ally aura phase
    derives from saved tick; textEffect motion/fade is extracted, but exact text
    filters remain approximate. Chain Gun phase playback follows
    deterministic time; sample-perfect audio/native SoundChannel scheduling is unverified.

@@ -6,6 +6,7 @@ import { HERO_CLASSES, heroClassUnlocked, type HeroClass } from './hero-classes.
 import { createGeneInfoView } from './gene-info-view.ts';
 import { animateStandingPortraits } from './portrait-animation.ts';
 import { configureDisplaySizing } from './display-sizing.ts';
+import { ScreenShake } from './screen-shake.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
 import { traitHintValues, type OriginalHintInfo } from './trait-hint.ts';
 import { sniperDamageLimit, duelistDamageLimit } from './class-limits.ts';
@@ -96,6 +97,7 @@ const USED_SOUNDS = new Set(['soundSearch', 'soundEat1', 'soundParty', 'soundCli
 for (let index = 0; index < 5; index++) USED_SOUNDS.add(`soundGoodshot${index}`);
 USED_SOUNDS.add('soundGood');
 USED_SOUNDS.add('soundMedal');
+for (const key of ['soundChicken', 'soundChickenAttack', 'soundCrow', 'soundCata', 'soundTank', 'soundDeadBoss2']) USED_SOUNDS.add(key);
 USED_SOUNDS.add('soundReloaded1');
 for (const key of ['soundBgTown', 'soundRepair1', 'soundBeep', 'soundScroll1', 'soundPay1', 'soundMod']) USED_SOUNDS.add(key);
 for (let index = 1; index <= 15; index++) USED_SOUNDS.add(`soundGun${index}`);
@@ -148,6 +150,12 @@ class ElonaScene extends Phaser.Scene {
   private profileRead = readProfile();
   private profile = this.profileRead.profile;
   private ammoFill?: Phaser.GameObjects.Image;
+  private bottomBarSprite?: Phaser.GameObjects.Image;
+  private screenShake = new ScreenShake();
+  private bossReticles = new Map<number, { image: Phaser.GameObjects.Image; frame: number }>();
+  private bossReticleSeen = new Set<number>();
+  private enemyFrameAudio = new Map<number, { frame: number; crowPlayed: boolean }>();
+  private frameSoundCues: { key: string; uid: number; frame: number }[] = [];
   private adrenalineFill?: Phaser.GameObjects.Image;
   private cursor?: Phaser.GameObjects.Image;
   private pauseLayer?: Phaser.GameObjects.Container;
@@ -300,6 +308,11 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.rampageEffects;
     const keepTownAmbience = this.screen === 'town' && screen === 'town';
     this.screen = screen;
+    this.screenShake.reset(); this.cameras.main.setScroll(0, 0);
+    this.bottomBarSprite = undefined;
+    this.bossReticles.clear(); this.bossReticleSeen.clear(); this.enemyFrameAudio.clear(); this.frameSoundCues = [];
+    delete container.dataset.screenShake; delete container.dataset.bossReticles; delete container.dataset.frameSounds;
+    delete container.dataset.rampageBar;
     this.paused = false;
     this.accumulator = 0;
     this.firePressed = this.fireReleased = this.reloadRequested = false; this.slotRequested = undefined;
@@ -603,6 +616,7 @@ class ElonaScene extends Phaser.Scene {
 
   private enterBattle(announce = false): void {
     this.reset('battle');
+    if (!announce) for (const enemy of this.sim!.state.enemies) if (enemy.kind === 'boss' && enemy.x > 20) this.bossReticleSeen.add(enemy.uid);
     this.drawBattleBackground();
     this.playerSprite = new OriginalAlly(this, this.cache.json.get('ally-animation') as OriginalAllyMetadata, manifest.clips, this.appearance, WORLD.playerX, WORLD.playerY);
     this.root.add(this.playerSprite);
@@ -616,6 +630,7 @@ class ElonaScene extends Phaser.Scene {
     this.input.setDefaultCursor('crosshair');
     if (this.cache.audio.exists('soundBgForest')) this.ambient = this.sound.add('soundBgForest', { volume: 0.3, loop: true });
     this.ambient?.play();
+    this.syncEnemyFrameAudio(announce);
     this.paintBattle();
     if (announce && this.sim?.state.activeMission.bossDay) this.announceCombat('Boss Day!');
   }
@@ -639,6 +654,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private drawHud(): void {
+    this.bottomBarSprite = this.clip('hotbarBackground', 1, 315, 370)?.setAlpha(143 / 256);
     this.ammoFill = this.image('ammo_fill', 290.9, 11);
     this.adrenalineFill = undefined;
     if (this.sim && ['sniper', 'ranger', 'duelist'].includes(this.sim.state.player.classId)) {
@@ -723,6 +739,12 @@ class ElonaScene extends Phaser.Scene {
     }
     container.dataset.combatNotices = JSON.stringify(this.combatNotices.active);
     if (this.paused) return;
+    if (this.screen === 'battle') {
+      this.screenShake.advance(delta);
+      // Камера меняет только показ: мировые матрицы hitTest и состояние симуляции остаются прежними.
+      this.cameras.main.setScroll(-this.screenShake.x, -this.screenShake.y);
+      container.dataset.screenShake = JSON.stringify({ x: this.screenShake.x, y: this.screenShake.y, frames: this.screenShake.remaining });
+    }
     this.celebration?.advance(delta);
     if (this.celebration) {
       container.dataset.fireworkFrames = String(this.celebration.frame);
@@ -790,6 +812,7 @@ class ElonaScene extends Phaser.Scene {
       }
       this.animateEffects();
       for (const event of this.sim.events) this.renderEvent(event);
+      this.syncEnemyFrameAudio();
       if (this.sim.state.tick % 150 === 0) this.saveGame(false);
     }
     // Последний выстрел может выдать медаль и закончить бой в одном кадре.
@@ -821,6 +844,12 @@ class ElonaScene extends Phaser.Scene {
       this.enemySprites.set(enemy.uid, actor);
     }
     actor.setPosition(enemy.x, enemy.y).setScale(enemy.bossFacing ?? -1, 1);
+    if (enemy.hp > 0 && enemy.x > 20 && !this.bossReticleSeen.has(enemy.uid)) {
+      this.bossReticleSeen.add(enemy.uid);
+      const asset = manifest.clips.bossReticle;
+      const marker = this.add.image(13, -20, 'bossReticle', '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
+      actor.add(marker); this.bossReticles.set(enemy.uid, { image: marker, frame: 1 });
+    }
     if (this.bossFrames.get(enemy.uid) !== enemy.frame) {
       // Симуляция уже исполняет кадры и остановку щита; отдельные часы здесь удвоили бы шаг.
       actor.stopOriginal(enemy.frame);
@@ -889,6 +918,8 @@ class ElonaScene extends Phaser.Scene {
   private paintBattle(): void {
     if (!this.sim) return;
     const state = this.sim.state;
+    this.bottomBarSprite?.setFrame(state.player.rampageTicks > 0 ? '2' : '1');
+    container.dataset.rampageBar = String(state.player.rampageTicks > 0);
     this.syncChainSounds();
     this.paintCastleSister();
     container.dataset.heroSettings = JSON.stringify(this.sim.heroSettings);
@@ -1092,6 +1123,7 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.bossBars = String(this.bossBars.size);
     container.dataset.bossHealth = JSON.stringify(bosses.map(enemy => ({ uid: enemy.uid, fraction: enemy.hp / enemy.maxHp, x: enemy.x - 11, y: enemy.y + 22 })));
     container.dataset.bossVisuals = JSON.stringify(bosses.map(enemy => ({ uid: enemy.uid, action: enemy.bossAction, frame: enemy.frame, facing: enemy.bossFacing ?? -1 })));
+    container.dataset.bossReticles = JSON.stringify([...this.bossReticles].map(([uid, marker]) => ({ uid, frame: marker.frame })));
   }
 
   private hitTest(enemy: Readonly<EnemyState>, x: number, y: number): boolean {
@@ -1130,6 +1162,10 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private renderEvent(event: SimulationEvent): void {
+    if (event.type === 'explosion') this.screenShake.start(10, 5, 0.9);
+    if (event.type === 'ragnarok') this.screenShake.start(150, 1.5, 1);
+    if (event.type === 'rampage' && !event.actorSlot) this.screenShake.start(40, 1.5, 1);
+    if (event.type === 'shot' && event.oneShot) this.screenShake.start(5, 1.5, 1);
     if (event.type === 'enemy-attack') {
       const key = { cata: 'soundBow1', tank: 'soundTank2', dino: 'soundLightning', dragon: 'soundFireball' }[event.enemyKind as 'cata' | 'tank' | 'dino' | 'dragon'];
       const pan = Phaser.Math.Clamp(Math.trunc(Math.trunc(event.x ?? 0) / 25), 0, 19) * 0.08 - 0.8;
@@ -1252,6 +1288,10 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private animateEffects(): void {
+    for (const [uid, marker] of this.bossReticles) {
+      if (!marker.image.scene || ++marker.frame >= manifest.clips.bossReticle.count) { marker.image.destroy(); this.bossReticles.delete(uid); }
+      else marker.image.setFrame(String(marker.frame));
+    }
     this.effects = this.effects.filter(effect => {
       effect.ticks--;
       if (effect.ticks <= 0) { effect.object.destroy(); return false; }
@@ -1889,6 +1929,34 @@ class ElonaScene extends Phaser.Scene {
     const layout = (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog;
     this.collectionDialog = createModConfirmation(this, manifest, layout, () => this.closeCollectionImport(), 'import-error', message, true);
     this.root.add(this.collectionDialog);
+  }
+
+  private syncEnemyFrameAudio(allowSpawn = true): void {
+    const present = new Set<number>();
+    for (const enemy of this.sim?.state.enemies ?? []) {
+      if (enemy.removed) continue;
+      present.add(enemy.uid);
+      const previous = this.enemyFrameAudio.get(enemy.uid);
+      const audio = previous ?? { frame: enemy.frame, crowPlayed: !allowSpawn };
+      const play = (key: string) => {
+        const pan = Phaser.Math.Clamp(Math.trunc(Math.trunc(enemy.x) / 25), 0, 19) * 0.08 - 0.8;
+        this.playSound(key, 0.9, pan);
+        this.frameSoundCues.push({ key, uid: enemy.uid, frame: enemy.frame });
+        if (this.frameSoundCues.length > 12) this.frameSoundCues.shift();
+        container.dataset.frameSounds = JSON.stringify(this.frameSoundCues);
+      };
+      if (!previous && allowSpawn && enemy.hp > 0) {
+        const key = { chicken: 'soundChicken', cata: 'soundCata', tank: 'soundTank' }[enemy.kind as 'chicken' | 'cata' | 'tank'];
+        if (key) play(key);
+      }
+      if (previous && previous.frame !== enemy.frame) {
+        if (enemy.kind === 'chicken' && enemy.frame === 136) play('soundChickenAttack');
+        if (enemy.kind === 'boss' && enemy.frame === 291) play('soundDeadBoss2');
+        if (enemy.kind === 'crow' && enemy.frame === 24 && !audio.crowPlayed) { play('soundCrow'); audio.crowPlayed = true; }
+      }
+      audio.frame = enemy.frame; this.enemyFrameAudio.set(enemy.uid, audio);
+    }
+    for (const uid of this.enemyFrameAudio.keys()) if (!present.has(uid)) this.enemyFrameAudio.delete(uid);
   }
 
   playSound(key: string, volume = 0.7, pan = 0): void { if (this.cache.audio.exists(key)) this.sound.play(key, { volume, pan }); }

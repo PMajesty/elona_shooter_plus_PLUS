@@ -91,7 +91,7 @@ export interface SimulationState {
   pendingPartyAction: PartyPendingAction | null;
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
-export interface SimulationEvent { actorSlot?: number; enemyKind?: EnemyKind; type: 'combat-notice' | 'enemy-attack' | 'enemy-drop' | 'sister-killed' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number }
+export interface SimulationEvent { actorSlot?: number; enemyKind?: EnemyKind; type: 'combat-notice' | 'enemy-attack' | 'enemy-drop' | 'sister-killed' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; bossGuard?: boolean; pellets?: { x: number; y: number }[]; explosionKind?: ExplosionKind; scale?: number; oneShot?: true }
 export interface SimulationOptions { mods?: GameMods; mode?: GameMode; hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
@@ -653,7 +653,7 @@ export class Simulation {
     const manual = actorSlot === 0 && !this.heroAutomatic;
     const member = actorSlot ? partySlot(this.state.party, actorSlot)!.member! : null;
     const ai = actorSlot === 0 && this.heroAutomatic ? this.state.heroAI!.state : member?.aiState;
-    const meter = ai ?? (actorSlot === 0 ? this.heroClassState : undefined);
+    let meter = ai ?? (actorSlot === 0 ? this.heroClassState : undefined);
     const position = partyActorPosition(actorSlot);
     const weaponSlot = actorSlot === 0 ? this.state.player.selectedSlot : 0;
     if (player.shootTimer > 0) return false;
@@ -677,6 +677,10 @@ export class Simulation {
       if (manual) this.state.pendingShot = false;
       else if (ai) { ai.shooting = false; ai.burst = 0; }
       this.requestActorReload(actorSlot); return false;
+    }
+    // Базовому ручному классу нужен сохраняемый счётчик только для очереди Burst.
+    if (!meter && manual && player.traits[COMBAT_TRAIT.BURST] && item.automatic && item.reqTrait === COMBAT_TRAIT.RIFLE) {
+      meter = this.state.player.classState = { frenzy: 0, idleCount: 0, burst: 0 };
     }
     const spread = shotSpread(item, player.traits, player.accuracyFix, { tight: this.state.mods?.tight, manualControl: manual, fireAtWill: actorSlot === 0 && (this.heroSettings.order === -1 && this.fireAtWill || this.heroSettings.order === 6) || member?.ai === 6 });
     player.shootTimer = stats.shootTimer;
@@ -719,12 +723,13 @@ export class Simulation {
       }
       return true;
     }
-    if (meter) {
-      const modified = hitscanShotModifiers(item, player.traits, damage, { burst: meter.burst, ammoAfterShot: item.ammo,
-        accuracyFix: player.accuracyFix, powerShotRoll: !item.automatic && player.traits[COMBAT_TRAIT.POWER_SHOT] ? this.random() : undefined });
-      damage = modified.damage; meter.burst = modified.burst; player.accuracyFix = modified.accuracyFix;
-      if (modified.specialHitType === 2) { this.random(); this.random(); }
-    }
+    let oneShot: true | undefined;
+    const modified = hitscanShotModifiers(item, player.traits, damage, { burst: meter?.burst ?? 0, ammoAfterShot: item.ammo,
+      accuracyFix: player.accuracyFix, powerShotRoll: !item.automatic && player.traits[COMBAT_TRAIT.POWER_SHOT] ? this.random() : undefined });
+    damage = modified.damage;
+    if (meter) meter.burst = modified.burst;
+    player.accuracyFix = modified.accuracyFix;
+    if (modified.specialHitType === 2) { this.random(); this.random(); oneShot = true; }
     let hasHitAnything = false, hasHitAnyEnemy = false, hasKillAnyEnemy = false, hasCritHit = false;
     const pellets: { x: number; y: number }[] = [];
     for (let i = 0; i < stats.shells; i++) {
@@ -754,12 +759,12 @@ export class Simulation {
       }
       if (meter && !hasHitAnything) meter.idleCount = 0;
     }
+    if (hasCritHit && hasKillAnyEnemy) player.shootTimer = criticalKillCooldown(player.shootTimer, player.traits);
     if (meter) {
       if (!hasHitAnything) meter.idleCount = 0;
-      if (hasCritHit && hasKillAnyEnemy) player.shootTimer = criticalKillCooldown(player.shootTimer, player.traits);
       meter.idleCount *= 0.8;
     }
-    this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'shot', weaponId: item.id, x: position.x, y: position.y, pellets });
+    this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'shot', weaponId: item.id, x: position.x, y: position.y, pellets, ...(oneShot ? { oneShot } : {}) });
     return true;
   }
 
@@ -2072,7 +2077,10 @@ export class Simulation {
     const advancedHero = ['sniper', 'ranger', 'duelist', 'noble'].includes(player.classId);
     const control = record(value.heroAI) ? value.heroAI : undefined;
     const meter = control ? control.state as Record<string, unknown> : player.classState;
-    if (control && player.classState !== undefined || (advancedHero ? value.version < 31 || !record(meter) || ['frenzy', 'idleCount', 'burst'].some(key => !finite(meter[key]) || Number(meter[key]) < 0 || Number(meter[key]) > 1000000) || !Number.isInteger(meter.burst) : !control && meter !== undefined)) throw new Error('Invalid hero class state.');
+    const needsMeter = advancedHero || !!control || meter !== undefined;
+    if (control && player.classState !== undefined || advancedHero && value.version < 31
+      || !advancedHero && !control && meter !== undefined && value.version < 42
+      || needsMeter && (!record(meter) || ['frenzy', 'idleCount', 'burst'].some(key => !finite(meter[key]) || Number(meter[key]) < 0 || Number(meter[key]) > 1000000) || !Number.isInteger(meter.burst))) throw new Error('Invalid hero class state.');
     if (['level', 'exp', 'skillPoints'].some(key => !Number.isInteger(player[key]) || Number(player[key]) < 0) || Number(player.exp) > 1000000000) throw new Error('Invalid player counters.');
     if (!legacyProjectiles && typeof player.bowDrawing !== 'boolean') throw new Error('Invalid bow draw state.');
     if (legacyEquipment) {

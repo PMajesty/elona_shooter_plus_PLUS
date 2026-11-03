@@ -67,6 +67,9 @@ BUTTONS.update({"button_pauseTitle": 1487, "button_pauseSave": 1490, "button_gam
 FORCE = False
 
 
+CLIPS.update({"bossReticle": 2425, "hotbarBackground": 2675})
+
+
 def ffdec(args, log_name):
     WORK.mkdir(parents=True, exist_ok=True)
     result = subprocess.run([find_java(None), "-Djava.awt.headless=true", "-Xmx2g", "-jar",
@@ -798,7 +801,7 @@ def main():
     omit_title = {"newGameButton", "continueButton", "helpButton", "longest", "saveBox", "trash",
                   "vol", "kong_mc", "kong_mc2", "armorButton"}
     omit_battle = {"dayText", "moneyText", "castleHPText", "ammoText", "lvText", "expText", "apText",
-                   "customCursor", "frenzyBar", "frenzyBar2", "frenzyText", "menuButton", "vol", "ammobar"}
+                   "customCursor", "frenzyBar", "frenzyBar2", "frenzyText", "menuButton", "vol", "ammobar", "bottomBar"}
     omit_gene = {"hint", "closeButton", "desc2", "classPic", "optHint", "optHint3", "optHC", "optCasual",
                  "unlockButton", "extraButton", "procButton"}
     omit_result = {"closeButton", "field", "before", "now", "taken", "reward", "wage", "castle", "other",
