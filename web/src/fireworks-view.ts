@@ -20,7 +20,12 @@ export function createFireworks(scene: Phaser.Scene, manifest: { clips: Record<s
           if (!objects) { objects = { launch: sprite('fireworkLaunch', burst.x, burst.y), particles: [] }; live.set(index, objects); }
           objects.launch.setFrame(String(age));
           if (age === 30) objects.particles = burst.particles.map(p => sprite(p.clip, burst.x, burst.y).setAngle(p.angle).setScale(p.scale).setTint(p.tint));
-          objects.particles.forEach((particle, i) => particle.setFrame(String(Math.min(manifest.clips[burst.particles[i].clip].count, age - 29))));
+          objects.particles.forEach((particle, i) => {
+            const key = burst.particles[i].clip, count = manifest.clips[key].count;
+            // У fireBit1 есть stop на последнем кадре. Дорожка fireBit2 зациклена.
+            const pose = key === 'fireworkBit2' ? 1 + (age - 30) % count : Math.min(count, age - 29);
+            particle.setFrame(String(pose));
+          });
           if (age === 93) { objects.launch.destroy(); objects.particles.forEach(p => p.destroy()); live.delete(index); }
         });
       }

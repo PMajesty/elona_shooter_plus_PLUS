@@ -14,7 +14,7 @@ def extract_enemy_shots(xml, manifest):
     sprites = {int(tag.get('spriteId')): tag for tag in xml.find('tags') if tag.get('type') == 'DefineSpriteTag'}
     bodies = {'enemyBoltBody': 2206, 'enemyTankBoltBody': 2202}
     for suffix, directory, extra in [('png', assets.CACHE, []), ('svg', assets.ROOT / '.build/svg-bounds', ['-format', 'sprite:svg'])]:
-        missing = [symbol for symbol in bodies.values() if not list(directory.glob(f'DefineSprite_{symbol}*'))]
+        missing = [symbol for symbol in bodies.values() if not assets.sprite_directory(directory, symbol)]
         if missing:
             assets.ffdec(['-ignorebackground', '-selectid', ','.join(map(str, missing)), *extra, '-export', 'sprite', directory, assets.SOURCE], 'enemy-shots-' + suffix)
     for key, symbol in bodies.items():
@@ -39,7 +39,7 @@ def extract_enemy_shots(xml, manifest):
 def extract_dropped_rat(xml, manifest):
     symbol = 1258
     for suffix, directory, extra in [('png', assets.CACHE, []), ('svg', assets.ROOT / '.build/svg-bounds', ['-format', 'sprite:svg'])]:
-        if not list(directory.glob(f'DefineSprite_{symbol}*')):
+        if not assets.sprite_directory(directory, symbol):
             assets.ffdec(['-ignorebackground', '-selectid', symbol, *extra, '-export', 'sprite', directory, assets.SOURCE], 'dropped-rat-' + suffix)
     sprite = next(tag for tag in xml.find('tags') if tag.get('type') == 'DefineSpriteTag' and tag.get('spriteId') == str(symbol))
     manifest['clips']['droppedRatBody'] = assets.atlas('droppedRatBody', symbol, sprite)
@@ -53,7 +53,7 @@ def main():
     sources = {kind: (assets.CACHE / 'scripts' / f'enemy_{kind}.as').read_text(encoding='utf-8') for kind in KINDS}
     symbols = {kind: int(re.search(r'symbol(\d+)', source)[1]) for kind, source in sources.items()}
     for suffix, root, extra in [('png', assets.CACHE, []), ('svg', assets.ROOT / '.build/svg-bounds', ['-format', 'sprite:svg'])]:
-        missing = [symbol for symbol in symbols.values() if not list(root.glob(f'DefineSprite_{symbol}*'))]
+        missing = [symbol for symbol in symbols.values() if not assets.sprite_directory(root, symbol)]
         if missing:
             assets.ffdec(['-ignorebackground', '-selectid', ','.join(map(str, missing)), *extra,
                           '-export', 'sprite', root, assets.SOURCE], 'campaign-enemies-' + suffix)

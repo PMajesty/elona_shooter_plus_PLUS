@@ -10,7 +10,7 @@ import shutil
 import subprocess
 import xml.etree.ElementTree as ET
 
-from PIL import Image
+from PIL import Image, ImageFilter
 from build import ORIGINAL_SHA256, find_java
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -201,27 +201,49 @@ def static_screen(xml, name, tags, omit=(), offset=(0, 0), sprite_frames=None, s
             "height": image.height, "originX": 0, "originY": 0}
 
 
-def atlas(name, character_id, sprite, png_root=CACHE, svg_root=ROOT / ".build/svg-bounds"):
-    folder = next(png_root.glob(f"DefineSprite_{character_id}*"))
+def sprite_directory(root, symbol):
+    # FFDec использует имя DefineSprite_96 или DefineSprite_96_fireWork1. Символ 964 — другой ресурс.
+    plain = root / f"DefineSprite_{symbol}"
+    return plain if plain.is_dir() else next(root.glob(f"DefineSprite_{symbol}_*"), None)
+
+
+def atlas(name, character_id, sprite, png_root=CACHE, svg_root=ROOT / ".build/svg-bounds", *, drop_shadow=False):
+    folder = sprite_directory(png_root, character_id)
+    if folder is None:
+        raise FileNotFoundError(f"Missing PNG export for symbol {character_id} in {png_root}")
     paths = sorted(folder.glob("*.png"), key=lambda path: int(path.stem))
     first = Image.open(paths[0]).convert("RGBA")
     width, height = first.size
+    # Симметричный запас сохраняет точку регистрации и не обрезает тень у границ кадра.
+    if drop_shadow:
+        width += 12
+        height += 12
     unique, indices, images = {}, {}, []
     for path in paths:
         image = Image.open(path).convert("RGBA")
+        if drop_shadow:
+            shadow_alpha = Image.new("L", (width, height))
+            shadow_alpha.paste(image.getchannel("A"), (9, 9))
+            shadow = Image.new("RGBA", (width, height))
+            shadow.putalpha(shadow_alpha.filter(ImageFilter.BoxBlur(2)))
+            shadow.alpha_composite(image, (6, 6))
+            image = shadow
         digest = hashlib.sha256(image.tobytes()).hexdigest()
         if digest not in unique:
             unique[digest] = len(images)
             images.append(image)
         indices[path.stem] = unique[digest]
     columns = max(1, math.ceil(math.sqrt(len(images) * height / width)))
-    sheet = Image.new("RGBA", (columns * width, math.ceil(len(images) / columns) * height))
+    # Межкадровый зазор исключает выборку соседней ячейки при дробном масштабе портретов.
+    gutter = 1 if name == "charaPic" else 0
+    stride_x, stride_y = width + 2 * gutter, height + 2 * gutter
+    sheet = Image.new("RGBA", (columns * stride_x, math.ceil(len(images) / columns) * stride_y))
     for index, image in enumerate(images):
-        sheet.paste(image, ((index % columns) * width, (index // columns) * height))
+        sheet.paste(image, ((index % columns) * stride_x + gutter, (index // columns) * stride_y + gutter))
     directory = DEST / "sprites"
     directory.mkdir(parents=True, exist_ok=True)
     sheet.save(directory / (name + ".png"), optimize=True)
-    frames = {frame: {"frame": {"x": (index % columns) * width, "y": (index // columns) * height,
+    frames = {frame: {"frame": {"x": (index % columns) * stride_x + gutter, "y": (index // columns) * stride_y + gutter,
                                 "w": width, "h": height}, "rotated": False, "trimmed": False,
                       "spriteSourceSize": {"x": 0, "y": 0, "w": width, "h": height},
                       "sourceSize": {"w": width, "h": height}}
@@ -229,7 +251,7 @@ def atlas(name, character_id, sprite, png_root=CACHE, svg_root=ROOT / ".build/sv
     (directory / (name + ".json")).write_text(json.dumps({"frames": frames, "meta": {
         "app": "Elona original SWF extraction", "image": name + ".png", "scale": "1"}},
         separators=(",", ":")), encoding="utf-8")
-    svg_path = next(svg_root.glob(f"DefineSprite_{character_id}*/1.svg"))
+    svg_path = sprite_directory(svg_root, character_id) / "1.svg"
     svg = ET.parse(svg_path).getroot()
     shift = re.search(r"matrix\([^,]+,[^,]+,[^,]+,[^,]+,\s*([^,]+),\s*([^\)]+)\)", list(svg)[0].get("transform"))
     svg_width = float(svg.get("width").removesuffix("px"))
@@ -426,7 +448,7 @@ def effect_segment_asset(xml, sprite, name, cache_name, start, end, alpha):
         depths = [tag.get("depth") for tag in selected]
         timeline.append(ET.Element("item", type="ShowFrameTag", forceWriteAsLong="false"))
     timeline.append(ET.Element("item", type="EndTag", forceWriteAsLong="false"))
-    if FORCE or not list(directory.glob(f"DefineSprite_{symbol}*")):
+    if FORCE or not sprite_directory(directory, symbol):
         derived = copy.deepcopy(xml)
         target = next(tag for tag in derived.find("tags") if tag.get("spriteId") == str(symbol))
         target.set("frameCount", str(end - start))
@@ -547,7 +569,7 @@ def runtime_clips(xml, sprites, manifest):
              "sheepShadow": (910, {"1"}, True), "crowShadow": (981, {"1"}, True),
              "gameOver": (2741, {"6", "9"}, False),
              "castleSister": (2622, {"5"}, False)}
-    if FORCE or any(not list(directory.glob(f"DefineSprite_{value[0]}*")) for value in specs.values()):
+    if FORCE or any(not sprite_directory(directory, value[0]) for value in specs.values()):
         derived = copy.deepcopy(xml)
         for name, (character_id, depths, keep) in specs.items():
             target = next(t for t in derived.find("tags") if t.get("spriteId") == str(character_id))
@@ -565,7 +587,7 @@ def runtime_clips(xml, sprites, manifest):
         ffdec(["-ignorebackground", "-selectid", ids, "-format", "sprite:svg", "-export",
                "sprite", svg_directory, swf_path], "runtime-clips-svg")
     for name, (character_id, _, _) in specs.items():
-        manifest["clips"][name] = atlas(name, character_id, sprites[character_id], directory, svg_directory)
+        manifest["clips"][name] = atlas(name, character_id, sprites[character_id], directory, svg_directory, drop_shadow=name == "itemPicture")
     entry = manifest["clips"].pop("gameOver")
     source = next(directory.glob("DefineSprite_2741*/1.png"))
     shutil.copyfile(source, DEST / "images/gameOver.png")
@@ -775,11 +797,11 @@ def main():
     xml = ET.parse(xml_path).getroot()
     tags = xml.find("tags")
     sprites = {int(tag.get("spriteId")): tag for tag in tags if tag.get("type") == "DefineSpriteTag"}
-    needed = [i for i in CLIPS.values() if args.refresh or not list(CACHE.glob(f"DefineSprite_{i}*"))]
+    needed = [i for i in CLIPS.values() if args.refresh or not sprite_directory(CACHE, i)]
     ids = ",".join(map(str, needed))
     if needed:
         ffdec(["-ignorebackground", "-selectid", ids, "-export", "sprite", CACHE, SOURCE], "sprites")
-    needed = [i for i in CLIPS.values() if args.refresh or not list((ROOT / ".build/svg-bounds").glob(f"DefineSprite_{i}*"))]
+    needed = [i for i in CLIPS.values() if args.refresh or not sprite_directory(ROOT / ".build/svg-bounds", i)]
     ids = ",".join(map(str, needed))
     if needed:
         ffdec(["-ignorebackground", "-selectid", ids, "-format", "sprite:svg", "-export",
@@ -788,6 +810,8 @@ def main():
                 "clips": {}, "sounds": {}, "fonts": {}}
     for name, i in CLIPS.items():
         manifest["clips"][name] = atlas(name, i, sprites[i])
+        if manifest["clips"][name]["count"] != int(sprites[i].get("frameCount")):
+            raise ValueError(f"Incomplete frame export for {name} (symbol {i})")
     manifest["clips"]["itemPopup"] = item_popup_asset(xml, sprites[1791])
     manifest["clips"]["infoPopup"] = info_popup_asset(xml, sprites[2290])
     manifest["clips"]["partyPortraitBackground"] = party_portrait_background(xml, sprites[685])
@@ -802,6 +826,8 @@ def main():
     projectile_assets(xml, sprites, manifest)
     for layer in ["back", "front"]:
         manifest["clips"]["ally" + layer.capitalize()] = ally_effects(xml, sprites[838], layer)
+    from extract_title import TITLE_ACTORS, extract as extract_title
+    extract_title(xml, manifest, args.refresh)
     omit_title = {"newGameButton", "continueButton", "helpButton", "longest", "saveBox", "trash",
                   "vol", "kong_mc", "kong_mc2", "armorButton"}
     omit_battle = {"dayText", "moneyText", "castleHPText", "ammoText", "lvText", "expText", "apText",
@@ -841,6 +867,8 @@ def main():
         ("level", sprites[1995].find("subTags"), 148, omit_level, (0, -26))]:
         selected = placed_frame(timeline, frame)
         # Текст2672 скрыт под bg в SWF; он не должен оказаться поверх отделённого фона.
+        if name == "title":
+            selected = [tag for tag in selected if int(tag.get("depth")) > 5 and int(tag.get("characterId")) not in TITLE_ACTORS.values()]
         if name == "battle":
             selected = [tag for tag in selected if tag.get("characterId") != "2672"]
         manifest["images"][name] = static_screen(xml, name, selected, omit, offset)
@@ -925,6 +953,7 @@ def main():
                    "sounds": len(manifest["sounds"]), "fonts": len(manifest["fonts"])},
         "runtimeAdjustments": [
             "Static screens omit runtime text placeholders and separately rendered controls",
+            "Opening logo uses frames 1–171 of symbol 2473. The title animates its own actors, buttons and clouds. itemPicture includes the default inventory drop shadow, and charaPic cells have a transparent gutter.",
             "Town Sister is frozen at stand frame4; battle Sister is rendered separately with original reactions and hidden sisterFire",
             "townHud applies the original eventGene bgAlpha.alpha=1",
             "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",

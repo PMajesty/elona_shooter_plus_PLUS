@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { titleButtonOffset, titleRunner } from '../src/title-sequence.ts';
 import { titlePointerHit, titleStateBounds, titleStateHit, type TitleButtonKey, type TitleButtonState } from '../src/title-hit.ts';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/original-title-hit-trace.json', import.meta.url), 'utf8'));
@@ -52,5 +53,21 @@ test('title pointer picking and current-state click geometry retain the original
     assert.equal(titleStateHit(button, 'down', 80, 18), true);
     assert.equal(titlePointerHit(button, 'up', 50, 0), false);
     assert.equal(titlePointerHit(button, 'over', 80, 18.85), false);
+  }
+});
+
+test('title buttons arrive in sequence and runners change direction, fall and stop', () => {
+  for (let i = 0; i < 3; i++) {
+    const first = 20 + i * 5, last = 30 + i * 9;
+    assert.equal(titleButtonOffset(first - 1, i), -(last - first + 1) * 25);
+    assert.equal(titleButtonOffset(last - 1, i), -25);
+    assert.equal(titleButtonOffset(last, i), 0);
+  }
+  for (let i = 0; i < 8; i++) {
+    assert.ok(titleRunner(94, i).x > titleRunner(49, i).x);
+    assert.equal(titleRunner(129, i).x, titleRunner(94, i).x);
+    assert.ok(titleRunner(130, i).x < titleRunner(129, i).x);
+    assert.equal(titleRunner(400, i).frame % 120, 0);
+    assert.deepEqual(titleRunner(401, i), titleRunner(400, i));
   }
 });

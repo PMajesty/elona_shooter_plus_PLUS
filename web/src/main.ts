@@ -1,3 +1,4 @@
+import { createTitleSequence, playOpening } from './title-sequence.ts';
 import { MAX_CAMPAIGN_DAY } from './missions.ts';
 import { COMMUNITY_MOD_DETAILS, GAME_MODS, type GameMod } from './game-mods.ts';
 import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
@@ -60,7 +61,7 @@ interface ClipAsset { image: string; json: string; originX: number; originY: num
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual; enemyShotVisuals: Record<EnemyShotKind, ProjectileVisual> }
 interface PortSave { format: 'elona-shooter-browser'; version: number; appearance: number; simulation: unknown; profile?: GlobalProfile; carryCheckpoint?: unknown; options?: GameOptions }
-type Screen = 'title' | 'gene' | 'mods' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
+type Screen = 'intro' | 'title' | 'gene' | 'mods' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
 const muteButton = document.querySelector<HTMLButtonElement>('#mute')!;
@@ -109,6 +110,7 @@ for (const key of ['soundReloading1', 'soundReloading3', 'soundReloaded3', 'soun
 for (const key of ['soundDead4', 'soundDead8', 'soundDead9']) USED_SOUNDS.add(key);
 for (const key of ['soundBow1', 'soundBow2', 'soundDead1', 'soundDead2', 'soundDead6', 'soundFireball', 'soundRampageEnemy', 'soundPuls', 'soundLow']) USED_SOUNDS.add(key);
 USED_SOUNDS.add('soundFirework');
+USED_SOUNDS.add('soundImpact1');
 for (const key of ['soundChain1', 'soundChain2', 'soundChain3', 'soundDrop']) USED_SOUNDS.add(key);
 for (const key of ['soundTank2', 'soundLightning']) USED_SOUNDS.add(key);
 let manifest: Manifest;
@@ -172,6 +174,8 @@ class ElonaScene extends Phaser.Scene {
   private pauseDialog?: Phaser.GameObjects.Container;
   private collectionDialog?: Phaser.GameObjects.Container;
   private closeTownEvent?: () => void;
+  private closeOpening?: () => void;
+  private titleSequence?: ReturnType<typeof createTitleSequence>;
   private celebration?: ReturnType<typeof createFireworks>;
   private fireworkMedalChecked = false;
   private flash?: Phaser.GameObjects.Rectangle;
@@ -310,7 +314,10 @@ class ElonaScene extends Phaser.Scene {
       this.game.canvas.removeEventListener('webglcontextrestored', contextRestored);
     });
     container.dataset.webglContext = 'ready';
-    this.showTitle();
+    this.reset('intro');
+    const cleanup = playOpening(container, assetUrl('screens/opening.webp'), () => this.showTitle());
+    this.closeOpening = cleanup;
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, cleanup);
     this.ready = true;
   }
 
@@ -321,6 +328,8 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.rampageEffects;
     const keepTownAmbience = this.screen === 'town' && screen === 'town';
     this.screen = screen;
+    this.titleSequence = undefined;
+    this.closeOpening?.(); this.closeOpening = undefined;
     this.screenShake.reset(); this.cameras.main.setScroll(0, 0);
     this.bottomBarSprite = undefined;
     this.battleBackdropSprite = this.battleCloudSprite = undefined;
@@ -431,8 +440,13 @@ class ElonaScene extends Phaser.Scene {
   }
 
   showTitle(): void {
+    const frame = this.titleSequence?.frame ?? 0;
     this.reset('title');
+    this.clip('battleBackdrop', 1, -5, -15);
+    const cloud = this.clip('battleCloud', 1, 175, -23)!;
     this.image('title');
+    const actors = this.add.container(0, 0); this.root.add(actors);
+    const buttons: Phaser.GameObjects.Image[] = [];
     for (const [key, x, y, action] of [
       ['button_newGame', 185, 195.7, () => this.showGene()],
       ['button_continue', 187.9, 249, () => this.continueGame()],
@@ -440,6 +454,7 @@ class ElonaScene extends Phaser.Scene {
     ] as const) {
       const button = this.image(key, x, y);
       if (button) {
+        buttons.push(button);
         const asset = manifest.images[key];
         let state: TitleButtonState = 'up';
         const showState = (next: TitleButtonState) => { state = next; button.setTexture(next === 'up' ? key : `${key}_${next}`); };
@@ -449,12 +464,16 @@ class ElonaScene extends Phaser.Scene {
             if (pointer.button !== 0) return;
             showState('down');
             // MouseLDownFunc_title сначала преобразует stage.mouseX/Y в int.
-            if (!titleStateHit(key, state, Math.trunc(pointer.x) - x, Math.trunc(pointer.y) - y)) return;
+            if (!titleStateHit(key, state, Math.trunc(pointer.worldX) - button.x - asset.originX, Math.trunc(pointer.worldY) - button.y - asset.originY)) return;
             event.stopPropagation(); this.playSound('soundClick1'); action();
           });
         button.on('pointerover', () => showState('over')).on('pointerout', () => showState('up')).on('pointerup', () => showState('over'));
       } else this.labelButton(x + 45, y - 15, key.replace('button_', ''), action);
     }
+    const art = this.add.container(0, 0); this.root.add(art);
+    this.titleSequence = createTitleSequence((key, frame, x, y) => {
+      const image = this.clip(key, frame, x, y)!; art.add(image); return image;
+    }, actors, cloud, buttons, frame, (x, y) => this.cameras.main.setScroll(-x, -y), () => this.playSound('soundImpact1'));
     const saved = readSave(this.saveSlot);
     if (saved.kind === 'saved') {
       try {
@@ -515,17 +534,21 @@ class ElonaScene extends Phaser.Scene {
     this.image('gene');
     this.appearance = Math.max(0, Math.min(21, this.appearance));
     const portraits = this.add.container(0, 0); this.root.add(portraits);
-    const bodies: { image: Phaser.GameObjects.Image; appearance: number }[] = [];
+    const bodies: { image: Phaser.GameObjects.Image; shadow: Phaser.GameObjects.Image; appearance: number }[] = [];
     let hovered = -1;
     const updatePortraits = () => {
-      for (const body of bodies) body.image.setAlpha(body.appearance === this.appearance ? 1 : body.appearance === hovered ? 0.8 : 0.5);
+      for (const body of bodies) {
+        const alpha = body.appearance === this.appearance ? 1 : body.appearance === hovered ? 0.8 : 0.5;
+        body.image.setAlpha(alpha); body.shadow.setAlpha(alpha);
+      }
       container.dataset.geneAppearance = String(this.appearance);
     };
     for (let index = 0; index < 22; index++) {
       const x = 176 + index % 11 * 32;
       const y = 131 + Math.floor(index / 11) * 30;
+      const shadow = this.clip('partyShadow', 1, x - 9.25, y + 7)!.setScale(0.9024353, 1);
       const body = this.clip('charaPic', index * 10 + 5, x - 12.45, y - 15.45)!.setScale(1, 0.9530487);
-      portraits.add(body); bodies.push({ image: body, appearance: index });
+      portraits.add([shadow, body]); bodies.push({ image: body, shadow, appearance: index });
       this.zone(x - 14, y - 17, 30, 31, () => { this.appearance = index; this.sim?.rerollOpeningHero(); updatePortraits(); refreshClass(); })
         .on('pointerover', () => { hovered = index; updatePortraits(); })
         .on('pointerout', () => { hovered = -1; updatePortraits(); });
@@ -772,6 +795,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private updatePresentation(delta: number): void {
+    this.titleSequence?.advance(delta);
     this.updateMedalNotices(delta);
     this.combatNotices.advance(Math.min(delta, 250));
     const layout = (this.cache.json.get('town-layout') as { combatNotices: CombatNoticeLayout }).combatNotices;

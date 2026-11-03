@@ -1599,10 +1599,10 @@
     "itemPicture": {
       "image": "sprites/itemPicture.png",
       "json": "sprites/itemPicture.json",
-      "originX": 8.0,
-      "originY": 27.5,
-      "frameWidth": 98,
-      "frameHeight": 89,
+      "originX": 14.0,
+      "originY": 33.5,
+      "frameWidth": 110,
+      "frameHeight": 101,
       "labels": {},
       "count": 131,
       "uniqueFrames": 60,
@@ -2259,13 +2259,13 @@
     "fireworkLaunch": {
       "image": "sprites/fireworkLaunch.png",
       "json": "sprites/fireworkLaunch.json",
-      "originX": 24.95,
-      "originY": 22.95,
-      "frameWidth": 56,
-      "frameHeight": 177,
+      "originX": 70.2,
+      "originY": 48.85,
+      "frameWidth": 112,
+      "frameHeight": 145,
       "labels": {},
-      "count": 161,
-      "uniqueFrames": 24,
+      "count": 93,
+      "uniqueFrames": 43,
       "characterId": 96
     },
     "fireworkBit1": {
@@ -2283,13 +2283,13 @@
     "fireworkBit2": {
       "image": "sprites/fireworkBit2.png",
       "json": "sprites/fireworkBit2.json",
-      "originX": 14.5,
-      "originY": 8.5,
-      "frameWidth": 36,
-      "frameHeight": 32,
+      "originX": 0.25,
+      "originY": 114.4,
+      "frameWidth": 3,
+      "frameHeight": 157,
       "labels": {},
-      "count": 216,
-      "uniqueFrames": 25,
+      "count": 31,
+      "uniqueFrames": 31,
       "characterId": 91
     },
     "museumKongregate": {
@@ -2584,6 +2584,80 @@
         0.1,
         0.1
       ]
+    },
+    "titleBoy": {
+      "image": "sprites/titleBoy.png",
+      "json": "sprites/titleBoy.json",
+      "originX": 285.9,
+      "originY": 23.35,
+      "frameWidth": 315,
+      "frameHeight": 50,
+      "labels": {},
+      "count": 50,
+      "uniqueFrames": 39,
+      "characterId": 2516
+    },
+    "titleGirl": {
+      "image": "sprites/titleGirl.png",
+      "json": "sprites/titleGirl.json",
+      "originX": 415.9,
+      "originY": 23.35,
+      "frameWidth": 445,
+      "frameHeight": 50,
+      "labels": {},
+      "count": 58,
+      "uniqueFrames": 47,
+      "characterId": 2537
+    },
+    "titleCat": {
+      "image": "sprites/titleCat.png",
+      "json": "sprites/titleCat.json",
+      "originX": 415.9,
+      "originY": 22.95,
+      "frameWidth": 451,
+      "frameHeight": 52,
+      "labels": {},
+      "count": 71,
+      "uniqueFrames": 61,
+      "characterId": 2558
+    },
+    "titleLady": {
+      "image": "sprites/titleLady.png",
+      "json": "sprites/titleLady.json",
+      "originX": 415.9,
+      "originY": 23.35,
+      "frameWidth": 445,
+      "frameHeight": 50,
+      "labels": {},
+      "count": 70,
+      "uniqueFrames": 59,
+      "characterId": 2574
+    },
+    "titleSister": {
+      "image": "sprites/titleSister.png",
+      "json": "sprites/titleSister.json",
+      "originX": 30.35,
+      "originY": 29.1,
+      "frameWidth": 48,
+      "frameHeight": 49,
+      "labels": {
+        "repeat1": 152
+      },
+      "count": 451,
+      "uniqueFrames": 30,
+      "characterId": 2637
+    },
+    "titleRunners": {
+      "image": "sprites/titleRunners.png",
+      "json": "sprites/titleRunners.json",
+      "originX": 25.85,
+      "originY": 27.25,
+      "frameWidth": 41,
+      "frameHeight": 49,
+      "labels": {},
+      "count": 960,
+      "uniqueFrames": 219,
+      "characterId": 763
     }
   },
   "sounds": {

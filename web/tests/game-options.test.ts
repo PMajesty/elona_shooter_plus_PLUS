@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { DEFAULT_GAME_OPTIONS, savedGameOptions, validGameOptions, showDamageNumber, pauseStatistics } from '../src/game-options.ts';
 import { fireworkPlan, FIREWORK_MEDAL_FRAMES } from '../src/fireworks.ts';
 import { Simulation } from '../src/simulation.ts';
@@ -28,6 +29,17 @@ test('the original statistics text includes mode, MODs, Carry Over and accumulat
   for (const line of ['Elona Shooter Stactics  Day 1', 'You are playing Casual Mode.', 'Mod(Intense Start) is on.',
     'Mod(Tighter crosshair) is on.', "You've used Carry Over Option.", '2 Perfect Games scored.', '8 eggs collected.',
     'Exploded 9 sisters.', 'Robbed 10 children.', 'Total of 123 enemies killed.', 'Total of 456 GP earned.', 'This game modded by Alfred.']) assert.ok(text.includes(line));
+});
+
+test('the packaged firework clips have the SWF timelines for the rocket and both sparks', () => {
+  const assets = new URL('../public/assets/', import.meta.url);
+  const { clips } = JSON.parse(readFileSync(new URL('manifest.json', assets), 'utf8'));
+  for (const [key, symbol, frames] of [['fireworkLaunch', 96, 93], ['fireworkBit1', 101, 40], ['fireworkBit2', 91, 31]] as const) {
+    const clip = clips[key];
+    assert.deepEqual([clip.characterId, clip.count], [symbol, frames]);
+    const atlas = JSON.parse(readFileSync(new URL(clip.json, assets), 'utf8'));
+    assert.equal(Object.keys(atlas.frames).length, frames);
+  }
 });
 
 test('source firework counts, delays and particle families use an independent deterministic stream', () => {

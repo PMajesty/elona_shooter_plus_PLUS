@@ -9,12 +9,13 @@
   "origins": "Pixel offset from exported image top-left to Flash registration point",
   "counts": {
     "images": 156,
-    "clips": 91,
+    "clips": 97,
     "sounds": 89,
     "fonts": 6
   },
   "runtimeAdjustments": [
     "Static screens omit runtime text placeholders and separately rendered controls",
+    "Opening logo uses frames 1\u2013171 of symbol 2473. The title animates its own actors, buttons and clouds. itemPicture includes the default inventory drop shadow, and charaPic cells have a transparent gutter.",
     "Town Sister is frozen at stand frame4; battle Sister is rendered separately with original reactions and hidden sisterFire",
     "townHud applies the original eventGene bgAlpha.alpha=1",
     "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",
