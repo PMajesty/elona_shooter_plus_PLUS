@@ -735,7 +735,7 @@ class ElonaScene extends Phaser.Scene {
     const layout = (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog;
     this.collectionDialog = createModConfirmation(this, manifest, layout, confirmed => {
       this.closeCollectionImport(); if (confirmed) this.showGene();
-    }, 'replace-adventure', `Start ${RULESETS[this.newGameRuleset].name} in slot ${this.saveSlot + 1}?\nThe saved adventure will be replaced.\nChoose an empty slot to keep it.`);
+    }, 'replace-adventure', `Start ${RULESETS[this.newGameRuleset].name} in slot ${this.saveSlot + 1}?\nReplace the saved game?`);
     container.dataset.replaceAdventure = 'new';
     this.root.add(this.collectionDialog);
   }

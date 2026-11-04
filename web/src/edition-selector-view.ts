@@ -15,11 +15,13 @@ export function createEditionSelector(scene: Phaser.Scene, selected: EditionChoi
   const root = scene.add.container(bounds.x, bounds.y).setName('edition-selector');
   root.setSize(bounds.width, bounds.height).setData({ selected, bounds: { ...bounds } });
   const backing = scene.add.graphics();
-  backing.fillStyle(0xe8d8b5, 1).fillRect(5, 3, bounds.width - 13, bounds.height - 17);
+  backing.fillStyle(0xe8d8b5, 1).fillRect(3, 3, bounds.width - 6, bounds.height - 6);
   root.add(backing);
-  // Исходная бумага подсказки занимает только318×119 в прозрачном кадре620×380.
-  const paper = scene.add.image(0, 0, 'medalHint').setOrigin(0).setCrop(0, 0, 318, 119)
-    .setScale(bounds.width / 318, bounds.height / 119).setName('edition-parchment');
+  // Растягиваем середину бумаги, сохраняя пропорции свитка в левом верхнем углу.
+  const texture = scene.textures.get('medalHint');
+  if (!texture.has('edition-paper')) texture.add('edition-paper', 0, 8, 0, 300, 109);
+  const paper = scene.add.nineslice(0, 0, 'medalHint', 'edition-paper', bounds.width, bounds.height, 30, 10, 28, 10)
+    .setOrigin(0).setName('edition-parchment');
   root.add(paper);
   root.add(scene.add.image(bounds.width / 2, 7, 'townActionPin', '1').setOrigin(0.5).setScale(0.8));
   const text = (x: number, y: number, value: string, size = 12, color = '#352c20') => {
@@ -27,7 +29,7 @@ export function createEditionSelector(scene: Phaser.Scene, selected: EditionChoi
       wordWrap: { width: bounds.width - x - 9 }, padding: { x: 0, y: 1 } });
     root.add(label); return label;
   };
-  text(24, 9, 'New game', 13, '#330000').setFontFamily('ElonaMenuBold');
+  text(32, 9, 'New game', 13, '#330000').setFontFamily('ElonaMenuBold');
   const description = text(12, 89, DESCRIPTIONS[selected], 11).setName('edition-description');
   const options: EditionChoice[] = ['classic', 'expanded'];
   const radios: Phaser.GameObjects.Image[] = [];
