@@ -1,6 +1,6 @@
 # VPS deployment
 
-Updated2026-11-03. Domain:
+Updated2026-11-04. Domain:
 [Elona Shooter Plus](https://pastalapizza.site/elona/).
 The root URL redirects to /elona/; www redirects to the apex domain.
 The [HTTP IP address](http://151.241.155.138/elona/) remains available.
@@ -9,8 +9,8 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- The current game is `/srv/elona/releases/review-B_k9m-G9/elona/` (save v45,
-  code `e1ba324`). The previous v45 release is `releases/review-7YZuhYO9`
+- The current game is `/srv/elona/releases/review-C3b_KnNb/elona/` (save v45,
+  code `ba936ec`). The previous v45 release is `releases/review-B_k9m-G9`
   and the previous v43 release is `releases/release-By__DLWU`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
@@ -23,7 +23,14 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
 
-The touch release serves the verified mobile JavaScript bundle and compact
+The piercing correction passed 43 focused gameplay, save, party and source-probe
+tests plus the production build. Muted Chromium on public HTTPS imported bow
+and crossbow scenarios, resumed 32 ticks and exported the resulting saves.
+Each sheep took one hit (1000 to 980 HP); the bolt also hit the second sheep.
+Saved RNG matched the deterministic run, the arrow retained its target history,
+and the served JavaScript SHA-256 matched the local bundle. No script errors.
+
+The preceding touch release serves the verified mobile JavaScript bundle and compact
 dinosaur atlas. SHA-256 matches the local build for the JavaScript, atlas JSON
 and sprite image. Muted Chromium on the public URL started a new game in
 portrait, used the enlarged menu, rotated into landscape, fired and reloaded
