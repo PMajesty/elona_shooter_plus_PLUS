@@ -14,7 +14,7 @@ import { createTownEconomy, validTownEconomy, museumIncome, TOWN_ACTIVITIES, typ
 import { ENEMY_TIMELINES, type EnemyTimeline } from './enemy-timelines.ts';
 import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
 import { RULESETS, readRuleset, rulesetIdentity, type RulesetId, type RulesetIdentity } from './rulesets.ts';
-import { CAREFUL_ORDER, CAREFUL_DAMAGE_MULTIPLIER } from './careful-consideration.ts';
+import { SMART_ORDER, SMART_DAMAGE_MULTIPLIER } from './smart-mode.ts';
 import { HERO_CLASSES, heroClassMedal, isHeroClass, applyHeroChoice, availableHeroTraits, rollHeroChoices, type HeroClass } from './hero-classes.ts';
 import { ENEMIES, FIRST_DAY, GRENADE, SHOTGUN, SIMULATION_HZ, STARTING_CLASS, TIMER_HZ, WORLD, type EnemyKind, type Rect } from './content.ts';
 import { generateLowLevelMission, generateLowLevelWaves, validCampaignDay, MAX_CAMPAIGN_DAY, type LowLevelMission, type GameMode } from './missions.ts';
@@ -158,6 +158,7 @@ export class Simulation {
     const generated = generateHero(random, classId);
     this.state = {
       ruleset: rulesetIdentity(options.ruleset ?? 'classic'),
+      ...(options.ruleset === 'expanded' ? { henchmanOrder: SMART_ORDER } : {}),
       ...(options.mode && options.mode !== 'normal' ? { mode: options.mode } : {}), ...(options.mods && Object.keys(options.mods).length ? { mods: structuredClone(options.mods) } : {}), version: SAVE_VERSION, economy: createTownEconomy(), phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
       activeMission: this.missionParameters(this.pendingOpeningMission), resultBefore: STARTING_CLASS.money, earnedMedals: [...new Set([40, ...(options.medals ?? [])])], perfectDays: 0, bossesSpawned: 0,
       castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, wallLevel: 1, wallFixCount: 0, repairmanLevel: 0, sandbagLevel: 0, looterLevel: 0, trainerLevel: 0, gold: STARTING_CLASS.money, totalMoney: 0, kills: 0, criticalKills: 0,
@@ -241,8 +242,10 @@ export class Simulation {
 
   private partyAIContext(): PartyAIContext {
     return { shared: this.state.partyAI, random: () => this.random(), heroSlot: this.heroSlot, fireAtWill: this.fireAtWill,
-      ...(this.rules.carefulConsideration ? { carefulConsideration: true,
+      ...(this.rules.smartMode ? { smartMode: true,
         listTargets: () => this.state.enemies as PartyAITarget[],
+        listActors: () => this.battleAIActors(),
+        isBoss: (target: PartyAITarget) => (target as unknown as EnemyState).kind === 'boss',
         // Курица наносит урон замку на кадре136 издалека, хотя её flags не содержит RANGED.
         isRanged: (target: PartyAITarget) => ['chicken', 'archer', 'cata', 'tank', 'dino', 'dragon', 'boss'].includes((target as unknown as EnemyState).kind),
         isShielded: (target: PartyAITarget) => (target as unknown as EnemyState).kind === 'boss' && (target as unknown as EnemyState).bossAction === 6,
@@ -252,8 +255,8 @@ export class Simulation {
   }
 
   private automaticDamageMultiplier(actorSlot: number): number {
-    return this.rules.carefulConsideration && actorSlot >= 1 && actorSlot <= 4
-      && partySlot(this.state.party, actorSlot)?.member?.ai === CAREFUL_ORDER ? CAREFUL_DAMAGE_MULTIPLIER : 1;
+    return this.rules.smartMode && actorSlot >= 1 && actorSlot <= 4
+      && partySlot(this.state.party, actorSlot)?.member?.ai === SMART_ORDER ? SMART_DAMAGE_MULTIPLIER : 1;
   }
 
   private partyAICallbacks(): PartyAICallbacks {
@@ -343,7 +346,9 @@ export class Simulation {
       const town = this.state.town;
       if (town?.preparation === 'ready' && !town.mission.hire) { town.mission.hire = true; outcome = 'contracted'; }
     } else if (pending.kind === 'hire') {
+      const candidate = this.state.party.slots[4].member;
       const result = hireCandidate(this.state.party, this.state.gold);
+      if (result.outcome === 'hired' && candidate && this.rules.smartMode) candidate.ai = SMART_ORDER;
       this.state.gold = result.gold; outcome = result.outcome;
     } else if (pending.kind === 'dismiss') outcome = dismissCompanion(this.state.party, pending.slot) ? 'dismissed' : 'unavailable';
     else outcome = resolvePartyMod(this.state.party, this.state.inventory, pending.inventorySlot, pending.partySlot, true, this.equipmentFactory());
@@ -356,10 +361,10 @@ export class Simulation {
     this.state.pendingPartyAction = { kind: 'henchman' }; return 'previewed';
   }
 
-  setHenchmanCareful(enabled: boolean): boolean {
-    if (!this.rules.carefulConsideration || typeof enabled !== 'boolean' || !this.partyMutationAvailable()
+  setHenchmanSmart(enabled: boolean): boolean {
+    if (!this.rules.smartMode || typeof enabled !== 'boolean' || !this.partyMutationAvailable()
       || !(this.state.town as ReadyTown).mission.hire) return false;
-    if (enabled) this.state.henchmanOrder = CAREFUL_ORDER;
+    if (enabled) this.state.henchmanOrder = SMART_ORDER;
     else delete this.state.henchmanOrder;
     return true;
   }
@@ -382,7 +387,7 @@ export class Simulation {
       return true;
     }
     const member = partySlot(this.state.party, slot)?.member;
-    if (!this.partyMutationAvailable() || slot > (this.rules.carefulConsideration ? 4 : 3) || !partySlot(this.state.party, slot)?.exists || !member || !Number.isInteger(order) || order < 0 || order > (this.rules.carefulConsideration ? 7 : 6)) return false;
+    if (!this.partyMutationAvailable() || slot > (this.rules.smartMode ? 4 : 3) || !partySlot(this.state.party, slot)?.exists || !member || !Number.isInteger(order) || order < 0 || order > (this.rules.smartMode ? 7 : 6)) return false;
     if (member.ai !== order && (member.ai === 7 || order === 7)) {
       const actor = this.battleAIActors().find(actor => actor.slot === slot);
       if (actor) clearPartyAITarget(actor);
@@ -467,7 +472,10 @@ export class Simulation {
 
   startOpeningBattle(): boolean {
     if (!this.pendingOpeningMission) return false;
-    if (this.state.player.classId === 'hunter' || this.state.player.classId === 'rogue') addStartingLittleGirl(this.state.party, () => this.random());
+    if (this.state.player.classId === 'hunter' || this.state.player.classId === 'rogue') {
+      addStartingLittleGirl(this.state.party, () => this.random());
+      if (this.rules.smartMode) this.state.party.slots[0].member!.ai = SMART_ORDER;
+    }
     this.applyStartingMedals();
     this.applyOpeningMission(this.pendingOpeningMission);
     this.initializePartyBattle();
@@ -580,7 +588,7 @@ export class Simulation {
     // Оригинал создаёт наёмника перед увеличением календарного дня.
     if (town.mission.hire) {
       generateHenchman(state.party, state.day, () => this.random(), state.partySkills.effects[120]);
-      if (this.rules.carefulConsideration && state.henchmanOrder === CAREFUL_ORDER) state.party.slots[3].member!.ai = CAREFUL_ORDER;
+      if (this.rules.smartMode && state.henchmanOrder === SMART_ORDER) state.party.slots[3].member!.ai = SMART_ORDER;
     }
     state.killHistory = nextKillHistory(state);
     state.day = state.day + 1;
@@ -2316,7 +2324,7 @@ export class Simulation {
     const simulation = new Simulation(1, { ...options, deferOpeningWaves: false });
     simulation.state = structuredClone(value) as unknown as SimulationState;
     simulation.state.ruleset = readRuleset(value.ruleset, Number(value.version));
-    if (value.henchmanOrder !== undefined && (simulation.state.ruleset.id !== 'expanded' || value.henchmanOrder !== CAREFUL_ORDER)) throw new Error('Invalid hired gun order.');
+    if (value.henchmanOrder !== undefined && (simulation.state.ruleset.id !== 'expanded' || value.henchmanOrder !== SMART_ORDER)) throw new Error('Invalid hired gun order.');
     // Старые боевые сохранения не знают фазу перехода; восстанавливаем достигнутое освещение без RNG.
     if (value.version < 43 && simulation.state.phase === 'battle' && simulation.state.waveIndex < 3) {
       simulation.state.battleLighting = { phase: simulation.state.waveIndex === 0 ? 'night' : 'dusk', step: 100 };

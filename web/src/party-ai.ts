@@ -1,4 +1,4 @@
-import { CAREFUL_AIM_DELAY_FRAMES, carefulTargetViable, carefulPriority, chooseCarefulTarget, claimCarefulTarget, usesCarefulConsideration } from './careful-consideration.ts';
+import { smartAimDelay, shouldYieldSmartTarget, smartTargetViable, smartPriority, chooseSmartTarget, claimSmartTarget, usesSmartMode } from './smart-mode.ts';
 import { COMBAT_TRAIT, combatTrait, advanceChainGunClock, idleChainGun, type ChainGunState } from './combat-stats.ts';
 import type { Item } from './items.ts';
 import type { TraitLevels } from './progression.ts';
@@ -38,9 +38,11 @@ export interface PartyAIContext {
   random(): number;
   heroSlot: number;
   fireAtWill: boolean;
-  carefulConsideration?: boolean;
+  smartMode?: boolean;
   listTargets?(): readonly PartyAITarget[];
+  listActors?(): readonly PartyAIActor[];
   isRanged?(enemy: PartyAITarget): boolean;
+  isBoss?(enemy: PartyAITarget): boolean;
   isShielded?(enemy: PartyAITarget): boolean;
 }
 
@@ -147,9 +149,9 @@ export function startingPartyAim(actor: PartyAIActor, enemy: PartyAITarget, rang
 
 /** Сохраняет ранние return остальных приказов исходной aiNormal. */
 export function selectPartyTarget(actor: PartyAIActor, range: number, context: PartyAIContext, forcedOrder?: number): PartyAITarget | null {
-  if (usesCarefulConsideration(actor, context)) {
-    const chosen = chooseCarefulTarget(actor, range, context);
-    return chosen ? claimCarefulTarget(chosen, context) : null;
+  if (usesSmartMode(actor, context)) {
+    const chosen = chooseSmartTarget(actor, range, context);
+    return chosen ? claimSmartTarget(chosen, context) : null;
   }
   const order = forcedOrder ?? actor.member!.ai;
   const bands = RANGE_ORDER[range];
@@ -182,7 +184,7 @@ export function selectPartyTarget(actor: PartyAIActor, range: number, context: P
 
 export function searchNextPartyAlert(actor: PartyAIActor, context: PartyAIContext): void {
   // Новый приказ сам выбирает срочность и не наследует жёсткую метку Defend.
-  if (usesCarefulConsideration(actor, context)) { clearPartyAITarget(actor); return; }
+  if (usesSmartMode(actor, context)) { clearPartyAITarget(actor); return; }
   const uid = context.shared.nextAlertUid;
   const enemy = uid === null ? null : target(context, uid);
   if (!enemy || enemy.hp <= 0 || !canAutoTarget(actor, enemy)) { clearPartyAITarget(actor); return; }
@@ -196,7 +198,7 @@ export function alertParty(enemy: PartyAITarget, actors: readonly PartyAIActor[]
   if (enemy.onMark) return;
   for (const actor of actors) {
     if (!active(actor) || !actor.member.optWall || actor.member.aiState.onMark || (actor.slot === context.heroSlot && !context.fireAtWill) || !canAutoTarget(actor, enemy)) continue;
-    if (usesCarefulConsideration(actor, context)) continue;
+    if (usesSmartMode(actor, context)) continue;
     const s = actor.member.aiState;
     Object.assign(s, { shooting: false, burst: 0, targetUid: enemy.uid, onMark: true });
     enemy.onMark = true; s.aimCount = startingPartyAim(actor, enemy, actor.weapon?.range ?? null);
@@ -213,24 +215,25 @@ export function stepPartyAIFrame(actor: PartyAIActor, context: PartyAIContext, c
   const member = actor.member, s = member.aiState;
   if (actor.weapon?.id === 16) advanceChainGunClock(s);
   const manual = actor.slot === context.heroSlot && !context.fireAtWill;
-  const careful = usesCarefulConsideration(actor, context);
-  if (careful && s.targetUid !== null) {
+  const smart = usesSmartMode(actor, context);
+  if (smart && s.targetUid !== null) {
     const retained = context.getTarget(s.targetUid);
-    if (!carefulTargetViable(retained, context)) clearPartyAITarget(actor);
+    if (!smartTargetViable(retained, context)) clearPartyAITarget(actor);
     else {
-      const urgent = chooseCarefulTarget(actor, actor.weapon?.range ?? 0, context);
-      // Смена категории угрозы прерывает прицеливание; колебания оценок внутри неё — нет.
-      if (urgent && carefulPriority(urgent, context, member.optWall) > carefulPriority(retained, context, member.optWall)) {
-        claimCarefulTarget(urgent, context);
+      const urgent = chooseSmartTarget(actor, actor.weapon?.range ?? 0, context);
+      // Меняем прицел при новой угрозе или уступаем дубль свободной цели; иначе сохраняем наводку.
+      if (urgent && urgent.uid !== retained.uid && (smartPriority(urgent, context, member.optWall) > smartPriority(retained, context, member.optWall)
+        || shouldYieldSmartTarget(actor, retained, urgent, context))) {
+        claimSmartTarget(urgent, context);
         Object.assign(s, { shooting: false, burst: 0, targetUid: urgent.uid, onMark: false });
-        s.aimCount = startingPartyAim(actor, urgent, actor.weapon?.range ?? null) + CAREFUL_AIM_DELAY_FRAMES;
+        s.aimCount = startingPartyAim(actor, urgent, actor.weapon?.range ?? null) + smartAimDelay(actor, urgent);
         return 'acquired';
       }
     }
   }
   if (!manual) {
     if (member.ai === 2 && s.targetUid !== null && !canAutoTarget(actor, target(context, s.targetUid))) clearPartyAITarget(actor);
-    if (!careful && member.optBoss && context.shared.targetBossUid !== null && !s.onMark) {
+    if (!smart && member.optBoss && context.shared.targetBossUid !== null && !s.onMark) {
       const boss = target(context, context.shared.targetBossUid);
       if (boss.hp <= 0) { context.shared.targetBossUid = null; clearPartyAITarget(actor); return 'boss-mark'; }
       if (canAutoTarget(actor, boss)) {
@@ -247,7 +250,7 @@ export function stepPartyAIFrame(actor: PartyAIActor, context: PartyAIContext, c
         const chosen = selectPartyTarget(actor, actor.weapon?.range ?? 0, context, actor.slot === context.heroSlot ? 6 : undefined);
         if (chosen) {
           s.targetUid = chosen.uid;
-          s.aimCount = startingPartyAim(actor, chosen, actor.weapon?.range ?? null) + (careful ? CAREFUL_AIM_DELAY_FRAMES : 0);
+          s.aimCount = startingPartyAim(actor, chosen, actor.weapon?.range ?? null) + (smart ? smartAimDelay(actor, chosen) : 0);
           return 'acquired';
         }
         const weapon = actor.weapon;

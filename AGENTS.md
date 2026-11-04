@@ -3,7 +3,7 @@
 User amendment on 2026-11-04: implement an optional Expanded edition jointly
 with Opus; keep Classic and its saved progress separate. Opus leads creative
 design and balance, Codex architecture/integration, with bounded shared coding.
-Careful Consideration is the first addition. See docs/expanded-edition.md.
+Smart Mode is the first addition. See docs/expanded-edition.md.
 No recurring watcher is requested for this work.
 
 The current scope is a faithful browser port, authorized on 2026-11-01.

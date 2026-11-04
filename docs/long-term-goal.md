@@ -9,7 +9,7 @@ Both recurring watchers are confirmed paused through the native automation tool.
 
 2026-11-04 extension: the user authorized joint Codex/Opus implementation of an
 optional Expanded edition. Classic retains the port baseline and old adventures;
-Expanded adds Careful Consideration with independent progression. See
+Expanded adds Smart Mode with independent progression. See
 [edition rules](expanded-edition.md). This later work does not restart watchers.
 
 Updated 2026-11-02 at the user's request. This replaces older clock-rate,

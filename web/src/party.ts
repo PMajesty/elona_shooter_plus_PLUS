@@ -177,13 +177,13 @@ const record = (value: unknown): value is Record<string, unknown> => value !== n
 const integer = (value: unknown, low: number, high = 1e9): value is number => Number.isInteger(value) && Number(value) >= low && Number(value) <= high;
 const finite = (value: unknown, low = -1e9, high = 1e9): value is number => typeof value === 'number' && Number.isFinite(value) && value >= low && value <= high;
 
-export function validPartyMember(value: unknown, allowCareful = false): value is PartyMember {
+export function validPartyMember(value: unknown, allowSmart = false): value is PartyMember {
   if (!record(value) || !integer(value.devType, 1, 9) || !integer(value.sex, 0, 1)
     || !integer(value.appearance, 0, 59) || typeof value.name !== 'string' || value.name.length < 1 || value.name.length > 256) return false;
   if (!integer(value.level, 1, 1000000) || !integer(value.exp, 0, 1000000000) || !integer(value.skillPoints, 0, 1000000)
     || !integer(value.nextTrait, 0, 99) || !integer(value.trained, 0) || !integer(value.kills, 0)
     || !finite(value.earnedGold, 0) || !finite(value.money, 0) || !finite(value.cost, 0)
-    || !finite(value.potentialAim, 0, 1) || !finite(value.potentialTeam, 0, 1) || !integer(value.ai, 0, allowCareful ? 7 : 6)
+    || !finite(value.potentialAim, 0, 1) || !finite(value.potentialTeam, 0, 1) || !integer(value.ai, 0, allowSmart ? 7 : 6)
     || typeof value.optBoss !== 'boolean' || typeof value.optWall !== 'boolean') return false;
   if (!record(value.traits) || value.traits[value.devType] !== value.level || !integer(value.traits[900], 1, 1000009)
     || !integer(value.traits[901], 1, 1000009) || Object.entries(value.traits).some(([key, level]) =>
@@ -197,13 +197,13 @@ export function validPartyMember(value: unknown, allowCareful = false): value is
 }
 
 export function validPartyState(value: unknown, validItem: (item: unknown) => item is Item,
-  options: { phase?: string; allowHenchman?: boolean; allowCareful?: boolean } = {}): value is PartyState {
+  options: { phase?: string; allowHenchman?: boolean; allowSmart?: boolean } = {}): value is PartyState {
   if (!record(value) || !integer(value.capacity, 1, 3) || !Array.isArray(value.slots) || value.slots.length !== 5) return false;
   let gap = false;
   for (let index = 0; index < 5; index++) {
     const slot = value.slots[index];
     if (!record(slot) || slot.slot !== index + 1 || typeof slot.exists !== 'boolean'
-      || slot.member !== null && !validPartyMember(slot.member, index < 4 && options.allowCareful) || slot.weapon !== null && !validItem(slot.weapon)) return false;
+      || slot.member !== null && !validPartyMember(slot.member, index < 4 && options.allowSmart) || slot.weapon !== null && !validItem(slot.weapon)) return false;
     if (slot.exists && slot.member === null || index === 3 && slot.exists && !options.allowHenchman) return false;
     if (index < 3) {
       if (slot.exists && (gap || index >= value.capacity)) return false;

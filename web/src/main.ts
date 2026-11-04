@@ -1860,8 +1860,8 @@ class ElonaScene extends Phaser.Scene {
         if (this.sim!.requestMissionHire() === 'previewed') { this.playSound('soundScroll1'); this.saveGame(false); this.showTown('mission'); }
         else { this.playSound('soundBeep'); status.textContent = 'A henchman is already contracted for this mission.'; }
       },
-      henchmanCareful: enabled => {
-        if (this.sim!.setHenchmanCareful(enabled)) { this.playSound('soundClick1'); this.saveGame(false); this.showTown('mission'); }
+      henchmanSmart: enabled => {
+        if (this.sim!.setHenchmanSmart(enabled)) { this.playSound('soundClick1'); this.saveGame(false); this.showTown('mission'); }
       },
       confirmHire: answer => {
         const outcome = this.sim!.resolvePartyAction(answer);
@@ -2088,7 +2088,7 @@ class ElonaScene extends Phaser.Scene {
       failure(result); return false;
     };
     this.root.add(createPartyView(this, { selectedSlot: this.selectedCharacter, members, inventory: state.inventory, gold: state.gold, capacity: state.party.capacity,
-      ap: state.town!.ap, carefulAvailable: this.sim.rules.carefulConsideration, dialog: pending?.kind === 'hire' ? 'recruit' : pending?.kind === 'dismiss' ? 'dismiss' : pending ? 'mod' : null }, manifest, this.cache.json.get('town-layout') as PartyLayout, {
+      ap: state.town!.ap, smartAvailable: this.sim.rules.smartMode, dialog: pending?.kind === 'hire' ? 'recruit' : pending?.kind === 'dismiss' ? 'dismiss' : pending ? 'mod' : null }, manifest, this.cache.json.get('town-layout') as PartyLayout, {
       itemPopup: inspectItemPopup,
       traitHint: inspectTraitHint,
       serviceItem: (service, slot) => {

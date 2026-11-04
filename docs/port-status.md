@@ -11,15 +11,15 @@ adventures and Flash imports stay Classic. Expanded has independent medals and
 day records, uses the same eight labeled save slots, and keeps its edition on
 Continue/import/Carry Over. Replacing an occupied slot requires confirmation.
 
-Expanded's first feature, **Careful Consideration**, is a Barrack companion order.
-Urgent wall threats come first, then ranged attackers with every weapon,
-including shotguns/SMGs, then other enemies. Chickens count as ranged attackers:
-the source egg-attack frame damages the castle from midfield. Preferred range does not prevent
-target acquisition, and guarded bosses are avoided. Each new gun target takes
-an extra 0.2 seconds to aim at. The order also costs 15% automatic shot damage
-at launch, including class grenades; learned stats stay unchanged.
-Temporary hired guns opt in at the Inn before Rest. Original content and all
-seven Game MODs remain available. [Usage, design and balance limits](expanded-edition.md).
+Expanded's first feature, **Smart Mode** (formerly Careful Consideration), is
+now the default for starting/newly recruited companions and the hired-gun
+preference in new Expanded adventures. Existing saved orders are preserved.
+Allies prefer uncovered targets, protect the wall, then seek ranged attackers,
+including chickens. Bosses and the last enemy can receive shared fire; surplus
+allies help when every target is covered. Switching aim adds distance / 25
+simulation frames, rounded and capped at 12 (0..0.4 seconds), instead of the
+former flat delay. Automatic damage still costs 15% at launch. The hero and
+Classic defaults are unchanged. [Usage and limits](expanded-edition.md).
 The edition selector uses original parchment/pin/radio artwork and menu fonts;
 the order uses a short description with its damage cost.
 The parchment now resizes without stretching its scroll emblem. New Game's
@@ -38,10 +38,10 @@ targeting call with a null actor; its affected class/control tests now pass.
 The targeting followup passed 27 focused checks and an actual muted HTTPS-browser
 shotgun scenario: switch from safe sheep to distant chicken, then back to sheep
 when it reaches the wall. Same-category score changes do not restart aim.
-The balance followup verified the six-frame acquisition cost, saved aim progress,
-unchanged original AI and updated Barrack/Inn labels. Opus's 44 short skirmishes
-showed slower cleanup and worse rush defense, while mixed-threat targeting
-remained useful. The Expanded guide records the setup and limits.
+The Smart Mode followup covers distance-based acquisition, two-ally target
+coordination and Continue, starting/recruit/hired-gun defaults, saved opt-outs
+and updated Barrack/Inn labels. Prior fixed-delay skirmish numbers are historical;
+they do not establish balance for the new coordination behavior.
 
 Phone and tablet browsers have touch aiming, a second-finger reload, Fire at
 will, hotbar selection, pause and save-file controls. The portrait menu can be

@@ -17,75 +17,68 @@ These are fan additions, separate from the original developers' game.
   fail before changing the active adventure or storage. Carry Over stays within
   the adventure's edition. Mute remains a shared browser preference.
 
-## Careful Consideration
+## Smart Mode
 
-In Expanded, open Barrack, select a companion and choose the order. Change back
-to any ordinary order to remove its penalty. The hero does not receive this order.
-After contracting a temporary henchman, the Inn offers the same opt-in before
-Rest; this preference is saved for future contracts.
+Smart Mode is the default for starting companions, newly recruited companions
+and hired guns in new Expanded adventures. Your character stays in Hero Mode.
+Choose another order in Barrack, or change the hired gun preference at the Inn.
+Existing saves retain their selected orders and hired gun preference. The old
+Careful Consideration order keeps ID 7 and is now called Smart Mode.
 
-Urgent wall threats come first, then ranged attackers, then other enemies.
-This hierarchy applies to every weapon, including shotguns and SMGs. Chickens
-are ranged threats: the original egg-attack frame damages the castle from
-midfield. Weapon roles break ties within a threat category. Preferred
-range is a preference, not an exclusion. Tagged enemies remain eligible so
-another troop's target does not leave everyone else idle. Boss is a small
-preference; Defend broadens the urgency boundary. A troop keeps its aim unless
-its target becomes invalid/shielded or a higher-priority threat appears, including
-a ranged attacker appearing while it is targeting a distant melee enemy.
+Allies protect the wall, then seek ranged attackers, then other enemies.
+Chickens count as ranged attackers. Preferred weapon range helps choose between
+similar threats, but never makes a distant target ineligible. Boss is a small
+preference; Defend broadens the urgency boundary.
 
-The order trades speed and damage for less supervision. Each new gun target
-takes **0.2 seconds longer to aim at**, including a switch to a more urgent foe.
-It chooses the target immediately and stops shooting a shielded boss immediately.
-Keeping the same target does not restart this delay or slow subsequent shots.
-The extra six simulation frames use the existing saved aim counter.
+### Spreading fire
 
-It also costs **15% automatic shot damage**, including class grenades, applied
-once when fired. Grenades have no extra targeting delay. Projectiles retain their
-launch damage after an order change or Continue.
-Integer projectile damage can round the effective loss slightly above 15%.
-Learned skills, weapon eligibility, accuracy, ammunition and reload rules are
-unchanged. Careful uses ordinary-order accuracy; Fire at will keeps its original
-spread penalty. Ordinary orders keep their original aiming time and full damage.
-Orders can only be changed in town, so the costs cannot be toggled off mid-battle.
-Existing saves keep pending aim and projectile damage; the new delay applies
-when a new target is acquired.
+Smart allies prefer enemies that another Smart ally is not already aiming at.
+This uses live targets, not the temporary markers left behind by old attacks.
+Bosses and the last viable enemy can draw shared fire. If every enemy already
+has someone aiming at it, extra allies help with the least-covered targets.
+They do not wait for a target to become free.
 
-The order stops targeting guarded bosses. Existing projectiles and incidental
-pellets/blasts can still arrive after a shield rises. Ordinary acquisition rolls
-remain, and shooting beyond preferred range can waste ammunition. This
-is assistance toward a Perfect Game, not a guarantee of one.
+If allies share a target and another enemy becomes available, a stable slot
+order decides who keeps it and who switches. Small score changes do not restart
+aim. A more urgent threat, a shielded boss or an uncovered alternative can cause
+a switch.
+
+### Cost and timing
+
+Changing aim farther takes longer. The extra delay is the distance from the
+current aim point to the new target, divided by 25 and rounded to simulation
+frames, capped at 12 frames. At the reference 30 Hz, a 75-pixel move adds 0.1s,
+150 pixels adds 0.2s, and 300 pixels or more adds 0.4s. These are game coordinates,
+so browser zoom does not change the delay. Keeping the same target adds no cost
+per shot. Shielded bosses stop receiving aimed fire immediately.
+
+Smart Mode also costs **15% automatic shot damage**, including class grenades.
+Grenades have no extra aiming delay. Damage is fixed at launch; projectiles
+already in flight keep it through Continue. Integer damage can round the loss
+slightly above 15%. Accuracy, learned skills, ammunition and reload rules stay
+unchanged. Orders can only be changed in town.
+
+There is no guarantee of a Perfect Game. Allies may waste shots beyond their
+preferred range. A projectile already in flight can hit a newly raised shield.
 
 ## Evidence and limits
 
-The first release compared mainly against Fire at will, which has its own
-accuracy penalty. After player feedback, Codex and Opus added the aim delay
-and compared ordinary order0 as well. Four paired seeds (42, 137, 2026, 8675309)
-use identical starting stats/RNG, one companion, an idle hero, 100 castle HP and
-a 30-second limit. These are hand-positioned encounters, not campaign victories.
+Focused checks cover distance-based aim, stable target ownership, shared bosses,
+last-target and fully-covered fallback, immediate shield avoidance, damage at
+launch, defaults, opt-outs and deterministic save/Continue. Original AI reference
+checks cover the unchanged Classic orders. Muted browser checks exercise the
+normal menus and exported saves in an isolated profile.
 
-| Encounter | Ordinary order | Careful Consideration |
-| --- | --- | --- |
-| Close-range rush, SMG | Clears in 6.70s; 65.75 HP left | Clears in 8.53s; 53.75 HP left |
-| Six sheep, shotgun | Clears in 5.66s; 5 shots | Clears in 7.35s; 5.75 shots |
-| Ranged foes among sheep, sniper | Does not clear in any seed | Clears in every seed; 61.75 HP left |
-| Shielded boss with other foes, rifle | Does not clear in any seed | Clears in every seed; 92.50 HP left |
+Run the focused checks with:
 
-Values are means. Careful lost more castle HP in every rush seed. It remains
-useful against mixed threats, but ordinary orders can clear suitable targets
-faster. Careful aimed no new shots at the guarded boss; Fire at will aimed four
-per seed. Class charge bonuses can partly offset the extra aim time, and different
-decisions change later RNG. These 44 short runs support an initial tradeoff,
-not a claim of universal or long-term campaign balance. No further damage cut
-was added.
+```sh
+node --experimental-strip-types --test web/tests/smart-mode*.test.ts
+```
 
-Reproduce with `node --experimental-strip-types --test web/tests/careful-balance.test.ts`.
-Focused tests cover urgency, range fallback, retained aim, shields, original-order
-parity, actual damage, launch persistence, save/replay, edition/profile isolation,
-and hired-gun Rest integration. Browser checks use isolated muted profiles and
-real menu actions/exported saves. Original AI snapshots remain unchanged.
+The balance test contains four small encounters with paired seeds and records
+castle HP, kills, shots and clear time. It is not campaign balance evidence.
+Earlier figures for the fixed 0.2-second delay no longer describe this version.
+Team composition, weapon choices and active hero play still matter.
 
-`rulesets.ts` defines the small edition/capability boundary. Both editions still
-use the original content catalog; no new classes, items or enemies ship yet.
-Add future content through this boundary and versioned save identities as needed,
-without a parallel game engine or speculative plugin framework.
+`rulesets.ts` defines the edition boundary. Both editions use the original
+content catalog; no new classes, items or enemies ship yet.

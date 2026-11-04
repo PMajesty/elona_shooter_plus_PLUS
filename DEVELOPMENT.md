@@ -47,7 +47,7 @@ npm.cmd --prefix web run build
 For a small change, start with the relevant test file:
 
 ```powershell
-node --experimental-strip-types --test web/tests/careful-integration.test.ts
+node --experimental-strip-types --test web/tests/smart-mode-integration.test.ts
 ```
 
 Use a fixed seed to reproduce combat problems. If a change affects saved state,

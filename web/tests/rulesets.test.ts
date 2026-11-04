@@ -28,6 +28,8 @@ test('Expanded without its optional order retains Classic simulation and RNG', (
   for (const seed of [42, 123]) {
     const classic = new Simulation(seed, { heroClass: 'rogue' });
     const expanded = new Simulation(seed, { heroClass: 'rogue', ruleset: 'expanded' });
+    expanded.state.party.slots[0].member!.ai = classic.state.party.slots[0].member!.ai;
+    delete expanded.state.henchmanOrder;
     for (let i = 0; i < 120; i++) { classic.tick(); expanded.tick(); }
     const left = classic.toSave(), right = expanded.toSave(); right.ruleset = left.ruleset;
     assert.deepEqual(right, left); assert.deepEqual(expanded.events, classic.events);
@@ -44,6 +46,7 @@ test('Expanded saves select their own edition and reject mismatched medals and C
   assert.throws(() => parseAdventureSave(mismatched), /different game edition/);
   assert.throws(() => parseAdventureSave(mismatched, {}, true), /different game edition/);
   const classic = structuredClone(saved); classic.simulation.ruleset.id = 'classic'; classic.profile = createProfile();
+  delete classic.simulation.henchmanOrder;
   assert.throws(() => parseAdventureSave(classic), /party/);
   const hero = envelope(sim); hero.simulation.heroSettings = { order: 7, focus: -1, wall: true, boss: true };
   assert.throws(() => parseAdventureSave(hero), /hero orders/);
@@ -58,6 +61,7 @@ test('Carry Over cannot change an adventure edition', () => {
   const checkpoint = sim.toSave(); sim.startNextDay();
   assert.deepEqual(sim.readCarryCheckpoint(checkpoint), checkpoint);
   checkpoint.ruleset.id = 'classic';
+  delete checkpoint.henchmanOrder;
   assert.throws(() => sim.readCarryCheckpoint(checkpoint), /Carry Over/);
 });
 

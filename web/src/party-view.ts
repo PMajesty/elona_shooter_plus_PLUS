@@ -1,4 +1,4 @@
-import { CAREFUL_COST_HINT, CAREFUL_HINT, CAREFUL_ORDER } from './careful-consideration.ts';
+import { SMART_COST_HINT, SMART_HINT, SMART_ORDER } from './smart-mode.ts';
 import { buttonInput } from './button-input.ts';
 import { createItemPopupView, type ItemPopupLayout } from './item-popup-view.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
@@ -46,7 +46,7 @@ export interface PartyViewState {
   selectedSlot: number; members: readonly PartyViewMember[]; inventory: readonly (Item | null)[];
   gold: number; capacity: number; dialog: 'recruit' | 'dismiss' | 'mod' | null;
   ap: number;
-  carefulAvailable?: boolean;
+  smartAvailable?: boolean;
 }
 export interface PartyViewCallbacks {
   traitHint?(info: OriginalHintInfo | null): void;
@@ -178,9 +178,9 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
         button('button_partyDismiss', panel.children.dismissButton, candidate ? callbacks.recruit : callbacks.dismiss);
         text(panel.children.dismissText, candidate ? 'RECRUIT' : 'DISMISS');
       }
-      const carefulAllowed = state.carefulAvailable === true && member.slot >= 1 && member.slot <= 4;
-      const carefulSelected = carefulAllowed && member.order === CAREFUL_ORDER;
-      const memberHint = carefulSelected ? CAREFUL_HINT : candidate ? '\nClick "Recruit" to hire this person.' : `Click a skill to set it as a focused skill.\n${hero ? 'It will appear on the list more frequently when leveling.' : 'Your ally will likely gain the skill when leveling.'}`;
+      const smartAllowed = state.smartAvailable === true && member.slot >= 1 && member.slot <= 4;
+      const smartSelected = smartAllowed && member.order === SMART_ORDER;
+      const memberHint = smartSelected ? SMART_HINT : candidate ? '\nClick "Recruit" to hire this person.' : `Click a skill to set it as a focused skill.\n${hero ? 'It will appear on the list more frequently when leveling.' : 'Your ally will likely gain the skill when leveling.'}`;
       hint.setText(memberHint);
       const sort = (trait: PartyViewTrait) => trait.kind === 'class' ? 100000 + trait.id : trait.kind === 'base' ? 70000 + trait.id : trait.kind === 'party' ? 10000 + trait.id : 50000 - trait.id;
       const traits = [...member.traits].filter(value => !(hero && member.order === -1 && [900, 901].includes(value.id))).sort((a, b) => sort(b) - sort(a));
@@ -206,10 +206,10 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
         const controls = layout.partyControls;
         const width = controls.componentBaseWidth * p.scaleX, height = controls.componentBaseHeight * p.scaleY;
         skin('partyOrderSkin', controls.orderGrid, menu.x + p.x, menu.y + p.y, width, height);
-        const orders = carefulAllowed ? [...ORDERS, { value: CAREFUL_ORDER, label: 'Careful Consideration' }] : ORDERS;
+        const orders = smartAllowed ? [...ORDERS, { value: SMART_ORDER, label: 'Smart Mode' }] : ORDERS;
         const value = scene.add.text(menu.x + p.x + 3, menu.y + p.y + 5, orders.find(order => order.value === member.order)?.label ?? '', { fontFamily: 'Arial', fontSize: '11px', color: '#000000' });
         // Подгоняем только новый длинный приказ, не обрезая его последние буквы.
-        if (carefulSelected && value.width > width - 22) value.setScale((width - 22) / value.width, 1);
+        if (smartSelected && value.width > width - 22) value.setScale((width - 22) / value.width, 1);
         else value.setCrop(0, 0, width - 22, height);
         root.add(value);
         let list: Phaser.GameObjects.Container | null = null;
@@ -218,19 +218,19 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
           event.stopPropagation(); if (modal) return;
           traitHint.hide();
           if (list) { list.destroy(); list = null; hint.setText(memberHint); return; }
-          if (carefulAllowed) hint.setText(CAREFUL_HINT);
+          if (smartAllowed) hint.setText(SMART_HINT);
           list = scene.add.container(0, 0); root.add(list);
           const options = orders.filter(order => hero || order.value !== -1);
           // Раскрытый список остаётся внутри игрового кадра, в том числе на touch.
-          const listX = carefulAllowed ? Math.max(0, Math.min(430, menu.x + p.x)) : menu.x + p.x;
-          const listY = carefulAllowed ? Math.max(0, Math.min(menu.y + p.y + height, 380 - (options.length * 18 + 2))) : menu.y + p.y + height;
+          const listX = smartAllowed ? Math.max(0, Math.min(430, menu.x + p.x)) : menu.x + p.x;
+          const listY = smartAllowed ? Math.max(0, Math.min(menu.y + p.y + height, 380 - (options.length * 18 + 2))) : menu.y + p.y + height;
           const background = skin('partyOrderListSkin', controls.orderListGrid, listX, listY, 190, options.length * 18 + 2); list.add(background);
           const outside = scene.add.zone(0, 0, 620, 380).setOrigin(0).setInteractive(); list.addAt(outside, 0);
           outside.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); list?.destroy(); list = null; hint.setText(memberHint); });
           options.forEach((order, index) => {
             const label = scene.add.text(listX + 3, listY + 2 + index * 18, order.label, { fontFamily: 'Arial', fontSize: '11px', color: '#000000' }); list!.add(label);
             const option = scene.add.zone(listX, listY + index * 18, 190, 18).setOrigin(0).setInteractive({ useHandCursor: true }); list!.add(option);
-            option.on('pointerover', () => { label.setColor('#0000cc'); if (order.value === CAREFUL_ORDER) hint.setText(CAREFUL_HINT); }); option.on('pointerout', () => label.setColor('#000000'));
+            option.on('pointerover', () => { label.setColor('#0000cc'); if (order.value === SMART_ORDER) hint.setText(SMART_HINT); }); option.on('pointerout', () => label.setColor('#000000'));
             option.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); callbacks.order(order.value); });
           });
         });
@@ -241,7 +241,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
             clip(selected ? 'partyCheckOn' : 'partyCheckOff', 1, x + controls.checkIconX, y + controls.checkIconY);
             root.add(scene.add.text(x + controls.checkLabelX, y + 5, label, { fontFamily: 'Arial', fontSize: '11px', color: '#000000' }));
             const area = scene.add.zone(x, y, 70, 22).setOrigin(0).setInteractive({ useHandCursor: true }); root.add(area);
-            const checkHint = carefulSelected ? `Boss and Defend guide your choice of foes.\n${CAREFUL_COST_HINT}` : 'When "Boss" is checked, the character will go for the boss when a boss appears.\nWhen "Defend" is checked, the character will go for the enemies attacking your wall.';
+            const checkHint = smartSelected ? `Boss and Defend guide your choice of foes.\n${SMART_COST_HINT}` : 'When "Boss" is checked, the character will go for the boss when a boss appears.\nWhen "Defend" is checked, the character will go for the enemies attacking your wall.';
             area.on('pointerover', () => hint.setText(checkHint));
             area.on('pointerout', () => hint.setText(memberHint));
             area.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); if (!modal) action(); });

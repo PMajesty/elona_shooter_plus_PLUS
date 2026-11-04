@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BASE_ITEM_FIELDS, type Item } from '../src/items.ts';
 import { COMBAT_TRAIT } from '../src/combat-stats.ts';
-import { CAREFUL_AIM_DELAY_FRAMES, CAREFUL_DAMAGE_MULTIPLIER, carefulUrgency } from '../src/careful-consideration.ts';
+import { SMART_AIM_DELAY_MAX_FRAMES, SMART_DAMAGE_MULTIPLIER, smartAimDelay, smartUrgency } from '../src/smart-mode.ts';
 import { alertParty, createPartyAIShared, createPartyAIState, registerPartyTarget, searchNextPartyAlert,
-  selectPartyTarget, startingPartyAim, stepPartyAIFrame, stepPartyAITimer,
+  selectPartyTarget, startingPartyAim, stepPartyAIFrame, stepPartyAITimer, validPartyAIState,
   type PartyAIActor, type PartyAIContext, type PartyAITarget, type PartyAICallbacks } from '../src/party-ai.ts';
 
 function enemy(uid: number, x: number, extra: Partial<PartyAITarget> = {}): PartyAITarget {
@@ -19,21 +19,21 @@ function setup(id = 4, enemies: PartyAITarget[] = []) {
   let draws = 0, shots = 0, grenades = 0;
   const shields = new Set<number>(), ranged = new Set<number>();
   const context: PartyAIContext = { shared: createPartyAIShared(), heroSlot: 0, fireAtWill: false,
-    carefulConsideration: true, listTargets: () => enemies, getTarget: uid => enemies.find(e => e.uid === uid),
+    smartMode: true, listTargets: () => enemies, getTarget: uid => enemies.find(e => e.uid === uid),
     isRanged: e => ranged.has(e.uid), isShielded: e => shields.has(e.uid), random: () => { draws++; return 0; } };
   const callbacks: PartyAICallbacks = { shoot: () => { shots++; }, reload: () => {}, reloading: () => {},
     throwMilitiaGrenade: () => { grenades++; } };
   return { actor, ai, enemies, context, callbacks, shields, ranged, counts: () => ({ draws, shots, grenades }) };
 }
 
-test('Careful takes six extra frames to engage a new target, without slowing retained fire', () => {
+test('Smart pays cursor-distance cost to engage a new target, without slowing retained fire', () => {
   const firstShots: number[] = [];
   for (const order of [0, 7]) {
     const s = setup(4, [enemy(1, 100)]); s.actor.member!.ai = order;
     registerPartyTarget(s.enemies[0], s.context.shared);
     assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
     const ordinaryAim = startingPartyAim(s.actor, s.enemies[0], s.actor.weapon!.range!);
-    assert.equal(s.ai.aimCount, ordinaryAim + (order === 7 ? 6 : 0));
+    assert.equal(s.ai.aimCount, ordinaryAim + (order === 7 ? smartAimDelay(s.actor, s.enemies[0]) : 0));
     let frames = 0;
     while (s.counts().shots === 0 && frames < 40) { stepPartyAIFrame(s.actor, s.context, s.callbacks); frames++; }
     assert.equal(s.counts().shots, 1);
@@ -42,18 +42,18 @@ test('Careful takes six extra frames to engage a new target, without slowing ret
     assert.equal(s.counts().shots, 5);
     assert.equal(s.counts().draws, 1);
   }
-  assert.equal(CAREFUL_AIM_DELAY_FRAMES, 6);
-  assert.equal(firstShots[1] - firstShots[0], 6);
+  assert.equal(SMART_AIM_DELAY_MAX_FRAMES, 12);
+  assert.equal(firstShots[1] - firstShots[0], 12);
 });
 
 test('replacing a dead or shielded target pays the same aim cost and cannot fire immediately', () => {
   for (const reason of ['dead', 'shielded']) {
     const s = setup(4, [enemy(1, 100), enemy(2, 110)]);
-    Object.assign(s.ai, { targetUid: 1, shooting: true, aimCount: 0 });
+    Object.assign(s.ai, { targetUid: 1, shooting: true, aimCount: 0, cursorX: 135, cursorY: 245 });
     if (reason === 'dead') s.enemies[0].hp = 0; else s.shields.add(1);
     assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
     assert.equal(s.ai.targetUid, 2); assert.equal(s.counts().shots, 0);
-    assert.equal(s.ai.aimCount, startingPartyAim(s.actor, s.enemies[1], s.actor.weapon!.range!) + 6);
+    assert.equal(s.ai.aimCount, startingPartyAim(s.actor, s.enemies[1], s.actor.weapon!.range!) + smartAimDelay(s.actor, s.enemies[1]));
   }
 });
 
@@ -96,18 +96,18 @@ test('urgent threats preempt a retained ranged boss without RNG and then finish 
   const s = setup(13, [boss, threat]); s.ranged.add(1);
   s.actor.member!.optBoss = s.actor.member!.optWall = true; s.context.shared.targetBossUid = 1;
   stepPartyAIFrame(s.actor, s.context, s.callbacks); assert.equal(s.ai.targetUid, 1);
-  threat.x = 440;
+  threat.x = 440; s.ai.cursorX = 415; s.ai.cursorY = threat.y;
   assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
   assert.equal(s.ai.targetUid, 2); assert.equal(s.counts().draws, 1);
-  assert.equal(s.ai.aimCount, startingPartyAim(s.actor, threat, s.actor.weapon!.range!) + 6);
+  assert.equal(s.ai.aimCount, startingPartyAim(s.actor, threat, s.actor.weapon!.range!) + smartAimDelay(s.actor, threat));
   for (let i = 0; i < 20; i++) stepPartyAIFrame(s.actor, s.context, s.callbacks);
   assert.ok(s.counts().shots > 0); assert.equal(s.ai.targetUid, 2);
 });
 
 test('present speed contributes urgency; Defend widens urgency but never outranks critical', () => {
-  assert.equal(carefulUrgency(enemy(1, 100, { speed: 4 }), false), 1);
-  assert.equal(carefulUrgency(enemy(1, 385, { speed: 0 }), false), 0);
-  assert.equal(carefulUrgency(enemy(1, 385, { speed: 0 }), true), 1);
+  assert.equal(smartUrgency(enemy(1, 100, { speed: 4 }), false), 1);
+  assert.equal(smartUrgency(enemy(1, 385, { speed: 0 }), false), 0);
+  assert.equal(smartUrgency(enemy(1, 385, { speed: 0 }), true), 1);
   const s = setup(13, [enemy(1, 390), enemy(2, 436)]); s.ranged.add(1);
   s.actor.member!.optBoss = s.actor.member!.optWall = true; s.context.shared.targetBossUid = 1;
   assert.equal(selectPartyTarget(s.actor, 2, s.context)?.uid, 2);
@@ -148,15 +148,13 @@ test('deterministic ties use UID regardless of enumeration; dead/removed/bomb ex
       enemy(2, 440, { removed: true }), enemy(4, 440, { bomb: true })];
     const s = setup(4, reverse ? enemies.reverse() : enemies);
     assert.equal(selectPartyTarget(s.actor, 2, s.context)?.uid, 3);
-    assert.equal(selectPartyTarget(s.actor, 2, s.context)?.uid, 8);
+    assert.equal(selectPartyTarget(s.actor, 2, s.context)?.uid, 3); // tag60 не является живой заявкой.
   }
 });
 
-test('tag60 is a soft distribution preference, never an idle or urgency veto', () => {
+test('stale tag60 is not a claim or an idle/urgency veto', () => {
   const s = setup(4, [enemy(1, 100, { tag: 60 }), enemy(2, 100)]);
-  assert.equal(selectPartyTarget(s.actor, 2, s.context)?.uid, 2);
   assert.equal(selectPartyTarget(s.actor, 2, s.context)?.uid, 1);
-  s.enemies.length = 1;
   assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
   assert.equal(s.ai.targetUid, 1);
   s.enemies.push(enemy(3, 440, { tag: 60 }));
@@ -182,18 +180,18 @@ test('Militia forced-order6 uses shield avoidance and ordinary timer, no extra R
   stepPartyAITimer(s.actor, s.context, s.callbacks);
   assert.deepEqual(s.counts(), { draws: 1, shots: 0, grenades: 1 });
   assert.equal(s.enemies[0].tag, 0); assert.equal(s.enemies[1].tag, 60);
-  assert.equal(CAREFUL_DAMAGE_MULTIPLIER, 0.85);
+  assert.equal(SMART_DAMAGE_MULTIPLIER, 0.85);
 });
 
 test('capability absent, normal orders, hero and candidate never call Expanded target callbacks', () => {
   for (const kind of ['classic', 'normal', 'hero', 'candidate']) {
     const s = setup(4, [enemy(1, 100)]);
-    if (kind === 'classic') delete s.context.carefulConsideration;
+    if (kind === 'classic') delete s.context.smartMode;
     if (kind === 'normal') s.actor.member!.ai = 0;
     if (kind === 'hero') { s.actor.slot = 0; s.context.fireAtWill = true; }
     if (kind === 'candidate') s.actor.slot = 5;
     const forbidden = () => { throw Error('Expanded callback in original path'); };
-    s.context.listTargets = forbidden; s.context.isRanged = forbidden; s.context.isShielded = forbidden;
+    s.context.listTargets = forbidden; s.context.listActors = forbidden; s.context.isRanged = forbidden; s.context.isShielded = forbidden;
     registerPartyTarget(s.enemies[0], s.context.shared);
     assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
     assert.equal(s.ai.targetUid, 1); assert.equal(s.counts().draws, 1);
@@ -206,7 +204,7 @@ test('normal-order frame/timer state and RNG match with Expanded capability on o
       const s = setup(id, [enemy(1, 100), enemy(2, 330, { type: 1 }), enemy(3, 240, { type: 2 })]);
       s.actor.member!.ai = 0;
       s.actor.member!.traits[COMBAT_TRAIT.MILITIA] = 1; s.ai.grenadeCount = 2;
-      if (!enabled) delete s.context.carefulConsideration;
+      if (!enabled) delete s.context.smartMode;
       for (const target of s.enemies) registerPartyTarget(target, s.context.shared);
       return s;
     };
@@ -241,4 +239,122 @@ test('missing live-list callback falls back to cache and a removed retained targ
   s.enemies.length = 0;
   assert.doesNotThrow(() => stepPartyAIFrame(s.actor, s.context, s.callbacks));
   assert.equal(s.ai.targetUid, null);
+});
+
+function squad(s: ReturnType<typeof setup>, count: number): PartyAIActor[] {
+  const actors = [s.actor];
+  for (let slot = 2; slot <= count; slot++) {
+    const actor = structuredClone(s.actor); actor.slot = slot;
+    actor.member!.aiState = createPartyAIState(slot);
+    actor.member!.aiState.workRate = 0.3; actor.member!.aiState.aimTime = 3;
+    actors.push(actor);
+  }
+  s.context.listActors = () => actors;
+  return actors;
+}
+
+test('distance cost uses current cursor, both axes, dropping point, rounding and cap', () => {
+  const s = setup(); Object.assign(s.ai, { cursorX: 100, cursorY: 200 });
+  for (const [x, y, frames] of [[100, 200, 0], [112, 200, 0], [113, 200, 1], [125, 200, 1],
+    [100, 250, 2], [175, 300, 5], [400, 200, 12], [2000, 2000, 12]]) {
+    assert.equal(smartAimDelay(s.actor, enemy(1, x, { y })), frames);
+  }
+  assert.equal(smartAimDelay(s.actor, enemy(1, 100, { y: 300, dropping: true, dropY: -100 })), 0);
+  s.ai.cursorX = 300;
+  assert.equal(smartAimDelay(s.actor, enemy(1, 300, { y: 200 })), 0);
+});
+
+test('two and three Smart actors spread across live targets, not tags or enumeration order', () => {
+  for (const count of [2, 3]) {
+    const s = setup(3, [enemy(1, 430), enemy(2, 200), enemy(3, 100)]);
+    s.ranged.add(2);
+    const actors = squad(s, count); s.context.listActors = () => [...actors].reverse();
+    for (const actor of actors) assert.equal(stepPartyAIFrame(actor, s.context, s.callbacks), 'acquired');
+    assert.deepEqual(actors.map(a => a.member!.aiState!.targetUid), count === 2 ? [1, 2] : [1, 2, 3]);
+    for (let frame = 0; frame < 30; frame++) for (const actor of actors) stepPartyAIFrame(actor, s.context, s.callbacks);
+    assert.deepEqual(actors.map(a => a.member!.aiState!.targetUid), count === 2 ? [1, 2] : [1, 2, 3]);
+  }
+});
+
+test('retained duplicates yield to free alternatives; lowest slot keeps aim without churn', () => {
+  for (const reverseStep of [false, true]) {
+    const s = setup(4, [enemy(1, 440)]), actors = squad(s, 3);
+    for (const actor of actors) Object.assign(actor.member!.aiState!, { targetUid: 1, shooting: true, aimCount: 0 });
+    s.enemies.push(enemy(2, 200), enemy(3, 100));
+    const originalKeys = Object.keys(s.ai).sort();
+    const order = reverseStep ? [...actors].reverse() : actors;
+    for (const actor of order) stepPartyAIFrame(actor, s.context, s.callbacks);
+    assert.equal(s.ai.targetUid, 1); assert.equal(s.ai.aimCount, 0);
+    assert.equal(new Set(actors.map(a => a.member!.aiState!.targetUid)).size, 3);
+    const assignments = actors.map(a => a.member!.aiState!.targetUid);
+    for (let frame = 0; frame < 35; frame++) for (const actor of order) stepPartyAIFrame(actor, s.context, s.callbacks);
+    assert.deepEqual(actors.map(a => a.member!.aiState!.targetUid), assignments);
+    assert.deepEqual(Object.keys(s.ai).sort(), originalKeys);
+    assert.equal(s.counts().draws, 0);
+  }
+});
+
+test('coordination switches pay distance from the actual retained cursor', () => {
+  const s = setup(4, [enemy(1, 440), enemy(2, 100)]), actors = squad(s, 2);
+  for (const actor of actors) Object.assign(actor.member!.aiState!, { targetUid: 1, shooting: true, aimCount: 0, cursorX: 125, cursorY: 245 });
+  assert.equal(stepPartyAIFrame(actors[1], s.context, s.callbacks), 'acquired');
+  assert.equal(actors[1].member!.aiState!.targetUid, 2);
+  assert.equal(actors[1].member!.aiState!.aimCount, startingPartyAim(actors[1], s.enemies[1], 2) + 1);
+});
+
+test('boss and sole enemy may be shared; excess allies use least-contested fallback', () => {
+  const sole = setup(4, [enemy(1, 100)]), aloneActors = squad(sole, 3);
+  for (const actor of aloneActors) stepPartyAIFrame(actor, sole.context, sole.callbacks);
+  assert.deepEqual(aloneActors.map(a => a.member!.aiState!.targetUid), [1, 1, 1]);
+  const boss = setup(4, [enemy(1, 100), enemy(2, 100)]), bossActors = squad(boss, 3);
+  boss.context.shared.targetBossUid = 1;
+  for (const actor of bossActors) { actor.member!.optBoss = true; stepPartyAIFrame(actor, boss.context, boss.callbacks); }
+  assert.deepEqual(bossActors.map(a => a.member!.aiState!.targetUid), [1, 1, 1]);
+  const covered = setup(4, [enemy(1, 440), enemy(2, 100)]), actors = squad(covered, 4);
+  for (const actor of actors) stepPartyAIFrame(actor, covered.context, covered.callbacks);
+  assert.deepEqual(actors.map(a => a.member!.aiState!.targetUid), [1, 2, 1, 2]);
+  const before = actors.map(a => a.member!.aiState!.targetUid);
+  for (let i = 0; i < 25; i++) for (const actor of actors) stepPartyAIFrame(actor, covered.context, covered.callbacks);
+  assert.deepEqual(actors.map(a => a.member!.aiState!.targetUid), before);
+});
+
+test('boss identity allows sharing even when another boss owns the global priority marker', () => {
+  const s = setup(4, [enemy(1, 140), enemy(2, 100)]), actors = squad(s, 2);
+  s.context.shared.targetBossUid = 2;
+  s.context.isBoss = target => target.uid === 1 || target.uid === 2;
+  for (const actor of actors) stepPartyAIFrame(actor, s.context, s.callbacks);
+  assert.deepEqual(actors.map(actor => actor.member!.aiState!.targetUid), [1, 1]);
+  s.enemies.push(enemy(3, 150));
+  const remaining = actors[1].member!.aiState!.aimCount;
+  stepPartyAIFrame(actors[1], s.context, s.callbacks);
+  assert.equal(actors[1].member!.aiState!.targetUid, 1);
+  assert.equal(actors[1].member!.aiState!.aimCount, remaining - 1);
+});
+
+test('absent, unarmed, ordinary, hero and candidate actors do not make phantom claims', () => {
+  for (const reason of ['absent', 'null-member', 'null-state', 'unarmed', 'spent', 'ordinary', 'hero', 'candidate', 'stale-uid']) {
+    const s = setup(4, [enemy(1, 100), enemy(2, 100)]), actors = squad(s, 2), other = actors[1];
+    other.member!.aiState!.targetUid = 1;
+    if (reason === 'absent') other.exists = false;
+    if (reason === 'null-member') other.member = null;
+    if (reason === 'null-state') other.member!.aiState = null;
+    if (reason === 'unarmed') other.weapon = null;
+    if (reason === 'spent') other.weapon!.num = 0;
+    if (reason === 'ordinary') other.member!.ai = 6;
+    if (reason === 'hero') other.slot = 0;
+    if (reason === 'candidate') other.slot = 5;
+    if (reason === 'stale-uid') other.member!.aiState!.targetUid = 999;
+    assert.equal(selectPartyTarget(s.actor, 2, s.context)?.uid, 1, reason);
+  }
+});
+
+test('saved aim resumes without resetting distance cost or adding mutable state', () => {
+  const s = setup(4, [enemy(1, 100)]); stepPartyAIFrame(s.actor, s.context, s.callbacks);
+  const saved = structuredClone(s.ai); assert.ok(validPartyAIState(saved));
+  const restored = structuredClone(s.actor); restored.member!.aiState = saved;
+  const keys = Object.keys(saved).sort();
+  stepPartyAIFrame(restored, s.context, s.callbacks);
+  assert.equal(saved.aimCount, s.ai.aimCount - 1);
+  assert.deepEqual(Object.keys(saved).sort(), keys);
+  assert.equal(s.counts().draws, 1);
 });

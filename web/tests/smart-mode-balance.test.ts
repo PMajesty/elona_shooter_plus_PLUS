@@ -68,7 +68,7 @@ function encounter(seed: number, order: Order, scenario: Encounter) {
     firstShotFrame, clearFrame, guardedAimShots, living: sim.state.enemies.filter(e => e.hp > 0).length, frames: sim.state.tick, initialRng };
 }
 
-test('seeded actual Simulation evidence: ordinary orders versus slower Careful Consideration at equal stats', () => {
+test('seeded actual Simulation evidence: ordinary orders versus slower Smart Mode at equal stats', () => {
   const scenarios: Encounter[] = ['ranged distractions', 'approaching rush', 'shield boss + alternatives', 'shotgun cleanup'];
   for (const scenario of scenarios) {
     // 36 исходных сравнений плюс8 ближних:44 прогона, без матрицы подбора параметров.

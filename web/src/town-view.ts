@@ -38,7 +38,7 @@ interface TownViewState {
   ruleset?: { id: 'classic' | 'expanded'; revision: 1 };
   henchmanOrder?: 7;
 }
-interface Callbacks { henchmanCareful?(enabled: boolean): void; robVisitors(): void; medalPage(page: 0 | 1): void; visitKongregate(): void; medalHint(hint: { id: number; name: string; description: string; bonus: string } | null): void; hire(): void; confirmHire(answer: boolean): void; castlePage(page: 0 | 1): void; activity(action: TownActivity): void; activityAvailable(action: TownActivity): boolean; select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; message(value: string): void }
+interface Callbacks { henchmanSmart?(enabled: boolean): void; robVisitors(): void; medalPage(page: 0 | 1): void; visitKongregate(): void; medalHint(hint: { id: number; name: string; description: string; bonus: string } | null): void; hire(): void; confirmHire(answer: boolean): void; castlePage(page: 0 | 1): void; activity(action: TownActivity): void; activityAvailable(action: TownActivity): boolean; select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; message(value: string): void }
 
 /** Городские координаты и повороты берутся из исходного кадра 71 и его окон. */
 export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, navigation: Phaser.GameObjects.Container, castlePage: 0 | 1 = 0, medalPage: 0 | 1 = 0): Phaser.GameObjects.Container {
@@ -187,7 +187,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         });
       }
       const action = layout.claimTitleAction;
-      if (state.ruleset?.id === 'expanded' && state.town?.preparation === 'ready' && state.town.mission?.hire && callbacks.henchmanCareful) {
+      if (state.ruleset?.id === 'expanded' && state.town?.preparation === 'ready' && state.town.mission?.hire && callbacks.henchmanSmart) {
         const selected = state.henchmanOrder === 7;
         // Свободный промежуток между Train и Claim Title; вся область доступна для касания.
         const control = scene.add.container(330, 235).setName('henchman-order');
@@ -199,16 +199,16 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         };
         label(0, 0, 'Henchman order', 11, '#4c4031');
         control.add(scene.add.image(1, 20, selected ? 'partyCheckOn' : 'partyCheckOff', '1').setOrigin(0));
-        const name = label(20, 16, 'Careful\nConsideration', 12);
+        const name = label(20, 16, 'Smart Mode', 12);
         label(0, 48, 'Slower aim, -15% damage', 9, '#703b22');
-        label(0, 63, selected ? 'Careful' : 'Fire at will', 11, '#4c4031');
-        const hit = scene.add.zone(0, 0, 110, 78).setOrigin(0).setInteractive({ useHandCursor: true }).setName('henchman-careful');
+        label(0, 63, selected ? 'Smart Mode' : 'Fire at will', 11, '#4c4031');
+        const hit = scene.add.zone(0, 0, 110, 78).setOrigin(0).setInteractive({ useHandCursor: true }).setName('henchman-smart');
         control.add(hit);
         hit.on('pointerover', () => name.setColor('#000099'));
         hit.on('pointerout', () => name.setColor('#000000'));
         hit.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
           event.stopPropagation();
-          if (!state.pendingPartyAction) callbacks.henchmanCareful?.(!selected);
+          if (!state.pendingPartyAction) callbacks.henchmanSmart?.(!selected);
         });
       }
       const available = nextTitle(state.title, state.day) !== undefined;

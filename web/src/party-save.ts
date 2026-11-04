@@ -49,7 +49,7 @@ export function validatePartySave(state: SimulationState, validItem: (value: unk
   const henchmanExpected = activeHire && (state.phase === 'battle' || state.phase === 'defeat' || state.phase === 'victory' && state.postbattle !== 'result');
   if (state.activeMission.hire !== undefined && (state.version < 29 || state.activeMission.hire !== true || state.day < 2)) throw new Error('Invalid mission hire contract.');
   const expanded = state.ruleset.id === 'expanded';
-  if (!validPartyState(state.party, validItem, { phase: state.phase, allowHenchman: henchmanExpected, allowCareful: expanded }) || !validSkills(state.partySkills)) throw new Error('Invalid party state or skill cache.');
+  if (!validPartyState(state.party, validItem, { phase: state.phase, allowHenchman: henchmanExpected, allowSmart: expanded }) || !validSkills(state.partySkills)) throw new Error('Invalid party state or skill cache.');
   const henchman = state.party.slots[3];
   if (henchman.exists !== henchmanExpected || henchmanExpected && (!henchman.member || henchman.member.devType !== 4 || henchman.member.level < 9 + state.day || (henchman.member.traits[106] ?? 0) < 40 || !expanded && henchman.member.ai !== 6 || henchman.member.optBoss || !henchman.member.optWall || !henchman.weapon)) throw new Error('Invalid temporary henchman.');
   if (state.pendingPartyAction?.kind === 'henchman' && (state.town?.preparation !== 'ready' || state.town.mission.hire)) throw new Error('Invalid pending henchman contract.');
