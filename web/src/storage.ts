@@ -1,6 +1,7 @@
 export const SAVE_KEY = 'elona-shooter-plus-plus.port.save.v1';
 export const SAVE_SLOTS = 8;
-import { createProfile, validProfile, type GlobalProfile } from './profile.ts';
+import { createProfile, validProfile, profileRuleset, type GlobalProfile } from './profile.ts';
+import type { RulesetId } from './rulesets.ts';
 const SLOT_KEY = 'elona-shooter-plus-plus.port.slot.v1';
 const DELETED_FORMAT = 'elona-shooter-browser-deleted';
 function validSlot(slot: number): boolean { return Number.isInteger(slot) && slot >= 0 && slot < SAVE_SLOTS; }
@@ -57,18 +58,18 @@ export function deleteSaveSlot(slot: number): boolean {
   } catch { return false; }
 }
 
-export function readProfile(): { profile: GlobalProfile; warning?: string } {
+export function readProfile(ruleset: RulesetId = 'classic'): { profile: GlobalProfile; warning?: string } {
   try {
-    const raw = localStorage.getItem(PROFILE_KEY);
-    if (raw === null) return { profile: createProfile() };
+    const raw = localStorage.getItem(ruleset === 'classic' ? PROFILE_KEY : `${PROFILE_KEY}.expanded`);
+    if (raw === null) return { profile: createProfile(ruleset) };
     const profile = JSON.parse(raw);
-    if (validProfile(profile)) return { profile };
+    if (validProfile(profile) && profileRuleset(profile) === ruleset) return { profile };
   } catch { /* Повреждённая коллекция не должна блокировать загрузку самой игры. */ }
-  return { profile: createProfile(), warning: 'The medal collection could not be read. Import a backup to restore it.' };
+  return { profile: createProfile(ruleset), warning: 'The medal collection could not be read. Import a backup to restore it.' };
 }
 export function storeProfile(profile: GlobalProfile): boolean {
   if (!validProfile(profile)) return false;
-  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); return true; }
+  try { localStorage.setItem(profileRuleset(profile) === 'classic' ? PROFILE_KEY : `${PROFILE_KEY}.expanded`, JSON.stringify(profile)); return true; }
   catch { return false; }
 }
 

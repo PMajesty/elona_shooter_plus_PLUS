@@ -76,8 +76,8 @@ test('corrupt slots and failed/invalid writes cannot damage another adventure or
 
 test('title labels follow original class/level/day and HC text, exposing empty and unreadable slots', () => {
   const game = adventure(42);
-  assert.equal(saveSlotLabel({ kind: 'saved', data: game }), 'Sheriff(1) Day.1');
-  assert.equal(saveSlotLabel({ kind: 'saved', data: { ...game, simulation: { ...game.simulation, mode: 'hardcore' } } }), 'Sheriff(1) Day.1 HC');
+  assert.equal(saveSlotLabel({ kind: 'saved', data: game }), 'Classic · Sheriff(1) Day.1');
+  assert.equal(saveSlotLabel({ kind: 'saved', data: { ...game, simulation: { ...game.simulation, mode: 'hardcore' } } }), 'Classic · Sheriff(1) Day.1 HC');
   assert.equal(saveSlotLabel({ kind: 'empty' }), 'Empty Save');
   assert.equal(saveSlotLabel({ kind: 'error', message: 'broken' }), 'Unreadable Save');
   for (const data of [null, {}, { ...game, simulation: { day: 1, player: { classId: 'unknown', level: 1 } } }]) assert.equal(saveSlotLabel({ kind: 'saved', data }), 'Unreadable Save');

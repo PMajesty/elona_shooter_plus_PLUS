@@ -1,3 +1,4 @@
+import { carefulTargetViable, carefulUrgency, chooseCarefulTarget, claimCarefulTarget, usesCarefulConsideration } from './careful-consideration.ts';
 import { COMBAT_TRAIT, combatTrait, advanceChainGunClock, idleChainGun, type ChainGunState } from './combat-stats.ts';
 import type { Item } from './items.ts';
 import type { TraitLevels } from './progression.ts';
@@ -37,6 +38,10 @@ export interface PartyAIContext {
   random(): number;
   heroSlot: number;
   fireAtWill: boolean;
+  carefulConsideration?: boolean;
+  listTargets?(): readonly PartyAITarget[];
+  isRanged?(enemy: PartyAITarget): boolean;
+  isShielded?(enemy: PartyAITarget): boolean;
 }
 
 export interface PartyAICallbacks {
@@ -142,6 +147,10 @@ export function startingPartyAim(actor: PartyAIActor, enemy: PartyAITarget, rang
 
 /** Сохраняет ранние return остальных приказов исходной aiNormal. */
 export function selectPartyTarget(actor: PartyAIActor, range: number, context: PartyAIContext, forcedOrder?: number): PartyAITarget | null {
+  if (usesCarefulConsideration(actor, context)) {
+    const chosen = chooseCarefulTarget(actor, range, context);
+    return chosen ? claimCarefulTarget(chosen, context) : null;
+  }
   const order = forcedOrder ?? actor.member!.ai;
   const bands = RANGE_ORDER[range];
   if (!bands) throw new Error('Invalid original weapon range.');
@@ -172,6 +181,8 @@ export function selectPartyTarget(actor: PartyAIActor, range: number, context: P
 }
 
 export function searchNextPartyAlert(actor: PartyAIActor, context: PartyAIContext): void {
+  // Новый приказ сам выбирает срочность и не наследует жёсткую метку Defend.
+  if (usesCarefulConsideration(actor, context)) { clearPartyAITarget(actor); return; }
   const uid = context.shared.nextAlertUid;
   const enemy = uid === null ? null : target(context, uid);
   if (!enemy || enemy.hp <= 0 || !canAutoTarget(actor, enemy)) { clearPartyAITarget(actor); return; }
@@ -185,6 +196,7 @@ export function alertParty(enemy: PartyAITarget, actors: readonly PartyAIActor[]
   if (enemy.onMark) return;
   for (const actor of actors) {
     if (!active(actor) || !actor.member.optWall || actor.member.aiState.onMark || (actor.slot === context.heroSlot && !context.fireAtWill) || !canAutoTarget(actor, enemy)) continue;
+    if (usesCarefulConsideration(actor, context)) continue;
     const s = actor.member.aiState;
     Object.assign(s, { shooting: false, burst: 0, targetUid: enemy.uid, onMark: true });
     enemy.onMark = true; s.aimCount = startingPartyAim(actor, enemy, actor.weapon?.range ?? null);
@@ -201,9 +213,24 @@ export function stepPartyAIFrame(actor: PartyAIActor, context: PartyAIContext, c
   const member = actor.member, s = member.aiState;
   if (actor.weapon?.id === 16) advanceChainGunClock(s);
   const manual = actor.slot === context.heroSlot && !context.fireAtWill;
+  const careful = usesCarefulConsideration(actor, context);
+  if (careful && s.targetUid !== null) {
+    const retained = context.getTarget(s.targetUid);
+    if (!carefulTargetViable(retained, context)) clearPartyAITarget(actor);
+    else {
+      const urgent = chooseCarefulTarget(actor, actor.weapon?.range ?? 0, context);
+      // Только более высокая срочность прерывает уже начатое прицеливание.
+      if (urgent && carefulUrgency(urgent, member.optWall) > carefulUrgency(retained, member.optWall)) {
+        claimCarefulTarget(urgent, context);
+        Object.assign(s, { shooting: false, burst: 0, targetUid: urgent.uid, onMark: false });
+        s.aimCount = startingPartyAim(actor, urgent, actor.weapon?.range ?? null);
+        return 'acquired';
+      }
+    }
+  }
   if (!manual) {
     if (member.ai === 2 && s.targetUid !== null && !canAutoTarget(actor, target(context, s.targetUid))) clearPartyAITarget(actor);
-    if (member.optBoss && context.shared.targetBossUid !== null && !s.onMark) {
+    if (!careful && member.optBoss && context.shared.targetBossUid !== null && !s.onMark) {
       const boss = target(context, context.shared.targetBossUid);
       if (boss.hp <= 0) { context.shared.targetBossUid = null; clearPartyAITarget(actor); return 'boss-mark'; }
       if (canAutoTarget(actor, boss)) {

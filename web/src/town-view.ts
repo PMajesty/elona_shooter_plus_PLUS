@@ -35,8 +35,10 @@ interface TownViewState {
   player: { level: number; exp: number; selectedSlot: number };
   town: { ap: number; preparation: string; mission?: { hire: boolean } } | null; inventory: (Item | null)[];
   pendingPartyAction: { kind: string } | null;
+  ruleset?: { id: 'classic' | 'expanded'; revision: 1 };
+  henchmanOrder?: 7;
 }
-interface Callbacks { robVisitors(): void; medalPage(page: 0 | 1): void; visitKongregate(): void; medalHint(hint: { id: number; name: string; description: string; bonus: string } | null): void; hire(): void; confirmHire(answer: boolean): void; castlePage(page: 0 | 1): void; activity(action: TownActivity): void; activityAvailable(action: TownActivity): boolean; select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; message(value: string): void }
+interface Callbacks { henchmanCareful?(enabled: boolean): void; robVisitors(): void; medalPage(page: 0 | 1): void; visitKongregate(): void; medalHint(hint: { id: number; name: string; description: string; bonus: string } | null): void; hire(): void; confirmHire(answer: boolean): void; castlePage(page: 0 | 1): void; activity(action: TownActivity): void; activityAvailable(action: TownActivity): boolean; select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; message(value: string): void }
 
 /** Городские координаты и повороты берутся из исходного кадра 71 и его окон. */
 export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, navigation: Phaser.GameObjects.Container, castlePage: 0 | 1 = 0, medalPage: 0 | 1 = 0): Phaser.GameObjects.Container {
@@ -185,6 +187,34 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         });
       }
       const action = layout.claimTitleAction;
+      if (state.ruleset?.id === 'expanded' && state.town?.preparation === 'ready' && state.town.mission?.hire && callbacks.henchmanCareful) {
+        const selected = state.henchmanOrder === 7;
+        // Свободный промежуток между Train и Claim Title; вся область доступна для касания.
+        const control = scene.add.container(330, 235).setName('henchman-order');
+        control.setData({ selected, order: selected ? 7 : 6 }); root.add(control);
+        const label = (x: number, y: number, value: string, size = 11, color = '#000000') => {
+          const field = scene.add.text(x, y, value, { resolution: 2, fontFamily: 'Arial', fontSize: `${size}px`, color,
+            wordWrap: { width: 110 - x }, padding: { x: 0, y: 1 } });
+          control.add(field); return field;
+        };
+        label(0, 0, 'Henchman order', 10, '#4c4031');
+        const check = scene.add.graphics();
+        check.fillStyle(0xffffff, 1).fillRect(1, 20, 14, 14);
+        check.lineStyle(1, 0x777777, 1).strokeRect(1, 20, 14, 14);
+        if (selected) check.lineStyle(2, 0x12356b, 1).beginPath().moveTo(4, 27).lineTo(7, 30).lineTo(12, 23).strokePath();
+        control.add(check);
+        const name = label(20, 16, 'Careful\nConsideration', 11);
+        label(0, 47, '-15% auto damage', 10, '#703b22');
+        label(0, 62, selected ? 'On: next battle' : 'Off: Fire at will', 10, '#4c4031');
+        const hit = scene.add.zone(0, 0, 110, 78).setOrigin(0).setInteractive({ useHandCursor: true }).setName('henchman-careful');
+        control.add(hit);
+        hit.on('pointerover', () => name.setColor('#000099'));
+        hit.on('pointerout', () => name.setColor('#000000'));
+        hit.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
+          event.stopPropagation();
+          if (!state.pendingPartyAction) callbacks.henchmanCareful?.(!selected);
+        });
+      }
       const available = nextTitle(state.title, state.day) !== undefined;
       const actionX = x + action.x, actionY = y + action.y;
       const cardAsset = manifest.clips[action.cardClip], pinAsset = manifest.clips[action.pinClip];

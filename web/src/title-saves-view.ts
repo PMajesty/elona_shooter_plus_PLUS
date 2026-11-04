@@ -12,8 +12,8 @@ export interface TitleSavesLayout {
 export function createTitleSavesView(scene: Phaser.Scene, manifest: LootViewManifest, layout: TitleSavesLayout,
   labels: readonly string[], selected: number, select: (slot: number) => void, remove: () => void): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName('title-saves');
-  const placement = layout.titleSaves.children, controls = layout.partyControls, p = placement.saveBox;
-  const width = controls.componentBaseWidth * p.scaleX, height = controls.componentBaseHeight * p.scaleY;
+  const placement = layout.titleSaves.children, controls = layout.partyControls, p = { ...placement.saveBox, x: placement.saveBox.x - 100 };
+  const width = controls.componentBaseWidth * p.scaleX + 100, height = controls.componentBaseHeight * p.scaleY;
   const skin = (key: string, grid: number[], x: number, y: number, w: number, h: number) => {
     const asset = manifest.clips[key];
     return scene.add.nineslice(x, y, key, '1', w, h, grid[0], asset.frameWidth - grid[2], grid[1], asset.frameHeight - grid[3]).setOrigin(0);
@@ -52,7 +52,7 @@ export function createTitleSavesView(scene: Phaser.Scene, manifest: LootViewMani
   };
   scene.input.keyboard?.on('keydown', keyboard);
   root.once('destroy', () => scene.input.keyboard?.off('keydown', keyboard));
-  const asset = manifest.images.button_deleteSave, trash = scene.add.image(placement.trash.x, placement.trash.y, 'button_deleteSave').setOrigin(asset.originX / asset.width, asset.originY / asset.height)
+  const asset = manifest.images.button_deleteSave, trash = scene.add.image(placement.trash.x - 100, placement.trash.y, 'button_deleteSave').setOrigin(asset.originX / asset.width, asset.originY / asset.height)
     .setScale(placement.trash.scaleX, placement.trash.scaleY).setInteractive(buttonInput(asset)); root.add(trash);
   trash.on('pointerover', () => trash.setTexture('button_deleteSave_over')); trash.on('pointerout', () => trash.setTexture('button_deleteSave'));
   trash.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); close(); remove(); });

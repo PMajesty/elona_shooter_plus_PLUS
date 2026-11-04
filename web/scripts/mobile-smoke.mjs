@@ -8,6 +8,8 @@ const { chromium, webkit } = require('../../.tools/browser-qa/node_modules/playw
 const engine = process.argv[2] ?? 'chromium';
 assert.ok(['chromium', 'webkit'].includes(engine));
 const url = process.argv[3] ?? 'http://127.0.0.1:5175/elona/';
+const edition = process.env.QA_EDITION ?? 'classic';
+assert.ok(['classic', 'expanded'].includes(edition));
 const options = engine === 'chromium' ? { args: ['--mute-audio'], executablePath: process.env.CHROME_PATH } : {};
 if (process.env.QA_PROXY && process.env.HTTPS_PROXY) {
   const proxy = new URL(process.env.HTTPS_PROXY);
@@ -48,6 +50,8 @@ try {
   const portrait = await canvas.boundingBox();
   assert.ok(portrait.width >= 388 && portrait.x >= 0 && portrait.x + portrait.width <= 391);
   assert.equal(await data('muted'), 'true');
+  if (edition === 'expanded') await tap(490, 251);
+  assert.equal(await data('new-game-ruleset'), edition);
   await tap(295, 195); await screen('gene');
   await page.locator('#touch-enlarge').tap();
   await page.waitForFunction(() => document.querySelector('#playfield > canvas').clientWidth >= 700);
@@ -88,6 +92,7 @@ try {
   await page.waitForFunction(n => Number(document.querySelector('#game').dataset.grenades) === n - 1, grenades);
   await page.locator('#touch-pause').tap();
   const saved = await exportPaused();
+  assert.equal(saved.ruleset.id, edition);
   await openTitle(); await tap(295, 249); await screen('battle');
   assert.equal(await data('paused'), 'true'); assert.equal(Number(await data('tick')), saved.tick);
   const resumed = await exportPaused();
@@ -95,20 +100,22 @@ try {
   assert.equal(resumed.rng, saved.rng);
 
   // Короткий снимок перед последней волной проходит обычные экраны добычи, итогов и города.
-  const end = new Simulation(42, { heroClass: 'rogue' });
+  const end = new Simulation(42, { heroClass: 'rogue', ruleset: edition });
   end.state.waveIndex = 0; end.state.newWave = true;
   await page.locator('#touch-guide').tap();
   const picker = page.waitForEvent('filechooser');
   await page.locator('#touch-import').tap();
   await (await picker).setFiles({ name: 'final-wave.json', mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify({ format: 'elona-shooter-browser', version: end.state.version, appearance: 0, simulation: end.toSave() })) });
+  await page.locator('#game[data-replace-adventure="import"]').waitFor();
+  await tap(260, 240);
   await page.waitForFunction(() => document.querySelector('#game').dataset.tick === '0');
   await page.locator('#touch-pause').tap(); await screen('loot');
   await tap(310, 315); await screen('result');
   await tap(205, 318); await screen('town');
   await tap(44, 75); await page.locator('#game[data-town-tab="mission"]').waitFor();
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ engine, portrait, landscape, savedTick: saved.tick, screen: 'town', muted: await data('muted') }));
+  console.log(JSON.stringify({ engine, edition, portrait, landscape, savedTick: saved.tick, screen: 'town', muted: await data('muted') }));
 } finally {
   await browser.close();
 }

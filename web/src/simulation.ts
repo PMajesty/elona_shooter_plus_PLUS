@@ -13,6 +13,8 @@ import { fixedSearchRandom } from './town-search.ts';
 import { createTownEconomy, validTownEconomy, museumIncome, TOWN_ACTIVITIES, type TownEconomy, type TownActivity } from './town-economy.ts';
 import { ENEMY_TIMELINES, type EnemyTimeline } from './enemy-timelines.ts';
 import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
+import { RULESETS, readRuleset, rulesetIdentity, type RulesetId, type RulesetIdentity } from './rulesets.ts';
+import { CAREFUL_ORDER, CAREFUL_DAMAGE_MULTIPLIER } from './careful-consideration.ts';
 import { HERO_CLASSES, heroClassMedal, isHeroClass, applyHeroChoice, availableHeroTraits, rollHeroChoices, type HeroClass } from './hero-classes.ts';
 import { ENEMIES, FIRST_DAY, GRENADE, SHOTGUN, SIMULATION_HZ, STARTING_CLASS, TIMER_HZ, WORLD, type EnemyKind, type Rect } from './content.ts';
 import { generateLowLevelMission, generateLowLevelWaves, validCampaignDay, MAX_CAMPAIGN_DAY, type LowLevelMission, type GameMode } from './missions.ts';
@@ -62,6 +64,8 @@ export type ReadyTown = FirstTownPreparation & { ap: number; preparation: 'ready
 export interface HeroSettings { order: number; focus: number; boss: boolean; wall: boolean }
 const DEFAULT_HERO_SETTINGS: Readonly<HeroSettings> = { order: -1, focus: -1, boss: true, wall: true };
 export interface SimulationState {
+  ruleset: RulesetIdentity;
+  henchmanOrder?: 7;
   heroSettings?: HeroSettings;
   castleSister?: CastleSister;
   heroAI?: { enabled: boolean; state: PartyAIState };
@@ -99,7 +103,7 @@ export interface SimulationState {
 }
 export interface Input { aimX?: number; aimY?: number; firePressed?: boolean; fireHeld?: boolean; fireReleased?: boolean; reload?: boolean; slot?: number }
 export interface SimulationEvent { actorSlot?: number; enemyKind?: EnemyKind; type: 'info' | 'combat-notice' | 'enemy-attack' | 'enemy-drop' | 'sister-killed' | 'sister-launch' | 'ragnarok' | 'lava-explode' | 'boss-special' | 'enemy-rage' | 'boss-shot' | 'enemy-arrow' | 'shot' | 'bow-draw' | 'hit' | 'kill' | 'castle-hit' | 'reload' | 'reloaded' | 'grenade' | 'explosion' | 'pulse' | 'wave' | 'victory' | 'defeat' | 'rampage' | 'level-up' | 'gold' | 'select' | 'beep' | 'repair' | 'protection' | 'defend'; x?: number; y?: number; amount?: number; weaponId?: number; automaticReload?: boolean; message?: string; critical?: boolean; criticalType?: number; enemyUid?: number; goodShotIndex?: number; resisted?: true; pellets?: { x: number; y: number; specialHitType?: number; groundImpact?: true }[]; explosionKind?: ExplosionKind; scale?: number; oneShot?: true }
-export interface SimulationOptions { mods?: GameMods; mode?: GameMode; hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
+export interface SimulationOptions { ruleset?: RulesetId; mods?: GameMods; mode?: GameMode; hitTest?: (enemy: Readonly<EnemyState>, x: number, y: number) => boolean; deferOpeningWaves?: boolean; heroClass?: HeroClass; medals?: readonly number[] }
 type EnemyOrigins = ReadonlyMap<number, { x: number; y: number }>;
 export type LootArea = LootItemAddress['area'];
 export type RepairOutcome = 'repaired' | 'not-damaged' | 'not-enough-ap' | 'unavailable';
@@ -153,6 +157,7 @@ export class Simulation {
     const classId = options.heroClass ?? 'sheriff';
     const generated = generateHero(random, classId);
     this.state = {
+      ruleset: rulesetIdentity(options.ruleset ?? 'classic'),
       ...(options.mode && options.mode !== 'normal' ? { mode: options.mode } : {}), ...(options.mods && Object.keys(options.mods).length ? { mods: structuredClone(options.mods) } : {}), version: SAVE_VERSION, economy: createTownEconomy(), phase: 'battle', day: 1, tick: 0, timerRemainder: 0, rng: initialRng, nextUid: 1, hero: generated.hero, title: 0,
       activeMission: this.missionParameters(this.pendingOpeningMission), resultBefore: STARTING_CLASS.money, earnedMedals: [...new Set([40, ...(options.medals ?? [])])], perfectDays: 0, bossesSpawned: 0,
       castleHp: FIRST_DAY.castleHp, castleMaxHp: FIRST_DAY.castleHp, wallLevel: 1, wallFixCount: 0, repairmanLevel: 0, sandbagLevel: 0, looterLevel: 0, trainerLevel: 0, gold: STARTING_CLASS.money, totalMoney: 0, kills: 0, criticalKills: 0,
@@ -188,6 +193,7 @@ export class Simulation {
   private get heroSlot(): number { return this.heroSettings.order === -1 ? 0 : -1; }
   get heroAutomatic(): boolean { return this.heroSettings.order !== -1 || this.fireAtWill; }
   get heroClassState(): SimulationState['player']['classState'] { return this.state.heroAI?.state ?? this.state.player.classState; }
+  get rules() { return RULESETS[this.state.ruleset.id]; }
   get heroChainState(): ChainGunState | undefined { return this.state.heroAI?.state ?? this.state.player.chainGun; }
 
   private heroAIActor(): PartyAIActor {
@@ -235,8 +241,18 @@ export class Simulation {
 
   private partyAIContext(): PartyAIContext {
     return { shared: this.state.partyAI, random: () => this.random(), heroSlot: this.heroSlot, fireAtWill: this.fireAtWill,
+      ...(this.rules.carefulConsideration ? { carefulConsideration: true,
+        listTargets: () => this.state.enemies as PartyAITarget[],
+        isRanged: (target: PartyAITarget) => ['archer', 'cata', 'tank', 'dino', 'dragon', 'boss'].includes((target as unknown as EnemyState).kind),
+        isShielded: (target: PartyAITarget) => (target as unknown as EnemyState).kind === 'boss' && (target as unknown as EnemyState).bossAction === 6,
+      } : {}),
       getTarget: uid => this.state.enemies.find(enemy => enemy.uid === uid) as PartyAITarget | undefined
         ?? this.state.retainedAITargets.find(enemy => enemy.uid === uid) };
+  }
+
+  private automaticDamageMultiplier(actorSlot: number): number {
+    return this.rules.carefulConsideration && actorSlot >= 1 && actorSlot <= 4
+      && partySlot(this.state.party, actorSlot)?.member?.ai === CAREFUL_ORDER ? CAREFUL_DAMAGE_MULTIPLIER : 1;
   }
 
   private partyAICallbacks(): PartyAICallbacks {
@@ -254,7 +270,7 @@ export class Simulation {
         const uid = actor.member?.aiState?.targetUid;
         const targetSpeed = actor.slot !== this.heroSlot && uid ? this.partyAIContext().getTarget(uid)?.speed : undefined;
         this.state.projectiles.push(createProjectile({ uid: this.state.nextUid++, kind: 'hand-grenade', weaponSlot: null, actorSlot: actor.slot,
-          startX: position.x, startY: position.y, targetX: launch.x, targetY: launch.y, speedBase: launch.speedBase, damage: launch.damage, targetSpeed }));
+          startX: position.x, startY: position.y, targetX: launch.x, targetY: launch.y, speedBase: launch.speedBase, damage: launch.damage * this.automaticDamageMultiplier(actor.slot), targetSpeed }));
         this.events.push({ type: 'grenade', actorSlot: actor.slot, x: position.x, y: position.y });
       },
     };
@@ -339,6 +355,14 @@ export class Simulation {
     this.state.pendingPartyAction = { kind: 'henchman' }; return 'previewed';
   }
 
+  setHenchmanCareful(enabled: boolean): boolean {
+    if (!this.rules.carefulConsideration || typeof enabled !== 'boolean' || !this.partyMutationAvailable()
+      || !(this.state.town as ReadyTown).mission.hire) return false;
+    if (enabled) this.state.henchmanOrder = CAREFUL_ORDER;
+    else delete this.state.henchmanOrder;
+    return true;
+  }
+
   movePartyEquipment(from: PartyEquipmentAddress, to: PartyEquipmentAddress): 'moved' | 'previewed' | 'unavailable' {
     if (!this.partyMutationAvailable()) return 'unavailable';
     const outcome = movePartyEquipment(this.state.party, this.state.inventory, from, to);
@@ -357,7 +381,12 @@ export class Simulation {
       return true;
     }
     const member = partySlot(this.state.party, slot)?.member;
-    if (!this.partyMutationAvailable() || slot > 3 || !partySlot(this.state.party, slot)?.exists || !member || !Number.isInteger(order) || order < 0 || order > 6) return false;
+    if (!this.partyMutationAvailable() || slot > (this.rules.carefulConsideration ? 4 : 3) || !partySlot(this.state.party, slot)?.exists || !member || !Number.isInteger(order) || order < 0 || order > (this.rules.carefulConsideration ? 7 : 6)) return false;
+    if (member.ai !== order && (member.ai === 7 || order === 7)) {
+      const actor = this.battleAIActors().find(actor => actor.slot === slot);
+      if (actor) clearPartyAITarget(actor);
+      member.bowDrawing = false;
+    }
     member.ai = order; return true;
   }
 
@@ -516,6 +545,7 @@ export class Simulation {
     const saved = Simulation.fromSave(value, this.options).state;
     const day = this.state.day - (this.state.phase === 'town' ? 0 : 1);
     if (this.state.mode === 'hardcore' || saved.phase !== 'town' || saved.day !== day || saved.town?.preparation !== 'ready'
+      || saved.ruleset.id !== this.state.ruleset.id || saved.ruleset.revision !== this.state.ruleset.revision
       || saved.pendingTownAction || saved.pendingPartyAction || saved.mode !== this.state.mode
       || saved.player.classId !== this.state.player.classId || JSON.stringify(saved.hero) !== JSON.stringify(this.state.hero)
       || saved.carryOver !== this.state.carryOver
@@ -547,7 +577,10 @@ export class Simulation {
     if (this.state.phase !== 'town' || (this.state.pendingTownAction || this.state.pendingPartyAction) || this.state.day >= MAX_CAMPAIGN_DAY || town?.preparation !== 'ready' || town.mission.level !== this.state.day) return false;
     const state = this.state;
     // Оригинал создаёт наёмника перед увеличением календарного дня.
-    if (town.mission.hire) generateHenchman(state.party, state.day, () => this.random(), state.partySkills.effects[120]);
+    if (town.mission.hire) {
+      generateHenchman(state.party, state.day, () => this.random(), state.partySkills.effects[120]);
+      if (this.rules.carefulConsideration && state.henchmanOrder === CAREFUL_ORDER) state.party.slots[3].member!.ai = CAREFUL_ORDER;
+    }
     state.killHistory = nextKillHistory(state);
     state.day = state.day + 1;
     if (state.mode === 'hardcore') { if (state.day >= 20) this.awardMedal(95); if (state.day >= 80) this.awardMedal(97); }
@@ -724,6 +757,8 @@ export class Simulation {
       this.events.push({ type: 'info', message: 'Reload your gun by pressing Space Key!' });
     }
     let damage = shotDamage(item, player.traits, { missionDamage: this.state.activeMission.dmgFix, rampage: player.rampageTicks > 0, frenzy: meter?.frenzy, idleCount: meter?.idleCount });
+    // Штраф фиксируется при выстреле; смена приказа не усиливает уже летящий снаряд.
+    damage *= this.automaticDamageMultiplier(actorSlot);
     if (behavior.projectile) {
       let hitX = int(x + this.random() * spread - this.random() * spread);
       const hitY = int(y + this.random() * spread - this.random() * spread);
@@ -938,7 +973,7 @@ export class Simulation {
     this.state.partyAI.sharedWeaponRange = item?.range ?? null;
     const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
     if (player.traits[4] && --player.grenadeCount < 0) {
-      const actor = { slot: 0, exists: true, member: null, weapon: item };
+      const actor = this.heroAIActor();
       const target = selectPartyTarget(actor, 2, partyContext, 6);
       if (!target || target.x > WORLD.playerX) player.grenadeCount += 10;
       else {
@@ -2279,6 +2314,8 @@ export class Simulation {
     if (!Array.isArray(value.loot) || value.loot.length > 200 || value.loot.some(item => !Number.isInteger(item) || !Object.hasOwn(BASE_ITEM_FIELDS, item > 1000 ? item - 1000 : item)) || !record(value.result) || ['reward', 'perfectBonus', 'upkeep', 'netReward'].some(key => !finite((value.result as Record<string, unknown>)[key]))) throw new Error('Invalid results.');
     const simulation = new Simulation(1, { ...options, deferOpeningWaves: false });
     simulation.state = structuredClone(value) as unknown as SimulationState;
+    simulation.state.ruleset = readRuleset(value.ruleset, Number(value.version));
+    if (value.henchmanOrder !== undefined && (simulation.state.ruleset.id !== 'expanded' || value.henchmanOrder !== CAREFUL_ORDER)) throw new Error('Invalid hired gun order.');
     // Старые боевые сохранения не знают фазу перехода; восстанавливаем достигнутое освещение без RNG.
     if (value.version < 43 && simulation.state.phase === 'battle' && simulation.state.waveIndex < 3) {
       simulation.state.battleLighting = { phase: simulation.state.waveIndex === 0 ? 'night' : 'dusk', step: 100 };

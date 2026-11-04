@@ -22,6 +22,20 @@ and Casual and Hardcore modes. The supported save range is days 1–1000.
 Sound starts muted and remembers your choice.
 [Coverage and known differences](docs/port-status.md)
 
+Choose **Classic** or **Expanded** on the title screen before New Game.
+Classic keeps the original content and agreed port fixes. Expanded is the
+optional home for new features, with its own medal collection. Adventures keep
+their edition when loaded; existing saves remain Classic. Use an empty slot to
+keep both. The seven original Game MODs remain separate.
+
+Expanded's first addition is **Careful Consideration**, a companion order in
+Barrack: prioritize urgent threats, favor ranged enemies with rifles, defend
+against approaching enemies with close weapons, and avoid shielded bosses.
+It can target beyond preferred range and costs **15% automatic shot damage**.
+It helps protect the castle without guaranteeing a Perfect Game. Temporary
+hired guns can opt in at the Inn before Rest.
+[Edition rules and balance evidence](docs/expanded-edition.md)
+
 ## Playing on a phone
 
 Open the same game link. Landscape gives the largest view of the battlefield.

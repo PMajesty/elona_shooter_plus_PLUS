@@ -2,7 +2,10 @@ import { buttonInput, refreshMenuHover } from './button-input.ts';
 import { createTitleSequence, playOpening } from './title-sequence.ts';
 import { MAX_CAMPAIGN_DAY } from './missions.ts';
 import { COMMUNITY_MOD_DETAILS, GAME_MODS, type GameMod } from './game-mods.ts';
-import { SAVE_VERSION, supportedSaveVersion } from './save-version.ts';
+import { SAVE_VERSION } from './save-version.ts';
+import { RULESETS, type RulesetId } from './rulesets.ts';
+import { parseAdventureSave, type PortSave } from './adventure-save.ts';
+import { createEditionSelector } from './edition-selector-view.ts';
 import Phaser from 'phaser';
 import { HERO_CLASSES, heroClassUnlocked, type HeroClass } from './hero-classes.ts';
 import { createGeneInfoView } from './gene-info-view.ts';
@@ -14,7 +17,7 @@ import { battleLightColor, battleCloudX } from './battle-lighting.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
 import { traitHintValues, type OriginalHintInfo } from './trait-hint.ts';
 import { sniperDamageLimit, duelistDamageLimit } from './class-limits.ts';
-import { createProfile, mergeProfile, mergeProfiles, validProfile, type GlobalProfile } from './profile.ts';
+import { createProfile, mergeProfile, mergeProfiles, type GlobalProfile } from './profile.ts';
 import { MEDALS } from './medals.ts';
 import { MedalNotices, type MedalNotice } from './medal-notices.ts';
 import { createMedalNoticeView, updateMedalNoticeView, type InfoPopupLayout } from './medal-notice-view.ts';
@@ -37,7 +40,7 @@ import { createHelpView, type HelpLayout } from './help-view.ts';
 import { originalTextArea } from './original-text-area.ts';
 import { dayReport } from './day-report.ts';
 import { createPauseView, type PauseLayout } from './pause-view.ts';
-import { DEFAULT_GAME_OPTIONS, validGameOptions, savedGameOptions, showDamageNumber, pauseStatistics, type GameOptions } from './game-options.ts';
+import { DEFAULT_GAME_OPTIONS, savedGameOptions, showDamageNumber, pauseStatistics, type GameOptions } from './game-options.ts';
 import { createFireworks } from './fireworks-view.ts';
 import { FIREWORK_MEDAL_FRAMES } from './fireworks.ts';
 import { createModConfirmation, type ModConfirmationLayout } from './mod-confirmation-view.ts';
@@ -62,7 +65,6 @@ interface ImageAsset { file: string; width: number; height: number; originX: num
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number; frameAlpha?: number[] }
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual; enemyShotVisuals: Record<EnemyShotKind, ProjectileVisual> }
-interface PortSave { format: 'elona-shooter-browser'; version: number; appearance: number; simulation: unknown; profile?: GlobalProfile; carryCheckpoint?: unknown; options?: GameOptions }
 type Screen = 'intro' | 'title' | 'gene' | 'mods' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
@@ -143,6 +145,7 @@ class ElonaScene extends Phaser.Scene {
   screen: Screen = 'title';
   sim?: Simulation;
   saveSlot = readSelectedSlot();
+  private newGameRuleset: RulesetId = 'classic';
   private carryCheckpoint?: SimulationState;
   appearance = 0;
   paused = false;
@@ -579,6 +582,7 @@ class ElonaScene extends Phaser.Scene {
     delete container.dataset.deleteSaveSlot;
     status.hide();
     container.dataset.paused = 'false';
+    container.dataset.ruleset = this.sim?.state.ruleset.id ?? this.newGameRuleset;
     container.dataset.bossBars = '0'; container.dataset.bossHealth = '[]';
     container.dataset.bossVisuals = '[]';
     container.dataset.playerFrame = ''; container.dataset.reloadTicks = '0'; container.dataset.reloadAnimations = '0';
@@ -649,6 +653,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   showTitle(): void {
+    this.profileRead = readProfile(this.newGameRuleset); this.profile = this.profileRead.profile;
     const frame = this.titleSequence?.frame ?? 0;
     this.reset('title');
     this.clip('battleBackdrop', 1, -5, -15);
@@ -657,7 +662,7 @@ class ElonaScene extends Phaser.Scene {
     const actors = this.add.container(0, 0); this.root.add(actors);
     const buttons: Phaser.GameObjects.Image[] = [];
     for (const [key, x, y, action] of [
-      ['button_newGame', 185, 195.7, () => this.showGene()],
+      ['button_newGame', 185, 195.7, () => this.requestNewGame()],
       ['button_continue', 187.9, 249, () => this.continueGame()],
       ['button_help', 207.9, 301, () => this.showHelp()],
     ] as const) {
@@ -694,13 +699,11 @@ class ElonaScene extends Phaser.Scene {
       }
     });
     const saved = readSave(this.saveSlot);
-    if (saved.kind === 'saved') {
-      try {
-        const parsed = this.parseSave(saved.data, true);
-        if (parsed.profile) this.profile = mergeProfiles(this.profile, parsed.profile);
-        this.profile = mergeProfile(this.profile, parsed.simulation.state); if (storeProfile(this.profile)) delete this.profileRead.warning;
-      } catch { /* Повреждённое приключение не блокирует создание нового героя. */ }
-    }
+    container.dataset.newGameRuleset = this.newGameRuleset;
+    this.root.add(createEditionSelector(this, this.newGameRuleset, edition => {
+      if (this.collectionDialog || this.helpLayer) return;
+      this.newGameRuleset = edition; this.playSound('soundClick1'); this.showTitle();
+    }));
     const labels = Array.from({ length: SAVE_SLOTS }, (_, slot) => saveSlotLabel(readSave(slot)));
     container.dataset.saveSlots = JSON.stringify(labels);
     this.root.add(createTitleSavesView(this, manifest, this.cache.json.get('town-layout') as TitleSavesLayout, labels, this.saveSlot, slot => {
@@ -726,6 +729,17 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.deleteSaveSlot = String(slot); this.root.add(dialog);
   }
 
+  private requestNewGame(): void {
+    if (this.collectionDialog || this.helpLayer) return;
+    if (readSave(this.saveSlot).kind === 'empty') { this.showGene(); return; }
+    const layout = (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog;
+    this.collectionDialog = createModConfirmation(this, manifest, layout, confirmed => {
+      this.closeCollectionImport(); if (confirmed) this.showGene();
+    }, 'replace-adventure', `Start ${RULESETS[this.newGameRuleset].name} in slot ${this.saveSlot + 1}?\nThe saved adventure will be replaced.\nChoose an empty slot to keep it.`);
+    container.dataset.replaceAdventure = 'new';
+    this.root.add(this.collectionDialog);
+  }
+
   private showHelp(): void {
     if (this.helpLayer || (this.screen !== 'title' && !this.paused)) return;
     const layout = this.cache.json.get('town-layout') as { help: HelpLayout };
@@ -745,8 +759,9 @@ class ElonaScene extends Phaser.Scene {
     this.reset('gene');
     if (!keepHero) { this.options = { ...DEFAULT_GAME_OPTIONS }; this.applyRenderingOptions(); }
     if (!keepHero || !this.sim) {
+      this.profileRead = readProfile(this.newGameRuleset); this.profile = this.profileRead.profile;
       this.clearMedalNotices(this.profile.medals);
-      this.sim = new Simulation(Date.now(), { ...this.simulationOptions(), medals: this.profile.medals, deferOpeningWaves: true });
+      this.sim = new Simulation(Date.now(), { ...this.simulationOptions(), ruleset: this.newGameRuleset, medals: this.profile.medals, deferOpeningWaves: true });
     }
     this.image(manifest.images.townHud ? 'townHud' : 'town');
     this.drawHud();
@@ -775,7 +790,7 @@ class ElonaScene extends Phaser.Scene {
     }
     updatePortraits();
     animateStandingPortraits(this, portraits, bodies, pose => { container.dataset.genePose = String(pose); });
-    const classes = (Object.keys(HERO_CLASSES) as HeroClass[]).slice(page * 4, page * 4 + 4);
+    const classes = (Object.keys(this.sim!.rules.content.classes) as HeroClass[]).slice(page * 4, page * 4 + 4);
     const radios: (Phaser.GameObjects.Image | undefined)[] = [];
     const labels: Phaser.GameObjects.Text[] = [];
     const hint = this.text(280, 205, '', 13, '#2d315b');
@@ -880,7 +895,7 @@ class ElonaScene extends Phaser.Scene {
 
   startGame(): void {
     this.carryCheckpoint = undefined;
-    if (!this.sim?.startOpeningBattle()) this.sim = new Simulation(Date.now(), this.simulationOptions());
+    if (!this.sim?.startOpeningBattle()) this.sim = new Simulation(Date.now(), { ...this.simulationOptions(), ruleset: this.newGameRuleset, medals: this.profile.medals });
     this.enterBattle(true);
     this.saveGame(false);
     this.playSound('soundBattleBegin');
@@ -1845,6 +1860,9 @@ class ElonaScene extends Phaser.Scene {
         if (this.sim!.requestMissionHire() === 'previewed') { this.playSound('soundScroll1'); this.saveGame(false); this.showTown('mission'); }
         else { this.playSound('soundBeep'); status.textContent = 'A henchman is already contracted for this mission.'; }
       },
+      henchmanCareful: enabled => {
+        if (this.sim!.setHenchmanCareful(enabled)) { this.playSound('soundClick1'); this.saveGame(false); this.showTown('mission'); }
+      },
       confirmHire: answer => {
         const outcome = this.sim!.resolvePartyAction(answer);
         this.playSound(outcome === 'contracted' ? 'soundGood' : 'soundClick1'); this.saveGame(false); this.showTown('mission', outcome === 'contracted' ? TOWN_NOTICES.hiredGun : null);
@@ -2070,7 +2088,7 @@ class ElonaScene extends Phaser.Scene {
       failure(result); return false;
     };
     this.root.add(createPartyView(this, { selectedSlot: this.selectedCharacter, members, inventory: state.inventory, gold: state.gold, capacity: state.party.capacity,
-      ap: state.town!.ap, dialog: pending?.kind === 'hire' ? 'recruit' : pending?.kind === 'dismiss' ? 'dismiss' : pending ? 'mod' : null }, manifest, this.cache.json.get('town-layout') as PartyLayout, {
+      ap: state.town!.ap, carefulAvailable: this.sim.rules.carefulConsideration, dialog: pending?.kind === 'hire' ? 'recruit' : pending?.kind === 'dismiss' ? 'dismiss' : pending ? 'mod' : null }, manifest, this.cache.json.get('town-layout') as PartyLayout, {
       itemPopup: inspectItemPopup,
       traitHint: inspectTraitHint,
       serviceItem: (service, slot) => {
@@ -2196,19 +2214,11 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private parseSave(raw: unknown, ignoreProfileError = false): { simulation: Simulation; appearance: number; profile?: GlobalProfile; carryCheckpoint?: SimulationState; options: GameOptions } {
-    const save = raw as Partial<PortSave> | null;
-    if (!save || save.format !== 'elona-shooter-browser' || !supportedSaveVersion(save.version) || !Number.isInteger(save.appearance) || save.appearance! < 0 || save.appearance! > 21) throw new Error('This is not a supported browser-port save. Select an original .sol file to import a Flash adventure.');
-    if (save.options !== undefined && !validGameOptions(save.options)) throw new Error('This save contains invalid game options.');
-    const validCollection = validProfile(save.profile);
-    if (save.profile !== undefined && !validCollection && !ignoreProfileError) throw new Error('This save contains an invalid medal collection.');
-    const simulation = Simulation.fromSave(save.simulation, this.simulationOptions());
-    if (!canSaveAdventure(simulation.state)) throw new Error('Hardcore games can only be restored in town.');
-    const carryCheckpoint = save.carryCheckpoint === undefined ? undefined : simulation.readCarryCheckpoint(save.carryCheckpoint);
-    if (carryCheckpoint && save.version! < 36) throw new Error('Invalid Carry Over save version.');
-    return { simulation, appearance: save.appearance!, options: { ...(save.options ?? DEFAULT_GAME_OPTIONS) }, ...(validCollection ? { profile: structuredClone(save.profile) } : {}), ...(carryCheckpoint ? { carryCheckpoint } : {}) };
+    return parseAdventureSave(raw, this.simulationOptions(), ignoreProfileError);
   }
 
   continueGame(): void {
+    if (this.collectionDialog || this.helpLayer) return;
     const saved = readSave(this.saveSlot);
     if (saved.kind !== 'saved') { this.playSound('soundBeep'); this.importFailure(new Error(saved.kind === 'error' ? saved.message : 'Save Game not found.')); return; }
     try { this.loadGame(saved.data); } catch (error) { this.playSound('soundBeep'); this.importFailure(error); }
@@ -2217,7 +2227,9 @@ class ElonaScene extends Phaser.Scene {
   loadGame(raw: unknown, restoreCollection = false): void {
     const validated = this.parseSave(raw, !restoreCollection);
     this.celebration?.destroy(); this.celebration = undefined; this.fireworkMedalChecked = false;
-    if (restoreCollection && validated.profile) this.profile = createProfile();
+    const edition = validated.simulation.state.ruleset.id;
+    this.profileRead = readProfile(edition);
+    this.profile = this.profileRead.profile;
     if (validated.profile) this.profile = mergeProfiles(this.profile, validated.profile);
     this.profile = mergeProfile(this.profile, validated.simulation.state); if (storeProfile(this.profile)) delete this.profileRead.warning;
     this.clearMedalNotices([...this.profile.medals, ...validated.simulation.state.earnedMedals]);
@@ -2229,7 +2241,16 @@ class ElonaScene extends Phaser.Scene {
     status.textContent = 'Saved game restored.';
   }
 
-  importSave(raw: unknown): void {
+  importSave(raw: unknown, confirmed = false): void {
+    if (!confirmed && readSave(this.saveSlot).kind !== 'empty') {
+      const validated = this.parseSave(raw);
+      const layout = (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog;
+      this.collectionDialog = createModConfirmation(this, manifest, layout, accept => {
+        this.closeCollectionImport(); if (accept) this.importSave(raw, true);
+      }, 'replace-adventure', `Import ${validated.simulation.rules.name}, Day ${validated.simulation.state.day}?\nReplace the adventure in slot ${this.saveSlot + 1}?`);
+      container.dataset.replaceAdventure = 'import';
+      this.root.add(this.collectionDialog); return;
+    }
     this.loadGame(raw, true);
     // Импорт тоже сообщает об ошибке записи и предлагает резервную копию текущего приключения.
     if (this.saveGame() && !this.pauseDialog) status.textContent = 'Save imported and restored.';
@@ -2244,17 +2265,18 @@ class ElonaScene extends Phaser.Scene {
   private closeCollectionImport(): void {
     this.collectionDialog?.destroy(true); this.collectionDialog = undefined;
     delete container.dataset.flashCollection; delete container.dataset.flashAdventure; delete container.dataset.importError;
+    delete container.dataset.replaceAdventure;
   }
 
   importFlashSave(bytes: Uint8Array): void {
     const decoded = readFlashSharedObject(bytes);
     if (/^elonas[0-7]$/.test(decoded.name)) {
-      const imported = readFlashAdventure(bytes, this.profile, decoded);
+      const imported = readFlashAdventure(bytes, readProfile('classic').profile, decoded);
       this.closeCollectionImport();
       const layout = (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog;
       this.collectionDialog = createModConfirmation(this, manifest, layout, confirm => {
         this.closeCollectionImport();
-        if (confirm) this.importSave(imported.save);
+        if (confirm) this.importSave(imported.save, true);
       }, 'flash-adventure', `Import ${imported.className}, Day ${imported.day}?\nReplace save slot ${this.saveSlot + 1}.\nFuture rolls differ.`);
       this.root.add(this.collectionDialog);
       container.dataset.flashAdventure = JSON.stringify({ day: imported.day, className: imported.className, originalSlot: imported.originalSlot, originalVersion: imported.originalVersion });
@@ -2265,12 +2287,12 @@ class ElonaScene extends Phaser.Scene {
     const layout = (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog;
     this.collectionDialog = createModConfirmation(this, manifest, layout, confirm => {
       if (!confirm) { this.closeCollectionImport(); return; }
-      const merged = mergeProfiles(this.profile, imported.profile);
+      const merged = mergeProfiles(readProfile('classic').profile, imported.profile);
       if (!storeProfile(merged)) {
         (this.collectionDialog!.getByName('flash-collection-question') as Phaser.GameObjects.Text).setText('The collection could not be stored. Please try again.');
         return;
       }
-      this.profile = merged; delete this.profileRead.warning;
+      this.newGameRuleset = 'classic'; this.profile = merged; delete this.profileRead.warning;
       this.closeCollectionImport(); this.showTitle();
       status.textContent = `Imported ${imported.profile.medals.length} Flash medals and survival records for future games.${imported.ignoredMedals.length ? ` ${imported.ignoredMedals.length} unsupported medal flags were ignored.` : ''}`;
     }, 'flash-collection', `Import ${imported.profile.medals.length} medals and records?\nAdventures will be kept.`);
