@@ -9,6 +9,30 @@ import { asLegacyV7Save } from './legacy-save-support.ts';
 const item = (id: number) => new ItemFactory(() => 0.5).generate(id);
 const jsonSave = (simulation: Simulation) => JSON.parse(JSON.stringify(simulation.toSave()));
 
+test('piercing hit history survives missing targets and rejects malformed imports; old saves remain readable', () => {
+  const sim = new Simulation(42);
+  sim['spawnEnemy']('sheep');
+  const uid = sim.state.enemies[0].uid;
+  const bolt = createProjectile({ uid: sim.state.nextUid++, kind: 'bolt', weaponSlot: 0, damage: 10,
+    startX: 510, startY: 245, targetX: 300, targetY: 230, speedBase: 20, penetrations: 2 });
+  sim.state.projectiles.push(bolt);
+  bolt.hitEnemyUids = [uid];
+  sim.state.enemies = [];
+  const valid = jsonSave(sim);
+  assert.deepEqual(Simulation.fromSave(valid).toSave(), valid);
+  for (const history of [null, {}, '1', [0], [-1], [1.5], [uid, uid], [bolt.uid], [valid.nextUid]]) {
+    const invalid = structuredClone(valid);
+    invalid.projectiles[0].hitEnemyUids = history;
+    assert.throws(() => Simulation.fromSave(invalid), /projectile hit history/);
+  }
+  const grenadeSave = structuredClone(valid);
+  grenadeSave.projectiles[0] = { ...createProjectile({ uid: bolt.uid, kind: 'grenade', weaponSlot: 0, damage: 10,
+    startX: 510, startY: 245, targetX: 300, targetY: 230, speedBase: 12 }), hitEnemyUids: [uid] };
+  assert.throws(() => Simulation.fromSave(grenadeSave), /projectile hit history/);
+  delete valid.projectiles[0].hitEnemyUids;
+  assert.deepEqual(Simulation.fromSave(valid).toSave(), valid);
+});
+
 test('v7 in-flight grenade migration preserves its stored trajectory, damage, RNG and input without relaunching', () => {
   const simulation = new Simulation(42);
   simulation.state.inventory[1]!.attack = 73;

@@ -10,6 +10,43 @@ const geometry: CollisionGeometry = JSON.parse(readFileSync(new URL('../public/a
 const options = { heroClass: 'rogue' as const, hitTest: (e: Readonly<EnemyState>, x: number, y: number) =>
   e.kind === 'sheep' && ordinaryEnemyHit({ ...e, kind: e.kind }, x, y, geometry) };
 
+for (const kind of ['arrow', 'bolt'] as const) {
+  test(`one piercing ${kind} damages each sheep once, including across Continue`, () => {
+    const sim = new Simulation(42, { hitTest: options.hitTest });
+    sim.state.newWave = false; sim.state.waveIndex = 4; sim.state.spawnTimer = 1000;
+    sim['spawnEnemy']('sheep');
+    Object.assign(sim.state.enemies[0], { x: 300, y: 230, speed: 0, speedOrg: 0, hp: 1000, maxHp: 1000 });
+    if (kind === 'bolt') {
+      sim['spawnEnemy']('sheep');
+      Object.assign(sim.state.enemies[1], { x: 260, y: 230, speed: 0, speedOrg: 0, hp: 1000, maxHp: 1000 });
+    }
+    const launch = () => createProjectile({ uid: sim.state.nextUid++, kind, weaponSlot: 0, damage: 10,
+      startX: 510, startY: 245, targetX: 300, targetY: 230, speedBase: kind === 'bolt' ? 20 : 10, penetrations: 3 });
+    const projectile = launch();
+    sim.state.projectiles.push(projectile);
+    while (!sim.events.some(e => e.type === 'hit') && sim.state.tick < 50) sim.tick();
+    const first = sim.state.enemies[0];
+    assert.ok(first.hp < 1000);
+    const hits = sim.events.filter(e => e.type === 'hit').map(e => e.enemyUid);
+    const hpAfterHit = first.hp;
+    const rngAfterHit = sim.state.rng;
+    const resumed = Simulation.fromSave(JSON.parse(JSON.stringify(sim.toSave())), { hitTest: options.hitTest });
+    for (let i = 0; i < 80; i++) {
+      sim.tick(); resumed.tick();
+      if (kind === 'arrow' && i === 0) assert.equal(sim.state.rng, rngAfterHit, 'a duplicate contact consumes no critical roll');
+      hits.push(...sim.events.filter(e => e.type === 'hit').map(e => e.enemyUid));
+      assert.deepEqual(resumed.toSave(), sim.toSave());
+      assert.deepEqual(resumed.events, sim.events);
+    }
+    assert.equal(first.hp, hpAfterHit, 'remaining inside the same target must not apply damage again');
+    assert.deepEqual(hits, sim.state.enemies.map(e => e.uid));
+    assert.equal(projectile.penetrations, 3 - hits.length, 'only new targets consume penetration');
+    sim.state.projectiles.push(launch());
+    for (let i = 0; i < 50 && first.hp === hpAfterHit; i++) sim.tick();
+    assert.ok(first.hp < hpAfterHit, 'a separate projectile can damage the same target');
+  });
+}
+
 for (const shot of [{ seed: 12, bow: 24, uid: 3, tick: 153 }, { seed: 1, bow: 23, uid: 2, tick: 55 }]) {
   test(`weapon ${shot.bow} hits the moving sheep between checks, including after Continue`, () => {
     const sim = new Simulation(shot.seed, options);

@@ -14,6 +14,8 @@ export interface ProjectileState {
   frame: number; pulseFrame: number; acceleration: number; direction: number; removed: boolean;
   verticalProgress: number | null;
   previousArrowPoint?: { x: number; y: number };
+  // Пробитие позволяет поразить другую цель, но не повторно ту же цель на следующем кадре.
+  hitEnemyUids?: number[];
 }
 
 export interface ProjectileLaunch {

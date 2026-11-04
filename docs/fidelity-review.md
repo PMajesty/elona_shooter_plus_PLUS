@@ -229,6 +229,7 @@ The user requested these additional corrections to confirmed Flash behavior.
 
 | Behavior | Browser rule and evidence |
 | --- | --- |
+| Piercing arrows hitting one target repeatedly | Each arrow/bolt remembers enemy IDs it has already touched, across point and swept contacts and save/Continue. A stationary sheep previously took damage on consecutive ticks 21–22 for a bow and 11–12 for a crossbow. The regression now retains the first hit, spends no further penetration/RNG on that enemy, reaches a second sheep and allows a different arrow to hit again. The untouched Flash trace still records its original repeated hits. |
 | Crossbow and Repeating Crossbow | An adjusted aim height of exactly 135 uses the ground collision and flight rules. The same bolt hit a moving sheep after a mid-flight save and Continue. Flash tested strictly above or below 135 and skipped collisions at equality. |
 | Don't attack armored mobs | Opus implemented armor exclusion across ordinary targeting, retained targets, Boss/Defend and automatic grenade targeting. The original trace chooses armored target 101. With the same inputs the port chooses flying target 103 and leaves 101 in the cache for other allies. Splash and penetration can still hit bystanders. |
 | Trouble | Search adds the displayed whole percentage to the next mission's enemy HP multiplier. It stacks with Taunt. A save across Rest verifies a spawned sheep's maximum HP. Historical saves retain the mission stats already recorded. |

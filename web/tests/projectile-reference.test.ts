@@ -10,7 +10,7 @@ const fixture = JSON.parse(readFileSync(new URL('./fixtures/original-projectile-
 const records = fixture.records as ProjectileRecord[];
 const sample = (name: string) => records.find(row => row.scenario === name)!;
 
-test('projectile launch, 650 manual flight steps and live impacts match the original, with separate vertical-fix checks', () => {
+test('original projectile callback probe matches 650 manual flight steps; gameplay hit deduplication is tested separately', () => {
   assert.equal(fixture.format, 'elona-original-projectile-trace');
   assert.equal(fixture.originalSha256, '4ceb133dce049204d66213f23abe14bd953b8931291a23337490ae5c1f031663');
   assert.equal(createHash('sha256').update(JSON.stringify(records)).digest('hex'), fixture.traceSha256);
@@ -20,6 +20,8 @@ test('projectile launch, 650 manual flight steps and live impacts match the orig
   assert.equal(sample('crossbow_overlap_corpse').drawCount, 10);
   assert.equal(sample('crossbow_overlap_corpse').damageEvents!.length, 4);
   assert.equal(sample('arrow_penetration').damageEvents!.length, 3);
+  // Зонд вызывает procHit без объекта снаряда и сохраняет свидетельство повторных попаданий Flash.
+  // Обычный Simulation.tick ведёт историю целей; исправление проверяется в projectile-gameplay.test.ts.
   assert.equal(sample('crossbow_fade').steps!.at(-1)!.actors[0].attached, false);
   assert.ok(Number(sample('crossbow_fade').steps!.at(-1)!.actors[0].scale) < 0);
   for (const name of ['gravity', 'flame']) {

@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-03. **Desktop and touch browser release, save v45.**
+Updated 2026-11-04. **Desktop and touch browser release, save v45.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
 The production bundle is `index-B_k9m-G9.js` from `e1ba324`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
@@ -78,6 +78,14 @@ control in the preserved source and are not missing normal-play features. These
 audits are evidence about connections, not formula/behavior equivalence proofs.
 
 ## Latest integrated fixes
+
+Piercing bow arrows and crossbow bolts damage each enemy at most once per
+projectile. Previously a target still overlapping the next collision check took
+another hit and spent another penetration. Optional saved target IDs preserve
+the correction across Continue. Older saves remain readable but cannot recover
+unrecorded contacts from before this update. Other arrows and other enemies
+remain eligible. The existing Flash callback trace is retained as evidence of
+the original behavior, separate from the corrected gameplay regressions.
 
 Manual Hunter/Rogue/Sheriff/Militia now apply Burst, Power Shot, One Shot and
 Killer during ordinary firing; an optional advanced-class meter had incorrectly
