@@ -2,9 +2,18 @@
 
 Updated 2026-11-04. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-The production bundle is `index-DtsZOO52.js` from `fe24618`. The documented
+The Russian-language release bundle is `index-ohWQvv_e.js`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
+
+The **EN/RU** button beside mute changes language immediately and remembers the
+choice in this browser. Opus translated the UI, game content and lettering in
+the original artwork. Russian includes Cyrillic fonts, fitted text, translated
+button states and matching click masks. Proper names and logos remain intact.
+Both editions and existing saves work without conversion; gameplay data stays
+in English. Checks passed for 25 focused cases, identical seeded saves/replays,
+muted desktop New Game/combat/Continue/help/town flows, and Russian phone-sized
+Chromium touch controls. [Translation maintenance](localization.md).
 
 The title now offers **Classic** and **Expanded** before New Game. Existing
 adventures and Flash imports stay Classic. Expanded has independent medals and

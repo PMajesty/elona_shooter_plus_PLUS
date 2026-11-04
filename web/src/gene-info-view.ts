@@ -1,3 +1,5 @@
+import { localizedImage } from './localized-image.ts';
+import { localizedText, fitLocalizedText } from './localized-text.ts';
 import Phaser from 'phaser';
 import { HERO_CLASSES, type HeroClass } from './hero-classes.ts';
 import { ALL_TRAITS } from './party-progression.ts';
@@ -27,10 +29,10 @@ export function createGeneInfoView(scene: Phaser.Scene, manifest: LootViewManife
     ids.forEach((id, index) => {
       const definition = ALL_TRAITS[id], level = traits[id], x = 271 + Math.trunc(index / 4) * 130, y = 218 + index % 4 * 18;
       const base = id < 100 || id >= 900, part = layout.partyTrait.children, icon = part.icon, atlas = manifest.clips.partyTraitIcon;
-      rows.add(scene.add.image(x + icon.x, y + icon.y, 'partyTraitIcon', base ? '2' : definition.party ? '3' : '1')
+      rows.add(localizedImage(scene, x + icon.x, y + icon.y, 'partyTraitIcon', base ? '2' : definition.party ? '3' : '1')
         .setOrigin(atlas.originX / atlas.frameWidth, atlas.originY / atlas.frameHeight).setScale(icon.scaleX, icon.scaleY));
-      rows.add(scene.add.text(x + part.traitName.x, y + part.traitName.y, `${definition.name}${level > 1 ? ` ${level}` : ''}`,
-        { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '13px', color: base ? '#044010' : '#000000', padding: { x: 1, y: 1 } }));
+      rows.add(fitLocalizedText(localizedText(scene, x + part.traitName.x, y + part.traitName.y, `${definition.name}${level > 1 ? ` ${level}` : ''}`,
+        { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '13px', color: base ? '#044010' : '#000000', padding: { x: 1, y: 1 } }), { width: 130 - part.traitName.x, height: 18, ellipsis: true }));
       const hit = scene.add.zone(x, y, 130, 18).setOrigin(0).setInteractive().setName(`gene-trait-${id}`); rows.add(hit);
       hit.on('pointerover', () => show(traitHintValues(id, traits)));
       hit.on('pointerout', hide);

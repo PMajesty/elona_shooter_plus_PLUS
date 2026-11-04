@@ -8,6 +8,8 @@ The original artwork, fonts, sound, English text and credits are retained. So ar
 
 Encounters repeat in cycles with stronger enemies later on. Class unlocks and medal bonuses carry into future adventures within the same edition.
 
+An optional Russian translation covers menus, gameplay descriptions and text in images. It uses Cyrillic fonts and adjusts text layout; English remains available. Author names, website names and the game logo stay in their original form. The language choice does not change game rules or save data.
+
 The [port status](docs/port-status.md) lists detailed coverage, comparisons and remaining differences.
 
 ## Fixes are part of Classic too

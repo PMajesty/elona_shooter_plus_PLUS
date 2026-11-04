@@ -1,3 +1,5 @@
+import { localizedImage } from './localized-image.ts';
+import { localizedText, contentText, fitLocalizedText } from './localized-text.ts';
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
 import type { MedalNotice } from './medal-notices.ts';
@@ -12,10 +14,10 @@ export function createMedalNoticeView(scene: Phaser.Scene, manifest: LootViewMan
   notice: MedalNotice): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setDepth(1000).setName(notice.id === undefined ? 'info' : `medal-${notice.id}`);
   const asset = manifest.clips.infoPopup;
-  root.add(scene.add.image(-asset.originX, -asset.originY, 'infoPopup', '1').setOrigin(0));
+  root.add(localizedImage(scene, -asset.originX, -asset.originY, 'infoPopup', '1').setOrigin(0));
   const p = layout.children.infoText, field = p.text, width = field.bounds[2] - field.bounds[0];
-  root.add(scene.add.text(p.x, p.y, notice.text, { fontFamily: 'ElonaMenuBold', fontSize: `${field.fontSize}px`,
-    color: field.color, letterSpacing: 1, padding: { x: 1, y: 1 } }).setCrop(0, 0, width, field.bounds[3] - field.bounds[1]));
+  root.add(fitLocalizedText(contentText(localizedText(scene, p.x, p.y, notice.text, { fontFamily: 'ElonaMenuBold', fontSize: `${field.fontSize}px`,
+    color: field.color, letterSpacing: 1, padding: { x: 1, y: 1 } }).setCrop(0, 0, width, field.bounds[3] - field.bounds[1])), { width, height: field.bounds[3] - field.bounds[1] }));
   return root;
 }
 

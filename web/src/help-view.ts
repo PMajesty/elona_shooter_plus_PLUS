@@ -1,3 +1,5 @@
+import { localizedImage } from './localized-image.ts';
+import { localizedText, fitLocalizedText } from './localized-text.ts';
 import { buttonInput, refreshMenuHover } from './button-input.ts';
 import Phaser from 'phaser';
 import { bindTouchSafeDismiss } from './touch-scroll.ts';
@@ -22,7 +24,7 @@ export function createHelpView(scene: Phaser.Scene, manifest: LootViewManifest, 
   let page = 4;
   const image = (key: string, p: Placement) => {
     const a = manifest.images[key];
-    const object = scene.add.image(layout.position.x + p.x, layout.position.y + p.y, key)
+    const object = localizedImage(scene, layout.position.x + p.x, layout.position.y + p.y, key)
       .setOrigin(a.originX / a.width, a.originY / a.height).setScale(p.scaleX, p.scaleY);
     content.add(object); return object;
   };
@@ -39,9 +41,9 @@ export function createHelpView(scene: Phaser.Scene, manifest: LootViewManifest, 
     const data = layout.pages[page - 1];
     image(data.image, { x: 0, y: 0, scaleX: 1, scaleY: 1 });
     if (page === 3) {
-      content.add(scene.add.text(layout.position.x + 146, layout.position.y + 308,
+      content.add(fitLocalizedText(localizedText(scene, layout.position.x + 146, layout.position.y + 308,
         'Game by Noa · Plus by its contributors · AI vibe-ported · Always free',
-        { resolution: 2, fontFamily: 'Arial', fontSize: '12px', color: '#352317' }));
+        { resolution: 2, fontFamily: 'Arial', fontSize: '12px', color: '#352317' }), { width: 398, height: 18 }));
       for (const [index, url] of Object.entries(layout.links)) {
         const p = data.children[`link${index}`];
         if (p) button('button_helpLink', p, () => window.open(url, '_blank', 'noopener,noreferrer')).setName(`help-credit-${index}`);

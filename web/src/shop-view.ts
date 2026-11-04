@@ -1,3 +1,5 @@
+import { localizedImage } from './localized-image.ts';
+import { localizedText, fitLocalizedText } from './localized-text.ts';
 import { buttonInput } from './button-input.ts';
 import { createItemPopupView, type ItemPopupLayout } from './item-popup-view.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
@@ -63,7 +65,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
   const menu = layout.menuPosition, panel = layout.shop;
   const image = (key: string, x = 0, y = 0, placement?: Placement) => {
     const asset = manifest.images[key];
-    const object = scene.add.image(x, y, key).setOrigin(asset.originX / asset.width, asset.originY / asset.height);
+    const object = localizedImage(scene, x, y, key).setOrigin(asset.originX / asset.width, asset.originY / asset.height);
     if (placement) object.setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees);
     else object.setDisplaySize(asset.width, asset.height);
     root.add(object); return object;
@@ -72,11 +74,12 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
     const field = placement.text!;
     const fonts: Record<number, string> = { 682: 'ElonaMenu', 1608: 'ElonaMenuBold', 2681: 'ElonaHud', 1392: 'ElonaSmall', 1535: 'ui', 2116: 'Arial' };
     const width = field.bounds[2] - field.bounds[0];
-    const object = scene.add.text(x + placement.x, y + placement.y, value, {
+    const object = localizedText(scene, x + placement.x, y + placement.y, value, {
       resolution: 2, fontFamily: fonts[field.fontId] ?? 'Arial', fontSize: `${field.fontSize}px`, color: field.color,
       wordWrap: { width }, align: field.align === 2 ? 'center' : 'left', padding: { x: 1, y: 1 },
     }).setFixedSize(width, 0).setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees);
     if (field.color === '#ffffff') object.setShadow(1, 1, '#000000', 2);
+    fitLocalizedText(object, { width, height: field.bounds[3] - field.bounds[1] });
     root.add(object); return object;
   };
   const button = (key: string, placement: Placement, action: () => void, x = 0, y = 0, enabled = true) => {
@@ -137,7 +140,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
     const item = isOccupiedItem(rawItem) ? rawItem : null;
     if (area === 'stock' && !item) return;
     const slotAsset = manifest.clips.inventorySlot;
-    const plate = scene.add.image(x - slotAsset.originX, y - slotAsset.originY, 'inventorySlot', '1').setOrigin(0);
+    const plate = localizedImage(scene, x - slotAsset.originX, y - slotAsset.originY, 'inventorySlot', '1').setOrigin(0);
     root.add(plate);
     if (upgradeSelecting && (area === 'stock' || item?.type !== ITEM_TYPE.gun)) plate.setAlpha(0.5);
     if (area === 'inventory') {
@@ -146,7 +149,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
     }
     if (area === 'stock' && item) {
       const coin = manifest.clips.shopCoin, p = layout.inventorySlot.children.coin;
-      root.add(scene.add.image(x + p.x - coin.originX, y + p.y - coin.originY, 'shopCoin', '1').setOrigin(0));
+      root.add(localizedImage(scene, x + p.x - coin.originX, y + p.y - coin.originY, 'shopCoin', '1').setOrigin(0));
       const price = itemPrice(item, true);
       text(layout.inventorySlot.children.cost, String(price), x, y).setColor(price <= state.gold ? '#0000cc' : '#cc0000').setName(`shop-price-${index}`);
     }
@@ -156,8 +159,8 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
       const width = GRAPHIC_WIDTH[item.graphic] ?? asset.frameWidth;
       const iconX = x - (width - 48) / 2 - 4;
       const icon = scene.add.container(iconX, y);
-      icon.add(scene.add.image(-asset.originX, -asset.originY, 'itemPicture', String(item.graphic)).setOrigin(0));
-      if (item.type === ITEM_TYPE.use && item.ammoMax > 0) icon.add(scene.add.text(30.95, 2, `x ${item.ammo}`, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
+      icon.add(localizedImage(scene, -asset.originX, -asset.originY, 'itemPicture', String(item.graphic)).setOrigin(0));
+      if (item.type === ITEM_TYPE.use && item.ammoMax > 0) icon.add(localizedText(scene, 30.95, 2, `x ${item.ammo}`, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
       root.add(icon);
       slotView = { area, index, item, icon, originalX: iconX, originalY: y, width, height: GRAPHIC_HEIGHT[item.graphic] ?? asset.frameHeight };
       if (pending?.kind === 'mod' && area === 'inventory' && pending.modSlot === index) pendingModIcon = slotView;
@@ -235,7 +238,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
       itemComparison(before, dialog.children.pop1, 'before');
       itemComparison(after, dialog.children.pop2, 'after');
       const placement = dialog.children.poparrow, asset = manifest.clips.shopUpgradeArrow;
-      root.add(scene.add.image(placement.x, placement.y, 'shopUpgradeArrow', '1')
+      root.add(localizedImage(scene, placement.x, placement.y, 'shopUpgradeArrow', '1')
         .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight)
         .setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees));
     }

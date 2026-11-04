@@ -1,3 +1,5 @@
+import { localizedImage } from './localized-image.ts';
+import { localizedText, fitLocalizedText } from './localized-text.ts';
 import { buttonInput } from './button-input.ts';
 import { createItemPopupView, type ItemPopupLayout } from './item-popup-view.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
@@ -31,16 +33,16 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
   const modal = state.pendingLootAction !== null;
   root.setName(mode === 'boss' ? 'boss-loot-view' : 'ordinary-loot-view').setData('pendingLootAction', state.pendingLootAction);
   const text = (x: number, y: number, value: string, size = 13, color = '#322316') => {
-    const object = scene.add.text(x, y, value, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: `${size}px`, color, padding: { x: 1, y: 1 } });
+    const object = localizedText(scene, x, y, value, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: `${size}px`, color, padding: { x: 1, y: 1 } });
     root.add(object); return object;
   };
   const image = (key: string, x: number, y: number) => {
     const asset = manifest.images[key];
-    const object = scene.add.image(x - asset.originX, y - asset.originY, key).setOrigin(0);
+    const object = localizedImage(scene, x - asset.originX, y - asset.originY, key).setOrigin(0);
     root.add(object); return object;
   };
   image(mode === 'boss' ? 'lootBoss' : 'loot', 0, 0);
-  if (mode === 'boss') text(295, 78, `You've successfully killed ${state.bossKilled ?? 0} boss(es) therefore received some prizes!`, 12).setWordWrapWidth(238);
+  if (mode === 'boss') fitLocalizedText(text(295, 78, `You've successfully killed ${state.bossKilled ?? 0} boss(es) therefore received some prizes!`, 12).setWordWrapWidth(238), { width: 238, height: 48 });
   const background = scene.add.zone(-MENU_X, 0, 620, 380).setOrigin(0).setInteractive();
   root.add(background);
   // Второй исходный ряд занимает прежнюю полосу подсказки порта; сообщение остаётся под canvas.
@@ -80,7 +82,7 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
   const addSlot = (area: LootArea, index: number, item: Item | null, x: number, y: number) => {
     if (!isOccupiedItem(item)) item = null;
     const slotAsset = manifest.clips.inventorySlot;
-    const slot = scene.add.image(x - slotAsset.originX, y - slotAsset.originY, 'inventorySlot', '1').setOrigin(0);
+    const slot = localizedImage(scene, x - slotAsset.originX, y - slotAsset.originY, 'inventorySlot', '1').setOrigin(0);
     root.add(slot);
     if (area === 'inventory' && index < 5) text(x + 6, y + 29.4, String(index + 1), 12, '#77664d');
     let slotView: SlotView | undefined;
@@ -90,9 +92,9 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
       const iconX = x - (width - 48) / 2 - 4;
       const icon = scene.add.container(iconX, y);
       const frame = scene.textures.get('itemPicture').has(String(item.graphic)) ? String(item.graphic) : '1';
-      icon.add(scene.add.image(-asset.originX, -asset.originY, 'itemPicture', frame).setOrigin(0));
+      icon.add(localizedImage(scene, -asset.originX, -asset.originY, 'itemPicture', frame).setOrigin(0));
       if (item.type === ITEM_TYPE.use && item.ammoMax > 0) {
-        icon.add(scene.add.text(30.95, 2, `x ${item.ammo}`, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
+        icon.add(localizedText(scene, 30.95, 2, `x ${item.ammo}`, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
       }
       root.add(icon);
       slotView = { area, index, item, icon, originalX: iconX, originalY: y, width, height: GRAPHIC_HEIGHT[item.graphic] ?? asset.frameHeight };

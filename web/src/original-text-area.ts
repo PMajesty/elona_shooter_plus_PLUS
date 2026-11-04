@@ -1,13 +1,28 @@
+import { localizedImage } from './localized-image.ts';
+import { localizedText } from './localized-text.ts';
 import Phaser from 'phaser';
 import { bindTouchScroll } from './touch-scroll.ts';
+import { t, onLanguageChanged } from './i18n.ts';
 
 /** Исходное поле Flash с прокруткой в координатах игрового окна. */
 export function originalTextArea(scene: Phaser.Scene, name: string, text: string, x: number, y: number, width: number, height: number,
   changed?: (value: number) => void): Phaser.GameObjects.Container {
+  const root = scene.add.container(0, 0);
+  const draw = () => {
+    root.removeAll(true);
+    const translated = t(text).replace(/<br\s*\/?>|<\/p>/gi, '\n').replace(/<[^>]+>/g, '');
+    root.add(createTextArea(scene, name, translated, x, y, width, height, changed));
+  };
+  draw(); const unsubscribe = onLanguageChanged(draw); root.once('destroy', unsubscribe);
+  return root;
+}
+
+function createTextArea(scene: Phaser.Scene, name: string, text: string, x: number, y: number, width: number, height: number,
+  changed?: (value: number) => void): Phaser.GameObjects.Container {
   const content = scene.add.container(0, 0);
   let scroll = 0;
   content.add(scene.add.nineslice(x, y, 'helpTextAreaSkin', '1', width, height, 2, 2, 2, 2).setOrigin(0));
-  const field = scene.add.text(x + 4, y + 4, text, {
+  const field = localizedText(scene, x + 4, y + 4, text, {
     fontFamily: 'Arial', fontSize: '12px', color: '#000000', wordWrap: { width: width - 25 },
   }).setName(name).setCrop(0, 0, width - 22, height - 8); content.add(field);
   const maxScroll = Math.max(0, field.height - height + 8);
@@ -34,7 +49,7 @@ export function originalTextArea(scene: Phaser.Scene, name: string, text: string
   thumb.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => e.stopPropagation());
   thumb.on('drag', (_p: Phaser.Input.Pointer, _dx: number, dy: number) => setScroll(travel ? (dy - trackTop) * maxScroll / travel : 0));
   for (const [key, arrowY, direction] of [['helpScrollUp', y, -1], ['helpScrollDown', y + height - 15, 1]] as const) {
-    const arrow = scene.add.image(scrollX, arrowY, key, '1').setOrigin(0).setInteractive({ useHandCursor: true }); content.add(arrow);
+    const arrow = localizedImage(scene, scrollX, arrowY, key, '1').setOrigin(0).setInteractive({ useHandCursor: true }); content.add(arrow);
     arrow.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); setScroll(scroll + direction * 36); });
   }
   const wheel = (pointer: Phaser.Input.Pointer, _over: Phaser.GameObjects.GameObject[], _dx: number, dy: number) => {

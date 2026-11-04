@@ -19,6 +19,8 @@ Choose **New Game**, pick a class and appearance, then press **Proceed**. Open *
 - **Desktop:** aim and shoot with the mouse. Hold and release for bows. Space reloads, 1–5 select weapons or use items, F toggles automatic fire, and Esc pauses.
 - **Touch:** tap to shoot, or hold and drag to aim an automatic weapon. A second finger can tap Reload. Landscape gives the battlefield more room; portrait menus have an Enlarge control.
 
+Use **EN / RU** beside the mute and fullscreen buttons to switch languages at any time. The choice is remembered. Russian includes the lettering in the original menu artwork, and works with both editions and existing saves.
+
 ## Classic or Expanded?
 
 **Classic** keeps the original content with gameplay fixes. **Expanded** adds optional fan-made features, starting with a companion targeting order. Choose before starting an adventure; loading a save keeps its edition. [Edition details](docs/expanded-edition.md).

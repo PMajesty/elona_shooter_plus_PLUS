@@ -1,3 +1,6 @@
+import { localizedImage } from './localized-image.ts';
+import { localizedText, fitLocalizedText } from './localized-text.ts';
+import { getLanguage, setLanguage, onLanguageChanged, t } from './i18n.ts';
 import { buttonInput, refreshMenuHover } from './button-input.ts';
 import { createTitleSequence, playOpening } from './title-sequence.ts';
 import { MAX_CAMPAIGN_DAY } from './missions.ts';
@@ -61,7 +64,7 @@ import type { EnemyShotKind } from './enemy-arrows.ts';
 import { titlePointerHit, titleStateHit, type TitleButtonState } from './title-hit.ts';
 import './style.css';
 
-interface ImageAsset { file: string; width: number; height: number; originX: number; originY: number }
+interface ImageAsset { file: string; width: number; height: number; originX: number; originY: number; ruHitMask?: string }
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number; frameAlpha?: number[] }
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual; enemyShotVisuals: Record<EnemyShotKind, ProjectileVisual> }
@@ -81,23 +84,24 @@ enlargeButton.addEventListener('click', () => {
   const enlarged = container.dataset.menuZoom !== 'true';
   container.dataset.menuZoom = String(enlarged);
   enlargeButton.setAttribute('aria-pressed', String(enlarged));
-  enlargeButton.textContent = enlarged ? 'Fit' : 'Enlarge';
+  enlargeButton.textContent = t(enlarged ? 'Fit' : 'Enlarge');
   positionMenuView();
 });
 const muteButton = document.querySelector<HTMLButtonElement>('#mute')!;
 function updateMuteControl(muted: boolean): void {
   muteButton.disabled = false;
   muteButton.setAttribute('aria-pressed', String(muted));
-  muteButton.setAttribute('aria-label', muted ? 'Unmute' : 'Mute');
+  muteButton.setAttribute('aria-label', t(muted ? 'Unmute' : 'Mute'));
 }
 const loadStatus = document.querySelector<HTMLDivElement>('#load-status')!;
 const statusElement = document.querySelector<HTMLParagraphElement>('#save-status')!;
+let statusSource: string | null = '';
 const status = {
-  get textContent(): string | null { return statusElement.textContent; },
+  get textContent(): string | null { return statusSource; },
   set textContent(message: string | null) {
-    statusElement.textContent = message;
+    statusSource = message; statusElement.textContent = message === null ? null : t(message);
   },
-  hide() { statusElement.textContent = ''; },
+  hide() { statusSource = ''; statusElement.textContent = ''; },
 };
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}assets/${path}`;
 const MENU_X = -15.587619764971691;
@@ -105,8 +109,8 @@ const bootStarted = performance.now();
 
 function showStartupFailure(message: string): void {
   const panel = document.createElement('div'); panel.className = 'startup-error';
-  const explanation = document.createElement('p'); explanation.textContent = message;
-  const retry = document.createElement('button'); retry.type = 'button'; retry.textContent = 'Retry';
+  const explanation = document.createElement('p'); explanation.textContent = t(message);
+  const retry = document.createElement('button'); retry.type = 'button'; retry.textContent = t('Retry');
   retry.addEventListener('click', () => window.location.reload());
   panel.append(explanation, retry); loadStatus.replaceChildren(panel); loadStatus.hidden = false;
   container.dataset.startupError = message;
@@ -134,6 +138,8 @@ USED_SOUNDS.add('soundImpact1');
 for (const key of ['soundChain1', 'soundChain2', 'soundChain3', 'soundDrop']) USED_SOUNDS.add(key);
 for (const key of ['soundTank2', 'soundLightning']) USED_SOUNDS.add(key);
 let manifest: Manifest;
+let russianAssets: { images: Record<string, string>; clips: Record<string, string>; hitMasks: Record<string, string> } = { images: {}, clips: {}, hitMasks: {} };
+let localizationReady = false;
 let gameScene: ElonaScene;
 
 class ElonaScene extends Phaser.Scene {
@@ -234,10 +240,13 @@ class ElonaScene extends Phaser.Scene {
     this.load.json('town-layout', assetUrl('town-layout.json'));
     for (const [key, asset] of Object.entries(manifest.images)) this.load.image(key, assetUrl(asset.file));
     for (const [key, asset] of Object.entries(manifest.clips)) this.load.atlas(key, assetUrl(asset.image), assetUrl(asset.json));
+    for (const [key, file] of Object.entries(russianAssets.images)) this.load.image(`ru:${key}`, assetUrl(`ru/${file}`));
+    for (const [key, file] of Object.entries(russianAssets.clips)) this.load.atlas(`ru:${key}`, assetUrl(`ru/${file}`), assetUrl(manifest.clips[key].json));
     for (const [key, file] of Object.entries(manifest.sounds)) if (USED_SOUNDS.has(key)) this.load.audio(key, assetUrl(file));
-    this.load.on('progress', (progress: number) => { loadStatus.textContent = `Loading original game assets… ${Math.round(progress * 100)}%`; });
+    this.load.on('progress', (progress: number) => { loadStatus.textContent = t(`Loading original game assets… ${Math.round(progress * 100)}%`); });
     this.load.on('loaderror', (file: Phaser.Loader.File) => {
       if (file.type === 'audio') console.warn(`Sound ${file.key} is unavailable; continuing without it.`);
+      else if (file.key.startsWith('ru:')) localizationReady = false;
       else this.failedRequiredAssets.add(file.key);
     });
   }
@@ -252,13 +261,15 @@ class ElonaScene extends Phaser.Scene {
       return;
     }
     gameScene = this;
+    if (!localizationReady) setLanguage('en');
+    document.querySelector<HTMLButtonElement>('#language')!.disabled = !localizationReady;
     this.battleCursor = new BattleCursor(this);
     // Все 273 изображения charaPic в SWF используют несглаживаемую заливку 0x43.
     // Сохраняем дробные исходные координаты, но исключаем размытие соседних пикселей тела.
     this.textures.get('charaPic').setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.textures.get('itemPicture').setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.game.canvas.tabIndex = 0;
-    this.game.canvas.setAttribute('aria-label', 'Elona Shooter battlefield');
+    this.game.canvas.setAttribute('aria-label', t('Elona Shooter battlefield'));
     loadStatus.hidden = true;
     container.dataset.loadMs = (performance.now() - bootStarted).toFixed(0);
     this.sound.mute = this.muted;
@@ -607,7 +618,7 @@ class ElonaScene extends Phaser.Scene {
   private image(key: string, x = 0, y = 0): Phaser.GameObjects.Image | undefined {
     const asset = manifest.images[key];
     if (!asset) return;
-    const object = this.add.image(x - (asset.originX ?? 0), y - (asset.originY ?? 0), key).setOrigin(0);
+    const object = localizedImage(this, x - (asset.originX ?? 0), y - (asset.originY ?? 0), key).setOrigin(0);
     this.root.add(object);
     return object;
   }
@@ -616,13 +627,13 @@ class ElonaScene extends Phaser.Scene {
     const asset = manifest.clips[key];
     if (!asset) return;
     const actual = this.textures.get(key).has(String(frame)) ? String(frame) : '1';
-    const object = this.add.image(x - asset.originX, y - asset.originY, key, actual).setOrigin(0);
+    const object = localizedImage(this, x - asset.originX, y - asset.originY, key, actual).setOrigin(0);
     this.root.add(object);
     return object;
   }
 
   private text(x: number, y: number, content: string, size = 13, color = '#322316', font = 'ElonaMenu'): Phaser.GameObjects.Text {
-    const object = this.add.text(x, y, content, { resolution: 2, fontFamily: font, fontSize: `${size}px`, color, padding: { x: 1, y: 1 } });
+    const object = localizedText(this, x, y, content, { resolution: 2, fontFamily: font, fontSize: `${size}px`, color, padding: { x: 1, y: 1 } });
     this.root.add(object);
     return object;
   }
@@ -793,7 +804,7 @@ class ElonaScene extends Phaser.Scene {
     const classes = (Object.keys(this.sim!.rules.content.classes) as HeroClass[]).slice(page * 4, page * 4 + 4);
     const radios: (Phaser.GameObjects.Image | undefined)[] = [];
     const labels: Phaser.GameObjects.Text[] = [];
-    const hint = this.text(280, 205, '', 13, '#2d315b');
+    const hint = fitLocalizedText(this.text(280, 205, '', 13, '#2d315b').setWordWrapWidth(255), { width: 255, height: 27 });
     const info = createGeneInfoView(this, manifest, this.cache.json.get('town-layout') as TownLayout & PartyLayout,
       hint => { if (hint) container.dataset.geneHint = JSON.stringify(hint); else delete container.dataset.geneHint; });
     this.root.add(info.root);
@@ -831,9 +842,9 @@ class ElonaScene extends Phaser.Scene {
     refreshClass();
     this.originalButton('button_proceed', 267, 301, () => this.startGame());
     this.originalButton('button_gameMods', 408, 301, () => this.showGameMods(page));
-    this.text(159, 302, page === 0 ? 'Next Page' : 'Previous Page', 13, '#2d315b');
+    fitLocalizedText(this.text(159, 302, page === 0 ? 'Next Page' : 'Previous Page', 13, '#2d315b'), { width: 101, height: 23 });
     const modeNames = [['casual', 'Casual Mode'], ['hardcore', 'Hardcore Mode']] as const;
-    const modeMarkers = modeNames.map(([mode, name], index) => this.text(413, 252 + index * 22, '', 12, '#2d315b', 'Arial'));
+    const modeMarkers = modeNames.map(([mode, name], index) => fitLocalizedText(this.text(413, 252 + index * 22, '', 12, '#2d315b', 'Arial'), { width: 133, height: 21 }));
     const refreshMode = () => modeNames.forEach(([mode, name], index) => modeMarkers[index].setText(`${this.sim!.state.mode === mode ? '[x]' : '[ ]'} ${name}`));
     refreshMode();
     modeNames.forEach(([mode], index) => this.zone(405, 244 + index * 22, 142, 21, () => {
@@ -860,7 +871,7 @@ class ElonaScene extends Phaser.Scene {
     this.image('gameMods');
     const rows: [GameMod, number][] = [['bossMods', 104], ['intense', 123], ['tight', 142], ['laptop', 161], ['community', 181], ['skipHard', 220], ['weaponLevel', 239]];
     const checks = rows.map(([key, y]) => {
-      this.text(168, y, GAME_MODS[key].label, 12, '#24221a', 'Arial');
+      fitLocalizedText(this.text(168, y, GAME_MODS[key].label, 12, '#24221a', 'Arial'), { width: key === 'community' ? 180 : 350, height: 19 });
       return this.clip('partyCheckOff', 1, 150, y + 2)!;
     });
     const refresh = () => {
@@ -974,7 +985,7 @@ class ElonaScene extends Phaser.Scene {
       const count = this.text(50 + slot * 90, 363, '', 11, '#ffffff', 'Arial').setShadow(1, 1, '#000000', 2);
       const timer = manifest.clips.itemTimer;
       // Исходный itemTimer.bar расположен внутри контейнера в (38.95, 6.5).
-      const cooldown = this.add.image(slot * 90 - 20 + 38.95, 350 + 6.5, 'itemTimer', '1')
+      const cooldown = localizedImage(this, slot * 90 - 20 + 38.95, 350 + 6.5, 'itemTimer', '1')
         .setOrigin((timer.originX + 38.95) / timer.frameWidth, (timer.originY + 6.5) / timer.frameHeight);
       this.root.add(cooldown);
       this.hotbar.push({ icon, count, cooldown });
@@ -997,7 +1008,7 @@ class ElonaScene extends Phaser.Scene {
     const { menuButton, vol } = (this.cache.json.get('town-layout') as { pause: PauseLayout }).pause.controls;
     this.originalButton('button_gameMenu', menuButton.x, menuButton.y, () => { if (!this.paused) this.togglePause(); });
     const a = manifest.clips.gameVolume;
-    this.volumeIcon = this.add.image(vol.x, vol.y, 'gameVolume', this.muted ? '2' : '1').setOrigin(a.originX / a.frameWidth, a.originY / a.frameHeight).setInteractive({ useHandCursor: true }); this.root.add(this.volumeIcon);
+    this.volumeIcon = localizedImage(this, vol.x, vol.y, 'gameVolume', this.muted ? '2' : '1').setOrigin(a.originX / a.frameWidth, a.originY / a.frameHeight).setInteractive({ useHandCursor: true }); this.root.add(this.volumeIcon);
     this.volumeIcon.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); this.toggleMute(); });
   }
 
@@ -1168,7 +1179,7 @@ class ElonaScene extends Phaser.Scene {
     if (enemy.hp > 0 && enemy.x > 20 && !this.bossReticleSeen.has(enemy.uid)) {
       this.bossReticleSeen.add(enemy.uid);
       const asset = manifest.clips.bossReticle;
-      const marker = this.add.image(13, -20, 'bossReticle', '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
+      const marker = localizedImage(this, 13, -20, 'bossReticle', '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
       actor.add(marker); this.bossReticles.set(enemy.uid, { image: marker, frame: 1 });
     }
     if (this.bossFrames.get(enemy.uid) !== enemy.frame) {
@@ -1193,7 +1204,7 @@ class ElonaScene extends Phaser.Scene {
       let actor = this.companionSprites.get(slot.slot), cursor = this.companionCursors.get(slot.slot);
       if (!actor) {
         const asset = manifest.clips.partyAimCursor;
-        cursor = this.add.image(480 + slot.slot * 2, position.y, 'partyAimCursor', '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
+        cursor = localizedImage(this, 480 + slot.slot * 2, position.y, 'partyAimCursor', '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
         this.root.add(cursor); this.companionCursors.set(slot.slot, cursor);
         actor = new OriginalAlly(this, this.cache.json.get('ally-animation') as OriginalAllyMetadata, manifest.clips, member.appearance, position.x, position.y);
         actor.stopOriginal(weaponPresentation(slot.weapon?.id ?? 0).idleFrame);
@@ -1345,7 +1356,7 @@ class ElonaScene extends Phaser.Scene {
     else this.battleCursor.hide();
     if (this.touchAimPointer && this.touchInput && !this.paused) {
       // Тот же кадр, регистрационная точка и отдача, что у мышиного originalCrosshair.
-      this.touchAimSprite ??= this.add.image(0, 0, 'originalCrosshair', frame);
+      this.touchAimSprite ??= localizedImage(this, 0, 0, 'originalCrosshair', frame);
       if (!this.touchAimSprite.parentContainer) this.root.add(this.touchAimSprite);
       this.touchAimSprite.setFrame(frame).setOrigin(crosshair.originX / crosshair.frameWidth, crosshair.originY / crosshair.frameHeight)
         .setPosition(this.touchAim.x, this.touchAim.y).setScale(size).setAlpha(alpha).setVisible(true);
@@ -1374,12 +1385,12 @@ class ElonaScene extends Phaser.Scene {
       let sprite = this.enemyArrowSprites.get(arrow.uid);
       if (!sprite) {
         const asset = manifest.clips[visual.clip];
-        const body = this.add.image(visual.bodyX, arrow.y, visual.clip, '1')
+        const body = localizedImage(this, visual.bodyX, arrow.y, visual.clip, '1')
           .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
         let shadow: Phaser.GameObjects.Image | undefined;
         if (visual.shadow) {
           const shadowAsset = manifest.clips[visual.shadow.clip];
-          shadow = this.add.image(visual.shadow.x, arrow.shadowY, visual.shadow.clip, '1')
+          shadow = localizedImage(this, visual.shadow.x, arrow.shadowY, visual.shadow.clip, '1')
             .setOrigin(shadowAsset.originX / shadowAsset.frameWidth, shadowAsset.originY / shadowAsset.frameHeight)
             .setScale(visual.shadow.scaleX, visual.shadow.scaleY);
         }
@@ -1408,7 +1419,7 @@ class ElonaScene extends Phaser.Scene {
         const keys = visual.hardLight ? [visual.hardLight.multiplyClip, visual.hardLight.addClip] : [visual.clip];
         const images = keys.map((key, index) => {
           const asset = manifest.clips[key];
-          const image = this.add.image(0, 0, key, '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
+          const image = localizedImage(this, 0, 0, key, '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
           // Flash hard-light разложен на умножение и прибавление с исходной альфой.
           if (visual.hardLight) image.setBlendMode(index === 0 ? Phaser.BlendModes.MULTIPLY : Phaser.BlendModes.ADD);
           return image;
@@ -1418,7 +1429,7 @@ class ElonaScene extends Phaser.Scene {
         let shadow: Phaser.GameObjects.Image | undefined;
         if (visual.shadow) {
           const asset = manifest.clips[visual.shadow.clip];
-          shadow = this.add.image(visual.shadow.x, 0, visual.shadow.clip, '1')
+          shadow = localizedImage(this, visual.shadow.x, 0, visual.shadow.clip, '1')
             .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight)
             .setScale(visual.shadow.scaleX, visual.shadow.scaleY);
         }
@@ -1450,7 +1461,7 @@ class ElonaScene extends Phaser.Scene {
       if (!bar) {
         const asset = manifest.clips.bossHealthFill;
         // В hpbar исходный дочерний bar сжимается относительно центра, а не левого края.
-        const fill = this.add.image(11.95, 1.45, 'bossHealthFill', '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
+        const fill = localizedImage(this, 11.95, 1.45, 'bossHealthFill', '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
         bar = { container: this.add.container(enemy.x - 11, enemy.y + 22, [fill]), fill };
         this.root.add(bar.container); this.bossBars.set(enemy.uid, bar);
       }
@@ -1511,7 +1522,7 @@ class ElonaScene extends Phaser.Scene {
       if (key) this.playSound(key, 0.9, pan);
       if (event.enemyKind === 'tank') {
         const asset = manifest.clips.explosion;
-        const muzzle = this.add.image((event.x ?? 0) + 45, (event.y ?? 0) - 23, 'explosion', '1')
+        const muzzle = localizedImage(this, (event.x ?? 0) + 45, (event.y ?? 0) - 23, 'explosion', '1')
           .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setScale(0.4).setAlpha(0.75).setDepth(1);
         this.effects.push({ object: muzzle, ticks: 22, clip: 'explosion', frame: 1 });
       }
@@ -1559,7 +1570,7 @@ class ElonaScene extends Phaser.Scene {
         const key = ['', 'powerShotTrail', 'oneShotTrail', 'lethalShotTrail'][pellet.specialHitType ?? 0];
         if (!key) continue;
         const asset = manifest.clips[key], x = (event.x ?? 0) - 10, y = event.y ?? 0;
-        const trail = this.add.image(x, y, key, '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight)
+        const trail = localizedImage(this, x, y, key, '1').setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight)
           .setScale(Math.hypot(pellet.x - x, pellet.y - y) / asset.frameWidth, 1)
           .setRotation(Math.atan2(pellet.y - y, pellet.x - x)).setAlpha(0);
         this.root.add(trail); this.effects.push({ object: trail, ticks: 16, trail: true });
@@ -1605,7 +1616,7 @@ class ElonaScene extends Phaser.Scene {
     if (event.type === 'explosion') {
       const key = event.explosionKind === 'rocket' ? 'explosionLarge' : 'explosion';
       const asset = manifest.clips[key];
-      const explosion = this.add.image(event.x ?? 0, event.y ?? 0, key, '1')
+      const explosion = localizedImage(this, event.x ?? 0, event.y ?? 0, key, '1')
         .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setScale(event.scale ?? 1).setAlpha(0.85);
       this.root.add(explosion);
       // Кадровые скрипты удаляют исходные эффекты на 23-м и 13-м кадрах.
@@ -1618,7 +1629,7 @@ class ElonaScene extends Phaser.Scene {
     if (event.type === 'level-up') {
       const position = actorSlot === 0 ? { x: WORLD.playerX, y: WORLD.playerY } : partyActorPosition(actorSlot);
       const asset = manifest.clips.levelUp;
-      const effect = this.add.image(position.x, position.y, 'levelUp', '1')
+      const effect = localizedImage(this, position.x, position.y, 'levelUp', '1')
         .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setDepth(1);
       this.effects.push({ object: effect, ticks: asset.count, clip: 'levelUp', frame: 1 });
     }
@@ -2350,9 +2361,18 @@ async function boot(): Promise<void> {
   const response = await fetch(assetUrl('manifest.json'));
   if (!response.ok) throw new Error('Original assets are missing. Run python tools/extract_web_assets.py from the project folder.');
   manifest = await response.json() as Manifest;
-  const families: Record<string, string> = { menu: 'ElonaMenu', menuBold: 'ElonaMenuBold', hud: 'ElonaHud', small: 'ElonaSmall', impact: 'ElonaImpact' };
+  try {
+    const localizedResponse = await fetch(assetUrl('ru/manifest.json'));
+    if (!localizedResponse.ok) throw new Error('Russian artwork is unavailable.');
+    russianAssets = await localizedResponse.json(); localizationReady = true;
+  } catch {
+    status.textContent = 'Russian artwork is unavailable. Reload to retry.';
+  }
+  for (const [key, mask] of Object.entries(russianAssets.hitMasks)) manifest.images[key].ruHitMask = mask;
+  const families: Record<string, string> = { menu: 'ElonaMenu', menuBold: 'ElonaMenuBold', hud: 'ElonaHud', small: 'ElonaSmall', impact: 'ElonaImpact', ruMenu: 'ElonaRussianMenu', ruUI: 'ElonaRussianUI', ruBold: 'ElonaRussianBold' };
   const fontFallbacks: string[] = [];
-  await Promise.all(Object.entries(manifest.fonts).map(async ([key, file]) => {
+  const fontFiles = { ...manifest.fonts, ruMenu: 'fonts/ru/Neucha.ttf', ruUI: 'fonts/ru/PT_Sans-Web-Regular.ttf', ruBold: 'fonts/ru/PT_Sans-Web-Bold.ttf' };
+  await Promise.all(Object.entries(fontFiles).map(async ([key, file]) => {
     try {
       const font = new FontFace(families[key] ?? key, `url("${assetUrl(file)}")`);
       await font.load(); document.fonts.add(font);
@@ -2370,6 +2390,28 @@ async function boot(): Promise<void> {
 }
 
 const fullscreenButton = document.querySelector<HTMLButtonElement>('#fullscreen')!;
+const languageButton = document.querySelector<HTMLButtonElement>('#language')!;
+const staticText = new Map<Text, string>();
+for (const selector of ['#touch-guide-dialog', '#touch-pause', '#touch-reload', '#touch-fire-at-will', '#touch-guide', '#touch-enlarge', '#touch-pan']) {
+  const walker = document.createTreeWalker(document.querySelector(selector)!, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) if (node.textContent?.trim()) staticText.set(node as Text, node.textContent);
+}
+function updateLanguageControl(): void {
+  const lang = getLanguage(); document.documentElement.lang = lang; container.dataset.language = lang;
+  statusElement.textContent = statusSource === null ? null : t(statusSource);
+  document.querySelector('#playfield > canvas')?.setAttribute('aria-label', t('Elona Shooter battlefield'));
+  languageButton.textContent = lang.toUpperCase(); languageButton.setAttribute('aria-pressed', String(lang === 'ru'));
+  languageButton.setAttribute('aria-label', t(lang === 'en' ? 'Switch to Russian' : 'Switch to English'));
+  for (const [node, source] of staticText) node.textContent = source.replace(source.trim(), t(source.trim()));
+  enlargeButton.textContent = t(container.dataset.menuZoom === 'true' ? 'Fit' : 'Enlarge');
+  updateMuteControl(container.dataset.muted !== 'false');
+  fullscreenButton.setAttribute('aria-label', t(document.fullscreenElement === container ? 'Exit fullscreen' : 'Enter fullscreen'));
+  container.setAttribute('aria-label', t('Elona Shooter game'));
+  document.querySelector('#game-controls')!.setAttribute('aria-label', t('Game controls'));
+  panMenu.setAttribute('aria-label', t('Pan enlarged menu horizontally'));
+}
+languageButton.addEventListener('click', () => setLanguage(getLanguage() === 'en' ? 'ru' : 'en'));
+onLanguageChanged(updateLanguageControl); updateLanguageControl();
 muteButton.addEventListener('click', () => gameScene?.toggleMute());
 fullscreenButton.disabled = !document.fullscreenEnabled || typeof container.requestFullscreen !== 'function';
 fullscreenButton.addEventListener('click', () => {
@@ -2380,7 +2422,7 @@ document.addEventListener('fullscreenchange', () => {
   const active = document.fullscreenElement === container;
   container.classList.toggle('game-expanded', active);
   fullscreenButton.setAttribute('aria-pressed', String(active));
-  fullscreenButton.setAttribute('aria-label', active ? 'Exit fullscreen' : 'Enter fullscreen');
+  fullscreenButton.setAttribute('aria-label', t(active ? 'Exit fullscreen' : 'Enter fullscreen'));
 });
 function exportAdventure(): void {
   if (gameScene?.sim && !['title', 'gene', 'mods'].includes(gameScene.screen) && !canSaveAdventure(gameScene.sim.state)) {

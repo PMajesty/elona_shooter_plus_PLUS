@@ -1,3 +1,5 @@
+import { localizedImage } from './localized-image.ts';
+import { localizedText, fitLocalizedText } from './localized-text.ts';
 import { buttonInput } from './button-input.ts';
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
@@ -14,7 +16,7 @@ export function createModConfirmation(scene: Phaser.Scene, manifest: LootViewMan
   const root = scene.add.container(0, 0).setName(`${name}-dialog`);
   const image = (key: string, placement?: Placement) => {
     const asset = manifest.images[key];
-    const object = scene.add.image(placement?.x ?? 0, placement?.y ?? 0, key)
+    const object = localizedImage(scene, placement?.x ?? 0, placement?.y ?? 0, key)
       .setOrigin(asset.originX / asset.width, asset.originY / asset.height);
     if (placement) object.setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees);
     root.add(object); return object;
@@ -22,10 +24,10 @@ export function createModConfirmation(scene: Phaser.Scene, manifest: LootViewMan
   image(layout.image);
   const placement = layout.children.question, field = placement.text!;
   const width = field.bounds[2] - field.bounds[0];
-  root.add(scene.add.text(placement.x, placement.y, question, {
+  root.add(fitLocalizedText(localizedText(scene, placement.x, placement.y, question, {
     fontFamily: 'ElonaMenu', fontSize: `${field.fontSize}px`, color: field.color,
     wordWrap: { width }, align: field.align === 2 ? 'center' : 'left', padding: { x: 1, y: 1 },
-  }).setFixedSize(width, 0).setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees).setName(`${name}-question`));
+  }).setFixedSize(width, 0).setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees).setName(`${name}-question`), { width, height: field.bounds[3] - field.bounds[1], minFontSize: 10 }));
 
   // MouseLDownFunc_result: только попадание в Yes подтверждает; любой иной щелчок выбирает No.
   const dismiss = scene.add.zone(0, 0, 620, 380).setOrigin(0).setInteractive().setName(`${name}-cancel-background`);

@@ -1,3 +1,4 @@
+import { localizedImage } from './localized-image.ts';
 import Phaser from 'phaser';
 import { fireworkPlan, FIREWORK_MEDAL_FRAMES } from './fireworks.ts';
 
@@ -6,7 +7,7 @@ export function createFireworks(scene: Phaser.Scene, manifest: { clips: Record<s
   const plan = fireworkPlan(seed, medals), live = new Map<number, { launch: Phaser.GameObjects.Image; particles: Phaser.GameObjects.Image[] }>();
   let accumulator = 0, frame = 0;
   const sprite = (key: string, x: number, y: number) => {
-    const a = manifest.clips[key], object = scene.add.image(x, y, key, '1').setOrigin(a.originX / a.frameWidth, a.originY / a.frameHeight); root.add(object); return object;
+    const a = manifest.clips[key], object = localizedImage(scene, x, y, key, '1').setOrigin(a.originX / a.frameWidth, a.originY / a.frameHeight); root.add(object); return object;
   };
   return { root, get frame() { return frame; }, get finished() { return frame >= FIREWORK_MEDAL_FRAMES && frame > plan[plan.length - 1].delay + 93; }, destroy() { root.destroy(true); },
     grantBonus() {

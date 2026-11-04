@@ -26,6 +26,7 @@ place of `npm.cmd`. The development server reloads the game when source files ch
 | `web/src/party-ai.ts` | Companion and automatic hero control |
 | `web/src/rulesets.ts` | Classic and Expanded definitions |
 | `web/src/main.ts` and `*-view.ts` | Input, screens and rendering |
+| `web/src/locales/` and `i18n.ts` | Russian catalogs and presentation-only translation |
 | `web/public/assets/` | Extracted artwork, fonts, sounds and layout data |
 | `web/tests/` | Logic, save and regression tests |
 | `web/scripts/` | Original-game comparisons and browser checks |
@@ -142,3 +143,7 @@ The build also accepts `--java` and `--ffdec` paths. See the
 Keep `.tools/`, `.build/`, credentials and runtime caches out of commits.
 The [license](LICENSE.md) covers newly written port code, not the upstream game
 or its extracted assets.
+
+## Translation
+
+See [localization](docs/localization.md) for catalogs, Cyrillic font credits, image regeneration and the language-switch checks.

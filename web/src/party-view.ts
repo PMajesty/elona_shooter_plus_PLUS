@@ -1,3 +1,5 @@
+import { localizedImage } from './localized-image.ts';
+import { localizedText, contentText, fitLocalizedText } from './localized-text.ts';
 import { SMART_COST_HINT, SMART_HINT, SMART_ORDER } from './smart-mode.ts';
 import { buttonInput } from './button-input.ts';
 import { createItemPopupView, type ItemPopupLayout } from './item-popup-view.ts';
@@ -82,14 +84,14 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
   root.setData({ tab, selectedSlot: state.selectedSlot, dialog: state.dialog, carrying: null });
   const image = (key: string, x = 0, y = 0, placement?: Placement) => {
     const asset = manifest.images[key];
-    const object = scene.add.image(x, y, key).setOrigin(asset.originX / asset.width, asset.originY / asset.height);
+    const object = localizedImage(scene, x, y, key).setOrigin(asset.originX / asset.width, asset.originY / asset.height);
     if (placement) object.setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees);
     else object.setDisplaySize(asset.width, asset.height);
     root.add(object); return object;
   };
   const clip = (key: string, frame: number, x: number, y: number) => {
     const asset = manifest.clips[key];
-    const object = scene.add.image(x, y, key, String(frame)).setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
+    const object = localizedImage(scene, x, y, key, String(frame)).setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
     root.add(object); return object;
   };
   const skin = (key: string, grid: number[], x: number, y: number, width: number, height: number) => {
@@ -101,10 +103,11 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
     const field = placement.text!;
     const width = field.bounds[2] - field.bounds[0];
     const fonts: Record<number, string> = { 682: 'ElonaMenu', 1608: 'ElonaMenuBold', 1653: 'ElonaImpact', 1535: 'ui', 2681: 'ElonaHud', 1392: 'ElonaSmall' };
-    const object = scene.add.text(x + placement.x, y + placement.y, value, {
+    const object = localizedText(scene, x + placement.x, y + placement.y, value, {
       resolution: 2, fontFamily: fonts[field.fontId] ?? 'Arial', fontSize: `${field.fontSize}px`, color: field.color,
       wordWrap: { width }, align: field.align === 1 ? 'right' : field.align === 2 ? 'center' : 'left', padding: { x: 1, y: 1 },
     }).setFixedSize(width, 0).setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees);
+    fitLocalizedText(object, { width, height: field.bounds[3] - field.bounds[1] });
     root.add(object); return object;
   };
   const button = (key: string, p: Placement, action: () => void, enabled = true, x = menu.x, y = menu.y) => {
@@ -145,7 +148,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
     const p = spec.children.chara1;
     const body = clip('charaPic', member.appearance * 10 + 5, x + p.x, y + p.y).setScale(p.scaleX, p.scaleY);
     portraitBodies.push({ image: body, appearance: member.appearance });
-    text(spec.children.pname, member.name, x, y);
+    contentText(text(spec.children.pname, member.name, x, y));
     if (!equipment) text(spec.children.lv, `L:${member.level}\nE:${member.exp / 10}`, x, y);
     const group = scene.add.container(0, 0, root.list.filter(child => !before.has(child)));
     root.add(group);
@@ -207,8 +210,9 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
         const width = controls.componentBaseWidth * p.scaleX, height = controls.componentBaseHeight * p.scaleY;
         skin('partyOrderSkin', controls.orderGrid, menu.x + p.x, menu.y + p.y, width, height);
         const orders = smartAllowed ? [...ORDERS, { value: SMART_ORDER, label: 'Smart Mode' }] : ORDERS;
-        const value = scene.add.text(menu.x + p.x + 3, menu.y + p.y + 5, orders.find(order => order.value === member.order)?.label ?? '', { fontFamily: 'Arial', fontSize: '11px', color: '#000000' });
-        // Подгоняем только новый длинный приказ, не обрезая его последние буквы.
+        const value = localizedText(scene, menu.x + p.x + 3, menu.y + p.y + 5, orders.find(order => order.value === member.order)?.label ?? '', { fontFamily: 'Arial', fontSize: '11px', color: '#000000' });
+        fitLocalizedText(value, { width: width - 22, height: height - 5, ellipsis: true });
+        // Исходное EN-поведение длинного нового приказа не меняется.
         if (smartSelected && value.width > width - 22) value.setScale((width - 22) / value.width, 1);
         else value.setCrop(0, 0, width - 22, height);
         root.add(value);
@@ -228,7 +232,8 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
           const outside = scene.add.zone(0, 0, 620, 380).setOrigin(0).setInteractive(); list.addAt(outside, 0);
           outside.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); list?.destroy(); list = null; hint.setText(memberHint); });
           options.forEach((order, index) => {
-            const label = scene.add.text(listX + 3, listY + 2 + index * 18, order.label, { fontFamily: 'Arial', fontSize: '11px', color: '#000000' }); list!.add(label);
+            const label = localizedText(scene, listX + 3, listY + 2 + index * 18, order.label, { fontFamily: 'Arial', fontSize: '11px', color: '#000000' });
+            fitLocalizedText(label, { width: 184, height: 16, ellipsis: true }); list!.add(label);
             const option = scene.add.zone(listX, listY + index * 18, 190, 18).setOrigin(0).setInteractive({ useHandCursor: true }); list!.add(option);
             option.on('pointerover', () => { label.setColor('#0000cc'); if (order.value === SMART_ORDER) hint.setText(SMART_HINT); }); option.on('pointerout', () => label.setColor('#000000'));
             option.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); callbacks.order(order.value); });
@@ -239,7 +244,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
             const p = panel.children[name], x = menu.x + p.x, y = menu.y + p.y;
             // Flash UIComponent поглощает scaleX в ширину; иконка остаётся 14×14.
             clip(selected ? 'partyCheckOn' : 'partyCheckOff', 1, x + controls.checkIconX, y + controls.checkIconY);
-            root.add(scene.add.text(x + controls.checkLabelX, y + 5, label, { fontFamily: 'Arial', fontSize: '11px', color: '#000000' }));
+            root.add(fitLocalizedText(localizedText(scene, x + controls.checkLabelX, y + 5, label, { fontFamily: 'Arial', fontSize: '11px', color: '#000000' }), { width: 70 - controls.checkLabelX, height: 17, ellipsis: true }));
             const area = scene.add.zone(x, y, 70, 22).setOrigin(0).setInteractive({ useHandCursor: true }); root.add(area);
             const checkHint = smartSelected ? `Boss and Defend guide your choice of foes.\n${SMART_COST_HINT}` : 'When "Boss" is checked, the character will go for the boss when a boss appears.\nWhen "Defend" is checked, the character will go for the enemies attacking your wall.';
             area.on('pointerover', () => hint.setText(checkHint));
@@ -302,8 +307,8 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
       if (address.kind === 'inventory' && address.slot < 5) text(layout.inventorySlot.children.shortNum, String(address.slot + 1), x, y);
       if (isOccupiedItem(item)) {
         record.icon = scene.add.container(record.x, y); root.add(record.icon);
-        record.icon.add(scene.add.image(-asset.originX, -asset.originY, 'itemPicture', String(item.graphic)).setOrigin(0));
-        if (item.type === ITEM_TYPE.use && item.ammoMax > 0) record.icon.add(scene.add.text(30.95, 2, `x ${item.ammo}`, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
+        record.icon.add(localizedImage(scene, -asset.originX, -asset.originY, 'itemPicture', String(item.graphic)).setOrigin(0));
+        if (item.type === ITEM_TYPE.use && item.ammoMax > 0) record.icon.add(localizedText(scene, 30.95, 2, `x ${item.ammo}`, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
       }
       const area = scene.add.zone(x, y, 48, 44).setOrigin(0).setInteractive({ useHandCursor: true }).setName(`equipment-${address.kind}-${address.slot}`);
       area.setData({ ...address, itemId: item?.id ?? null }); root.add(area);
@@ -365,7 +370,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
     const outside = scene.add.zone(0, 0, 620, 380).setOrigin(0).setInteractive(); root.add(outside);
     outside.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); callbacks.confirm(false); });
     image(layout.saleDialog.image);
-    text(layout.saleDialog.children.question, question, 0, 0);
+    contentText(text(layout.saleDialog.children.question, question, 0, 0));
     for (const [name, key, answer] of [['yes', 'button_dialogYes', true], ['no', 'button_dialogNo', false]] as const) {
       const p = layout.saleDialog.children[name];
       const object = image(key, p.x, p.y, p).setInteractive(buttonInput(manifest.images[key]));

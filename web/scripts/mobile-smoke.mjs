@@ -47,6 +47,9 @@ try {
     return JSON.parse(await readFile(await (await download).path(), 'utf8')).simulation;
   };
   await openTitle();
+  if (process.env.QA_LANGUAGE === 'ru') {
+    await page.locator('#language').tap(); assert.equal(await data('language'), 'ru');
+  }
   const portrait = await canvas.boundingBox();
   assert.ok(portrait.width >= 388 && portrait.x >= 0 && portrait.x + portrait.width <= 391);
   assert.equal(await data('muted'), 'true');

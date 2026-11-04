@@ -1,3 +1,5 @@
+import { localizedImage } from './localized-image.ts';
+import { localizedText, fitLocalizedText } from './localized-text.ts';
 import { buttonInput } from './button-input.ts';
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
@@ -19,7 +21,7 @@ export function createTitleSavesView(scene: Phaser.Scene, manifest: LootViewMani
     return scene.add.nineslice(x, y, key, '1', w, h, grid[0], asset.frameWidth - grid[2], grid[1], asset.frameHeight - grid[3]).setOrigin(0);
   };
   root.add(skin('partyOrderSkin', controls.orderGrid, p.x, p.y, width, height));
-  root.add(scene.add.text(p.x + 3, p.y + 5, labels[selected], { fontFamily: 'Arial', fontSize: '11px', color: '#000000' }).setCrop(0, 0, width - 22, height));
+  root.add(fitLocalizedText(localizedText(scene, p.x + 3, p.y + 5, labels[selected], { fontFamily: 'Arial', fontSize: '11px', color: '#000000' }).setCrop(0, 0, width - 22, height), { width: width - 22, height: height - 5, ellipsis: true }));
   let list: Phaser.GameObjects.Container | undefined;
   let highlighted = selected;
   let optionLabels: Phaser.GameObjects.Text[] = [];
@@ -34,7 +36,7 @@ export function createTitleSavesView(scene: Phaser.Scene, manifest: LootViewMani
     const y = p.y + height;
     list.add(skin('partyOrderListSkin', controls.orderListGrid, p.x, y, width, labels.length * 20 + 2));
     labels.forEach((value, index) => {
-      const label = scene.add.text(p.x + 3, y + index * 20 + 3, value, { fontFamily: 'Arial', fontSize: '11px', color: index === selected ? '#0000cc' : '#000000' }).setCrop(0, 0, width - 6, 20); list!.add(label);
+      const label = fitLocalizedText(localizedText(scene, p.x + 3, y + index * 20 + 3, value, { fontFamily: 'Arial', fontSize: '11px', color: index === selected ? '#0000cc' : '#000000' }).setCrop(0, 0, width - 6, 20), { width: width - 6, height: 17, ellipsis: true }); list!.add(label);
       optionLabels.push(label);
       const hit = scene.add.zone(p.x, y + index * 20, width, 20).setOrigin(0).setInteractive({ useHandCursor: true }).setName(`save-slot-${index}`); list!.add(hit);
       hit.on('pointerover', () => label.setColor('#0000cc')); hit.on('pointerout', () => label.setColor(index === selected ? '#0000cc' : '#000000'));
@@ -52,7 +54,7 @@ export function createTitleSavesView(scene: Phaser.Scene, manifest: LootViewMani
   };
   scene.input.keyboard?.on('keydown', keyboard);
   root.once('destroy', () => scene.input.keyboard?.off('keydown', keyboard));
-  const asset = manifest.images.button_deleteSave, trash = scene.add.image(placement.trash.x - 100, placement.trash.y, 'button_deleteSave').setOrigin(asset.originX / asset.width, asset.originY / asset.height)
+  const asset = manifest.images.button_deleteSave, trash = localizedImage(scene, placement.trash.x - 100, placement.trash.y, 'button_deleteSave').setOrigin(asset.originX / asset.width, asset.originY / asset.height)
     .setScale(placement.trash.scaleX, placement.trash.scaleY).setInteractive(buttonInput(asset)); root.add(trash);
   trash.on('pointerover', () => trash.setTexture('button_deleteSave_over')); trash.on('pointerout', () => trash.setTexture('button_deleteSave'));
   trash.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); close(); remove(); });

@@ -1,3 +1,5 @@
+import { localizedImage } from './localized-image.ts';
+import { localizedText, fitLocalizedText } from './localized-text.ts';
 import { buttonInput } from './button-input.ts';
 import Phaser from 'phaser';
 import { describeTrait, type TraitLevels } from './progression.ts';
@@ -13,17 +15,17 @@ export function createSkillView(scene: Phaser.Scene, state: SkillViewState, mani
   root.setName('skill-choice-view');
   const image = (key: string, x: number, y: number) => {
     const asset = manifest.images[key];
-    const object = scene.add.image(x - asset.originX, y - asset.originY, key).setOrigin(0);
+    const object = localizedImage(scene, x - asset.originX, y - asset.originY, key).setOrigin(0);
     root.add(object); return object;
   };
   const text = (x: number, y: number, value: string, width: number, color = '#000000') => {
-    const object = scene.add.text(x, y, value, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color, wordWrap: { width }, padding: { x: 1, y: 1 } }).setLineSpacing(2);
+    const object = localizedText(scene, x, y, value, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color, wordWrap: { width }, padding: { x: 1, y: 1 } }).setLineSpacing(2);
     root.add(object); return object;
   };
   image('level', 0, 0);
-  const description = text(263, 170, 'Please choose a skill you want to learn or improve.', 247);
-  const current = text(297, 213.1, '', 221);
-  const next = text(297, 229, '', 218, '#000099');
+  const description = fitLocalizedText(text(263, 170, 'Please choose a skill you want to learn or improve.', 247), { width: 247, height: 43, lineSpacing: 0 });
+  const current = fitLocalizedText(text(297, 213.1, '', 221), { width: 221, height: 16 });
+  const next = fitLocalizedText(text(297, 229, '', 218, '#000099'), { width: 218, height: 20 });
   const radios: Phaser.GameObjects.Image[] = [];
   let selected: number | undefined;
   const proceed = image('button_proceed', 259, 252).setVisible(false);
@@ -38,9 +40,10 @@ export function createSkillView(scene: Phaser.Scene, state: SkillViewState, mani
     const info = describeTrait(id, state.player.traits, ALL_TRAITS);
     const y = 180 + index * 20;
     const asset = manifest.clips.radioButton;
-    const radio = scene.add.image(158 - asset.originX, y - asset.originY, 'radioButton', '1').setOrigin(0);
+    const radio = localizedImage(scene, 158 - asset.originX, y - asset.originY, 'radioButton', '1').setOrigin(0);
     radios.push(radio); root.add(radio);
-    const label = scene.add.text(172, y - 7, info.name, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '13px', color: '#000000', padding: { x: 1, y: 1 } }).setFixedSize(89, 20);
+    const label = localizedText(scene, 172, y - 7, info.name, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '13px', color: '#000000', padding: { x: 1, y: 1 } }).setFixedSize(89, 20);
+    fitLocalizedText(label, { width: 89, height: 20, ellipsis: true });
     root.add(label);
     if (!info.canImprove) { radio.setAlpha(0.5); label.setAlpha(0.5); }
     const hit = scene.add.zone(148, y - 9, 113, 20).setOrigin(0).setInteractive({ useHandCursor: true });

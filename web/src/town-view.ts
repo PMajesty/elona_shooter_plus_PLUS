@@ -1,3 +1,5 @@
+import { localizedImage } from './localized-image.ts';
+import { localizedText, contentText, fitLocalizedText } from './localized-text.ts';
 import { buttonInput } from './button-input.ts';
 import { TOWN_ACTIVITIES, museumIncome, type TownActivity, type TownEconomy } from './town-economy.ts';
 import { MEDALS } from './medals.ts';
@@ -45,7 +47,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
   const root = scene.add.container(0, 0).setName('town-view');
   const image = (key: string, x = 0, y = 0, placement?: Placement) => {
     const asset = manifest.images[key];
-    const object = scene.add.image(x, y, key).setOrigin(asset.originX / asset.width, asset.originY / asset.height);
+    const object = localizedImage(scene, x, y, key).setOrigin(asset.originX / asset.width, asset.originY / asset.height);
     if (placement) object.setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees);
     else object.setDisplaySize(asset.width, asset.height);
     root.add(object); return object;
@@ -55,11 +57,12 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     const fonts: Record<number, string> = { 682: 'ElonaMenu', 1608: 'ElonaMenuBold', 2681: 'ElonaHud', 1392: 'ElonaSmall', 1535: 'ui' };
     const indent = field.indent ?? 0;
     const width = field.bounds[2] - field.bounds[0] - indent;
-    const object = scene.add.text(x + placement.x + indent, y + placement.y, value, {
+    const object = localizedText(scene, x + placement.x + indent, y + placement.y, value, {
       resolution: 2, fontFamily: fonts[field.fontId] ?? 'Arial', fontSize: `${field.fontSize}px`, color: field.color,
       wordWrap: { width }, align: field.align === 2 ? 'center' : 'left', padding: { x: 1, y: 1 },
     }).setFixedSize(width, 0).setScale(placement.scaleX, placement.scaleY);
     if (field.color === '#ffffff') object.setShadow(1, 1, '#000000', 2);
+    fitLocalizedText(object, { width, height: field.bounds[3] - field.bounds[1] });
     root.add(object); return object;
   };
   const button = (key: string, placement: Placement, action: () => void, x = 0, y = 0, enabled = true, parent = root) => {
@@ -84,8 +87,8 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
   const icon = manifest.clips.itemPicture;
   state.inventory.slice(0, 5).forEach((item, index) => {
     if (!isOccupiedItem(item)) return;
-    root.add(scene.add.image(25 + index * 90 - icon.originX, 343 - icon.originY, 'itemPicture', String(item.graphic)).setOrigin(0));
-    if (item.type === ITEM_TYPE.use) root.add(scene.add.text(50 + index * 90, 366, `x${item.ammo}`, { fontFamily: 'Arial', fontSize: '11px', color: '#ffffff' }));
+    root.add(localizedImage(scene, 25 + index * 90 - icon.originX, 343 - icon.originY, 'itemPicture', String(item.graphic)).setOrigin(0));
+    if (item.type === ITEM_TYPE.use) root.add(localizedText(scene, 50 + index * 90, 366, `x${item.ammo}`, { fontFamily: 'Arial', fontSize: '11px', color: '#ffffff' }));
   });
   root.add(navigation);
   if (!navigation.length) for (const [name, placement] of Object.entries(layout.navigation)) {
@@ -120,7 +123,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         const group = scene.add.container(tileX, tileY).setName(`castle-upgrade-${index}`).setAlpha(possible ? 1 : tile.disabledAlpha);
         root.add(group);
         const upFrame = index * 2 + 1;
-        const art = scene.add.image(0, 0, tile.clip, String(upFrame))
+        const art = localizedImage(scene, 0, 0, tile.clip, String(upFrame))
           .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
         // Счётчик Fix Wall сохраняется, но исходный индекс0 никогда не показывает суффикс уровня.
         const label = text(tile.children.upgradeName, name + (index !== 0 && levels[index] > 0 ? ` Lv ${levels[index]}` : ''));
@@ -175,11 +178,11 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         const activity = key as TownActivity, enabled = callbacks.activityAvailable(activity);
         const ax = x + 145 + info.index % 5 * 80, ay = y + 150 + Math.floor(info.index / 5) * 105;
         const cardAsset = manifest.clips[template.cardClip], pinAsset = manifest.clips[template.pinClip];
-        const card = scene.add.image(ax + template.children.card.x, ay + template.children.card.y, template.cardClip, String(info.frame))
+        const card = localizedImage(scene, ax + template.children.card.x, ay + template.children.card.y, template.cardClip, String(info.frame))
           .setOrigin(cardAsset.originX / cardAsset.frameWidth, cardAsset.originY / cardAsset.frameHeight).setAlpha(enabled ? 1 : 0.35)
           .setInteractive({ useHandCursor: enabled, pixelPerfect: true, alphaTolerance: 100 }).setName(`town-activity-${key}`);
         root.add(card);
-        root.add(scene.add.image(ax + template.children.pin.x, ay + template.children.pin.y, template.pinClip, '1')
+        root.add(localizedImage(scene, ax + template.children.pin.x, ay + template.children.pin.y, template.pinClip, '1')
           .setOrigin(pinAsset.originX / pinAsset.frameWidth, pinAsset.originY / pinAsset.frameHeight).setAlpha(enabled ? 1 : 0.35));
         text({ ...template.children.text }, `${info.cost} AP\n${info.name}`, ax, ay).setAlpha(enabled ? 1 : 0.35);
         card.on('pointerdown', (_pointer: Phaser.Input.Pointer, _lx: number, _ly: number, event: Phaser.Types.Input.EventData) => {
@@ -193,12 +196,13 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         const control = scene.add.container(330, 235).setName('henchman-order');
         control.setData({ selected, order: selected ? 7 : 6 }); root.add(control);
         const label = (x: number, y: number, value: string, size = 11, color = '#000000') => {
-          const field = scene.add.text(x, y, value, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: `${size}px`, color,
+          const field = localizedText(scene, x, y, value, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: `${size}px`, color,
             wordWrap: { width: 110 - x }, padding: { x: 0, y: 1 } });
+          fitLocalizedText(field, { width: 110 - x, height: y === 16 ? 30 : 16 });
           control.add(field); return field;
         };
         label(0, 0, 'Henchman order', 11, '#4c4031');
-        control.add(scene.add.image(1, 20, selected ? 'partyCheckOn' : 'partyCheckOff', '1').setOrigin(0));
+        control.add(localizedImage(scene, 1, 20, selected ? 'partyCheckOn' : 'partyCheckOff', '1').setOrigin(0));
         const name = label(20, 16, 'Smart Mode', 12);
         label(0, 48, 'Slower aim, -15% damage', 9, '#703b22');
         label(0, 63, selected ? 'Smart Mode' : 'Fire at will', 11, '#4c4031');
@@ -214,11 +218,11 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
       const available = nextTitle(state.title, state.day) !== undefined;
       const actionX = x + action.x, actionY = y + action.y;
       const cardAsset = manifest.clips[action.cardClip], pinAsset = manifest.clips[action.pinClip];
-      const card = scene.add.image(actionX + action.children.card.x, actionY + action.children.card.y, action.cardClip, String(action.cardFrame))
+      const card = localizedImage(scene, actionX + action.children.card.x, actionY + action.children.card.y, action.cardClip, String(action.cardFrame))
         .setOrigin(cardAsset.originX / cardAsset.frameWidth, cardAsset.originY / cardAsset.frameHeight)
         .setAngle(action.cardRotation).setAlpha(available ? 1 : 0.5)
         .setInteractive({ useHandCursor: available, pixelPerfect: true, alphaTolerance: 100 });
-      const pin = scene.add.image(actionX + action.children.pin.x, actionY + action.children.pin.y, action.pinClip, '1')
+      const pin = localizedImage(scene, actionX + action.children.pin.x, actionY + action.children.pin.y, action.pinClip, '1')
         .setOrigin(pinAsset.originX / pinAsset.frameWidth, pinAsset.originY / pinAsset.frameHeight).setAlpha(available ? 1 : 0.5);
       root.add([card, pin]);
       text(action.children.text, action.text, actionX, actionY).setAlpha(available ? 1 : 0.5);
@@ -245,7 +249,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     const hintBonus = text(panel.hintChildren.itemDesc2, '', hx, hy);
     hint.add([hintName, hintDescription, hintBonus]);
     const kong = panel.children.kongMc, asset = manifest.clips.museumKongregate;
-    const link = scene.add.image(x + kong.x, y + kong.y, 'museumKongregate', '1')
+    const link = localizedImage(scene, x + kong.x, y + kong.y, 'museumKongregate', '1')
       .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 }); root.add(link);
     link.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); callbacks.visitKongregate(); });
     const entries = Object.entries(MEDALS).filter(([id]) => Number(id) < 85 ? medalPage === 0 : medalPage === 1);
@@ -254,12 +258,12 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
       const rowX = x + 145 + Math.trunc(index / 10) * 130;
       const rowY = y + 130 + index % 10 * 20 + (index >= 20 ? 20 : 0);
       image('medalRow', rowX, rowY).setAlpha(earned ? 1 : 0.3);
-      text(panel.rowChildren.medalName, info.name, rowX, rowY).setAlpha(earned ? 1 : 0.3);
+      fitLocalizedText(contentText(text(panel.rowChildren.medalName, info.name, rowX, rowY)), { width: 92, height: 20, ellipsis: true }).setAlpha(earned ? 1 : 0.3);
       const hit = scene.add.zone(rowX, rowY, 140, 20).setOrigin(0).setInteractive({ useHandCursor: true }).setName(`medal-row-${id}`);
       root.add(hit);
       const describe = () => {
         const description = earned ? info.earned : info.condition, bonus = earned ? info.bonus : '????';
-        hintName.setText(info.name); hintDescription.setText(description); hintBonus.setText(bonus);
+        contentText(hintName).setText(info.name); hintDescription.setText(description); hintBonus.setText(bonus);
         hint.setVisible(true); root.bringToTop(hint); callbacks.medalHint({ id, name: info.name, description, bonus });
       };
       hit.on('pointerover', describe);

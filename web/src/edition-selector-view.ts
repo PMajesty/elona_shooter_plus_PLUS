@@ -1,3 +1,5 @@
+import { localizedImage } from './localized-image.ts';
+import { localizedText, fitLocalizedText } from './localized-text.ts';
 import Phaser from 'phaser';
 
 export type EditionChoice = 'classic' | 'expanded';
@@ -23,14 +25,14 @@ export function createEditionSelector(scene: Phaser.Scene, selected: EditionChoi
   const paper = scene.add.nineslice(0, 0, 'medalHint', 'edition-paper', bounds.width, bounds.height, 30, 10, 28, 10)
     .setOrigin(0).setName('edition-parchment');
   root.add(paper);
-  root.add(scene.add.image(bounds.width / 2, 7, 'townActionPin', '1').setOrigin(0.5).setScale(0.8));
+  root.add(localizedImage(scene, bounds.width / 2, 7, 'townActionPin', '1').setOrigin(0.5).setScale(0.8));
   const text = (x: number, y: number, value: string, size = 12, color = '#352c20') => {
-    const label = scene.add.text(x, y, value, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: `${size}px`, color,
+    const label = localizedText(scene, x, y, value, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: `${size}px`, color,
       wordWrap: { width: bounds.width - x - 9 }, padding: { x: 0, y: 1 } });
     root.add(label); return label;
   };
-  text(32, 9, 'New game', 13, '#330000').setFontFamily('ElonaMenuBold');
-  const description = text(12, 89, DESCRIPTIONS[selected], 11).setName('edition-description');
+  fitLocalizedText(text(32, 9, 'New game', 13, '#330000').setFontFamily('ElonaMenuBold'), { width: bounds.width - 41, height: 19 });
+  const description = fitLocalizedText(text(12, 89, DESCRIPTIONS[selected], 11).setName('edition-description'), { width: bounds.width - 21, height: bounds.height - 96 });
   const options: EditionChoice[] = ['classic', 'expanded'];
   const radios: Phaser.GameObjects.Image[] = [];
   const labels: Phaser.GameObjects.Text[] = [];
@@ -45,10 +47,10 @@ export function createEditionSelector(scene: Phaser.Scene, selected: EditionChoi
     const y = 24 + index * 32;
     // Кружок занимает только часть прозрачного кадра119×36; масштабируем кадр равномерно.
     const scale = 0.65;
-    const radio = scene.add.image(18 - 16.5 * scale, y + 15 - 17.7 * scale, 'radioButton', edition === selected ? '2' : '1')
+    const radio = localizedImage(scene, 18 - 16.5 * scale, y + 15 - 17.7 * scale, 'radioButton', edition === selected ? '2' : '1')
       .setOrigin(0).setScale(scale).setName(`edition-radio-${edition}`);
     root.add(radio); radios.push(radio);
-    labels.push(text(33, y + 7, edition === 'classic' ? 'Classic' : 'Expanded', 15));
+    labels.push(fitLocalizedText(text(33, y + 7, edition === 'classic' ? 'Classic' : 'Expanded', 15), { width: bounds.width - 42, height: 23 }));
     // Вся строка, а не только маленький кружок, доступна для касания.
     const hit = scene.add.zone(7, y, bounds.width - 14, 30).setOrigin(0)
       .setInteractive({ useHandCursor: true }).setName(`edition-choice-${edition}`);

@@ -1,3 +1,4 @@
+import { t } from './i18n.ts';
 import type Phaser from 'phaser';
 import { ScreenShake } from './screen-shake.ts';
 
@@ -102,7 +103,7 @@ export function createTitleSequence(clip: Clip, actorsLayer: Phaser.GameObjects.
 // Отсутствие необязательной заставки не должно блокировать главное меню.
 export function playOpening(container: HTMLElement, url: string, done: () => void): () => void {
   const skip = document.createElement('button'), art = new window.Image();
-  skip.className = 'opening-movie'; skip.type = 'button'; skip.ariaLabel = 'Skip intro';
+  skip.className = 'opening-movie'; skip.type = 'button'; skip.ariaLabel = t('Skip intro');
   skip.append(art); art.alt = ''; container.append(skip);
   let timer: number, active = true;
   const cleanup = () => { active = false; clearTimeout(timer); skip.remove(); };

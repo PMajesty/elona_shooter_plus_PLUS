@@ -1,0 +1,78 @@
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { createRequire } from 'node:module';
+import { readFile, writeFile } from 'node:fs/promises';
+import { Simulation } from '../src/simulation.ts';
+import { createProfile } from '../src/profile.ts';
+import { ItemFactory } from '../src/items.ts';
+import { refreshPartyAI } from '../src/party-ai.ts';
+const require = createRequire(import.meta.url);
+const { chromium } = require('../../.tools/browser-qa/node_modules/playwright-core');
+const url = process.argv[2] ?? 'http://127.0.0.1:5175/elona/';
+const launch = { executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', args: ['--mute-audio'] };
+if (url.startsWith('https:') && process.env.HTTPS_PROXY) {
+ const p=new URL(process.env.HTTPS_PROXY);launch.proxy={server:p.origin,username:decodeURIComponent(p.username),password:decodeURIComponent(p.password)};
+}
+const browser = await chromium.launch(launch);
+const evidence = { url, errors: [] };
+let page;
+try {
+ page = await browser.newPage({viewport:{width:1280,height:800}});
+ page.setDefaultTimeout(url.startsWith('https:')?45000:15000);page.on('pageerror', e=>evidence.errors.push(e.message));
+ const canvas=page.locator('#playfield > canvas'), game=page.locator('#game');
+ const data=key=>game.getAttribute('data-'+key);
+ const rendered=()=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+ const click=async(x,y)=>{await rendered();const b=await canvas.boundingBox();await page.mouse.click(b.x+x*b.width/620,b.y+y*b.height/380);await rendered()};
+ const screen=async name=>page.locator(`#game[data-screen="${name}"]`).waitFor();
+ const open=async()=>{await page.goto(url);await page.locator('.opening-movie, #game[data-screen="title"]').first().waitFor();if(await page.locator('.opening-movie').isVisible())await page.locator('.opening-movie').click();await page.locator('#game[data-title-buttons-ready="true"]').waitFor();};
+ const exported=async()=>{const d=page.waitForEvent('download');await page.keyboard.press('Control+Shift+s');return JSON.parse(await readFile(await(await d).path(),'utf8'));};
+ const stored=()=>page.evaluate(()=>Object.fromEntries(Object.entries(localStorage)));
+ const importSave=async(save,confirm=true)=>{
+  const chooser=page.waitForEvent('filechooser');await page.keyboard.press('Control+Shift+o');
+  await(await chooser).setFiles({name:'expanded-qa.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(save))});
+  await page.locator('#game[data-replace-adventure="import"]').waitFor();await click(confirm?260:365,240);
+ };
+
+ const shots=[];
+ const shot=async (name,keepPointer=false)=>{await rendered();if(!keepPointer)await page.mouse.move(10,10);const file=`.build/localization/qa-${name}.png`;await page.screenshot({path:file});shots.push(file);};
+ const toggle=async()=>{const before=await data('language');await page.locator('#language').click();assert.notEqual(await data('language'),before);await rendered();};
+ const envelope=sim=>{const save=sim.toSave();Simulation.fromSave(save);return {format:'elona-shooter-browser',version:sim.state.version,appearance:0,simulation:save,profile:createProfile(sim.state.ruleset.id)};};
+ await open();
+ const bundleUrl=await page.locator('script[type="module"][src]').getAttribute('src');
+ const remoteBundle=await page.request.get(new URL(bundleUrl,url).href);
+ assert.ok(remoteBundle.ok());
+ const bundleName=new URL(bundleUrl,url).pathname.split('/').at(-1);
+ const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
+ assert.equal(digest(await remoteBundle.body()),digest(await readFile(`web/dist/assets/${bundleName}`)));
+ evidence.bundle=bundleName;evidence.bundleVerified=true;
+ assert.equal(await data('language'),'en');await toggle();assert.equal(await data('language'),'ru');await shot('title');
+ await open();assert.equal(await data('language'),'ru');assert.equal(await data('muted'),'true');
+ await click(295,195);await screen('gene');await click(200,214);await shot('gene');
+ await toggle();await toggle();assert.equal(await data('hero-class'),'rogue');
+ await click(460,315);await screen('mods');await shot('mods');await page.keyboard.press('Escape');await screen('gene');
+ await click(310,315);await screen('battle');await shot('battle');await page.keyboard.press('Escape');
+ const before=await exported();await toggle();await toggle();assert.deepEqual((await exported()).simulation,before.simulation);await shot('pause');
+ await open();await click(295,249);await screen('battle');assert.deepEqual((await exported()).simulation,before.simulation);
+ // Названия и справка меняются на месте, не оставляя удалённых слушателей текста.
+ await open();await click(295,300);await page.locator('#game[data-help-page="4"]').waitFor();await toggle();await toggle();await toggle();await toggle();await shot('help4');
+ const layout=JSON.parse(await readFile('web/public/assets/town-layout.json','utf8')).help;
+ for(const n of [1,2,3]){const p=layout.pages[0].children[`help${n}`];await click(layout.position.x+p.x+20,layout.position.y+p.y+10);await page.locator(`#game[data-help-page="${n}"]`).waitFor();await shot('help'+n);}
+ await page.keyboard.press('Escape');
+ const town=new Simulation(42,{heroClass:'rogue',ruleset:'expanded'});town.state.player.skillPoints=1;town['finishDay']();
+ if(['loot','boss-loot'].includes(town.state.postbattle)){await importSave(envelope(town));await screen(town.state.postbattle);await shot('loot');}
+ while(['loot','boss-loot'].includes(town.state.postbattle))town.finishLoot();
+ while(town.state.postbattle==='skill'){await importSave(envelope(town));await screen('skill');await shot('skill');town.chooseSkill(town.state.skillChoices[0]);}
+ await importSave(envelope(town));await screen('result');await shot('result');assert.ok(town.enterTown());
+ const factory=new ItemFactory(()=>0.3),modified=factory.generate(1);modified.modMax=3;factory.enchant(modified,4,2);factory.enchant(modified,1,1);factory.enchant(modified,11,1);town.state.inventory[3]=modified;
+ await importSave(envelope(town));await screen('town');
+ for(const [name,x,y,tab] of [['inn',44,75,'mission'],['tower',44,135,'castle'],['barrack',44,194,'characters'],['equipment',75,218,'equipment'],['smithy',44,275,'shop'],['medals',44,326,'medals']]){await click(x,y);assert.equal(await data('town-tab'),tab);await shot(name);}
+ await click(44,275);const box=await canvas.boundingBox();await page.mouse.move(box.x+338*box.width/620,box.y+250*box.height/380);await page.locator('#game[data-item-popup]').waitFor();await shot('item-popup',true);await toggle();await toggle();
+ await click(44,194);await toggle();await toggle();assert.deepEqual((await exported()).simulation,town.toSave());
+ await page.setViewportSize({width:640,height:400});await shot('town-100');await page.setViewportSize({width:1280,height:800});
+ const defeat=Simulation.fromSave(town.toSave()),checkpoint=defeat.toSave();defeat.startNextDay();defeat.state.castleHp=0;for(let i=0;i<3&&defeat.state.phase==='battle';i++)defeat.tick();
+ await importSave({...envelope(defeat),carryCheckpoint:checkpoint});await screen('defeat');await shot('defeat');await click(310,257);await page.locator('#game[data-carry-over-confirmation="true"]').waitFor();await shot('confirmation');await toggle();await toggle();await click(365,240);
+ const fallback=await browser.newPage();await fallback.route('**/assets/ru/manifest.json',route=>route.abort());
+ await fallback.goto(url);await fallback.locator('#game[data-screen="intro"], #game[data-screen="title"]').first().waitFor();assert.equal(await fallback.locator('#language').isDisabled(),true);await fallback.close();
+ assert.deepEqual(evidence.errors,[]);evidence.result='passed';evidence.screenshots=shots;evidence.saveUnchanged=true;evidence.languageRemembered=true;evidence.helpToggle=true;evidence.muted=await data('muted');
+ console.log(JSON.stringify(evidence));await writeFile(`.build/localization/${url.startsWith('https:')?'live-':''}browser-evidence.json`,JSON.stringify(evidence,null,2));
+}catch(error){console.error('SCREEN',await page?.locator('#game').getAttribute('data-screen'),'ERRORS',evidence.errors);await page?.screenshot({path:'.build/localization/qa-failure.png'});throw error;}finally{await browser.close();}
