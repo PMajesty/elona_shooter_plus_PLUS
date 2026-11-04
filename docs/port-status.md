@@ -2,7 +2,7 @@
 
 Updated 2026-11-04. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-The production bundle is `index-wA24LumV.js` from `f21d0f3`. The documented
+The production bundle is `index-DtsZOO52.js` from `fe24618`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
@@ -48,7 +48,7 @@ The Smart Mode followup covers distance-based acquisition, two-ally target
 coordination and Continue, starting/recruit/hired-gun defaults, saved opt-outs
 and updated Barrack/Inn labels. Prior fixed-delay skirmish numbers are historical;
 they do not establish balance for the new coordination behavior.
-The commitment/UI followup passed 46 focused checks and the 74 original AI
+The commitment/UI followup passed 60 focused checks and the 74 original AI
 snapshots. A muted browser checked committed firing in a 24-enemy encounter,
 exact battle Continue, both edition preferences across reloads, Classic save
 loading with Expanded selected, and Carry Over cancellation/confirmation/retry.
