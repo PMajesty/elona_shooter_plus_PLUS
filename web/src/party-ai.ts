@@ -1,4 +1,4 @@
-import { carefulTargetViable, carefulUrgency, chooseCarefulTarget, claimCarefulTarget, usesCarefulConsideration } from './careful-consideration.ts';
+import { carefulTargetViable, carefulPriority, chooseCarefulTarget, claimCarefulTarget, usesCarefulConsideration } from './careful-consideration.ts';
 import { COMBAT_TRAIT, combatTrait, advanceChainGunClock, idleChainGun, type ChainGunState } from './combat-stats.ts';
 import type { Item } from './items.ts';
 import type { TraitLevels } from './progression.ts';
@@ -219,8 +219,8 @@ export function stepPartyAIFrame(actor: PartyAIActor, context: PartyAIContext, c
     if (!carefulTargetViable(retained, context)) clearPartyAITarget(actor);
     else {
       const urgent = chooseCarefulTarget(actor, actor.weapon?.range ?? 0, context);
-      // Только более высокая срочность прерывает уже начатое прицеливание.
-      if (urgent && carefulUrgency(urgent, member.optWall) > carefulUrgency(retained, member.optWall)) {
+      // Смена категории угрозы прерывает прицеливание; колебания оценок внутри неё — нет.
+      if (urgent && carefulPriority(urgent, context, member.optWall) > carefulPriority(retained, context, member.optWall)) {
         claimCarefulTarget(urgent, context);
         Object.assign(s, { shooting: false, burst: 0, targetUid: urgent.uid, onMark: false });
         s.aimCount = startingPartyAim(actor, urgent, actor.weapon?.range ?? null);

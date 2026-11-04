@@ -241,7 +241,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
             clip(selected ? 'partyCheckOn' : 'partyCheckOff', 1, x + controls.checkIconX, y + controls.checkIconY);
             root.add(scene.add.text(x + controls.checkLabelX, y + 5, label, { fontFamily: 'Arial', fontSize: '11px', color: '#000000' }));
             const area = scene.add.zone(x, y, 70, 22).setOrigin(0).setInteractive({ useHandCursor: true }); root.add(area);
-            const checkHint = carefulSelected ? '-15% auto damage. Boss favors bosses; urgency first.\nDefend widens urgency. Always skip shields.' : 'When "Boss" is checked, the character will go for the boss when a boss appears.\nWhen "Defend" is checked, the character will go for the enemies attacking your wall.';
+            const checkHint = carefulSelected ? 'Boss and Defend guide your choice of foes.\nDamage is reduced by 15%.' : 'When "Boss" is checked, the character will go for the boss when a boss appears.\nWhen "Defend" is checked, the character will go for the enemies attacking your wall.';
             area.on('pointerover', () => hint.setText(checkHint));
             area.on('pointerout', () => hint.setText(memberHint));
             area.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); if (!modal) action(); });

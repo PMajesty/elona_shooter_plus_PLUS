@@ -30,6 +30,22 @@ test('Careful rifle fire keeps ammunition/cooldown/traits and pays the 15% damag
   assert.deepEqual(careful.state.party.slots[0].member!.traits, traits);
 });
 
+test('a shotgun drops a safe sheep target for a distant chicken, then defends an urgent approach', () => {
+  const sim = battle(3, 7), sheep = sim.state.enemies[0];
+  Object.assign(sheep, { x: 310, speed: 0.5, speedOrg: 0.5 });
+  sim['spawnEnemy']('chicken');
+  const chicken = sim.state.enemies.at(-1)!;
+  Object.assign(chicken, { x: 90, y: 220, speed: 0, frame: 105, attacking: true });
+  const member = sim.state.party.slots[0].member!;
+  sim.tick();
+  assert.equal(member.aiState!.targetUid, chicken.uid);
+  assert.equal(member.aiState!.shooting, false);
+  const restored = Simulation.fromSave(sim.toSave(), { hitTest: () => true });
+  sim.tick(); restored.tick(); assert.deepEqual(restored.toSave(), sim.toSave());
+  sheep.x = 440;
+  sim.tick(); assert.equal(member.aiState!.targetUid, sheep.uid);
+});
+
 test('Careful projectile cost is fixed at launch and saved across a later order change', () => {
   const standard = battle(23, 6), careful = battle(23, 7);
   standard.tick(); careful.tick();

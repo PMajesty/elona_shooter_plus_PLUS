@@ -53,7 +53,7 @@ export function createHelpView(scene: Phaser.Scene, manifest: LootViewManifest, 
       const width = layout.textAreaBase.width * p.scaleX, height = layout.textAreaBase.height * p.scaleY;
       const editions = '<b>Browser editions (fan additions)</b><br>'
         + 'Classic keeps the original game with port bug fixes. Expanded enables optional new features. Choose an edition before New Game; Continue uses the saved edition. Each edition has its own medals. Use an empty save slot to keep another adventure.<br><br>'
-        + 'Expanded: in Barrack, select a companion and choose Careful Consideration. Urgent threats come first; rifles prefer ranged enemies and close guns defend. Troops can fire beyond preferred range and avoid shielded bosses. The order reduces automatic shot damage by 15%, with ordinary accuracy and reload rules. It cannot guarantee a Perfect Game. For a hired gun, enable the order in the Inn after hiring and before Rest.<br><br>';
+        + 'Expanded: in Barrack, select a companion and choose Careful Consideration. Protect the wall, then seek ranged foes, with 15% less damage. The order cannot guarantee a Perfect Game. Hired guns can receive it at the Inn before Rest.<br><br>';
       content.add(originalTextArea(scene, 'help-tips-text', editions + layout.tips.join(''), x, y, width, height, scroll => changed(page, scroll)));
     }
     changed(page, 0);

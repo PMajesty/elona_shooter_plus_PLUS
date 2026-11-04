@@ -193,19 +193,15 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         const control = scene.add.container(330, 235).setName('henchman-order');
         control.setData({ selected, order: selected ? 7 : 6 }); root.add(control);
         const label = (x: number, y: number, value: string, size = 11, color = '#000000') => {
-          const field = scene.add.text(x, y, value, { resolution: 2, fontFamily: 'Arial', fontSize: `${size}px`, color,
+          const field = scene.add.text(x, y, value, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: `${size}px`, color,
             wordWrap: { width: 110 - x }, padding: { x: 0, y: 1 } });
           control.add(field); return field;
         };
-        label(0, 0, 'Henchman order', 10, '#4c4031');
-        const check = scene.add.graphics();
-        check.fillStyle(0xffffff, 1).fillRect(1, 20, 14, 14);
-        check.lineStyle(1, 0x777777, 1).strokeRect(1, 20, 14, 14);
-        if (selected) check.lineStyle(2, 0x12356b, 1).beginPath().moveTo(4, 27).lineTo(7, 30).lineTo(12, 23).strokePath();
-        control.add(check);
-        const name = label(20, 16, 'Careful\nConsideration', 11);
-        label(0, 47, '-15% auto damage', 10, '#703b22');
-        label(0, 62, selected ? 'On: next battle' : 'Off: Fire at will', 10, '#4c4031');
+        label(0, 0, 'Henchman order', 11, '#4c4031');
+        control.add(scene.add.image(1, 20, selected ? 'partyCheckOn' : 'partyCheckOff', '1').setOrigin(0));
+        const name = label(20, 16, 'Careful\nConsideration', 12);
+        label(0, 48, '-15% damage', 11, '#703b22');
+        label(0, 63, selected ? 'Careful' : 'Fire at will', 11, '#4c4031');
         const hit = scene.add.zone(0, 0, 110, 78).setOrigin(0).setInteractive({ useHandCursor: true }).setName('henchman-careful');
         control.add(hit);
         hit.on('pointerover', () => name.setColor('#000099'));

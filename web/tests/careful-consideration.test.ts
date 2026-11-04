@@ -26,12 +26,27 @@ function setup(id = 4, enemies: PartyAITarget[] = []) {
   return { actor, ai, enemies, context, callbacks, shields, ranged, counts: () => ({ draws, shots, grenades }) };
 }
 
-test('rifles/snipers favor ranged attackers outside preferred band; SMGs favor castleward enemies', () => {
+test('every weapon favors ranged attackers when the wall is safe, including shotgun and SMG', () => {
   for (const id of [4, 5, 13, 2, 3]) {
     const s = setup(id, [enemy(1, 50), enemy(2, 320), enemy(3, 365)]); s.ranged.add(2);
-    assert.equal(selectPartyTarget(s.actor, s.actor.weapon!.range!, s.context)?.uid, [2, 3].includes(id) ? 3 : 2);
+    assert.equal(selectPartyTarget(s.actor, s.actor.weapon!.range!, s.context)?.uid, 2);
     assert.equal(s.counts().draws, 0);
   }
+});
+
+test('close weapons switch to ranged threats, then to urgent melee, without same-tier aim churn', () => {
+  const sheep = enemy(1, 310), archer = enemy(2, 50);
+  const s = setup(3, [sheep]);
+  stepPartyAIFrame(s.actor, s.context, s.callbacks); assert.equal(s.ai.targetUid, 1);
+  s.enemies.push(archer); s.ranged.add(2);
+  assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
+  assert.equal(s.ai.targetUid, 2);
+  s.enemies.push(enemy(3, 280)); s.ranged.add(3);
+  for (let i = 0; i < 20; i++) stepPartyAIFrame(s.actor, s.context, s.callbacks);
+  assert.equal(s.ai.targetUid, 2); assert.ok(s.counts().shots > 0);
+  sheep.x = 440;
+  assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
+  assert.equal(s.ai.targetUid, 1);
 });
 
 test('all-range fallback uses ordinary acquisition, claim tag60 and work-rate gate', () => {
@@ -84,7 +99,7 @@ test('ordinary score changes, Boss and Defend alerts do not restart retained aim
   s.actor.member!.optWall = true;
   stepPartyAIFrame(s.actor, s.context, s.callbacks);
   const initialAim = s.ai.aimCount;
-  s.actor.member!.optBoss = true; s.context.shared.targetBossUid = 2; s.ranged.add(2);
+  s.actor.member!.optBoss = true; s.context.shared.targetBossUid = 2;
   for (let i = 0; i <= initialAim + 1; i++) {
     s.enemies[1].x = 150 + i % 2;
     alertParty(s.enemies[1], [s.actor], s.context);

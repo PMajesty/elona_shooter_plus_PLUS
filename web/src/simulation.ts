@@ -243,7 +243,8 @@ export class Simulation {
     return { shared: this.state.partyAI, random: () => this.random(), heroSlot: this.heroSlot, fireAtWill: this.fireAtWill,
       ...(this.rules.carefulConsideration ? { carefulConsideration: true,
         listTargets: () => this.state.enemies as PartyAITarget[],
-        isRanged: (target: PartyAITarget) => ['archer', 'cata', 'tank', 'dino', 'dragon', 'boss'].includes((target as unknown as EnemyState).kind),
+        // Курица наносит урон замку на кадре136 издалека, хотя её flags не содержит RANGED.
+        isRanged: (target: PartyAITarget) => ['chicken', 'archer', 'cata', 'tank', 'dino', 'dragon', 'boss'].includes((target as unknown as EnemyState).kind),
         isShielded: (target: PartyAITarget) => (target as unknown as EnemyState).kind === 'boss' && (target as unknown as EnemyState).bossAction === 6,
       } : {}),
       getTarget: uid => this.state.enemies.find(enemy => enemy.uid === uid) as PartyAITarget | undefined

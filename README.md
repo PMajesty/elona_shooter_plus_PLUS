@@ -29,8 +29,8 @@ their edition when loaded; existing saves remain Classic. Use an empty slot to
 keep both. The seven original Game MODs remain separate.
 
 Expanded's first addition is **Careful Consideration**, a companion order in
-Barrack: prioritize urgent threats, favor ranged enemies with rifles, defend
-against approaching enemies with close weapons, and avoid shielded bosses.
+Barrack: defend against urgent threats, then prioritize ranged attackers with
+any weapon, including chickens, and avoid shielded bosses.
 It can target beyond preferred range and costs **15% automatic shot damage**.
 It helps protect the castle without guaranteeing a Perfect Game. Temporary
 hired guns can opt in at the Inn before Rest.

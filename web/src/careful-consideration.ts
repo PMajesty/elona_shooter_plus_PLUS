@@ -2,7 +2,7 @@ import type { PartyAIActor, PartyAIContext, PartyAITarget } from './party-ai.ts'
 
 export const CAREFUL_ORDER = 7;
 export const CAREFUL_DAMAGE_MULTIPLIER = 0.85;
-export const CAREFUL_HINT = '-15% auto damage. Skip shields; urgent foes first.\nRifles prefer ranged foes; close guns defend.';
+export const CAREFUL_HINT = 'Choose dangerous foes with care.\nDamage is reduced by 15%.';
 
 export function usesCarefulConsideration(actor: PartyAIActor, context: PartyAIContext): boolean {
   return context.carefulConsideration === true && actor.slot >= 1 && actor.slot <= 4
@@ -18,6 +18,12 @@ export function carefulUrgency(enemy: PartyAITarget, defend: boolean): number {
   if (enemy.x >= 435) return 2;
   const frames = enemy.speed > 0 ? Math.max(0, 455 - enemy.x) / enemy.speed : Infinity;
   return enemy.x >= (defend ? 380 : 400) || frames <= (defend ? 120 : 90) ? 1 : 0;
+}
+
+// Пока стене ничего не угрожает вблизи, любое оружие выбирает дальнего атакующего.
+export function carefulPriority(enemy: PartyAITarget, context: PartyAIContext, defend: boolean): number {
+  const urgency = carefulUrgency(enemy, defend);
+  return urgency > 0 ? urgency + 1 : context.isRanged?.(enemy) ? 1 : 0;
 }
 
 function candidates(context: PartyAIContext): readonly PartyAITarget[] {
@@ -44,7 +50,7 @@ function score(actor: PartyAIActor, enemy: PartyAITarget, range: number, context
 export function chooseCarefulTarget(actor: PartyAIActor, range: number, context: PartyAIContext): PartyAITarget | null {
   const member = actor.member!;
   let best: PartyAITarget | null = null;
-  const rank = (enemy: PartyAITarget): readonly number[] => [carefulUrgency(enemy, member.optWall),
+  const rank = (enemy: PartyAITarget): readonly number[] => [carefulPriority(enemy, context, member.optWall),
     score(actor, enemy, range, context), -enemy.uid];
   const better = (a: PartyAITarget, b: PartyAITarget) => {
     const ar = rank(a), br = rank(b);

@@ -24,12 +24,15 @@ to any ordinary order to remove its penalty. The hero does not receive this orde
 After contracting a temporary henchman, the Inn offers the same opt-in before
 Rest; this preference is saved for future contracts.
 
-Urgent wall threats outrank weapon roles. Rifles and long-range weapons otherwise
-prefer ranged attackers; close weapons favor approaching enemies. Preferred
+Urgent wall threats come first, then ranged attackers, then other enemies.
+This hierarchy applies to every weapon, including shotguns and SMGs. Chickens
+are ranged threats: the original egg-attack frame damages the castle from
+midfield. Weapon roles break ties within a threat category. Preferred
 range is a preference, not an exclusion. Tagged enemies remain eligible so
 another troop's target does not leave everyone else idle. Boss is a small
 preference; Defend broadens the urgency boundary. A troop keeps its aim unless
-its target becomes invalid/shielded or a more urgent threat appears.
+its target becomes invalid/shielded or a higher-priority threat appears, including
+a ranged attacker appearing while it is targeting a distant melee enemy.
 
 The order costs **15% automatic shot damage**, including class grenades, applied
 once when fired. Projectiles retain that damage after an order change or Continue.
@@ -54,7 +57,7 @@ movement, attack, accuracy, damage and reload; one companion, idle hero, 100 HP,
 | --- | --- | --- |
 | Ranged enemies among sheep, Sniper Rifle | 46.50 → 56.25 | 9.5 → 10 |
 | Rats/barbarians approaching, SMG | 70 → 73 | 27.5 → 38.5 |
-| Guarded boss with alternatives, Hunter's Rifle | 63.25 → 94.25 | 10.5 → 9 |
+| Guarded boss with alternatives, Hunter's Rifle | 63.25 → 93.50 | 10.5 → 9 |
 
 Careful lost more HP in two of four rush seeds and used 40% more shots on
 average. It aimed zero new shots at the guarded boss, versus four per seed with
