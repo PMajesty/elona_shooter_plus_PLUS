@@ -1,4 +1,4 @@
-import { carefulTargetViable, carefulPriority, chooseCarefulTarget, claimCarefulTarget, usesCarefulConsideration } from './careful-consideration.ts';
+import { CAREFUL_AIM_DELAY_FRAMES, carefulTargetViable, carefulPriority, chooseCarefulTarget, claimCarefulTarget, usesCarefulConsideration } from './careful-consideration.ts';
 import { COMBAT_TRAIT, combatTrait, advanceChainGunClock, idleChainGun, type ChainGunState } from './combat-stats.ts';
 import type { Item } from './items.ts';
 import type { TraitLevels } from './progression.ts';
@@ -223,7 +223,7 @@ export function stepPartyAIFrame(actor: PartyAIActor, context: PartyAIContext, c
       if (urgent && carefulPriority(urgent, context, member.optWall) > carefulPriority(retained, context, member.optWall)) {
         claimCarefulTarget(urgent, context);
         Object.assign(s, { shooting: false, burst: 0, targetUid: urgent.uid, onMark: false });
-        s.aimCount = startingPartyAim(actor, urgent, actor.weapon?.range ?? null);
+        s.aimCount = startingPartyAim(actor, urgent, actor.weapon?.range ?? null) + CAREFUL_AIM_DELAY_FRAMES;
         return 'acquired';
       }
     }
@@ -245,7 +245,11 @@ export function stepPartyAIFrame(actor: PartyAIActor, context: PartyAIContext, c
       s.shooting = false; s.burst = 0; s.onMark = false;
       if (context.random() < s.workRate) {
         const chosen = selectPartyTarget(actor, actor.weapon?.range ?? 0, context, actor.slot === context.heroSlot ? 6 : undefined);
-        if (chosen) { s.targetUid = chosen.uid; s.aimCount = startingPartyAim(actor, chosen, actor.weapon?.range ?? null); return 'acquired'; }
+        if (chosen) {
+          s.targetUid = chosen.uid;
+          s.aimCount = startingPartyAim(actor, chosen, actor.weapon?.range ?? null) + (careful ? CAREFUL_AIM_DELAY_FRAMES : 0);
+          return 'acquired';
+        }
         const weapon = actor.weapon;
         if (weapon && weapon.ammo < weapon.ammoMax / (weapon.manualReload ? 1.5 : 3)) callbacks.reload(actor);
         s.aimCount = asInt(s.aimTime * 2);

@@ -34,7 +34,7 @@ Compatibility remains provisional. A town save produced by the preserved game un
 
 ## Expanded is optional
 
-Expanded contains optional fan-made features. Its first addition is **Careful Consideration**, a companion targeting order that costs 15% damage. Adventures keep their edition when loaded; saves made before Expanded was introduced load as Classic. The [Expanded guide](docs/expanded-edition.md) explains the order and its balance limits.
+Expanded contains optional fan-made features. Its first addition is **Careful Consideration**, a companion targeting order that costs 15% damage and an extra 0.2 seconds to aim at each new target. Adventures keep their edition when loaded; saves made before Expanded was introduced load as Classic. The [Expanded guide](docs/expanded-edition.md) explains the order and its balance limits.
 
 Desktop and touch controls are available, but physical iOS and Android devices have not been checked. See [port status](docs/port-status.md#accepted-differences-and-support-limits) for browser and embed limits.
 

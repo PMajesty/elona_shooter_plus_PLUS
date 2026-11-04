@@ -1,4 +1,4 @@
-import { CAREFUL_HINT, CAREFUL_ORDER } from './careful-consideration.ts';
+import { CAREFUL_COST_HINT, CAREFUL_HINT, CAREFUL_ORDER } from './careful-consideration.ts';
 import { buttonInput } from './button-input.ts';
 import { createItemPopupView, type ItemPopupLayout } from './item-popup-view.ts';
 import type { ItemPopupInfo } from './item-popup-values.ts';
@@ -241,7 +241,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
             clip(selected ? 'partyCheckOn' : 'partyCheckOff', 1, x + controls.checkIconX, y + controls.checkIconY);
             root.add(scene.add.text(x + controls.checkLabelX, y + 5, label, { fontFamily: 'Arial', fontSize: '11px', color: '#000000' }));
             const area = scene.add.zone(x, y, 70, 22).setOrigin(0).setInteractive({ useHandCursor: true }); root.add(area);
-            const checkHint = carefulSelected ? 'Boss and Defend guide your choice of foes.\nDamage is reduced by 15%.' : 'When "Boss" is checked, the character will go for the boss when a boss appears.\nWhen "Defend" is checked, the character will go for the enemies attacking your wall.';
+            const checkHint = carefulSelected ? `Boss and Defend guide your choice of foes.\n${CAREFUL_COST_HINT}` : 'When "Boss" is checked, the character will go for the boss when a boss appears.\nWhen "Defend" is checked, the character will go for the enemies attacking your wall.';
             area.on('pointerover', () => hint.setText(checkHint));
             area.on('pointerout', () => hint.setText(memberHint));
             area.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => { e.stopPropagation(); if (!modal) action(); });

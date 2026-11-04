@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BASE_ITEM_FIELDS, type Item } from '../src/items.ts';
 import { COMBAT_TRAIT } from '../src/combat-stats.ts';
-import { CAREFUL_DAMAGE_MULTIPLIER, carefulUrgency } from '../src/careful-consideration.ts';
+import { CAREFUL_AIM_DELAY_FRAMES, CAREFUL_DAMAGE_MULTIPLIER, carefulUrgency } from '../src/careful-consideration.ts';
 import { alertParty, createPartyAIShared, createPartyAIState, registerPartyTarget, searchNextPartyAlert,
-  selectPartyTarget, stepPartyAIFrame, stepPartyAITimer,
+  selectPartyTarget, startingPartyAim, stepPartyAIFrame, stepPartyAITimer,
   type PartyAIActor, type PartyAIContext, type PartyAITarget, type PartyAICallbacks } from '../src/party-ai.ts';
 
 function enemy(uid: number, x: number, extra: Partial<PartyAITarget> = {}): PartyAITarget {
@@ -25,6 +25,37 @@ function setup(id = 4, enemies: PartyAITarget[] = []) {
     throwMilitiaGrenade: () => { grenades++; } };
   return { actor, ai, enemies, context, callbacks, shields, ranged, counts: () => ({ draws, shots, grenades }) };
 }
+
+test('Careful takes six extra frames to engage a new target, without slowing retained fire', () => {
+  const firstShots: number[] = [];
+  for (const order of [0, 7]) {
+    const s = setup(4, [enemy(1, 100)]); s.actor.member!.ai = order;
+    registerPartyTarget(s.enemies[0], s.context.shared);
+    assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
+    const ordinaryAim = startingPartyAim(s.actor, s.enemies[0], s.actor.weapon!.range!);
+    assert.equal(s.ai.aimCount, ordinaryAim + (order === 7 ? 6 : 0));
+    let frames = 0;
+    while (s.counts().shots === 0 && frames < 40) { stepPartyAIFrame(s.actor, s.context, s.callbacks); frames++; }
+    assert.equal(s.counts().shots, 1);
+    firstShots.push(frames);
+    for (let i = 0; i < 4; i++) stepPartyAIFrame(s.actor, s.context, s.callbacks);
+    assert.equal(s.counts().shots, 5);
+    assert.equal(s.counts().draws, 1);
+  }
+  assert.equal(CAREFUL_AIM_DELAY_FRAMES, 6);
+  assert.equal(firstShots[1] - firstShots[0], 6);
+});
+
+test('replacing a dead or shielded target pays the same aim cost and cannot fire immediately', () => {
+  for (const reason of ['dead', 'shielded']) {
+    const s = setup(4, [enemy(1, 100), enemy(2, 110)]);
+    Object.assign(s.ai, { targetUid: 1, shooting: true, aimCount: 0 });
+    if (reason === 'dead') s.enemies[0].hp = 0; else s.shields.add(1);
+    assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
+    assert.equal(s.ai.targetUid, 2); assert.equal(s.counts().shots, 0);
+    assert.equal(s.ai.aimCount, startingPartyAim(s.actor, s.enemies[1], s.actor.weapon!.range!) + 6);
+  }
+});
 
 test('every weapon favors ranged attackers when the wall is safe, including shotgun and SMG', () => {
   for (const id of [4, 5, 13, 2, 3]) {
@@ -68,6 +99,7 @@ test('urgent threats preempt a retained ranged boss without RNG and then finish 
   threat.x = 440;
   assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
   assert.equal(s.ai.targetUid, 2); assert.equal(s.counts().draws, 1);
+  assert.equal(s.ai.aimCount, startingPartyAim(s.actor, threat, s.actor.weapon!.range!) + 6);
   for (let i = 0; i < 20; i++) stepPartyAIFrame(s.actor, s.context, s.callbacks);
   assert.ok(s.counts().shots > 0); assert.equal(s.ai.targetUid, 2);
 });

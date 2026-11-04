@@ -69,6 +69,25 @@ test('the Careful order and selected target survive Continue with identical futu
   }
 });
 
+test('saving during Careful acquisition preserves the remaining wait and later shot timing', () => {
+  const sim = battle(4, 7), member = sim.state.party.slots[0].member!;
+  Object.assign(member.aiState!, { targetUid: null, shooting: false, aimCount: 0, workRate: 0.3 });
+  for (let i = 0; i < 40 && member.aiState!.targetUid === null; i++) sim.tick();
+  assert.notEqual(member.aiState!.targetUid, null);
+  sim.tick(); sim.tick();
+  const remaining = member.aiState!.aimCount; assert.ok(remaining > 0);
+  const resumed = Simulation.fromSave(sim.toSave(), { hitTest: () => true });
+  assert.equal(resumed.state.party.slots[0].member!.aiState!.aimCount, remaining);
+  assert.equal(resumed.setCompanionOrder(1, 0), false);
+  let fired = false;
+  for (let i = 0; i < remaining + 30; i++) {
+    sim.tick(); resumed.tick();
+    assert.deepEqual(resumed.toSave(), sim.toSave()); assert.deepEqual(resumed.events, sim.events);
+    if (sim.events.some(event => event.type === 'shot' && event.actorSlot === 1)) fired = true;
+  }
+  assert.ok(fired);
+});
+
 test('changing orders in the Barracks is reversible and does not permanently reduce a companion', () => {
   for (const ruleset of ['classic', 'expanded'] as const) {
     const sim = new Simulation(42, { ruleset, heroClass: 'rogue' });

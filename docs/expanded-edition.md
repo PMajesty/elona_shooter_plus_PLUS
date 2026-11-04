@@ -34,36 +34,50 @@ preference; Defend broadens the urgency boundary. A troop keeps its aim unless
 its target becomes invalid/shielded or a higher-priority threat appears, including
 a ranged attacker appearing while it is targeting a distant melee enemy.
 
-The order costs **15% automatic shot damage**, including class grenades, applied
-once when fired. Projectiles retain that damage after an order change or Continue.
+The order trades speed and damage for less supervision. Each new gun target
+takes **0.2 seconds longer to aim at**, including a switch to a more urgent foe.
+It chooses the target immediately and stops shooting a shielded boss immediately.
+Keeping the same target does not restart this delay or slow subsequent shots.
+The extra six simulation frames use the existing saved aim counter.
+
+It also costs **15% automatic shot damage**, including class grenades, applied
+once when fired. Grenades have no extra targeting delay. Projectiles retain their
+launch damage after an order change or Continue.
 Integer projectile damage can round the effective loss slightly above 15%.
 Learned skills, weapon eligibility, accuracy, ammunition and reload rules are
 unchanged. Careful uses ordinary-order accuracy; Fire at will keeps its original
-spread penalty. No extra accuracy bonus or aim-time shortcut is introduced.
+spread penalty. Ordinary orders keep their original aiming time and full damage.
+Orders can only be changed in town, so the costs cannot be toggled off mid-battle.
+Existing saves keep pending aim and projectile damage; the new delay applies
+when a new target is acquired.
 
 The order stops targeting guarded bosses. Existing projectiles and incidental
-pellets/blasts can still arrive after a shield rises. Normal acquisition/aiming
-delays remain, and shooting beyond preferred range can waste ammunition. This
+pellets/blasts can still arrive after a shield rises. Ordinary acquisition rolls
+remain, and shooting beyond preferred range can waste ammunition. This
 is assistance toward a Perfect Game, not a guarantee of one.
 
 ## Evidence and limits
 
-Opus reviewed the integration and ran three actual-Simulation skirmishes with
-four paired seeds (42, 137, 2026, 8675309). Same starting stats/RNG, ordinary
-movement, attack, accuracy, damage and reload; one companion, idle hero, 100 HP,
-30-second horizon. These are hand-positioned encounters, not campaign victories.
+The first release compared mainly against Fire at will, which has its own
+accuracy penalty. After player feedback, Codex and Opus added the aim delay
+and compared ordinary order0 as well. Four paired seeds (42, 137, 2026, 8675309)
+use identical starting stats/RNG, one companion, an idle hero, 100 castle HP and
+a 30-second limit. These are hand-positioned encounters, not campaign victories.
 
-| Encounter | Mean castle HP: Fire at will → Careful | Mean shots |
+| Encounter | Ordinary order | Careful Consideration |
 | --- | --- | --- |
-| Ranged enemies among sheep, Sniper Rifle | 46.50 → 56.25 | 9.5 → 10 |
-| Rats/barbarians approaching, SMG | 70 → 73 | 27.5 → 38.5 |
-| Guarded boss with alternatives, Hunter's Rifle | 63.25 → 93.50 | 10.5 → 9 |
+| Close-range rush, SMG | Clears in 6.70s; 65.75 HP left | Clears in 8.53s; 53.75 HP left |
+| Six sheep, shotgun | Clears in 5.66s; 5 shots | Clears in 7.35s; 5.75 shots |
+| Ranged foes among sheep, sniper | Does not clear in any seed | Clears in every seed; 61.75 HP left |
+| Shielded boss with other foes, rifle | Does not clear in any seed | Clears in every seed; 92.50 HP left |
 
-Careful lost more HP in two of four rush seeds and used 40% more shots on
-average. It aimed zero new shots at the guarded boss, versus four per seed with
-Fire at will. Comparisons include Fire at will's existing accuracy penalty;
-divergent actions also change later RNG. Keep 15% as an initial balance choice;
-these samples do not establish long-term campaign balance or universal superiority.
+Values are means. Careful lost more castle HP in every rush seed. It remains
+useful against mixed threats, but ordinary orders can clear suitable targets
+faster. Careful aimed no new shots at the guarded boss; Fire at will aimed four
+per seed. Class charge bonuses can partly offset the extra aim time, and different
+decisions change later RNG. These 44 short runs support an initial tradeoff,
+not a claim of universal or long-term campaign balance. No further damage cut
+was added.
 
 Reproduce with `node --experimental-strip-types --test web/tests/careful-balance.test.ts`.
 Focused tests cover urgency, range fallback, retained aim, shields, original-order

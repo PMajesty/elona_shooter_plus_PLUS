@@ -2,7 +2,10 @@ import type { PartyAIActor, PartyAIContext, PartyAITarget } from './party-ai.ts'
 
 export const CAREFUL_ORDER = 7;
 export const CAREFUL_DAMAGE_MULTIPLIER = 0.85;
-export const CAREFUL_HINT = 'Choose dangerous foes with care.\nDamage is reduced by 15%.';
+// Шесть кадров симуляции: цена самостоятельной смены цели, не каждого выстрела.
+export const CAREFUL_AIM_DELAY_FRAMES = 6;
+export const CAREFUL_COST_HINT = 'Slower to take aim; 15% less damage.';
+export const CAREFUL_HINT = `Choose dangerous foes with care.\n${CAREFUL_COST_HINT}`;
 
 export function usesCarefulConsideration(actor: PartyAIActor, context: PartyAIContext): boolean {
   return context.carefulConsideration === true && actor.slot >= 1 && actor.slot <= 4

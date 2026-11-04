@@ -15,8 +15,9 @@ Expanded's first feature, **Careful Consideration**, is a Barrack companion orde
 Urgent wall threats come first, then ranged attackers with every weapon,
 including shotguns/SMGs, then other enemies. Chickens count as ranged attackers:
 the source egg-attack frame damages the castle from midfield. Preferred range does not prevent
-target acquisition, and guarded bosses are avoided. The order costs 15% automatic
-shot damage at launch, including class grenades; learned stats stay unchanged.
+target acquisition, and guarded bosses are avoided. Each new gun target takes
+an extra 0.2 seconds to aim at. The order also costs 15% automatic shot damage
+at launch, including class grenades; learned stats stay unchanged.
 Temporary hired guns opt in at the Inn before Rest. Original content and all
 seven Game MODs remain available. [Usage, design and balance limits](expanded-edition.md).
 The edition selector uses original parchment/pin/radio artwork and menu fonts;
@@ -37,6 +38,10 @@ targeting call with a null actor; its affected class/control tests now pass.
 The targeting followup passed 27 focused checks and an actual muted HTTPS-browser
 shotgun scenario: switch from safe sheep to distant chicken, then back to sheep
 when it reaches the wall. Same-category score changes do not restart aim.
+The balance followup verified the six-frame acquisition cost, saved aim progress,
+unchanged original AI and updated Barrack/Inn labels. Opus's 44 short skirmishes
+showed slower cleanup and worse rush defense, while mixed-threat targeting
+remained useful. The Expanded guide records the setup and limits.
 
 Phone and tablet browsers have touch aiming, a second-finger reload, Fire at
 will, hotbar selection, pause and save-file controls. The portrait menu can be

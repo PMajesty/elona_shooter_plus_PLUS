@@ -200,7 +200,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         label(0, 0, 'Henchman order', 11, '#4c4031');
         control.add(scene.add.image(1, 20, selected ? 'partyCheckOn' : 'partyCheckOff', '1').setOrigin(0));
         const name = label(20, 16, 'Careful\nConsideration', 12);
-        label(0, 48, '-15% damage', 11, '#703b22');
+        label(0, 48, 'Slower aim, -15% damage', 9, '#703b22');
         label(0, 63, selected ? 'Careful' : 'Fire at will', 11, '#4c4031');
         const hit = scene.add.zone(0, 0, 110, 78).setOrigin(0).setInteractive({ useHandCursor: true }).setName('henchman-careful');
         control.add(hit);
