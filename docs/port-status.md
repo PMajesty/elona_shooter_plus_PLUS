@@ -2,7 +2,7 @@
 
 Updated 2026-11-04. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-The production bundle is `index-BpURX4JP.js` from `b9db08d`. The documented
+The production bundle is `index-CltLLFQv.js` from `86a94d6`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
@@ -21,6 +21,10 @@ Temporary hired guns opt in at the Inn before Rest. Original content and all
 seven Game MODs remain available. [Usage, design and balance limits](expanded-edition.md).
 The edition selector uses original parchment/pin/radio artwork and menu fonts;
 the order uses a short description with its damage cost.
+The parchment now resizes without stretching its scroll emblem. New Game's
+overwrite warning fits above Yes/No at normal and double size. Muted browser
+checks covered both editions, cancellation preserving the save and confirmation
+opening character creation.
 
 Codex and Opus jointly implemented and reviewed this addition. The full suite
 passed 636 tests; the original AI comparison retained all 74 snapshots. Muted
