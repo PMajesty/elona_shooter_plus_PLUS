@@ -1,10 +1,38 @@
 # Browser port status
 
-Updated 2026-11-04. **Desktop and touch browser release, save v45.**
+Updated 2026-11-04. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-The production bundle is `index-C3b_KnNb.js` from `ba936ec`. The documented
+The production bundle is `index-BpURX4JP.js` from `b9db08d`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
+
+The title now offers **Classic** and **Expanded** before New Game. Existing
+adventures and Flash imports stay Classic. Expanded has independent medals and
+day records, uses the same eight labeled save slots, and keeps its edition on
+Continue/import/Carry Over. Replacing an occupied slot requires confirmation.
+
+Expanded's first feature, **Careful Consideration**, is a Barrack companion order.
+Urgent wall threats come first, then ranged attackers with every weapon,
+including shotguns/SMGs, then other enemies. Chickens count as ranged attackers:
+the source egg-attack frame damages the castle from midfield. Preferred range does not prevent
+target acquisition, and guarded bosses are avoided. The order costs 15% automatic
+shot damage at launch, including class grenades; learned stats stay unchanged.
+Temporary hired guns opt in at the Inn before Rest. Original content and all
+seven Game MODs remain available. [Usage, design and balance limits](expanded-edition.md).
+The edition selector uses original parchment/pin/radio artwork and menu fonts;
+the order uses a short description with its damage cost.
+
+Codex and Opus jointly implemented and reviewed this addition. The full suite
+passed 636 tests; the original AI comparison retained all 74 snapshots. Muted
+desktop checks exercised both editions, original-save preservation, overwrite
+cancellation, invalid-revision rejection, Barrack selection, hired-gun Rest and
+exact battle Continue. Touch Chromium exercised Expanded and WebKit Classic,
+including rotation, shooting/reload, saves and the loot/results/town transition.
+The broader suite also exposed and fixed a pre-existing manual Militia grenade
+targeting call with a null actor; its affected class/control tests now pass.
+The targeting followup passed 27 focused checks and an actual muted HTTPS-browser
+shotgun scenario: switch from safe sheep to distant chicken, then back to sheep
+when it reaches the wall. Same-category score changes do not restart aim.
 
 Phone and tablet browsers have touch aiming, a second-finger reload, Fire at
 will, hotbar selection, pause and save-file controls. The portrait menu can be

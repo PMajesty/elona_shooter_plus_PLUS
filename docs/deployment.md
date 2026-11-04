@@ -9,9 +9,9 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- The current game is `/srv/elona/releases/review-C3b_KnNb/elona/` (save v45,
-  code `ba936ec`). The previous v45 release is `releases/review-B_k9m-G9`
-  and the previous v43 release is `releases/release-By__DLWU`.
+- The current game is `/srv/elona/releases/review-BpURX4JP/elona/` (save v46,
+  code `b9db08d`). The preceding v46 release is `releases/review-CjYQQCzx`;
+  the prior v45 release is `releases/review-C3b_KnNb`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
 - Both domain certificates were issued successfully by Let's Encrypt. Caddy's
@@ -19,9 +19,22 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
   www preserves the path while redirecting to the apex. Config validation passes.
 - Browser saves stay on each visitor's device. No account/gameplay backend exists.
   Export/import a backup to move a run between localhost, IP and domain origins.
-- The server verified the v45 archive and index before switching the current
+- The server verified the v46 archive and index before switching the current
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
+
+V46 adds the optional Expanded edition and Careful Consideration. The first
+release passed 636 automated checks and muted touch flows in Chromium/Expanded
+and WebKit/Classic. Public HTTPS checks matched the local bundle hash and used
+real New Game/import/export/Continue operations for both editions, preserving a
+separate Classic save. Hired-gun selection survived Rest and exact battle Continue.
+The followup corrects chicken threat classification and all-weapon ranged
+priorities, and uses original artwork/fonts for the edition selector. See
+[current behavior and evidence](expanded-edition.md).
+Its muted public-HTTPS check matched `index-BpURX4JP.js` to the local SHA-256
+and exported the actual shotgun targets: distant chicken while safe, approaching
+sheep when urgent. The styled selector, short order hint and hired-gun control
+were checked in the same browser run without script errors.
 
 The piercing correction passed 43 focused gameplay, save, party and source-probe
 tests plus the production build. Muted Chromium on public HTTPS imported bow
