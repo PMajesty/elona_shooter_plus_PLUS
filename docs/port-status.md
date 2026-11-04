@@ -2,7 +2,7 @@
 
 Updated 2026-11-04. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-The production bundle is `index-B4qQaDev.js` from `f34153d`. The documented
+The production bundle is `index-wA24LumV.js` from `f21d0f3`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
