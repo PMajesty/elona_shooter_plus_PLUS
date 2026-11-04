@@ -30,20 +30,37 @@ test('Smart rifle fire keeps ammunition/cooldown/traits and pays the 15% damage 
   assert.deepEqual(smart.state.party.slots[0].member!.traits, traits);
 });
 
-test('a shotgun drops a safe sheep target for a distant chicken, then defends an urgent approach', () => {
+test('a shotgun commits through a crowded wave and Continue, then prioritizes its next target', () => {
   const sim = battle(3, 7), sheep = sim.state.enemies[0];
   Object.assign(sheep, { x: 310, speed: 0.5, speedOrg: 0.5 });
   sim['spawnEnemy']('chicken');
   const chicken = sim.state.enemies.at(-1)!;
-  Object.assign(chicken, { x: 90, y: 220, speed: 0, frame: 105, attacking: true });
+  Object.assign(chicken, { x: 90, y: 220, speed: 0, frame: 105, attacking: true, hp: 10000, maxHp: 10000 });
+  for (let i = 0; i < 20; i++) {
+    sim['spawnEnemy']('sheep');
+    Object.assign(sim.state.enemies.at(-1)!, { x: 100 + i * 10, y: 150 + i * 5,
+      hp: 10000, maxHp: 10000, speed: 0, speedOrg: 0 });
+  }
   const member = sim.state.party.slots[0].member!;
-  sim.tick();
-  assert.equal(member.aiState!.targetUid, chicken.uid);
-  assert.equal(member.aiState!.shooting, false);
+  Object.assign(member.aiState!, { shooting: false, aimCount: 10, workRate: 0.3 });
   const restored = Simulation.fromSave(sim.toSave(), { hitTest: () => true });
-  sim.tick(); restored.tick(); assert.deepEqual(restored.toSave(), sim.toSave());
-  sheep.x = 440;
-  sim.tick(); assert.equal(member.aiState!.targetUid, sheep.uid);
+  let fired = false;
+  for (let i = 0; i < 90; i++) {
+    sim.tick(); restored.tick();
+    assert.equal(member.aiState!.targetUid, sheep.uid);
+    assert.deepEqual(restored.toSave(), sim.toSave()); assert.deepEqual(restored.events, sim.events);
+    if (sim.events.some(event => event.type === 'shot' && event.actorSlot === 1)) fired = true;
+  }
+  assert.ok(fired);
+  sheep.hp = 0;
+  for (let i = 0; i < 40 && member.aiState!.targetUid !== chicken.uid; i++) sim.tick();
+  assert.equal(member.aiState!.targetUid, chicken.uid);
+  const urgent = sim.state.enemies.find(enemy => enemy.kind === 'sheep' && enemy.hp > 0)!;
+  urgent.x = 440;
+  sim.tick(); assert.equal(member.aiState!.targetUid, chicken.uid);
+  chicken.hp = 0;
+  for (let i = 0; i < 40 && member.aiState!.targetUid !== urgent.uid; i++) sim.tick();
+  assert.equal(member.aiState!.targetUid, urgent.uid);
 });
 
 test('Smart projectile cost is fixed at launch and saved across a later order change', () => {

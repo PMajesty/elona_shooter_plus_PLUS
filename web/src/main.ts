@@ -33,7 +33,7 @@ import { Simulation, type SimulationState, type EnemyState, type SimulationEvent
 import { WORLD } from './content.ts';
 import { RAT_DROP_BODY_X, RAT_DROP_SHADOW, ratDropLocalPoint } from './bird-drop.ts';
 import { weaponPresentation } from './combat-stats.ts';
-import { SAVE_SLOTS, readSelectedSlot, selectSaveSlot, deleteSaveSlot, exportSave, readMute, readSave, readProfile, storeProfile, canSaveAdventure, clearSave, storeMute, storeSave } from './storage.ts';
+import { SAVE_SLOTS, readSelectedSlot, selectSaveSlot, readNewGameRuleset, storeNewGameRuleset, deleteSaveSlot, exportSave, readMute, readSave, readProfile, storeProfile, canSaveAdventure, clearSave, storeMute, storeSave } from './storage.ts';
 import { saveSlotLabel } from './save-slots.ts';
 import { createTitleSavesView, type TitleSavesLayout } from './title-saves-view.ts';
 import { createHelpView, type HelpLayout } from './help-view.ts';
@@ -145,7 +145,7 @@ class ElonaScene extends Phaser.Scene {
   screen: Screen = 'title';
   sim?: Simulation;
   saveSlot = readSelectedSlot();
-  private newGameRuleset: RulesetId = 'classic';
+  private newGameRuleset: RulesetId = readNewGameRuleset();
   private carryCheckpoint?: SimulationState;
   appearance = 0;
   paused = false;
@@ -702,7 +702,7 @@ class ElonaScene extends Phaser.Scene {
     container.dataset.newGameRuleset = this.newGameRuleset;
     this.root.add(createEditionSelector(this, this.newGameRuleset, edition => {
       if (this.collectionDialog || this.helpLayer) return;
-      this.newGameRuleset = edition; this.playSound('soundClick1'); this.showTitle();
+      this.newGameRuleset = edition; storeNewGameRuleset(edition); this.playSound('soundClick1'); this.showTitle();
     }));
     const labels = Array.from({ length: SAVE_SLOTS }, (_, slot) => saveSlotLabel(readSave(slot)));
     container.dataset.saveSlots = JSON.stringify(labels);
@@ -1699,9 +1699,13 @@ class ElonaScene extends Phaser.Scene {
       this.zone(120, 175, 400, 70, () => this.showTitle());
       const available = this.sim.canCarryOver(this.carryCheckpoint);
       container.dataset.carryOverAvailable = String(available);
-      if (available) this.labelButton(234, 265, 'Carry Over', () => {
-        if (state.carryOver) this.useCarryOver(); else this.showCarryConfirmation();
-      }, 155);
+      if (available) {
+        this.image(state.carryOver ? 'carryOverAgainNote' : 'carryOverNote');
+        this.originalButton(state.carryOver ? 'button_carryOverAgain' : 'button_carryOver',
+          state.carryOver ? 301.5 : 310.5, 257, () => {
+            if (state.carryOver) this.useCarryOver(); else this.showCarryConfirmation();
+          });
+      }
       status.textContent = available ? 'Carry Over restores the last town, adds earned battle money (at least 200 GP) and 1 AP. Most new medals become unavailable.'
         : 'The castle fell. Start a new game to try again.';
     }
@@ -1712,11 +1716,11 @@ class ElonaScene extends Phaser.Scene {
   private showCarryConfirmation(): void {
     this.showOutcome();
     container.dataset.carryOverConfirmation = 'true';
-    this.root.add(this.add.rectangle(310, 210, 430, 135, 0xe1d0aa).setStrokeStyle(2, 0x796a4f));
-    this.zone(95, 142, 430, 135, () => {});
-    this.text(119, 160, 'Do you really want to use Carry Over option?', 16).setWordWrapWidth(385);
-    this.originalButton('button_dialogYes', 245, 235, () => this.useCarryOver());
-    this.originalButton('button_dialogNo', 350, 235, () => this.showOutcome());
+    const layout = (this.cache.json.get('town-layout') as { saleDialog: ModConfirmationLayout }).saleDialog;
+    this.root.add(createModConfirmation(this, manifest, layout, confirmed => {
+      this.playSound('soundClick1');
+      if (confirmed) this.useCarryOver(); else this.showOutcome();
+    }, 'carry-over', 'Do you really want to use Carry Over option?'));
   }
 
   private useCarryOver(): void {
@@ -2292,7 +2296,7 @@ class ElonaScene extends Phaser.Scene {
         (this.collectionDialog!.getByName('flash-collection-question') as Phaser.GameObjects.Text).setText('The collection could not be stored. Please try again.');
         return;
       }
-      this.newGameRuleset = 'classic'; this.profile = merged; delete this.profileRead.warning;
+      this.profile = merged; delete this.profileRead.warning;
       this.closeCollectionImport(); this.showTitle();
       status.textContent = `Imported ${imported.profile.medals.length} Flash medals and survival records for future games.${imported.ignoredMedals.length ? ` ${imported.ignoredMedals.length} unsupported medal flags were ignored.` : ''}`;
     }, 'flash-collection', `Import ${imported.profile.medals.length} medals and records?\nAdventures will be kept.`);

@@ -1,4 +1,4 @@
-import { smartAimDelay, shouldYieldSmartTarget, smartTargetViable, smartPriority, chooseSmartTarget, claimSmartTarget, usesSmartMode } from './smart-mode.ts';
+import { smartAimDelay, smartTargetViable, chooseSmartTarget, claimSmartTarget, usesSmartMode } from './smart-mode.ts';
 import { COMBAT_TRAIT, combatTrait, advanceChainGunClock, idleChainGun, type ChainGunState } from './combat-stats.ts';
 import type { Item } from './items.ts';
 import type { TraitLevels } from './progression.ts';
@@ -217,19 +217,8 @@ export function stepPartyAIFrame(actor: PartyAIActor, context: PartyAIContext, c
   const manual = actor.slot === context.heroSlot && !context.fireAtWill;
   const smart = usesSmartMode(actor, context);
   if (smart && s.targetUid !== null) {
-    const retained = context.getTarget(s.targetUid);
-    if (!smartTargetViable(retained, context)) clearPartyAITarget(actor);
-    else {
-      const urgent = chooseSmartTarget(actor, actor.weapon?.range ?? 0, context);
-      // Меняем прицел при новой угрозе или уступаем дубль свободной цели; иначе сохраняем наводку.
-      if (urgent && urgent.uid !== retained.uid && (smartPriority(urgent, context, member.optWall) > smartPriority(retained, context, member.optWall)
-        || shouldYieldSmartTarget(actor, retained, urgent, context))) {
-        claimSmartTarget(urgent, context);
-        Object.assign(s, { shooting: false, burst: 0, targetUid: urgent.uid, onMark: false });
-        s.aimCount = startingPartyAim(actor, urgent, actor.weapon?.range ?? null) + smartAimDelay(actor, urgent);
-        return 'acquired';
-      }
-    }
+    // Доводим выбранную цель до конца: новые угрозы и прицелы союзников не сбрасывают наводку.
+    if (!smartTargetViable(context.getTarget(s.targetUid), context)) clearPartyAITarget(actor);
   }
   if (!manual) {
     if (member.ai === 2 && s.targetUid !== null && !canAutoTarget(actor, target(context, s.targetUid))) clearPartyAITarget(actor);

@@ -46,14 +46,19 @@ test('Smart pays cursor-distance cost to engage a new target, without slowing re
   assert.equal(firstShots[1] - firstShots[0], 12);
 });
 
-test('replacing a dead or shielded target pays the same aim cost and cannot fire immediately', () => {
-  for (const reason of ['dead', 'shielded']) {
+test('replacing an invalid target pays the same aim cost and cannot fire immediately', () => {
+  for (const reason of ['dead', 'shielded', 'removed', 'missing', 'bomb']) {
     const s = setup(4, [enemy(1, 100), enemy(2, 110)]);
     Object.assign(s.ai, { targetUid: 1, shooting: true, aimCount: 0, cursorX: 135, cursorY: 245 });
-    if (reason === 'dead') s.enemies[0].hp = 0; else s.shields.add(1);
+    if (reason === 'dead') s.enemies[0].hp = 0;
+    if (reason === 'shielded') s.shields.add(1);
+    if (reason === 'removed') s.enemies[0].removed = true;
+    if (reason === 'missing') s.enemies.shift();
+    if (reason === 'bomb') s.enemies[0].bomb = true;
     assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
     assert.equal(s.ai.targetUid, 2); assert.equal(s.counts().shots, 0);
-    assert.equal(s.ai.aimCount, startingPartyAim(s.actor, s.enemies[1], s.actor.weapon!.range!) + smartAimDelay(s.actor, s.enemies[1]));
+    const next = s.context.getTarget(2)!;
+    assert.equal(s.ai.aimCount, startingPartyAim(s.actor, next, s.actor.weapon!.range!) + smartAimDelay(s.actor, next));
   }
 });
 
@@ -65,19 +70,25 @@ test('every weapon favors ranged attackers when the wall is safe, including shot
   }
 });
 
-test('close weapons switch to ranged threats, then to urgent melee, without same-tier aim churn', () => {
+test('close weapons finish their target before choosing ranged or urgent threats', () => {
   const sheep = enemy(1, 310), archer = enemy(2, 50);
   const s = setup(3, [sheep]);
   stepPartyAIFrame(s.actor, s.context, s.callbacks); assert.equal(s.ai.targetUid, 1);
   s.enemies.push(archer); s.ranged.add(2);
+  const remaining = s.ai.aimCount;
+  assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'advanced');
+  assert.equal(s.ai.targetUid, 1); assert.equal(s.ai.aimCount, remaining - 1);
+  sheep.hp = 0;
   assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
   assert.equal(s.ai.targetUid, 2);
   s.enemies.push(enemy(3, 280)); s.ranged.add(3);
   for (let i = 0; i < 20; i++) stepPartyAIFrame(s.actor, s.context, s.callbacks);
   assert.equal(s.ai.targetUid, 2); assert.ok(s.counts().shots > 0);
-  sheep.x = 440;
+  const approaching = s.enemies[2]; approaching.x = 440;
+  stepPartyAIFrame(s.actor, s.context, s.callbacks); assert.equal(s.ai.targetUid, 2);
+  archer.hp = 0;
   assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
-  assert.equal(s.ai.targetUid, 1);
+  assert.equal(s.ai.targetUid, 3);
 });
 
 test('all-range fallback uses ordinary acquisition, claim tag60 and work-rate gate', () => {
@@ -91,14 +102,19 @@ test('all-range fallback uses ordinary acquisition, claim tag60 and work-rate ga
   assert.equal(s.actor.member!.shootTimer, -600); // Только первый, не acquisition-кадр двигает часы.
 });
 
-test('urgent threats preempt a retained ranged boss without RNG and then finish aiming', () => {
+test('urgent threats do not interrupt a committed boss target', () => {
   const boss = enemy(1, 80), threat = enemy(2, 200);
   const s = setup(13, [boss, threat]); s.ranged.add(1);
   s.actor.member!.optBoss = s.actor.member!.optWall = true; s.context.shared.targetBossUid = 1;
   stepPartyAIFrame(s.actor, s.context, s.callbacks); assert.equal(s.ai.targetUid, 1);
   threat.x = 440; s.ai.cursorX = 415; s.ai.cursorY = threat.y;
+  const remaining = s.ai.aimCount;
+  assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'advanced');
+  assert.equal(s.ai.targetUid, 1); assert.equal(s.ai.aimCount, remaining - 1);
+  assert.equal(s.counts().draws, 1);
+  boss.hp = 0;
   assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
-  assert.equal(s.ai.targetUid, 2); assert.equal(s.counts().draws, 1);
+  assert.equal(s.ai.targetUid, 2); assert.equal(s.counts().draws, 2);
   assert.equal(s.ai.aimCount, startingPartyAim(s.actor, threat, s.actor.weapon!.range!) + smartAimDelay(s.actor, threat));
   for (let i = 0; i < 20; i++) stepPartyAIFrame(s.actor, s.context, s.callbacks);
   assert.ok(s.counts().shots > 0); assert.equal(s.ai.targetUid, 2);
@@ -158,6 +174,7 @@ test('stale tag60 is not a claim or an idle/urgency veto', () => {
   assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
   assert.equal(s.ai.targetUid, 1);
   s.enemies.push(enemy(3, 440, { tag: 60 }));
+  s.enemies[0].hp = 0;
   assert.equal(stepPartyAIFrame(s.actor, s.context, s.callbacks), 'acquired');
   assert.equal(s.ai.targetUid, 3);
 });
@@ -276,7 +293,28 @@ test('two and three Smart actors spread across live targets, not tags or enumera
   }
 });
 
-test('retained duplicates yield to free alternatives; lowest slot keeps aim without churn', () => {
+test('a crowded moving wave cannot interrupt committed aim or starve shots', () => {
+  const s = setup(4, Array.from({ length: 24 }, (_, i) => enemy(i + 1, 80 + i * 10)));
+  const actors = squad(s, 3);
+  for (const actor of actors) stepPartyAIFrame(actor, s.context, s.callbacks);
+  const targets = actors.map(actor => actor.member!.aiState!.targetUid);
+  assert.equal(new Set(targets).size, 3);
+  const initialAim = actors.map(actor => actor.member!.aiState!.aimCount);
+  for (let frame = 0; frame < 120; frame++) {
+    for (const foe of s.enemies) {
+      foe.x = (frame + foe.uid) % 5 === 0 ? 440 : 80 + foe.uid * 10;
+      if ((frame + foe.uid) % 3 === 0) s.ranged.add(foe.uid); else s.ranged.delete(foe.uid);
+    }
+    for (const actor of actors) stepPartyAIFrame(actor, s.context, s.callbacks);
+    assert.deepEqual(actors.map(actor => actor.member!.aiState!.targetUid), targets);
+    assert.deepEqual(actors.map(actor => actor.member!.aiState!.aimCount),
+      initialAim.map(aim => Math.max(0, aim - frame - 1)));
+  }
+  assert.ok(s.counts().shots > 0);
+  assert.equal(s.counts().draws, 3);
+});
+
+test('shared commitments persist until the target dies, then allies spread again', () => {
   for (const reverseStep of [false, true]) {
     const s = setup(4, [enemy(1, 440)]), actors = squad(s, 3);
     for (const actor of actors) Object.assign(actor.member!.aiState!, { targetUid: 1, shooting: true, aimCount: 0 });
@@ -285,18 +323,23 @@ test('retained duplicates yield to free alternatives; lowest slot keeps aim with
     const order = reverseStep ? [...actors].reverse() : actors;
     for (const actor of order) stepPartyAIFrame(actor, s.context, s.callbacks);
     assert.equal(s.ai.targetUid, 1); assert.equal(s.ai.aimCount, 0);
-    assert.equal(new Set(actors.map(a => a.member!.aiState!.targetUid)).size, 3);
+    assert.deepEqual(actors.map(a => a.member!.aiState!.targetUid), [1, 1, 1]);
     const assignments = actors.map(a => a.member!.aiState!.targetUid);
     for (let frame = 0; frame < 35; frame++) for (const actor of order) stepPartyAIFrame(actor, s.context, s.callbacks);
     assert.deepEqual(actors.map(a => a.member!.aiState!.targetUid), assignments);
     assert.deepEqual(Object.keys(s.ai).sort(), originalKeys);
     assert.equal(s.counts().draws, 0);
+    s.enemies[0].hp = 0;
+    for (const actor of order) stepPartyAIFrame(actor, s.context, s.callbacks);
+    assert.equal(new Set(actors.map(a => a.member!.aiState!.targetUid)).size, 2);
+    assert.ok(actors.every(actor => actor.member!.aiState!.targetUid !== 1));
   }
 });
 
-test('coordination switches pay distance from the actual retained cursor', () => {
+test('replacement after a shared target dies pays distance from the actual retained cursor', () => {
   const s = setup(4, [enemy(1, 440), enemy(2, 100)]), actors = squad(s, 2);
   for (const actor of actors) Object.assign(actor.member!.aiState!, { targetUid: 1, shooting: true, aimCount: 0, cursorX: 125, cursorY: 245 });
+  s.enemies[0].hp = 0;
   assert.equal(stepPartyAIFrame(actors[1], s.context, s.callbacks), 'acquired');
   assert.equal(actors[1].member!.aiState!.targetUid, 2);
   assert.equal(actors[1].member!.aiState!.aimCount, startingPartyAim(actors[1], s.enemies[1], 2) + 1);

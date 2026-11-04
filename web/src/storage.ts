@@ -19,6 +19,19 @@ export function selectSaveSlot(slot: number): boolean {
 }
 const PROFILE_KEY = 'elona-shooter-plus-plus.port.profile.v1';
 const OPTIONS_KEY = 'elona-shooter-plus-plus.port.options.v1';
+const EDITION_PREFERENCE_KEY = 'elona-shooter-plus-plus.port.new-game-edition.v1';
+
+// Выбор следующей новой игры независим от издания загружаемого приключения.
+export function readNewGameRuleset(): RulesetId {
+  try { return localStorage.getItem(EDITION_PREFERENCE_KEY) === 'expanded' ? 'expanded' : 'classic'; }
+  catch { return 'classic'; }
+}
+export function storeNewGameRuleset(ruleset: RulesetId): boolean {
+  if (ruleset !== 'classic' && ruleset !== 'expanded') return false;
+  try { localStorage.setItem(EDITION_PREFERENCE_KEY, ruleset); return true; }
+  catch { return false; }
+}
+
 export function canSaveAdventure(state: { mode?: string; phase: string }): boolean {
   return state.mode !== 'hardcore' || state.phase === 'town';
 }

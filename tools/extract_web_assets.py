@@ -66,6 +66,7 @@ CLIPS.update({"gameVolume": 2671, "originalCrosshair": 2689, "fireworkLaunch": 9
 CLIPS["museumKongregate"] = 1835
 CLIPS["townEventCards"] = 2336
 BUTTONS.update({"button_pauseTitle": 1487, "button_pauseSave": 1490, "button_gameMenu": 2703})
+BUTTONS.update({"button_carryOver": 2732, "button_carryOverAgain": 2736})
 FORCE = False
 
 
@@ -648,6 +649,14 @@ def buttons(manifest, tags):
 
 
 
+def carry_over_assets(xml, sprites, manifest):
+    # Подписи двух исходных состояний отделены от интерактивной кнопки.
+    for frame, name in [(1, "carryOverNote"), (2, "carryOverAgainNote")]:
+        manifest["images"][name] = static_screen(xml, name,
+            placed_frame(sprites[2737].find("subTags"), frame),
+            omit={"carryOverButton"}, offset=(234, 289))
+
+
 def runtime_clips(xml, sprites, manifest):
     directory, svg_directory = WORK / "runtime-clips", WORK / "runtime-clips-svg"
     specs = {"itemPicture": (2113, {"2"}, False), "radioButton": (2312, {"1", "8"}, False),
@@ -999,6 +1008,7 @@ def main():
         shutil.copyfile(source, dest)
         manifest["sounds"][name] = f"sounds/{dest.name}"
     buttons(manifest, tags)
+    carry_over_assets(xml, sprites, manifest)
     manifest["images"]["pauseMenu"] = pause_screen(xml, sprites)
     manifest["images"]["medalHint"] = static_screen(xml, "medalHint", placed_frame(sprites[1657].find("subTags"), 1),
         {"itemName", "itemDesc", "itemDesc2", "maxText", "typeText"})
@@ -1065,7 +1075,7 @@ def main():
             "Gravity hard-light is decomposed into original-alpha multiply/add textures for the WebGL renderer",
             "sheepShadow and crowShadow preserve shadow-only alpha masks for original hit exclusion",
             "Ordinary enemy collision uses original filled contours and placement matrices, not bitmap alpha",
-            "gameOver hides day-one carry-over control and retired external play-more button"
+            "gameOver omits the conditionally shown carry-over control and retired external play-more button; separate original Carry Over button states and notes are rendered when available"
         ],
         "limitations": [
             "FFDec renders timelines without executing ActionScript; application implements frame actions",

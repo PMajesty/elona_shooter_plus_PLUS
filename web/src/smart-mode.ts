@@ -70,13 +70,6 @@ export function smartClaimCount(enemy: PartyAITarget, actor: PartyAIActor, conte
   return (context.isBoss?.(enemy) ?? enemy.uid === context.shared.targetBossUid) ? 0 : claimants(enemy, actor, context).length;
 }
 
-export function shouldYieldSmartTarget(actor: PartyAIActor, retained: PartyAITarget,
-  chosen: PartyAITarget, context: PartyAIContext): boolean {
-  return !(context.isBoss?.(retained) ?? retained.uid === context.shared.targetBossUid) && chosen.uid !== retained.uid
-    && smartClaimCount(chosen, actor, context) === 0
-    && claimants(retained, actor, context).some(other => other.slot < actor.slot);
-}
-
 export function chooseSmartTarget(actor: PartyAIActor, range: number, context: PartyAIContext): PartyAITarget | null {
   const member = actor.member!;
   let best: PartyAITarget | null = null;

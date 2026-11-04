@@ -10,13 +10,19 @@ The title now offers **Classic** and **Expanded** before New Game. Existing
 adventures and Flash imports stay Classic. Expanded has independent medals and
 day records, uses the same eight labeled save slots, and keeps its edition on
 Continue/import/Carry Over. Replacing an occupied slot requires confirmation.
+The title remembers the last explicitly selected edition across reloads;
+loading an adventure does not change that preference. Carry Over now uses the
+original button states and explanatory text, with the original parchment
+confirmation dialog, instead of a plain rectangle.
 
 Expanded's first feature, **Smart Mode** (formerly Careful Consideration), is
 now the default for starting/newly recruited companions and the hired-gun
 preference in new Expanded adventures. Existing saved orders are preserved.
 Allies prefer uncovered targets, protect the wall, then seek ranged attackers,
 including chickens. Bosses and the last enemy can receive shared fire; surplus
-allies help when every target is covered. Switching aim adds distance / 25
+allies help when every target is covered. Allies commit until their target dies,
+disappears or shields; priorities and coordination apply on the next acquisition.
+Changing crowd priorities no longer resets an ongoing aim. Switching aim adds distance / 25
 simulation frames, rounded and capped at 12 (0..0.4 seconds), instead of the
 former flat delay. Automatic damage still costs 15% at launch. The hero and
 Classic defaults are unchanged. [Usage and limits](expanded-edition.md).
@@ -35,13 +41,17 @@ exact battle Continue. Touch Chromium exercised Expanded and WebKit Classic,
 including rotation, shooting/reload, saves and the loot/results/town transition.
 The broader suite also exposed and fixed a pre-existing manual Militia grenade
 targeting call with a null actor; its affected class/control tests now pass.
-The targeting followup passed 27 focused checks and an actual muted HTTPS-browser
-shotgun scenario: switch from safe sheep to distant chicken, then back to sheep
-when it reaches the wall. Same-category score changes do not restart aim.
+The earlier immediate-preemption policy is superseded by target commitment.
+Crowd checks cover uninterrupted aiming and firing, replacement priorities,
+shield avoidance and deterministic Continue.
 The Smart Mode followup covers distance-based acquisition, two-ally target
 coordination and Continue, starting/recruit/hired-gun defaults, saved opt-outs
 and updated Barrack/Inn labels. Prior fixed-delay skirmish numbers are historical;
 they do not establish balance for the new coordination behavior.
+The commitment/UI followup passed 46 focused checks and the 74 original AI
+snapshots. A muted browser checked committed firing in a 24-enemy encounter,
+exact battle Continue, both edition preferences across reloads, Classic save
+loading with Expanded selected, and Carry Over cancellation/confirmation/retry.
 
 Phone and tablet browsers have touch aiming, a second-finger reload, Fire at
 will, hotbar selection, pause and save-file controls. The portrait menu can be

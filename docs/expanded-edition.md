@@ -5,8 +5,10 @@ These are fan additions, separate from the original developers' game.
 
 ## Player behavior
 
-- The title's **New Game Edition** selector defaults to Classic. Expanded opts
-  into new features; the original Game MODs remain independent choices.
+- The title's **New Game Edition** selector starts on Classic, then remembers
+  your choice in this browser. Expanded opts into new features; the original
+  Game MODs remain independent choices. Continue/import keep the saved
+  adventure's edition without changing your preference for the next new game.
 - An adventure keeps its edition throughout its life. Continue/import use the
   saved edition regardless of the selector. There is no in-place conversion.
 - Both editions share the eight labeled adventure slots, with confirmation
@@ -38,10 +40,12 @@ Bosses and the last viable enemy can draw shared fire. If every enemy already
 has someone aiming at it, extra allies help with the least-covered targets.
 They do not wait for a target to become free.
 
-If allies share a target and another enemy becomes available, a stable slot
-order decides who keeps it and who switches. Small score changes do not restart
-aim. A more urgent threat, a shielded boss or an uncovered alternative can cause
-a switch.
+Once an ally chooses a target, it commits until that enemy dies, disappears or
+raises a shield. New arrivals, changing threat scores and another ally's aim do
+not interrupt it. Threat priorities and spreading fire apply when choosing the
+next target. Allies already sharing a target finish it together, even if a new
+enemy appears. This prevents repeated aim resets in crowded waves, but means
+an engaged ally will not immediately turn toward a newly urgent threat.
 
 ### Cost and timing
 
@@ -63,8 +67,8 @@ preferred range. A projectile already in flight can hit a newly raised shield.
 
 ## Evidence and limits
 
-Focused checks cover distance-based aim, stable target ownership, shared bosses,
-last-target and fully-covered fallback, immediate shield avoidance, damage at
+Focused checks cover distance-based aim, commitment through crowded waves,
+shared bosses, last-target and fully-covered fallback, immediate shield avoidance, damage at
 launch, defaults, opt-outs and deterministic save/Continue. Original AI reference
 checks cover the unchanged Classic orders. Muted browser checks exercise the
 normal menus and exported saves in an isolated profile.
