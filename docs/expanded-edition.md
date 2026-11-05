@@ -73,7 +73,7 @@ criticals. The hero keeps the original white/gold numbers. In Pause, **Show
 companion damage** and the player's damage toggle work independently.
 
 Companion numbers start enabled, including when loading an older Expanded save.
-Turning them off is saved immediately and remembered on Continue. Classic keeps
+Changes are written to the adventure's next valid save and remembered on Continue. Classic keeps
 its original NPC-damage default and number styling.
 The adventure envelope records the settings revision separately from simulation
 save v46, so this default change applies once and later opt-outs stay intact.
