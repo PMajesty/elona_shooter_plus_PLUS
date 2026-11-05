@@ -18,6 +18,10 @@ Use `contentText` for names and medal text, the default UI context for controls.
 HP/AP/GP and keyboard keys retain their familiar abbreviations. Author names,
 web addresses and brands are preserved.
 
+Class names use the conventional masculine form regardless of appearance:
+«Плут», «Дуэлянт». Keep their descriptions and awards consistent. The original
+English uses she/her for these classes, but this does not restrict the portrait.
+
 `localizedText` retains its source string. Constrained fields use
 `fitLocalizedText` with measured bounds, a readable font floor and optional
 ellipsis for compact names. Full descriptions remain in their tooltips.
