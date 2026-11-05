@@ -6,6 +6,7 @@ import { Simulation } from '../src/simulation.ts';
 import { createProfile } from '../src/profile.ts';
 import { ItemFactory } from '../src/items.ts';
 import { refreshPartyAI } from '../src/party-ai.ts';
+import { DEFAULT_GAME_OPTIONS } from '../src/game-options.ts';
 const require = createRequire(import.meta.url);
 const { chromium } = require('../../.tools/browser-qa/node_modules/playwright-core');
 const url = process.argv[2] ?? 'http://127.0.0.1:5175/elona/';
@@ -37,6 +38,23 @@ try {
  const shot=async (name,keepPointer=false)=>{await rendered();if(!keepPointer)await page.mouse.move(10,10);const file=`.build/localization/qa-${name}.png`;await page.screenshot({path:file});shots.push(file);};
  const toggle=async()=>{const before=await data('language');await page.locator('#language').click();assert.notEqual(await data('language'),before);await rendered();};
  const envelope=sim=>{const save=sim.toSave();Simulation.fromSave(save);return {format:'elona-shooter-browser',version:sim.state.version,appearance:0,simulation:save,profile:createProfile(sim.state.ruleset.id)};};
+ const resultScrollCheck=async()=>{
+  await rendered();
+  const box=await canvas.boundingBox(),scale=box.width/620;
+  const region=(x,y,width,height)=>page.screenshot({clip:{x:box.x+x*scale,y:box.y+y*scale,width:width*scale,height:height*scale}});
+  const outside=await region(316,289,170,38),inside=await region(316,140,170,135);
+  await page.keyboard.press('ArrowDown');await rendered();await shot('result-scrolled');
+  assert.ok((await region(316,289,170,38)).equals(outside),'Scrolling painted news below its box');
+  assert.ok(!(await region(316,140,170,135)).equals(inside),'The report did not scroll');
+  await page.keyboard.press('End');await rendered();await shot('result-end');
+  assert.ok((await region(316,289,170,38)).equals(outside),'Report end painted outside its box');
+  await page.keyboard.press('Home');await rendered();
+  assert.ok((await region(316,140,170,135)).equals(inside),'Home did not restore the first report lines');
+  await page.mouse.move(box.x+400*scale,box.y+200*scale);await page.mouse.wheel(0,45);await rendered();
+  assert.ok((await region(316,289,170,38)).equals(outside),'Mouse-wheel scrolling painted below the box');
+  assert.ok(!(await region(316,140,170,135)).equals(inside),'Mouse-wheel scrolling did not move report text');
+  await page.keyboard.press('Home');await rendered();
+ };
  await open();
  const bundleUrl=await page.locator('script[type="module"][src]').getAttribute('src');
  const remoteBundle=await page.request.get(new URL(bundleUrl,url).href);
@@ -63,7 +81,14 @@ try {
  if(['loot','boss-loot'].includes(town.state.postbattle)){await importSave(envelope(town));await screen(town.state.postbattle);await shot('loot');}
  while(['loot','boss-loot'].includes(town.state.postbattle))town.finishLoot();
  while(town.state.postbattle==='skill'){await importSave(envelope(town));await screen('skill');await shot('skill');town.chooseSkill(town.state.skillChoices[0]);}
- await importSave(envelope(town));await screen('result');await shot('result');assert.ok(town.enterTown());
+ await importSave(envelope(town));await screen('result');await shot('result');
+ const longReport=Simulation.fromSave(town.toSave());
+ longReport.state.battleNews.push(...Array.from({length:12},(_,i)=>`Parker gains Cool ${i+2}.`));
+ await importSave({...envelope(longReport),options:{...DEFAULT_GAME_OPTIONS,disableFireworks:true}});await screen('result');
+ await resultScrollCheck();await toggle();await resultScrollCheck();await toggle();
+ await page.setViewportSize({width:640,height:400});await resultScrollCheck();
+ await page.setViewportSize({width:1280,height:800});
+ assert.ok(town.enterTown());
  const factory=new ItemFactory(()=>0.3),modified=factory.generate(1);modified.modMax=3;factory.enchant(modified,4,2);factory.enchant(modified,1,1);factory.enchant(modified,11,1);town.state.inventory[3]=modified;
  await importSave(envelope(town));await screen('town');
  for(const [name,x,y,tab] of [['inn',44,75,'mission'],['tower',44,135,'castle'],['barrack',44,194,'characters'],['equipment',75,218,'equipment'],['smithy',44,275,'shop'],['medals',44,326,'medals']]){await click(x,y);assert.equal(await data('town-tab'),tab);await shot(name);}

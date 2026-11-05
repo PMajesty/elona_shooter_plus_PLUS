@@ -28,6 +28,10 @@ and preserve the original decorative heading delimiters in artwork.
 `fitLocalizedText` with measured bounds, a readable font floor and optional
 ellipsis for compact names. Full descriptions remain in their tooltips.
 Cropped text uses logical game coordinates, accounting for the canvas resolution.
+Phaser 4's texture crop dimensions use pixels, but its draw offsets use game
+coordinates. `localizedText` normalizes those offsets and reapplies the requested
+crop when text or font changes resize the texture. The long-report browser check
+verifies that scrolling never paints below the viewport.
 
 ## Artwork and fonts
 

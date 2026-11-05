@@ -18,6 +18,7 @@ class LocalizedText extends Phaser.GameObjects.Text {
   declare private fitting: boolean | undefined;
   declare private sourceWrapWidth: number | undefined;
   declare private sourceLineSpacing: number | undefined;
+  declare private logicalCrop: { x: number; y: number; width: number; height: number } | undefined;
   constructor(scene: Phaser.Scene, x: number, y: number, value: string | string[], style: Phaser.Types.GameObjects.Text.TextStyle = {}) {
     super(scene, x, y, value, { ...style, fontFamily: localizedFont(style.fontFamily ?? 'Arial'), resolution: style.resolution ?? 2 });
     this.sourceText = value; this.sourceFamily = style.fontFamily ?? 'Arial';
@@ -30,12 +31,24 @@ class LocalizedText extends Phaser.GameObjects.Text {
   override setText(value: string | string[]): this {
     this.sourceText = value; return super.setText(translateText(value, getLanguage(), this.localizationContext));
   }
-  // Text хранит текстуру в resolution-раз большем размере, а поля заданы в координатах игры.
+  // Текстура хранится в увеличенных пикселях, а положение выреза задано в координатах игры.
   override setCrop(x?: number | Phaser.Geom.Rectangle, y?: number, width?: number, height?: number): this {
-    if (x === undefined) return super.setCrop();
-    const r = this.style.resolution;
-    if (typeof x !== 'number') return super.setCrop(x.x * r, x.y * r, x.width * r, x.height * r);
-    return super.setCrop(x * r, (y ?? 0) * r, (width ?? 0) * r, (height ?? 0) * r);
+    if (x === undefined) { this.logicalCrop = undefined; return super.setCrop(); }
+    this.logicalCrop = typeof x === 'number'
+      ? { x, y: y ?? 0, width: width ?? 0, height: height ?? 0 }
+      : { x: x.x, y: x.y, width: x.width, height: x.height };
+    return this.applyLogicalCrop();
+  }
+  private applyLogicalCrop(): this {
+    const rect = this.logicalCrop;
+    if (!rect) return this;
+    const r = this.frame.source.resolution;
+    super.setCrop(rect.x * r, rect.y * r, rect.width * r, rect.height * r);
+    // Phaser 4 делит размеры выреза на resolution, но прибавляет x/y без деления.
+    // UV и размеры остаются в пикселях текстуры; смещение нормализуем отдельно.
+    const crop = (this as unknown as { _crop: { x: number; y: number } })._crop;
+    crop.x /= r; crop.y /= r;
+    return this;
   }
   setContext(context: TextContext): this { this.localizationContext = context; return this.setText(this.sourceText); }
   setLocalizedBounds(bounds: LocalizedTextBounds): this {
@@ -61,6 +74,7 @@ class LocalizedText extends Phaser.GameObjects.Text {
     super.updateText();
     // updateText вызывается и при изменении переноса, отступов и гарнитуры.
     if (this.fitBounds && !this.fitting) this.fitTranslation();
+    if (this.isCropped && !this.fitting) this.applyLogicalCrop();
     return this;
   }
   private fitTranslation(): void {
@@ -95,7 +109,10 @@ class LocalizedText extends Phaser.GameObjects.Text {
           characters.pop(); super.setText(characters.join('').trimEnd() + '…');
         }
       }
-    } finally { this.fitting = false; }
+    } finally {
+      this.fitting = false;
+      if (this.isCropped) this.applyLogicalCrop();
+    }
   }
   override setFontFamily(family: string): this {
     this.sourceFamily = family; return super.setFontFamily(localizedFont(family));
