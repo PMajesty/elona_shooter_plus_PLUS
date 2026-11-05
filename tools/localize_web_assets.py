@@ -227,12 +227,14 @@ def build_assets(only=None):
     localized = {'images': {}, 'clips': {}, 'hitMasks': {}}
     stamp = hashlib.sha256(json.dumps(translations, ensure_ascii=False).encode() + Path(__file__).read_bytes()).hexdigest()
     cache = WORK / 'render-cache'; cache.mkdir(exist_ok=True)
-    def cached(key, action):
+    def cached(key, action, source_bytes=b''):
         if only and key not in only:
             return
         marker = cache / f'{key}.stamp'
-        if not marker.exists() or marker.read_text() != stamp:
-            action(); marker.write_text(stamp)
+        # Изменения состава английского кадра тоже требуют обновить перевод.
+        current = hashlib.sha256(stamp.encode() + source_bytes).hexdigest() if source_bytes else stamp
+        if not marker.exists() or marker.read_text() != current:
+            action(); marker.write_text(current)
     # Готовые XML кадров уже содержат точные исключения динамических полей и смещения.
     jobs = []
     for key, asset in manifest['images'].items():
@@ -256,7 +258,7 @@ def build_assets(only=None):
                 picture = picture.crop((x, y, x + round(asset['width'] * 2), y + round(asset['height'] * 2)))
             output = DEST / asset['file']; output.parent.mkdir(parents=True, exist_ok=True)
             picture.save(output, **({'lossless': True} if double else {'optimize': True}))
-        jobs.append((key, render))
+        jobs.append((key, render, path.read_bytes()))
     with ThreadPoolExecutor(max_workers=3) as pool:
         list(pool.map(lambda job: cached(*job), jobs))
     ru_source = WORK / 'source.swf'

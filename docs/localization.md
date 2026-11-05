@@ -44,6 +44,9 @@ The English assets and original SWF are unchanged. Inspect the generated
 This maintenance step requires the existing FFDec/Java extraction tools, Pillow
 and OpenCV. To rebuild only the day badge's containing screens, append
 `--only battle townHud townScene`; other existing exports are retained.
+Screen caches also track the extracted English XML, so a changed layout
+refreshes its translated artwork. The title's browser version and creator
+credits are live text; they do not need a new image export each release.
 
 Russian uses [Neucha](https://fonts.google.com/specimen/Neucha) for handwritten
 menus and [PT Sans](https://fonts.google.com/specimen/PT+Sans) for compact UI.

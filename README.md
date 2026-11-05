@@ -1,4 +1,4 @@
-# Elona Shooter Plus
+# Elona Shooter Plus+
 
 **[Play in your browser](https://pastalapizza.site/elona/)** · [Download the browser release](https://github.com/PMajesty/elona_shooter_plus_PLUS/releases/latest)
 

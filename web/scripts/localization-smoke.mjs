@@ -63,7 +63,10 @@ try {
  const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
  assert.equal(digest(await remoteBundle.body()),digest(await readFile(`web/dist/assets/${bundleName}`)));
  evidence.bundle=bundleName;evidence.bundleVerified=true;
- assert.equal(await data('language'),'en');await toggle();assert.equal(await data('language'),'ru');await shot('title');
+ assert.equal(await data('language'),'en');assert.match(await page.title(),/Elona Shooter Plus\+/);await shot('title-en-2x');
+ await page.setViewportSize({width:620,height:460});await shot('title-en-1x');
+ await toggle();assert.equal(await data('language'),'ru');await shot('title-ru-1x');
+ await page.setViewportSize({width:1280,height:800});await shot('title');
  await open();assert.equal(await data('language'),'ru');assert.equal(await data('muted'),'true');
  await click(295,195);await screen('gene');await click(200,214);await shot('gene');
  await toggle();await toggle();assert.equal(await data('hero-class'),'rogue');

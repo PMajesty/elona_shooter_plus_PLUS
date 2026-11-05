@@ -2,9 +2,16 @@
 
 Updated 2026-11-05. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-Browser Release 1.1.0 uses `index-GPl88U5c.js`. The documented
+Browser Release 1.2.0 uses `index-qxtJXMID.js`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
+
+The browser client is **Elona Shooter Plus+**. Its title retains the ornate
+logo, shows the package's browser version and credits Noa and the Plus creators
+in English and Russian. The upstream Flash version remains 1.3.0.4. Muted
+Chromium checks covered both title layouts at native and double size, New Game,
+combat, results and exact save/Continue. Seven localization checks and the
+production build passed. Gameplay and save v46 are unchanged.
 
 The **EN/RU** button beside mute changes language immediately and remembers the
 choice in this browser. Opus translated the UI, game content and lettering in

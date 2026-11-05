@@ -924,7 +924,7 @@ def main():
     from extract_title import TITLE_ACTORS, extract as extract_title
     extract_title(xml, manifest, args.refresh)
     omit_title = {"newGameButton", "continueButton", "helpButton", "longest", "saveBox", "trash",
-                  "vol", "kong_mc", "kong_mc2", "armorButton"}
+                  "vol", "kong_mc", "kong_mc2", "armorButton", "elonaButton"}
     omit_battle = {"dayText", "moneyText", "castleHPText", "ammoText", "lvText", "expText", "apText",
                    "customCursor", "frenzyBar", "frenzyBar2", "frenzyText", "menuButton", "vol", "ammobar", "bottomBar"}
     omit_gene = {"hint", "closeButton", "desc2", "classPic", "optHint", "optHint3", "optHC", "optCasual",
@@ -963,7 +963,9 @@ def main():
         selected = placed_frame(timeline, frame)
         # Текст2672 скрыт под bg в SWF; он не должен оказаться поверх отделённого фона.
         if name == "title":
-            selected = [tag for tag in selected if int(tag.get("depth")) > 5 and int(tag.get("characterId")) not in TITLE_ACTORS.values()]
+            # Версия браузерного клиента и благодарности выводятся отдельно от логотипа.
+            selected = [tag for tag in selected if int(tag.get("depth")) > 5
+                        and int(tag.get("characterId")) not in {*TITLE_ACTORS.values(), 2499}]
         if name == "battle":
             selected = [tag for tag in selected if tag.get("characterId") != "2672"]
         manifest["images"][name] = static_screen(xml, name, selected, omit, offset)

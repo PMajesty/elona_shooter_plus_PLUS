@@ -104,7 +104,7 @@ For an embed:
 
 ```html
 <div style="width:100%;max-width:1240px;aspect-ratio:31/19">
-  <iframe src="/elona/" title="Elona Shooter Plus"
+  <iframe src="/elona/" title="Elona Shooter Plus+"
     width="620" height="380" allow="fullscreen"
     style="display:block;width:100%;height:100%;border:0"></iframe>
 </div>

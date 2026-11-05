@@ -22,6 +22,8 @@ The [fidelity review](docs/fidelity-review.md) records the original behavior and
 
 Menus, scrolling, touch controls and display scaling are adapted for browsers. Normal play can save during combat and results as well as in town; Flash adventure saves were town checkpoints. Hardcore still permits saving and exporting only in town. Combat resumes paused after Continue.
 
+The browser client is called **Elona Shooter Plus+**. The title keeps the original logo with an additional plus, shows the browser release version, and credits Noa and the Plus creators. **1.3.0.4** identifies the upstream Flash release, not the browser client.
+
 Browser adventures currently support **Day 1–1000**. This limit comes from browser save validation. Later-day progression has been checked with controlled scenarios; natural late-game difficulty still needs more playtesting.
 
 Random outcomes will not exactly match a Flash playthrough. Browser saves retain their random stream for continuation, but Flash saves did not store that generator state. Fonts, filters, cosmetic randomness, animation timing and sound mixing can differ. Performance has not been benchmarked against native Flash.

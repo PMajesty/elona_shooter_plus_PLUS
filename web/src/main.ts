@@ -1,4 +1,5 @@
 import { localizedImage } from './localized-image.ts';
+import { version as browserVersion } from '../package.json';
 import { localizedText, fitLocalizedText } from './localized-text.ts';
 import { getLanguage, setLanguage, onLanguageChanged, t } from './i18n.ts';
 import { buttonInput, refreshMenuHover } from './button-input.ts';
@@ -671,6 +672,22 @@ class ElonaScene extends Phaser.Scene {
     this.clip('battleBackdrop', 1, -5, -15);
     const cloud = this.clip('battleCloud', 1, 175, -23)!;
     this.image('title');
+    // Исходный логотип сохранён; дополнительный плюс обозначает браузерное продолжение.
+    const plusShape = [{ x: -3, y: -10 }, { x: 3, y: -10 }, { x: 3, y: -3 }, { x: 10, y: -3 },
+      { x: 10, y: 3 }, { x: 3, y: 3 }, { x: 3, y: 10 }, { x: -3, y: 10 },
+      { x: -3, y: 3 }, { x: -10, y: 3 }, { x: -10, y: -3 }, { x: -3, y: -3 }]
+      .map(p => new Phaser.Math.Vector2(p.x, p.y));
+    const plus = this.add.graphics({ x: 535, y: 65 }).setName('title-plus');
+    plus.lineStyle(5, 0x101a1e).strokePoints(plusShape.map(p => p.clone().add(new Phaser.Math.Vector2(1, 2))), true);
+    plus.fillStyle(0x030507).fillPoints(plusShape, true);
+    plus.lineStyle(1.5, 0xb6d2e0).strokePoints(plusShape, true);
+    this.root.add(plus);
+    const version = this.text(545, 96, `Browser version ${browserVersion}`, 13, '#eee0b5')
+      .setOrigin(1, 0).setName('title-version').setShadow(1, 1, '#000000', 2);
+    fitLocalizedText(version, { width: 300, height: 22 });
+    const credits = this.text(310, 362, 'Original game: Noa · Plus: its creators and contributors', 11, '#e3dfc6')
+      .setOrigin(0.5, 0).setName('title-credits').setShadow(1, 1, '#000000', 2);
+    fitLocalizedText(credits, { width: 590, height: 17, minFontSize: 10 });
     const actors = this.add.container(0, 0); this.root.add(actors);
     const buttons: Phaser.GameObjects.Image[] = [];
     for (const [key, x, y, action] of [
