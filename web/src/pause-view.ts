@@ -17,7 +17,7 @@ const OPTION_KEYS = { optShowDamage: 'showDamage', optShowAllyDamage: 'showAllyD
 
 /** Исходная menu_pause, конечный кадр10; все действия остаются внутри игрового окна. */
 export function createPauseView(scene: Phaser.Scene, manifest: LootViewManifest, layout: PauseLayout, options: GameOptions,
-  statistics: string, callbacks: { close(): void; save(): void; title(): void; help(): void; option(key: keyof GameOptions): void; click(): void }): Phaser.GameObjects.Container {
+  statistics: string, callbacks: { close(): void; save(): void; title(): void; help(): void; option(key: keyof GameOptions): void; click(): void }, expanded = false): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName('original-pause');
   const shade = scene.add.rectangle(0, 0, 620, 380, 0, 0.45).setOrigin(0).setInteractive(); root.add(shade);
   bindTouchSafeDismiss(scene, root, shade, callbacks.close);
@@ -37,7 +37,7 @@ export function createPauseView(scene: Phaser.Scene, manifest: LootViewManifest,
   for (const [part, key] of Object.entries(OPTION_KEYS)) {
     const p = layout.options[part], px = parent.x + p.x, py = parent.y + p.y;
     const check = localizedImage(scene, px + 5, py + 4, options[key] ? 'partyCheckOn' : 'partyCheckOff', '1').setOrigin(0); root.add(check);
-    root.add(fitLocalizedText(localizedText(scene, px + 24, py + 4, layout.labels[part], { fontFamily: 'Arial', fontSize: '11px', color: '#000000' }), { width: 276, height: 15 }));
+    root.add(fitLocalizedText(localizedText(scene, px + 24, py + 4, expanded && key === 'showAllyDamage' ? 'Show companion damage' : layout.labels[part], { fontFamily: 'Arial', fontSize: '11px', color: '#000000' }), { width: 276, height: 15 }));
     const hit = scene.add.zone(px, py, 300, 19).setOrigin(0).setInteractive({ useHandCursor: true }).setName(`pause-${key}`); root.add(hit);
     hit.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, e: Phaser.Types.Input.EventData) => {
       e.stopPropagation(); callbacks.click(); callbacks.option(key); check.setTexture(options[key] ? 'partyCheckOn' : 'partyCheckOff', '1');

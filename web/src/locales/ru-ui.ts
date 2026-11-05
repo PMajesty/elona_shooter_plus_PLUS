@@ -100,7 +100,6 @@ export const ruUI: Record<string, string> = {
   "Game by Noa · Plus by its contributors · AI vibe-ported · Always free": "Игра от Noa · Plus от сообщества · Перенос с помощью ИИ · Всегда бесплатно",
   "<b>Browser editions (fan additions)</b><br>": "<b>Браузерные редакции (дополнения от поклонников)</b><br>",
   "Classic keeps the original game with port bug fixes. Expanded enables optional new features. Choose an edition before New Game; Continue uses the saved edition. Each edition has its own medals. Use an empty save slot to keep another adventure.<br><br>": "Классическая редакция сохраняет оригинальную игру с исправлениями переноса. Расширенная добавляет новые возможности. Выберите редакцию перед началом новой игры; продолжение использует редакцию сохранения. У каждой редакции свои медали. Чтобы сохранить другое приключение, используйте пустую ячейку.<br><br>",
-  "Expanded: companions start in Smart Mode. They protect the wall, seek ranged foes and spread their fire. Switching aim farther takes longer, and damage is reduced by 15%. Bosses and the last enemy can draw shared fire. Change companion orders in Barrack, or the hired gun order at the Inn. Saved order choices are kept.<br><br>": "В расширенной редакции спутники начинают в умном режиме. Они защищают стену, ищут стрелков и распределяют огонь. Чем дальше нужно перевести прицел, тем больше времени это займёт; урон снижен на 15%. Босса и последнего врага могут обстреливать вместе. Приказы спутникам можно менять в казарме, а приказы наёмнику можно менять в таверне. Выбранные приказы сохраняются.<br><br>",
   "No Modification": "Без модификаций",
   "\nIt's alive(Exp: {0}%)": "\nЖивое оружие (опыт: {0}%)",
   "Weapon skill": "Владение оружием",
@@ -361,7 +360,6 @@ export const ruUI: Record<string, string> = {
   "Nothing Found": "Ничего не найдено",
   "You wander around the town looking for something but in vain.": "Вы бродите по городу в поисках чего-нибудь, но безрезультатно.",
   "Please choose a skill you want to learn or improve.": "Выберите навык, который хотите изучить или улучшить.",
-  "Time to shift aim; 15% less damage.": "Перевод прицела занимает время; урон ниже на 15%.",
   "Choose dangerous foes with care.\n{0}": "Внимательно выбирайте опасных врагов.\n{0}",
   "The saved game could not be read. Import a backup, or start a new game.": "Не удалось прочитать сохранение. Импортируйте резервную копию или начните новую игру.",
   "The medal collection could not be read. Import a backup to restore it.": "Не удалось прочитать коллекцию медалей. Импортируйте резервную копию для её восстановления.",
@@ -410,7 +408,6 @@ export const ruUI: Record<string, string> = {
   "The next campaign cycle is not available yet.": "Следующий цикл кампании пока недоступен.",
   "{0} AP\n{1}": "{0} AP\n{1}",
   "Henchman order": "Приказ наёмнику",
-  "Slower aim, -15% damage": "Медленнее прицел, -15% урона",
   "Fire at will": "Огонь по готовности",
   "You will receive a new title and salary.": "Вы получите новый титул и жалованье.",
   "{0} medals won": "Получено медалей: {0}",
@@ -727,5 +724,10 @@ export const ruUI: Record<string, string> = {
   "The special trainer picks {0}. After hours of training, you gain {1}! You {2}": "Особый тренер выбирает: {0}. После нескольких часов тренировки вы получаете {1}! Для вас: {2}",
   "The special trainer picks {0}. After hours of training, {1} gains {2}! {3}": "Особый тренер выбирает: {0}. После нескольких часов тренировки {1} получает {2}! {3}",
   "{0} reached maximum training limit.": "{0}: достигнут предел тренировок.",
-  "{0} can still take the training {1} time(s).": "{0}: осталось тренировок: {1}."
+  "{0} can still take the training {1} time(s).": "{0}: осталось тренировок: {1}.",
+  "Expanded: companions start in Smart Mode. They protect the wall, seek ranged foes and spread their fire. Switching aim farther takes longer, and damage is reduced by 25%. Bosses and the last enemy can draw shared fire. Change companion orders in Barrack, or the hired gun order at the Inn. Saved order choices are kept.<br><br>": "В расширенной редакции спутники начинают в умном режиме. Они защищают стену, ищут стрелков и распределяют огонь. Чем дальше нужно перевести прицел, тем больше времени это займёт; урон снижен на 25%. Босса и последнего врага могут обстреливать вместе. Приказы спутникам можно менять в казарме, а приказы наёмнику можно менять в таверне. Выбранные приказы сохраняются.<br><br>",
+  "Time to shift aim; 25% less damage.": "Перевод прицела занимает время; урон ниже на 25%.",
+  "Slower aim, -25% damage": "Медленнее прицел, -25% урона",
+  "Show companion damage": "Показывать урон спутников",
+  "This save contains invalid game option settings.": "В сохранении содержатся неверные данные настроек игры."
 };

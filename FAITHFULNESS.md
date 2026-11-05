@@ -36,7 +36,7 @@ Compatibility remains provisional. A town save produced by the preserved game un
 
 ## Expanded is optional
 
-Expanded contains optional fan-made features. Its first addition is **Smart Mode**, the default order for new companions in Expanded. Allies spread their fire and prioritize threats, with 15% less damage and an aiming delay that grows with the distance to the next target. Adventures keep their edition when loaded; saves made before Expanded was introduced load as Classic. The [Expanded guide](docs/expanded-edition.md) explains the order and its balance limits.
+Expanded contains optional fan-made features. Its first addition is **Smart Mode**, the default order for new companions in Expanded. Allies spread their fire and prioritize threats, with 25% less damage and an aiming delay that grows with the distance to the next target. Expanded also has smaller companion damage numbers with a separate Pause toggle. Adventures keep their edition when loaded; saves made before Expanded was introduced load as Classic. The [Expanded guide](docs/expanded-edition.md) explains the order and its balance limits.
 
 Desktop and touch controls are available, but physical iOS and Android devices have not been checked. See [port status](docs/port-status.md#accepted-differences-and-support-limits) for browser and embed limits.
 

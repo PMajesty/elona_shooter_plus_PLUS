@@ -1,16 +1,16 @@
 import type { PartyAIActor, PartyAIContext, PartyAITarget } from './party-ai.ts';
 
 export const SMART_ORDER = 7;
-export const SMART_DAMAGE_MULTIPLIER = 0.85;
+export const SMART_DAMAGE_MULTIPLIER = 0.75;
 // Цена перевода текущего прицела, а не дальности врага от стены.
-export const SMART_AIM_PIXELS_PER_FRAME = 25;
+export const SMART_AIM_PIXELS_PER_FRAME = 25 / 1.33;
 export const SMART_AIM_DELAY_MAX_FRAMES = 12;
 export function smartAimDelay(actor: PartyAIActor, enemy: PartyAITarget): number {
   const s = actor.member!.aiState!;
   return Math.min(SMART_AIM_DELAY_MAX_FRAMES, Math.round(Math.hypot(enemy.x - s.cursorX,
     enemy.y + (enemy.dropping ? enemy.dropY ?? 0 : 0) - s.cursorY) / SMART_AIM_PIXELS_PER_FRAME));
 }
-export const SMART_COST_HINT = 'Time to shift aim; 15% less damage.';
+export const SMART_COST_HINT = 'Time to shift aim; 25% less damage.';
 export const SMART_HINT = `Choose dangerous foes with care.\n${SMART_COST_HINT}`;
 
 export function usesSmartMode(actor: PartyAIActor, context: PartyAIContext): boolean {

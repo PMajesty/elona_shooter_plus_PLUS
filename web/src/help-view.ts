@@ -60,7 +60,7 @@ export function createHelpView(scene: Phaser.Scene, manifest: LootViewManifest, 
       const width = layout.textAreaBase.width * p.scaleX, height = layout.textAreaBase.height * p.scaleY;
       const editions = '<b>Browser editions (fan additions)</b><br>'
         + 'Classic keeps the original game with port bug fixes. Expanded enables optional new features. Choose an edition before New Game; Continue uses the saved edition. Each edition has its own medals. Use an empty save slot to keep another adventure.<br><br>'
-        + 'Expanded: companions start in Smart Mode. They protect the wall, seek ranged foes and spread their fire. Switching aim farther takes longer, and damage is reduced by 15%. Bosses and the last enemy can draw shared fire. Change companion orders in Barrack, or the hired gun order at the Inn. Saved order choices are kept.<br><br>';
+        + 'Expanded: companions start in Smart Mode. They protect the wall, seek ranged foes and spread their fire. Switching aim farther takes longer, and damage is reduced by 25%. Bosses and the last enemy can draw shared fire. Change companion orders in Barrack, or the hired gun order at the Inn. Saved order choices are kept.<br><br>';
       content.add(originalTextArea(scene, 'help-tips-text', editions + layout.tips.join(''), x, y, width, height, scroll => changed(page, scroll)));
     }
     changed(page, 0);

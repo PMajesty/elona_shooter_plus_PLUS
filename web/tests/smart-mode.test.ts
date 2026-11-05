@@ -197,7 +197,7 @@ test('Militia forced-order6 uses shield avoidance and ordinary timer, no extra R
   stepPartyAITimer(s.actor, s.context, s.callbacks);
   assert.deepEqual(s.counts(), { draws: 1, shots: 0, grenades: 1 });
   assert.equal(s.enemies[0].tag, 0); assert.equal(s.enemies[1].tag, 60);
-  assert.equal(SMART_DAMAGE_MULTIPLIER, 0.85);
+  assert.equal(SMART_DAMAGE_MULTIPLIER, 0.75);
 });
 
 test('capability absent, normal orders, hero and candidate never call Expanded target callbacks', () => {
@@ -272,8 +272,9 @@ function squad(s: ReturnType<typeof setup>, count: number): PartyAIActor[] {
 
 test('distance cost uses current cursor, both axes, dropping point, rounding and cap', () => {
   const s = setup(); Object.assign(s.ai, { cursorX: 100, cursorY: 200 });
-  for (const [x, y, frames] of [[100, 200, 0], [112, 200, 0], [113, 200, 1], [125, 200, 1],
-    [100, 250, 2], [175, 300, 5], [400, 200, 12], [2000, 2000, 12]]) {
+  for (const [x, y, frames] of [[100, 200, 0], [109, 200, 0], [110, 200, 1], [125, 200, 1],
+    [100, 250, 3], [175, 200, 4], [250, 200, 8], [325, 200, 12],
+    [175, 300, 7], [400, 200, 12], [2000, 2000, 12]]) {
     assert.equal(smartAimDelay(s.actor, enemy(1, x, { y })), frames);
   }
   assert.equal(smartAimDelay(s.actor, enemy(1, 100, { y: 300, dropping: true, dropY: -100 })), 0);

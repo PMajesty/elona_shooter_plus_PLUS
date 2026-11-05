@@ -50,20 +50,33 @@ an engaged ally will not immediately turn toward a newly urgent threat.
 ### Cost and timing
 
 Changing aim farther takes longer. The extra delay is the distance from the
-current aim point to the new target, divided by 25 and rounded to simulation
-frames, capped at 12 frames. At the reference 30 Hz, a 75-pixel move adds 0.1s,
-150 pixels adds 0.2s, and 300 pixels or more adds 0.4s. These are game coordinates,
+current aim point to the new target, divided by 25, multiplied by 1.33 and rounded
+to simulation frames, capped at 12 frames. The gradient is 33% steeper than the
+initial version. At the reference 30 Hz, 75 pixels adds about 0.13s, 150 pixels
+about 0.27s, and 225 pixels or more adds 0.4s. These are game coordinates,
 so browser zoom does not change the delay. Keeping the same target adds no cost
 per shot. Shielded bosses stop receiving aimed fire immediately.
 
-Smart Mode also costs **15% automatic shot damage**, including class grenades.
+Smart Mode also costs **25% automatic shot damage**, including class grenades.
 Grenades have no extra aiming delay. Damage is fixed at launch; projectiles
 already in flight keep it through Continue. Integer damage can round the loss
-slightly above 15%. Accuracy, learned skills, ammunition and reload rules stay
+slightly above 25%. Accuracy, learned skills, ammunition and reload rules stay
 unchanged. Orders can only be changed in town.
 
 There is no guarantee of a Perfect Game. Allies may waste shots beyond their
 preferred range. A projectile already in flight can hit a newly raised shield.
+
+## Companion damage numbers
+
+Expanded shows companion hits as smaller, blue-gray numbers with softer gold
+criticals. The hero keeps the original white/gold numbers. In Pause, **Show
+companion damage** and the player's damage toggle work independently.
+
+Companion numbers start enabled, including when loading an older Expanded save.
+Turning them off is saved immediately and remembered on Continue. Classic keeps
+its original NPC-damage default and number styling.
+The adventure envelope records the settings revision separately from simulation
+save v46, so this default change applies once and later opt-outs stay intact.
 
 ## Evidence and limits
 

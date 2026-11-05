@@ -18,7 +18,7 @@ function battle(weaponId: number, order: number) {
   return sim;
 }
 
-test('Smart rifle fire keeps ammunition/cooldown/traits and pays the 15% damage cost', () => {
+test('Smart rifle fire keeps ammunition/cooldown/traits and pays the 25% damage cost', () => {
   const standard = battle(4, 6), smart = battle(4, 7);
   const traits = structuredClone(smart.state.party.slots[0].member!.traits);
   standard.tick(); smart.tick();

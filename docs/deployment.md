@@ -9,8 +9,8 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- Browser Release 1.0.2 is `/srv/elona/releases/review-D9amNAlV/elona/`
-  (save v46). The preceding release is `releases/review-ppsGvq4o`.
+- Browser Release 1.1.0 is `/srv/elona/releases/review-GPl88U5c/elona/`
+  (save v46). The preceding release is `releases/review-D9amNAlV`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
 - Both domain certificates were issued successfully by Let's Encrypt. Caddy's

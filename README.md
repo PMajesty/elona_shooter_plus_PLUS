@@ -25,6 +25,8 @@ Use **EN / RU** beside the mute and fullscreen buttons to switch languages at an
 
 **Classic** keeps the original content with gameplay fixes. **Expanded** adds optional fan-made features, starting with a companion targeting order. Choose before starting an adventure; loading a save keeps its edition. [Edition details](docs/expanded-edition.md).
 
+Expanded also shows smaller companion damage numbers. Pause has separate toggles for your numbers and theirs.
+
 ## Keep your saves
 
 Saves stay in your browser, not an account. Both editions use the same eight labeled slots, but have separate medal collections. Choose an empty slot to keep another adventure. Export a JSON backup before clearing browser data or moving to another browser or device.

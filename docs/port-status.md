@@ -2,7 +2,7 @@
 
 Updated 2026-11-05. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-Browser Release 1.0.2 uses `index-D9amNAlV.js`. The documented
+Browser Release 1.1.0 uses `index-GPl88U5c.js`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
@@ -49,12 +49,17 @@ Allies prefer uncovered targets, protect the wall, then seek ranged attackers,
 including chickens. Bosses and the last enemy can receive shared fire; surplus
 allies help when every target is covered. Allies commit until their target dies,
 disappears or shields; priorities and coordination apply on the next acquisition.
-Changing crowd priorities no longer resets an ongoing aim. Switching aim adds distance / 25
+Changing crowd priorities no longer resets an ongoing aim. Switching aim adds distance / 25 × 1.33
 simulation frames, rounded and capped at 12 (0..0.4 seconds), instead of the
-former flat delay. Automatic damage still costs 15% at launch. The hero and
+former flat delay. Automatic damage costs 25% at launch. The hero and
 Classic defaults are unchanged. [Usage and limits](expanded-edition.md).
 The edition selector uses original parchment/pin/radio artwork and menu fonts;
 the order uses a short description with its damage cost.
+Expanded companion damage numbers are smaller and subdued, with independent
+Pause toggles for hero and companion numbers. They start enabled on existing
+Expanded adventures too; subsequent opt-outs persist through save/Continue.
+The settings revision is separate from simulation save v46. Classic keeps its
+original defaults, styles and balance.
 The parchment now resizes without stretching its scroll emblem. New Game's
 overwrite warning fits above Yes/No at normal and double size. Muted browser
 checks covered both editions, cancellation preserving the save and confirmation

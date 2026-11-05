@@ -43,7 +43,8 @@ import { createHelpView, type HelpLayout } from './help-view.ts';
 import { originalTextArea } from './original-text-area.ts';
 import { dayReport } from './day-report.ts';
 import { createPauseView, type PauseLayout } from './pause-view.ts';
-import { DEFAULT_GAME_OPTIONS, savedGameOptions, showDamageNumber, pauseStatistics, type GameOptions } from './game-options.ts';
+import { DEFAULT_GAME_OPTIONS, GAME_OPTIONS_VERSION, defaultGameOptions, savedGameOptions, showDamageNumber, pauseStatistics, type GameOptions } from './game-options.ts';
+import { damageNumberStyle } from './damage-number-style.ts';
 import { createFireworks } from './fireworks-view.ts';
 import { FIREWORK_MEDAL_FRAMES } from './fireworks.ts';
 import { createModConfirmation, type ModConfirmationLayout } from './mod-confirmation-view.ts';
@@ -768,7 +769,7 @@ class ElonaScene extends Phaser.Scene {
 
   showGene(page: 0 | 1 = 0, keepHero = false): void {
     this.reset('gene');
-    if (!keepHero) { this.options = { ...DEFAULT_GAME_OPTIONS }; this.applyRenderingOptions(); }
+    if (!keepHero) { this.options = defaultGameOptions(this.newGameRuleset); this.applyRenderingOptions(); }
     if (!keepHero || !this.sim) {
       this.profileRead = readProfile(this.newGameRuleset); this.profile = this.profileRead.profile;
       this.clearMedalNotices(this.profile.medals);
@@ -1609,8 +1610,11 @@ class ElonaScene extends Phaser.Scene {
         this.playSound('soundLow', 0.9, pan);
       }
       if (showDamageNumber(this.options, actorSlot, event.criticalType)) {
-        const damage = this.text(event.x ?? 0, (event.y ?? 0) - 25, `${event.amount}${event.critical ? '!' : ''}`, 13, event.critical ? '#ffef62' : '#ffffff', 'ElonaHud').setShadow(1, 1, '#000000', 2);
-        this.effects.push({ object: damage, ticks: 24, moveY: -0.6 });
+        const style = damageNumberStyle(this.sim?.state.ruleset.id === 'expanded', actorSlot, Boolean(event.critical));
+        const damage = this.text(event.x ?? 0, (event.y ?? 0) + style.offsetY, `${event.amount}${event.critical ? '!' : ''}`, style.fontSize, style.color, 'ElonaHud')
+          .setShadow(1, 1, '#000000', style.shadowBlur).setAlpha(style.alpha)
+          .setName(actorSlot === 0 ? 'player-damage' : 'companion-damage');
+        this.effects.push({ object: damage, ticks: style.ticks, moveY: style.moveY });
       }
     }
     if (event.type === 'explosion') {
@@ -2176,8 +2180,9 @@ class ElonaScene extends Phaser.Scene {
       option: key => {
         this.options[key] = !this.options[key]; this.applyRenderingOptions();
         if (key === 'disableFireworks' && !this.options.disableFireworks) { this.startCelebration(); this.celebration?.root.setVisible(false); }
+        this.saveGame(false);
       }, click: () => this.playSound('soundClick1'),
-    }); this.root.add(this.pauseLayer);
+    }, this.sim!.state.ruleset.id === 'expanded'); this.root.add(this.pauseLayer);
     if (this.volumeIcon) this.root.bringToTop(this.volumeIcon);
   }
 
@@ -2187,8 +2192,8 @@ class ElonaScene extends Phaser.Scene {
     if (!canSaveAdventure(this.sim.state)) return undefined;
     // Город хранится рядом с приключением, поэтому повторные переносы не вкладывают снимки друг в друга.
     const checkpoint = this.sim.state.phase === 'town' ? undefined : this.carryCheckpoint;
-    const options = savedGameOptions(this.options);
-    return { format: 'elona-shooter-browser', version: SAVE_VERSION, appearance: this.appearance, simulation: this.sim.toSave(), profile: structuredClone(this.profile),
+    const options = savedGameOptions(this.options, this.sim.state.ruleset.id);
+    return { format: 'elona-shooter-browser', version: SAVE_VERSION, appearance: this.appearance, simulation: this.sim.toSave(), profile: structuredClone(this.profile), optionsVersion: GAME_OPTIONS_VERSION,
       ...(checkpoint && this.sim.state.mode !== 'hardcore' ? { carryCheckpoint: structuredClone(checkpoint) } : {}), ...(options ? { options } : {}) };
   }
 

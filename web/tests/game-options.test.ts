@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { DEFAULT_GAME_OPTIONS, savedGameOptions, validGameOptions, showDamageNumber, pauseStatistics } from '../src/game-options.ts';
+import { DEFAULT_GAME_OPTIONS, GAME_OPTIONS_VERSION, defaultGameOptions, savedGameOptions, validGameOptions, showDamageNumber, pauseStatistics } from '../src/game-options.ts';
+import { parseAdventureSave } from '../src/adventure-save.ts';
 import { fireworkPlan, FIREWORK_MEDAL_FRAMES } from '../src/fireworks.ts';
 import { Simulation } from '../src/simulation.ts';
 
@@ -19,6 +20,24 @@ test('player and NPC damage visibility are independent and critical type3 never 
   const options = { ...DEFAULT_GAME_OPTIONS, showDamage: false, showAllyDamage: true };
   assert.equal(showDamageNumber(options, 0), false); assert.ok(showDamageNumber(options, 4));
   assert.equal(showDamageNumber(options, 4, 3), false); assert.equal(showDamageNumber(DEFAULT_GAME_OPTIONS, 0, 3), false);
+});
+
+test('Expanded enables companion damage on old saves and remembers a later opt-out', () => {
+  for (const edition of ['classic', 'expanded'] as const) {
+    const sim = new Simulation(42, { ruleset: edition });
+    const original = { format: 'elona-shooter-browser', version: sim.state.version, appearance: 0,
+      simulation: sim.toSave(), options: { ...DEFAULT_GAME_OPTIONS, lowQuality: true } };
+    const before = structuredClone(original), loaded = parseAdventureSave(original);
+    assert.equal(loaded.options.showAllyDamage, edition === 'expanded');
+    assert.equal(loaded.options.lowQuality, true);assert.deepEqual(original, before);
+    assert.deepEqual(loaded.simulation.toSave(), sim.toSave());
+    const off = { ...defaultGameOptions(edition), showAllyDamage: false };
+    const current = { ...original, optionsVersion: GAME_OPTIONS_VERSION, options: savedGameOptions(off, edition) };
+    assert.equal(parseAdventureSave(current).options.showAllyDamage, false);
+    const noOptions = { ...current, options: undefined };
+    assert.equal(parseAdventureSave(noOptions).options.showAllyDamage, edition === 'expanded');
+    assert.throws(() => parseAdventureSave({ ...current, optionsVersion: 2 }), /option settings/);
+  }
 });
 
 test('the original statistics text includes mode, MODs, Carry Over and accumulated counters', () => {

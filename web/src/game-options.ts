@@ -1,5 +1,6 @@
 import type { SimulationState } from './simulation.ts';
 import { lifetimeKills } from './kill-history.ts';
+import type { RulesetId } from './rulesets.ts';
 
 export interface GameOptions {
   showDamage: boolean; showAllyDamage: boolean; lowQuality: boolean;
@@ -9,13 +10,17 @@ export const DEFAULT_GAME_OPTIONS: Readonly<GameOptions> = Object.freeze({
   showDamage: true, showAllyDamage: false, lowQuality: false,
   disableFireworks: false, colorBlind: false, disableFlash: false,
 });
+export const GAME_OPTIONS_VERSION = 1;
+export function defaultGameOptions(edition: RulesetId = 'classic'): GameOptions {
+  return { ...DEFAULT_GAME_OPTIONS, showAllyDamage: edition === 'expanded' };
+}
 export function validGameOptions(value: unknown): value is GameOptions {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
     && Object.keys(value!).length === Object.keys(DEFAULT_GAME_OPTIONS).length
     && Object.keys(DEFAULT_GAME_OPTIONS).every(key => typeof (value as Record<string, unknown>)[key] === 'boolean');
 }
-export function savedGameOptions(options: GameOptions): GameOptions | undefined {
-  return Object.entries(DEFAULT_GAME_OPTIONS).some(([key, value]) => options[key as keyof GameOptions] !== value) ? { ...options } : undefined;
+export function savedGameOptions(options: GameOptions, edition: RulesetId = 'classic'): GameOptions | undefined {
+  return Object.entries(defaultGameOptions(edition)).some(([key, value]) => options[key as keyof GameOptions] !== value) ? { ...options } : undefined;
 }
 export function showDamageNumber(options: GameOptions, actorSlot: number, criticalType?: number): boolean {
   return criticalType !== 3 && (actorSlot === 0 ? options.showDamage : options.showAllyDamage);

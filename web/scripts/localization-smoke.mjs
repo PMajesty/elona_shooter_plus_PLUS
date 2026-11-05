@@ -94,6 +94,18 @@ try {
  for(const [name,x,y,tab] of [['inn',44,75,'mission'],['tower',44,135,'castle'],['barrack',44,194,'characters'],['equipment',75,218,'equipment'],['smithy',44,275,'shop'],['medals',44,326,'medals']]){await click(x,y);assert.equal(await data('town-tab'),tab);await shot(name);}
  await click(44,275);const box=await canvas.boundingBox();await page.mouse.move(box.x+338*box.width/620,box.y+250*box.height/380);await page.locator('#game[data-item-popup]').waitFor();await shot('item-popup',true);await toggle();await toggle();
  await click(44,194);await toggle();await toggle();assert.deepEqual((await exported()).simulation,town.toSave());
+ assert.equal(JSON.parse(await data('options')).showAllyDamage,true);
+ await page.keyboard.press('Escape');await page.locator('#game[data-paused="true"]').waitFor();
+ const pauseLayout=JSON.parse(await readFile('web/public/assets/town-layout.json','utf8')).pause;
+ const pauseParent=pauseLayout.children.options,allyOption=pauseLayout.options.optShowAllyDamage;
+ await click(pauseParent.x+allyOption.x+7,pauseParent.y+allyOption.y+8);
+ const optedOut=await exported();assert.equal(optedOut.optionsVersion,1);assert.equal(optedOut.options.showAllyDamage,false);
+ assert.deepEqual(optedOut.simulation,town.toSave());
+ await open();await click(295,249);await screen('town');
+ assert.equal(JSON.parse(await data('options')).showAllyDamage,false);
+ assert.deepEqual((await exported()).simulation,town.toSave());
+ await page.keyboard.press('Escape');await page.locator('#game[data-paused="true"]').waitFor();
+ await click(pauseParent.x+allyOption.x+7,pauseParent.y+allyOption.y+8);await page.keyboard.press('Escape');
  await page.setViewportSize({width:640,height:400});await shot('town-100');await page.setViewportSize({width:1280,height:800});
  const ballista=new Simulation(42,{heroClass:'rogue'});
  for(const [x,y] of [[170.25,200.25],[280.5,270.5]]){
