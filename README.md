@@ -1,6 +1,6 @@
 # Elona Shooter Plus
 
-**[Play in your browser](https://pastalapizza.site/elona/)** · [Download the browser release](https://github.com/PMajesty/elona_shooter_plus_PLUS/releases/tag/browser-v1.0.0)
+**[Play in your browser](https://pastalapizza.site/elona/)** · [Download the browser release](https://github.com/PMajesty/elona_shooter_plus_PLUS/releases/latest)
 
 An unofficial browser port of **Elona Shooter Plus 1.3.0.4**, the Flash castle-defense game. Pick a hero, aim at the monsters and keep your castle standing. Between battles, buy weapons, recruit companions and spend your earnings in town.
 

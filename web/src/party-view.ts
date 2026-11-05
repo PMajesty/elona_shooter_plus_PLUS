@@ -173,8 +173,8 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
       text(panel.children.classText, member.className);
       text(hero ? panel.children.titleText : panel.children.wage, hero ? 'TITLE.' : 'WAGE.');
       text(panel.children.wageText, member.wageLabel);
-      text(panel.children.killText, member.kill === null ? '—' : String(member.kill));
-      text(panel.children.earnText, member.earn === null ? '—' : String(member.earn));
+      text(panel.children.killText, member.kill === null ? '-' : String(member.kill));
+      text(panel.children.earnText, member.earn === null ? '-' : String(member.earn));
       text(panel.children.orderText, candidate ? 'COST.' : 'ORDER.');
       if (candidate) text(panel.children.costText, String(member.cost ?? 0)).setColor((member.cost ?? 0) > state.gold ? '#cc0000' : '#0000cc');
       if (!hero) {

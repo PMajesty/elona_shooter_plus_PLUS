@@ -2,7 +2,7 @@
 
 Updated 2026-11-05. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-Browser Release 1.0.0 uses `index-BTW8Wa_u.js`. The documented
+Browser Release 1.0.1 uses `index-ppsGvq4o.js`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
@@ -25,6 +25,9 @@ The day badge retains its textured background and original border. Seven
 localization checks cover these compositions, save/replay stability and asset
 footprints; muted browser inspection confirmed the corrected result/trainer
 screens and the source link in Credits.
+The 1.0.1 copy pass removes added em dashes and restores original artwork
+heading delimiters. Ballista frames now have transparent atlas gutters; all
+279 frames keep identical pixels, dimensions and registration.
 
 The title now offers **Classic** and **Expanded** before New Game. Existing
 adventures and Flash imports stay Classic. Expanded has independent medals and

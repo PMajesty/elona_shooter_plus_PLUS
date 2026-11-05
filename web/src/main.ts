@@ -2047,7 +2047,7 @@ class ElonaScene extends Phaser.Scene {
       : pending?.kind === 'mod' ? 'Yes mounts the MOD. No or clicking elsewhere swaps these two inventory items.'
       : upgradeSelecting ? 'Choose an owned weapon to upgrade. Click elsewhere to cancel. Upgrade keeps mounted mods.'
       : dialog === 'repair' ? 'The castle walls are repaired. Click to continue.'
-      : dialog === 'title' ? `${TITLES[this.sim.state.title].name} — daily salary: ${TITLES[this.sim.state.title].salary} GP, beginning with the next completed day. Click to continue.`
+      : dialog === 'title' ? `${TITLES[this.sim.state.title].name}: daily salary: ${TITLES[this.sim.state.title].salary} GP, beginning with the next completed day. Click to continue.`
       : dialog === 'rest' ? `Click to finish resting and begin Day ${this.sim.state.day + 1}.`
       : pendingParty?.kind === 'henchman' ? 'The henchman demands half the mission reward. Accept?'
       : pendingParty?.kind === 'hire' ? 'Yes pays the displayed cost and recruits this character. Any other click cancels.'
@@ -2057,7 +2057,7 @@ class ElonaScene extends Phaser.Scene {
       : tab === 'equipment' ? 'Click an item, then a destination slot. Companions need the weapon’s required skill. Dropping outside cancels the move.'
       : tab === 'shop' ? (saleSlot === null ? 'Click stock, then an empty owned slot to buy. Drop an owned item outside its slots to sell; confirmation is required.' : 'Confirm the sale with Yes, or click elsewhere to keep the item.')
       : `Castle has two upgrade pages. Mission activities prepare bonuses for the next battle; shop and recruit refresh each cost 2 AP. ${this.sim.state.day < MAX_CAMPAIGN_DAY ? `Mission → Rest begins Day ${this.sim.state.day + 1}.` : 'The browser save safety limit has been reached.'}`;
-    if (this.sim.state.carryOver) status.textContent = `Carry Over Mode — most new medals are unavailable. ${status.textContent}`;
+    if (this.sim.state.carryOver) status.textContent = `Carry Over Mode: most new medals are unavailable. ${status.textContent}`;
     status.hide();
   }
 

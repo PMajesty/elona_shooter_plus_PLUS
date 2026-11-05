@@ -21,6 +21,8 @@ web addresses and brands are preserved.
 Class names use the conventional masculine form regardless of appearance:
 «Плут», «Дуэлянт». Keep their descriptions and awards consistent. The original
 English uses she/her for these classes, but this does not restrict the portrait.
+Do not add em dashes absent from the source. Rephrase Russian sentences naturally
+and preserve the original decorative heading delimiters in artwork.
 
 `localizedText` retains its source string. Constrained fields use
 `fitLocalizedText` with measured bounds, a readable font floor and optional

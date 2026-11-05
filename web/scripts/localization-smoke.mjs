@@ -70,6 +70,12 @@ try {
  await click(44,275);const box=await canvas.boundingBox();await page.mouse.move(box.x+338*box.width/620,box.y+250*box.height/380);await page.locator('#game[data-item-popup]').waitFor();await shot('item-popup',true);await toggle();await toggle();
  await click(44,194);await toggle();await toggle();assert.deepEqual((await exported()).simulation,town.toSave());
  await page.setViewportSize({width:640,height:400});await shot('town-100');await page.setViewportSize({width:1280,height:800});
+ const ballista=new Simulation(42,{heroClass:'rogue'});
+ for(const [x,y] of [[170.25,200.25],[280.5,270.5]]){
+  ballista['spawnEnemy']('cata');const enemy=ballista.state.enemies.at(-1);
+  enemy.x=x;enemy.y=y;enemy.frame=21;
+ }
+ await importSave(envelope(ballista));await screen('battle');await page.keyboard.press('Escape');await shot('ballista');
  const defeat=Simulation.fromSave(town.toSave()),checkpoint=defeat.toSave();defeat.startNextDay();defeat.state.castleHp=0;for(let i=0;i<3&&defeat.state.phase==='battle';i++)defeat.tick();
  await importSave({...envelope(defeat),carryCheckpoint:checkpoint});await screen('defeat');await shot('defeat');await click(310,257);await page.locator('#game[data-carry-over-confirmation="true"]').waitFor();await shot('confirmation');await toggle();await toggle();await click(365,240);
  const fallback=await browser.newPage();await fallback.route('**/assets/ru/manifest.json',route=>route.abort());
