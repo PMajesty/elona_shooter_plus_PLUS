@@ -7,6 +7,9 @@ import { ruUI } from '../src/locales/ru-ui.ts';
 import { Simulation } from '../src/simulation.ts';
 import { ItemFactory } from '../src/items.ts';
 import { itemPopupValues } from '../src/item-popup-values.ts';
+import { dayReport } from '../src/day-report.ts';
+import { ALL_TRAITS } from '../src/party-progression.ts';
+import { traitHintValues } from '../src/trait-hint.ts';
 
 test('Russian catalogs preserve placeholders; English stays canonical', () => {
   for (const dictionary of [ruContent, ruUI]) for (const [source, value] of Object.entries(dictionary)) {
@@ -41,6 +44,30 @@ test('numeric units never capture prose, and joined help translates whole paragr
   const editions = Object.keys(ruUI).filter(key => key.startsWith('<b>Browser editions') || key.startsWith('Classic keeps') || key.startsWith('Expanded: companions')).join('');
   const help = translate(editions + layout.help.tips.join(''), 'ru') as string;
   assert.doesNotMatch(help.replace(/<[^>]+>/g, ''), /[A-Za-z][A-Za-z ]{4,}/);
+});
+
+test('day news keeps skill names and perfect-game sentences separate', () => {
+  const sim = new Simulation(42, { heroClass: 'rogue' });
+  sim['finishDay']();
+  sim.state.battleNews = ['You have earned total of 100 weapon exp and gain Small Gun 2.',
+    'Little Girl has earned total of 100 weapon exp and gains Anti Armor.',
+    'Little Girl gains Anti Armor 2.'];
+  const news = dayReport(sim.state).news, russian = translate(news, 'ru') as string;
+  assert.ok(russian.includes('Безупречная победа!'), russian);
+  assert.ok(russian.includes('получает Бронебойность'), russian);
+  assert.doesNotMatch(russian, /[A-Za-z]{3}/);
+  assert.equal(translate(news, 'en'), news);
+  // Проверяем названия внутри уведомления, а не только отдельные ключи словаря.
+  for (const trait of Object.values(ALL_TRAITS)) {
+    const name = traitHintValues(trait.id, { [trait.id]: 2 }).name;
+    assert.equal(translate(`Little Girl gains ${name}.`, 'ru'), `Девочка получает ${translate(name, 'ru')}.`);
+    for (const [person, gain] of [['You', 'you gain'], ['Little Girl', 'Little Girl gains']]) {
+      const training = translate(`The special trainer picks ${person}. After hours of training, ${gain} ${name}! ${person} reached maximum training limit.`, 'ru') as string;
+      assert.ok(training.includes(`${translate(name, 'ru')}!`), training);
+      assert.doesNotMatch(training, /[A-Za-z]{3}/, training);
+    }
+  }
+  assert.equal(translate('2 AP\nSmart Mode', 'ru'), '2 AP\nУмный режим');
 });
 
 test('preference survives reload and unavailable storage; stale callbacks are skipped', () => {

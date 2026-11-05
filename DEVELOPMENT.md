@@ -115,6 +115,10 @@ and export under the host's actual browser policies; sandboxed embeds have not
 been verified. The current site's HTTPS setup and release recovery are documented
 in [deployment](docs/deployment.md).
 
+The [public browser release](https://github.com/PMajesty/elona_shooter_plus_PLUS/releases/tag/browser-v1.0.0)
+also includes a static web build and SHA-256 checksum. Its browser version is
+separate from the original Flash game's 1.3.0.4 version and the save format.
+
 ## Original assets and Flash reference
 
 The checked-in assets are enough for ordinary browser development. Their

@@ -35,7 +35,9 @@ It replaces text layers, preserves original geometry, and regenerates button
 states, click masks and shadows. The bitmap Day badge is handled separately.
 The English assets and original SWF are unchanged. Inspect the generated
 `.build/localization/text-fit.json` and actual screens after wording changes.
-This maintenance step requires the existing FFDec/Java extraction tools and Pillow.
+This maintenance step requires the existing FFDec/Java extraction tools, Pillow
+and OpenCV. To rebuild only the day badge's containing screens, append
+`--only battle townHud townScene`; other existing exports are retained.
 
 Russian uses [Neucha](https://fonts.google.com/specimen/Neucha) for handwritten
 menus and [PT Sans](https://fonts.google.com/specimen/PT+Sans) for compact UI.
@@ -51,3 +53,7 @@ against the local preview. It uses an isolated muted browser and checks live
 switching, reload, New Game, combat/save/Continue, help, loot, skills, town and dialogs.
 `QA_LANGUAGE=ru` also enables Russian in the existing mobile smoke script.
 These checks do not modify the player's browser profile.
+
+Single-line translation templates cannot consume adjacent news lines. The
+results check combines real weapon/companion skill gains with the perfect-game
+note so names and sentence punctuation remain intact.

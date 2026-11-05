@@ -717,11 +717,15 @@ export const ruUI: Record<string, string> = {
   "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">L:1</font></p><p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">E:56</font></p>": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">Ур:1</font></p><p align=\"left\"><font face=\"HGPGyoshotai\" size=\"12\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">Оп:56</font></p>",
   "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"11\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">1560 gp</font></p>": "<p align=\"left\"><font face=\"HGPGyoshotai\" size=\"11\" color=\"#000000\" letterSpacing=\"0.000000\" kerning=\"1\">1560 GP</font></p>",
   "[1] ....meoowwwww!": "[1] ....мяяяууууу!",
-  "The special trainer picks {0}. After hours of training, you gain {1} {2}! You {3}": "Особый тренер выбирает: {0}. После нескольких часов тренировки вы получаете {1} {2}! Для вас: {3}",
-  "The special trainer picks {0}. After hours of training, {1} gains {2} {3}! {4} {5}": "Особый тренер выбирает: {0}. После нескольких часов тренировки {1} получает {2} {3}! {4}: {5}",
   "It's alive(Exp: {0}%)": "Живое оружие (опыт: {0}%)",
   "(M)": "(Р)",
   "Russian artwork is unavailable. Reload to retry.": "Изображения с русским текстом недоступны. Перезагрузите страницу, чтобы повторить попытку.",
   "{0} Lv {1}": "{0} ур. {1}",
-  "E:{0}": "Оп:{0}"
+  "E:{0}": "Оп:{0}",
+  "{0} gains {1}.": "{0} получает {1}.",
+  "Game: Noa · Plus contributors · Free AI vibe-port · Source on GitHub": "Игра: Noa · Авторы Plus · Бесплатный ИИ-порт · Код на GitHub",
+  "The special trainer picks {0}. After hours of training, you gain {1}! You {2}": "Особый тренер выбирает: {0}. После нескольких часов тренировки вы получаете {1}! Для вас: {2}",
+  "The special trainer picks {0}. After hours of training, {1} gains {2}! {3}": "Особый тренер выбирает: {0}. После нескольких часов тренировки {1} получает {2}! {3}",
+  "{0} reached maximum training limit.": "{0}: достигнут предел тренировок.",
+  "{0} can still take the training {1} time(s).": "{0}: оставшееся число тренировок — {1}."
 };

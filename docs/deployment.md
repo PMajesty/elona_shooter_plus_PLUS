@@ -1,6 +1,6 @@
 # VPS deployment
 
-Updated2026-11-04. Domain:
+Updated 2026-11-05. Domain:
 [Elona Shooter Plus](https://pastalapizza.site/elona/).
 The root URL redirects to /elona/; www redirects to the apex domain.
 The [HTTP IP address](http://151.241.155.138/elona/) remains available.
@@ -9,9 +9,8 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- The current game is `/srv/elona/releases/review-BpURX4JP/elona/` (save v46,
-  code `b9db08d`). The preceding v46 release is `releases/review-CjYQQCzx`;
-  the prior v45 release is `releases/review-C3b_KnNb`.
+- Browser Release 1.0.0 is `/srv/elona/releases/review-BTW8Wa_u/elona/`
+  (save v46). The preceding release is `releases/review-D2OUPtrU`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
 - Both domain certificates were issued successfully by Let's Encrypt. Caddy's

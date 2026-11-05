@@ -2,7 +2,7 @@
 
 Updated 2026-11-05. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-The Russian-language release bundle is `index-D2OUPtrU.js`. The documented
+Browser Release 1.0.0 uses `index-BTW8Wa_u.js`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
@@ -19,6 +19,12 @@ unavailable-translation fallback; its bundle hash matches the local build.
 [Translation maintenance](localization.md).
 Class names and related descriptions now use «Плут» and «Дуэлянт», independent
 of portrait selection. The catalog checks and production build passed again.
+The public release fixes mixed-language result news after weapon experience,
+companion skill-gain notices and trainer messages that split multiword names.
+The day badge retains its textured background and original border. Seven
+localization checks cover these compositions, save/replay stability and asset
+footprints; muted browser inspection confirmed the corrected result/trainer
+screens and the source link in Credits.
 
 The title now offers **Classic** and **Expanded** before New Game. Existing
 adventures and Flash imports stay Classic. Expanded has independent medals and
@@ -104,7 +110,8 @@ Low Quality uses the smaller drawing buffer. In a short headless Chrome sample
 using the same 150-enemy battle save at 1× and 2×, the 95th-percentile frame
 interval was 16.8 ms at both sizes. The README and Help credits
 identify this as an unofficial, free, AI-assisted port of Noa’s game and the
-Plus release. Its source repository is private.
+Plus release. The [source repository](https://github.com/PMajesty/elona_shooter_plus_PLUS)
+is public with the developer's permission, confirmed by the maintainer on 2026-11-05.
 
 Both review passes are complete. Claude reproduced five discrepancies and
 independently rechecked four fixes. Codex verified the fifth on public HTTPS by

@@ -150,16 +150,30 @@ def translated_definitions(xml, translations):
 
 
 def day_badge(xml):
+    import cv2
+    import numpy as np
     # Day нарисовано внутри bitmap2690; рамку сохраняем, заменяем только внутреннюю надпись.
     tag = next(t for t in xml.find('tags') if t.get('characterID') == '2690')
     picture = Image.open(io.BytesIO(bytes.fromhex(tag.get('imageData')))).convert('RGBA')
     picture.putalpha(Image.frombytes('L', picture.size, zlib.decompress(bytes.fromhex(tag.get('bitmapAlphaData')))))
-    enlarged = picture.resize((104, 104), Image.Resampling.NEAREST)
-    draw = ImageDraw.Draw(enlarged)
-    draw.rounded_rectangle((19, 27, 86, 79), radius=8, fill=(42, 43, 37, 255))
-    draw.text((52, 50), 'День', font=ImageFont.truetype(str(FONT_DIR / 'PT_Sans-Web-Bold.ttf'), 32),
-              anchor='mm', fill='#eee8d2', stroke_width=1, stroke_fill='#121714')
-    picture = enlarged.resize((26, 26), Image.Resampling.LANCZOS)
+    # Восстанавливаем фон под буквами из соседних пикселей самого значка.
+    # Рамка и её исходная фактура остаются пиксель в пиксель без ресайза.
+    pixels = np.array(picture)
+    mask = np.zeros((26, 26), dtype=np.uint8)
+    # Маска закрывает светлые буквы и тень, оставляя тёмную зелёную текстуру между ними.
+    interior = pixels[7:20, 4:22, :3]
+    mask[7:20, 4:22] = np.where((interior.min(axis=2) > 90) | (interior.max(axis=2) < 35), 255, 0)
+    clean = Image.fromarray(cv2.inpaint(pixels[:, :, :3], mask, 2, cv2.INPAINT_TELEA)).convert('RGBA')
+    clean.putalpha(picture.getchannel('A'))
+    lettering = Image.new('RGBA', (160, 104))
+    draw = ImageDraw.Draw(lettering)
+    draw.text((80, 50), 'День', font=ImageFont.truetype(str(FONT_DIR / 'PT_Sans-Web-Bold.ttf'), 48),
+              anchor='mm', fill='#eee8d2', stroke_width=2, stroke_fill='#121714')
+    letters = lettering.crop(lettering.getbbox()).resize((76, 40), Image.Resampling.LANCZOS)
+    lettering = Image.new('RGBA', (104, 104))
+    lettering.alpha_composite(letters, (14, 30))
+    # Сглаживаем только новые буквы; исходная рамка не проходит повторный ресайз.
+    picture = Image.alpha_composite(clean, lettering.resize((26, 26), Image.Resampling.LANCZOS))
     argb = bytearray()
     for r, g, b, a in picture.getdata():
         argb.extend((a, round(r*a/255), round(g*a/255), round(b*a/255)))
@@ -202,7 +216,7 @@ def normalize(image, origin, asset, size=None):
     return canvas
 
 
-def build_assets():
+def build_assets(only=None):
     source = ET.parse(ROOT / '.build/reference/original.xml').getroot()
     manifest = json.loads((original.DEST / 'manifest.json').read_text())
     translations = json.loads((ROOT / 'web/src/locales/ru-images.json').read_text(encoding='utf-8'))
@@ -214,6 +228,8 @@ def build_assets():
     stamp = hashlib.sha256(json.dumps(translations, ensure_ascii=False).encode() + Path(__file__).read_bytes()).hexdigest()
     cache = WORK / 'render-cache'; cache.mkdir(exist_ok=True)
     def cached(key, action):
+        if only and key not in only:
+            return
         marker = cache / f'{key}.stamp'
         if not marker.exists() or marker.read_text() != stamp:
             action(); marker.write_text(stamp)
@@ -330,9 +346,10 @@ def build_assets():
 
 if __name__ == '__main__':
     WORK.mkdir(parents=True, exist_ok=True)
-    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('--build', action='store_true'); args = parser.parse_args()
+    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('--build', action='store_true')
+    parser.add_argument('--only', nargs='+', help='Rebuild selected asset keys; keep other existing exports.'); args = parser.parse_args()
     inventory = text_inventory(ET.parse(ROOT / '.build/reference/original.xml').getroot())
     (WORK / 'image-source.json').write_text(json.dumps(inventory, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'{len(inventory)} original text symbols inventoried', flush=True)
     if args.build:
-        build_assets()
+        build_assets(set(args.only) if args.only else None)

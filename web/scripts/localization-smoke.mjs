@@ -59,6 +59,7 @@ try {
  for(const n of [1,2,3]){const p=layout.pages[0].children[`help${n}`];await click(layout.position.x+p.x+20,layout.position.y+p.y+10);await page.locator(`#game[data-help-page="${n}"]`).waitFor();await shot('help'+n);}
  await page.keyboard.press('Escape');
  const town=new Simulation(42,{heroClass:'rogue',ruleset:'expanded'});town.state.player.skillPoints=1;town['finishDay']();
+ town.state.battleNews=['You have earned total of 100 weapon exp and gain Small Gun 2.', 'Little Girl gains Anti Armor 2.'];
  if(['loot','boss-loot'].includes(town.state.postbattle)){await importSave(envelope(town));await screen(town.state.postbattle);await shot('loot');}
  while(['loot','boss-loot'].includes(town.state.postbattle))town.finishLoot();
  while(town.state.postbattle==='skill'){await importSave(envelope(town));await screen('skill');await shot('skill');town.chooseSkill(town.state.skillChoices[0]);}

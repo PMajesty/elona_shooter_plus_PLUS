@@ -1,6 +1,6 @@
 # Elona Shooter Plus
 
-**[Play in your browser](https://pastalapizza.site/elona/)**
+**[Play in your browser](https://pastalapizza.site/elona/)** · [Download the browser release](https://github.com/PMajesty/elona_shooter_plus_PLUS/releases/tag/browser-v1.0.0)
 
 An unofficial browser port of **Elona Shooter Plus 1.3.0.4**, the Flash castle-defense game. Pick a hero, aim at the monsters and keep your castle standing. Between battles, buy weapons, recruit companions and spend your earnings in town.
 
@@ -10,7 +10,7 @@ An unofficial browser port of **Elona Shooter Plus 1.3.0.4**, the Flash castle-d
 
 I used Codex and Claude to vibe-port the game from Flash to TypeScript and Phaser. I claim no credit for the original game or its content. This port will always be free to play and will never be monetized.
 
-The source is private pending permission for a public release. The MIT license covers newly written port code only, not the original game content: [license scope](LICENSE.md).
+Published with the developer's permission. The [source is on GitHub](https://github.com/PMajesty/elona_shooter_plus_PLUS), and contributions and bug reports are welcome. The MIT license covers newly written port code only; original game content retains its existing terms. See [license scope](LICENSE.md).
 
 ## Start playing
 

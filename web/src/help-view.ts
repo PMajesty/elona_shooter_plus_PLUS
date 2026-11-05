@@ -41,9 +41,14 @@ export function createHelpView(scene: Phaser.Scene, manifest: LootViewManifest, 
     const data = layout.pages[page - 1];
     image(data.image, { x: 0, y: 0, scaleX: 1, scaleY: 1 });
     if (page === 3) {
-      content.add(fitLocalizedText(localizedText(scene, layout.position.x + 146, layout.position.y + 308,
-        'Game by Noa · Plus by its contributors · AI vibe-ported · Always free',
-        { resolution: 2, fontFamily: 'Arial', fontSize: '12px', color: '#352317' }), { width: 398, height: 18 }));
+      const source = fitLocalizedText(localizedText(scene, layout.position.x + 146, layout.position.y + 308,
+        'Game: Noa · Plus contributors · Free AI vibe-port · Source on GitHub',
+        { resolution: 2, fontFamily: 'Arial', fontSize: '12px', color: '#352317' }), { width: 398, height: 18 });
+      source.setName('help-port-source').setInteractive({ useHandCursor: true });
+      source.on('pointerover', () => source.setColor('#0000cc'));
+      source.on('pointerout', () => source.setColor('#352317'));
+      source.on('pointerdown', () => window.open('https://github.com/PMajesty/elona_shooter_plus_PLUS', '_blank', 'noopener,noreferrer'));
+      content.add(source);
       for (const [index, url] of Object.entries(layout.links)) {
         const p = data.children[`link${index}`];
         if (p) button('button_helpLink', p, () => window.open(url, '_blank', 'noopener,noreferrer')).setName(`help-credit-${index}`);

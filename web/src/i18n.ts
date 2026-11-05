@@ -28,11 +28,13 @@ const patterns = Object.entries(RUSSIAN).filter(([key]) => /\{\d+\}/.test(key))
   .map(([source, translated]) => {
     const slots: number[] = [];
     const numericUnit = source === '{0}ms{1}' || source === '{0}/sec';
+    // Обычное сообщение не захватывает соседнюю строку новостей вместе с её точкой.
+    const capture = /[\r\n]/.test(source) ? '([\\s\\S]*?)' : '([^\\r\\n]*?)';
     const pattern = source.split(/(\{\d+\})/).map(part => {
       if (!/^\{\d+\}$/.test(part)) return escape(part);
       const slot = Number(part.slice(1, -1)); slots.push(slot);
       if (numericUnit) return slot === 0 ? '([0-9]+(?:\\.[0-9]+)?)' : '(\\(M\\))?';
-      return '([\\s\\S]*?)';
+      return capture;
     }).join('');
     return { match: new RegExp(`^${pattern}$`), slots, translated, source };
   });
