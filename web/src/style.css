@@ -74,7 +74,7 @@ html[lang="ru"] #audio-settings strong { font-family: ElonaRussianMenu, serif; f
   #stage-viewport { position: relative; inset: auto; flex: none; width: min(calc(100% - var(--touch-reload-size) - var(--touch-option-size) - 8px), calc(var(--usable-height) * 31 / 19)); }
   #playfield { position: relative; inset: auto; width: 100%; aspect-ratio: 31 / 19; }
   #playfield > canvas { touch-action: none; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
-  /* Поле остаётся по центру; круглая кнопка выступает из узкой колонки на край игры. */
+  /* Поле остаётся по центру; широкая кнопка не сдвигает колонку остальных кнопок. */
   #game-controls { position: absolute; top: calc(50% + (env(safe-area-inset-top) - env(safe-area-inset-bottom)) / 2); left: calc(50% + (env(safe-area-inset-left) - env(safe-area-inset-right)) / 2 + var(--canvas-width, 0px) / 2 + 4px); right: auto; transform: translateY(-50%); width: var(--touch-option-size); flex: none; align-items: center; justify-content: center; gap: var(--touch-control-gap); }
   #game-controls button { width: var(--touch-option-size); height: var(--touch-option-size); flex: none; padding: 3px; line-height: 1.05; touch-action: manipulation; border-radius: 6px; background: #28251c66; border-color: #baa77c66; color: #dfd1b1; }
   #game-controls button:hover { background: #48402e88; }
@@ -104,7 +104,17 @@ html[lang="ru"] #audio-settings strong { font-family: ElonaRussianMenu, serif; f
   #game-controls #touch-reload[data-reload-state="reloading"] svg { animation: none; }
 }
 @media (any-pointer: coarse) and (orientation: landscape) {
-  /* Круг перекрывает край поля, но не нижний пояс с предметами и кнопкой меню. */
+  /* Срез проходит по левому краю колонки: ни рисунок, ни область касания не заходят на поле. */
+  #game-controls #touch-reload {
+    --reload-cut: calc((var(--touch-reload-size) - var(--touch-option-size)) / 2);
+    position: relative; overflow: hidden; clip-path: inset(0 0 0 var(--reload-cut));
+    padding-left: calc(var(--reload-cut) + 1px); padding-right: 7px;
+    font-size: calc(var(--touch-reload-size) * 0.16);
+  }
+  #game-controls #touch-reload::before { content: ''; position: absolute; left: var(--reload-cut); top: 0; bottom: 0; border-left: 1px solid; border-color: inherit; pointer-events: none; }
+  html[lang="ru"] #game-controls #touch-reload { font-size: calc(var(--touch-reload-size) * 0.13); }
+  #game-controls #touch-reload svg { width: 26px; height: 26px; }
+  /* Нижний пояс с предметами и кнопкой меню остаётся свободным. */
   #game[data-screen="battle"][data-paused="false"] #game-controls { top: auto; bottom: calc(50% + (env(safe-area-inset-bottom) - env(safe-area-inset-top)) / 2 - var(--canvas-height, 0px) * 0.38); transform: none; }
 }
 @media (any-pointer: coarse) and (orientation: portrait) {
