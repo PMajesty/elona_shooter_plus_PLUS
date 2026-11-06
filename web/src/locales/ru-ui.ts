@@ -419,6 +419,7 @@ export const ruUI: Record<string, string> = {
   "{0} AP\n{1}": "{0} AP\n{1}",
   "Henchman order": "Приказ наёмнику",
   "Fire at will": "Огонь по готовности",
+  "Auto": "Авто",
   "You will receive a new title and salary.": "Вы получите новый титул и жалованье.",
   "{0} medals won": "Получено медалей: {0}",
   "Medals you won give you various bonuses.\nThey are carried over to the next games.": "Полученные медали дают различные бонусы.\nОни сохраняются для следующих игр.",

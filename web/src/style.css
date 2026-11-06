@@ -71,15 +71,17 @@ html[lang="ru"] #audio-settings strong { font-family: ElonaRussianMenu, serif; f
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     display: flex; align-items: center; justify-content: center; gap: 4px;
   }
-  #stage-viewport { position: relative; inset: auto; flex: none; width: min(calc(100% - var(--touch-reload-size) - 8px), calc(var(--usable-height) * 31 / 19)); }
+  #stage-viewport { position: relative; inset: auto; flex: none; width: min(calc(100% - var(--touch-reload-size) - var(--touch-option-size) - 8px), calc(var(--usable-height) * 31 / 19)); }
   #playfield { position: relative; inset: auto; width: 100%; aspect-ratio: 31 / 19; }
   #playfield > canvas { touch-action: none; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
-  #game-controls { position: static; width: var(--touch-reload-size); flex: none; align-items: center; justify-content: center; gap: var(--touch-control-gap); }
+  /* Поле остаётся по центру; круглая кнопка выступает из узкой колонки на край игры. */
+  #game-controls { position: absolute; top: calc(50% + (env(safe-area-inset-top) - env(safe-area-inset-bottom)) / 2); left: calc(50% + (env(safe-area-inset-left) - env(safe-area-inset-right)) / 2 + var(--canvas-width, 0px) / 2 + 4px); right: auto; transform: translateY(-50%); width: var(--touch-option-size); flex: none; align-items: center; justify-content: center; gap: var(--touch-control-gap); }
   #game-controls button { width: var(--touch-option-size); height: var(--touch-option-size); flex: none; padding: 3px; line-height: 1.05; touch-action: manipulation; border-radius: 6px; background: #28251c66; border-color: #baa77c66; color: #dfd1b1; }
   #game-controls button:hover { background: #48402e88; }
   #game-controls button:active { background: #645235aa; }
   #game-controls svg { width: 20px; height: 20px; margin: auto; }
-  #game-controls :is(#touch-fire-at-will, #touch-guide, #touch-enlarge) { width: 56px; font: 11px/1.05 ElonaMenu, serif; }
+  #game-controls :is(#touch-fire-at-will, #touch-guide, #touch-enlarge) { font: 11px/1.05 ElonaMenu, serif; }
+  #game-controls :is(#touch-guide, #touch-enlarge) { width: 56px; }
   html[lang="ru"] #game-controls :is(#touch-fire-at-will, #touch-guide, #touch-enlarge) { font-family: ElonaRussianMenu, serif; }
   #game-controls #touch-reload { width: var(--touch-reload-size); height: var(--touch-reload-size); border-radius: 50%; border: 1px solid #d0bd8c88; background: radial-gradient(circle at 35% 25%, #73634c66, #211e1659 72%); box-shadow: inset 0 0 0 3px #100e0926, 0 2px 4px #0003; font: 14px/1.1 ElonaMenu, serif; }
   html[lang="ru"] #game-controls #touch-reload { font: 12px/1.1 ElonaRussianMenu, serif; }
@@ -101,10 +103,14 @@ html[lang="ru"] #audio-settings strong { font-family: ElonaRussianMenu, serif; f
 @media (prefers-reduced-motion: reduce) {
   #game-controls #touch-reload[data-reload-state="reloading"] svg { animation: none; }
 }
+@media (any-pointer: coarse) and (orientation: landscape) {
+  /* Круг перекрывает край поля, но не нижний пояс с предметами и кнопкой меню. */
+  #game[data-screen="battle"][data-paused="false"] #game-controls { top: auto; bottom: calc(50% + (env(safe-area-inset-bottom) - env(safe-area-inset-top)) / 2 - var(--canvas-height, 0px) * 0.38); transform: none; }
+}
 @media (any-pointer: coarse) and (orientation: portrait) {
   #game, #game:fullscreen { flex-direction: column; --touch-option-size: clamp(32px, 9vw, 40px); --touch-reload-size: clamp(68px, 22vw, 84px); }
   #stage-viewport { width: min(100%, calc((var(--usable-height) - var(--touch-reload-size) - 4px) * 31 / 19)); }
-  #game-controls { order: -2; width: 100%; min-height: var(--touch-option-size); flex-direction: row; }
+  #game-controls { position: static; transform: none; order: -2; width: 100%; min-height: var(--touch-option-size); flex-direction: row; }
 }
 
 @media (any-pointer: coarse) and (orientation: portrait) and (max-width: 600px) {
