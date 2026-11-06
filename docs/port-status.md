@@ -2,11 +2,16 @@
 
 Updated 2026-11-06. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-Browser Release 1.2.0 uses `index-qxtJXMID.js`. The documented
+Browser Release 1.3.0 uses `index-B23sQsym.js`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
-**Local preview, not deployed: Aim Assist.** A new opt-in Game MOD under Controls,
+Release 1.3.0 is deployed. The build and 34 focused checks pass; muted public-HTTPS
+checks verified the matching bundle, new controls, results/town, exact Continue
+and assisted touch firing. This deployment check used the workstation's HTTPS
+proxy with normal certificate validation; see [deployment](deployment.md).
+
+**Aim Assist.** A new opt-in Game MOD under Controls,
 available at creation in either edition, with EN/RU labels and saved selection.
 Manual touch and mouse aim receive at most four logical pixels of correction
 toward a nearby live enemy or Sister's actual hit silhouette. Acquisition is
@@ -21,7 +26,7 @@ phone portrait/landscape menus and an actual assisted touch shot (3.5-pixel nudg
 These are emulated touch checks, not a physical-phone playtest. Evidence is in
 `.build/aim-assist-evidence.json` and `.build/aim-assist-touch-evidence.json`.
 
-**Local preview, not deployed:** Sound on the title screen and Menu / Pause
+**Sound settings:** Sound on the title screen and Menu / Pause
 (including the tavern) offer Master, Effects and Ambience sliders in both editions,
 with original menu fonts, checkbox/metal-knob artwork, EN/RU labels and persistence outside
 adventure saves. Only the forest and town background loops are ambience. All 89
@@ -180,7 +185,7 @@ ordinary browser storage are the measured browser scope.
 
 | Player flow | Implemented coverage |
 | --- | --- |
-| New Game | All eight classes, four medal unlocks, all22 animated appearances, original English class/skill hints, starting equipment/skills/companions, starting medal bonuses, Casual/Hardcore and all seven original Game MODs. Local preview also includes opt-in Aim Assist. |
+| New Game | All eight classes, four medal unlocks, all22 animated appearances, original English class/skill hints, starting equipment/skills/companions, starting medal bonuses, Casual/Hardcore, all seven original Game MODs and opt-in Aim Assist. |
 | Combat | Manual/automatic reload, all weapon/projectile/consumable categories, Chain Gun wind-up/down and saved spin, skill growth/bonuses, hero manual/AI orders and F, companion AI/orders/focus/priorities, castle/Sister reactions and hitscan death, protection/repair, damage/health displays and pause/options. |
 | Encounters | All19 enemy kinds, repeating40-level cycles, strength scaling/large variants, multi-boss days and original boss actions, ranged attack-frame flights/muzzle flashes, bird-dropped rats with separate body/shadow/fall state and airborne targeting. |
 | Progression | Ordinary/boss loot, loot MODs, earned skill choices, weapon/living-weapon growth, results, taxes/upkeep/wages, honorary promotions/salaries, defeat and Carry Over with town snapshot/earnings/AP/medal restrictions. |

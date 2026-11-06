@@ -1,16 +1,17 @@
 # VPS deployment
 
-Updated 2026-11-05. Domain:
+Updated 2026-11-06. Domain:
 [Elona Shooter Plus+](https://pastalapizza.site/elona/).
 The root URL redirects to /elona/; www redirects to the apex domain.
 The [HTTP IP address](http://151.241.155.138/elona/) remains available.
-The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
+The current release passes HTTPS checks through the workstation's proxy, with
+normal certificate verification and no host mappings or TLS bypass.
 
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- Browser Release 1.2.0 is `/srv/elona/releases/review-qxtJXMID/elona/`
-  (save v46). The preceding release is `releases/review-GPl88U5c`.
+- Browser Release 1.3.0 is `/srv/elona/releases/review-B23sQsym/elona/`
+  (save v46). The preceding release is `releases/review-qxtJXMID`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
 - Both domain certificates were issued successfully by Let's Encrypt. Caddy's
@@ -21,6 +22,17 @@ The ordinary Chrome HTTPS route now passes without host mappings or TLS bypass.
 - The server verified the v46 archive and index before switching the current
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
+
+Release 1.3.0 adds opt-in Aim Assist and separate Master, Effects and Ambience
+controls. Its build and 34 focused checks pass. Public HTTPS serves the matching
+JavaScript SHA-256 `8bf728f571839b6a54b6e6f737a44f1eb6a1a9175aec557b8902caf71fe855d3`.
+Muted Chromium verified the title and Game MODs controls, reticle/shot alignment
+at about 1× and 2×, results-to-town navigation, tavern sound controls, remembered
+audio preferences and exact save/Continue. Phone emulation passed portrait and
+landscape menus and an assisted touch shot. No script errors occurred. Evidence:
+`.build/deployment/1.3.0-aim-assist.json`. The current workstation's direct
+network route timed out; these public checks use its HTTPS proxy with normal
+certificate validation. Earlier direct-route evidence below is historical.
 
 V46 adds the optional Expanded edition and Careful Consideration. The first
 release passed 636 automated checks and muted touch flows in Chromium/Expanded
@@ -138,7 +150,9 @@ update, and gzip compresses text responses. Directory browsing is disabled.
 
 For content rollback, repoint current to the retained release. An older build
 may reject saves from a newer schema (v43 lighting, v42 manual Burst); preserve
-exports and use a matching pre-update checkpoint rather than editing live saves. For a bad HTTPS
+exports and use a matching pre-update checkpoint rather than editing live saves.
+Release 1.2.0 also rejects the new `aimAssist` MOD key despite sharing save v46;
+keep an enabled adventure's export for 1.3.0 or later. For a bad HTTPS
 configuration, restore /srv/elona/staging/Caddyfile.http-active and reload Caddy.
 The original package configuration is saved as
 /srv/elona/staging/Caddyfile.before-elona. Do not restart unrelated services.
