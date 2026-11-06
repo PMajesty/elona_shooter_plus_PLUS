@@ -13,9 +13,9 @@ proxy with normal certificate validation; see [deployment](deployment.md).
 
 **Local preview, not deployed:** the touch strip has equal-sized option buttons,
 with Fire at will labeled Auto / Авто above a larger translucent Reload button.
-In landscape its circular left segment is cut off at the other buttons' left
-edge, leaving the same 4 px gap beside the centered game. The cut-away area
-does not intercept battlefield touches. Portrait keeps the full circle and a
+In landscape it has a flat left edge with rounded joins and one continuous
+border, aligned with the other buttons and leaving the same 4 px gap beside
+the centered game. It does not intercept battlefield touches. Portrait keeps the full circle and a
 single row above the field. Queued and active reloads have distinct feedback.
 Reload accepts the last 200 ms of the original firing
 cooldown. Repeated taps neither cancel nor restart it. New firing gestures,
@@ -25,10 +25,11 @@ reload/save/localization checks pass. Muted Chromium verified real repeated
 touch taps through reload completion, shot/pause cancellation, New Game/combat,
 exact save/Continue and unclipped EN/RU controls at 844×390, 390×844 and 640×320.
 Screenshots and evidence are in `.build/mobile-reload-*`; physical-phone feel
-remains unverified. The cut-circle revision passed the build and muted EN/RU
-browser checks at 844×390, 640×480, 640×320 and 390×844, including touch targeting
-on either side of the cut. The hotbar/menu stay clear. Updated previews and
-evidence: `.build/mobile-flat-reload-*`.
+remains unverified. The rounded-outline revision passed the build and muted
+EN/RU browser checks at 844×390, 640×320 and 390×844, including touch targeting
+beside the game. It replaces the clipped circle and separate vertical border
+that produced sharp tips. The hotbar/menu stay clear. Updated previews and
+evidence: `.build/mobile-smooth-reload-*`.
 Android's fullscreen exit notice belongs to the browser.
 
 **Aim Assist.** A new opt-in Game MOD under Controls,

@@ -104,14 +104,14 @@ html[lang="ru"] #audio-settings strong { font-family: ElonaRussianMenu, serif; f
   #game-controls #touch-reload[data-reload-state="reloading"] svg { animation: none; }
 }
 @media (any-pointer: coarse) and (orientation: landscape) {
-  /* Срез проходит по левому краю колонки: ни рисунок, ни область касания не заходят на поле. */
+  /* Единый скруглённый контур вместо обрезанной окружности и отдельной линии среза. */
   #game-controls #touch-reload {
-    --reload-cut: calc((var(--touch-reload-size) - var(--touch-option-size)) / 2);
-    position: relative; overflow: hidden; clip-path: inset(0 0 0 var(--reload-cut));
-    padding-left: calc(var(--reload-cut) + 1px); padding-right: 7px;
+    width: calc((var(--touch-reload-size) + var(--touch-option-size)) / 2);
+    align-self: flex-start;
+    border-radius: 10px calc(var(--touch-reload-size) / 2) calc(var(--touch-reload-size) / 2) 10px;
+    padding-left: 1px; padding-right: 7px;
     font-size: calc(var(--touch-reload-size) * 0.16);
   }
-  #game-controls #touch-reload::before { content: ''; position: absolute; left: var(--reload-cut); top: 0; bottom: 0; border-left: 1px solid; border-color: inherit; pointer-events: none; }
   html[lang="ru"] #game-controls #touch-reload { font-size: calc(var(--touch-reload-size) * 0.13); }
   #game-controls #touch-reload svg { width: 26px; height: 26px; }
   /* Нижний пояс с предметами и кнопкой меню остаётся свободным. */
