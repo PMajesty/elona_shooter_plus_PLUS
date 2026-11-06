@@ -10,8 +10,8 @@ normal certificate verification and no host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- Browser Release 1.3.0 is `/srv/elona/releases/review-B23sQsym/elona/`
-  (save v46). The preceding release is `releases/review-qxtJXMID`.
+- Browser Release 1.3.1 is `/srv/elona/releases/review-B1M5Tdet/elona/`
+  (save v46). The preceding release is `releases/review-B23sQsym`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
 - Both domain certificates were issued successfully by Let's Encrypt. Caddy's
@@ -23,16 +23,15 @@ normal certificate verification and no host mappings or TLS bypass.
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
 
-Release 1.3.0 adds opt-in Aim Assist and separate Master, Effects and Ambience
-controls. Its build and 34 focused checks pass. Public HTTPS serves the matching
-JavaScript SHA-256 `8bf728f571839b6a54b6e6f737a44f1eb6a1a9175aec557b8902caf71fe855d3`.
-Muted Chromium verified the title and Game MODs controls, reticle/shot alignment
-at about 1× and 2×, results-to-town navigation, tavern sound controls, remembered
-audio preferences and exact save/Continue. Phone emulation passed portrait and
-landscape menus and an assisted touch shot. No script errors occurred. Evidence:
-`.build/deployment/1.3.0-aim-assist.json`. The current workstation's direct
-network route timed out; these public checks use its HTTPS proxy with normal
-certificate validation. Earlier direct-route evidence below is historical.
+Release 1.3.1 adds the revised mobile controls and a 200 ms reload input buffer.
+The build and 19 focused reload/save/localization checks pass. Public HTTPS
+serves JavaScript SHA-256 `a6d910f0192e3d83eac78b862ad7d649c8048155a939fdf3ce46f0306425abfc`;
+both JavaScript and CSS match the local build. Muted Chromium verified New Game,
+touch reload input, the clear margin beside the battlefield, English/Russian
+portrait and landscape layouts, and exact save/Continue. No script errors
+occurred. Evidence: `.build/deployment/1.3.1-mobile-reload.json`.
+These public checks use the workstation's HTTPS proxy with normal certificate
+validation. Earlier direct-route evidence below is historical.
 
 V46 adds the optional Expanded edition and Careful Consideration. The first
 release passed 636 automated checks and muted touch flows in Chromium/Expanded

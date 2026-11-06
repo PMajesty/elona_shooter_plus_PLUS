@@ -2,16 +2,17 @@
 
 Updated 2026-11-06. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-Browser Release 1.3.0 uses `index-B23sQsym.js`. The documented
+Browser Release 1.3.1 uses `index-B1M5Tdet.js`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
-Release 1.3.0 is deployed. The build and 34 focused checks pass; muted public-HTTPS
-checks verified the matching bundle, new controls, results/town, exact Continue
-and assisted touch firing. This deployment check used the workstation's HTTPS
+Release 1.3.1 is deployed. The build and 19 focused reload/save/localization
+checks pass. Muted public-HTTPS checks verified matching JavaScript and CSS,
+New Game, the mobile reload controls, EN/RU layouts and exact Continue.
+This deployment check used the workstation's HTTPS
 proxy with normal certificate validation; see [deployment](deployment.md).
 
-**Local preview, not deployed:** the touch strip has equal-sized option buttons,
+**Mobile controls:** the touch strip has equal-sized option buttons,
 with Fire at will labeled Auto / Авто above a larger translucent Reload button.
 In landscape it has a flat left edge with rounded joins and one continuous
 border, aligned with the other buttons and leaving the same 4 px gap beside
@@ -30,6 +31,7 @@ EN/RU browser checks at 844×390, 640×320 and 390×844, including touch targeti
 beside the game. It replaces the clipped circle and separate vertical border
 that produced sharp tips. The hotbar/menu stay clear. Updated previews and
 evidence: `.build/mobile-smooth-reload-*`.
+Public-release evidence: `.build/deployment/1.3.1-mobile-reload.json`.
 Android's fullscreen exit notice belongs to the browser.
 
 **Aim Assist.** A new opt-in Game MOD under Controls,
