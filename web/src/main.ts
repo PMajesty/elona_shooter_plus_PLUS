@@ -44,6 +44,9 @@ import { createHelpView, type HelpLayout } from './help-view.ts';
 import { originalTextArea } from './original-text-area.ts';
 import { dayReport } from './day-report.ts';
 import { createPauseView, type PauseLayout } from './pause-view.ts';
+import { AudioMixer } from './audio-mixer.ts';
+import { readAudioSettings, storeAudioSettings } from './audio-settings.ts';
+import { createAudioSettingsView } from './audio-settings-view.ts';
 import { DEFAULT_GAME_OPTIONS, GAME_OPTIONS_VERSION, defaultGameOptions, savedGameOptions, showDamageNumber, pauseStatistics, type GameOptions } from './game-options.ts';
 import { damageNumberStyle } from './damage-number-style.ts';
 import { createFireworks } from './fireworks-view.ts';
@@ -158,6 +161,9 @@ class ElonaScene extends Phaser.Scene {
   appearance = 0;
   paused = false;
   muted = readMute();
+  private audioMixer!: AudioMixer;
+  private audioSettingsView?: ReturnType<typeof createAudioSettingsView>;
+  private titleAudioOpen = false;
   private options: GameOptions = { ...DEFAULT_GAME_OPTIONS };
   private accumulator = 0;
   private root!: Phaser.GameObjects.Container;
@@ -265,7 +271,7 @@ class ElonaScene extends Phaser.Scene {
     gameScene = this;
     if (!localizationReady) setLanguage('en');
     document.querySelector<HTMLButtonElement>('#language')!.disabled = !localizationReady;
-    this.battleCursor = new BattleCursor(this);
+    this.battleCursor = new BattleCursor(this, (x, y) => this.sim?.manualAim(x, y) ?? { x, y });
     // Все 273 изображения charaPic в SWF используют несглаживаемую заливку 0x43.
     // Сохраняем дробные исходные координаты, но исключаем размытие соседних пикселей тела.
     this.textures.get('charaPic').setFilter(Phaser.Textures.FilterMode.NEAREST);
@@ -274,6 +280,7 @@ class ElonaScene extends Phaser.Scene {
     this.game.canvas.setAttribute('aria-label', t('Elona Shooter battlefield'));
     loadStatus.hidden = true;
     container.dataset.loadMs = (performance.now() - bootStarted).toFixed(0);
+    this.audioMixer = new AudioMixer(this.sound, readAudioSettings());
     this.sound.mute = this.muted;
     updateMuteControl(this.muted);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, configureDisplaySizing(this, container, playfield, () => this.options.lowQuality, positionMenuView));
@@ -438,6 +445,11 @@ class ElonaScene extends Phaser.Scene {
     // Прямое событие DOM выполняет переключение один раз и не зависит от частоты рендеринга.
     const combatKey = (event: KeyboardEvent) => {
       if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (this.titleAudioOpen) {
+        if (event.code === 'Escape') { event.preventDefault(); this.closeTitleAudio(); }
+        return;
+      }
+      if (event.code !== 'Escape' && event.target instanceof Element && event.target.closest('#audio-settings')) return;
       // Space/Enter на HTML-кнопке выполняет её нативный click, а не боевую перезарядку.
       if (['Space', 'Enter'].includes(event.code) && controlFrom(event.target)) return;
       if (this.collectionDialog) {
@@ -543,6 +555,8 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private reset(screen: Screen): void {
+    this.titleAudioOpen = false;
+    this.audioSettingsView = undefined;
     this.cancelBattleGesture();
     this.touchAimSprite = undefined;
     this.combatNotices.reset();
@@ -716,14 +730,14 @@ class ElonaScene extends Phaser.Scene {
     const art = this.add.container(0, 0); this.root.add(art);
     this.titleSequence = createTitleSequence((key, frame, x, y) => {
       const image = this.clip(key, frame, x, y)!; art.add(image); return image;
-    }, actors, cloud, buttons, frame, (x, y) => this.cameras.main.setScroll(-x, -y), key => {
+    }, actors, cloud, buttons, frame, (x, y) => this.cameras.main.setScroll(this.titleAudioOpen ? 0 : -x, this.titleAudioOpen ? 0 : -y), key => {
       if (key === 'soundImpact1') this.playSound(key);
       else if (!this.sound.locked && this.cache.audio.exists(key)) {
         if (key === 'soundReloaded1') this.playSound(key, 1, 0.42);
         else if (!this.sound.isPlaying(key)) {
           // DefineSound 87: пропустить задержку MP3 и ограничить выстрел длиной из SWF.
-          this.sound.play(key, { name: 'title-shot', start: 1633 / 22050, duration: 1607 / 22050,
-            config: { volume: 0.74, pan: 0.42 } });
+          this.audioMixer.play(key, { volume: 0.74, pan: 0.42 },
+            { name: 'title-shot', start: 1633 / 22050, duration: 1607 / 22050 });
         }
       }
     });
@@ -742,8 +756,30 @@ class ElonaScene extends Phaser.Scene {
     }, () => this.confirmDeleteSave()));
     this.text(119, 21, 'Unofficial browser port', 12, '#ffffff').setShadow(1, 1, '#000000', 2);
     this.text(334, 11, `Most Days Survived: ${this.profile.bestDay} / ${this.profile.bestHardcoreDay ?? 0} (HC) / ${this.profile.bestCasualDay ?? 0} (Casual)`, 12, '#ffffff').setShadow(1, 1, '#000000', 2);
+    const soundLabel = this.text(285, 337, 'Sound', 16, '#eee0b5', 'ElonaMenuBold')
+      .setOrigin(0.5, 0).setShadow(1, 1, '#000000', 2).setName('title-sound-label');
+    const soundButton = this.zone(235, 334, 100, 25, () => this.showTitleAudio()).setName('title-sound');
+    soundButton.on('pointerover', () => soundLabel.setColor('#ffffff'));
+    soundButton.on('pointerout', () => soundLabel.setColor('#eee0b5'));
     if (saved.kind === 'error') status.textContent = saved.message;
     else if (this.profileRead.warning) status.textContent = this.profileRead.warning;
+  }
+
+  private showTitleAudio(): void {
+    if (this.screen !== 'title' || this.titleAudioOpen || this.helpLayer || this.collectionDialog) return;
+    this.titleAudioOpen = true; this.cameras.main.setScroll(0, 0);
+    this.audioSettingsView = this.createAudioControls(() => this.closeTitleAudio());
+    this.root.add(this.audioSettingsView.root);
+  }
+
+  private closeTitleAudio(): void {
+    this.titleAudioOpen = false; this.audioSettingsView?.root.destroy(true); this.audioSettingsView = undefined;
+  }
+
+  private createAudioControls(close?: () => void): ReturnType<typeof createAudioSettingsView> {
+    return createAudioSettingsView(this, playfield, this.audioMixer.settings, this.muted, settings => {
+      this.audioMixer.setSettings(settings); storeAudioSettings(settings);
+    }, () => this.toggleMute(), close);
   }
 
   private confirmDeleteSave(): void {
@@ -887,7 +923,8 @@ class ElonaScene extends Phaser.Scene {
     this.reset('mods'); this.image('townHud'); this.drawHud();
     const background = new Set(this.root.list);
     this.image('gameMods');
-    const rows: [GameMod, number][] = [['bossMods', 104], ['intense', 123], ['tight', 142], ['laptop', 161], ['community', 181], ['skipHard', 220], ['weaponLevel', 239]];
+    this.text(176, 263, 'Controls', 12, '#542d20', 'Arial').setFontStyle('bold');
+    const rows: [GameMod, number][] = [['bossMods', 104], ['intense', 123], ['tight', 142], ['laptop', 161], ['community', 181], ['skipHard', 220], ['weaponLevel', 239], ['aimAssist', 282]];
     const checks = rows.map(([key, y]) => {
       fitLocalizedText(this.text(168, y, GAME_MODS[key].label, 12, '#24221a', 'Arial'), { width: key === 'community' ? 180 : 350, height: 19 });
       return this.clip('partyCheckOff', 1, 150, y + 2)!;
@@ -942,7 +979,7 @@ class ElonaScene extends Phaser.Scene {
     this.syncCompanionActors();
     this.drawHud();
     this.input.setDefaultCursor(BATTLE_CURSOR);
-    if (this.cache.audio.exists('soundBgForest')) this.ambient = this.sound.add('soundBgForest', { volume: 0.3, loop: true });
+    if (this.cache.audio.exists('soundBgForest')) this.ambient = this.audioMixer.add('soundBgForest', { volume: 0.3, loop: true });
     this.ambient?.play();
     this.syncEnemyFrameAudio(announce);
     this.paintBattle();
@@ -1134,6 +1171,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
+    this.audioSettingsView?.sync((this.paused || this.titleAudioOpen) && !this.helpLayer && !this.pauseDialog && !this.collectionDialog, this.muted);
     this.syncTouchBattleControls();
     if (!this.ready || this.graphicsLost) return;
     this.updatePresentation(delta);
@@ -1146,7 +1184,8 @@ class ElonaScene extends Phaser.Scene {
     while (this.accumulator >= 1000 / 30 && this.sim.state.phase === 'battle') {
       // Короткое касание лука между тиками: сначала натягиваем, затем отпускаем.
       const deferBowRelease = this.touchInput && this.firePressed && this.fireReleased && [24, 25].includes(this.sim.weapon?.id ?? 0);
-      const aim = this.touchInput ? this.touchAim : { x: pointer.x / this.cameras.main.zoom, y: pointer.y / this.cameras.main.zoom };
+      // PointerEvent сохраняет дробные CSS-координаты; прицел и выстрел используют один источник.
+      const aim = this.touchInput ? this.touchAim : this.battleCursor.rawAim() ?? { x: pointer.x / this.cameras.main.zoom, y: pointer.y / this.cameras.main.zoom };
       const held = this.touchInput ? Boolean(this.touchAimPointer && this.firingGesture) : this.firingGesture && pointer.isDown && pointer.leftButtonDown();
       this.sim.tick({ aimX: aim.x, aimY: aim.y, firePressed: this.firePressed, fireReleased: this.fireReleased && !deferBowRelease, fireHeld: held || deferBowRelease, reload: this.reloadRequested, slot: this.slotRequested });
       this.firePressed = this.reloadRequested = false; this.fireReleased = deferBowRelease; this.slotRequested = undefined;
@@ -1256,7 +1295,7 @@ class ElonaScene extends Phaser.Scene {
       if (!mode) continue;
       const key = `soundChain${mode === 1 ? 2 : mode === 2 ? 1 : 3}`;
       if (!this.cache.audio.exists(key)) continue;
-      const sound = this.sound.add(key, { volume: slot ? 0.2 : 0.65, pan: slot ? 0.8 : 0, loop: mode === 3 });
+      const sound = this.audioMixer.add(key, { volume: slot ? 0.2 : 0.65, pan: slot ? 0.8 : 0, loop: mode === 3 });
       this.chainSounds.set(slot, { mode, sound });
       // Позиция клипа следует сохранённым часам; сам звук не управляет симуляцией.
       const seek = mode === 3 ? 0 : (state?.chainTime ?? 0) / 1000;
@@ -1373,11 +1412,12 @@ class ElonaScene extends Phaser.Scene {
     if (this.screen === 'battle' && !this.paused && !this.touchInput) this.battleCursor.update(frame, size, alpha, crosshair.originX, crosshair.originY, WORLD.width);
     else this.battleCursor.hide();
     if (this.touchAimPointer && this.touchInput && !this.paused) {
+      const aim = this.sim.manualAim(this.touchAim.x, this.touchAim.y);
       // Тот же кадр, регистрационная точка и отдача, что у мышиного originalCrosshair.
       this.touchAimSprite ??= localizedImage(this, 0, 0, 'originalCrosshair', frame);
       if (!this.touchAimSprite.parentContainer) this.root.add(this.touchAimSprite);
       this.touchAimSprite.setFrame(frame).setOrigin(crosshair.originX / crosshair.frameWidth, crosshair.originY / crosshair.frameHeight)
-        .setPosition(this.touchAim.x, this.touchAim.y).setScale(size).setAlpha(alpha).setVisible(true);
+        .setPosition(aim.x, aim.y).setScale(size).setAlpha(alpha).setVisible(true);
       this.root.bringToTop(this.touchAimSprite);
     } else this.touchAimSprite?.setVisible(false);
     container.dataset.crosshairFrame = frame;
@@ -1599,7 +1639,7 @@ class ElonaScene extends Phaser.Scene {
       if (actorSlot === 0) { this.bowSound?.destroy(); this.bowSound = undefined; }
       else { this.companionBowSounds.get(actorSlot)?.destroy(); this.companionBowSounds.delete(actorSlot); }
       if (this.cache.audio.exists('soundBow2')) {
-        const sound = this.sound.add('soundBow2', actorAudio); sound.play();
+        const sound = this.audioMixer.add('soundBow2', actorAudio); sound.play();
         if (actorSlot === 0) this.bowSound = sound; else this.companionBowSounds.set(actorSlot, sound);
       }
     }
@@ -2061,7 +2101,7 @@ class ElonaScene extends Phaser.Scene {
       ai: slot.member?.ai ?? null, focus: slot.member?.focus ?? null, boss: slot.member?.optBoss, wall: slot.member?.optWall })));
     container.dataset.pendingPartyAction = JSON.stringify(pendingParty);
     if (!this.ambient && this.cache.audio.exists('soundBgTown')) {
-      this.ambient = this.sound.add('soundBgTown', { volume: 0.3, loop: true }); this.ambient.play();
+      this.ambient = this.audioMixer.add('soundBgTown', { volume: 0.3, loop: true }); this.ambient.play();
     }
     status.textContent = pending?.kind === 'upgrade' ? 'Compare the weapon before and after upgrading. Upgrade keeps mounted mods. Yes spends the shown gold and 4 AP.'
       : tab === 'medals' ? 'Museum: select a medal to read its requirements. Rob visitors costs 2 AP; repeated attempts pay less today.'
@@ -2178,7 +2218,7 @@ class ElonaScene extends Phaser.Scene {
     if (this.screen === 'battle') this.input.setDefaultCursor(this.paused ? 'default' : BATTLE_CURSOR);
     container.dataset.paused = String(this.paused);
     this.celebration?.root.setVisible(!this.paused);
-    if (!this.paused) { status.hide(); this.pauseLayer?.destroy(true); this.pauseLayer = undefined; this.saveGame(false); this.ambient?.resume(); this.bowSound?.resume(); for (const sound of this.companionBowSounds.values()) sound.resume(); for (const entry of this.chainSounds.values()) entry.sound.resume(); return; }
+    if (!this.paused) { status.hide(); this.pauseLayer?.destroy(true); this.pauseLayer = undefined; this.audioSettingsView = undefined; this.saveGame(false); this.ambient?.resume(); this.bowSound?.resume(); for (const sound of this.companionBowSounds.values()) sound.resume(); for (const entry of this.chainSounds.values()) entry.sound.resume(); return; }
     for (const sound of this.companionBowSounds.values()) sound.pause();
     for (const entry of this.chainSounds.values()) entry.sound.pause();
     this.ambient?.pause(); this.bowSound?.pause(); this.saveGame(false);
@@ -2200,6 +2240,8 @@ class ElonaScene extends Phaser.Scene {
         this.saveGame(false);
       }, click: () => this.playSound('soundClick1'),
     }, this.sim!.state.ruleset.id === 'expanded'); this.root.add(this.pauseLayer);
+    this.audioSettingsView = this.createAudioControls();
+    this.pauseLayer.add(this.audioSettingsView.root);
     if (this.volumeIcon) this.root.bringToTop(this.volumeIcon);
   }
 
@@ -2375,7 +2417,7 @@ class ElonaScene extends Phaser.Scene {
     for (const uid of this.enemyFrameAudio.keys()) if (!present.has(uid)) this.enemyFrameAudio.delete(uid);
   }
 
-  playSound(key: string, volume = 0.7, pan = 0): void { if (this.cache.audio.exists(key)) this.sound.play(key, { volume, pan }); }
+  playSound(key: string, volume = 0.7, pan = 0): void { if (this.cache.audio.exists(key)) this.audioMixer.play(key, { volume, pan }); }
   toggleMute(): void { this.muted = !this.muted; this.sound.mute = this.muted; this.volumeIcon?.setFrame(this.muted ? '2' : '1'); container.dataset.muted = String(this.muted); updateMuteControl(this.muted); storeMute(this.muted); }
 }
 

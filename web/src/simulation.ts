@@ -1,4 +1,5 @@
 import { GAME_MODS, validGameMods, type GameMods, type GameMod } from './game-mods.ts';
+import { assistedAim, type AimPoint } from './aim-assist.ts';
 import { townEvent, type TownActionResult, type CompletedTownAction } from './town-events.ts';
 import { STANDING_SISTER, advanceCastleSister, castleSisterHit, validCastleSister, type CastleSister } from './castle-sister.ts';
 import { TITLES, isTitle, nextTitle, type Title } from './titles.ts';
@@ -628,8 +629,13 @@ export class Simulation {
   tick(input: Input = {}): void {
     this.events = [];
     if (this.state.phase !== 'battle' || this.pendingOpeningMission) return;
-    if (finite(input.aimX)) this.state.aimX = input.aimX;
-    if (finite(input.aimY)) this.state.aimY = input.aimY;
+    if (finite(input.aimX) && finite(input.aimY)) {
+      const aim = this.manualAim(input.aimX, input.aimY);
+      this.state.aimX = aim.x; this.state.aimY = aim.y;
+    } else {
+      if (finite(input.aimX)) this.state.aimX = input.aimX;
+      if (finite(input.aimY)) this.state.aimY = input.aimY;
+    }
     const firePressed = input.firePressed || (input.fireHeld && !this.state.fireHeld);
     const fireReleased = input.fireReleased ?? (this.state.fireHeld && !input.fireHeld);
     this.state.fireHeld = Boolean(input.fireHeld);
@@ -699,6 +705,17 @@ export class Simulation {
       this.state.timerRemainder -= SIMULATION_HZ;
       this.timerTick();
     }
+  }
+
+  /** Один расчёт для ввода и прицела; исходная позиция не накапливает поправку между кадрами. */
+  manualAim(x: number, y: number): AimPoint {
+    const raw = { x, y };
+    if (!this.state.mods?.aimAssist || this.heroAutomatic || this.state.phase !== 'battle'
+      || this.pendingOpeningMission || x < 0 || x >= WORLD.width || y < 0 || y >= WORLD.height) return raw;
+    const targets = this.state.enemies.filter(enemy => !enemy.removed && enemy.hp > 0);
+    const sister = this.state.castleSister ?? STANDING_SISTER;
+    return assistedAim(raw, (px, py) => px >= 0 && px < WORLD.width && py >= 0 && py < WORLD.height
+      && (targets.some(enemy => this.hitEnemy(enemy, px, py)) || !sister.dead && castleSisterHit(sister.frame, px, py)));
   }
 
   fireAt(x: number, y: number): boolean {

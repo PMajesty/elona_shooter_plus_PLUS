@@ -1,5 +1,12 @@
 // Presentation-only exact English keys. Keep source/save values canonical.
 export const ruUI: Record<string, string> = {
+  "Sound": "Звук",
+  "Close sound settings": "Закрыть настройки звука",
+  "Mute audio": "Без звука",
+  "Master": "Общая",
+  "Master volume": "Общая",
+  "Effects": "Эффекты",
+  "Ambience": "Окружение",
   "This is not a supported browser-port save. Select an original .sol file to import a Flash adventure.": "Это сохранение браузерной версии не поддерживается. Чтобы импортировать приключение из Flash, выберите исходный файл .sol.",
   "This save contains invalid game options.": "В сохранении содержатся неверные настройки игры.",
   "Inconsistent save format versions.": "Версии формата сохранения не совпадают.",
@@ -80,6 +87,9 @@ export const ruUI: Record<string, string> = {
   "Laptop difficulty": "Для ноутбука",
   "Laptop difficulty. Enemies move 30% slower.": "Сложность для ноутбука. Враги движутся на 30% медленнее.",
   "Community Compilation": "Сборка сообщества",
+  "Aim Assist": "Помощь в прицеливании",
+  "Controls": "Управление",
+  "Aim Assist: a small nudge toward nearby targets.": "Помощь в прицеливании: чуть ближе к цели.",
   "Community Compilation Mod.": "Модификация «Сборка сообщества».",
   "-In mod sales day, the blacksmith will still sell mods after refreshing his inventory. \n\n": "-В день распродажи кузнец продолжает продавать модификации даже после обновления ассортимента. \n\n",
   "-You will get 1/2 AP from your Active Skill. But you always get full AP.": "-Навык «Непоседа» даёт вдвое меньше AP. Зато бонус всегда начисляется полностью.",

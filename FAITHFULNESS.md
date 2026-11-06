@@ -22,6 +22,8 @@ The [fidelity review](docs/fidelity-review.md) records the original behavior and
 
 Menus, scrolling, touch controls and display scaling are adapted for browsers. Normal play can save during combat and results as well as in town; Flash adventure saves were town checkpoints. Hardcore still permits saving and exporting only in town. Combat resumes paused after Continue.
 
+**Aim Assist** is a new, optional Game MOD in both editions, off by default. It helps manual touch or mouse aiming near a living enemy or Sister, by at most four pixels in the original 620×380 game coordinates. Assistance fades between eight and twelve pixels from a hittable silhouette. Aim already on a target stays unchanged. It does not change weapon spread, damage, experience or companion orders, and does not lead moving targets or fire automatically. The choice stays with the adventure save.
+
 The browser client is called **Elona Shooter Plus+**. The title keeps the original logo with an additional plus, shows the browser release version, and credits Noa and the Plus creators. **1.3.0.4** identifies the upstream Flash release, not the browser client.
 
 Browser adventures currently support **Day 1–1000**. This limit comes from browser save validation. Later-day progression has been checked with controlled scenarios; natural late-game difficulty still needs more playtesting.

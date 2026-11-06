@@ -6,6 +6,7 @@ export const GAME_MODS = {
   tight: { name: 'Tighter crosshair', label: 'Tighter accuracy&cross-hair. Slightly less exp gains.' },
   laptop: { name: 'Laptop difficulty', label: 'Laptop difficulty. Enemies move 30% slower.' },
   community: { name: 'Community Compilation', label: 'Community Compilation Mod.' },
+  aimAssist: { name: 'Aim Assist', label: 'Aim Assist: a small nudge toward nearby targets.' },
 } as const;
 export type GameMod = keyof typeof GAME_MODS;
 // Текст исходного окна detailwin_287 относится именно к Community Compilation.

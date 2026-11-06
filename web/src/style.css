@@ -25,6 +25,30 @@ button:focus-visible { outline: 2px solid #e6d5a6; outline-offset: 1px; }
 #game-controls svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: square; }
 #mute[aria-pressed="true"] .sound-waves, #mute[aria-pressed="false"] .sound-muted { display: none; }
 
+#audio-settings { position: absolute; z-index: 3; width: 235px; height: 144px; padding: 10px 12px; transform-origin: top left; color: #382b1d; font: 13px ElonaMenu, serif; color-scheme: light; }
+html[lang="ru"] #audio-settings { font-family: ElonaRussianMenu, serif; }
+#audio-settings[hidden] { display: none; }
+#audio-settings header { display: flex; justify-content: space-between; align-items: center; height: 23px; padding-left: 20px; }
+#audio-settings strong { font: 17px ElonaMenuBold, serif; color: #4a251b; }
+html[lang="ru"] #audio-settings strong { font-family: ElonaRussianMenu, serif; font-weight: bold; }
+#audio-settings header label { display: flex; align-items: center; gap: 3px; }
+#audio-settings .audio-row { display: grid; grid-template-columns: 72px minmax(0, 1fr) 30px; align-items: center; gap: 5px; height: 33px; }
+#audio-settings output { text-align: right; font-variant-numeric: tabular-nums; }
+#audio-settings input { margin: 0; }
+#audio-settings input[type="checkbox"] { appearance: none; width: 14px; height: 14px; flex: none; background: var(--audio-check-off) center / contain no-repeat; cursor: pointer; }
+#audio-settings input[type="checkbox"]:checked { background-image: var(--audio-check-on); }
+#audio-settings input[type="range"] { appearance: none; width: 100%; height: 29px; background: transparent; cursor: pointer; touch-action: none; }
+#audio-settings input[type="range"]::-webkit-slider-runnable-track { height: 5px; border: 1px solid #6a553a; background: #9a8058; box-shadow: inset 0 1px 1px #433521, 0 1px #f5e5ba; }
+#audio-settings input[type="range"]::-moz-range-track { height: 3px; border: 1px solid #6a553a; background: #9a8058; box-shadow: inset 0 1px 1px #433521, 0 1px #f5e5ba; }
+#audio-settings input[type="range"]::-webkit-slider-thumb { appearance: none; width: 19px; height: 20px; margin-top: -8px; border: 0; background: var(--audio-knob) center / contain no-repeat; }
+#audio-settings input[type="range"]::-moz-range-thumb { width: 19px; height: 20px; border: 0; border-radius: 0; background: var(--audio-knob) center / contain no-repeat; }
+#audio-settings input:focus-visible { outline: 1px solid #4a3723; outline-offset: 2px; }
+#audio-settings input[type="range"]:focus-visible { outline: none; }
+#audio-settings input[type="range"]:focus-visible::-webkit-slider-runnable-track { outline: 1px solid #4a3723; outline-offset: 2px; }
+#audio-settings input[type="range"]:focus-visible::-moz-range-track { outline: 1px solid #4a3723; outline-offset: 2px; }
+#audio-settings .audio-close { position: absolute; top: -10px; right: -9px; width: 27px; height: 27px; border: 0; padding: 0; background: var(--audio-close) center / contain no-repeat; }
+#audio-settings .audio-close:hover { background-image: var(--audio-close-over); }
+
 .screen-reader-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 
 #game .opening-movie { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 0; border: 0; background: black; }

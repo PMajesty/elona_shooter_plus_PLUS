@@ -31,7 +31,7 @@ export function pauseStatistics(state: SimulationState): string {
   if (state.mode === 'casual') lines.push('You are playing Casual Mode.');
   if (state.mode === 'hardcore') lines.push('You are playing Hardcore Mode.');
   for (const [key, name] of [['bossMods', 'Bosses drop Mod'], ['intense', 'Intense Start'], ['tight', 'Tighter crosshair'],
-    ['weaponLevel', 'Limit high level weapons'], ['laptop', 'Laptop difficulty'], ['community', 'Community Compilation'], ['skipHard', 'Skip hard waves']] as const) {
+    ['weaponLevel', 'Limit high level weapons'], ['laptop', 'Laptop difficulty'], ['community', 'Community Compilation'], ['skipHard', 'Skip hard waves'], ['aimAssist', 'Aim Assist']] as const) {
     if (state.mods?.[key]) lines.push(`Mod(${name}) is on.`);
   }
   if (state.carryOver) lines.push("You've used Carry Over Option.");

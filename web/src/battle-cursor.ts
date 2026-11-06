@@ -1,4 +1,5 @@
 import type Phaser from 'phaser';
+import type { AimPoint } from './aim-assist.ts';
 
 export const BATTLE_CURSOR = 'none';
 
@@ -21,8 +22,9 @@ export class BattleCursor {
   private current = '';
   private hotspot = { x: 0, y: 0 };
   private pointer: { x: number; y: number; density: number } | null = null;
+  private stageWidth = 620;
 
-  constructor(private readonly scene: Phaser.Scene) {
+  constructor(private readonly scene: Phaser.Scene, private readonly adjustAim: (x: number, y: number) => AimPoint) {
     this.overlay.className = 'battle-reticle';
     this.overlay.setAttribute('aria-hidden', 'true');
     this.overlay.append(this.image);
@@ -72,6 +74,15 @@ export class BattleCursor {
     this.overlay.hidden = true;
   }
 
+  rawAim(): AimPoint | null {
+    return this.pointer ? this.logicalPointer(this.scene.game.canvas.getBoundingClientRect()) : null;
+  }
+
+  private logicalPointer(rect: DOMRect): AimPoint {
+    return { x: (this.pointer!.x - rect.left) * this.stageWidth / rect.width,
+      y: (this.pointer!.y - rect.top) * this.stageWidth / rect.width };
+  }
+
   private position(): void {
     const canvas = this.scene.game.canvas;
     const p = this.pointer;
@@ -83,13 +94,16 @@ export class BattleCursor {
       this.overlay.hidden = true;
       return;
     }
-    const x = (p.x - rect.left) * canvas.clientWidth / rect.width;
-    const y = (p.y - rect.top) * canvas.clientHeight / rect.height;
+    const zoom = canvas.clientWidth / this.stageWidth;
+    const raw = this.logicalPointer(rect);
+    const aim = this.adjustAim(raw.x, raw.y);
+    const x = aim.x * zoom, y = aim.y * zoom;
     this.image.style.transform = `translate(${x - this.hotspot.x}px, ${y - this.hotspot.y}px)`;
     this.overlay.hidden = false;
   }
 
   update(frameName: string, size: number, alpha: number, originX: number, originY: number, stageWidth: number): void {
+    this.stageWidth = stageWidth;
     const { game, textures } = this.scene;
     const frame = textures.getFrame('originalCrosshair', frameName);
     // Размер задаёт сцена. Плотность экрана влияет только на разрешение рисунка.
