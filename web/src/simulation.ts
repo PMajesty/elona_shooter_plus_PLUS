@@ -143,6 +143,7 @@ export class Simulation {
   events: SimulationEvent[] = [];
   private options: SimulationOptions;
   private pendingOpeningMission?: LowLevelMission;
+  private queuedReload?: { item: Item; untilTick: number };
 
   constructor(seed = Date.now(), options: SimulationOptions = {}) {
     this.options = options;
@@ -213,6 +214,7 @@ export class Simulation {
 
   toggleFireAtWill(): boolean {
     if (this.state.phase !== 'battle' || this.pendingOpeningMission) return false;
+    this.cancelQueuedReload();
     this.initializeHeroAI();
     this.state.heroAI!.enabled = !this.state.heroAI!.enabled;
     return true;
@@ -425,6 +427,7 @@ export class Simulation {
 
   useSlot(slot: number): boolean {
     if (this.state.phase !== 'battle' || this.pendingOpeningMission || !Number.isInteger(slot) || slot < 0 || slot >= 5) return false;
+    this.cancelQueuedReload();
     const item = this.state.inventory[slot];
     if (!isOccupiedItem(item)) { this.events.push({ type: 'beep' }); return false; }
     if (item.type === ITEM_TYPE.use) {
@@ -637,6 +640,7 @@ export class Simulation {
       if (finite(input.aimY)) this.state.aimY = input.aimY;
     }
     const firePressed = input.firePressed || (input.fireHeld && !this.state.fireHeld);
+    if (firePressed || input.slot !== undefined) this.cancelQueuedReload();
     const fireReleased = input.fireReleased ?? (this.state.fireHeld && !input.fireHeld);
     this.state.fireHeld = Boolean(input.fireHeld);
     const player = this.state.player;
@@ -682,6 +686,8 @@ export class Simulation {
       }
     }
     const protection = advanceProtection(this.state.protection.counter, this.state.protection.blueMultiplierAdd);
+    // Буфер касания ждёт конца исходной задержки, но получает приоритет перед удерживаемым выстрелом.
+    if (!this.heroAutomatic && this.reloadQueued) this.requestReload();
     this.state.protection = { counter: protection.counter, blueMultiplierAdd: protection.blueMultiplierAdd };
     if (!this.heroAutomatic && player.rampageTicks > 0) player.rampageTicks--;
     this.state.itemCooldowns = this.state.itemCooldowns.map(time => Math.max(0, time - 1));
@@ -689,7 +695,10 @@ export class Simulation {
     if (!this.heroAutomatic && !this.state.pendingShot && weapon?.id === 16 && this.heroChainState) idleChainGun(this.heroChainState, true);
     this.state.partyAI.sharedWeaponRange = weapon?.range ?? null;
     const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
-    if (this.heroAutomatic) stepPartyAIFrame(this.heroAIActor(), partyContext, partyCallbacks);
+    if (this.heroAutomatic) {
+      stepPartyAIFrame(this.heroAIActor(), partyContext, partyCallbacks);
+      if (this.reloadQueued) this.requestReload();
+    }
     for (const slot of this.state.party.slots.slice(0, 4)) stepPartyAIFrame(slot, partyContext, partyCallbacks);
     const beforeMove = this.state.projectiles.some(p => p.previousArrowPoint)
       ? new Map(this.state.enemies.map(e => [e.uid, { x: e.x, y: e.y + (e.dropY ?? 0) }])) : undefined;
@@ -734,6 +743,7 @@ export class Simulation {
     const position = partyActorPosition(actorSlot);
     const weaponSlot = actorSlot === 0 ? this.state.player.selectedSlot : 0;
     if (player.shootTimer > 0) return false;
+    if (actorSlot === 0 && this.reloadQueued && this.requestReload()) return false;
     const item = this.actorWeapon(actorSlot);
     if (!item) {
       if (manual) this.state.pendingShot = false;
@@ -923,10 +933,32 @@ export class Simulation {
   }
 
   canReload(manual = true): boolean {
+    return this.reloadReadyWithin(manual, 0);
+  }
+
+  private reloadReadyWithin(manual: boolean, frames: number): boolean {
     const item = this.weapon;
-    return this.state.phase === 'battle' && !!item && this.state.player.shootTimer <= 0
+    return this.state.phase === 'battle' && !!item && this.state.player.shootTimer <= item.shootRate * frames
       && item.reloadTime === 0 && item.ammo < item.ammoMax && !(manual && item.autoReload > 0);
   }
+
+  canQueueReload(): boolean { return this.reloadReadyWithin(true, 6); }
+
+  get reloadQueued(): boolean {
+    return !!this.queuedReload && this.queuedReload.item === this.weapon
+      && this.state.tick <= this.queuedReload.untilTick && this.canQueueReload();
+  }
+
+  queueReload(): boolean {
+    // Повторные нажатия не отменяют и не продлевают уже принятый запрос.
+    if (this.reloadQueued) return true;
+    if (!this.canQueueReload()) return false;
+    // Шесть кадров = 200 мс. Это краткий ввод, не часть сохранённого приключения.
+    this.queuedReload = { item: this.weapon!, untilTick: this.state.tick + 6 };
+    return true;
+  }
+
+  cancelQueuedReload(): void { this.queuedReload = undefined; }
 
   requestReload(manual = true): boolean {
     return this.canReload(manual) && this.requestActorReload(0);
@@ -935,6 +967,7 @@ export class Simulation {
   private requestActorReload(actorSlot: number): boolean {
     const actor = this.actor(actorSlot), item = this.actorWeapon(actorSlot);
     if (this.state.phase !== 'battle' || !actor || !item || item.reloadTime > 0) return false;
+    if (actorSlot === 0) this.cancelQueuedReload();
     item.reloadTime = reloadTimer(item, actor.traits);
     if (actorSlot === 0 && this.heroClassState) this.heroClassState.burst = 0;
     this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'reload', weaponId: item.id, automaticReload: item.autoReload > 0 });

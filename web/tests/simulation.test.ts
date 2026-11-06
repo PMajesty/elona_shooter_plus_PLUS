@@ -130,6 +130,99 @@ test('a Space reload accepted after cooldown protects an already queued held sho
   assert.ok(simulation.state.player.shootTimer > 0);
 });
 
+test('touch reload buffers only the last six cooldown frames and repeated taps keep it queued', () => {
+  const simulation = new Simulation(7);
+  simulation.fireAt(450, 230);
+  advance(simulation, 18, { fireHeld: true });
+  assert.equal(simulation.canQueueReload(), false);
+  assert.equal(simulation.queueReload(), false);
+  simulation.tick({ fireHeld: true });
+  assert.equal(simulation.canReload(), false);
+  assert.equal(simulation.queueReload(), true);
+  for (let frame = 0; frame < 5; frame++) {
+    assert.equal(simulation.queueReload(), true);
+    simulation.tick({ fireHeld: true });
+    assert.equal(simulation.reloadQueued, true);
+    assert.equal(simulation.weapon!.reloadTime, 0);
+  }
+  simulation.tick({ fireHeld: true });
+  assert.equal(simulation.reloadQueued, false);
+  assert.equal(simulation.weapon!.ammo, 4);
+  assert.ok(simulation.weapon!.reloadTime > 0);
+  assert.equal(simulation.events.filter(event => event.type === 'reload').length, 1);
+  assert.equal(simulation.events.some(event => event.type === 'shot'), false);
+  const reloadTime = simulation.weapon!.reloadTime;
+  for (let tap = 0; tap < 10; tap++) assert.equal(simulation.queueReload(), false);
+  assert.equal(simulation.weapon!.reloadTime, reloadTime);
+  advance(simulation, 12, { fireHeld: true });
+  assert.equal(simulation.weapon!.reloadTime, 0);
+  assert.equal(simulation.weapon!.ammo, 4);
+  assert.ok(simulation.state.player.shootTimer > 0);
+});
+
+test('touch reload is cancelled by a new firing gesture, a slot action, Fire at will or gesture cancellation', () => {
+  for (const action of [
+    (sim: Simulation) => sim.tick({ firePressed: true }),
+    (sim: Simulation) => sim.useSlot(1),
+    (sim: Simulation) => sim.tick({ slot: 0 }),
+    (sim: Simulation) => sim.toggleFireAtWill(),
+    (sim: Simulation) => sim.cancelQueuedReload(),
+  ]) {
+    const simulation = new Simulation(7);
+    simulation.fireAt(450, 230);
+    advance(simulation, 19);
+    assert.equal(simulation.queueReload(), true);
+    action(simulation);
+    assert.equal(simulation.reloadQueued, false);
+    advance(simulation, 6);
+    assert.equal(simulation.weapon!.reloadTime, 0);
+  }
+});
+
+test('touch reload retains full magazine and automatic reload restrictions', () => {
+  const simulation = new Simulation(7);
+  assert.equal(simulation.queueReload(), false);
+  simulation.weapon!.ammo--;
+  simulation.weapon!.autoReload = 1;
+  assert.equal(simulation.queueReload(), false);
+  simulation.weapon!.autoReload = 0;
+  assert.equal(simulation.queueReload(), true);
+  simulation.tick();
+  assert.ok(simulation.weapon!.reloadTime > 0);
+  assert.equal(simulation.queueReload(), false);
+});
+
+test('touch reload survives existing Fire at will aiming but takes priority when its cooldown ends', () => {
+  const simulation = new Simulation(7);
+  simulation.toggleFireAtWill();
+  simulation.weapon!.ammo--;
+  simulation.state.player.shootTimer = simulation.weapon!.shootRate;
+  simulation.state.heroAI!.state.shooting = true;
+  assert.equal(simulation.queueReload(), true);
+  simulation.tick();
+  assert.ok(simulation.weapon!.reloadTime > 0);
+  assert.equal(simulation.weapon!.ammo, 4);
+  assert.equal(simulation.events.some(event => event.type === 'shot' && !event.actorSlot), false);
+});
+
+test('touch reload is transient input and repeated taps do not change a deterministic save replay', () => {
+  const simulation = new Simulation(7);
+  simulation.fireAt(450, 230);
+  advance(simulation, 19);
+  const saved = simulation.toSave();
+  assert.equal(simulation.queueReload(), true);
+  assert.deepEqual(simulation.toSave(), saved);
+  const restored = Simulation.fromSave(JSON.parse(JSON.stringify(simulation.toSave())));
+  assert.equal(restored.reloadQueued, false);
+  assert.equal(restored.queueReload(), true);
+  for (let frame = 0; frame < 45; frame++) {
+    simulation.queueReload();
+    simulation.tick();
+    restored.tick();
+  }
+  assert.deepEqual(simulation.toSave(), restored.toSave());
+});
+
 test('grenade count, cooldown and vertical trajectory stay finite', () => {
   const simulation = new Simulation(9);
   assert.equal(simulation.throwGrenade(510, 200), true);

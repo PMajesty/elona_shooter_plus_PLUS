@@ -11,6 +11,18 @@ checks verified the matching bundle, new controls, results/town, exact Continue
 and assisted touch firing. This deployment check used the workstation's HTTPS
 proxy with normal certificate validation; see [deployment](deployment.md).
 
+**Local preview, not deployed:** the touch strip has smaller option buttons,
+Fire at will above a larger round, translucent Reload button, and distinct queued
+and reloading feedback. Reload accepts the last 200 ms of the original firing
+cooldown. Repeated taps neither cancel nor restart it. New firing gestures,
+slot actions, Fire at will changes and pause/gesture cancellation clear pending
+input. No save-format or desktop Space timing change. Build and 19 focused
+reload/save/localization checks pass. Muted Chromium verified real repeated
+touch taps through reload completion, shot/pause cancellation, New Game/combat,
+exact save/Continue and unclipped EN/RU controls at 844×390, 390×844 and 640×320.
+Screenshots and evidence are in `.build/mobile-reload-*`; physical-phone feel
+remains unverified. Android's fullscreen exit notice belongs to the browser.
+
 **Aim Assist.** A new opt-in Game MOD under Controls,
 available at creation in either edition, with EN/RU labels and saved selection.
 Manual touch and mouse aim receive at most four logical pixels of correction

@@ -17,7 +17,7 @@ Published with the developer's permission. The [source is on GitHub](https://git
 Choose **New Game**, pick a class and appearance, then press **Proceed**. Open **Help** from the title or pause screen for the original instructions.
 
 - **Desktop:** aim and shoot with the mouse. Hold and release for bows. Space reloads, 1–5 select weapons or use items, F toggles automatic fire, and Esc pauses.
-- **Touch:** tap to shoot, or hold and drag to aim an automatic weapon. A second finger can tap Reload. Landscape gives the battlefield more room; portrait menus have an Enlarge control.
+- **Touch:** tap to shoot, or hold and drag to aim an automatic weapon. A second finger can tap the round Reload button, including just before the weapon is ready. Repeated taps keep the reload queued. Landscape gives the battlefield more room; portrait menus have an Enlarge control.
 
 For a little help with touch aiming, enable **Aim Assist** in **Game MODs** during character creation. It gently nudges near misses toward enemies or Sisters. It is off by default and available in both editions.
 

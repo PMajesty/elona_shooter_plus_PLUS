@@ -64,16 +64,32 @@ html[lang="ru"] #audio-settings strong { font-family: ElonaRussianMenu, serif; f
 @media (any-pointer: coarse) {
   #game, #game:fullscreen {
     --usable-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    --touch-option-size: clamp(32px, 10dvh, 40px);
+    --touch-reload-size: clamp(60px, 22dvh, 88px);
+    --touch-control-gap: clamp(3px, 1dvh, 5px);
     width: 100%; height: 100dvh; aspect-ratio: auto;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     display: flex; align-items: center; justify-content: center; gap: 4px;
   }
-  #stage-viewport { position: relative; inset: auto; flex: none; width: min(calc(100% - 56px), calc(var(--usable-height) * 31 / 19)); }
+  #stage-viewport { position: relative; inset: auto; flex: none; width: min(calc(100% - var(--touch-reload-size) - 8px), calc(var(--usable-height) * 31 / 19)); }
   #playfield { position: relative; inset: auto; width: 100%; aspect-ratio: 31 / 19; }
   #playfield > canvas { touch-action: none; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
-  #game-controls { position: static; width: 52px; flex: none; align-items: center; justify-content: center; gap: 4px; }
-  #game-controls button { width: 48px; height: 44px; padding: 3px; line-height: 1.05; touch-action: manipulation; }
-  #game-controls svg { width: 22px; height: 22px; margin: auto; }
+  #game-controls { position: static; width: var(--touch-reload-size); flex: none; align-items: center; justify-content: center; gap: var(--touch-control-gap); }
+  #game-controls button { width: var(--touch-option-size); height: var(--touch-option-size); flex: none; padding: 3px; line-height: 1.05; touch-action: manipulation; border-radius: 6px; background: #28251c66; border-color: #baa77c66; color: #dfd1b1; }
+  #game-controls button:hover { background: #48402e88; }
+  #game-controls button:active { background: #645235aa; }
+  #game-controls svg { width: 20px; height: 20px; margin: auto; }
+  #game-controls :is(#touch-fire-at-will, #touch-guide, #touch-enlarge) { width: 56px; font: 11px/1.05 ElonaMenu, serif; }
+  html[lang="ru"] #game-controls :is(#touch-fire-at-will, #touch-guide, #touch-enlarge) { font-family: ElonaRussianMenu, serif; }
+  #game-controls #touch-reload { width: var(--touch-reload-size); height: var(--touch-reload-size); border-radius: 50%; border: 1px solid #d0bd8c88; background: radial-gradient(circle at 35% 25%, #73634c66, #211e1659 72%); box-shadow: inset 0 0 0 3px #100e0926, 0 2px 4px #0003; font: 14px/1.1 ElonaMenu, serif; }
+  html[lang="ru"] #game-controls #touch-reload { font: 12px/1.1 ElonaRussianMenu, serif; }
+  #game-controls #touch-reload svg { width: 30px; height: 30px; margin: 0 auto 3px; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  #game-controls #touch-reload:active { background: #73604499; }
+  #game-controls #touch-reload[data-reload-state="queued"] { border-color: #ebcd83; background: radial-gradient(circle at 35% 25%, #b28d3e77, #4e3a2066 72%); box-shadow: inset 0 0 0 3px #e8c87a22, 0 2px 4px #0003; }
+  #game-controls #touch-reload[data-reload-state="reloading"] { opacity: 0.9; color: #f3e3bb; border-color: #d7c69c; }
+  #game-controls #touch-reload[data-reload-state="reloading"] svg { animation: reload-turn 1.2s linear infinite; }
+  #touch-reload :is(.reload-queued-label, .reload-active-label), #touch-reload:is([data-reload-state="queued"], [data-reload-state="reloading"]) .reload-label { display: none; }
+  #touch-reload[data-reload-state="queued"] .reload-queued-label, #touch-reload[data-reload-state="reloading"] .reload-active-label { display: inline; }
   #game-controls #fullscreen:disabled { display: none; }
   #game[data-screen="battle"][data-paused="false"] :is(#touch-reload, #touch-fire-at-will),
   #game:is([data-screen="battle"], [data-screen="town"], [data-screen="result"]):not([data-help-page]) #touch-pause,
@@ -81,10 +97,14 @@ html[lang="ru"] #audio-settings strong { font-family: ElonaRussianMenu, serif; f
   #game[data-paused="true"] .pause-label, #game:not([data-paused="true"]) .resume-label { display: none; }
   #touch-fire-at-will[aria-pressed="true"] { background: #6c552e; border-color: #f6dc9a; }
 }
+@keyframes reload-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  #game-controls #touch-reload[data-reload-state="reloading"] svg { animation: none; }
+}
 @media (any-pointer: coarse) and (orientation: portrait) {
-  #game, #game:fullscreen { flex-direction: column; }
-  #stage-viewport { width: min(100%, calc((var(--usable-height) - 52px) * 31 / 19)); }
-  #game-controls { order: -2; width: 100%; height: 48px; flex-direction: row; }
+  #game, #game:fullscreen { flex-direction: column; --touch-option-size: clamp(32px, 9vw, 40px); --touch-reload-size: clamp(68px, 22vw, 84px); }
+  #stage-viewport { width: min(100%, calc((var(--usable-height) - var(--touch-reload-size) - 4px) * 31 / 19)); }
+  #game-controls { order: -2; width: 100%; min-height: var(--touch-option-size); flex-direction: row; }
 }
 
 @media (any-pointer: coarse) and (orientation: portrait) and (max-width: 600px) {

@@ -373,7 +373,7 @@ class ElonaScene extends Phaser.Scene {
     const recentTouchControls = new WeakMap<HTMLButtonElement, number>();
     const activateControl = (button: HTMLButtonElement) => {
       if (button.disabled || this.screen !== 'battle' || this.paused || this.helpLayer || this.pauseDialog || this.graphicsLost) return;
-      if (button.id === 'touch-reload') this.reloadRequested = true;
+      if (button.id === 'touch-reload') this.sim?.queueReload();
       else this.toggleBattleFireAtWill();
       this.syncTouchBattleControls();
     };
@@ -501,6 +501,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private cancelBattleGesture(): void {
+    this.sim?.cancelQueuedReload();
     // Незавершённое касание HTML-кнопки тоже не переживает паузу или смену экрана.
     this.touchControlEpoch++;
     // Локальные флаги сбрасываются всегда; симуляция — только у незавершённого touch-жеста.
@@ -540,16 +541,24 @@ class ElonaScene extends Phaser.Scene {
   private syncTouchBattleControls(): void {
     const active = this.screen === 'battle' && !this.paused && !this.helpLayer && !this.pauseDialog && !this.graphicsLost && this.sim?.state.phase === 'battle';
     const pressed = Boolean(this.sim?.fireAtWill);
-    const readyToReload = active && this.sim!.canReload();
-    const state = `${Boolean(active)}/${pressed}/${Boolean(readyToReload)}`;
+    const readyToReload = active && this.sim!.canQueueReload();
+    const queued = Boolean(active && this.sim!.reloadQueued);
+    const reloading = Boolean(active && this.sim!.weapon?.reloadTime);
+    const state = `${Boolean(active)}/${pressed}/${Boolean(readyToReload)}/${queued}/${reloading}/${getLanguage()}`;
     // Проверка состояния дешева; поиск DOM и запись атрибутов нужны лишь при изменении.
     if (this.touchControlsState === state) return;
     this.touchControlsState = state;
     const reload = document.querySelector<HTMLButtonElement>('#touch-reload');
     const fire = document.querySelector<HTMLButtonElement>('#touch-fire-at-will');
-    if (reload) reload.disabled = !readyToReload;
+    if (reload) {
+      reload.disabled = !readyToReload;
+      reload.dataset.reloadState = reloading ? 'reloading' : queued ? 'queued' : 'ready';
+      reload.setAttribute('aria-busy', String(queued || reloading));
+      reload.setAttribute('aria-label', t(reloading ? 'Reloading' : queued ? 'Reload queued' : 'Reload'));
+    }
     if (fire) {
       fire.disabled = !active;
+      fire.setAttribute('aria-label', t('Fire at will'));
       fire.setAttribute('aria-pressed', String(pressed));
     }
   }
