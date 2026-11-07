@@ -1,6 +1,6 @@
 # VPS deployment
 
-Updated 2026-11-06. Domain:
+Updated 2026-11-07. Domain:
 [Elona Shooter Plus+](https://pastalapizza.site/elona/).
 The root URL redirects to /elona/; www redirects to the apex domain.
 The [HTTP IP address](http://151.241.155.138/elona/) remains available.
@@ -10,8 +10,8 @@ normal certificate verification and no host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- Browser Release 1.3.1 is `/srv/elona/releases/review-B1M5Tdet/elona/`
-  (save v46). The preceding release is `releases/review-B23sQsym`.
+- Browser Release 1.3.2 is `/srv/elona/releases/review-C0IZhngI/elona/`
+  (save v46). The preceding release is `releases/review-B1M5Tdet`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
 - Both domain certificates were issued successfully by Let's Encrypt. Caddy's
@@ -23,13 +23,14 @@ normal certificate verification and no host mappings or TLS bypass.
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
 
-Release 1.3.1 adds the revised mobile controls and a 200 ms reload input buffer.
-The build and 19 focused reload/save/localization checks pass. Public HTTPS
-serves JavaScript SHA-256 `a6d910f0192e3d83eac78b862ad7d649c8048155a939fdf3ce46f0306425abfc`;
-both JavaScript and CSS match the local build. Muted Chromium verified New Game,
-touch reload input, the clear margin beside the battlefield, English/Russian
-portrait and landscape layouts, and exact save/Continue. No script errors
-occurred. Evidence: `.build/deployment/1.3.1-mobile-reload.json`.
+Release 1.3.2 fixes neighboring-frame texture bleeding on tanks and applies
+transparent gutters to every enemy family. The build and three extractor
+checks pass; all 4,224 enemy frames retain their original pixels and registration.
+Public HTTPS serves JavaScript SHA-256 `6dcf4c45c23d75903b0eb2e0d5cd66a39140823a7895765ae4053d7a5d79906e`.
+The JavaScript and all 36 enemy atlas PNG/JSON files match the local build.
+Muted Chromium verified New Game, normal/enlarged and Cripple Shot-slowed tanks,
+seven other later enemy types and exact save/Continue. No script errors occurred.
+Evidence: `.build/deployment/1.3.2-enemy-sprites.json`.
 These public checks use the workstation's HTTPS proxy with normal certificate
 validation. Earlier direct-route evidence below is historical.
 

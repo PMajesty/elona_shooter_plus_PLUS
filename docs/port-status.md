@@ -2,17 +2,17 @@
 
 Updated 2026-11-07. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-Browser Release 1.3.1 uses `index-B1M5Tdet.js`. The documented
+Browser Release 1.3.2 uses `index-C0IZhngI.js`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
-Release 1.3.1 is deployed. The build and 19 focused reload/save/localization
-checks pass. Muted public-HTTPS checks verified matching JavaScript and CSS,
-New Game, the mobile reload controls, EN/RU layouts and exact Continue.
+Release 1.3.2 is deployed. The build and three extractor checks pass. Muted
+public-HTTPS checks verified matching JavaScript and all 36 enemy atlas files,
+New Game, late-game enemy fixtures and exact Continue.
 This deployment check used the workstation's HTTPS
 proxy with normal certificate validation; see [deployment](deployment.md).
 
-**Local fix awaiting release:** enemy atlas gutters now cover every enemy family.
+**Enemy sprite edges:** enemy atlas gutters now cover every enemy family.
 The tank's right-edge line reproduced without Cripple Shot; neighboring frame
 pixels were being sampled during rendering. Birds and knights also had exposed
 neighboring pixels, along with several earlier enemies. Fifteen atlases were
@@ -23,6 +23,7 @@ Cripple Shot, seven other later enemy types and exact save/Continue. Cripple Sho
 changes speed, not the displayed frame. Evidence: `.build/tank-sprites-*-*` and
 `.build/enemy-gutter-preservation.json`. These are controlled fixtures, not a
 full campaign playthrough.
+Public-release evidence: `.build/deployment/1.3.2-enemy-sprites.json`.
 
 **Mobile controls:** the touch strip has equal-sized option buttons,
 with Fire at will labeled Auto / Авто above a larger translucent Reload button.
