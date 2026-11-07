@@ -99,6 +99,8 @@ function updateMuteControl(muted: boolean): void {
   muteButton.setAttribute('aria-label', t(muted ? 'Unmute' : 'Mute'));
 }
 const loadStatus = document.querySelector<HTMLDivElement>('#load-status')!;
+const optionsEntry = document.querySelector<HTMLButtonElement>('#browser-options-open')!;
+const optionsDialog = document.querySelector<HTMLDialogElement>('#browser-options')!;
 const statusElement = document.querySelector<HTMLParagraphElement>('#save-status')!;
 let statusSource: string | null = '';
 const status = {
@@ -163,7 +165,7 @@ class ElonaScene extends Phaser.Scene {
   muted = readMute();
   private audioMixer!: AudioMixer;
   private audioSettingsView?: ReturnType<typeof createAudioSettingsView>;
-  private titleAudioOpen = false;
+  private optionsAudioOpen = false;
   private options: GameOptions = { ...DEFAULT_GAME_OPTIONS };
   private accumulator = 0;
   private root!: Phaser.GameObjects.Container;
@@ -276,6 +278,13 @@ class ElonaScene extends Phaser.Scene {
     // Сохраняем дробные исходные координаты, но исключаем размытие соседних пикселей тела.
     this.textures.get('charaPic').setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.textures.get('itemPicture').setFilter(Phaser.Textures.FilterMode.NEAREST);
+    const paper = this.textures.get('medalHint');
+    if (!paper.has('browser-options-paper')) paper.add('browser-options-paper', 0, 8, 0, 300, 109);
+    for (const [property, key, frame] of [['--options-paper', 'medalHint', 'browser-options-paper'],
+      ['--options-pin', 'townActionPin', '1'], ['--options-check-off', 'partyCheckOff', '1'],
+      ['--options-check-on', 'partyCheckOn', '1']] as const) {
+      container.style.setProperty(property, `url("${this.textures.getBase64(key, frame)}")`);
+    }
     this.game.canvas.tabIndex = 0;
     this.game.canvas.setAttribute('aria-label', t('Elona Shooter battlefield'));
     loadStatus.hidden = true;
@@ -450,8 +459,9 @@ class ElonaScene extends Phaser.Scene {
     // Прямое событие DOM выполняет переключение один раз и не зависит от частоты рендеринга.
     const combatKey = (event: KeyboardEvent) => {
       if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
-      if (this.titleAudioOpen) {
-        if (event.code === 'Escape') { event.preventDefault(); this.closeTitleAudio(); }
+      if (optionsDialog.open) return;
+      if (this.optionsAudioOpen) {
+        if (event.code === 'Escape') { event.preventDefault(); this.closeOptionsAudio(); }
         return;
       }
       if (event.code !== 'Escape' && event.target instanceof Element && event.target.closest('#audio-settings')) return;
@@ -569,7 +579,9 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private reset(screen: Screen): void {
-    this.titleAudioOpen = false;
+    optionsDialog.close();
+    this.optionsAudioOpen = false;
+    delete container.dataset.optionsAudio;
     this.audioSettingsView = undefined;
     this.cancelBattleGesture();
     this.touchAimSprite = undefined;
@@ -744,7 +756,7 @@ class ElonaScene extends Phaser.Scene {
     const art = this.add.container(0, 0); this.root.add(art);
     this.titleSequence = createTitleSequence((key, frame, x, y) => {
       const image = this.clip(key, frame, x, y)!; art.add(image); return image;
-    }, actors, cloud, buttons, frame, (x, y) => this.cameras.main.setScroll(this.titleAudioOpen ? 0 : -x, this.titleAudioOpen ? 0 : -y), key => {
+    }, actors, cloud, buttons, frame, (x, y) => this.cameras.main.setScroll(this.optionsAudioOpen ? 0 : -x, this.optionsAudioOpen ? 0 : -y), key => {
       if (key === 'soundImpact1') this.playSound(key);
       else if (!this.sound.locked && this.cache.audio.exists(key)) {
         if (key === 'soundReloaded1') this.playSound(key, 1, 0.42);
@@ -770,24 +782,33 @@ class ElonaScene extends Phaser.Scene {
     }, () => this.confirmDeleteSave()));
     this.text(119, 21, 'Unofficial browser port', 12, '#ffffff').setShadow(1, 1, '#000000', 2);
     this.text(334, 11, `Most Days Survived: ${this.profile.bestDay} / ${this.profile.bestHardcoreDay ?? 0} (HC) / ${this.profile.bestCasualDay ?? 0} (Casual)`, 12, '#ffffff').setShadow(1, 1, '#000000', 2);
-    const soundLabel = this.text(285, 337, 'Sound', 16, '#eee0b5', 'ElonaMenuBold')
-      .setOrigin(0.5, 0).setShadow(1, 1, '#000000', 2).setName('title-sound-label');
-    const soundButton = this.zone(235, 334, 100, 25, () => this.showTitleAudio()).setName('title-sound');
-    soundButton.on('pointerover', () => soundLabel.setColor('#ffffff'));
-    soundButton.on('pointerout', () => soundLabel.setColor('#eee0b5'));
     if (saved.kind === 'error') status.textContent = saved.message;
     else if (this.profileRead.warning) status.textContent = this.profileRead.warning;
   }
 
-  private showTitleAudio(): void {
-    if (this.screen !== 'title' || this.titleAudioOpen || this.helpLayer || this.collectionDialog) return;
-    this.titleAudioOpen = true; this.cameras.main.setScroll(0, 0);
-    this.audioSettingsView = this.createAudioControls(() => this.closeTitleAudio());
+  canOpenBrowserOptions(): boolean {
+    return (this.screen === 'title' || this.paused && ['battle', 'town', 'result'].includes(this.screen))
+      && !this.optionsAudioOpen && !this.helpLayer && !this.collectionDialog && !this.pauseDialog;
+  }
+
+  showOptionsAudio(): void {
+    if (!this.canOpenBrowserOptions()) return;
+    optionsDialog.close();
+    this.optionsAudioOpen = true; container.dataset.optionsAudio = 'true'; this.cameras.main.setScroll(0, 0);
+    // Единственный звуковой интерфейс временно переносится из паузы в центральное окно.
+    this.audioSettingsView?.root.destroy(true);
+    this.audioSettingsView = this.createAudioControls(() => this.closeOptionsAudio());
     this.root.add(this.audioSettingsView.root);
   }
 
-  private closeTitleAudio(): void {
-    this.titleAudioOpen = false; this.audioSettingsView?.root.destroy(true); this.audioSettingsView = undefined;
+  private closeOptionsAudio(): void {
+    this.optionsAudioOpen = false; delete container.dataset.optionsAudio;
+    this.audioSettingsView?.root.destroy(true); this.audioSettingsView = undefined;
+    if (this.paused && this.pauseLayer) {
+      this.audioSettingsView = this.createAudioControls();
+      this.pauseLayer.add(this.audioSettingsView.root);
+    }
+    showBrowserOptions();
   }
 
   private createAudioControls(close?: () => void): ReturnType<typeof createAudioSettingsView> {
@@ -1185,7 +1206,8 @@ class ElonaScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
-    this.audioSettingsView?.sync((this.paused || this.titleAudioOpen) && !this.helpLayer && !this.pauseDialog && !this.collectionDialog, this.muted);
+    this.audioSettingsView?.sync((this.paused || this.optionsAudioOpen) && !this.helpLayer && !this.pauseDialog && !this.collectionDialog, this.muted);
+    optionsEntry.hidden = !this.canOpenBrowserOptions();
     this.syncTouchBattleControls();
     if (!this.ready || this.graphicsLost) return;
     this.updatePresentation(delta);
@@ -2219,7 +2241,7 @@ class ElonaScene extends Phaser.Scene {
   }
 
   toggleTouchPause(): void {
-    if (!this.pauseDialog && !this.helpLayer && !this.collectionDialog && !this.closeTownEvent) this.togglePause();
+    if (!this.optionsAudioOpen && !this.pauseDialog && !this.helpLayer && !this.collectionDialog && !this.closeTownEvent) this.togglePause();
   }
 
   togglePause(): void {
@@ -2470,7 +2492,7 @@ async function boot(): Promise<void> {
 const fullscreenButton = document.querySelector<HTMLButtonElement>('#fullscreen')!;
 const languageButton = document.querySelector<HTMLButtonElement>('#language')!;
 const staticText = new Map<Text, string>();
-for (const selector of ['#touch-guide-dialog', '#touch-pause', '#touch-reload', '#touch-fire-at-will', '#touch-guide', '#touch-enlarge', '#touch-pan']) {
+for (const selector of ['#browser-options', '#browser-options-open', '#touch-pause', '#touch-reload', '#touch-fire-at-will', '#touch-enlarge', '#touch-pan']) {
   const walker = document.createTreeWalker(document.querySelector(selector)!, NodeFilter.SHOW_TEXT);
   for (let node = walker.nextNode(); node; node = walker.nextNode()) if (node.textContent?.trim()) staticText.set(node as Text, node.textContent);
 }
@@ -2511,7 +2533,6 @@ function exportAdventure(): void {
   if (data) { exportSave(data); status.textContent = 'Save exported.'; } else status.textContent = 'Start a game before exporting a save.';
 }
 const fileInput = document.querySelector<HTMLInputElement>('#save-file')!;
-const touchGuide = document.querySelector<HTMLDialogElement>('#touch-guide-dialog')!;
 const largeReload = document.querySelector<HTMLInputElement>('#touch-large-reload')!;
 const LARGE_RELOAD_KEY = 'elona-shooter-plus-plus.port.large-reload.v1';
 try { largeReload.checked = localStorage.getItem(LARGE_RELOAD_KEY) === 'true'; }
@@ -2523,29 +2544,38 @@ largeReload.addEventListener('change', () => {
   try { localStorage.setItem(LARGE_RELOAD_KEY, String(largeReload.checked)); }
   catch (error) { console.warn('Reload button preference could not be saved; this session keeps the selected layout.', error); }
 });
-touchGuide.addEventListener('keydown', event => event.stopPropagation());
+optionsDialog.addEventListener('keydown', event => {
+  // Сочетания переноса сохранений остаются общими; обычные клавиши не доходят до игры.
+  if (!((event.ctrlKey || event.metaKey) && event.shiftKey && ['KeyO', 'KeyS', 'KeyM'].includes(event.code))) event.stopPropagation();
+});
+optionsDialog.addEventListener('close', () => {
+  if (gameScene?.canOpenBrowserOptions()) optionsEntry.focus({ preventScroll: true });
+});
 document.querySelector('#touch-pause')!.addEventListener('click', () => {
   gameScene?.toggleTouchPause();
 });
-document.querySelector('#touch-guide')!.addEventListener('click', () => {
-  if (!gameScene || !['title', 'battle', 'town', 'result'].includes(gameScene.screen)) return;
+function showBrowserOptions(): void {
+  if (!gameScene?.canOpenBrowserOptions()) return;
   const canExport = gameScene.screen === 'title' ? readSave(gameScene.saveSlot).kind === 'saved'
     : !!gameScene.sim && canSaveAdventure(gameScene.sim.state);
-  document.querySelector<HTMLButtonElement>('#touch-export')!.disabled = !canExport;
-  touchGuide.showModal();
-});
-document.querySelector('#touch-import')!.addEventListener('click', () => {
+  document.querySelector<HTMLButtonElement>('#options-export')!.disabled = !canExport;
+  optionsDialog.showModal();
+  document.querySelector<HTMLElement>('#browser-options-heading')!.focus({ preventScroll: true });
+}
+optionsEntry.addEventListener('click', showBrowserOptions);
+document.querySelector('#options-sound')!.addEventListener('click', () => gameScene?.showOptionsAudio());
+document.querySelector('#options-import')!.addEventListener('click', () => {
   if (!gameScene?.prepareImport()) return;
-  touchGuide.close();
+  optionsDialog.close();
   fileInput.click();
 });
-document.querySelector('#touch-export')!.addEventListener('click', () => { touchGuide.close(); exportAdventure(); });
+document.querySelector('#options-export')!.addEventListener('click', exportAdventure);
 window.addEventListener('keydown', event => {
   if (!(event.ctrlKey || event.metaKey) || !gameScene || event.altKey) return;
   if (event.code === 'KeyS') {
     event.preventDefault();
     if (event.shiftKey) exportAdventure(); else gameScene.saveGame();
-  } else if (event.code === 'KeyO' && event.shiftKey) { event.preventDefault(); if (gameScene.prepareImport()) fileInput.click(); }
+  } else if (event.code === 'KeyO' && event.shiftKey) { event.preventDefault(); if (gameScene.prepareImport()) { optionsDialog.close(); fileInput.click(); } }
   else if (event.code === 'KeyM' && event.shiftKey) { event.preventDefault(); gameScene.toggleMute(); }
 });
 fileInput.addEventListener('change', async () => {

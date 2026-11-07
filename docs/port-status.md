@@ -6,7 +6,17 @@ Browser Release 1.3.3 uses `index-BWN_FVXb.js`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
-**Mobile UI in 1.3.3:** Guide now offers **Reload on battlefield**
+**Options menu, prepared for 1.3.4:** Opus designed the renamed entry and concise
+EN/RU copy. A parchment card inside the left of the title screen replaces the
+right-rail Guide, opposite the edition selector. Options separates Sound,
+Touch controls and Save transfer. Sound reuses the existing controls and returns
+to Options; original Help remains separate. Desktop and touch pause screens have
+an in-game Options button. The scrollable body keeps the heading and Back visible.
+The build, localization checks, focused muted desktop/touch menu checks and the
+existing Chromium mobile smoke pass, including exact export/import/Continue,
+portrait/short landscape, results and town. Evidence: `.build/mobile-options-evidence.json`.
+
+**Mobile reload layout:** Options offers **Move Reload onto the battlefield**
 (off by default, EN/RU, device preference separate from saves). Opus proposed
 the opt-in placement; the user refined it to a full circle inside the field,
 then reduced its radius by 33% while preserving its centre. The ordinary circle

@@ -19,13 +19,13 @@ Choose **New Game**, pick a class and appearance, then press **Proceed**. Open *
 - **Desktop:** aim and shoot with the mouse. Hold and release for bows. Space reloads, 1–5 select weapons or use items, F toggles automatic fire, and Esc pauses.
 - **Touch:** tap to shoot, or hold and drag to aim an automatic weapon. A second finger can tap the round Reload button, including just before the weapon is ready. Repeated taps keep the reload queued. Landscape gives the battlefield more room; portrait menus have an Enlarge control.
 
-For an easier thumb reach in landscape, open **Guide** and enable **Reload on battlefield**. This moves a small, translucent circular button onto the field. The compact side button remains the default, and your choice is remembered on this device.
+Open **Options** on the left of the title screen for sound, touch controls and save files. Options is also available while paused. For an easier thumb reach in landscape, enable **Move Reload onto the battlefield**. The compact side button remains the default, and your choice is remembered in this browser.
 
 For a little help with touch aiming, enable **Aim Assist** in **Game MODs** during character creation. It gently nudges near misses toward enemies or Sisters. It is off by default and available in both editions.
 
 Use **EN / RU** beside the mute and fullscreen buttons to switch languages at any time. The choice is remembered. Russian includes the lettering in the original menu artwork, and works with both editions and existing saves.
 
-Choose **Sound** on the title screen or open **Menu / Pause** during a game for separate Master, Effects and Ambience volume controls. Lower Ambience to quiet the forest and town backgrounds, including the tavern, without quieting weapons or enemies. The settings are remembered in this browser.
+Choose **Options → Adjust sound** or open **Menu / Pause** during a game for separate Master, Effects and Ambience volume controls. Lower Ambience to quiet the forest and town backgrounds, including the tavern, without quieting weapons or enemies. The settings are remembered in this browser.
 
 ## Classic or Expanded?
 
@@ -37,7 +37,7 @@ Expanded also shows smaller companion damage numbers. Pause has separate toggles
 
 Saves stay in your browser, not an account. Both editions use the same eight labeled slots, but have separate medal collections. Choose an empty slot to keep another adventure. Export a JSON backup before clearing browser data or moving to another browser or device.
 
-Use **Ctrl+Shift+S** to export and **Ctrl+Shift+O** to import. On touch screens, both actions are in **Guide**.
+Use **Options → Save transfer** to export or import a file. The keyboard shortcuts are **Ctrl+Shift+S** to export and **Ctrl+Shift+O** to import.
 
 ## Read more
 

@@ -10,7 +10,14 @@
     <main>
       <div id="game" aria-label="Elona Shooter game">
         <div id="stage-viewport">
-          <div id="playfield"><div id="load-status" role="status">Loading original game assets…</div></div>
+          <div id="playfield">
+            <div id="load-status" role="status">Loading original game assets…</div>
+            <button id="browser-options-open" aria-haspopup="dialog">
+              <span class="options-entry-title">Options</span>
+              <span class="options-entry-description">Controls and sound</span>
+              <span class="options-entry-description">Import / export saves</span>
+            </button>
+          </div>
         </div>
         <div id="game-controls" role="group" aria-label="Game controls">
           <button id="fullscreen" aria-label="Enter fullscreen" aria-pressed="false">
@@ -30,22 +37,38 @@
             <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M25 12a10 10 0 1 0 1 8M25 5v7h-7" /></svg>
             <span class="reload-label">Reload</span><span class="reload-queued-label">Queued</span><span class="reload-active-label">Reloading</span>
           </button>
-          <button class="touch-action" id="touch-guide">Guide</button>
           <button class="touch-action" id="touch-enlarge" aria-pressed="false">Enlarge</button>
         </div>
         <label id="touch-pan">View <input type="range" min="0" max="100" value="50" aria-label="Pan enlarged menu horizontally"></label>
-        <dialog id="touch-guide-dialog" aria-labelledby="touch-guide-heading">
-          <h2 id="touch-guide-heading">Touch controls</h2>
-          <div class="touch-setting">
-            <label><input id="touch-large-reload" type="checkbox" aria-describedby="touch-large-reload-help" /> <span>Reload on battlefield</span></label>
-            <p id="touch-large-reload-help">Landscape only. Moves the Reload button onto the battlefield, closer to your right thumb.</p>
+        <dialog id="browser-options" aria-labelledby="browser-options-heading">
+          <h2 id="browser-options-heading" tabindex="-1">Options</h2>
+          <div class="options-content">
+            <section>
+              <h3>Sound</h3>
+              <button id="options-sound">Adjust sound…</button>
+            </section>
+            <section>
+              <h3>Touch controls</h3>
+              <div class="touch-setting">
+                <label><input id="touch-large-reload" type="checkbox" aria-describedby="touch-large-reload-help" /> <span>Move Reload onto the battlefield</span></label>
+                <p id="touch-large-reload-help">Landscape only. Places a small, translucent Reload button closer to your thumb. Saved in this browser.</p>
+              </div>
+              <ul>
+                <li>Tap or drag on the battlefield to shoot. Release to fire a bow.</li>
+                <li>Tap an item to use it.</li>
+                <li>Tap Reload to refill your weapon. Auto toggles automatic aim and fire.</li>
+                <li>Rotate your device for more room. In portrait menus, use Enlarge and View.</li>
+                <li>Swipe to scroll reports.</li>
+              </ul>
+            </section>
+            <section>
+              <h3>Save transfer</h3>
+              <p>Export a save file to keep a backup or move it to another browser. Import a file to load a saved game.</p>
+              <div class="options-files"><button id="options-import">Import save…</button><button id="options-export">Export save</button></div>
+              <p class="options-shortcuts">Import: Ctrl+Shift+O · Export: Ctrl+Shift+S</p>
+            </section>
           </div>
-          <p>Tap a target to shoot. Hold and drag to aim an automatic weapon. With a bow, lift your finger to release the arrow.</p>
-          <p>Tap an item in the bottom row to use it. Tap Reload to refill your weapon or Fire at will to toggle automatic aim and fire.</p>
-          <p>Tap Reload just before your weapon is ready to queue it. Repeated taps keep it queued. A new shot, a weapon change or pausing clears the queue.</p>
-          <p>Turn your phone sideways for a larger playfield. In portrait, tap Enlarge in a menu and slide View to reach either side. Swipe the text in Help, Statistics and the day report to scroll.</p>
-          <div class="touch-files"><button id="touch-import">Import save</button><button id="touch-export">Export save</button></div>
-          <form method="dialog"><button autofocus>Back to game</button></form>
+          <form method="dialog"><button>Back</button></form>
         </dialog>
         <input id="save-file" type="file" accept=".json,.sol,application/json,application/octet-stream" hidden />
         <p id="save-status" class="screen-reader-only" role="status"></p>

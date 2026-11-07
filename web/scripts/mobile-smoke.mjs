@@ -41,10 +41,13 @@ try {
     await page.locator('#game[data-title-buttons-ready="true"]').waitFor();
   };
   const exportPaused = async () => {
-    await page.locator('#touch-guide').tap();
+    await page.locator('#browser-options-open').tap();
     const download = page.waitForEvent('download');
-    await page.locator('#touch-export').tap();
-    return JSON.parse(await readFile(await (await download).path(), 'utf8')).simulation;
+    await page.locator('#options-export').tap();
+    const saved = JSON.parse(await readFile(await (await download).path(), 'utf8')).simulation;
+    await page.locator('#browser-options form button').tap();
+    assert.equal(await data('paused'), 'true');
+    return saved;
   };
   await openTitle();
   if (process.env.QA_LANGUAGE === 'ru') {
@@ -105,9 +108,9 @@ try {
   // Короткий снимок перед последней волной проходит обычные экраны добычи, итогов и города.
   const end = new Simulation(42, { heroClass: 'rogue', ruleset: edition });
   end.state.waveIndex = 0; end.state.newWave = true;
-  await page.locator('#touch-guide').tap();
+  await page.locator('#browser-options-open').tap();
   const picker = page.waitForEvent('filechooser');
-  await page.locator('#touch-import').tap();
+  await page.locator('#options-import').tap();
   await (await picker).setFiles({ name: 'final-wave.json', mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify({ format: 'elona-shooter-browser', version: end.state.version, appearance: 0, simulation: end.toSave() })) });
   await page.locator('#game[data-replace-adventure="import"]').waitFor();

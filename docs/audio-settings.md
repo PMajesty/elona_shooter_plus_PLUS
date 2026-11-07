@@ -1,6 +1,6 @@
 # Sound settings
 
-Choose **Sound** below Help on the title screen, or open **Menu / Pause**
+Choose **Options → Adjust sound** on the title screen, or open **Menu / Pause**
 during a game, including the tavern. Both editions share three volume sliders:
 
 - **Master volume:** all sound.
@@ -16,8 +16,8 @@ the new volume without restarting.
 The tavern uses the town ambience loop. Title gunfire, reloads and impacts use
 Effects; there is no separate menu music track in the current playback paths.
 The controls use original parchment, checkbox and metal radio-button artwork
-with the game's menu fonts. The title dialog closes with its red cross, Escape
-or a tap outside it. The existing speaker buttons still toggle mute directly.
+with the game's menu fonts. The sound dialog closes with its red cross, Escape
+or a tap outside it, returning to Options. The existing speaker buttons still toggle mute directly.
 
 ## Classification audit
 

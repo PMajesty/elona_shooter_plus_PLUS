@@ -8,6 +8,7 @@ export function configureDisplaySizing(scene: Phaser.Scene, root: HTMLElement, p
     root.style.setProperty('--canvas-width', `${width}px`);
     root.style.setProperty('--canvas-height', `${height}px`);
     root.dataset.displayScale = String(width / 620);
+    root.style.setProperty('--display-scale', String(width / 620));
     // Крупная перезарядка занимает место в колонке, не задевая Auto и нижний пояс предметов.
     // Считаем место для полного боевого набора, даже если сейчас открыто меню.
     const controls = root.querySelector<HTMLElement>('#game-controls')!;
