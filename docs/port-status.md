@@ -2,11 +2,11 @@
 
 Updated 2026-11-07. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-Browser Release 1.3.3 uses `index-BWN_FVXb.js`. The documented
+Browser Release 1.3.4 uses `index-CGxFnhbq.js`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
-**Options menu, prepared for 1.3.4:** Opus designed the renamed entry and concise
+**Options menu in 1.3.4:** Opus designed the renamed entry and concise
 EN/RU copy. A parchment card inside the left of the title screen replaces the
 right-rail Guide, opposite the edition selector. Options separates Sound,
 Touch controls and Save transfer. Sound reuses the existing controls and returns
@@ -33,11 +33,11 @@ storage, exact save/Continue, and switching back to the default. No page errors.
 Evidence: `.build/mobile-thumb-evidence.json` and `.build/mobile-thumb-*.png`.
 Physical-phone comfort still needs user feedback; automation checks geometry and input.
 
-Release 1.3.3 is deployed. The build passes. Muted public-HTTPS checks verified
-matching JavaScript/CSS, loading controls, New Game, the opt-in circle, actual
-one- and two-finger reloads, EN/RU, preference persistence, exact save/Continue,
-and restoring the compact control. No page errors occurred.
-Public evidence: `.build/deployment/1.3.3-thumb-reload.json`.
+Release 1.3.4 is deployed. Muted public-HTTPS checks verified matching JavaScript/CSS,
+the left title entry, EN/RU layout, New Game, the Sound round trip, preserved pause
+state, preference persistence and exact save export/import/Continue. No page errors.
+Public evidence: `.build/deployment/1.3.4-options.json`.
+The preceding reload release's evidence is `.build/deployment/1.3.3-thumb-reload.json`.
 This deployment check used the workstation's HTTPS
 proxy with normal certificate validation; see [deployment](deployment.md).
 

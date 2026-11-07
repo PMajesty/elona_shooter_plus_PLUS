@@ -10,8 +10,8 @@ normal certificate verification and no host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- Browser Release 1.3.3 is `/srv/elona/releases/review-BWN_FVXb/elona/`
-  (save v46). The preceding release is `releases/review-C0IZhngI`.
+- Browser Release 1.3.4 is `/srv/elona/releases/review-CGxFnhbq/elona/`
+  (save v46). The preceding release is `releases/review-BWN_FVXb`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
 - Both domain certificates were issued successfully by Let's Encrypt. Caddy's
@@ -23,16 +23,20 @@ normal certificate verification and no host mappings or TLS bypass.
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
 
-Release 1.3.3 adds the optional inset circular Reload control and fixes controls
-overlapping the loading message. Guide touches no longer change the game options
-behind the dialog. The build and focused local checks pass.
-Public HTTPS serves JavaScript SHA-256 `47a893f8e2d0e4fff0cf5d5810dc13b176814d16e532bf7bb00ad11b047fae18`.
+Release 1.3.4 replaces Guide with an in-game Options entry, opposite the edition
+selector. Sound, touch controls and save transfer have separate concise sections.
+The build, localization checks, local desktop/touch checks and mobile smoke pass.
+Public HTTPS serves JavaScript SHA-256 `8e2806890de48816e2514c0faa4a4465512321c6b44ebc6b6be0a8e8b94a4f0b`.
 The JavaScript and CSS match the local build. Muted Chromium verified New Game,
-one- and two-finger reloads, EN/RU, preference persistence, exact save/Continue,
-and returning to the default compact control. No page errors occurred.
-Evidence: `.build/deployment/1.3.3-thumb-reload.json`.
+EN/RU menus, sound settings and return navigation, preserved pause state, preference
+persistence and exact save export/import/Continue. No page errors occurred.
+Evidence: `.build/deployment/1.3.4-options.json`.
 These public checks use the workstation's HTTPS proxy with normal certificate
 validation. Earlier direct-route evidence below is historical.
+
+Release 1.3.3 added the optional inset circular Reload control and fixed controls
+overlapping loading, HTML-dialog touch leakage and short-screen positioning.
+Evidence: `.build/deployment/1.3.3-thumb-reload.json`.
 
 Release 1.3.2 added transparent gutters to every enemy family. All 4,224 frames
 retained their pixels and registration; public checks matched all 36 enemy atlas
