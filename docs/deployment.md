@@ -10,8 +10,8 @@ normal certificate verification and no host mappings or TLS bypass.
 ## Current state
 
 - Ubuntu24.04, distribution Caddy2.6.2 package, enabled systemd service.
-- Browser Release 1.3.2 is `/srv/elona/releases/review-C0IZhngI/elona/`
-  (save v46). The preceding release is `releases/review-B1M5Tdet`.
+- Browser Release 1.3.3 is `/srv/elona/releases/review-BWN_FVXb/elona/`
+  (save v46). The preceding release is `releases/review-C0IZhngI`.
 - /srv/elona/current points to that release's parent directory.
 - Active config: /etc/caddy/Caddyfile, from deploy/Caddyfile.https.
 - Both domain certificates were issued successfully by Let's Encrypt. Caddy's
@@ -23,16 +23,20 @@ normal certificate verification and no host mappings or TLS bypass.
   symlink atomically. The public JavaScript SHA-256 matched the local bundle.
 - SSH credentials are not stored in this repository or deployment files.
 
-Release 1.3.2 fixes neighboring-frame texture bleeding on tanks and applies
-transparent gutters to every enemy family. The build and three extractor
-checks pass; all 4,224 enemy frames retain their original pixels and registration.
-Public HTTPS serves JavaScript SHA-256 `6dcf4c45c23d75903b0eb2e0d5cd66a39140823a7895765ae4053d7a5d79906e`.
-The JavaScript and all 36 enemy atlas PNG/JSON files match the local build.
-Muted Chromium verified New Game, normal/enlarged and Cripple Shot-slowed tanks,
-seven other later enemy types and exact save/Continue. No script errors occurred.
-Evidence: `.build/deployment/1.3.2-enemy-sprites.json`.
+Release 1.3.3 adds the optional inset circular Reload control and fixes controls
+overlapping the loading message. Guide touches no longer change the game options
+behind the dialog. The build and focused local checks pass.
+Public HTTPS serves JavaScript SHA-256 `47a893f8e2d0e4fff0cf5d5810dc13b176814d16e532bf7bb00ad11b047fae18`.
+The JavaScript and CSS match the local build. Muted Chromium verified New Game,
+one- and two-finger reloads, EN/RU, preference persistence, exact save/Continue,
+and returning to the default compact control. No page errors occurred.
+Evidence: `.build/deployment/1.3.3-thumb-reload.json`.
 These public checks use the workstation's HTTPS proxy with normal certificate
 validation. Earlier direct-route evidence below is historical.
+
+Release 1.3.2 added transparent gutters to every enemy family. All 4,224 frames
+retained their pixels and registration; public checks matched all 36 enemy atlas
+files and exercised late-game fixtures. Evidence: `.build/deployment/1.3.2-enemy-sprites.json`.
 
 V46 adds the optional Expanded edition and Careful Consideration. The first
 release passed 636 automated checks and muted touch flows in Chromium/Expanded

@@ -2,11 +2,11 @@
 
 Updated 2026-11-07. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
-Browser Release 1.3.2 uses `index-C0IZhngI.js`. The documented
+Browser Release 1.3.3 uses `index-BWN_FVXb.js`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
-**Local mobile UI update, not deployed:** Guide now offers **Reload on battlefield**
+**Mobile UI in 1.3.3:** Guide now offers **Reload on battlefield**
 (off by default, EN/RU, device preference separate from saves). Opus proposed
 the opt-in placement; the user refined it to a full circle inside the field,
 then reduced its radius by 33% while preserving its centre. The ordinary circle
@@ -23,9 +23,11 @@ storage, exact save/Continue, and switching back to the default. No page errors.
 Evidence: `.build/mobile-thumb-evidence.json` and `.build/mobile-thumb-*.png`.
 Physical-phone comfort still needs user feedback; automation checks geometry and input.
 
-Release 1.3.2 is deployed. The build and three extractor checks pass. Muted
-public-HTTPS checks verified matching JavaScript and all 36 enemy atlas files,
-New Game, late-game enemy fixtures and exact Continue.
+Release 1.3.3 is deployed. The build passes. Muted public-HTTPS checks verified
+matching JavaScript/CSS, loading controls, New Game, the opt-in circle, actual
+one- and two-finger reloads, EN/RU, preference persistence, exact save/Continue,
+and restoring the compact control. No page errors occurred.
+Public evidence: `.build/deployment/1.3.3-thumb-reload.json`.
 This deployment check used the workstation's HTTPS
 proxy with normal certificate validation; see [deployment](deployment.md).
 
