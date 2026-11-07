@@ -18,6 +18,8 @@ button { border: 1px solid #796a4f; border-radius: 2px; background: #302b20; col
 button:hover { background: #4c4230; }
 button:focus-visible { outline: 2px solid #e6d5a6; outline-offset: 1px; }
 #game-controls { position: absolute; z-index: 4; top: calc((100% - var(--canvas-height, 100%)) / 2 + 5px); right: calc((100% - var(--canvas-width, 100%)) / 2 + 5px); display: flex; flex-direction: column; gap: 4px; }
+/* До готовности сцены размеры canvas ещё неизвестны; кнопки не перекрывают загрузку или Retry. */
+#game:not([data-screen]) #game-controls, #game[data-startup-error] #game-controls { visibility: hidden; }
 #game-controls button { width: 25px; height: 25px; padding: 3px; background: #171711a6; border-color: #e6dac066; }
 #game-controls button:hover { background: #171711ed; }
 #game-controls button:disabled { opacity: 0.5; cursor: default; }
@@ -59,6 +61,10 @@ html[lang="ru"] #audio-settings strong { font-family: ElonaRussianMenu, serif; f
 #touch-guide-dialog h2 { margin: 0; font-size: 1.2rem; }
 #touch-guide-dialog p { margin: .7rem 0; }
 #touch-guide-dialog button { min-height: 44px; padding: 0 .9rem; }
+.touch-setting { margin: .7rem 0; padding: .5rem .7rem; border: 1px solid #947c5266; border-radius: 4px; background: #78613b22; }
+.touch-setting label { display: flex; align-items: center; gap: .65rem; min-height: 44px; cursor: pointer; }
+.touch-setting input { width: 20px; height: 20px; margin: 0; flex: none; accent-color: #c2a66f; }
+#touch-guide-dialog .touch-setting p { margin: 0 0 .25rem; color: #c9bda3; font-size: 13px; }
 .touch-files { display: flex; gap: 8px; margin: .8rem 0; }
 
 @media (any-pointer: coarse) {
@@ -116,6 +122,21 @@ html[lang="ru"] #audio-settings strong { font-family: ElonaRussianMenu, serif; f
   #game-controls #touch-reload svg { width: 26px; height: 26px; }
   /* Нижний пояс с предметами и кнопкой меню остаётся свободным. */
   #game[data-screen="battle"][data-paused="false"] #game-controls { top: auto; bottom: calc(50% + (env(safe-area-inset-bottom) - env(safe-area-inset-top)) / 2 - var(--canvas-height, 0px) * 0.38); transform: none; }
+  /* На очень низком экране компактная колонка использует всю высоту свободного поля сбоку. */
+  #game[data-screen="battle"][data-paused="false"][data-large-reload-size="0"] #game-controls { top: calc(50% + (env(safe-area-inset-top) - env(safe-area-inset-bottom)) / 2); bottom: auto; transform: translateY(-50%); }
+  #game[data-large-reload-size="88"] { --large-reload-size: 88px; }
+  #game[data-large-reload-size="64"] { --large-reload-size: 64px; }
+  #game[data-large-reload="true"]:is([data-large-reload-size="88"], [data-large-reload-size="64"]) #touch-reload {
+    width: var(--large-reload-size); height: var(--large-reload-size);
+    align-self: flex-end;
+    margin-right: calc(var(--touch-option-size) + 24px);
+    border-radius: 50%;
+    /* Центр остаётся под большим пальцем; и рисунок, и область касания уменьшаются на треть. */
+    transform: scale(0.67);
+    padding: 3px;
+    font-size: calc(var(--large-reload-size) * 0.16);
+  }
+  html[lang="ru"] #game[data-large-reload="true"]:is([data-large-reload-size="88"], [data-large-reload-size="64"]) #touch-reload { font-size: calc(var(--large-reload-size) * 0.13); }
 }
 @media (any-pointer: coarse) and (orientation: portrait) {
   #game, #game:fullscreen { flex-direction: column; --touch-option-size: clamp(32px, 9vw, 40px); --touch-reload-size: clamp(68px, 22vw, 84px); }

@@ -19,6 +19,8 @@ Choose **New Game**, pick a class and appearance, then press **Proceed**. Open *
 - **Desktop:** aim and shoot with the mouse. Hold and release for bows. Space reloads, 1–5 select weapons or use items, F toggles automatic fire, and Esc pauses.
 - **Touch:** tap to shoot, or hold and drag to aim an automatic weapon. A second finger can tap the round Reload button, including just before the weapon is ready. Repeated taps keep the reload queued. Landscape gives the battlefield more room; portrait menus have an Enlarge control.
 
+For an easier thumb reach in landscape, open **Guide** and enable **Reload on battlefield**. This moves a small, translucent circular button onto the field. The compact side button remains the default, and your choice is remembered on this device.
+
 For a little help with touch aiming, enable **Aim Assist** in **Game MODs** during character creation. It gently nudges near misses toward enemies or Sisters. It is off by default and available in both editions.
 
 Use **EN / RU** beside the mute and fullscreen buttons to switch languages at any time. The choice is remembered. Russian includes the lettering in the original menu artwork, and works with both editions and existing saves.

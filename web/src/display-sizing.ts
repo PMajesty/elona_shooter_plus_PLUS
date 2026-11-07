@@ -8,6 +8,14 @@ export function configureDisplaySizing(scene: Phaser.Scene, root: HTMLElement, p
     root.style.setProperty('--canvas-width', `${width}px`);
     root.style.setProperty('--canvas-height', `${height}px`);
     root.dataset.displayScale = String(width / 620);
+    // Крупная перезарядка занимает место в колонке, не задевая Auto и нижний пояс предметов.
+    // Считаем место для полного боевого набора, даже если сейчас открыто меню.
+    const controls = root.querySelector<HTMLElement>('#game-controls')!;
+    const optionHeight = root.querySelector<HTMLElement>('#mute')!.getBoundingClientRect().height;
+    const optionCount = root.querySelector<HTMLButtonElement>('#fullscreen')!.disabled ? 4 : 5;
+    const gap = parseFloat(getComputedStyle(controls).rowGap) || 0;
+    const available = height * 0.88 - 8 - optionCount * (optionHeight + gap);
+    root.dataset.largeReloadSize = String(available >= 88 ? 88 : available >= 64 ? 64 : 0);
   };
   const resize = () => {
     // Ширина монитора не уменьшается при Ctrl+. Окно и iframe всё равно ограничивают сцену.

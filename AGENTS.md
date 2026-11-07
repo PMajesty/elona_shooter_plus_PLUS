@@ -1,5 +1,10 @@
 # Project instructions
 
+User amendment on 2026-11-07: completed changes may be committed, pushed to
+main and deployed automatically after proportionate verification. The user will
+explicitly say when a change should stay local or await review. Keep a practical
+rollback and verify the deployed result; do not ask for routine release approval.
+
 User amendment on 2026-11-04: implement an optional Expanded edition jointly
 with Opus; keep Classic and its saved progress separate. Opus leads creative
 design and balance, Codex architecture/integration, with bounded shared coding.

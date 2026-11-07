@@ -293,6 +293,11 @@ class ElonaScene extends Phaser.Scene {
     const mouse = this.input.mouse;
     const mouseWindow = mouse?.isTop ? window.top : window;
     if (mouse) mouseWindow?.removeEventListener('mousedown', mouse.onMouseDownWindow as EventListener);
+    // TouchManager тоже принимает нажатия HTML-диалогов через window и активирует меню под ними.
+    // Новое касание принадлежит canvas; глобальные отпускания сохраняем для начатых на поле жестов.
+    const touch = this.input.manager.touch;
+    const touchWindow = touch?.isTop ? window.top : window;
+    if (touch) touchWindow?.removeEventListener('touchstart', touch.onTouchStartWindow as EventListener);
     // Указатели HUD независимы: цель принадлежит первому пальцу, нажавшему на поле.
     this.input.addPointer(2);
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
@@ -2507,6 +2512,17 @@ function exportAdventure(): void {
 }
 const fileInput = document.querySelector<HTMLInputElement>('#save-file')!;
 const touchGuide = document.querySelector<HTMLDialogElement>('#touch-guide-dialog')!;
+const largeReload = document.querySelector<HTMLInputElement>('#touch-large-reload')!;
+const LARGE_RELOAD_KEY = 'elona-shooter-plus-plus.port.large-reload.v1';
+try { largeReload.checked = localStorage.getItem(LARGE_RELOAD_KEY) === 'true'; }
+catch (error) { console.warn('Reload button preference could not be read; using the compact layout.', error); }
+container.dataset.largeReload = String(largeReload.checked);
+largeReload.addEventListener('change', () => {
+  container.dataset.largeReload = String(largeReload.checked);
+  // Настройка устройства не входит в приключение и работает даже без доступа к хранилищу.
+  try { localStorage.setItem(LARGE_RELOAD_KEY, String(largeReload.checked)); }
+  catch (error) { console.warn('Reload button preference could not be saved; this session keeps the selected layout.', error); }
+});
 touchGuide.addEventListener('keydown', event => event.stopPropagation());
 document.querySelector('#touch-pause')!.addEventListener('click', () => {
   gameScene?.toggleTouchPause();

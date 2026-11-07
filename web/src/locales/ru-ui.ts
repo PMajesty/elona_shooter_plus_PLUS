@@ -469,6 +469,8 @@ export const ruUI: Record<string, string> = {
   "View": "Обзор",
   "Pan enlarged menu horizontally": "Прокрутить увеличенное меню по горизонтали",
   "Touch controls": "Сенсорное управление",
+  "Reload on battlefield": "Перезарядка на поле боя",
+  "Landscape only. Moves the Reload button onto the battlefield, closer to your right thumb.": "Только в альбомной ориентации. Перемещает кнопку перезарядки на поле боя, ближе к большому пальцу правой руки.",
   "Tap a target to shoot. Hold and drag to aim an automatic weapon. With a bow, lift your finger to release the arrow.": "Коснитесь цели, чтобы выстрелить. Для автоматического оружия удерживайте палец и ведите им по экрану, чтобы целиться. При стрельбе из лука уберите палец, чтобы выпустить стрелу.",
   "Tap an item in the bottom row to use it. Tap Reload to refill your weapon or Fire at will to toggle automatic aim and fire.": "Коснитесь предмета в нижнем ряду, чтобы использовать его. Нажмите «Перезарядка», чтобы пополнить боезапас, или «Огонь по готовности», чтобы включить или выключить автоматическое прицеливание и стрельбу.",
   "Turn your phone sideways for a larger playfield. In portrait, tap Enlarge in a menu and slide View to reach either side. Swipe the text in Help, Statistics and the day report to scroll.": "Поверните телефон горизонтально, чтобы увеличить поле боя. В вертикальном положении нажмите «Увеличить» в меню и двигайте ползунок «Обзор», чтобы увидеть края. Текст в справке, статистике и отчёте за день прокручивается смахиванием.",

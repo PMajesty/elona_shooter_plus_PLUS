@@ -6,6 +6,23 @@ Browser Release 1.3.2 uses `index-C0IZhngI.js`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
 found and corrected differences in combat and end-of-day settlement.
 
+**Local mobile UI update, not deployed:** Guide now offers **Reload on battlefield**
+(off by default, EN/RU, device preference separate from saves). Opus proposed
+the opt-in placement; the user refined it to a full circle inside the field,
+then reduced its radius by 33% while preserving its centre. The ordinary circle
+is about 59 CSS px across, positioned above the hotbar. Short landscape screens
+use a smaller circle or the compact side control; portrait keeps the existing
+row. The controls stay hidden until the loaded scene establishes canvas bounds.
+The Guide check also exposed Phaser accepting HTML-dialog touches through its
+window listener: new game touches now start only on canvas, while global releases
+remain connected. This prevents guide interaction from changing options behind it.
+Build and localization checks pass. Muted browser verification covered delayed
+loading, New Game, actual one- and two-finger reloads, rounded-corner pass-through,
+EN/RU, rotation and short-screen fallback, preference persistence/unavailable
+storage, exact save/Continue, and switching back to the default. No page errors.
+Evidence: `.build/mobile-thumb-evidence.json` and `.build/mobile-thumb-*.png`.
+Physical-phone comfort still needs user feedback; automation checks geometry and input.
+
 Release 1.3.2 is deployed. The build and three extractor checks pass. Muted
 public-HTTPS checks verified matching JavaScript and all 36 enemy atlas files,
 New Game, late-game enemy fixtures and exact Continue.
