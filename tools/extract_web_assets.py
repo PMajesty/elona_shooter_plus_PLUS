@@ -293,8 +293,8 @@ def atlas(name, character_id, sprite, png_root=CACHE, svg_root=ROOT / ".build/sv
             images.append(image)
         indices[path.stem] = unique[digest]
     columns = max(1, math.ceil(math.sqrt(len(images) * height / width)))
-    # Зазор исключает выборку соседнего кадра на портретах, овцах и баллисте.
-    gutter = 1 if name in {"charaPic", "enemy_sheep", "enemy_cata"} else 0
+    # Общий зазор для всех врагов исключает выборку соседнего кадра при движении и масштабировании.
+    gutter = 1 if name == "charaPic" or name.startswith("enemy_") else 0
     stride_x, stride_y = width + 2 * gutter, height + 2 * gutter
     sheet = Image.new("RGBA", (columns * stride_x, math.ceil(len(images) / columns) * stride_y))
     for index, image in enumerate(images):
@@ -1051,7 +1051,7 @@ def main():
                    "sounds": len(manifest["sounds"]), "fonts": len(manifest["fonts"])},
         "runtimeAdjustments": [
             "Static screens omit runtime text placeholders and separately rendered controls",
-            "Opening logo uses frames 1–171 of symbol 2473. The title animates its own actors, buttons and clouds. itemPicture includes the default inventory drop shadow; hero, sheep and ballista frames have transparent gutters. Town navigation shadows use the six original placement filters.",
+            "Opening logo uses frames 1–171 of symbol 2473. The title animates its own actors, buttons and clouds. itemPicture includes the default inventory drop shadow; hero and all enemy frames have transparent gutters. Town navigation shadows use the six original placement filters.",
             "Town Sister is frozen at stand frame4; battle Sister is rendered separately with original reactions and hidden sisterFire",
             "townHud applies the original eventGene bgAlpha.alpha=1",
             "Town panels retain offset (0,-22); original town slide settles at x24.41238023502831",

@@ -1,6 +1,6 @@
 # Browser port status
 
-Updated 2026-11-06. **Classic + optional Expanded desktop/touch release, save v46.**
+Updated 2026-11-07. **Classic + optional Expanded desktop/touch release, save v46.**
 [Play online](https://pastalapizza.site/elona/) or [locally](http://127.0.0.1:5175/elona/).
 Browser Release 1.3.1 uses `index-B1M5Tdet.js`. The documented
 desktop completion boundary was reached in v43. The subsequent joint review
@@ -11,6 +11,18 @@ checks pass. Muted public-HTTPS checks verified matching JavaScript and CSS,
 New Game, the mobile reload controls, EN/RU layouts and exact Continue.
 This deployment check used the workstation's HTTPS
 proxy with normal certificate validation; see [deployment](deployment.md).
+
+**Local fix awaiting release:** enemy atlas gutters now cover every enemy family.
+The tank's right-edge line reproduced without Cripple Shot; neighboring frame
+pixels were being sampled during rendering. Birds and knights also had exposed
+neighboring pixels, along with several earlier enemies. Fifteen atlases were
+repacked; all 4,224 frames across 18 enemy atlases retain identical pixels,
+dimensions and registration. The three extractor checks and production build
+pass. Muted browser fixtures verified normal/enlarged day-50 tanks before/after
+Cripple Shot, seven other later enemy types and exact save/Continue. Cripple Shot
+changes speed, not the displayed frame. Evidence: `.build/tank-sprites-*-*` and
+`.build/enemy-gutter-preservation.json`. These are controlled fixtures, not a
+full campaign playthrough.
 
 **Mobile controls:** the touch strip has equal-sized option buttons,
 with Fire at will labeled Auto / Авто above a larger translucent Reload button.
