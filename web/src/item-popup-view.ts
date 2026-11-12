@@ -1,5 +1,6 @@
-import { getLanguage, onLanguageChanged } from './i18n.ts';
+import { onLanguageChanged } from './i18n.ts';
 import { localizedText, fitLocalizedText } from './localized-text.ts';
+import { localizedTextureKey } from './localized-image.ts';
 import Phaser from 'phaser';
 import { ITEM_TYPE, type Item } from './items.ts';
 import { itemPopupValues, type ItemPopupInfo, type ItemPopupValues } from './item-popup-values.ts';
@@ -16,7 +17,7 @@ export function createItemPopupView(scene: Phaser.Scene, manifest: LootViewManif
   traits: Readonly<Record<number, number>>, changed?: (info: ItemPopupInfo | null) => void, name = 'original-item-popup') {
   const root = scene.add.container(0, 0).setVisible(false).setName(name);
   const asset = manifest.clips[layout.clip];
-  const texture = () => getLanguage() === 'ru' && scene.textures.exists(`ru:${layout.clip}`) ? `ru:${layout.clip}` : layout.clip;
+  const texture = () => localizedTextureKey(scene, layout.clip);
   const background = scene.add.nineslice(-asset.originX, -asset.originY, texture(), '1', asset.frameWidth, asset.frameHeight, 28, 28, 94, 12).setOrigin(0);
   root.add(background);
   const fields = {} as Record<keyof ItemPopupValues, Phaser.GameObjects.Text>;

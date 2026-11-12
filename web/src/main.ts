@@ -1,7 +1,7 @@
 import { localizedImage } from './localized-image.ts';
 import { version as browserVersion } from '../package.json';
 import { localizedText, fitLocalizedText } from './localized-text.ts';
-import { getLanguage, setLanguage, onLanguageChanged, t } from './i18n.ts';
+import { getLanguage, setLanguage, onLanguageChanged, t, nextLanguage, LANGUAGES, type Language, type TranslatedLanguage } from './i18n.ts';
 import { buttonInput, refreshMenuHover } from './button-input.ts';
 import { createTitleSequence, playOpening } from './title-sequence.ts';
 import { MAX_CAMPAIGN_DAY } from './missions.ts';
@@ -72,7 +72,7 @@ import { PanelSlide, createInputBlocker, fadeLevel, fadeFinished, blackInBrightn
   TOWN_ENTRY_FRAMES, TOWN_ENTRY_NAVIGATION_STEP, TOWN_ENTRY_PANEL_STEP, TOWN_ENTRY_BACKDROP_STEP } from './ui-transitions.ts';
 import './style.css';
 
-interface ImageAsset { file: string; width: number; height: number; originX: number; originY: number; ruHitMask?: string }
+interface ImageAsset { file: string; width: number; height: number; originX: number; originY: number; ruHitMask?: string; zhHitMask?: string }
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number; frameAlpha?: number[] }
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual; enemyShotVisuals: Record<EnemyShotKind, ProjectileVisual> }
@@ -152,8 +152,12 @@ USED_SOUNDS.add('soundImpact1');
 for (const key of ['soundChain1', 'soundChain2', 'soundChain3', 'soundDrop']) USED_SOUNDS.add(key);
 for (const key of ['soundTank2', 'soundLightning']) USED_SOUNDS.add(key);
 let manifest: Manifest;
-let russianAssets: { images: Record<string, string>; clips: Record<string, string>; hitMasks: Record<string, string> } = { images: {}, clips: {}, hitMasks: {} };
-let localizationReady = false;
+interface LocalizedAssets { images: Record<string, string>; clips: Record<string, string>; hitMasks: Record<string, string> }
+/** Переведённые надписи в графике по языкам; язык, чья графика не загрузилась, не участвует в переключении. */
+const LOCALIZED_ART_LANGUAGES = ['ru', 'zh'] as const satisfies readonly TranslatedLanguage[];
+const localizedAssets: Partial<Record<TranslatedLanguage, LocalizedAssets>> = {};
+/** Английский и переведённые языки с загруженной графикой (до загрузки — только английский). */
+const availableLanguages = (): Language[] => ['en', ...LOCALIZED_ART_LANGUAGES.filter(language => localizedAssets[language])];
 let gameScene: ElonaScene;
 
 class ElonaScene extends Phaser.Scene {
@@ -278,13 +282,21 @@ class ElonaScene extends Phaser.Scene {
     this.load.json('town-layout', assetUrl('town-layout.json'));
     for (const [key, asset] of Object.entries(manifest.images)) this.load.image(key, assetUrl(asset.file));
     for (const [key, asset] of Object.entries(manifest.clips)) this.load.atlas(key, assetUrl(asset.image), assetUrl(asset.json));
-    for (const [key, file] of Object.entries(russianAssets.images)) this.load.image(`ru:${key}`, assetUrl(`ru/${file}`));
-    for (const [key, file] of Object.entries(russianAssets.clips)) this.load.atlas(`ru:${key}`, assetUrl(`ru/${file}`), assetUrl(manifest.clips[key].json));
+    for (const language of LOCALIZED_ART_LANGUAGES) {
+      const art = localizedAssets[language];
+      if (!art) continue;
+      for (const [key, file] of Object.entries(art.images)) this.load.image(`${language}:${key}`, assetUrl(`${language}/${file}`));
+      for (const [key, file] of Object.entries(art.clips)) this.load.atlas(`${language}:${key}`, assetUrl(`${language}/${file}`), assetUrl(manifest.clips[key].json));
+    }
     for (const [key, file] of Object.entries(manifest.sounds)) if (USED_SOUNDS.has(key)) this.load.audio(key, assetUrl(file));
     this.load.on('progress', (progress: number) => { loadStatus.textContent = t(`Loading original game assets… ${Math.round(progress * 100)}%`); });
     this.load.on('loaderror', (file: Phaser.Loader.File) => {
       if (file.type === 'audio') console.warn(`Sound ${file.key} is unavailable; continuing without it.`);
-      else if (file.key.startsWith('ru:')) localizationReady = false;
+      else if (/^(?:ru|zh):/.test(file.key)) {
+        // Как и прежде для русского: без любой переведённой картинки язык отключается целиком, чтобы не смешивать надписи.
+        delete localizedAssets[file.key.slice(0, 2) as TranslatedLanguage];
+        console.warn(`Localized artwork ${file.key} is unavailable; this language is disabled until reload.`);
+      }
       else this.failedRequiredAssets.add(file.key);
     });
   }
@@ -299,8 +311,10 @@ class ElonaScene extends Phaser.Scene {
       return;
     }
     gameScene = this;
-    if (!localizationReady) setLanguage('en');
-    document.querySelector<HTMLButtonElement>('#language')!.disabled = !localizationReady;
+    // Языки без загруженной графики не участвуют в переключении; если недоступны все, остаётся английский.
+    if (!availableLanguages().includes(getLanguage())) setLanguage('en');
+    document.querySelector<HTMLButtonElement>('#language')!.disabled = availableLanguages().length < 2;
+    updateLanguageControl();
     this.battleCursor = new BattleCursor(this, (x, y) => this.sim?.manualAim(x, y) ?? { x, y });
     // Все 273 изображения charaPic в SWF используют несглаживаемую заливку 0x43.
     // Сохраняем дробные исходные координаты, но исключаем размытие соседних пикселей тела.
@@ -2783,17 +2797,23 @@ async function boot(): Promise<void> {
   const response = await fetch(assetUrl('manifest.json'));
   if (!response.ok) throw new Error('Original assets are missing. Run python tools/extract_web_assets.py from the project folder.');
   manifest = await response.json() as Manifest;
-  try {
-    const localizedResponse = await fetch(assetUrl('ru/manifest.json'));
-    if (!localizedResponse.ok) throw new Error('Russian artwork is unavailable.');
-    russianAssets = await localizedResponse.json(); localizationReady = true;
-  } catch {
-    status.textContent = 'Russian artwork is unavailable. Reload to retry.';
-  }
-  for (const [key, mask] of Object.entries(russianAssets.hitMasks)) manifest.images[key].ruHitMask = mask;
-  const families: Record<string, string> = { menu: 'ElonaMenu', menuBold: 'ElonaMenuBold', hud: 'ElonaHud', small: 'ElonaSmall', impact: 'ElonaImpact', banner: 'ElonaBanner', ruMenu: 'ElonaRussianMenu', ruUI: 'ElonaRussianUI', ruBold: 'ElonaRussianBold' };
+  await Promise.all(LOCALIZED_ART_LANGUAGES.map(async language => {
+    try {
+      const localizedResponse = await fetch(assetUrl(`${language}/manifest.json`));
+      if (!localizedResponse.ok) throw new Error(`${language} artwork is unavailable.`);
+      localizedAssets[language] = await localizedResponse.json() as LocalizedAssets;
+    } catch (error) {
+      console.warn(`Localized artwork for ${language} is unavailable; this language is disabled until reload.`, error);
+      if (getLanguage() === language) status.textContent = language === 'ru' ? 'Russian artwork is unavailable. Reload to retry.' : 'Chinese artwork is unavailable. Reload to retry.';
+    }
+  }));
+  for (const [key, mask] of Object.entries(localizedAssets.ru?.hitMasks ?? {})) manifest.images[key].ruHitMask = mask;
+  for (const [key, mask] of Object.entries(localizedAssets.zh?.hitMasks ?? {})) manifest.images[key].zhHitMask = mask;
+  const families: Record<string, string> = { menu: 'ElonaMenu', menuBold: 'ElonaMenuBold', hud: 'ElonaHud', small: 'ElonaSmall', impact: 'ElonaImpact', banner: 'ElonaBanner',
+    ruMenu: 'ElonaRussianMenu', ruUI: 'ElonaRussianUI', ruBold: 'ElonaRussianBold', zhMenu: 'ElonaChineseMenu', zhUI: 'ElonaChineseUI', zhBold: 'ElonaChineseBold' };
   const fontFallbacks: string[] = [];
-  const fontFiles = { ...manifest.fonts, ruMenu: 'fonts/ru/Neucha.ttf', ruUI: 'fonts/ru/PT_Sans-Web-Regular.ttf', ruBold: 'fonts/ru/PT_Sans-Web-Bold.ttf' };
+  const fontFiles = { ...manifest.fonts, ruMenu: 'fonts/ru/Neucha.ttf', ruUI: 'fonts/ru/PT_Sans-Web-Regular.ttf', ruBold: 'fonts/ru/PT_Sans-Web-Bold.ttf',
+    zhMenu: 'fonts/zh/LXGWWenKai-Subset.ttf', zhUI: 'fonts/zh/NotoSansSC-Regular-Subset.ttf', zhBold: 'fonts/zh/NotoSansSC-Bold-Subset.ttf' };
   await Promise.all(Object.entries(fontFiles).map(async ([key, file]) => {
     try {
       const font = new FontFace(families[key] ?? key, `url("${assetUrl(file)}")`);
@@ -2818,12 +2838,16 @@ for (const selector of ['#browser-options', '#browser-options-open', '#touch-pau
   const walker = document.createTreeWalker(document.querySelector(selector)!, NodeFilter.SHOW_TEXT);
   for (let node = walker.nextNode(); node; node = walker.nextNode()) if (node.textContent?.trim()) staticText.set(node as Text, node.textContent);
 }
+/** Кнопка показывает текущий язык; для китайского — один иероглиф, чтобы уместиться в кнопку 25 px. */
+const LANGUAGE_LABELS: Readonly<Record<Language, string>> = { en: 'EN', ru: 'RU', zh: '中' };
+const SWITCH_LANGUAGE_LABELS: Readonly<Record<Language, string>> = { en: 'Switch to English', ru: 'Switch to Russian', zh: 'Switch to Chinese' };
 function updateLanguageControl(): void {
-  const lang = getLanguage(); document.documentElement.lang = lang; container.dataset.language = lang;
+  const lang = getLanguage(); document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang; container.dataset.language = lang;
   statusElement.textContent = statusSource === null ? null : t(statusSource);
   document.querySelector('#playfield > canvas')?.setAttribute('aria-label', t('Elona Shooter battlefield'));
-  languageButton.textContent = lang.toUpperCase(); languageButton.setAttribute('aria-pressed', String(lang === 'ru'));
-  languageButton.setAttribute('aria-label', t(lang === 'en' ? 'Switch to Russian' : 'Switch to English'));
+  languageButton.textContent = LANGUAGE_LABELS[lang]; languageButton.setAttribute('aria-pressed', String(lang !== 'en'));
+  const cycle = availableLanguages();
+  languageButton.setAttribute('aria-label', t(SWITCH_LANGUAGE_LABELS[nextLanguage(lang, cycle.length > 1 ? cycle : LANGUAGES)]));
   for (const [node, source] of staticText) node.textContent = source.replace(source.trim(), t(source.trim()));
   enlargeButton.textContent = t(container.dataset.menuZoom === 'true' ? 'Fit' : 'Enlarge');
   updateMuteControl(container.dataset.muted !== 'false');
@@ -2832,7 +2856,7 @@ function updateLanguageControl(): void {
   document.querySelector('#game-controls')!.setAttribute('aria-label', t('Game controls'));
   panMenu.setAttribute('aria-label', t('Pan enlarged menu horizontally'));
 }
-languageButton.addEventListener('click', () => setLanguage(getLanguage() === 'en' ? 'ru' : 'en'));
+languageButton.addEventListener('click', () => setLanguage(nextLanguage(getLanguage(), availableLanguages())));
 onLanguageChanged(updateLanguageControl); updateLanguageControl();
 muteButton.addEventListener('click', () => gameScene?.toggleMute());
 fullscreenButton.disabled = !document.fullscreenEnabled || typeof container.requestFullscreen !== 'function';

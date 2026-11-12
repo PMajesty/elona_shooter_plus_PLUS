@@ -17,7 +17,7 @@ if (process.env.QA_PROXY && process.env.HTTPS_PROXY) {
 }
 const browser = await (engine === 'webkit' ? webkit : chromium).launch(options);
 try {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: 'en-US' });
   page.setDefaultTimeout(30000);
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
@@ -52,8 +52,10 @@ try {
     return saved;
   };
   await openTitle();
-  if (process.env.QA_LANGUAGE === 'ru') {
-    await page.locator('#language').tap(); assert.equal(await data('language'), 'ru');
+  // QA_LANGUAGE=ru|zh: кнопка языка переключает EN → RU → 中 по кругу.
+  if (['ru', 'zh'].includes(process.env.QA_LANGUAGE)) {
+    for (let i = 0; i < 3 && await data('language') !== process.env.QA_LANGUAGE; i++) await page.locator('#language').tap();
+    assert.equal(await data('language'), process.env.QA_LANGUAGE);
   }
   const portrait = await canvas.boundingBox();
   assert.ok(portrait.width >= 388 && portrait.x >= 0 && portrait.x + portrait.width <= 391);
