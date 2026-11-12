@@ -42,15 +42,31 @@ interface TownViewState {
 }
 interface Callbacks { henchmanSmart?(enabled: boolean): void; robVisitors(): void; medalPage(page: 0 | 1): void; visitKongregate(): void; medalHint(hint: { id: number; name: string; description: string; bonus: string } | null): void; hire(): void; confirmHire(answer: boolean): void; castlePage(page: 0 | 1): void; activity(action: TownActivity): void; activityAvailable(action: TownActivity): boolean; select(tab: TownTab): void; repair(): void; rest(): void; claimTitle(): void; castleUpgrade(kind: CastleUpgradeKind): void; actionHover(): void; message(value: string): void }
 
+/** Шесть кнопок навигации для перехода из итогов в город (menuList сдвигается на 3 за кадр): только изображение без щелчков, позиции как в городе. */
+export function createTownNavigationPreview(scene: Phaser.Scene, manifest: LootViewManifest, layout: TownLayout): Phaser.GameObjects.Container {
+  const root = scene.add.container(0, 0).setName('town-navigation-preview');
+  for (const placement of Object.values(layout.navigation)) {
+    for (const key of [`${placement.image}_shadow`, placement.image]) {
+      const asset = manifest.images[key];
+      if (!asset) continue;
+      root.add(localizedImage(scene, placement.x, placement.y, key).setOrigin(asset.originX / asset.width, asset.originY / asset.height)
+        .setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees));
+    }
+  }
+  return root;
+}
+
 /** Городские координаты и повороты берутся из исходного кадра 71 и его окон. */
 export function createTownView(scene: Phaser.Scene, state: TownViewState, manifest: LootViewManifest, layout: TownLayout, callbacks: Callbacks, tab: TownTab, navigation: Phaser.GameObjects.Container, castlePage: 0 | 1 = 0, medalPage: 0 | 1 = 0): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName('town-view');
+  // Фон города, панель предметов и навигация рисуются в root; панель меню лежит отдельно в town-panel, потому что исходное window2_mc въезжает справа.
+  let layer: Phaser.GameObjects.Container = root;
   const image = (key: string, x = 0, y = 0, placement?: Placement) => {
     const asset = manifest.images[key];
     const object = localizedImage(scene, x, y, key).setOrigin(asset.originX / asset.width, asset.originY / asset.height);
     if (placement) object.setScale(placement.scaleX, placement.scaleY).setAngle(placement.rotationDegrees);
     else object.setDisplaySize(asset.width, asset.height);
-    root.add(object); return object;
+    layer.add(object); return object;
   };
   const text = (placement: Placement, value: string, x = 0, y = 0) => {
     const field = placement.text!;
@@ -63,12 +79,12 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     }).setFixedSize(width, 0).setScale(placement.scaleX, placement.scaleY);
     if (field.color === '#ffffff') object.setShadow(1, 1, '#000000', 2);
     fitLocalizedText(object, { width, height: field.bounds[3] - field.bounds[1] });
-    root.add(object); return object;
+    layer.add(object); return object;
   };
-  const button = (key: string, placement: Placement, action: () => void, x = 0, y = 0, enabled = true, parent = root) => {
+  const button = (key: string, placement: Placement, action: () => void, x = 0, y = 0, enabled = true, parent = layer) => {
     const shadow = manifest.images[`${key}_shadow`] ? image(`${key}_shadow`, x + placement.x, y + placement.y, placement) : undefined;
     const object = image(key, x + placement.x, y + placement.y, placement).setName(key);
-    if (parent !== root) { if (shadow) parent.add(shadow); parent.add(object); }
+    if (parent !== layer) { if (shadow) parent.add(shadow); parent.add(object); }
     object.setAlpha(enabled ? 1 : 0.35).setInteractive(buttonInput(manifest.images[key], enabled));
     if (enabled) {
       object.on('pointerover', () => { object.setTexture(`${key}_over`); shadow?.setTexture(`${key}_over_shadow`); });
@@ -96,6 +112,8 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     const tab = name === 'chara' ? 'characters' : name === 'equip' ? 'equipment' : name === 'medal' ? 'medals' : name as TownTab;
     button(placement.image, placement, () => enabled ? callbacks.select(tab) : callbacks.message('This town menu is not available in the current port yet.'), 0, 0, enabled, navigation);
   }
+  const panelLayer = scene.add.container(0, 0).setName('town-panel');
+  root.add(panelLayer); layer = panelLayer;
   if (tab === 'mission' || tab === 'castle') {
     const panel = layout[tab], { x, y } = layout.menuPosition;
     const canRest = state.day < MAX_CAMPAIGN_DAY && state.town?.preparation === 'ready';
@@ -121,7 +139,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         const tileX = x + tile.x + slotIndex % tile.columns * tile.stepX;
         const tileY = y + tile.y + Math.floor(slotIndex / tile.columns) * tile.stepY;
         const group = scene.add.container(tileX, tileY).setName(`castle-upgrade-${index}`).setAlpha(possible ? 1 : tile.disabledAlpha);
-        root.add(group);
+        layer.add(group);
         const upFrame = index * 2 + 1;
         const art = localizedImage(scene, 0, 0, tile.clip, String(upFrame))
           .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight);
@@ -181,8 +199,8 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         const card = localizedImage(scene, ax + template.children.card.x, ay + template.children.card.y, template.cardClip, String(info.frame))
           .setOrigin(cardAsset.originX / cardAsset.frameWidth, cardAsset.originY / cardAsset.frameHeight).setAlpha(enabled ? 1 : 0.35)
           .setInteractive({ useHandCursor: enabled, pixelPerfect: true, alphaTolerance: 100 }).setName(`town-activity-${key}`);
-        root.add(card);
-        root.add(localizedImage(scene, ax + template.children.pin.x, ay + template.children.pin.y, template.pinClip, '1')
+        layer.add(card);
+        layer.add(localizedImage(scene, ax + template.children.pin.x, ay + template.children.pin.y, template.pinClip, '1')
           .setOrigin(pinAsset.originX / pinAsset.frameWidth, pinAsset.originY / pinAsset.frameHeight).setAlpha(enabled ? 1 : 0.35));
         text({ ...template.children.text }, `${info.cost} AP\n${info.name}`, ax, ay).setAlpha(enabled ? 1 : 0.35);
         card.on('pointerdown', (_pointer: Phaser.Input.Pointer, _lx: number, _ly: number, event: Phaser.Types.Input.EventData) => {
@@ -194,7 +212,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         const selected = state.henchmanOrder === 7;
         // Свободный промежуток между Train и Claim Title; вся область доступна для касания.
         const control = scene.add.container(330, 235).setName('henchman-order');
-        control.setData({ selected, order: selected ? 7 : 6 }); root.add(control);
+        control.setData({ selected, order: selected ? 7 : 6 }); layer.add(control);
         const label = (x: number, y: number, value: string, size = 11, color = '#000000') => {
           const field = localizedText(scene, x, y, value, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: `${size}px`, color,
             wordWrap: { width: 110 - x }, padding: { x: 0, y: 1 } });
@@ -224,7 +242,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
         .setInteractive({ useHandCursor: available, pixelPerfect: true, alphaTolerance: 100 });
       const pin = localizedImage(scene, actionX + action.children.pin.x, actionY + action.children.pin.y, action.pinClip, '1')
         .setOrigin(pinAsset.originX / pinAsset.frameWidth, pinAsset.originY / pinAsset.frameHeight).setAlpha(available ? 1 : 0.5);
-      root.add([card, pin]);
+      layer.add([card, pin]);
       text(action.children.text, action.text, actionX, actionY).setAlpha(available ? 1 : 0.5);
       card.on('pointerover', () => { if (available) { card.setScale(action.hoverScale); callbacks.actionHover(); } callbacks.message('You will receive a new title and salary.'); });
       card.on('pointerout', () => card.setScale(1));
@@ -241,7 +259,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     image(panel.labelsImage, x, 0);
     text(panel.children.lootText, `${state.earnedMedals.length} medals won`, x, y);
     text(panel.children.hint2, 'Medals you won give you various bonuses.\nThey are carried over to the next games.', x, y);
-    const hint = scene.add.container(0, 0).setVisible(false).setName('original-medal-hint'); root.add(hint);
+    const hint = scene.add.container(0, 0).setVisible(false).setName('original-medal-hint'); layer.add(hint);
     const hx = x + panel.children.hint.x, hy = y + panel.children.hint.y;
     hint.add(image(panel.hintImage, hx, hy));
     const hintName = text(panel.hintChildren.itemName, '', hx, hy);
@@ -250,7 +268,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     hint.add([hintName, hintDescription, hintBonus]);
     const kong = panel.children.kongMc, asset = manifest.clips.museumKongregate;
     const link = localizedImage(scene, x + kong.x, y + kong.y, 'museumKongregate', '1')
-      .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 }); root.add(link);
+      .setOrigin(asset.originX / asset.frameWidth, asset.originY / asset.frameHeight).setInteractive({ useHandCursor: true, pixelPerfect: true, alphaTolerance: 100 }); layer.add(link);
     link.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); callbacks.visitKongregate(); });
     const entries = Object.entries(MEDALS).filter(([id]) => Number(id) < 85 ? medalPage === 0 : medalPage === 1);
     entries.forEach(([key, info], index) => {
@@ -260,11 +278,11 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
       image('medalRow', rowX, rowY).setAlpha(earned ? 1 : 0.3);
       fitLocalizedText(contentText(text(panel.rowChildren.medalName, info.name, rowX, rowY)), { width: 92, height: 20, ellipsis: true }).setAlpha(earned ? 1 : 0.3);
       const hit = scene.add.zone(rowX, rowY, 140, 20).setOrigin(0).setInteractive({ useHandCursor: true }).setName(`medal-row-${id}`);
-      root.add(hit);
+      layer.add(hit);
       const describe = () => {
         const description = earned ? info.earned : info.condition, bonus = earned ? info.bonus : '????';
         contentText(hintName).setText(info.name); hintDescription.setText(description); hintBonus.setText(bonus);
-        hint.setVisible(true); root.bringToTop(hint); callbacks.medalHint({ id, name: info.name, description, bonus });
+        hint.setVisible(true); layer.bringToTop(hint); callbacks.medalHint({ id, name: info.name, description, bonus });
       };
       hit.on('pointerover', describe);
       hit.on('pointerout', () => { hint.setVisible(false); callbacks.medalHint(null); });
@@ -272,6 +290,8 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     });
   }
   if (state.pendingPartyAction?.kind === 'henchman') {
+    // Диалог подтверждения — отдельное модальное окно и не едет вместе с меню.
+    layer = root;
     const outside = scene.add.zone(0, 0, 620, 380).setOrigin(0).setInteractive(); root.add(outside);
     outside.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); callbacks.confirmHire(false); });
     const modal = layout.saleDialog;

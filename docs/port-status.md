@@ -268,6 +268,22 @@ audits are evidence about connections, not formula/behavior equivalence proofs.
 
 ## Latest integrated fixes
 
+Event windows, town menus, Help and Pause follow the original transitions
+(onEnterFrame_result/town/help, menu_pause frames 1–10). Windows wait three
+reference frames, slide in by animeTime^1.7, ignore clicks while sliding and
+fade out over nine frames after Proceed. Character creation and Game MODs also
+darken the whole screen, and the next window fades in from black over 40 frames.
+A victory first shows the original Clear window («Congratulations!»); every
+battle begins with the Day N window (black-in, slide, fade on frames 71–80,
+combat at frame 90). Fireworks start on Clear, and Watch Fireworks requires
+staying on Clear for 651 frames, as fireworkCount does. Proceed on Results plays
+the 30-frame town entry: navigation slides in from the left, the sheet drifts
+right and the town backdrop fades in. The sheet copy (window3_mc) stays below
+town menus until leaving town. Town menus slide in again after every navigation
+click. Help and Pause blur a screen snapshot (BlurFilter 3 over one second)
+rather than darkening it. Timing interpolates 30 fps reference frames;
+`data-transition` reports busy/settling/idle for browser checks.
+
 Piercing bow arrows and crossbow bolts damage each enemy at most once per
 projectile. Previously a target still overlapping the next collision check took
 another hit and spent another penetration. Optional saved target IDs preserve
