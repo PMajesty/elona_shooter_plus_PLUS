@@ -51,7 +51,7 @@ export const zhContent: Record<string, string> = {
   "\"Some guy from Vernis showed up the other night and killed a Bard...\"": "“前几天晚上，有个从维尔尼斯来的家伙跑来杀了一个吟游诗人……”",
   "\"Well with as much killing as you have been doing lately Someone was bound to hold a grudge.\"": "“嗯，以你最近的杀戮规模，总会有谁怀恨在心的。”",
   "\"Apparently this is just a Juere prototype related to a bigger project, the fact that it's causing you nuisance is purely coincidental.\"": "“看来这只是朱艾尔人某个大项目的原型机而已，它给你添麻烦纯属巧合。”",
-  "\"These monster's chew through anything. Seems they've eaten everything on the way and the castle food supplies are kinda low...\"": "“地主家也没余粮啊”",
+  "\"These monster's chew through anything. Seems they've eaten everything on the way and the castle food supplies are kinda low...\"": "“这些怪物什么都啃。看来它们一路上把能吃的都吃光了，地主家也没余粮啊……”",
   "This mod increases the base accuracy of a weapon.": "此改装件可提高武器的基础精准度。",
   "This mod speeds up the reloading time of a weapon.": "此改装件可加快武器的装填速度。",
   "This mod improves the firing rate of a weapon. For weapons with a very high firing rate, its effect may be less than satisfactory.": "此改装件可提高武器的射速。对射速本就极高的武器，效果可能不尽如人意。",
