@@ -1266,7 +1266,8 @@ export class Simulation {
     enemy.frame = ENEMY_TIMELINES[enemy.kind]?.labels.dead ?? (enemy.kind === 'dropped-rat' ? 93 : enemy.kind === 'sheep' ? 107 : enemy.kind === 'rat' ? 93 : enemy.kind === 'chicken' ? 208 : enemy.kind === 'crow' ? 58 : enemy.kind === 'archer' ? 94 : enemy.kind === 'fly' ? 12 : enemy.kind === 'barbarian' ? 84 : enemy.kind === 'lava' ? 98 : enemy.kind === 'boss' ? 281 : 1);
     if (enemy.dropping) { enemy.frame = 2; enemy.dropFrame = 16; }
     enemy.shadowHit = shadowHitAtFrame(enemy.kind, enemy.frame, enemy.shadowHit);
-    this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'kill', x: enemy.x, y: enemy.y, critical, enemyUid: enemy.uid, goodShotIndex });
+    // Тип крита смертельного попадания (1 уязвимое место, 2 Sense, 3 One hit kill) — по нему показывается исходная надпись critKill.
+    this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'kill', x: enemy.x, y: enemy.y, critical, criticalType: Number(criticalValue), enemyUid: enemy.uid, goodShotIndex });
   }
 
   private levelUp(): void {
