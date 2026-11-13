@@ -137,6 +137,16 @@ export function weaponHitEffects(item: Readonly<Item>, traits: CombatTraits, tar
 }
 
 export function reloadTimer(item: Readonly<Item>, traits: CombatTraits): number { return int(item.reloadTimeMax * 100 / (100 + combatTrait(TRAIT.RELOADING, traits))) + 1; }
+/**
+ * Длина полосы патронов (updateAmmoBar и reloading, строка 7359): при смене магазина
+ * ammobar.scaleX = 1 − оставшееся время / полное время перезарядки, полоса растёт от пустой к полной;
+ * при поштучной зарядке и вне перезарядки — патроны / ёмкость.
+ */
+export function ammoBarRatio(item: Readonly<Item> | null | undefined, traits: CombatTraits): number {
+  if (!item || !(item.ammoMax > 0)) return 0;
+  if (item.reloadTime > 0 && !item.manualReload) return Math.min(1, Math.max(0, 1 - item.reloadTime / reloadTimer(item, traits)));
+  return Math.min(1, Math.max(0, item.ammo / item.ammoMax));
+}
 export function autoReloadReady(item: Readonly<Item>, shootTimer: number): boolean { return item.autoReload > 0 && item.reloadTime === 0 && item.ammo < item.ammoMax && shootTimer <= item.shootRate * -3; }
 
 /** Один исходный вызов reloading; manual завершает через cancelReload, магазин — через sound_reloaded1. */
