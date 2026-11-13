@@ -9,7 +9,7 @@ import { MEDALS } from './medals.ts';
 import { traitHintValues } from './trait-hint.ts';
 import { nextKillHistory, type KillHistory } from './kill-history.ts';
 import { advanceRatFall, ratDropLocalPoint } from './bird-drop.ts';
-import { advanceChainGunClock, idleChainGun, spinChainGun, type ChainGunState } from './combat-stats.ts';
+import { advanceChainGunClock, idleChainGun, isChainGunId, spinChainGun, type ChainGunState } from './combat-stats.ts';
 import { fixedSearchRandom } from './town-search.ts';
 import { createTownEconomy, validTownEconomy, museumIncome, TOWN_ACTIVITIES, type TownEconomy, type TownActivity } from './town-economy.ts';
 import { ENEMY_TIMELINES, type EnemyTimeline } from './enemy-timelines.ts';
@@ -21,7 +21,8 @@ import { ENEMIES, FIRST_DAY, GRENADE, SHOTGUN, SIMULATION_HZ, STARTING_CLASS, TI
 import { generateLowLevelMission, generateLowLevelWaves, validCampaignDay, MAX_CAMPAIGN_DAY, type LowLevelMission, type GameMode } from './missions.ts';
 import { generateHero, isKnownHeroInitialization, levelUpHero, reconstructSheriffHero, type KnownHeroInitialization } from './hero.ts';
 import { advanceReload, autoReloadReady, COMBAT_TRAIT, combatTrait, criticalType, hitscanHit, hitscanShotModifiers, criticalKillCooldown, duelistHitFrenzy, livingWeaponKill, rampageDuration, recoverAccuracy, reloadTimer, shotDamage, shotSpread, weaponBehavior, weaponHitDamage, weaponHitEffects, weaponStats } from './combat-stats.ts';
-import { BASE_ITEM_FIELDS, ITEM_TYPE, ItemFactory, collectLoot as collectLootItem, createStartingInventory, isOccupiedItem, itemPrice, swapInventorySlots, type Item } from './items.ts';
+import { remapModItems } from './mod-save.ts';
+import { BASE_ITEM_FIELDS, itemFields, ITEM_TYPE, ItemFactory, collectLoot as collectLootItem, createStartingInventory, isOccupiedItem, itemPrice, swapInventorySlots, type Item } from './items.ts';
 import { prepareEarlyTown, generateTownShop, type FirstTownPreparation } from './town-preparation.ts';
 import { validTownPreparation } from './town-save.ts';
 import { TRAIT, createSheriffTraits, type TraitLevels } from './progression.ts';
@@ -121,14 +122,15 @@ const WEAPON_SKILLS = [103, 106, 104, 105] as const;
 function record(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }
 function finite(value: unknown): value is number { return typeof value === 'number' && Number.isFinite(value) && Math.abs(value) < 1e12; }
 function validItem(value: unknown): value is Item {
-  if (!record(value) || !Number.isInteger(value.id) || !Object.hasOwn(BASE_ITEM_FIELDS, Number(value.id))) return false;
+  // Исходные предметы, оружие модов этой сессии и заглушка отсутствующего мода (999).
+  if (!record(value) || !Number.isInteger(value.id) || !itemFields(Number(value.id))) return false;
   const numbers = ['num', 'id', 'graphic', 'type', 'reloadTime', 'reloadTimeMax', 'ammo', 'ammoMax', 'value', 'mod', 'modMax', 'shell', 'lv', 'typeMinor', 'special', 'leech', 'impact', 'shootRate', 'rare', 'autoReload', 'livingWeapon'];
   const optional = ['baseAccuracy', 'accuracyDec', 'attack', 'dmgAir', 'dmgArmor', 'reqTrait', 'reqLv', 'range'];
   const spentArtifact = value.num === 0 && (value.id === 37 || value.id === 38) && value.ammo === -1 && value.ammoMax === 0;
   if (numbers.some(key => !finite(value[key]) || (Number(value[key]) < 0 && !(key === 'ammo' && spentArtifact))) || optional.some(key => value[key] !== undefined && (!finite(value[key]) || Number(value[key]) < 0))) return false;
   if (numbers.filter(key => key !== 'value').some(key => !Number.isInteger(value[key]))) return false;
   const id = Number(value.id);
-  const expectedType = [8, 9, 10, 121].includes(id) ? ITEM_TYPE.mod : BASE_ITEM_FIELDS[id].type ?? ITEM_TYPE.gun;
+  const expectedType = [8, 9, 10, 121].includes(id) ? ITEM_TYPE.mod : itemFields(id)!.type ?? ITEM_TYPE.gun;
   if ((value.num !== 0 && value.num !== 1) || value.graphic !== id + 10 || value.type !== expectedType || Number(value.lv) < 1 || Number(value.modMax) < 1 || typeof value.manualReload !== 'boolean' || typeof value.automatic !== 'boolean') return false;
   if (typeof value.name !== 'string' || value.name.length === 0 || value.name.length > 256 || typeof value.modText !== 'string' || value.modText.length > 4096) return false;
   if (expectedType === ITEM_TYPE.gun && (optional.some(key => !finite(value[key])) || Number(value.ammoMax) < 1 || Number(value.ammo) > Number(value.ammoMax) || Number(value.mod) > Number(value.modMax))) return false;
@@ -651,8 +653,9 @@ export class Simulation {
     if (input.slot !== undefined) this.useSlot(input.slot);
     if (input.reload) this.requestReload();
     const weapon = this.weapon;
-    const bow = weapon?.id === 24 || weapon?.id === 25;
-    if (!this.heroAutomatic && weapon?.id === 16 && this.heroChainState) advanceChainGunClock(this.heroChainState);
+    // Лук с натяжением (Long Bow, Wind Bow или оружие мода с bowDraw) стреляет при отпускании.
+    const bow = !!weapon && isOccupiedItem(weapon) && weaponBehavior(weapon).bowDraw;
+    if (!this.heroAutomatic && isChainGunId(weapon?.id) && this.heroChainState) advanceChainGunClock(this.heroChainState);
     if (this.heroSettings.order === -1 && this.fireAtWill) {
       const ai = this.state.heroAI!.state;
       // MouseDown по-прежнему отменяет ручную перезарядку; выстрел берёт цель AI, не мышь.
@@ -692,7 +695,7 @@ export class Simulation {
     if (!this.heroAutomatic && player.rampageTicks > 0) player.rampageTicks--;
     this.state.itemCooldowns = this.state.itemCooldowns.map(time => Math.max(0, time - 1));
     if (!this.heroAutomatic && this.state.pendingShot && !(weapon?.reloadTime && !weapon.autoReload) && this.fireAt(this.state.aimX, this.state.aimY) && !weapon?.automatic) this.state.pendingShot = false;
-    if (!this.heroAutomatic && !this.state.pendingShot && weapon?.id === 16 && this.heroChainState) idleChainGun(this.heroChainState, true);
+    if (!this.heroAutomatic && !this.state.pendingShot && isChainGunId(weapon?.id) && this.heroChainState) idleChainGun(this.heroChainState, true);
     this.state.partyAI.sharedWeaponRange = weapon?.range ?? null;
     const partyContext = this.partyAIContext(), partyCallbacks = this.partyAICallbacks();
     if (this.heroAutomatic) {
@@ -773,7 +776,7 @@ export class Simulation {
     player.shootTimer = stats.shootTimer;
     if (!manual && !item.automatic) player.shootTimer += int(this.random() * (item.shootRate / 1.5 / ai!.workRate));
     const behavior = weaponBehavior(item);
-    if (item.id === 16) {
+    if (isChainGunId(item.id)) {
       const chain = ai ?? this.state.heroAI?.state ?? (this.state.player.chainGun ??= { chainMode: 0, chainPos: 0 });
       if (!spinChainGun(chain)) return true;
     }
@@ -798,8 +801,8 @@ export class Simulation {
     if (behavior.projectile) {
       let hitX = int(x + this.random() * spread - this.random() * spread);
       const hitY = int(y + this.random() * spread - this.random() * spread);
-      if (meter && [23, 24, 25, 26].includes(item.id)) meter.idleCount *= 0.5;
-      if (actorSlot !== this.heroSlot && item.id === 27) hitX -= 200;
+      if (meter && (behavior.projectile === 'arrow' || behavior.projectile === 'bolt')) meter.idleCount *= 0.5;
+      if (actorSlot !== this.heroSlot && behavior.projectile === 'gravity') hitX -= 200;
       const target = actorSlot !== this.heroSlot && ai?.targetUid ? this.partyAIContext().getTarget(ai.targetUid) : undefined;
       const launch = (startOffset = 0, targetOffset = 0) => this.state.projectiles.push(createProjectile({
         uid: this.state.nextUid++, kind: behavior.projectile!, weaponSlot, damage, actorSlot, targetSpeed: target?.speed,
@@ -807,7 +810,7 @@ export class Simulation {
         speedBase: behavior.speedBase, penetrations: (player.traits[COMBAT_TRAIT.BOW_MASTER] ?? 0) + behavior.extraPenetrations,
         scale: ['gravity', 'flame'].includes(behavior.projectile!) ? (100 + combatTrait(COMBAT_TRAIT.DA_BOMB, player.traits)) / 100 : 1,
       }));
-      if (item.id === 25) { launch(5, 20); launch(); launch(-5, -20); } else launch();
+      if (behavior.projectileCount === 3) { launch(5, 20); launch(); launch(-5, -20); } else launch();
       this.events.push({ ...(actorSlot ? { actorSlot } : {}), type: 'shot', weaponId: item.id, x: position.x, y: position.y });
       if (behavior.immediateReload) {
         item.reloadTime = stats.reloadTime;
@@ -2231,6 +2234,8 @@ export class Simulation {
   }
 
   static fromSave(value: unknown, options: SimulationOptions = {}): Simulation {
+    // Оружие модов получает номера этой сессии по регистрационному имени, оружие отсутствующих модов — заглушку (новый объект, вход не меняется).
+    value = remapModItems(value);
     if (record(value) && value.killHistory !== undefined && (!record(value.killHistory)
       || !Number.isSafeInteger(value.killHistory.completed) || Number(value.killHistory.completed) < 0
       || value.killHistory.incomplete !== undefined && value.killHistory.incomplete !== true
@@ -2595,7 +2600,7 @@ export class Simulation {
     // enchant сохраняет старый таймер при заполнении патронов и уменьшении максимума; Rest обнуляет его.
     if (state.phase === 'battle' && state.inventory.some(item => isOccupiedItem(item) && item.type === ITEM_TYPE.gun && (item.reloadTime > item.reloadTimeMax + 1 || item.ammo === item.ammoMax && item.reloadTime !== 0))) throw new Error('Invalid battle weapon reload state.');
     const drawnBow = state.inventory[state.player.selectedSlot];
-    if (state.player.bowDrawing && (state.phase !== 'battle' || !isOccupiedItem(drawnBow) || ![24, 25].includes(drawnBow.id))) throw new Error('Invalid bow draw selection.');
+    if (state.player.bowDrawing && (state.phase !== 'battle' || !isOccupiedItem(drawnBow) || !weaponBehavior(drawnBow).bowDraw)) throw new Error('Invalid bow draw selection.');
     if (state.upgradeReference !== null && (!validItem(state.upgradeReference) || !isOccupiedItem(state.upgradeReference) || state.upgradeReference.type !== ITEM_TYPE.gun)) throw new Error('Invalid upgrade reference.');
     const lootPending = state.pendingLootAction;
     if (lootPending !== null) {

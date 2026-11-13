@@ -1,10 +1,15 @@
 import { ITEM_TYPE, type Item } from './items.ts';
+import { MISSING_MOD_ITEM_ID, modWeaponById } from './weapon-registry.ts';
 
 export function itemDetail(item: Item): string {
   if (item.type === ITEM_TYPE.mod) return `A modification device that can be mounted on a weapon. ${MOD_DETAILS[item.mod] ?? ''}`;
   if (item.id === 11) return `[Usable] When thrown to the ground, it exlodes and deals ${item.attack} damage to all enemies surrounding it.`;
   if (item.id === 12) return `[Usable] Repairs ${item.attack} points of castle HP when used. It's a life saver but has long recharge time.`;
   if (item.id === 35) return `A special token. When dragged onto a shop item, the item get discounted by ${item.attack} gp. Use it wisely!`;
+  // Описание оружия мода берётся из data.json; заглушка называет недостающий мод.
+  const mod = modWeaponById(item.id);
+  if (mod) return mod.description.en ?? mod.description.zh ?? mod.description.ru ?? '';
+  if (item.id === MISSING_MOD_ITEM_ID) return `This weapon comes from a MOD that is not installed or is disabled (${item.modItem?.modWeapon ?? '?'}). Enable the MOD again to restore it.`;
   return ITEM_DETAILS[item.id] ?? '';
 }
 

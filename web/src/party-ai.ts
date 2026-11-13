@@ -1,5 +1,5 @@
 import { smartAimDelay, smartTargetViable, chooseSmartTarget, claimSmartTarget, usesSmartMode } from './smart-mode.ts';
-import { COMBAT_TRAIT, combatTrait, advanceChainGunClock, idleChainGun, type ChainGunState } from './combat-stats.ts';
+import { COMBAT_TRAIT, combatTrait, advanceChainGunClock, idleChainGun, isChainGunId, type ChainGunState } from './combat-stats.ts';
 import type { Item } from './items.ts';
 import type { TraitLevels } from './progression.ts';
 
@@ -213,7 +213,7 @@ export type PartyAIFrameOutcome = 'absent' | 'boss-mark' | 'acquired' | 'dead-ta
 export function stepPartyAIFrame(actor: PartyAIActor, context: PartyAIContext, callbacks: PartyAICallbacks): PartyAIFrameOutcome {
   if (!active(actor)) return 'absent';
   const member = actor.member, s = member.aiState;
-  if (actor.weapon?.id === 16) advanceChainGunClock(s);
+  if (isChainGunId(actor.weapon?.id)) advanceChainGunClock(s);
   const manual = actor.slot === context.heroSlot && !context.fireAtWill;
   const smart = usesSmartMode(actor, context);
   if (smart && s.targetUid !== null) {
@@ -274,7 +274,7 @@ export function stepPartyAIFrame(actor: PartyAIActor, context: PartyAIContext, c
   if (s.shooting) callbacks.shoot(actor);
   else {
     s.idleCount += 0.033;
-    if (actor.weapon?.id === 16) {
+    if (isChainGunId(actor.weapon?.id)) {
       if (s.chainMode > 1) callbacks.chainIdle?.(actor);
       idleChainGun(s, manual);
     } else s.chainPos = 0;

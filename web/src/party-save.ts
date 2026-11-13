@@ -3,6 +3,7 @@ import { validPartyState, validPartyPendingAction } from './party.ts';
 import { partyActorPosition } from './party-ai.ts';
 import { ITEM_TYPE, type Item } from './items.ts';
 import { ENEMIES } from './content.ts';
+import { weaponBehavior } from './combat-stats.ts';
 import type { SimulationState } from './simulation.ts';
 
 const record = (v: unknown): v is Record<string, unknown> => Boolean(v) && typeof v === 'object' && !Array.isArray(v);
@@ -86,7 +87,8 @@ export function validatePartySave(state: SimulationState, validItem: (value: unk
     if (state.phase !== 'battle') continue;
     if (owner) {
       const slot = state.party.slots[owner - 1], position = partyActorPosition(owner);
-      const allowedOffsets = projectile.kind === 'arrow' && slot.weapon?.id === 25 ? [-5, 0, 5] : [0];
+      // Залп из трёх (Wind Bow или оружие мода с volley 3) смещает крайние снаряды на ±5.
+      const allowedOffsets = slot.weapon && slot.weapon.type === ITEM_TYPE.gun && weaponBehavior(slot.weapon).projectileCount === 3 ? [-5, 0, 5] : [0];
       if (!slot.exists || !slot.member || !allowedOffsets.includes(projectile.startX - position.x) || projectile.startY !== position.y
         || projectile.weaponSlot !== null && slot.weapon?.type !== ITEM_TYPE.gun) throw new Error('Missing companion projectile owner or weapon.');
     } else if (projectile.weaponSlot !== null && state.inventory[projectile.weaponSlot]?.type !== ITEM_TYPE.gun) throw new Error('Projectile launch slot is not a gun.');

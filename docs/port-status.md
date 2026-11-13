@@ -91,6 +91,39 @@ phone portrait/landscape menus and an actual assisted touch shot (3.5-pixel nudg
 These are emulated touch checks, not a physical-phone playtest. Evidence is in
 `.build/aim-assist-evidence.json` and `.build/aim-assist-touch-evidence.json`.
 
+**Weapon MODs.** An opt-in loader for custom weapons, reached through
+Options → Weapon MODs. Each weapon folder sits in `mods/weapons/<registry name>`
+and holds `slot.png` (192×128) and `data.json`. The JSON fields are the original
+item fields, plus behavior (projectile, pierce, volley, bow draw, spin-up,
+reload after shot) and presentation (pose, shot and reload sound). Optional
+templates start from any of the 23 original guns. `mods/README.md` documents
+every field. Malformed data is reported per field in the MOD manager, with
+EN/RU text. The page cannot list folders, so it reads `mods/index.json`:
+`npm run dev` serves it live, `npm run build` writes it, and static hosts can
+edit it.
+
+Without MODs, item generation makes the same single `1 + int(rand*40)` call
+as before. MOD weapons extend that roll by their weight, and are then accepted
+by price like original weapons. Saves store MOD weapons by registry name. A
+weapon whose MOD is removed becomes a sellable "Unknown MOD Weapon" (id 999)
+that keeps the original data and is restored when the MOD returns. Weapon id
+checks were moved onto the weapon behavior: bow draw, Wind Bow volleys,
+chain spin-up, sniper meter, gravity offset and reload sounds. MOD weapons
+therefore behave like their original counterparts. Tests in
+`tests/mod-weapons.test.ts` check:
+- each template reproduces its original weapon field by field;
+- validation messages and their Russian text;
+- the weighted pool;
+- firing, bow draw and saves taken mid-draw;
+- renumbering, the placeholder and its restore;
+- the shipped examples.
+
+Muted Chromium verified:
+- the manager;
+- icons in the shop and hotbar;
+- the item description;
+- disabling a MOD, reloading and the placeholder.
+
 **Sound settings:** Sound on the title screen and Menu / Pause
 (including the tavern) offer Master, Effects and Ambience sliders in both editions,
 with original menu fonts, checkbox/metal-knob artwork, EN/RU labels and persistence outside

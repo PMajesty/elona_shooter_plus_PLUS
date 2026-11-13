@@ -1,0 +1,19 @@
+{
+  "format": 1,
+  "template": "huntersRifle",
+  "name": "Marksman Rifle",
+  "names": { "ru": "Винтовка стрелка" },
+  "description": {
+    "en": "An example MOD weapon: a hunter's rifle rebuilt for long shots. Steady, accurate and hard-hitting, but slow to reload.",
+    "ru": "Пример оружия из мода: охотничье ружьё, переделанное для дальних выстрелов. Точное и мощное, но долго перезаряжается."
+  },
+  "attack": 70,
+  "baseAccuracy": 210,
+  "accuracyDec": 0.15,
+  "ammoMax": 6,
+  "reloadTimeMax": 8,
+  "reqLv": 3,
+  "value": 700,
+  "pose": "rifle",
+  "sound": "gun5"
+}

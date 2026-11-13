@@ -23,21 +23,25 @@ export function onLanguageChanged(update: () => void): () => void {
 }
 
 const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const patterns = Object.entries(RUSSIAN).filter(([key]) => /\{\d+\}/.test(key))
-  .sort((a, b) => b[0].replace(/\{\d+\}/g, '').length - a[0].replace(/\{\d+\}/g, '').length)
-  .map(([source, translated]) => {
-    const slots: number[] = [];
-    const numericUnit = source === '{0}ms{1}' || source === '{0}/sec';
-    // Обычное сообщение не захватывает соседнюю строку новостей вместе с её точкой.
-    const capture = /[\r\n]/.test(source) ? '([\\s\\S]*?)' : '([^\\r\\n]*?)';
-    const pattern = source.split(/(\{\d+\})/).map(part => {
-      if (!/^\{\d+\}$/.test(part)) return escape(part);
-      const slot = Number(part.slice(1, -1)); slots.push(slot);
-      if (numericUnit) return slot === 0 ? '([0-9]+(?:\\.[0-9]+)?)' : '(\\(M\\))?';
-      return capture;
-    }).join('');
-    return { match: new RegExp(`^${pattern}$`), slots, translated, source };
-  });
+interface Pattern { match: RegExp; slots: number[]; translated: string; source: string }
+function compilePatterns(entries: [string, string][]): Pattern[] {
+  return entries.filter(([key]) => /\{\d+\}/.test(key))
+    .sort((a, b) => b[0].replace(/\{\d+\}/g, '').length - a[0].replace(/\{\d+\}/g, '').length)
+    .map(([source, translated]) => {
+      const slots: number[] = [];
+      const numericUnit = source === '{0}ms{1}' || source === '{0}/sec';
+      // Обычное сообщение не захватывает соседнюю строку новостей вместе с её точкой.
+      const capture = /[\r\n]/.test(source) ? '([\\s\\S]*?)' : '([^\\r\\n]*?)';
+      const pattern = source.split(/(\{\d+\})/).map(part => {
+        if (!/^\{\d+\}$/.test(part)) return escape(part);
+        const slot = Number(part.slice(1, -1)); slots.push(slot);
+        if (numericUnit) return slot === 0 ? '([0-9]+(?:\\.[0-9]+)?)' : '(\\(M\\))?';
+        return capture;
+      }).join('');
+      return { match: new RegExp(`^${pattern}$`), slots, translated, source };
+    });
+}
+const patterns = compilePatterns(Object.entries(RUSSIAN));
 // Составные названия предметов и строки эффектов создаются оригинальными правилами.
 const htmlFragments = Object.keys(RUSSIAN).filter(key => /<[^>]+>/.test(key) && !/\{\d+\}/.test(key)).sort((a, b) => b.length - a.length);
 const htmlPattern = new RegExp(htmlFragments.map(escape).join('|'), 'g');
@@ -45,10 +49,21 @@ const fragments = Object.keys(RUSSIAN).filter(key => key.trim() && !/\{\d+\}/.te
   .sort((a, b) => b.length - a.length);
 const fragmentPattern = new RegExp(`(?<![A-Za-z])(?:${fragments.map(escape).join('|')})(?![A-Za-z])`, 'g');
 const cache = new Map<string, string>();
+/** Переводы, добавленные во время работы (названия и описания оружия из модов); ключи исходного каталога не перезаписываются. */
+const runtimeRussian: Record<string, string> = {};
+let runtimePatterns: Pattern[] = [];
+export function registerRuntimeTranslations(selected: 'ru' | 'zh', entries: Readonly<Record<string, string>>): void {
+  // Каталога для других языков пока нет; data.json может заранее содержать и их.
+  if (selected !== 'ru') return;
+  for (const [source, value] of Object.entries(entries)) if (!Object.hasOwn(RUSSIAN, source)) runtimeRussian[source] = value;
+  runtimePatterns = compilePatterns(Object.entries(runtimeRussian));
+  cache.clear();
+}
 function russian(source: string, depth = 0, context: TextContext = 'ui'): string {
   if (!source || !/[A-Za-z]/.test(source) || depth > 8) return source;
   const dictionary = context === 'content' ? CONTENT_RUSSIAN : RUSSIAN;
   if (Object.hasOwn(dictionary, source)) return dictionary[source];
+  if (Object.hasOwn(runtimeRussian, source)) return runtimeRussian[source];
   const cacheKey = context + ':' + source;
   if (cache.has(cacheKey)) return cache.get(cacheKey)!;
   let translated: string | undefined;
@@ -61,11 +76,13 @@ function russian(source: string, depth = 0, context: TextContext = 'ui'): string
   if (modifiers.length > 3 || modifiers.length === 3 && (modifiers[0] || modifiers[2])) {
     translated = modifiers.map(part => russian(part, depth + 1, context)).join('');
   }
-  for (const pattern of translated === undefined ? patterns : []) {
+  // Шаблоны модов (например, «Название Mk-{0}») точнее общих, поэтому проверяются первыми.
+  for (const pattern of translated === undefined ? [...runtimePatterns, ...patterns] : []) {
     const match = pattern.match.exec(source);
     if (!match) continue;
     const values = new Map(pattern.slots.map((slot, index) => [slot, russian(match[index + 1] ?? '', depth + 1, context)]));
-    translated = dictionary[pattern.source].replace(/\{(\d+)\}/g, (token, index) => values.get(Number(index)) ?? token);
+    const template = Object.hasOwn(dictionary, pattern.source) ? dictionary[pattern.source] : pattern.translated;
+    translated = template.replace(/\{(\d+)\}/g, (token, index) => values.get(Number(index)) ?? token);
     break;
   }
   if (translated === undefined && /\n/.test(source)) translated = source.split('\n').map(line => russian(line, depth + 1, context)).join('\n');

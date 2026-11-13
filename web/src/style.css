@@ -69,30 +69,48 @@ html[lang="ru"] #audio-settings strong { font-family: ElonaRussianMenu, serif; f
 #game[data-paused="true"] #browser-options-open .options-entry-title { margin: 0; padding: 0; font-size: 17px; border: 0; box-shadow: none; background: none; }
 #game[data-paused="true"] #browser-options-open .options-entry-description { display: none; }
 #game[data-paused="true"] #browser-options-open::before { display: none; }
-#browser-options { width: min(480px, calc(100vw - 16px)); max-height: calc(100dvh - 16px); padding: 4px 8px 6px; border: solid transparent; border-width: 28px 10px 10px 30px; border-image: var(--options-paper) 28 10 10 30 fill / 28px 10px 10px 30px; background: linear-gradient(#e8d8b5, #e8d8b5) center / calc(100% - 6px) calc(100% - 6px) no-repeat border-box; color: #382b1d; color-scheme: light; font: 15px/1.4 system-ui, sans-serif; overflow: hidden; -webkit-tap-highlight-color: transparent; }
-#browser-options[open] { display: flex; flex-direction: column; }
-#browser-options::backdrop { background: #0009; }
-#browser-options h2 { margin: 0 0 8px; font: 25px ElonaMenuBold, serif; color: #4a251b; }
-#browser-options h3 { margin: 0 0 7px; font: 20px ElonaMenuBold, serif; color: #4a251b; }
-#browser-options .options-content { min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-color: #99805a #dac79f; padding: 0 6px 0 0; }
-#browser-options section + section { border-top: 1px solid #82674066; margin-top: 16px; padding-top: 12px; }
-#browser-options p { margin: .5rem 0; }
-#browser-options ul { padding-left: 20px; margin: .7rem 0; }
-#browser-options li + li { margin-top: 6px; }
-#browser-options button { min-height: 44px; padding: 6px 15px; border: 1px solid #846b46; border-radius: 2px; background: #cbb18466; color: #402619; box-shadow: 1px 2px 2px #5c482744; font: 19px ElonaMenu, serif; }
-#browser-options button:hover { background: #f5e4bd88; color: #000099; }
-#browser-options button:disabled { opacity: .5; cursor: default; }
-#browser-options :focus-visible, #browser-options-open:focus-visible { outline: 2px solid #7c5426; outline-offset: 2px; }
-#browser-options h2:focus { outline: none; }
-#browser-options form { padding-top: 10px; flex: none; }
-#browser-options form button { min-width: 110px; }
+:is(#browser-options, #mod-manager) { width: min(480px, calc(100vw - 16px)); max-height: calc(100dvh - 16px); padding: 4px 8px 6px; border: solid transparent; border-width: 28px 10px 10px 30px; border-image: var(--options-paper) 28 10 10 30 fill / 28px 10px 10px 30px; background: linear-gradient(#e8d8b5, #e8d8b5) center / calc(100% - 6px) calc(100% - 6px) no-repeat border-box; color: #382b1d; color-scheme: light; font: 15px/1.4 system-ui, sans-serif; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+:is(#browser-options, #mod-manager)[open] { display: flex; flex-direction: column; }
+:is(#browser-options, #mod-manager)::backdrop { background: #0009; }
+:is(#browser-options, #mod-manager) h2 { margin: 0 0 8px; font: 25px ElonaMenuBold, serif; color: #4a251b; }
+:is(#browser-options, #mod-manager) h3 { margin: 0 0 7px; font: 20px ElonaMenuBold, serif; color: #4a251b; }
+:is(#browser-options, #mod-manager) .options-content { min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-color: #99805a #dac79f; padding: 0 6px 0 0; }
+:is(#browser-options, #mod-manager) section + section { border-top: 1px solid #82674066; margin-top: 16px; padding-top: 12px; }
+:is(#browser-options, #mod-manager) p { margin: .5rem 0; }
+:is(#browser-options, #mod-manager) ul { padding-left: 20px; margin: .7rem 0; }
+:is(#browser-options, #mod-manager) li + li { margin-top: 6px; }
+:is(#browser-options, #mod-manager) button { min-height: 44px; padding: 6px 15px; border: 1px solid #846b46; border-radius: 2px; background: #cbb18466; color: #402619; box-shadow: 1px 2px 2px #5c482744; font: 19px ElonaMenu, serif; }
+:is(#browser-options, #mod-manager) button:hover { background: #f5e4bd88; color: #000099; }
+:is(#browser-options, #mod-manager) button:disabled { opacity: .5; cursor: default; }
+:is(#browser-options, #mod-manager) :focus-visible, #browser-options-open:focus-visible { outline: 2px solid #7c5426; outline-offset: 2px; }
+:is(#browser-options, #mod-manager) h2:focus { outline: none; }
+:is(#browser-options, #mod-manager) form { padding-top: 10px; flex: none; }
+:is(#browser-options, #mod-manager) form button { min-width: 110px; }
 .touch-setting { padding: .4rem .6rem; border: 1px solid #947c5266; border-radius: 2px; background: #c5a97822; }
 .touch-setting label { display: flex; align-items: center; gap: .65rem; min-height: 44px; cursor: pointer; }
 .touch-setting input { appearance: none; width: 20px; height: 20px; margin: 0; flex: none; background: var(--options-check-off) center / contain no-repeat; cursor: pointer; }
 .touch-setting input:checked { background-image: var(--options-check-on); }
-#browser-options .touch-setting p, #browser-options .options-shortcuts { font-size: 13px; color: #68523a; }
+:is(#browser-options, #mod-manager) .touch-setting p, :is(#browser-options, #mod-manager) .options-shortcuts { font-size: 13px; color: #68523a; }
 .options-files { display: flex; flex-wrap: wrap; gap: 8px; margin: .8rem 0; }
-html[lang="ru"] #browser-options-open, html[lang="ru"] #browser-options :is(h2, h3, button), html[lang="ru"] .options-entry-title { font-family: ElonaRussianMenu, serif; }
+/* Окно модов: строка = флажок · значок · название/имя/состояние; значок 192×128 показан в половину. */
+#mod-manager .mod-list { margin-top: 12px; }
+#mod-manager .mod-row { display: flex; align-items: flex-start; gap: 10px; padding: 6px 8px; border: 1px solid #947c5266; border-radius: 2px; background: #c5a97822; }
+#mod-manager .mod-row + .mod-row { margin-top: 6px; }
+#mod-manager .mod-toggle { display: flex; align-items: center; min-height: 64px; cursor: pointer; }
+#mod-manager .mod-toggle input { appearance: none; width: 20px; height: 20px; margin: 0; flex: none; background: var(--options-check-off) center / contain no-repeat; cursor: pointer; }
+#mod-manager .mod-toggle input:checked { background-image: var(--options-check-on); }
+#mod-manager .mod-toggle input:disabled { opacity: .5; cursor: default; }
+#mod-manager .mod-icon { width: 96px; height: 64px; flex: none; display: flex; align-items: center; justify-content: center; background: #5c48271a; }
+#mod-manager .mod-icon img { width: 96px; height: 64px; image-rendering: auto; filter: drop-shadow(2px 2px 1px #000a); }
+#mod-manager .mod-info { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
+#mod-manager .mod-info strong { font: 18px ElonaMenuBold, serif; color: #4a251b; }
+#mod-manager .mod-key { font: 12px ui-monospace, Consolas, monospace; color: #68523a; }
+#mod-manager .mod-status { font-size: 13px; color: #2f5a1c; }
+#mod-manager .mod-error { color: #8f1d12; }
+#mod-manager .mod-errors { margin: 2px 0 0; padding-left: 18px; font-size: 13px; color: #8f1d12; }
+#mod-manager .mod-note { font-size: 13px; color: #68523a; }
+html[lang="ru"] #mod-manager .mod-info strong { font-family: ElonaRussianMenu, serif; }
+html[lang="ru"] #browser-options-open, html[lang="ru"] :is(#browser-options, #mod-manager) :is(h2, h3, button), html[lang="ru"] .options-entry-title { font-family: ElonaRussianMenu, serif; }
 
 @media (any-pointer: coarse) {
   #game, #game:fullscreen {

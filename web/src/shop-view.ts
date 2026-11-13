@@ -6,6 +6,7 @@ import type { ItemPopupInfo } from './item-popup-values.ts';
 import Phaser from 'phaser';
 import { ITEM_TYPE, isOccupiedItem, itemPrice, type Item } from './items.ts';
 import type { LootViewManifest } from './loot-view.ts';
+import { createItemIcon, itemIconSize } from './item-icon.ts';
 import { createModConfirmation } from './mod-confirmation-view.ts';
 
 interface Placement {
@@ -156,13 +157,13 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
     let slotView: SlotView | undefined;
     if (item) {
       const asset = manifest.clips.itemPicture;
-      const width = GRAPHIC_WIDTH[item.graphic] ?? asset.frameWidth;
+      const { width, height } = itemIconSize(item, asset);
       const iconX = x - (width - 48) / 2 - 4;
       const icon = scene.add.container(iconX, y);
-      icon.add(localizedImage(scene, -asset.originX, -asset.originY, 'itemPicture', String(item.graphic)).setOrigin(0));
+      icon.add(createItemIcon(scene, 0, 0, item, asset));
       if (item.type === ITEM_TYPE.use && item.ammoMax > 0) icon.add(localizedText(scene, 30.95, 2, `x ${item.ammo}`, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
       root.add(icon);
-      slotView = { area, index, item, icon, originalX: iconX, originalY: y, width, height: GRAPHIC_HEIGHT[item.graphic] ?? asset.frameHeight };
+      slotView = { area, index, item, icon, originalX: iconX, originalY: y, width, height };
       if (pending?.kind === 'mod' && area === 'inventory' && pending.modSlot === index) pendingModIcon = slotView;
     }
     const zone = scene.add.zone(x, y, 50, 50).setOrigin(0).setInteractive({ useHandCursor: true });
