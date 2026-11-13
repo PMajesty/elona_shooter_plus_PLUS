@@ -29,10 +29,12 @@ button:focus-visible { outline: 2px solid #e6d5a6; outline-offset: 1px; }
 
 #audio-settings { position: absolute; z-index: 3; width: 235px; height: 144px; padding: 10px 12px; transform-origin: top left; color: #382b1d; font: 13px ElonaMenu, serif; color-scheme: light; }
 html[lang="ru"] #audio-settings { font-family: ElonaRussianMenu, serif; }
+html[lang="zh-CN"] #audio-settings { font-family: ElonaChineseMenu, "Microsoft YaHei", sans-serif; }
 #audio-settings[hidden] { display: none; }
 #audio-settings header { display: flex; justify-content: space-between; align-items: center; height: 23px; padding-left: 20px; }
 #audio-settings strong { font: 17px ElonaMenuBold, serif; color: #4a251b; }
 html[lang="ru"] #audio-settings strong { font-family: ElonaRussianMenu, serif; font-weight: bold; }
+html[lang="zh-CN"] #audio-settings strong { font-family: ElonaChineseMenu, "Microsoft YaHei", sans-serif; font-weight: bold; }
 #audio-settings header label { display: flex; align-items: center; gap: 3px; }
 #audio-settings .audio-row { display: grid; grid-template-columns: 72px minmax(0, 1fr) 30px; align-items: center; gap: 5px; height: 33px; }
 #audio-settings output { text-align: right; font-variant-numeric: tabular-nums; }
@@ -93,6 +95,7 @@ html[lang="ru"] #audio-settings strong { font-family: ElonaRussianMenu, serif; f
 #browser-options .touch-setting p, #browser-options .options-shortcuts { font-size: 13px; color: #68523a; }
 .options-files { display: flex; flex-wrap: wrap; gap: 8px; margin: .8rem 0; }
 html[lang="ru"] #browser-options-open, html[lang="ru"] #browser-options :is(h2, h3, button), html[lang="ru"] .options-entry-title { font-family: ElonaRussianMenu, serif; }
+html[lang="zh-CN"] #browser-options-open, html[lang="zh-CN"] #browser-options :is(h2, h3, button), html[lang="zh-CN"] .options-entry-title { font-family: ElonaChineseMenu, "Microsoft YaHei", sans-serif; }
 
 @media (any-pointer: coarse) {
   #game, #game:fullscreen {
@@ -116,9 +119,11 @@ html[lang="ru"] #browser-options-open, html[lang="ru"] #browser-options :is(h2, 
   #game-controls :is(#touch-fire-at-will, #touch-enlarge) { font: 11px/1.05 ElonaMenu, serif; }
   #game-controls #touch-enlarge { width: 56px; }
   html[lang="ru"] #game-controls :is(#touch-fire-at-will, #touch-enlarge) { font-family: ElonaRussianMenu, serif; }
+  html[lang="zh-CN"] #game-controls :is(#touch-fire-at-will, #touch-enlarge) { font-family: ElonaChineseMenu, "Microsoft YaHei", sans-serif; }
   #browser-options .options-shortcuts { display: none; }
   #game-controls #touch-reload { width: var(--touch-reload-size); height: var(--touch-reload-size); border-radius: 50%; border: 1px solid #d0bd8c88; background: radial-gradient(circle at 35% 25%, #73634c66, #211e1659 72%); box-shadow: inset 0 0 0 3px #100e0926, 0 2px 4px #0003; font: 14px/1.1 ElonaMenu, serif; }
   html[lang="ru"] #game-controls #touch-reload { font: 12px/1.1 ElonaRussianMenu, serif; }
+  html[lang="zh-CN"] #game-controls #touch-reload { font: 13px/1.1 ElonaChineseMenu, "Microsoft YaHei", sans-serif; }
   #game-controls #touch-reload svg { width: 30px; height: 30px; margin: 0 auto 3px; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   #game-controls #touch-reload:active { background: #73604499; }
   #game-controls #touch-reload[data-reload-state="queued"] { border-color: #ebcd83; background: radial-gradient(circle at 35% 25%, #b28d3e77, #4e3a2066 72%); box-shadow: inset 0 0 0 3px #e8c87a22, 0 2px 4px #0003; }

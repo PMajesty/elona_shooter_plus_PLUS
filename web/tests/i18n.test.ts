@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync, existsSync } from 'node:fs';
-import { translateText as translate, setLanguage, getLanguage, readLanguage, onLanguageChanged } from '../src/i18n.ts';
+import { translateText as translate, setLanguage, getLanguage, readLanguage, onLanguageChanged, nextLanguage } from '../src/i18n.ts';
 import { ruContent } from '../src/locales/ru-content.ts';
 import { ruUI } from '../src/locales/ru-ui.ts';
+import { zhContent } from '../src/locales/zh-content.ts';
+import { zhUI } from '../src/locales/zh-ui.ts';
+import { wrapCjkText } from '../src/cjk-wrap.ts';
 import { Simulation } from '../src/simulation.ts';
 import { ItemFactory } from '../src/items.ts';
 import { itemPopupValues } from '../src/item-popup-values.ts';
@@ -22,6 +25,41 @@ test('Russian catalogs preserve placeholders; English stays canonical', () => {
   assert.equal(translate('Prayer', 'ru'), 'Молитва');
   assert.equal(translate('Prayer', 'ru', 'content'), 'Богомолец');
   assert.equal(translate('unknown development string', 'en'), 'unknown development string');
+});
+
+test('Chinese catalogs cover the Russian keys and preserve placeholders', () => {
+  assert.deepEqual(Object.keys(zhContent).sort(), Object.keys(ruContent).sort());
+  assert.deepEqual(Object.keys(zhUI).sort(), Object.keys(ruUI).sort());
+  const images = JSON.parse(readFileSync(new URL('../src/locales/zh-images.json', import.meta.url), 'utf8'));
+  const russianImages = JSON.parse(readFileSync(new URL('../src/locales/ru-images.json', import.meta.url), 'utf8'));
+  assert.deepEqual(Object.keys(images), Object.keys(russianImages));
+  for (const dictionary of [zhContent, zhUI]) for (const [source, value] of Object.entries(dictionary)) {
+    assert.deepEqual(value.match(/\{\d+\}/g)?.sort() ?? [], source.match(/\{\d+\}/g)?.sort() ?? [], source);
+    assert.ok(value.length, source);
+  }
+  assert.equal(translate('Day  3', 'zh'), '第 3 天');
+  assert.equal(translate('You have survived another day!\n(+25 xp)', 'zh'), '你又挺过了一天！\n（+25 经验）');
+  assert.equal(translate('Day 4 begins.', 'zh'), '第4天开始了。');
+});
+
+test('Chinese wrapping breaks between characters, keeps Latin words and follows line-break punctuation rules', () => {
+  // Ширина иероглифа 1, латинского символа 0.5.
+  const measure = (value: string) => Array.from(value).reduce((sum, character) => sum + (character <= 'ÿ' ? 0.5 : 1), 0);
+  assert.equal(wrapCjkText('准备迎战敌人来袭', measure, 4), '准备迎战\n敌人来袭');
+  assert.equal(wrapCjkText('一二三四。', measure, 4), '一二三四。');
+  assert.equal(wrapCjkText('一二（三）', measure, 3), '一二\n（三）');
+  assert.equal(wrapCjkText('获得Shotgun霰弹枪', measure, 6), '获得Shotgun\n霰弹枪');
+  assert.equal(wrapCjkText('Supercalifragilistic', measure, 4), 'Supercal\nifragili\nstic');
+  assert.equal(wrapCjkText('第一行\n\n第三行', measure, 10), '第一行\n\n第三行');
+});
+
+test('the language button cycles EN → RU → 中 and skips languages without artwork', () => {
+  assert.equal(nextLanguage('en'), 'ru');
+  assert.equal(nextLanguage('ru'), 'zh');
+  assert.equal(nextLanguage('zh'), 'en');
+  assert.equal(nextLanguage('en', ['en', 'zh']), 'zh');
+  assert.equal(nextLanguage('zh', ['en', 'zh']), 'en');
+  assert.equal(nextLanguage('ru', ['en']), 'en');
 });
 
 test('actual generated modifier lists and living-weapon suffix translate independently', () => {
@@ -98,18 +136,20 @@ test('switching language during a seeded battle does not affect saves or replay'
 test('localized artwork uses complete original image and atlas footprints', () => {
   const root = new URL('../public/assets/', import.meta.url);
   const source = JSON.parse(readFileSync(new URL('manifest.json', root), 'utf8'));
-  const russian = JSON.parse(readFileSync(new URL('ru/manifest.json', root), 'utf8'));
-  assert.ok(Object.keys(russian.images).length > 100);
-  for (const [key, path] of Object.entries(russian.images) as [string,string][]) {
-    assert.equal(path, source.images[key].file); assert.ok(existsSync(new URL('ru/' + path, root)), key);
-    if (path.endsWith('.png')) assert.deepEqual(readFileSync(new URL('ru/' + path, root)).subarray(16,24), readFileSync(new URL(path, root)).subarray(16,24), key);
-  }
-  for (const [key, path] of Object.entries(russian.clips) as [string,string][]) {
-    assert.equal(path, source.clips[key].image);
-    assert.deepEqual(readFileSync(new URL('ru/' + path, root)).subarray(16,24), readFileSync(new URL(path, root)).subarray(16,24), key);
-  }
-  assert.equal(russian.hitMasks.button_proceed, source.images.button_proceed.hitMask, 'Russian button keeps the source hit registration');
-  for (const [key, value] of Object.entries(russian.hitMasks) as [string,string][]) {
-    const a = source.images[key]; assert.equal(Buffer.from(value, 'base64').length, Math.ceil(a.width / 8) * a.height, key);
+  for (const language of ['ru', 'zh']) {
+    const localized = JSON.parse(readFileSync(new URL(`${language}/manifest.json`, root), 'utf8'));
+    assert.ok(Object.keys(localized.images).length > 100, language);
+    for (const [key, path] of Object.entries(localized.images) as [string,string][]) {
+      assert.equal(path, source.images[key].file); assert.ok(existsSync(new URL(`${language}/` + path, root)), key);
+      if (path.endsWith('.png')) assert.deepEqual(readFileSync(new URL(`${language}/` + path, root)).subarray(16,24), readFileSync(new URL(path, root)).subarray(16,24), key);
+    }
+    for (const [key, path] of Object.entries(localized.clips) as [string,string][]) {
+      assert.equal(path, source.clips[key].image);
+      assert.deepEqual(readFileSync(new URL(`${language}/` + path, root)).subarray(16,24), readFileSync(new URL(path, root)).subarray(16,24), key);
+    }
+    assert.equal(localized.hitMasks.button_proceed, source.images.button_proceed.hitMask, `${language} button keeps the source hit registration`);
+    for (const [key, value] of Object.entries(localized.hitMasks) as [string,string][]) {
+      const a = source.images[key]; assert.equal(Buffer.from(value, 'base64').length, Math.ceil(a.width / 8) * a.height, key);
+    }
   }
 });

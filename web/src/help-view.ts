@@ -18,9 +18,12 @@ export interface HelpLayout {
 export function createHelpView(scene: Phaser.Scene, manifest: LootViewManifest, layout: HelpLayout,
   close: () => void, changed: (page: number, scroll: number) => void, click: () => void): Phaser.GameObjects.Container {
   const root = scene.add.container(0, 0).setName('original-help');
-  const shade = scene.add.rectangle(0, 0, 620, 380, 0, 0.45).setOrigin(0).setInteractive(); root.add(shade);
+  // Справка в оригинале не затемняет фон, а размывает снимок (makeBlurScreen, его подкладывает сцена); прозрачный слой только закрывает справку щелчком мимо.
+  const shade = scene.add.rectangle(0, 0, 620, 380, 0, 0).setOrigin(0).setInteractive(); root.add(shade);
   bindTouchSafeDismiss(scene, root, shade, () => { click(); close(); });
-  const content = scene.add.container(0, 0); root.add(content);
+  // window4_mc (страница и четыре вкладки) въезжает справа целиком; слой и размытый снимок остаются на месте.
+  const panel = scene.add.container(0, 0).setName('help-window'); root.add(panel);
+  const content = scene.add.container(0, 0); panel.add(content);
   let page = 4;
   const image = (key: string, p: Placement) => {
     const a = manifest.images[key];
@@ -69,7 +72,7 @@ export function createHelpView(scene: Phaser.Scene, manifest: LootViewManifest, 
   draw(4);
   for (const [part, key, number] of [['help1', 'button_helpBattle', 1], ['help2', 'button_helpTown', 2],
     ['help3', 'button_helpCredits', 3], ['help4', 'button_helpTips', 4]] as const) {
-    root.add(button(key, layout.pages[0].children[part], () => draw(number)).setName(`help-page-${number}`));
+    panel.add(button(key, layout.pages[0].children[part], () => draw(number)).setName(`help-page-${number}`));
   }
   return root;
 }

@@ -1,7 +1,7 @@
 import type Phaser from 'phaser';
 import { getLanguage } from './i18n.ts';
 
-interface ButtonAsset { width: number; height: number; hitMask?: string; ruHitMask?: string }
+interface ButtonAsset { width: number; height: number; hitMask?: string; ruHitMask?: string; zhHitMask?: string }
 const shapes = new WeakMap<ButtonAsset, string>();
 
 /** У Flash отдельный HitTest-кадр: смена рисунка под мышью не меняет область нажатия. */
@@ -9,10 +9,12 @@ export function buttonInput(asset: ButtonAsset, useHandCursor = true): Phaser.Ty
   if (!asset.hitMask) return { useHandCursor, pixelPerfect: true, alphaTolerance: 100 };
   let bits = shapes.get(asset);
   if (bits === undefined) { bits = atob(asset.hitMask); shapes.set(asset, bits); }
-  const englishMask = bits, russianMask = asset.ruHitMask ? atob(asset.ruHitMask) : bits, stride = Math.ceil(asset.width / 8);
+  const englishMask = bits, stride = Math.ceil(asset.width / 8);
+  // У переведённых кнопок может быть своя область щелчка; без неё используется английская.
+  const masks = { en: englishMask, ru: asset.ruHitMask ? atob(asset.ruHitMask) : bits, zh: asset.zhHitMask ? atob(asset.zhHitMask) : bits };
   return { useHandCursor, hitArea: asset, hitAreaCallback: (_area, x, y) => {
     if (x < 0 || y < 0 || x >= asset.width || y >= asset.height) return false;
-    const mask = getLanguage() === 'ru' ? russianMask : englishMask;
+    const mask = masks[getLanguage()];
     const px = Math.floor(x);
     return (mask.charCodeAt(Math.floor(y) * stride + (px >> 3)) & (128 >> (px & 7))) !== 0;
   } };

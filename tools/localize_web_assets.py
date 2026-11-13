@@ -1,4 +1,7 @@
-"""Русские варианты исходной графики: текстовые слои SWF, без изменения оригинала."""
+"""Локализованные варианты исходной графики: текстовые слои SWF, без изменения оригинала.
+
+Запуск: python tools/localize_web_assets.py --build [--language ru|zh] (по умолчанию ru).
+"""
 from pathlib import Path
 import html
 import json
@@ -15,11 +18,36 @@ from PIL import Image, ImageFont, ImageDraw, ImageFilter
 import extract_web_assets as original
 
 ROOT = Path(__file__).resolve().parents[1]
+FONTS = ROOT / 'web/public/assets/fonts'
+# Шрифты, заменяющие исходные (меню 682, интерфейс 1535, жирный 1653), и надпись значка «Day» в HUD для каждого языка.
+# В китайском нет пробелов между словами, поэтому перенос идёт по символам.
+LANGUAGES = {
+    'ru': {'menu': 'ru/Neucha.ttf', 'ui': 'ru/PT_Sans-Web-Regular.ttf', 'bold': 'ru/PT_Sans-Web-Bold.ttf',
+           'day': 'День', 'cjk': False},
+    'zh': {'menu': 'zh/LXGWWenKai-Subset.ttf', 'ui': 'zh/NotoSansSC-Regular-Subset.ttf',
+           'bold': 'zh/NotoSansSC-Bold-Subset.ttf', 'day': '天', 'cjk': True},
+}
+LANGUAGE = 'ru'
 WORK = ROOT / '.build/localization'
 DEST = ROOT / 'web/public/assets/ru'
-FONT_DIR = ROOT / 'web/public/assets/fonts/ru'
 TEXT_TYPES = {'DefineTextTag', 'DefineText2Tag', 'DefineEditTextTag'}
 DEFINITION_TYPES = TEXT_TYPES | {'DefineButton2Tag', 'DefineSpriteTag'}
+# Переносы китайского текста: закрывающая пунктуация не начинает строку, открывающая скобка не заканчивает её (как в web/src/cjk-wrap.ts).
+NO_LINE_START = set('，。、！？：；）」』》〉】〕…％%,.!?:;)]}·ー々')
+NO_LINE_END = set('（「『《〈【〔“‘([{')
+CJK_TOKEN = re.compile(r"[A-Za-z0-9À-ɏЀ-ӿ.,:;!?%+\-/'\"#()\[\]{}*&@$^=_<>~]+| +|.", re.S)
+
+
+def configure(language):
+    global LANGUAGE, WORK, DEST
+    LANGUAGE = language
+    # Русский сохраняет прежний каталог кэша; у других языков свои каталоги.
+    WORK = ROOT / ('.build/localization' if language == 'ru' else f'.build/localization-{language}')
+    DEST = ROOT / 'web/public/assets' / language
+
+
+def font_path(kind):
+    return FONTS / LANGUAGES[LANGUAGE][kind]
 
 
 def plain_html(value):
@@ -77,10 +105,40 @@ def font_source():
     output = WORK / 'fonts.xml'
     if not output.exists():
         swf = WORK / 'fonts.swf'
-        original.ffdec(['-replace', original.SOURCE, swf, 682, FONT_DIR / 'Neucha.ttf',
-                        1535, FONT_DIR / 'PT_Sans-Web-Regular.ttf', 1653, FONT_DIR / 'PT_Sans-Web-Bold.ttf'], 'ru-fonts')
-        original.ffdec(['-swf2xml', swf, output], 'ru-fonts-xml')
+        original.ffdec(['-replace', original.SOURCE, swf, 682, font_path('menu'),
+                        1535, font_path('ui'), 1653, font_path('bold')], f'{LANGUAGE}-fonts')
+        original.ffdec(['-swf2xml', swf, output], f'{LANGUAGE}-fonts-xml')
     return ET.parse(output).getroot()
+
+
+def wrap_cjk(paragraph, font, width):
+    """Перенос китайского текста по символам по правилам web/src/cjk-wrap.ts: латинские слова не разрываются."""
+    lines, line = [], ''
+    for token in CJK_TOKEN.findall(paragraph):
+        if token.isspace():
+            if line and font.getlength(line + token) <= width:
+                line += token
+            elif line:
+                lines.append(line.rstrip()); line = ''
+            continue
+        if line and font.getlength(line + token) > width:
+            if token[0] in NO_LINE_START:
+                line += token; continue
+            carried = ''
+            while len(line) > 1 and line[-1] in NO_LINE_END:
+                carried = line[-1] + carried; line = line[:-1]
+            lines.append(line.rstrip()); line = carried
+        while not line and len(token) > 1 and font.getlength(token) > width:
+            head = ''
+            while token and font.getlength(head + token[0]) <= width:
+                head += token[0]; token = token[1:]
+            if not head:
+                head, token = token[0], token[1:]
+            lines.append(head)
+        line += token
+    if line or not lines:
+        lines.append(line.rstrip())
+    return lines
 
 
 def wrap(value, font, width, multiline):
@@ -88,6 +146,8 @@ def wrap(value, font, width, multiline):
     for paragraph in value.split('\n'):
         if not multiline:
             lines.append(paragraph); continue
+        if LANGUAGES[LANGUAGE]['cjk']:
+            lines.extend(wrap_cjk(paragraph, font, width)); continue
         line = ''
         for word in paragraph.split(' '):
             joined = (line + ' ' + word).strip()
@@ -113,18 +173,21 @@ def translated_definitions(xml, translations):
         menu = any(name in info['font'] for name in ('HGP', 'Victorian', 'KaiTi'))
         bold = not menu and any(name in info['font'] for name in ('Bold', 'Impact', 'Times New', 'Optimum', 'Gothic'))
         font_id = 60000 if menu else 60002 if bold else 60001
-        filename = 'Neucha.ttf' if menu else 'PT_Sans-Web-Bold.ttf' if bold else 'PT_Sans-Web-Regular.ttf'
+        kind = 'menu' if menu else 'bold' if bold else 'ui'
         bounds = tag.find('bounds') if tag.get('type') == 'DefineEditTextTag' else tag.find('textBounds')
         width = (int(bounds.get('Xmax')) - int(bounds.get('Xmin'))) / 20
         height = (int(bounds.get('Ymax')) - int(bounds.get('Ymin'))) / 20
         maximum = info['size']; size = maximum
         multiline = '\n' in value or height > maximum * 2
+        sample = '天' if LANGUAGES[LANGUAGE]['cjk'] else 'А'
         while True:
-            font = ImageFont.truetype(str(FONT_DIR / filename), round(size * 4))
+            font = ImageFont.truetype(str(font_path(kind)), round(size * 4))
             lines = wrap(value, font, max(1, width - 3) * 4, multiline)
-            ink = max((font.getbbox(line or 'А')[3] - font.getbbox(line or 'А')[1]) / 4 for line in lines)
+            ink = max((font.getbbox(line or sample)[3] - font.getbbox(line or sample)[1]) / 4 for line in lines)
             fits_width = max(font.getlength(line) / 4 for line in lines) <= width - 2
-            fits_height = ink + (len(lines) - 1) * size * 1.15 <= height - 1
+            # Строка китайского шрифта (ascent+descent) заметно выше латинской, поэтому высота нескольких строк считается по метрикам шрифта.
+            step = sum(font.getmetrics()) / 4 if LANGUAGES[LANGUAGE]['cjk'] else size * 1.15
+            fits_height = ink + (len(lines) - 1) * step <= height - 1
             if fits_width and fits_height or size <= 6:
                 break
             size = max(6, size - 0.5)
@@ -167,11 +230,19 @@ def day_badge(xml):
     clean.putalpha(picture.getchannel('A'))
     lettering = Image.new('RGBA', (160, 104))
     draw = ImageDraw.Draw(lettering)
-    draw.text((80, 50), 'День', font=ImageFont.truetype(str(FONT_DIR / 'PT_Sans-Web-Bold.ttf'), 48),
+    draw.text((80, 50), LANGUAGES[LANGUAGE]['day'], font=ImageFont.truetype(str(font_path('bold')), 48),
               anchor='mm', fill='#eee8d2', stroke_width=2, stroke_fill='#121714')
-    letters = lettering.crop(lettering.getbbox()).resize((76, 40), Image.Resampling.LANCZOS)
+    letters = lettering.crop(lettering.getbbox())
+    if LANGUAGES[LANGUAGE]['cjk']:
+        # Один иероглиф масштабируется пропорционально и центрируется, а не растягивается, как латинское слово.
+        scale = min(76 / letters.width, 40 / letters.height)
+        letters = letters.resize((round(letters.width * scale), round(letters.height * scale)), Image.Resampling.LANCZOS)
+        position = (14 + (76 - letters.width) // 2, 30 + (40 - letters.height) // 2)
+    else:
+        letters = letters.resize((76, 40), Image.Resampling.LANCZOS)
+        position = (14, 30)
     lettering = Image.new('RGBA', (104, 104))
-    lettering.alpha_composite(letters, (14, 30))
+    lettering.alpha_composite(letters, position)
     # Сглаживаем только новые буквы; исходная рамка не проходит повторный ресайз.
     picture = Image.alpha_composite(clean, lettering.resize((26, 26), Image.Resampling.LANCZOS))
     argb = bytearray()
@@ -197,7 +268,7 @@ def localize_tree(xml, replacements, font_xml):
 def export_swf(name, xml):
     path, swf = WORK / f'{name}.xml', WORK / f'{name}.swf'
     ET.ElementTree(xml).write(path, encoding='utf-8', xml_declaration=True)
-    original.ffdec(['-xml2swf', path, swf], 'ru-' + name)
+    original.ffdec(['-xml2swf', path, swf], f'{LANGUAGE}-' + name)
     return swf
 
 
@@ -219,7 +290,7 @@ def normalize(image, origin, asset, size=None):
 def build_assets(only=None):
     source = ET.parse(ROOT / '.build/reference/original.xml').getroot()
     manifest = json.loads((original.DEST / 'manifest.json').read_text())
-    translations = json.loads((ROOT / 'web/src/locales/ru-images.json').read_text(encoding='utf-8'))
+    translations = json.loads((ROOT / f'web/src/locales/{LANGUAGE}-images.json').read_text(encoding='utf-8'))
     replacements, fits = translated_definitions(source, translations)
     font_xml = font_source(); defs = definitions(source)
     replacements['2690'] = day_badge(source)
@@ -251,7 +322,7 @@ def build_assets(only=None):
             swf = export_swf(key, localize_tree(tree, replacements, font_xml))
             directory = WORK / ('frames-' + key)
             double = asset['file'].endswith('.webp')
-            original.ffdec(['-ignorebackground', '-zoom', '2' if double else '1', '-export', 'frame', directory, swf], 'ru-frame-' + key)
+            original.ffdec(['-ignorebackground', '-zoom', '2' if double else '1', '-export', 'frame', directory, swf], f'{LANGUAGE}-frame-' + key)
             picture = Image.open(directory / '1.png').convert('RGBA')
             if double:
                 x, y = round(-asset['originX'] * 2), round(-asset['originY'] * 2)
@@ -261,14 +332,14 @@ def build_assets(only=None):
         jobs.append((key, render, path.read_bytes()))
     with ThreadPoolExecutor(max_workers=3) as pool:
         list(pool.map(lambda job: cached(*job), jobs))
-    ru_source = WORK / 'source.swf'
+    localized_source = WORK / 'source.swf'
     cached('source', lambda: export_swf('source', localize_tree(copy.deepcopy(source), replacements, font_xml)))
     buttons = {key: symbol for key, symbol in original.BUTTONS.items() if reachable_text(defs, symbol)}
     png_dir, svg_dir = WORK / 'buttons', WORK / 'buttons-svg'
     def render_buttons():
         ids = ','.join(map(str, buttons.values()))
-        original.ffdec(['-ignorebackground', '-selectid', ids, '-export', 'button', png_dir, ru_source], 'ru-buttons')
-        original.ffdec(['-ignorebackground', '-selectid', ids, '-format', 'button:svg', '-export', 'button', svg_dir, ru_source], 'ru-buttons-svg')
+        original.ffdec(['-ignorebackground', '-selectid', ids, '-export', 'button', png_dir, localized_source], f'{LANGUAGE}-buttons')
+        original.ffdec(['-ignorebackground', '-selectid', ids, '-format', 'button:svg', '-export', 'button', svg_dir, localized_source], f'{LANGUAGE}-buttons-svg')
     cached('buttons', render_buttons)
     nav_shadows = {int(t.get('characterId')): t.find('surfaceFilterList/item')
                    for t in original.placed_frame(source.find('tags'), 71) if t.get('name') in
@@ -311,8 +382,8 @@ def build_assets(only=None):
         def render_clip(key=key, asset=asset, tree=tree, symbol=symbol):
             swf = export_swf('clip-' + key, localize_tree(tree, replacements, font_xml))
             directory, svgs = WORK / ('clip-' + key), WORK / ('clip-' + key + '-svg')
-            original.ffdec(['-ignorebackground', '-selectid', str(symbol), '-export', 'sprite', directory, swf], 'ru-clip-' + key)
-            original.ffdec(['-ignorebackground', '-selectid', str(symbol), '-format', 'sprite:svg', '-export', 'sprite', svgs, swf], 'ru-clip-svg-' + key)
+            original.ffdec(['-ignorebackground', '-selectid', str(symbol), '-export', 'sprite', directory, swf], f'{LANGUAGE}-clip-' + key)
+            original.ffdec(['-ignorebackground', '-selectid', str(symbol), '-format', 'sprite:svg', '-export', 'sprite', svgs, swf], f'{LANGUAGE}-clip-svg-' + key)
             pngs = original.sprite_directory(directory, symbol); vectors = original.sprite_directory(svgs, symbol)
             atlas = json.loads((original.DEST / asset['json']).read_text()); picture = Image.open(original.DEST / asset['image']).convert('RGBA')
             done = set()
@@ -334,8 +405,8 @@ def build_assets(only=None):
         tree = ET.parse(original.WORK / 'runtime-clips.xml').getroot()
         swf = export_swf(key, localize_tree(tree, replacements, font_xml))
         directory, svgs = WORK / key, WORK / (key + '-svg')
-        original.ffdec(['-ignorebackground', '-selectid', str(symbol), '-export', 'sprite', directory, swf], 'ru-gameOver')
-        original.ffdec(['-ignorebackground', '-selectid', str(symbol), '-format', 'sprite:svg', '-export', 'sprite', svgs, swf], 'ru-gameOver-svg')
+        original.ffdec(['-ignorebackground', '-selectid', str(symbol), '-export', 'sprite', directory, swf], f'{LANGUAGE}-gameOver')
+        original.ffdec(['-ignorebackground', '-selectid', str(symbol), '-format', 'sprite:svg', '-export', 'sprite', svgs, swf], f'{LANGUAGE}-gameOver-svg')
         pngs, vectors = original.sprite_directory(directory, symbol), original.sprite_directory(svgs, symbol)
         frame = Image.open(pngs / '1.png').convert('RGBA')
         picture = normalize(frame, svg_origin(vectors / '1.svg', frame.size), asset)
@@ -347,9 +418,11 @@ def build_assets(only=None):
 
 
 if __name__ == '__main__':
-    WORK.mkdir(parents=True, exist_ok=True)
     parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('--build', action='store_true')
+    parser.add_argument('--language', choices=sorted(LANGUAGES), default='ru', help='Target language (default: ru).')
     parser.add_argument('--only', nargs='+', help='Rebuild selected asset keys; keep other existing exports.'); args = parser.parse_args()
+    configure(args.language)
+    WORK.mkdir(parents=True, exist_ok=True)
     inventory = text_inventory(ET.parse(ROOT / '.build/reference/original.xml').getroot())
     (WORK / 'image-source.json').write_text(json.dumps(inventory, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'{len(inventory)} original text symbols inventoried', flush=True)

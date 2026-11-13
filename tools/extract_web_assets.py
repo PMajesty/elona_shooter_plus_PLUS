@@ -995,7 +995,8 @@ def main():
         im = Image.open(dest)
         manifest["images"][name] = {"file": f"images/{name}.png", "width": im.width,
                                     "height": im.height, "originX": 0, "originY": 0}
-    for name, font_id in {"menu": 682, "menuBold": 1608, "hud": 2681, "small": 1392, "ui": 1535, "impact": 1653}.items():
+    # banner: шрифт MoolBoran окон Clear/Begin (только заглавные, цифры и несколько строчных глифов).
+    for name, font_id in {"menu": 682, "menuBold": 1608, "hud": 2681, "small": 1392, "ui": 1535, "impact": 1653, "banner": 1569}.items():
         source = next((CACHE / "fonts").glob(f"{font_id}_*"))
         dest = DEST / "fonts" / (name + ".ttf")
         dest.parent.mkdir(parents=True, exist_ok=True)

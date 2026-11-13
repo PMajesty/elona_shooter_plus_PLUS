@@ -2956,7 +2956,8 @@
     "hud": "fonts/hud.ttf",
     "small": "fonts/small.ttf",
     "ui": "fonts/ui.ttf",
-    "impact": "fonts/impact.ttf"
+    "impact": "fonts/impact.ttf",
+    "banner": "fonts/banner.ttf"
   },
   "enemyArrowVisual": {
     "characterId": 2282,

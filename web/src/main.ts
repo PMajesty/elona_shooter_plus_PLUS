@@ -1,7 +1,7 @@
 import { localizedImage } from './localized-image.ts';
 import { version as browserVersion } from '../package.json';
 import { localizedText, fitLocalizedText } from './localized-text.ts';
-import { getLanguage, setLanguage, onLanguageChanged, t } from './i18n.ts';
+import { getLanguage, setLanguage, onLanguageChanged, t, nextLanguage, LANGUAGES, type Language, type TranslatedLanguage } from './i18n.ts';
 import { buttonInput, refreshMenuHover } from './button-input.ts';
 import { createTitleSequence, playOpening } from './title-sequence.ts';
 import { MAX_CAMPAIGN_DAY } from './missions.ts';
@@ -55,7 +55,7 @@ import { createModConfirmation, type ModConfirmationLayout } from './mod-confirm
 import { OriginalAlly, type OriginalAllyMetadata } from './original-animation.ts';
 import { createLootView } from './loot-view.ts';
 import { createSkillView } from './skill-view.ts';
-import { createTownView, type TownLayout, type TownTab, type TownDialog } from './town-view.ts';
+import { createTownView, createTownNavigationPreview, type TownLayout, type TownTab, type TownDialog } from './town-view.ts';
 import { createShopView, type ShopLayout } from './shop-view.ts';
 import { createPartyView, type PartyLayout, type PartyViewMember, type PartyViewTrait, type PartyEquipmentSlot } from './party-view.ts';
 import { ALL_TRAITS } from './party-progression.ts';
@@ -67,13 +67,16 @@ import { alphaMaskHit, ordinaryEnemyHit, type CollisionGeometry } from './collis
 import type { ProjectileKind } from './projectiles.ts';
 import type { EnemyShotKind } from './enemy-arrows.ts';
 import { titlePointerHit, titleStateHit, type TitleButtonState } from './title-hit.ts';
+import { PanelSlide, createInputBlocker, fadeLevel, fadeFinished, blackInBrightness, pauseSlideProgress, easeOutExpo, townEntryFrames, townEntryFinished,
+  beginWindowAlpha, beginFinished, PAUSE_LEFT_DISTANCE, PAUSE_RIGHT_DISTANCE, HELP_SLIDE_DELAY, RESULT_UNDERLAY_SHIFT,
+  TOWN_ENTRY_FRAMES, TOWN_ENTRY_NAVIGATION_STEP, TOWN_ENTRY_PANEL_STEP, TOWN_ENTRY_BACKDROP_STEP } from './ui-transitions.ts';
 import './style.css';
 
-interface ImageAsset { file: string; width: number; height: number; originX: number; originY: number; ruHitMask?: string }
+interface ImageAsset { file: string; width: number; height: number; originX: number; originY: number; ruHitMask?: string; zhHitMask?: string }
 interface ClipAsset { image: string; json: string; originX: number; originY: number; frameWidth: number; frameHeight: number; labels: Record<string, number>; count: number; frameAlpha?: number[] }
 interface ProjectileVisual { clip: string; bodyX: number; hardLight?: { multiplyClip: string; addClip: string }; shadow?: { clip: string; x: number; scaleX: number; scaleY: number; aboveBody: boolean } }
 interface Manifest { images: Record<string, ImageAsset>; clips: Record<string, ClipAsset>; sounds: Record<string, string>; fonts: Record<string, string>; projectileVisuals: Record<ProjectileKind, ProjectileVisual>; enemyArrowVisual: ProjectileVisual; enemyShotVisuals: Record<EnemyShotKind, ProjectileVisual> }
-type Screen = 'intro' | 'title' | 'gene' | 'mods' | 'battle' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
+type Screen = 'intro' | 'title' | 'gene' | 'mods' | 'begin' | 'battle' | 'clear' | 'loot' | 'boss-loot' | 'skill' | 'result' | 'defeat' | 'town';
 
 const container = document.querySelector<HTMLDivElement>('#game')!;
 const playfield = document.querySelector<HTMLDivElement>('#playfield')!;
@@ -112,6 +115,10 @@ const status = {
 };
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}assets/${path}`;
 const MENU_X = -15.587619764971691;
+/** Итоговая сила размытия снимка: исходный BlurFilter blurX/blurY=3 (низкое качество), подобрано на глаз для буфера 1240×760. */
+const BLUR_STRENGTH = 1;
+/** Белый текст окон Clear/Begin: чёрное внешнее свечение и тень с размытием 5; тень под 45° на расстоянии 5. */
+const CAPTION_SHADOW = 5 * Math.SQRT1_2;
 const bootStarted = performance.now();
 
 function showStartupFailure(message: string): void {
@@ -145,8 +152,12 @@ USED_SOUNDS.add('soundImpact1');
 for (const key of ['soundChain1', 'soundChain2', 'soundChain3', 'soundDrop']) USED_SOUNDS.add(key);
 for (const key of ['soundTank2', 'soundLightning']) USED_SOUNDS.add(key);
 let manifest: Manifest;
-let russianAssets: { images: Record<string, string>; clips: Record<string, string>; hitMasks: Record<string, string> } = { images: {}, clips: {}, hitMasks: {} };
-let localizationReady = false;
+interface LocalizedAssets { images: Record<string, string>; clips: Record<string, string>; hitMasks: Record<string, string> }
+/** Переведённые надписи в графике по языкам; язык, чья графика не загрузилась, не участвует в переключении. */
+const LOCALIZED_ART_LANGUAGES = ['ru', 'zh'] as const satisfies readonly TranslatedLanguage[];
+const localizedAssets: Partial<Record<TranslatedLanguage, LocalizedAssets>> = {};
+/** Английский и переведённые языки с загруженной графикой (до загрузки — только английский). */
+const availableLanguages = (): Language[] => ['en', ...LOCALIZED_ART_LANGUAGES.filter(language => localizedAssets[language])];
 let gameScene: ElonaScene;
 
 class ElonaScene extends Phaser.Scene {
@@ -207,6 +218,27 @@ class ElonaScene extends Phaser.Scene {
   private townNavigation?: Phaser.GameObjects.Container;
   private pauseLayer?: Phaser.GameObjects.Container;
   private helpLayer?: Phaser.GameObjects.Container;
+  /** Исходные переходы интерфейса: въезд окон событий и меню города, угасание после «Далее», выход из черноты, размытый снимок и переход из итогов в город. */
+  private panelSlide = new PanelSlide();
+  private helpSlide = new PanelSlide();
+  private panelObjects: Phaser.GameObjects.Container[] = [];
+  private blockPanelInput = false;
+  private panelFade?: { startedAt: number; objects: Phaser.GameObjects.Container[]; blackout: boolean; next: () => void };
+  private blackInStartedAt?: number;
+  private blackOverlay?: Phaser.GameObjects.Rectangle;
+  private transitionBlocker?: Phaser.GameObjects.Zone;
+  private pauseOpenedAt?: number;
+  private blurLayers: { image: Phaser.GameObjects.Image; blur: Phaser.Filters.Blur; startedAt: number }[] = [];
+  private blurSnapshots = 0;
+  private panelWasSliding = false;
+  private townEntry?: { startedAt: number; panel: Phaser.GameObjects.Container; panelX: number; backdrop: Phaser.GameObjects.Image; navigation: Phaser.GameObjects.Container };
+  /** Копия листа итогов (window3_mc) лежит под меню города до выхода из него; содержимое — итоги на момент нажатия «Далее». */
+  private resultUnderlay?: { rows: number[]; news: string };
+  private townPanelRestart = false;
+  /** Начало экрана «Day N» перед боем (_eventBegin); бой начинается на 90-м кадре. */
+  private beginStartedAt?: number;
+  /** После победы сначала показывается Clear (Congratulations!); при загрузке сохранения в итогах он не повторяется. */
+  private clearPending = false;
   private fireAtWillSprites?: { fire: Phaser.GameObjects.Image; rage: Phaser.GameObjects.Image };
   private volumeIcon?: Phaser.GameObjects.Image;
   private pauseDialog?: Phaser.GameObjects.Container;
@@ -250,13 +282,21 @@ class ElonaScene extends Phaser.Scene {
     this.load.json('town-layout', assetUrl('town-layout.json'));
     for (const [key, asset] of Object.entries(manifest.images)) this.load.image(key, assetUrl(asset.file));
     for (const [key, asset] of Object.entries(manifest.clips)) this.load.atlas(key, assetUrl(asset.image), assetUrl(asset.json));
-    for (const [key, file] of Object.entries(russianAssets.images)) this.load.image(`ru:${key}`, assetUrl(`ru/${file}`));
-    for (const [key, file] of Object.entries(russianAssets.clips)) this.load.atlas(`ru:${key}`, assetUrl(`ru/${file}`), assetUrl(manifest.clips[key].json));
+    for (const language of LOCALIZED_ART_LANGUAGES) {
+      const art = localizedAssets[language];
+      if (!art) continue;
+      for (const [key, file] of Object.entries(art.images)) this.load.image(`${language}:${key}`, assetUrl(`${language}/${file}`));
+      for (const [key, file] of Object.entries(art.clips)) this.load.atlas(`${language}:${key}`, assetUrl(`${language}/${file}`), assetUrl(manifest.clips[key].json));
+    }
     for (const [key, file] of Object.entries(manifest.sounds)) if (USED_SOUNDS.has(key)) this.load.audio(key, assetUrl(file));
     this.load.on('progress', (progress: number) => { loadStatus.textContent = t(`Loading original game assets… ${Math.round(progress * 100)}%`); });
     this.load.on('loaderror', (file: Phaser.Loader.File) => {
       if (file.type === 'audio') console.warn(`Sound ${file.key} is unavailable; continuing without it.`);
-      else if (file.key.startsWith('ru:')) localizationReady = false;
+      else if (/^(?:ru|zh):/.test(file.key)) {
+        // Как и прежде для русского: без любой переведённой картинки язык отключается целиком, чтобы не смешивать надписи.
+        delete localizedAssets[file.key.slice(0, 2) as TranslatedLanguage];
+        console.warn(`Localized artwork ${file.key} is unavailable; this language is disabled until reload.`);
+      }
       else this.failedRequiredAssets.add(file.key);
     });
   }
@@ -271,8 +311,10 @@ class ElonaScene extends Phaser.Scene {
       return;
     }
     gameScene = this;
-    if (!localizationReady) setLanguage('en');
-    document.querySelector<HTMLButtonElement>('#language')!.disabled = !localizationReady;
+    // Языки без загруженной графики не участвуют в переключении; если недоступны все, остаётся английский.
+    if (!availableLanguages().includes(getLanguage())) setLanguage('en');
+    document.querySelector<HTMLButtonElement>('#language')!.disabled = availableLanguages().length < 2;
+    updateLanguageControl();
     this.battleCursor = new BattleCursor(this, (x, y) => this.sim?.manualAim(x, y) ?? { x, y });
     // Все 273 изображения charaPic в SWF используют несглаживаемую заливку 0x43.
     // Сохраняем дробные исходные координаты, но исключаем размытие соседних пикселей тела.
@@ -464,6 +506,8 @@ class ElonaScene extends Phaser.Scene {
         if (event.code === 'Escape') { event.preventDefault(); this.closeOptionsAudio(); }
         return;
       }
+      // Оригинал не обрабатывает клавиши во время угасания, перехода в город и экрана перед боем.
+      if (this.transitionBusy()) { if (event.code === 'Space') event.preventDefault(); return; }
       if (event.code !== 'Escape' && event.target instanceof Element && event.target.closest('#audio-settings')) return;
       // Space/Enter на HTML-кнопке выполняет её нативный click, а не боевую перезарядку.
       if (['Space', 'Enter'].includes(event.code) && controlFrom(event.target)) return;
@@ -482,7 +526,7 @@ class ElonaScene extends Phaser.Scene {
         else if (['battle', 'town', 'result'].includes(this.screen)) this.togglePause();
         else if (this.screen === 'gene') this.showTitle();
         else if (this.screen === 'mods') {
-          if (this.modDetailsOpen) this.showGameMods(this.modsClassPage); else this.leaveGameMods();
+          if (this.modDetailsOpen) this.showGameMods(this.modsClassPage); else this.fadeOutPanel(() => this.leaveGameMods(), true);
         }
       } else if (event.code === 'Space') {
         event.preventDefault();
@@ -590,8 +634,18 @@ class ElonaScene extends Phaser.Scene {
     this.combatNoticeViews.clear(); delete container.dataset.combatNotices;
     delete container.dataset.rampageEffects;
     const keepTownAmbience = this.screen === 'town' && screen === 'town';
+    // Экран перед боем уже запустил звук леса; в бою он продолжает играть.
+    const keepBattleAmbience = this.screen === 'begin' && screen === 'battle';
     if (keepTownAmbience && this.townNavigation) this.townNavigation.parentContainer?.remove(this.townNavigation);
     else this.townNavigation = undefined;
+    // При смене экрана въезд и выход из черноты прежнего экрана сбрасываются; перестройка того же экрана (листание, обновление) их продолжает.
+    if (screen !== this.screen) {
+      this.panelSlide.clear(); this.blackInStartedAt = undefined;
+      if (screen !== 'town') this.resultUnderlay = undefined;
+    }
+    this.panelFade = undefined; this.townEntry = undefined; this.beginStartedAt = undefined;
+    this.panelObjects = []; this.blackOverlay = undefined; this.pauseOpenedAt = undefined; this.blurLayers = [];
+    this.helpSlide.clear();
     this.screen = screen;
     this.titleSequence = undefined; delete container.dataset.titleButtonsReady;
     this.closeOpening?.(); this.closeOpening = undefined;
@@ -611,7 +665,7 @@ class ElonaScene extends Phaser.Scene {
     // Эффекты, добавленные в stage над HUD, тоже принадлежат текущему экрану.
     for (const effect of this.effects) effect.object.destroy();
     this.root.removeAll(true);
-    if (!['loot', 'boss-loot', 'skill', 'result'].includes(screen)) { this.celebration?.destroy(); this.celebration = undefined; this.fireworkMedalChecked = false; }
+    if (!['clear', 'loot', 'boss-loot', 'skill', 'result'].includes(screen)) { this.celebration?.destroy(); this.celebration = undefined; this.fireworkMedalChecked = false; }
     this.volumeIcon = undefined; this.pauseDialog = undefined; this.flash = undefined; this.flashFrames = 0; this.flashClock = 0;
     this.collectionDialog = undefined; this.closeTownEvent = undefined; delete container.dataset.townNotice; delete container.dataset.flashCollection; delete container.dataset.flashAdventure;
     if (!this.celebration) delete container.dataset.fireworkFrames;
@@ -629,7 +683,7 @@ class ElonaScene extends Phaser.Scene {
     this.companionBowSounds.clear(); this.companionSprites.clear(); this.companionCursors.clear();
     this.reloadAnimations = 0;
     this.pauseLayer = undefined; this.playerSprite = undefined; this.battleCursor.hide(); this.ammoFill = undefined;
-    if (!keepTownAmbience) { this.ambient?.destroy(); this.ambient = undefined; }
+    if (!keepTownAmbience && !keepBattleAmbience) { this.ambient?.destroy(); this.ambient = undefined; }
     container.dataset.screen = screen;
     container.dataset.saveSlot = String(this.saveSlot);
     delete container.dataset.deleteSaveSlot;
@@ -788,7 +842,12 @@ class ElonaScene extends Phaser.Scene {
 
   canOpenBrowserOptions(): boolean {
     return (this.screen === 'title' || this.paused && ['battle', 'town', 'result'].includes(this.screen))
-      && !this.optionsAudioOpen && !this.helpLayer && !this.collectionDialog && !this.pauseDialog;
+      && !this.optionsAudioOpen && !this.helpLayer && !this.collectionDialog && !this.pauseDialog && !this.pauseSettling();
+  }
+
+  /** Меню паузы ещё ждёт снимок или въезжает (кадры 1–10 menu_pause); HTML-элементы порта появляются после этого. */
+  private pauseSettling(): boolean {
+    return this.paused && (this.pauseOpenedAt !== undefined || this.pauseLayer?.visible === false);
   }
 
   showOptionsAudio(): void {
@@ -848,10 +907,15 @@ class ElonaScene extends Phaser.Scene {
     }, () => this.playSound('soundClick1'));
     this.root.add(this.helpLayer);
     if (this.volumeIcon) this.root.bringToTop(this.volumeIcon);
+    // Исходное window4_mc въезжает с x=600 поверх размытого снимка; во время въезда вкладки недоступны (здесь блокируется весь ввод).
+    this.playSound('soundScroll1');
+    this.helpSlide.begin('help', this.time.now, HELP_SLIDE_DELAY, true);
+    this.helpSlide.track(this.helpLayer.getByName('help-window') as Phaser.GameObjects.Container, this.time.now);
+    this.makeBlurScreen(this.helpLayer, () => undefined);
   }
 
   private closeHelp(): void {
-    this.helpLayer?.destroy(true); this.helpLayer = undefined;
+    this.helpLayer?.destroy(true); this.helpLayer = undefined; this.helpSlide.clear();
     delete container.dataset.helpPage; delete container.dataset.helpScroll;
   }
 
@@ -929,8 +993,9 @@ class ElonaScene extends Phaser.Scene {
       }).setName(`hero-class-${id}`).on('pointerover', () => info.showClass(id, heroClassUnlocked(id, this.profile.medals))).on('pointerout', info.hide);
     });
     refreshClass();
-    this.originalButton('button_proceed', 267, 301, () => this.startGame());
-    this.originalButton('button_gameMods', 408, 301, () => this.showGameMods(page));
+    // После «Далее» или Game MODs оригинал ставит fadeCount=9: окно гаснет, весь экран темнеет до чёрного, затем начинается следующее событие.
+    this.originalButton('button_proceed', 267, 301, () => this.fadeOutPanel(() => this.startGame(), true));
+    this.originalButton('button_gameMods', 408, 301, () => this.fadeOutPanel(() => this.showGameMods(page), true));
     fitLocalizedText(this.text(159, 302, page === 0 ? 'Next Page' : 'Previous Page', 13, '#2d315b'), { width: 101, height: 23 });
     const modeNames = [['casual', 'Casual Mode'], ['hardcore', 'Hardcore Mode']] as const;
     const modeMarkers = modeNames.map(([mode, name], index) => fitLocalizedText(this.text(413, 252 + index * 22, '', 12, '#2d315b', 'Arial'), { width: 133, height: 21 }));
@@ -944,7 +1009,10 @@ class ElonaScene extends Phaser.Scene {
     }));
     this.zone(145, 294, 103, 37, () => { this.playSound('soundClick1'); this.showGene(page === 0 ? 1 : 0, true); });
     const menu = this.root.list.filter(object => !background.has(object));
-    this.root.add(this.add.container(MENU_X, 0, menu));
+    const panel = this.add.container(MENU_X, 0, menu);
+    this.root.add(panel);
+    // Выбор персонажа выходит из черноты (delay<41), окно въезжает с 4-го кадра; смена страницы перестраивает содержимое без нового въезда.
+    this.slidePanel('gene', [panel], { blackIn: true, sound: 'soundScroll1' });
   }
 
   private leaveGameMods(): void {
@@ -974,12 +1042,12 @@ class ElonaScene extends Phaser.Scene {
       this.sim!.setOpeningMods(mods); refresh();
       status.textContent = key === 'community' ? 'Community Compilation: Active grants fixed bonus AP; MOD sales remain active for shop refreshes on sale days.' : GAME_MODS[key].label;
     }));
-    this.originalButton('button_proceed', 269.05, 310, () => this.startGame());
+    this.originalButton('button_proceed', 269.05, 310, () => this.fadeOutPanel(() => this.startGame(), true));
     this.originalButton('button_modDetails', 341.8, 182.95, () => this.showGameMods(page, true), 'soundScroll1', false);
     if (details) {
       for (const object of this.root.list) if (!background.has(object) && object.input) object.disableInteractive();
     }
-    this.originalButton('button_modBack', 132.35, 310, () => this.leaveGameMods());
+    this.originalButton('button_modBack', 132.35, 310, () => this.fadeOutPanel(() => this.leaveGameMods(), true));
     if (details) {
       this.image('modDetails');
       this.root.add(originalTextArea(this, 'community-mod-details', COMMUNITY_MOD_DETAILS, 160.05, 166.1, 358, 154));
@@ -987,7 +1055,9 @@ class ElonaScene extends Phaser.Scene {
     }
     refresh();
     const menu = this.root.list.filter(object => !background.has(object));
-    this.root.add(this.add.container(MENU_X, 0, menu));
+    const panel = this.add.container(MENU_X, 0, menu);
+    this.root.add(panel);
+    this.slidePanel('mods', [panel], { blackIn: true, sound: 'soundScroll1' });
     status.textContent = 'Choose optional Game MODs. Proceed starts this adventure; Back resets MODs.';
     status.hide();
   }
@@ -997,9 +1067,9 @@ class ElonaScene extends Phaser.Scene {
   startGame(): void {
     this.carryCheckpoint = undefined;
     if (!this.sim?.startOpeningBattle()) this.sim = new Simulation(Date.now(), { ...this.simulationOptions(), ruleset: this.newGameRuleset, medals: this.profile.medals });
-    this.enterBattle(true);
+    // Состояние боя применяется и сохраняется сразу; сначала показывается «Day N», бой — с 90-го кадра.
+    this.showBegin();
     this.saveGame(false);
-    this.playSound('soundBattleBegin');
   }
 
   private enterBattle(announce = false): void {
@@ -1014,8 +1084,7 @@ class ElonaScene extends Phaser.Scene {
     this.syncCompanionActors();
     this.drawHud();
     this.input.setDefaultCursor(BATTLE_CURSOR);
-    if (this.cache.audio.exists('soundBgForest')) this.ambient = this.audioMixer.add('soundBgForest', { volume: 0.3, loop: true });
-    this.ambient?.play();
+    if (!this.ambient && this.cache.audio.exists('soundBgForest')) { this.ambient = this.audioMixer.add('soundBgForest', { volume: 0.3, loop: true }); this.ambient.play(); }
     this.syncEnemyFrameAudio(announce);
     this.paintBattle();
     if (announce && this.sim?.state.activeMission.bossDay) this.announceCombat('Boss Day!');
@@ -1161,7 +1230,8 @@ class ElonaScene extends Phaser.Scene {
     this.celebration?.advance(delta);
     if (this.celebration) {
       container.dataset.fireworkFrames = String(this.celebration.frame);
-      if (!this.fireworkMedalChecked && this.celebration.frame >= FIREWORK_MEDAL_FRAMES) {
+      // Исходный fireworkCount уменьшается только на экране Clear: медаль за фейерверк требует оставаться на нём.
+      if (!this.fireworkMedalChecked && this.screen === 'clear' && this.celebration.frame >= FIREWORK_MEDAL_FRAMES) {
         this.fireworkMedalChecked = true;
         if (this.sim?.watchFireworks()) {
           this.celebration.grantBonus();
@@ -1179,7 +1249,8 @@ class ElonaScene extends Phaser.Scene {
   }
 
   private startCelebration(): void {
-    if (this.options.disableFireworks || this.celebration || this.screen !== 'result' || !this.sim) return;
+    // Исходный startFire вызывается в конце боя: фейерверк начинается на Clear и продолжается на экранах добычи, навыков и итогов.
+    if (this.options.disableFireworks || this.celebration || this.screen !== 'clear' || !this.sim) return;
     const state = this.sim.state;
     this.celebration = createFireworks(this, manifest, state.rng ^ state.day, state.earnedMedals);
     this.fireworkMedalChecked = false; this.playSound('soundFirework', 0.25);
@@ -1206,11 +1277,12 @@ class ElonaScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
-    this.audioSettingsView?.sync((this.paused || this.optionsAudioOpen) && !this.helpLayer && !this.pauseDialog && !this.collectionDialog, this.muted);
+    this.audioSettingsView?.sync((this.paused || this.optionsAudioOpen) && !this.pauseSettling() && !this.helpLayer && !this.pauseDialog && !this.collectionDialog, this.muted);
     optionsEntry.hidden = !this.canOpenBrowserOptions();
     this.syncTouchBattleControls();
     if (!this.ready || this.graphicsLost) return;
     this.updatePresentation(delta);
+    this.updateTransitions();
     if (this.screen !== 'battle' || !this.sim || this.paused) return;
     const pointer = this.input.mousePointer;
     this.accumulator += Math.min(delta, 250);
@@ -1245,8 +1317,245 @@ class ElonaScene extends Phaser.Scene {
     this.paintBattle();
     if (this.sim.state.phase !== 'battle') {
       this.saveGame(false);
+      // После победы оригинал сначала показывает _eventClear; при загрузке итогов он не повторяется.
+      this.clearPending = this.sim.state.phase === 'victory';
       this.showOutcome();
     }
+  }
+
+  /** Во время угасания, перехода в город и экрана перед боем оригинал игнорирует щелчки и клавиши. */
+  private transitionBusy(): boolean {
+    return Boolean(this.panelFade || this.townEntry) || this.beginStartedAt !== undefined;
+  }
+
+  /** Продвигает переходы каждый кадр; время считается в исходных кадрах 30 fps с интерполяцией между ними. */
+  private updateTransitions(): void {
+    const now = this.time.now;
+    this.panelSlide.update(now); this.helpSlide.update(now);
+    // Оригинал проверяет hitTest каждый кадр, и подсказка появляется под неподвижной мышью; Phaser проверяет только при движении, поэтому после въезда проверка повторяется.
+    const sliding = this.panelSlide.sliding(now) || this.helpSlide.sliding(now) || this.pauseOpenedAt !== undefined;
+    if (this.panelWasSliding && !sliding) refreshMenuHover(this);
+    this.panelWasSliding = sliding;
+    const fade = this.panelFade;
+    if (fade) {
+      const elapsed = now - fade.startedAt, level = fadeLevel(elapsed);
+      for (const object of fade.objects) if (object.active) object.setAlpha(level);
+      if (fade.blackout) this.setBlackness(1 - level);
+      if (fadeFinished(elapsed)) {
+        this.panelFade = undefined;
+        fade.next();
+        // Если следующий экран не выходит из черноты, затемнение снимается сразу.
+        if (fade.blackout && this.blackInStartedAt === undefined) this.setBlackness(0);
+      }
+    } else if (this.blackInStartedAt !== undefined) {
+      const brightness = blackInBrightness(now - this.blackInStartedAt);
+      this.setBlackness(1 - brightness);
+      if (brightness >= 1) this.blackInStartedAt = undefined;
+    }
+    if (this.beginStartedAt !== undefined) {
+      const elapsed = now - this.beginStartedAt;
+      for (const object of this.panelObjects) if (object.active) object.setAlpha(beginWindowAlpha(elapsed));
+      if (beginFinished(elapsed)) { this.beginStartedAt = undefined; this.enterBattle(true); }
+    }
+    if (this.pauseOpenedAt !== undefined) this.placePauseGroups(1 - pauseSlideProgress(now - this.pauseOpenedAt));
+    this.blurLayers = this.blurLayers.filter(layer => layer.image.active);
+    for (const layer of this.blurLayers) layer.blur.strength = BLUR_STRENGTH * easeOutExpo((now - layer.startedAt) / 1000);
+    if (this.townEntry) this.updateTownEntry(now);
+    this.updateTransitionBlocker(now);
+  }
+
+  private updateTransitionBlocker(now: number): void {
+    const blocking = this.transitionBusy() || (this.blockPanelInput && this.panelSlide.sliding(now))
+      || (Boolean(this.helpLayer) && this.helpSlide.sliding(now));
+    if (blocking && !this.transitionBlocker) this.transitionBlocker = createInputBlocker(this, 'transition-input-blocker');
+    else if (!blocking && this.transitionBlocker) { this.transitionBlocker.destroy(); this.transitionBlocker = undefined; }
+    // busy — оригинал игнорирует ввод; settling — анимация идёт, но ввод принимается (меню города и паузы, выход из черноты, размытие); idle — экран неподвижен.
+    const settling = this.pauseSettling() || this.panelSlide.sliding(now) || this.helpSlide.sliding(now)
+      || this.blackInStartedAt !== undefined || this.blurLayers.some(layer => now - layer.startedAt < 1000);
+    const state = blocking ? 'busy' : settling ? 'settling' : 'idle';
+    if (container.dataset.transition !== state) container.dataset.transition = state;
+  }
+
+  /**
+   * Исходный root.colorTransform затемняет только основную временную шкалу; окна событий на stage сохраняют яркость.
+   * Для непрозрачного фона умножение на яркость b равно чёрному слою с alpha=1-b, поэтому слой вставляется под окно события.
+   */
+  private setBlackness(alpha: number): void {
+    if (alpha <= 0) { this.blackOverlay?.destroy(); this.blackOverlay = undefined; return; }
+    if (!this.blackOverlay?.active) {
+      this.blackOverlay = this.add.rectangle(-10, -10, 640, 400, 0x000000).setOrigin(0).setName('transition-blackout');
+      this.root.add(this.blackOverlay);
+      const panel = this.panelObjects.find(object => object.active && object.parentContainer === this.root);
+      if (panel) this.root.moveBelow<Phaser.GameObjects.GameObject>(this.blackOverlay, panel);
+    }
+    this.blackOverlay.setAlpha(Math.min(1, alpha));
+  }
+
+  /**
+   * Регистрирует окно события текущего экрана: новое окно въезжает справа (исходные anime/animeTime), перестроенное (листание, обновление) продолжает въезд.
+   * block — щелчки блокируются на время въезда (у окон событий, но не у меню города); blackIn — фон выходит из черноты вместе с новым окном.
+   */
+  private slidePanel(key: string, objects: Phaser.GameObjects.Container[], options: { block?: boolean; restart?: boolean; blackIn?: boolean; sound?: string } = {}): void {
+    const now = this.time.now;
+    const started = this.panelSlide.begin(key, now, undefined, options.restart);
+    this.panelObjects = objects;
+    this.blockPanelInput = options.block ?? true;
+    for (const object of objects) this.panelSlide.track(object, now);
+    if (started && options.blackIn) this.blackInStartedAt = now;
+    if (started && options.sound) this.playSound(options.sound);
+    if (this.blackInStartedAt !== undefined) this.setBlackness(1 - blackInBrightness(now - this.blackInStartedAt));
+    this.updateTransitionBlocker(now);
+  }
+
+  /** fadeCount=9 после «Далее»: окно гаснет за 9 кадров, затем начинается следующее событие; при blackout весь экран одновременно темнеет. */
+  private fadeOutPanel(next: () => void, blackout = false): void {
+    if (this.panelFade || this.townEntry) return;
+    this.panelFade = { startedAt: this.time.now, objects: this.panelObjects.filter(object => object.active), blackout, next };
+    this.updateTransitionBlocker(this.time.now);
+  }
+
+  /**
+   * Исходный makeBlurScreen рисует сцену в bitmap поверх всего и за 1 секунду доводит размытие Tweener до 3.
+   * Снимок WebGL готов только после следующего кадра, поэтому cover (само меню) скрыт, пока снимок не ляжет под него.
+   */
+  private makeBlurScreen(cover: Phaser.GameObjects.Container, ready: () => void): void {
+    cover.setVisible(false);
+    let done = false;
+    const finish = (snapshot?: HTMLImageElement) => {
+      if (done || !cover.active) return;
+      done = true;
+      if (snapshot) {
+        const key = `blur-screen-${++this.blurSnapshots}`;
+        this.textures.addImage(key, snapshot);
+        const camera = this.cameras.main;
+        // Снимок соответствует видимой области камеры; смещение тряски на паузе не меняется, поэтому учитывается прокрутка камеры.
+        const image = this.add.image(camera.scrollX, camera.scrollY, key).setOrigin(0).setDisplaySize(620, 380).setName('blur-screen');
+        image.once(Phaser.GameObjects.Events.DESTROY, () => { if (this.textures.exists(key)) this.textures.remove(key); });
+        cover.addAt(image, 0);
+        const blur = image.enableFilters().filters?.internal.addBlur(0, 1, 1, 0);
+        if (blur) this.blurLayers.push({ image, blur, startedAt: this.time.now });
+      }
+      cover.setVisible(true);
+      ready();
+    };
+    this.game.renderer.snapshot(snapshot => finish(snapshot instanceof HTMLImageElement ? snapshot : undefined));
+    // Например, при потере контекста снимок может не прийти; меню всё равно должно появиться.
+    this.time.delayedCall(300, () => finish());
+  }
+
+  /** Кадры 1–10 menu_pause: настройки слева едут от −353, бумага с кнопками справа — от +214, линейно. */
+  private placePauseGroups(remaining: number): void {
+    const layer = this.pauseLayer;
+    if (!layer?.active) { this.pauseOpenedAt = undefined; return; }
+    (layer.getByName('pause-left') as Phaser.GameObjects.Container | null)?.setX(-PAUSE_LEFT_DISTANCE * remaining);
+    (layer.getByName('pause-right') as Phaser.GameObjects.Container | null)?.setX(PAUSE_RIGHT_DISTANCE * remaining);
+    if (remaining <= 0) this.pauseOpenedAt = undefined;
+  }
+
+  /**
+   * «Далее» в итогах (toTownMenu): 30 кадров навигация города сдвигается от −90 на 3 за кадр,
+   * лист итогов — на 1.1 вправо, фон города bgAlpha получает +0.04; на 31-м кадре открывается город.
+   */
+  private startTownEntry(panel: Phaser.GameObjects.Container, report: { rows: number[]; news: string }): void {
+    const backdrop = localizedImage(this, 0, 0, manifest.images.townHud ? 'townHud' : 'town').setOrigin(0).setAlpha(0).setName('town-entry-backdrop');
+    this.root.add(backdrop);
+    // На основной шкале bgAlpha лежит над полем боя, но под нижней панелью и HUD.
+    if (this.bottomBarSprite?.parentContainer === this.root) this.root.moveBelow(backdrop, this.bottomBarSprite);
+    const navigation = createTownNavigationPreview(this, manifest, this.cache.json.get('town-layout') as TownLayout)
+      .setX(-TOWN_ENTRY_FRAMES * TOWN_ENTRY_NAVIGATION_STEP);
+    this.root.add(navigation); this.root.moveBelow(navigation, panel);
+    this.townEntry = { startedAt: this.time.now, panel, panelX: panel.x, backdrop, navigation };
+    this.resultUnderlay = report;
+    this.updateTransitionBlocker(this.time.now);
+  }
+
+  private updateTownEntry(now: number): void {
+    const entry = this.townEntry!, elapsed = now - entry.startedAt, frames = townEntryFrames(elapsed);
+    entry.navigation.setX((frames - TOWN_ENTRY_FRAMES) * TOWN_ENTRY_NAVIGATION_STEP);
+    entry.panel.setX(entry.panelX + frames * TOWN_ENTRY_PANEL_STEP);
+    entry.backdrop.setAlpha(Math.min(1, frames * TOWN_ENTRY_BACKDROP_STEP));
+    if (!townEntryFinished(elapsed)) return;
+    this.townEntry = undefined;
+    // Исходный frame71 играет sound_scroll1 при входе в город; затем въезжает меню трактира.
+    this.playSound('soundScroll1');
+    this.showTown();
+  }
+
+  /** Лист итогов: window2_mc экрана result или его копия window3_mc под меню города. */
+  private resultSheet(report: { rows: number[]; news: string }, newsName: string): Phaser.GameObjects.Container {
+    const sheet = this.add.container(MENU_X, 0).setName(newsName === 'result-news' ? 'result-window' : 'result-underlay');
+    const background = localizedImage(this, 0, 0, 'result').setOrigin(0);
+    sheet.add(background);
+    report.rows.forEach((value, index) => sheet.add(localizedText(this, 252, 128 + index * 20 + (index === 7 ? 10 : 0), String(value),
+      { resolution: 2, fontFamily: 'Arial', fontSize: '12px', color: value < 0 ? '#b02020' : '#14248d', padding: { x: 1, y: 1 } })));
+    sheet.add(originalTextArea(this, newsName, report.news, 326, 132, 200, 155));
+    return sheet;
+  }
+
+  /**
+   * Белый текст окон Clear/Begin: чёрное свечение и тень под 45°; оба фильтра приближены двумя слоями теней canvas.
+   * centered — x задаёт центр, поэтому переводы разной длины сохраняют центр исходного текста.
+   */
+  private captionText(x: number, y: number, content: string, style: Phaser.Types.GameObjects.Text.TextStyle, centered = false): Phaser.GameObjects.Container {
+    const caption = this.add.container(0, 0);
+    const full = { resolution: 2, padding: { x: 8, y: 8 }, ...style };
+    const left = centered ? x : x - 8;
+    caption.add(localizedText(this, left, y - 8, content, { ...full, color: '#000000' }).setOrigin(centered ? 0.5 : 0, 0)
+      .setShadow(CAPTION_SHADOW, CAPTION_SHADOW, '#000000', 5, false, true));
+    caption.add(localizedText(this, left, y - 8, content, { ...full, color: '#ffffff' }).setOrigin(centered ? 0.5 : 0, 0)
+      .setShadow(0, 0, '#000000', 5, false, true));
+    return caption;
+  }
+
+  /** Фон боя, персонажи и HUD для Clear и экрана перед боем; порядок слоёв как в enterBattle. */
+  private drawBattleStage(): void {
+    this.drawBattleBackground();
+    this.playerSprite = new OriginalAlly(this, this.cache.json.get('ally-animation') as OriginalAllyMetadata, manifest.clips, this.appearance, WORLD.playerX, WORLD.playerY);
+    this.root.add(this.playerSprite);
+    this.playerSprite.setOriginalFrame(weaponPresentation(this.sim?.selectedItem?.id ?? 0).idleFrame);
+    this.syncCompanionActors();
+    this.drawHud();
+    this.paintBattle();
+  }
+
+  /** Исходный _eventClear: на поле боя въезжает «Congratulations!», начинается фейерверк; после въезда щелчок где угодно гасит окно и ведёт к добыче, навыкам или итогам. */
+  private showClear(): void {
+    if (!this.sim) return;
+    this.reset('clear');
+    this.drawBattleStage();
+    const panel = this.add.container(MENU_X, 0).setName('clear-window');
+    // Глифы DefineText1570 занимают x=231.25–390.85; текст центрируется по их середине.
+    panel.add(this.captionText(311.05, 140, 'Congratulations!', { fontFamily: 'ElonaBanner', fontSize: '34px' }, true));
+    panel.add(this.captionText(126, 202, 'You have survived another day!\n(+25 xp)',
+      { fontFamily: 'ElonaMenu', fontSize: '15px', letterSpacing: 4, lineSpacing: 2, align: 'center', fixedWidth: 388 + 16 }));
+    this.root.add(panel);
+    const proceed = this.add.zone(0, 0, 620, 380).setOrigin(0).setInteractive().setName('clear-proceed');
+    proceed.on('pointerdown', (_pointer: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+      this.fadeOutPanel(() => this.showOutcome());
+    });
+    this.root.add(proceed);
+    this.slidePanel('clear', [panel]);
+    this.startCelebration();
+    container.dataset.phase = 'victory';
+    status.textContent = 'Victory! Click to continue.';
+    status.hide();
+  }
+
+  /** Исходный _eventBegin: поле боя выходит из черноты, въезжает окно «Day N», кадры 71–80 гасят его, бой начинается на 90-м. Щелчки игнорируются. */
+  private showBegin(): void {
+    if (!this.sim) return;
+    this.reset('begin');
+    this.drawBattleStage();
+    const panel = this.add.container(MENU_X, 0).setName('begin-window');
+    panel.add(this.captionText(288, 140, `Day  ${this.sim.state.day}`, { fontFamily: 'ElonaBanner', fontSize: '34px' }));
+    panel.add(this.captionText(197, 202, 'Get ready! Enemies are coming!', { fontFamily: 'ElonaMenu', fontSize: '15px', letterSpacing: 2 }));
+    this.root.add(panel);
+    this.slidePanel('begin', [panel], { blackIn: true });
+    this.beginStartedAt = this.time.now;
+    if (this.cache.audio.exists('soundBgForest')) { this.ambient = this.audioMixer.add('soundBgForest', { volume: 0.3, loop: true }); this.ambient.play(); }
+    this.playSound('soundBattleBegin');
+    status.textContent = `Day ${this.sim.state.day} begins.`;
   }
 
   private enemyClip(enemy: Readonly<EnemyState>): string {
@@ -1780,6 +2089,7 @@ class ElonaScene extends Phaser.Scene {
     if (!this.sim) return;
     if (this.sim.state.phase === 'town') { this.showTown(); return; }
     if (this.sim.state.phase === 'victory') {
+      if (this.clearPending) { this.clearPending = false; this.showClear(); return; }
       if (['loot', 'boss-loot'].includes(this.sim.state.postbattle)) { this.showLoot(); return; }
       if (this.sim.state.postbattle === 'skill') { this.showSkillChoice(); return; }
     }
@@ -1790,18 +2100,22 @@ class ElonaScene extends Phaser.Scene {
     this.root.add(this.playerSprite);
     this.paintBattle();
     if (state.phase === 'victory') {
-      const background = new Set(this.root.list);
-      this.image('result');
       const report = dayReport(state);
-      report.rows.forEach((value, index) => this.text(252, 128 + index * 20 + (index === 7 ? 10 : 0), String(value), 12, value < 0 ? '#b02020' : '#14248d', 'Arial'));
-      this.root.add(originalTextArea(this, 'result-news', report.news, 326, 132, 200, 155));
+      const sheet = this.resultSheet(report, 'result-news');
+      this.root.add(sheet);
+      let proceed: Phaser.GameObjects.GameObject[] = [];
+      const count = this.root.list.length;
       this.originalButton('button_proceed', 160, 301, () => {
-        if (this.sim!.enterTown()) { this.saveGame(false); this.showTown(); }
+        if (!this.sim!.enterTown()) return;
+        this.saveGame(false);
+        // Оригинал сразу скрывает кнопку «Далее»; затем лист итогов сдвигается вправо, а город проявляется.
+        for (const object of proceed) (object as Phaser.GameObjects.Image).setVisible(false);
+        this.startTownEntry(sheet, report);
       });
-      const menu = this.root.list.filter(object => !background.has(object));
-      this.root.add(this.add.container(MENU_X, 0, menu));
+      proceed = this.root.list.slice(count);
+      sheet.add(proceed);
+      this.slidePanel('result', [sheet], { sound: 'soundScroll1' });
       status.textContent = `Day ${state.day} complete and saved. Proceed to town.`;
-      this.startCelebration();
     } else {
       this.image('gameOver', 300, 205);
       this.zone(120, 175, 400, 70, () => this.showTitle());
@@ -1889,7 +2203,7 @@ class ElonaScene extends Phaser.Scene {
     this.reset(bossReward ? 'boss-loot' : 'loot');
     this.drawBattleBackground(); this.drawHud();
     this.updateHud();
-    this.root.add(createLootView(this, this.sim.state, manifest, {
+    const view = createLootView(this, this.sim.state, manifest, {
       itemPopup: inspectItemPopup,
       move: (fromArea, from, toArea, to) => {
         const moved = this.sim!.moveLootItem(fromArea, from, toArea, to);
@@ -1897,7 +2211,7 @@ class ElonaScene extends Phaser.Scene {
         return moved;
       },
       proceed: () => {
-        if (this.sim!.finishLoot()) { this.playSound('soundClick1'); this.saveGame(false); this.showOutcome(); }
+        if (this.sim!.finishLoot()) { this.playSound('soundClick1'); this.saveGame(false); this.fadeOutPanel(() => this.showOutcome()); }
       },
       resolveModMount: confirm => {
         const outcome = this.sim!.resolveLootModMount(confirm);
@@ -1912,7 +2226,9 @@ class ElonaScene extends Phaser.Scene {
         if (errors[outcome]) { this.playSound('soundBeep'); status.textContent = errors[outcome]; }
       },
       message: value => { status.textContent = value; },
-    }, (this.cache.json.get('town-layout') as ShopLayout).saleDialog, (this.cache.json.get('town-layout') as ShopLayout).itemPopup, bossReward ? 'boss' : 'ordinary'));
+    }, (this.cache.json.get('town-layout') as ShopLayout).saleDialog, (this.cache.json.get('town-layout') as ShopLayout).itemPopup, bossReward ? 'boss' : 'ordinary');
+    this.root.add(view);
+    this.slidePanel(`loot:${bossReward ? 'boss' : 'ordinary'}`, [view], { sound: 'soundScroll1' });
     container.dataset.phase = 'victory';
     container.dataset.lootOffers = JSON.stringify(this.sim.state.lootOffers.map(item => isOccupiedItem(item) ? item.id : null));
     container.dataset.inventory = JSON.stringify(this.sim.state.inventory.map(item => isOccupiedItem(item) ? item.id : null));
@@ -1926,14 +2242,17 @@ class ElonaScene extends Phaser.Scene {
     if (!this.sim || this.sim.state.postbattle !== 'skill') return;
     this.reset('skill');
     this.drawBattleBackground(); this.drawHud(); this.updateHud();
-    this.root.add(createSkillView(this, this.sim.state, manifest, {
+    const view = createSkillView(this, this.sim.state, manifest, {
       select: id => { container.dataset.selectedTrait = String(id); },
       choose: id => {
         if (!this.sim!.chooseSkill(id)) return false;
-        this.playSound('soundClick1'); this.saveGame(false); this.showOutcome();
+        this.playSound('soundClick1'); this.saveGame(false); this.fadeOutPanel(() => this.showOutcome());
         return true;
       },
-    }));
+    });
+    this.root.add(view);
+    // Каждое очко навыка — отдельный _eventLevel: после выбора окно гаснет, а следующее въезжает заново.
+    this.slidePanel(`skill:${this.sim.state.player.skillPoints}`, [view], { sound: 'soundScroll1' });
     container.dataset.skillChoices = JSON.stringify(this.sim.state.skillChoices);
     container.dataset.traits = JSON.stringify(this.sim.state.player.traits);
     container.dataset.skillPoints = String(this.sim.state.player.skillPoints);
@@ -1955,7 +2274,7 @@ class ElonaScene extends Phaser.Scene {
     if (this.screen !== 'town' && this.sim.state.day === 1) this.medalNotices.add('Make sure to repair your walls!', false);
     this.reset('town');
     this.townNavigation ??= this.add.container(0, 0);
-    this.root.add(createTownView(this, this.sim.state, manifest, this.cache.json.get('town-layout') as TownLayout, {
+    const townView = createTownView(this, this.sim.state, manifest, this.cache.json.get('town-layout') as TownLayout, {
       medalPage: page => { this.medalPage = page; this.playSound('soundClick1'); this.showTown('medals'); },
       medalHint: hint => { if (hint) container.dataset.medalHint = JSON.stringify(hint); else delete container.dataset.medalHint; },
       visitKongregate: () => {
@@ -1980,7 +2299,8 @@ class ElonaScene extends Phaser.Scene {
         this.playSound(outcome === 'contracted' ? 'soundGood' : 'soundClick1'); this.saveGame(false); this.showTown('mission', outcome === 'contracted' ? TOWN_NOTICES.hiredGun : null);
         status.textContent = outcome === 'contracted' ? "Hired Gun: You've hired a henchman for this mission. He will join when you rest." : 'Henchman contract cancelled.';
       },
-      select: next => { if (next === 'medals' && this.sim!.visitMuseum(this.profile.bestHardcoreDay ?? 0)) this.saveGame(false); this.playSound('soundScroll1'); this.showTown(next); },
+      // Кнопка навигации переносит меню на x=1000, и со следующего кадра оно въезжает с 630, даже если это то же меню.
+      select: next => { if (next === 'medals' && this.sim!.visitMuseum(this.profile.bestHardcoreDay ?? 0)) this.saveGame(false); this.playSound('soundScroll1'); this.townPanelRestart = true; this.showTown(next); },
       actionHover: () => this.playSound('soundCard1'),
       message: value => { status.textContent = value; },
       castlePage: page => { this.castlePage = page; this.showTown('castle'); },
@@ -2025,7 +2345,8 @@ class ElonaScene extends Phaser.Scene {
         }
       },
       rest: () => { this.playSound('soundNight'); this.showTown('mission', 'rest'); },
-    }, tab, this.townNavigation, this.castlePage, this.medalPage));
+    }, tab, this.townNavigation, this.castlePage, this.medalPage);
+    this.root.add(townView);
     refreshMenuHover(this);
     if (tab === 'characters' || tab === 'equipment') this.showPartyPanel(tab);
     if (tab === 'shop' && this.sim.state.town.preparation === 'ready') {
@@ -2085,6 +2406,16 @@ class ElonaScene extends Phaser.Scene {
       container.dataset.pendingTownAction = JSON.stringify(pending);
       container.dataset.upgradePreview = JSON.stringify(pending?.kind === 'upgrade' ? this.sim.state.upgradeReference : null);
     }
+    // В оригинале копия итогов window3_mc лежит под меню города, но над навигацией, до выхода из города.
+    const panelLayer = townView.getByName('town-panel') as Phaser.GameObjects.Container | null;
+    if (this.resultUnderlay && panelLayer) {
+      townView.addAt(this.resultSheet(this.resultUnderlay, 'result-underlay-news').setX(MENU_X + RESULT_UNDERLAY_SHIFT), townView.getIndex(panelLayer));
+    }
+    // Меню города (window2_mc) въезжает с x=630; обновления того же меню (покупка, листание) его не перезапускают. В городе въезд не блокирует щелчки.
+    const panels = [panelLayer, this.root.getByName('shop-view'), this.root.getByName('party-view')]
+      .filter((object): object is Phaser.GameObjects.Container => object instanceof Phaser.GameObjects.Container);
+    this.slidePanel(`town:${tab}`, panels, { block: false, restart: this.townPanelRestart });
+    this.townPanelRestart = false;
     let eventView: Phaser.GameObjects.Container | undefined;
     if (dialog) {
       this.closeTownEvent = () => {
@@ -2094,7 +2425,8 @@ class ElonaScene extends Phaser.Scene {
           if (this.sim!.startNextDay()) {
             this.carryCheckpoint = this.sim!.state.mode === 'hardcore' ? undefined : checkpoint;
             // procEventDialog воспроизводит второй щелчок внутри ветки сна.
-            this.playSound('soundClick1'); this.enterBattle(true); this.saveGame(false); this.playSound('soundBattleBegin');
+            // После сна оригинал открывает _eventBegin: выход из черноты, въезд «Day N», затем бой.
+            this.playSound('soundClick1'); this.showBegin(); this.saveGame(false);
             status.textContent = `Day ${this.sim!.state.day} begins.`;
           } else { this.showTown('mission'); status.textContent = 'The next day is not available yet.'; }
         } else this.showTown(typeof dialog === 'object' ? tab : dialog === 'title' ? 'mission' : 'castle');
@@ -2279,6 +2611,10 @@ class ElonaScene extends Phaser.Scene {
     this.audioSettingsView = this.createAudioControls();
     this.pauseLayer.add(this.audioSettingsView.root);
     if (this.volumeIcon) this.root.bringToTop(this.volumeIcon);
+    // Исходный pauseMenu: makeBlurScreen и sound_scroll1; в кадрах 1–10 menu_pause въезжают обе половины.
+    this.playSound('soundScroll1');
+    this.placePauseGroups(1);
+    this.makeBlurScreen(this.pauseLayer, () => { this.pauseOpenedAt = this.time.now; });
   }
 
   makeSave(): PortSave | undefined {
@@ -2461,17 +2797,23 @@ async function boot(): Promise<void> {
   const response = await fetch(assetUrl('manifest.json'));
   if (!response.ok) throw new Error('Original assets are missing. Run python tools/extract_web_assets.py from the project folder.');
   manifest = await response.json() as Manifest;
-  try {
-    const localizedResponse = await fetch(assetUrl('ru/manifest.json'));
-    if (!localizedResponse.ok) throw new Error('Russian artwork is unavailable.');
-    russianAssets = await localizedResponse.json(); localizationReady = true;
-  } catch {
-    status.textContent = 'Russian artwork is unavailable. Reload to retry.';
-  }
-  for (const [key, mask] of Object.entries(russianAssets.hitMasks)) manifest.images[key].ruHitMask = mask;
-  const families: Record<string, string> = { menu: 'ElonaMenu', menuBold: 'ElonaMenuBold', hud: 'ElonaHud', small: 'ElonaSmall', impact: 'ElonaImpact', ruMenu: 'ElonaRussianMenu', ruUI: 'ElonaRussianUI', ruBold: 'ElonaRussianBold' };
+  await Promise.all(LOCALIZED_ART_LANGUAGES.map(async language => {
+    try {
+      const localizedResponse = await fetch(assetUrl(`${language}/manifest.json`));
+      if (!localizedResponse.ok) throw new Error(`${language} artwork is unavailable.`);
+      localizedAssets[language] = await localizedResponse.json() as LocalizedAssets;
+    } catch (error) {
+      console.warn(`Localized artwork for ${language} is unavailable; this language is disabled until reload.`, error);
+      if (getLanguage() === language) status.textContent = language === 'ru' ? 'Russian artwork is unavailable. Reload to retry.' : 'Chinese artwork is unavailable. Reload to retry.';
+    }
+  }));
+  for (const [key, mask] of Object.entries(localizedAssets.ru?.hitMasks ?? {})) manifest.images[key].ruHitMask = mask;
+  for (const [key, mask] of Object.entries(localizedAssets.zh?.hitMasks ?? {})) manifest.images[key].zhHitMask = mask;
+  const families: Record<string, string> = { menu: 'ElonaMenu', menuBold: 'ElonaMenuBold', hud: 'ElonaHud', small: 'ElonaSmall', impact: 'ElonaImpact', banner: 'ElonaBanner',
+    ruMenu: 'ElonaRussianMenu', ruUI: 'ElonaRussianUI', ruBold: 'ElonaRussianBold', zhMenu: 'ElonaChineseMenu', zhUI: 'ElonaChineseUI', zhBold: 'ElonaChineseBold' };
   const fontFallbacks: string[] = [];
-  const fontFiles = { ...manifest.fonts, ruMenu: 'fonts/ru/Neucha.ttf', ruUI: 'fonts/ru/PT_Sans-Web-Regular.ttf', ruBold: 'fonts/ru/PT_Sans-Web-Bold.ttf' };
+  const fontFiles = { ...manifest.fonts, ruMenu: 'fonts/ru/Neucha.ttf', ruUI: 'fonts/ru/PT_Sans-Web-Regular.ttf', ruBold: 'fonts/ru/PT_Sans-Web-Bold.ttf',
+    zhMenu: 'fonts/zh/LXGWWenKai-Subset.ttf', zhUI: 'fonts/zh/NotoSansSC-Regular-Subset.ttf', zhBold: 'fonts/zh/NotoSansSC-Bold-Subset.ttf' };
   await Promise.all(Object.entries(fontFiles).map(async ([key, file]) => {
     try {
       const font = new FontFace(families[key] ?? key, `url("${assetUrl(file)}")`);
@@ -2496,12 +2838,16 @@ for (const selector of ['#browser-options', '#browser-options-open', '#touch-pau
   const walker = document.createTreeWalker(document.querySelector(selector)!, NodeFilter.SHOW_TEXT);
   for (let node = walker.nextNode(); node; node = walker.nextNode()) if (node.textContent?.trim()) staticText.set(node as Text, node.textContent);
 }
+/** Кнопка показывает текущий язык; для китайского — один иероглиф, чтобы уместиться в кнопку 25 px. */
+const LANGUAGE_LABELS: Readonly<Record<Language, string>> = { en: 'EN', ru: 'RU', zh: '中' };
+const SWITCH_LANGUAGE_LABELS: Readonly<Record<Language, string>> = { en: 'Switch to English', ru: 'Switch to Russian', zh: 'Switch to Chinese' };
 function updateLanguageControl(): void {
-  const lang = getLanguage(); document.documentElement.lang = lang; container.dataset.language = lang;
+  const lang = getLanguage(); document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang; container.dataset.language = lang;
   statusElement.textContent = statusSource === null ? null : t(statusSource);
   document.querySelector('#playfield > canvas')?.setAttribute('aria-label', t('Elona Shooter battlefield'));
-  languageButton.textContent = lang.toUpperCase(); languageButton.setAttribute('aria-pressed', String(lang === 'ru'));
-  languageButton.setAttribute('aria-label', t(lang === 'en' ? 'Switch to Russian' : 'Switch to English'));
+  languageButton.textContent = LANGUAGE_LABELS[lang]; languageButton.setAttribute('aria-pressed', String(lang !== 'en'));
+  const cycle = availableLanguages();
+  languageButton.setAttribute('aria-label', t(SWITCH_LANGUAGE_LABELS[nextLanguage(lang, cycle.length > 1 ? cycle : LANGUAGES)]));
   for (const [node, source] of staticText) node.textContent = source.replace(source.trim(), t(source.trim()));
   enlargeButton.textContent = t(container.dataset.menuZoom === 'true' ? 'Fit' : 'Enlarge');
   updateMuteControl(container.dataset.muted !== 'false');
@@ -2510,7 +2856,7 @@ function updateLanguageControl(): void {
   document.querySelector('#game-controls')!.setAttribute('aria-label', t('Game controls'));
   panMenu.setAttribute('aria-label', t('Pan enlarged menu horizontally'));
 }
-languageButton.addEventListener('click', () => setLanguage(getLanguage() === 'en' ? 'ru' : 'en'));
+languageButton.addEventListener('click', () => setLanguage(nextLanguage(getLanguage(), availableLanguages())));
 onLanguageChanged(updateLanguageControl); updateLanguageControl();
 muteButton.addEventListener('click', () => gameScene?.toggleMute());
 fullscreenButton.disabled = !document.fullscreenEnabled || typeof container.requestFullscreen !== 'function';

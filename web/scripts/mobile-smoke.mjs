@@ -17,7 +17,7 @@ if (process.env.QA_PROXY && process.env.HTTPS_PROXY) {
 }
 const browser = await (engine === 'webkit' ? webkit : chromium).launch(options);
 try {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: 'en-US' });
   page.setDefaultTimeout(30000);
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
@@ -27,6 +27,8 @@ try {
     catch (error) { console.error('Expected', name, 'saw', await game.getAttribute('data-screen'), await page.locator('#save-status').textContent()); throw error; }
   };
   const data = key => game.getAttribute('data-' + key);
+  // Окна событий въезжают и гаснут как в оригинале; щелчки в это время игнорируются.
+  const idle = () => page.locator('#game[data-transition="idle"]').waitFor({ timeout: 12000 });
   const point = async (x, y) => {
     const b = await canvas.boundingBox();
     return { x: b.x + x * b.width / 620, y: b.y + y * b.height / 380 };
@@ -50,8 +52,10 @@ try {
     return saved;
   };
   await openTitle();
-  if (process.env.QA_LANGUAGE === 'ru') {
-    await page.locator('#language').tap(); assert.equal(await data('language'), 'ru');
+  // QA_LANGUAGE=ru|zh: кнопка языка переключает EN → RU → 中 по кругу.
+  if (['ru', 'zh'].includes(process.env.QA_LANGUAGE)) {
+    for (let i = 0; i < 3 && await data('language') !== process.env.QA_LANGUAGE; i++) await page.locator('#language').tap();
+    assert.equal(await data('language'), process.env.QA_LANGUAGE);
   }
   const portrait = await canvas.boundingBox();
   assert.ok(portrait.width >= 388 && portrait.x >= 0 && portrait.x + portrait.width <= 391);
@@ -62,7 +66,7 @@ try {
   await page.locator('#touch-enlarge').tap();
   await page.waitForFunction(() => document.querySelector('#playfield > canvas').clientWidth >= 700);
   await page.locator('#touch-pan input').tap({ position: { x: 90, y: 22 } });
-  await tap(310, 315); await screen('battle');
+  await idle(); await tap(310, 315); await screen('begin'); await screen('battle');
   const initialAmmo = Number(await data('ammo'));
   await tap(165, 214);
   await page.waitForFunction(n => Number(document.querySelector('#game').dataset.ammo) < n, initialAmmo);
@@ -116,9 +120,10 @@ try {
   await page.locator('#game[data-replace-adventure="import"]').waitFor();
   await tap(260, 240);
   await page.waitForFunction(() => document.querySelector('#game').dataset.tick === '0');
-  await page.locator('#touch-pause').tap(); await screen('loot');
-  await tap(310, 315); await screen('result');
-  await tap(205, 318); await screen('town');
+  await page.locator('#touch-pause').tap(); await screen('clear');
+  await idle(); await tap(300, 200); await screen('loot');
+  await idle(); await tap(310, 315); await screen('result');
+  await idle(); await tap(205, 318); await screen('town');
   await tap(44, 75); await page.locator('#game[data-town-tab="mission"]').waitFor();
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ engine, edition, portrait, landscape, savedTick: saved.tick, screen: 'town', muted: await data('muted') }));

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { getLanguage, localizedFont, onLanguageChanged, translateText, type TextContext } from './i18n.ts';
+import { getLanguage, isCjkLanguage, localizedFont, onLanguageChanged, translateText, type TextContext } from './i18n.ts';
+import { wrapCjkText } from './cjk-wrap.ts';
 
 export interface LocalizedTextBounds {
   /** Размеры в локальных координатах текста, до scale родительского поля. */
@@ -8,7 +9,7 @@ export interface LocalizedTextBounds {
   ellipsis?: boolean;
 }
 
-/** Текст хранит исходную строку, поэтому EN/RU переключается без изменения игрового состояния. */
+/** Текст хранит исходную строку, поэтому язык переключается без изменения игрового состояния. */
 class LocalizedText extends Phaser.GameObjects.Text {
   declare private sourceText: string | string[];
   declare private sourceFamily: string;
@@ -77,6 +78,13 @@ class LocalizedText extends Phaser.GameObjects.Text {
     if (this.isCropped && !this.fitting) this.applyLogicalCrop();
     return this;
   }
+  /** В китайском нет пробелов, и встроенный перенос Phaser по пробелам переполнял бы длинные фразы. */
+  override runWordWrap(text: string): string {
+    const style = this.style;
+    if (!isCjkLanguage(getLanguage()) || style.wordWrapCallback || !style.wordWrapWidth) return super.runWordWrap(text);
+    const context = this.context, spacing = this.letterSpacing;
+    return wrapCjkText(text, value => context.measureText(value).width + Array.from(value).length * spacing, style.wordWrapWidth);
+  }
   private fitTranslation(): void {
     if (!this.fitBounds || this.fitting || !this.sourceFontSize) return;
     this.fitting = true;
@@ -84,12 +92,12 @@ class LocalizedText extends Phaser.GameObjects.Text {
       const bounds = this.fitBounds, original = this.sourceFontSize;
       super.setText(translateText(this.sourceText, getLanguage(), this.localizationContext));
       super.setFontSize(original);
-      const russian = getLanguage() === 'ru';
-      if (this.sourceWrapWidth) super.setWordWrapWidth(russian
+      const localized = getLanguage() !== 'en';
+      if (this.sourceWrapWidth) super.setWordWrapWidth(localized
         ? Math.min(this.sourceWrapWidth, Math.max(1, bounds.width - (this.padding.left ?? 0) - (this.padding.right ?? 0))) : this.sourceWrapWidth);
-      super.setLineSpacing(russian ? bounds.lineSpacing ?? this.sourceLineSpacing ?? 0 : this.sourceLineSpacing ?? 0);
+      super.setLineSpacing(localized ? bounds.lineSpacing ?? this.sourceLineSpacing ?? 0 : this.sourceLineSpacing ?? 0);
       // EN всегда возвращается к исходному кеглю; строка sourceText не меняется.
-      if (getLanguage() !== 'ru') return;
+      if (!localized) return;
       const minimum = Math.min(original, bounds.minFontSize ?? 9);
       const fits = () => {
         // width/height у Text могут быть fixedSize: измеряем сами строки, не холст.

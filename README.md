@@ -23,7 +23,7 @@ Open **Options** on the left of the title screen for sound, touch controls and s
 
 For a little help with touch aiming, enable **Aim Assist** in **Game MODs** during character creation. It gently nudges near misses toward enemies or Sisters. It is off by default and available in both editions.
 
-Use **EN / RU** beside the mute and fullscreen buttons to switch languages at any time. The choice is remembered. Russian includes the lettering in the original menu artwork, and works with both editions and existing saves.
+Use **EN / RU / 中** beside the mute and fullscreen buttons to switch languages at any time. The choice is remembered. Russian and Simplified Chinese include the lettering in the original menu artwork, and work with both editions and existing saves.
 
 Choose **Options → Adjust sound** or open **Menu / Pause** during a game for separate Master, Effects and Ambience volume controls. Lower Ambience to quiet the forest and town backgrounds, including the tavern, without quieting weapons or enemies. The settings are remembered in this browser.
 
