@@ -761,5 +761,12 @@ export const ruUI: Record<string, string> = {
   "Time to shift aim; 25% less damage.": "Перевод прицела занимает время; урон ниже на 25%.",
   "Slower aim, -25% damage": "Медленнее прицел, -25% урона",
   "Show companion damage": "Показывать урон спутников",
-  "This save contains invalid game option settings.": "В сохранении содержатся неверные данные настроек игры."
+  "This save contains invalid game option settings.": "В сохранении содержатся неверные данные настроек игры.",
+  "HEAD  SHOT!": "В ГОЛОВУ!",
+  "LIMB  SHOT!": "ПО КОНЕЧНОСТИ!",
+  "CORE  SHOT!": "В ЯДРО!",
+  "ABDOMEN SHOT!": "В БРЮХО!",
+  "TORSO  SHOT!": "В КОРПУС!",
+  "CRITICAL KILL!": "КРИТИЧЕСКОЕ УБИЙСТВО!",
+  "ONE HIT KILL!": "УБИТ С ОДНОГО ВЫСТРЕЛА!"
 };

@@ -34,7 +34,8 @@ import { readFlashAdventure } from './flash-adventure.ts';
 import { readFlashSharedObject } from './flash-shared-object.ts';
 import { TITLES, nextTitle } from './titles.ts';
 import { Simulation, type SimulationState, type EnemyState, type SimulationEvent } from './simulation.ts';
-import { WORLD } from './content.ts';
+import { ENEMIES, WORLD } from './content.ts';
+import { CRIT_KILL_FRAMES, critKillFrame, critKillMessage } from './crit-kill-text.ts';
 import { RAT_DROP_BODY_X, RAT_DROP_SHADOW, ratDropLocalPoint } from './bird-drop.ts';
 import { weaponPresentation } from './combat-stats.ts';
 import { SAVE_SLOTS, readSelectedSlot, selectSaveSlot, readNewGameRuleset, storeNewGameRuleset, deleteSaveSlot, exportSave, readMute, readSave, readProfile, storeProfile, canSaveAdventure, clearSave, storeMute, storeSave } from './storage.ts';
@@ -235,7 +236,7 @@ class ElonaScene extends Phaser.Scene {
   private reloadAnimations = 0;
   private slotRequested?: number;
   private hotbar: { icon: Phaser.GameObjects.Image; count: Phaser.GameObjects.Text; cooldown: Phaser.GameObjects.Image }[] = [];
-  private effects: { object: Phaser.GameObjects.GameObject; ticks: number; moveY?: number; clip?: string; frame?: number; trail?: true; enemyOffset?: { uid: number; x: number; y: number } }[] = [];
+  private effects: { object: Phaser.GameObjects.GameObject; ticks: number; moveY?: number; clip?: string; frame?: number; trail?: true; enemyOffset?: { uid: number; x: number; y: number }; critKill?: { baseY: number; age: number } }[] = [];
   private ambient?: Phaser.Sound.BaseSound;
   private bowSound?: Phaser.Sound.BaseSound;
   private chainSounds = new Map<number, { mode: number; sound: Phaser.Sound.BaseSound }>();
@@ -1655,6 +1656,14 @@ class ElonaScene extends Phaser.Scene {
       if (enemy) sound.kill = { sheep: 'soundDead3', rat: 'soundDead7', chicken: 'soundDeadChicken', crow: 'soundDead5', archer: 'soundDead2', fly: 'soundDead6', barbarian: 'soundDead2', lava: 'soundDead1', boss: 'soundDeadBoss1', cata: 'soundDead4', spider: 'soundDead2', ghost: 'soundDead2', ogre: 'soundDead1', knight: 'soundDead2', bird: 'soundDead8', tank: 'soundDead4', dino: 'soundDead9', dragon: 'soundDead9', 'dropped-rat': 'soundDead7', 'sister-bomb': 'soundExp1' }[enemy.kind];
       // Выбор реплики уже сделан симуляцией в исходном порядке случайных вызовов.
       if (event.goodShotIndex !== undefined) this.playSound(`soundGoodshot${event.goodShotIndex}`, 0.65);
+      // Исходный critKill: на сцене в (x, y − 12), поле txt в (−29, −6.8), чёрная тень под 45°, расстояние 1, без размытия.
+      const message = enemy && event.criticalType ? critKillMessage(event.criticalType, ENEMIES[enemy.kind].id) : '';
+      if (message) {
+        // У TextField отступ 2 пикселя, у текста Phaser здесь 1, поэтому вычитаем ещё 1.
+        const baseY = (event.y ?? 0) - 12 - 6.8 - 1;
+        const text = this.text((event.x ?? 0) - 29 - 1, baseY, message, 11, '#ffffff', 'ElonaCrit').setAlpha(0.8).setShadow(0.71, 0.71, '#000000', 0, false, true);
+        this.effects.push({ object: text, ticks: CRIT_KILL_FRAMES, critKill: { baseY, age: 0 } });
+      }
     }
     if (sound[event.type]) this.playSound(sound[event.type]!, event.type === 'kill' ? 0.4 : actorSound ? actorAudio.volume : 0.65, actorSound ? actorAudio.pan : 0);
     if (event.type === 'shot') {
@@ -1762,6 +1771,10 @@ class ElonaScene extends Phaser.Scene {
       effect.ticks--;
       if (effect.ticks <= 0) { effect.object.destroy(); return false; }
       if (effect.moveY && effect.object instanceof Phaser.GameObjects.Text) effect.object.y += effect.moveY;
+      if (effect.critKill && effect.object instanceof Phaser.GameObjects.Text) {
+        const frame = critKillFrame(++effect.critKill.age);
+        effect.object.setY(effect.critKill.baseY + frame.offsetY).setAlpha(frame.alpha);
+      }
       if (effect.trail && effect.object instanceof Phaser.GameObjects.Image) {
         const age = 16 - effect.ticks;
         effect.object.setAlpha(age < 3 ? age * 0.4 : Math.max(0, 0.8 - (age - 2) * 0.06));
@@ -2469,7 +2482,7 @@ async function boot(): Promise<void> {
     status.textContent = 'Russian artwork is unavailable. Reload to retry.';
   }
   for (const [key, mask] of Object.entries(russianAssets.hitMasks)) manifest.images[key].ruHitMask = mask;
-  const families: Record<string, string> = { menu: 'ElonaMenu', menuBold: 'ElonaMenuBold', hud: 'ElonaHud', small: 'ElonaSmall', impact: 'ElonaImpact', ruMenu: 'ElonaRussianMenu', ruUI: 'ElonaRussianUI', ruBold: 'ElonaRussianBold' };
+  const families: Record<string, string> = { menu: 'ElonaMenu', menuBold: 'ElonaMenuBold', hud: 'ElonaHud', small: 'ElonaSmall', impact: 'ElonaImpact', crit: 'ElonaCrit', ruMenu: 'ElonaRussianMenu', ruUI: 'ElonaRussianUI', ruBold: 'ElonaRussianBold' };
   const fontFallbacks: string[] = [];
   const fontFiles = { ...manifest.fonts, ruMenu: 'fonts/ru/Neucha.ttf', ruUI: 'fonts/ru/PT_Sans-Web-Regular.ttf', ruBold: 'fonts/ru/PT_Sans-Web-Bold.ttf' };
   await Promise.all(Object.entries(fontFiles).map(async ([key, file]) => {
