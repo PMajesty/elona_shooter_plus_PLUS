@@ -36,7 +36,7 @@ import { TITLES, nextTitle } from './titles.ts';
 import { Simulation, type SimulationState, type EnemyState, type SimulationEvent } from './simulation.ts';
 import { WORLD } from './content.ts';
 import { RAT_DROP_BODY_X, RAT_DROP_SHADOW, ratDropLocalPoint } from './bird-drop.ts';
-import { weaponPresentation } from './combat-stats.ts';
+import { weaponPresentation, ammoBarRatio } from './combat-stats.ts';
 import { SAVE_SLOTS, readSelectedSlot, selectSaveSlot, readNewGameRuleset, storeNewGameRuleset, deleteSaveSlot, exportSave, readMute, readSave, readProfile, storeProfile, canSaveAdventure, clearSave, storeMute, storeSave } from './storage.ts';
 import { saveSlotLabel } from './save-slots.ts';
 import { createTitleSavesView, type TitleSavesLayout } from './title-saves-view.ts';
@@ -1857,7 +1857,8 @@ class ElonaScene extends Phaser.Scene {
       // Сохранённый счётчик включает последнее обновление, при котором Flash удаляет таймер.
       cooldown.setVisible(remaining > 0).setScale(Math.max(0, remaining - 1) / timerMax, 1);
     });
-    this.ammoFill?.setScale(selected && selected.ammoMax > 0 ? selected.ammo / selected.ammoMax : 0, 1);
+    // Во время смены магазина полоса заполняется по ходу перезарядки, как в reloading; иначе показывает патроны.
+    this.ammoFill?.setScale(ammoBarRatio(selected, state.player.traits), 1);
     const meter = this.sim!.heroClassState;
     if (meter && this.adrenalineFill) {
       const level = state.player.traits[HERO_CLASSES[state.player.classId].id];

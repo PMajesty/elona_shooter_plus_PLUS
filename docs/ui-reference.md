@@ -135,6 +135,9 @@ Do not infer a hitbox from the visible sprite rectangle alone.
 Battle HUD values come from `updateDay`, `updateHP`, and `updateAmmoBar`:
 day shows `game.day + "/" + mission.wave`, HP shows `current/max`, ammo shows
 `current/max`. The source does not show elapsed seconds as the day counter.
+During a magazine reload `reloading` sets `ammobar.scaleX = 1 - reloadTime / reloadTimer`
+on every timer tick, so the bar fills from empty to full while the text stays `0/max`;
+single-round reloads grow the bar one round at a time through `updateAmmoBar`.
 
 ## Archer and the third day
 
