@@ -8,6 +8,7 @@ import { nextTitle, type Title } from './titles.ts';
 import type { TownNotice } from './town-events.ts';
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
+import { createTownNpc } from './town-npc.ts';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
 import { CASTLE_UPGRADES, castleDamageMultiplier, castleLootMultiplier, castleRepairAmount, castleStorageLevel, castleTrainerMultiplier, castleUpgradeCost, castleUpkeep, type CastleUpgradeKind } from './castle-upgrades.ts';
 
@@ -101,6 +102,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
     const canRest = state.day < MAX_CAMPAIGN_DAY && state.town?.preparation === 'ready';
     // Вертикальный сдвиг уже запечён в статическую панель; её кнопкам он нужен отдельно.
     image(panel.image, x, 0);
+    const npc = createTownNpc(scene, manifest, tab, x, y); if (npc) root.add(npc);
     button('button_windowClose', panel.children.closeButton, () => callbacks.select(null), x, y);
     if (tab === 'castle') {
       text(panel.children.unkeep, String(castleUpkeep(state)), x, y);
@@ -234,6 +236,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
   if (tab === 'medals') {
     const panel = layout.medals, { x, y } = layout.menuPosition;
     image(panel.image, x, 0);
+    const npc = createTownNpc(scene, manifest, 'medals', x, y); if (npc) root.add(npc);
     button('button_windowClose', panel.children.closeButton, () => callbacks.select(null), x, y);
     button('button_castlePage1', panel.children.page1, () => callbacks.medalPage(0), x, y);
     button('button_castlePage2', panel.children.page2, () => callbacks.medalPage(1), x, y);

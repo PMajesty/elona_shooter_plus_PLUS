@@ -6,6 +6,7 @@ import type { ItemPopupInfo } from './item-popup-values.ts';
 import Phaser from 'phaser';
 import { ITEM_TYPE, isOccupiedItem, itemPrice, type Item } from './items.ts';
 import type { LootViewManifest } from './loot-view.ts';
+import { createTownNpc } from './town-npc.ts';
 import { createModConfirmation } from './mod-confirmation-view.ts';
 
 interface Placement {
@@ -94,6 +95,7 @@ export function createShopView(scene: Phaser.Scene, state: ShopViewState, manife
   };
   // Сдвиг y уже запечён в исходную панель; отдельные элементы используют оба смещения.
   image(panel.image, menu.x, 0);
+  const npc = createTownNpc(scene, manifest, 'shop', menu.x, menu.y); if (npc) root.add(npc);
   const status = text(panel.children.hint2, HINT, menu.x, menu.y).setName('shop-hint');
   const warning = text(panel.children.warning, '', menu.x, menu.y).setName('shop-skill-warning');
   const message = (value: string) => { status.setText(value); callbacks.message(value); };

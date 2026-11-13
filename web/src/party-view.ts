@@ -1,4 +1,5 @@
 import { localizedImage } from './localized-image.ts';
+import { createTownNpc } from './town-npc.ts';
 import { localizedText, contentText, fitLocalizedText } from './localized-text.ts';
 import { SMART_COST_HINT, SMART_HINT, SMART_ORDER } from './smart-mode.ts';
 import { buttonInput } from './button-input.ts';
@@ -122,6 +123,7 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
   };
   // y уже включён в статические панели; динамические элементы используют оба смещения.
   image(panel.image, menu.x, 0);
+  const npc = createTownNpc(scene, manifest, tab, menu.x, menu.y); if (npc) root.add(npc);
   const hint = text(panel.children.hint2, tab === 'equipment' ? EQUIP_HINT : '').setName('party-hint');
   const message = (value: string) => { hint.setText(value); callbacks.message(value); };
   button('button_windowClose', panel.children.closeButton, callbacks.close);
