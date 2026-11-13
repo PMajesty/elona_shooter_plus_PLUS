@@ -1,0 +1,125 @@
+// ============================================================================
+// Example MOD weapon: Storm Crossbow, written without a template (every field).
+//
+// - Comments (// to the end of a line, or /* ... */) and a trailing comma are allowed.
+// - The folder name is the registry name (here storm-crossbow). Saves use it to find the
+//   weapon, so do not rename a released weapon.
+// - The folder also needs slot.png: a transparent 192×128 PNG, shown at half size (96×64).
+// - Misspelled fields, wrong types and out-of-range values are listed with the field name
+//   in Options → Weapon MODs → Manage MODs….
+// - To start from an original weapon and change only a few values, see "template" in the
+//   marksman-rifle example.
+// - Reload the game ("Reload game to apply" or refresh the page) after editing.
+// ============================================================================
+{
+  // Data format version. Must be 1; may be left out.
+  "format": 1,
+
+  // ------------------------------------------------------------- Name and description
+  // English name (required, at most 80 characters). Saves store it and translations use
+  // it as the key. It must differ from original and other MOD weapons. Upgraded copies are
+  // shown as "Storm Crossbow Mk-2" and so on automatically.
+  "name": "Storm Crossbow",
+  // Names in other languages (optional). Languages without a name show the English one.
+  "names": { "ru": "Грозовой арбалет" },
+  // Item description, shown above the attachment list in the item popup (optional).
+  // Either one English string, or one string per language: en, ru; at most 600 characters each.
+  "description": {
+    "en": "An example MOD weapon written without a template: every parameter is set here. Its bolts fly fast and pierce two extra enemies.",
+    "ru": "Пример оружия из мода без шаблона: все параметры заданы здесь. Болты летят быстро и пробивают ещё двух врагов."
+  },
+
+  // ------------------------------------------------------------- Combat values
+  // Damage per shot (required, 0–100000). Pistol 20, Hunter's Rifle 55, Crossbow 36, Sniper Rifle 100.
+  "attack": 42,
+  // Fire rate (required, 1–3000), higher is faster. A shot takes about 1000 / shootRate
+  // frames (30 frames per second); the item popup shows it as "x/sec".
+  // Pistol 100, Crossbow 28, Hunter's Rifle 30, Sniper Rifle 20.
+  "shootRate": 26,
+  // Magazine size (required, whole number 1–9999). Irrelevant when reloadTimeMax is 0; use 1.
+  "ammoMax": 1,
+  // Reload time in frames (required, whole number 0–2000); the Reloading skill shortens it.
+  // 0 = no ammo is used and nothing reloads (like the original bows and crossbows).
+  // Pistol 20, Sniper Rifle 65.
+  "reloadTimeMax": 0,
+  // true = reload one round at a time (shotguns, Hunter's Rifle, revolvers);
+  // false = refill the whole magazine at once.
+  "manualReload": false,
+  // true = keep firing while the button is held; false = one shot per click.
+  "automatic": false,
+  // Base accuracy (required, 0–1000); higher means less spread. Pistol 150, Crossbow 120, Sniper Rifle 225.
+  "baseAccuracy": 130,
+  // Recoil (required, 0–10): accuracy lost per shot, recovered after you stop firing.
+  // Lower is steadier. Pistol 0.1, Sniper Rifle 0.18, Crossbow 0.35.
+  "accuracyDec": 0.3,
+  // Pellets per shot (whole number 1–30, default 1). Shotguns use more; each pellet deals attack damage.
+  "shell": 1,
+  // Best range (whole number, default 1): 0 near, 1 middle, 2 far.
+  // The farther the crosshair is from it, the worse the accuracy.
+  "range": 2,
+  // Damage against flying enemies, percent (0–1000, default 100). 100 = unchanged;
+  // below 60 a hit on a flying enemy shows the original "blocked" effect and sound.
+  "dmgAir": 100,
+  // Damage against armored enemies, percent (0–1000, default 100); same rule as above.
+  "dmgArmor": 60,
+
+  // ------------------------------------------------------------- Requirements and drops
+  // Weapon skill (required). It decides which skill is needed and which skill bonuses apply:
+  //   "smallGun" Small Gun | "rifle" Rifle | "shotgun" Shotgun | "bigGun" Big Gun
+  "category": "rifle",
+  // Required skill level (whole number 0–99, default 1). Below it the hero cannot fire,
+  // and the requirement is shown in red.
+  "reqLv": 4,
+  // Weapon class (default "normal"):
+  //   "normal"
+  //   "sniper"  — the One hit kill skill works only with sniper weapons (never on bosses)
+  //   "shotgun" — the Dr Holliday skill adds pellets
+  "weaponClass": "normal",
+  // Price (required, 1–10000000). Shop and sale prices come from it, and it also sets the
+  // rarity: expensive weapons are rare early and common later, like original weapons of the
+  // same price. Pistol 300, Hunter's Rifle 400, Crossbow 650, Sniper Rifle 1100, Gravity Gun 2000.
+  "value": 900,
+  // true = can appear in shops, loot and boss drops (default); false = never appears randomly.
+  "randomDrop": true,
+  // Weight in the random pool (0–100, default 1). 1 = the same chance of being picked as one
+  // original item number, 2 = twice, 0 = never. Whether it then appears still depends on the price.
+  "weight": 1,
+
+  // ------------------------------------------------------------- Projectile and special behavior
+  // Projectile (default "none"):
+  //   "none"     instant bullets that hit the crosshair (most guns)
+  //   "grenade"  thrown, explodes with area damage (Grenade Launcher)
+  //   "rocket"   accelerates, then explodes with area damage (Rocket Launcher)
+  //   "bolt"     nearly straight, can pierce (Crossbow, Repeating Crossbow)
+  //   "arrow"    arcs and only hurts just before landing, can pierce (Long Bow, Wind Bow)
+  //   "gravity"  pulses area damage along its path (Gravity Gun)
+  //   "flame"    short-range stream (Flame Thrower)
+  "projectile": "bolt",
+  // Projectile speed (1–100, default 10); ignored for "none". Long Bow 10, grenade 12, Crossbow 20.
+  "projectileSpeed": 26,
+  // Extra enemies a projectile passes through (whole number 0–20, default 0); only "bolt" and "arrow".
+  // 2 = one bolt can hit up to 3 enemies. Crossbow 1.
+  "pierce": 2,
+  // Projectiles per shot: 1, or 3 (a fanned Wind Bow volley; needs a projectile other than "none").
+  // Guns that should fire several pellets use shell instead.
+  "volley": 1,
+  // true = hold the button to draw, release to shoot (Long Bow, Wind Bow). Needs "projectile": "arrow".
+  "bowDraw": false,
+  // true = the barrels spin up before continuous fire starts (Chain Gun). Needs "projectile": "none".
+  "spinUp": false,
+  // true = reload after every shot (Gravity Gun). Needs reloadTimeMax above 0.
+  "reloadAfterShot": false,
+
+  // ------------------------------------------------------------- Presentation
+  // Hero pose while holding the weapon (default by category):
+  //   "pistol" | "shotgun" (shotguns, Hunter's Rifle) | "rifle" | "chainGun"
+  //   "launcher" (on the shoulder) | "bow" (bows and crossbows)
+  "pose": "bow",
+  // Shot sound (default "gun1"), every sound the original weapons use:
+  //   "gun1" … "gun15" | "fireball" (flames) | "rampageEnemy"
+  //   Pistol gun6, Hunter's Rifle gun4, Sniper Rifle gun5, Crossbow gun14.
+  "sound": "gun14",
+  // Reload sound (default by manualReload):
+  //   "magazine" | "shell" (one round at a time) | "revolver"
+  "reloadSound": "magazine",
+}

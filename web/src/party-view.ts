@@ -1,4 +1,5 @@
 import { localizedImage } from './localized-image.ts';
+import { createItemIcon, itemIconSize } from './item-icon.ts';
 import { localizedText, contentText, fitLocalizedText } from './localized-text.ts';
 import { SMART_COST_HINT, SMART_HINT, SMART_ORDER } from './smart-mode.ts';
 import { buttonInput } from './button-input.ts';
@@ -11,7 +12,6 @@ import type { TownLayout } from './town-view.ts';
 import Phaser from 'phaser';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
 import type { LootViewManifest } from './loot-view.ts';
-import { GRAPHIC_WIDTH, GRAPHIC_HEIGHT } from './shop-view.ts';
 import { EQUIPMENT_SERVICE_COST, equipmentServiceEligible, type EquipmentService } from './equipment.ts';
 
 interface Placement {
@@ -302,12 +302,12 @@ export function createPartyView(scene: Phaser.Scene, state: PartyViewState, mani
     const slot = (address: PartyEquipmentSlot, item: Item | null, x: number, y: number) => {
       const plate = clip('inventorySlot', 1, x, y);
       const asset = manifest.clips.itemPicture;
-      const width = item ? GRAPHIC_WIDTH[item.graphic] ?? asset.frameWidth : 48, height = item ? GRAPHIC_HEIGHT[item.graphic] ?? asset.frameHeight : 44;
+      const { width, height } = item ? itemIconSize(item, asset) : { width: 48, height: 44 };
       const record: Slot = { address, item, plate, x: x - (width - 48) / 2 - 4, y, width, height }; slots.push(record);
       if (address.kind === 'inventory' && address.slot < 5) text(layout.inventorySlot.children.shortNum, String(address.slot + 1), x, y);
       if (isOccupiedItem(item)) {
         record.icon = scene.add.container(record.x, y); root.add(record.icon);
-        record.icon.add(localizedImage(scene, -asset.originX, -asset.originY, 'itemPicture', String(item.graphic)).setOrigin(0));
+        record.icon.add(createItemIcon(scene, 0, 0, item, asset));
         if (item.type === ITEM_TYPE.use && item.ammoMax > 0) record.icon.add(localizedText(scene, 30.95, 2, `x ${item.ammo}`, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
       }
       const area = scene.add.zone(x, y, 48, 44).setOrigin(0).setInteractive({ useHandCursor: true }).setName(`equipment-${address.kind}-${address.slot}`);

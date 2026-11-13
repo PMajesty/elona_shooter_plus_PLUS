@@ -1,3 +1,5 @@
+import { drawRandomItemId, MISSING_MOD_ITEM_ID, modWeaponById } from './weapon-registry.ts';
+
 export const ITEM_TYPE = { gun: 1, sell: 3, use: 4, mod: 5, token: 6 } as const;
 export const ITEM_TRAIT = { smallGun: 103, rifle: 104, shotgun: 105, bigGun: 106 } as const;
 export const PLAYER_INVENTORY_START = 20;
@@ -11,6 +13,10 @@ export interface Item {
   impact: number; shootRate: number; rare: number; autoReload: number; livingWeapon: number;
   name: string; baseAccuracy?: number; accuracyDec?: number; attack?: number;
   dmgAir?: number; dmgArmor?: number; reqTrait?: number; reqLv?: number; range?: number;
+  /** Регистрационное имя (папка) оружия из мода; по нему сохранение находит оружие при другом наборе модов. У исходных предметов поля нет. */
+  modWeapon?: string;
+  /** Данные исходного оружия мода внутри заглушки (номер 999); восстанавливаются, когда мод вернётся. */
+  modItem?: Item;
 }
 export interface ItemContext {
   day: number; looter: number; engineer: number; recycleMedal: boolean;
@@ -87,6 +93,15 @@ export const BASE_ITEM_FIELDS: Readonly<Record<number, Readonly<Partial<Item>>>>
   121: {},
 };
 
+/** Если мод удалён, его оружие в сохранении временно становится этим предметом для продажи (rare 0 — не выпадает случайно). Он не входит в исходную таблицу: эталонные тесты покрывают только исходные предметы. */
+export const MISSING_MOD_ITEM_FIELDS: Readonly<Partial<Item>> = { name: 'Unknown MOD Weapon', type: 3, value: 1, rare: 0 };
+
+/** Статические поля предмета: исходные номера — из исходной таблицы, номера модов — из реестра. */
+export function itemFields(id: number): Readonly<Partial<Item>> | undefined {
+  if (Object.hasOwn(BASE_ITEM_FIELDS, id)) return BASE_ITEM_FIELDS[id];
+  return id === MISSING_MOD_ITEM_ID ? MISSING_MOD_ITEM_FIELDS : modWeaponById(id)?.fields;
+}
+
 export const MODS = [
   { name: 'NullEnc', cost: 100 }, { name: 'Accuracy', cost: 100 }, { name: 'Reloading', cost: 120 },
   { name: 'Fire Rate', cost: 130 }, { name: 'Damage', cost: 140 }, { name: 'Anti Air', cost: 80 },
@@ -108,7 +123,8 @@ export class ItemFactory {
   }
 
   generate(id: number, previous?: Readonly<Item>): Item {
-    if (!Object.hasOwn(BASE_ITEM_FIELDS, id)) throw new Error(`Unknown original item ID: ${id}`);
+    const fields = itemFields(id);
+    if (!fields) throw new Error(`Unknown item ID: ${id}`);
     let modMax = 1 + int(limit(this.random() * this.random() * 6, 0, 5));
     if (modMax >= 3 && this.random() > 0.35) modMax -= 2;
     // Исходник сохраняет не перезаписанные поля предыдущего предмета в этом слоте.
@@ -117,8 +133,12 @@ export class ItemFactory {
       reloadTime: 0, reloadTimeMax: 0, ammoMax: 0, value: 100, mod: 0, modMax,
       shell: 1, manualReload: false, automatic: true, modText: '', lv: 1,
       typeMinor: 0, special: 0, leech: 0, impact: 0, shootRate: 100, rare: 100,
-      autoReload: 0, livingWeapon: 0, ...BASE_ITEM_FIELDS[id],
+      autoReload: 0, livingWeapon: 0, ...fields,
     } as Item;
+    // Прежний предмет ячейки мог быть оружием мода: его имя и данные заглушки не должны перейти к новому предмету.
+    const modWeapon = modWeaponById(id);
+    if (modWeapon) item.modWeapon = modWeapon.key; else delete item.modWeapon;
+    delete item.modItem;
     if (id === 8 || id === 9 || id === 10) this.setMod(item, MOD_POOL[int(this.random() * MOD_POOL.length)]);
     if (id === 11) {
       item.lv = 1 + int(limit(this.random() * this.context.day / 2, 0, 99));
@@ -202,7 +222,8 @@ export class ItemFactory {
     let item = previous ? { ...previous } : undefined;
     for (let attempt = 1; attempt <= 200; attempt++) {
       if (attempt === 200) return this.generate(8, item);
-      item = this.generate(1 + int(this.random() * 40), item);
+      // Исходное 1 + int(rand*40); с оружием модов в случайном пуле диапазон расширяется по весам (weapon-registry.ts).
+      item = this.generate(drawRandomItemId(this.random), item);
       if (item.rare === 0) continue;
       if (mode === 0 && ((item.type === ITEM_TYPE.mod && this.random() > 0.025) || (item.type === ITEM_TYPE.gun && this.random() > 0.25))) continue;
       if (mode === 1 && ((item.type === ITEM_TYPE.mod && this.random() > 0.2) || (item.type === ITEM_TYPE.gun && this.random() > 0.1))) continue;

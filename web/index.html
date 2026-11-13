@@ -67,9 +67,15 @@
               <div class="options-files"><button id="options-import">Import save…</button><button id="options-export">Export save</button></div>
               <p class="options-shortcuts">Import: Ctrl+Shift+O · Export: Ctrl+Shift+S</p>
             </section>
+            <section>
+              <h3>Weapon MODs</h3>
+              <p id="options-mods-summary">Add custom weapons from the mods folder.</p>
+              <button id="options-mods">Manage MODs…</button>
+            </section>
           </div>
           <form method="dialog"><button>Back</button></form>
         </dialog>
+        <dialog id="mod-manager" aria-labelledby="mod-manager-heading"></dialog>
         <input id="save-file" type="file" accept=".json,.sol,application/json,application/octet-stream" hidden />
         <p id="save-status" class="screen-reader-only" role="status"></p>
       </div>

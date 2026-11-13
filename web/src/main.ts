@@ -36,7 +36,11 @@ import { TITLES, nextTitle } from './titles.ts';
 import { Simulation, type SimulationState, type EnemyState, type SimulationEvent } from './simulation.ts';
 import { WORLD } from './content.ts';
 import { RAT_DROP_BODY_X, RAT_DROP_SHADOW, ratDropLocalPoint } from './bird-drop.ts';
-import { weaponPresentation } from './combat-stats.ts';
+import { weaponPresentation, isChainGunId, reloadSoundVariant } from './combat-stats.ts';
+import { applyItemIcon, createMissingIcon } from './item-icon.ts';
+import { loadWeaponMods, modLoadResult } from './mod-loader.ts';
+import { createModManager } from './mod-manager-view.ts';
+import { setModWeaponIcon } from './weapon-registry.ts';
 import { SAVE_SLOTS, readSelectedSlot, selectSaveSlot, readNewGameRuleset, storeNewGameRuleset, deleteSaveSlot, exportSave, readMute, readSave, readProfile, storeProfile, canSaveAdventure, clearSave, storeMute, storeSave } from './storage.ts';
 import { saveSlotLabel } from './save-slots.ts';
 import { createTitleSavesView, type TitleSavesLayout } from './title-saves-view.ts';
@@ -101,6 +105,7 @@ function updateMuteControl(muted: boolean): void {
 const loadStatus = document.querySelector<HTMLDivElement>('#load-status')!;
 const optionsEntry = document.querySelector<HTMLButtonElement>('#browser-options-open')!;
 const optionsDialog = document.querySelector<HTMLDialogElement>('#browser-options')!;
+const modManagerDialog = document.querySelector<HTMLDialogElement>('#mod-manager')!;
 const statusElement = document.querySelector<HTMLParagraphElement>('#save-status')!;
 let statusSource: string | null = '';
 const status = {
@@ -278,6 +283,13 @@ class ElonaScene extends Phaser.Scene {
     // Сохраняем дробные исходные координаты, но исключаем размытие соседних пикселей тела.
     this.textures.get('charaPic').setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.textures.get('itemPicture').setFilter(Phaser.Textures.FilterMode.NEAREST);
+    // Значки оружия модов уже подготовлены при загрузке (с тенью); регистрируем текстуры и сообщаем реестру их геометрию.
+    for (const icon of modLoadResult().icons) {
+      const texture = `modicon:${icon.key}`;
+      if (!this.textures.exists(texture)) this.textures.addCanvas(texture, icon.canvas);
+      setModWeaponIcon(icon.key, { texture, width: icon.width, height: icon.height, originX: icon.originX, originY: icon.originY });
+    }
+    createMissingIcon(this);
     const paper = this.textures.get('medalHint');
     if (!paper.has('browser-options-paper')) paper.add('browser-options-paper', 0, 8, 0, 300, 109);
     for (const [property, key, frame] of [['--options-paper', 'medalHint', 'browser-options-paper'],
@@ -459,7 +471,7 @@ class ElonaScene extends Phaser.Scene {
     // Прямое событие DOM выполняет переключение один раз и не зависит от частоты рендеринга.
     const combatKey = (event: KeyboardEvent) => {
       if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
-      if (optionsDialog.open) return;
+      if (optionsDialog.open || modManagerDialog.open) return;
       if (this.optionsAudioOpen) {
         if (event.code === 'Escape') { event.preventDefault(); this.closeOptionsAudio(); }
         return;
@@ -1071,7 +1083,10 @@ class ElonaScene extends Phaser.Scene {
     this.zone(580, 344, 40, 36, () => { if (this.screen === 'battle') this.togglePause(); else this.showTitle(); });
     this.zone(546, 350, 31, 30, () => this.toggleMute());
     for (let slot = 0; slot < 5; slot++) {
-      const icon = this.clip('itemPicture', 1, 25 + slot * 90, 343)!;
+      // Точка регистрации в (25 + slot·90, 343): applyItemIcon совмещает с ней и исходный атлас, и значки модов.
+      const picture = manifest.clips.itemPicture;
+      const icon = this.add.image(25 + slot * 90, 343, 'itemPicture', '1').setOrigin(picture.originX / picture.frameWidth, picture.originY / picture.frameHeight);
+      this.root.add(icon);
       const count = this.text(50 + slot * 90, 363, '', 11, '#ffffff', 'Arial').setShadow(1, 1, '#000000', 2);
       const timer = manifest.clips.itemTimer;
       // Исходный itemTimer.bar расположен внутри контейнера в (38.95, 6.5).
@@ -1324,7 +1339,7 @@ class ElonaScene extends Phaser.Scene {
     for (let slot = 0; slot <= 4; slot++) {
       const member = slot ? this.sim.state.party.slots[slot - 1] : null;
       const state = slot ? member?.exists ? member.member?.aiState : undefined : this.sim.heroChainState;
-      const mode = this.sim.actorWeapon(slot)?.id === 16 ? state?.chainMode ?? 0 : 0;
+      const mode = isChainGunId(this.sim.actorWeapon(slot)?.id) ? state?.chainMode ?? 0 : 0;
       const previous = this.chainSounds.get(slot);
       if (previous?.mode === mode) continue;
       previous?.sound.destroy(); this.chainSounds.delete(slot);
@@ -1638,11 +1653,11 @@ class ElonaScene extends Phaser.Scene {
     if (event.weaponId !== undefined) {
       const presentation = weaponPresentation(event.weaponId);
       sound.shot = `sound${presentation.sound[0].toUpperCase()}${presentation.sound.slice(1)}`;
-      if (event.weaponId === 16) delete sound.shot;
+      if (isChainGunId(event.weaponId)) delete sound.shot;
       const manual = actorWeapon?.manualReload;
-      const reloadVariant = event.weaponId === 14 || event.weaponId === 15 ? 3 : 2;
-      sound.reload = manual ? `soundReloading${reloadVariant}` : 'soundReloading1';
-      sound.reloaded = manual ? `soundReloaded${reloadVariant}` : 'soundReloaded1';
+      const reloadVariant = reloadSoundVariant(event.weaponId, Boolean(manual));
+      sound.reload = `soundReloading${reloadVariant}`;
+      sound.reloaded = `soundReloaded${reloadVariant}`;
       // Автоперезарядка скрывает анимацию, но звук каждого нового патрона остаётся.
       // cancelReload после последнего автоматического патрона получает уже нулевой таймер.
       if (event.automaticReload && manual) delete sound.reloaded;
@@ -1850,7 +1865,7 @@ class ElonaScene extends Phaser.Scene {
     this.hotbar.forEach(({ icon, count, cooldown }, slot) => {
       const item = state.inventory[slot], occupied = isOccupiedItem(item);
       icon.setVisible(occupied);
-      if (occupied) icon.setFrame(String(item.graphic)).setAlpha(slot === state.player.selectedSlot ? 1 : 0.6);
+      if (occupied) applyItemIcon(this, icon, item, manifest.clips.itemPicture).setAlpha(slot === state.player.selectedSlot ? 1 : 0.6);
       count.setText(occupied && item.type === ITEM_TYPE.use && item.ammo > 0 ? `x ${item.ammo}` : '');
       const remaining = state.itemCooldowns[slot];
       const timerMax = item?.id === 12 ? 2000 : 100;
@@ -2461,6 +2476,10 @@ async function boot(): Promise<void> {
   const response = await fetch(assetUrl('manifest.json'));
   if (!response.ok) throw new Error('Original assets are missing. Run python tools/extract_web_assets.py from the project folder.');
   manifest = await response.json() as Manifest;
+  // Оружие модов регистрируется до создания сцены и загрузки сохранения (сохранение переназначает номера по регистрационным именам).
+  try { await loadWeaponMods(import.meta.env.BASE_URL); }
+  catch (error) { console.warn('MODs could not be loaded; continuing without them.', error); }
+  updateModSummary();
   try {
     const localizedResponse = await fetch(assetUrl('ru/manifest.json'));
     if (!localizedResponse.ok) throw new Error('Russian artwork is unavailable.');
@@ -2570,6 +2589,16 @@ document.querySelector('#options-import')!.addEventListener('click', () => {
   fileInput.click();
 });
 document.querySelector('#options-export')!.addEventListener('click', exportAdventure);
+// Окно модов открывается из настроек и возвращает в них.
+const modManager = createModManager(modManagerDialog, () => { if (gameScene?.canOpenBrowserOptions()) showBrowserOptions(); });
+document.querySelector('#options-mods')!.addEventListener('click', () => { optionsDialog.close(); modManager.open(); });
+function updateModSummary(): void {
+  const result = modLoadResult(), summary = document.querySelector<HTMLElement>('#options-mods-summary')!;
+  const active = result.weapons.filter(mod => mod.active).length, broken = result.weapons.filter(mod => mod.errors.length).length;
+  summary.textContent = !result.available ? t('MODs are unavailable (mods/index.json could not be loaded).')
+    : t(`${active} of ${result.weapons.length} weapon MODs active.`) + (broken ? ` ${t(`${broken} with errors.`)}` : '');
+}
+onLanguageChanged(updateModSummary);
 window.addEventListener('keydown', event => {
   if (!(event.ctrlKey || event.metaKey) || !gameScene || event.altKey) return;
   if (event.code === 'KeyS') {

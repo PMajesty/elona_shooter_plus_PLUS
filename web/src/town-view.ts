@@ -8,6 +8,7 @@ import { nextTitle, type Title } from './titles.ts';
 import type { TownNotice } from './town-events.ts';
 import Phaser from 'phaser';
 import type { LootViewManifest } from './loot-view.ts';
+import { createItemIcon } from './item-icon.ts';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
 import { CASTLE_UPGRADES, castleDamageMultiplier, castleLootMultiplier, castleRepairAmount, castleStorageLevel, castleTrainerMultiplier, castleUpgradeCost, castleUpkeep, type CastleUpgradeKind } from './castle-upgrades.ts';
 
@@ -87,7 +88,7 @@ export function createTownView(scene: Phaser.Scene, state: TownViewState, manife
   const icon = manifest.clips.itemPicture;
   state.inventory.slice(0, 5).forEach((item, index) => {
     if (!isOccupiedItem(item)) return;
-    root.add(localizedImage(scene, 25 + index * 90 - icon.originX, 343 - icon.originY, 'itemPicture', String(item.graphic)).setOrigin(0));
+    root.add(createItemIcon(scene, 25 + index * 90, 343, item, icon));
     if (item.type === ITEM_TYPE.use) root.add(localizedText(scene, 50 + index * 90, 366, `x${item.ammo}`, { fontFamily: 'Arial', fontSize: '11px', color: '#ffffff' }));
   });
   root.add(navigation);

@@ -2,6 +2,7 @@ import { ITEM_TYPE, ItemFactory, isOccupiedItem, type Item, type ItemContext } f
 import { TRAIT, type TraitLevels } from './progression.ts';
 import { calculateAnyTrait } from './party-progression.ts';
 import { sniperDamageLimit, duelistDamageLimit } from './class-limits.ts';
+import { modWeaponById } from './weapon-registry.ts';
 
 export const COMBAT_TRAIT = {
   ...TRAIT, HUNTER: 1, SNIPER: 2, ROGUE: 3, MILITIA: 4, RANGER: 5, DUELIST: 7, NOBLE: 8, GUARDIAN: 9,
@@ -30,7 +31,8 @@ export function weaponStats(item: Readonly<Item>, traits: CombatTraits, context:
     canFire: isOccupiedItem(item) && item.type === ITEM_TYPE.gun && level(traits, item.reqTrait!) >= item.reqLv!,
     shells: item.shell + (item.typeMinor === 2 ? level(traits, TRAIT.DR_HOLLIDAY) : 0),
     accuracyDiv, rangeFix: 1800 + combatTrait(COMBAT_TRAIT.HUNTER, traits) * 20,
-    recoil: item.id === 24 || item.id === 25 ? item.accuracyDec! : item.accuracyDec! / (1 + Number(context.tight === true)),
+    // Луки с натяжением (Long Bow, Wind Bow или оружие мода с bowDraw) не получают половинную отдачу Tighter crosshair.
+    recoil: weaponBehavior(item).bowDraw ? item.accuracyDec! : item.accuracyDec! / (1 + Number(context.tight === true)),
     recovery: 0.02 * (100 + combatTrait(TRAIT.COOL, traits)) / 100,
     shootTimer, shootRate: item.shootRate, intervalFrames: Math.max(1, Math.ceil(shootTimer / item.shootRate)),
     reloadTime: reloadTimer(item, traits), consumesAmmo: item.reloadTimeMax !== 0,
@@ -181,8 +183,23 @@ const WEAPON_PRESENTATION: Readonly<Record<number, readonly [string, number, num
 };
 /** Четыре используемых поля исходного getWeaponInfo; неизвестные ID сохраняют исходную запасную позу. */
 export function weaponPresentation(id: number): WeaponPresentation {
+  const mod = modWeaponById(id);
+  if (mod) return { sound: mod.presentation.sound, shootFrame: mod.presentation.shootFrame, idleFrame: mod.presentation.idleFrame, endFrame: mod.presentation.endFrame };
   const [sound, shootFrame, idleFrame, endFrame] = WEAPON_PRESENTATION[id] ?? ['gun1', 10, 24, 10];
   return { sound, shootFrame, idleFrame, endFrame };
+}
+
+/** Вариант звука перезарядки: без поштучной зарядки всегда 1; исходные револьверы (14, 15) — 3, остальное поштучное — 2; у модов — по reloadSound. */
+export function reloadSoundVariant(id: number, manual: boolean): 1 | 2 | 3 {
+  if (!manual) return 1;
+  const mod = modWeaponById(id);
+  if (mod) return mod.presentation.reloadSound === 'revolver' ? 3 : mod.presentation.reloadSound === 'shell' ? 2 : 1;
+  return id === 14 || id === 15 ? 3 : 2;
+}
+
+/** Оружие с раскруткой стволов: исходный Chain Gun (16) или оружие мода с chainSpinUp. */
+export function isChainGunId(id: number | undefined): boolean {
+  return id === 16 || (id !== undefined && Boolean(modWeaponById(id)?.behavior.chainSpinUp));
 }
 
 const PROJECTILES: Readonly<Partial<Record<number, ProjectileKind>>> = { 21: 'grenade', 22: 'rocket', 23: 'bolt', 26: 'bolt', 24: 'arrow', 25: 'arrow', 27: 'gravity', 40: 'flame' };
@@ -214,6 +231,12 @@ export function idleChainGun(state: ChainGunState, manual: boolean): void {
 }
 
 export function weaponBehavior(item: Readonly<Item>) {
+  const mod = modWeaponById(item.id);
+  if (mod) {
+    const b = mod.behavior;
+    return { projectile: item.special ? b.projectile : null, chainSpinUp: b.chainSpinUp, bowDraw: b.bowDraw, speedBase: b.speedBase,
+      projectileCount: b.projectileCount, extraPenetrations: b.extraPenetrations, immediateReload: b.immediateReload };
+  }
   const projectile = item.special ? PROJECTILES[item.id] ?? null : null;
   return {
     projectile, chainSpinUp: item.id === 16, bowDraw: item.id === 24 || item.id === 25,

@@ -5,6 +5,7 @@ import { createItemPopupView, type ItemPopupLayout } from './item-popup-view.ts'
 import type { ItemPopupInfo } from './item-popup-values.ts';
 import Phaser from 'phaser';
 import { ITEM_TYPE, isOccupiedItem, type Item } from './items.ts';
+import { createItemIcon, itemIconSize } from './item-icon.ts';
 import { createModConfirmation, type ModConfirmationLayout } from './mod-confirmation-view.ts';
 
 export type LootArea = 'offers' | 'inventory';
@@ -88,16 +89,15 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
     let slotView: SlotView | undefined;
     if (item) {
       const asset = manifest.clips.itemPicture;
-      const width = GRAPHIC_WIDTH[item.graphic] ?? asset.frameWidth;
+      const { width, height } = itemIconSize(item, asset);
       const iconX = x - (width - 48) / 2 - 4;
       const icon = scene.add.container(iconX, y);
-      const frame = scene.textures.get('itemPicture').has(String(item.graphic)) ? String(item.graphic) : '1';
-      icon.add(localizedImage(scene, -asset.originX, -asset.originY, 'itemPicture', frame).setOrigin(0));
+      icon.add(createItemIcon(scene, 0, 0, item, asset));
       if (item.type === ITEM_TYPE.use && item.ammoMax > 0) {
         icon.add(localizedText(scene, 30.95, 2, `x ${item.ammo}`, { resolution: 2, fontFamily: 'ElonaMenu', fontSize: '12px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }));
       }
       root.add(icon);
-      slotView = { area, index, item, icon, originalX: iconX, originalY: y, width, height: GRAPHIC_HEIGHT[item.graphic] ?? asset.frameHeight };
+      slotView = { area, index, item, icon, originalX: iconX, originalY: y, width, height };
       if (state.pendingLootAction?.mod.area === area && state.pendingLootAction.mod.index === index) pendingModIcon = slotView;
     }
     const zone = scene.add.zone(x, y, 50, 50).setOrigin(0).setInteractive({ useHandCursor: true });
@@ -163,6 +163,3 @@ export function createLootView(scene: Phaser.Scene, state: LootViewState, manife
   return root;
 }
 
-// Исходные границы рисунка и поля num, без фильтров; для высоты учтено num.y = 2.
-const GRAPHIC_WIDTH: Readonly<Record<number, number>> = {"11": 58.85, "12": 59.85, "13": 79.95, "14": 79.95, "15": 83.95, "16": 51.85, "17": 52.85, "18": 55.85, "19": 60.85, "20": 57.85, "21": 51.85, "22": 56.85, "23": 95.95, "24": 59.85, "25": 62.85, "26": 79.95, "27": 89.95, "28": 67.85, "29": 69.95, "30": 79.95, "31": 69.95, "32": 84.95, "33": 63.85, "34": 63.85, "35": 52.8, "36": 62.35, "37": 75.95, "38": 60.3, "39": 52.85, "40": 48.85, "41": 57.85, "42": 59.85, "43": 49.85, "44": 69.95, "45": 54.4, "46": 79.95, "47": 53.8, "48": 79.95, "49": 79.95, "50": 60.0, "111": 55.35, "112": 50.85, "113": 52.3, "114": 50.85, "115": 56.85, "116": 54.85, "117": 50.85, "118": 50.85, "119": 53.85, "120": 51.3, "122": 58.35, "123": 64.95, "124": 52.35, "125": 67.95, "126": 62.8, "127": 51.3, "130": 61.85, "131": 60.85};
-const GRAPHIC_HEIGHT: Readonly<Record<number, number>> = {"11": 32.95, "12": 42.0, "13": 50.95, "14": 42.95, "15": 41.95, "16": 44.95, "17": 51.95, "18": 36.95, "19": 36.95, "20": 39.95, "21": 36.6, "22": 34.95, "23": 40.95, "24": 39.95, "25": 34.95, "26": 52.95, "27": 53.95, "28": 35.95, "29": 43.95, "30": 35.95, "31": 52.95, "32": 44.95, "33": 43.95, "34": 42.95, "35": 63.95, "36": 45.45, "37": 47.95, "38": 38.5, "39": 42.95, "40": 50.95, "41": 35.95, "42": 43.95, "43": 38.95, "44": 39.95, "45": 36.95, "46": 50.95, "47": 47.95, "48": 50.95, "49": 51.0, "50": 54.0, "111": 52.95, "112": 41.95, "113": 38.0, "114": 43.95, "115": 40.95, "116": 38.0, "117": 46.95, "118": 46.95, "119": 44.95, "120": 38.0, "122": 41.95, "123": 65.95, "124": 40.95, "125": 63.95, "126": 58.95, "127": 37.95, "130": 36.95, "131": 45.95};
