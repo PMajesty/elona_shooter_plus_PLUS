@@ -2534,6 +2534,66 @@
       "uniqueFrames": 16,
       "characterId": 2336
     },
+    "townNpcInn": {
+      "image": "sprites/townNpcInn.png",
+      "json": "sprites/townNpcInn.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "labels": {},
+      "count": 12,
+      "uniqueFrames": 3,
+      "characterId": 1595
+    },
+    "townNpcCastle": {
+      "image": "sprites/townNpcCastle.png",
+      "json": "sprites/townNpcCastle.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "labels": {},
+      "count": 17,
+      "uniqueFrames": 3,
+      "characterId": 1637
+    },
+    "townNpcBarrack": {
+      "image": "sprites/townNpcBarrack.png",
+      "json": "sprites/townNpcBarrack.json",
+      "originX": 4.0,
+      "originY": 0.0,
+      "frameWidth": 84,
+      "frameHeight": 32,
+      "labels": {},
+      "count": 68,
+      "uniqueFrames": 17,
+      "characterId": 1690
+    },
+    "townNpcSmithy": {
+      "image": "sprites/townNpcSmithy.png",
+      "json": "sprites/townNpcSmithy.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 72,
+      "frameHeight": 32,
+      "labels": {},
+      "count": 24,
+      "uniqueFrames": 4,
+      "characterId": 1800
+    },
+    "townNpcMuseum": {
+      "image": "sprites/townNpcMuseum.png",
+      "json": "sprites/townNpcMuseum.json",
+      "originX": 0.0,
+      "originY": 0.0,
+      "frameWidth": 48,
+      "frameHeight": 32,
+      "labels": {},
+      "count": 21,
+      "uniqueFrames": 3,
+      "characterId": 1826
+    },
     "infoPopup": {
       "image": "sprites/infoPopup.png",
       "json": "sprites/infoPopup.json",

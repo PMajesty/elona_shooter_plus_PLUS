@@ -65,6 +65,9 @@ CLIPS.update({"gameVolume": 2671, "originalCrosshair": 2689, "fireworkLaunch": 9
               "fireworkBit1": 101, "fireworkBit2": 91})
 CLIPS["museumKongregate"] = 1835
 CLIPS["townEventCards"] = 2336
+# Персонажи в углу городских окон — циклические клипы; они экспортируются отдельно и исключаются из статических панелей.
+TOWN_NPCS = {"townNpcInn": 1595, "townNpcCastle": 1637, "townNpcBarrack": 1690, "townNpcSmithy": 1800, "townNpcMuseum": 1826}
+CLIPS.update(TOWN_NPCS)
 BUTTONS.update({"button_pauseTitle": 1487, "button_pauseSave": 1490, "button_gameMenu": 2703})
 BUTTONS.update({"button_carryOver": 2732, "button_carryOverAgain": 2736})
 FORCE = False
@@ -196,7 +199,8 @@ def static_screen(xml, name, tags, omit=(), offset=(0, 0), sprite_frames=None, s
                             "SoundStreamBlockTag", "SoundStreamHeadTag", "SoundStreamHead2Tag"}):
             target.remove(tag)
     for tag in tags:
-        if tag.get("name") in omit:
+        # omit принимает имя экземпляра или characterId безымянного экземпляра (у персонажей окон нет имён).
+        if tag.get("name") in omit or tag.get("characterId") in omit:
             continue
         tag = copy.deepcopy(tag)
         if name == "townHud" and tag.get("name") == "bgAlpha":
@@ -939,18 +943,18 @@ def main():
         ("townHud", tags, 65, omit_battle | omit_town_nav, (0, 0)),
         ("townScene", tags, 71, omit_battle | omit_town_nav | {"textCarryOver"}, (0, 0)),
         ("townMission", sprites[1995].find("subTags"), 40,
-         {"closeButton", "hint2", "act1", "act2", "actRef1", "actRef2"}, (0, -22)),
+         {"closeButton", "hint2", "act1", "act2", "actRef1", "actRef2", "1595"}, (0, -22)),
         ("townCastle", sprites[1995].find("subTags"), 54,
-         {"closeButton", "hint2", "hint", "unkeep", "locker", "act1", "actRef1", "page1", "page2"}, (0, -22)),
+         {"closeButton", "hint2", "hint", "unkeep", "locker", "act1", "actRef1", "page1", "page2", "1637"}, (0, -22)),
         ("townShop", sprites[1995].find("subTags"), 80,
-         {"closeButton", "hint2", "warning", "popup", "actHelp", "act1", "act2", "actRef1", "actRef2"}, (0, -22)),
+         {"closeButton", "hint2", "warning", "popup", "actHelp", "act1", "act2", "actRef1", "actRef2", "1800"}, (0, -22)),
         ("townCharacters", sprites[1995].find("subTags"), 63,
          {"closeButton", "hint2", "hint", "dismissButton", "classText", "wage", "titleText", "wageText", "earnText", "killText",
-          "orderText", "recruitText", "dismissText", "costText", "order", "fo", "act1", "actRef1", "optHint", "optBoss", "optWall"}, (0, -22)),
+          "orderText", "recruitText", "dismissText", "costText", "order", "fo", "act1", "actRef1", "optHint", "optBoss", "optWall", "1690"}, (0, -22)),
         ("townEquipment", sprites[1995].find("subTags"), 71,
-         {"closeButton", "hint2", "popup", "warning", "actHelp", "act1", "act2", "actRef1", "actRef2"}, (0, -22)),
+         {"closeButton", "hint2", "popup", "warning", "actHelp", "act1", "act2", "actRef1", "actRef2", "1690"}, (0, -22)),
         ("townMedals", sprites[1995].find("subTags"), 85,
-         {"closeButton", "hint2", "hint", "lootText", "act1", "actRef1", "page1", "page2", "kongMc", "armorbt"}, (0, -22)),
+         {"closeButton", "hint2", "hint", "lootText", "act1", "actRef1", "page1", "page2", "kongMc", "armorbt", "1826"}, (0, -22)),
         ("medalRow", sprites[2151].find("subTags"), 1, {"medalName"}, (0, 0)),
         ("gene", sprites[1995].find("subTags"), 125, omit_gene, (0, -26)),
         ("gameMods", sprites[1995].find("subTags"), 136,
