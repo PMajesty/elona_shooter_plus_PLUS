@@ -38,7 +38,7 @@ export const zhContent: Record<string, string> = {
   "[Usable] A special artifact of Jure, Goddess of Healing. Her blessing protects your castle from enemies for a short period.": "【可使用】治愈女神朱亚的特殊神器。她的祝福能在短时间内保护你的城堡免受敌人侵害。",
   "[Usable] A special artifact. The ancient sword is called Ragnarok for a reason.": "【可使用】一件特殊的神器。这把古剑被称作“诸神黄昏”，自有其道理。",
   "\"These guy's do two thing's well, feasting on food bought with their hard earned gold... And earning their gold.\"": "“这帮家伙只擅长两件事：用辛苦赚来的金子买吃的大吃大喝……以及赚金子。”",
-  "\"One day these guy's just showed up shooting... That make's them party crashers and they must be treated accordingly!\"": "“某天，这帮家伙突然冒出来就开始放箭……这么一来他们就是不速之客了，这已经不是一般的市民了，必须重拳出击！”",
+  "\"One day these guy's just showed up shooting... That make's them party crashers and they must be treated accordingly!\"": "“某天，这帮家伙突然冒出来就开始放箭……这已经不是一般的市民了，必须重拳出击！”",
   "\"Something seems to have scared the sheep all in your direction, they are not damaging \"Your castle\" intentionally but... You don't care you kill them anyway.\"": "“好像有什么东西把羊群全都吓得朝你这边跑来了。它们并不是故意要破坏‘你的城堡’，但是……你才不在乎，照杀不误。”",
   "\"One night you saw one trip on a rock and then blow up... Now there's a whole army of them!\"": "“某天夜里，你看见其中一只被石头绊了一跤，然后就炸了……现在来了一整支大军！”",
   "\"Unfortunately you do not carry insurance against damage from these weapons, also unfortunate is the fact that during your recent tax audit they were mistaken as yours and your taxes have been raised accordingly.\"": "“很不幸，你的保险不赔这些武器造成的损失。同样不幸的是，在最近一次税务审计中，它们被误认成了你的财产，你的税也因此相应上调了。”",
