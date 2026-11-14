@@ -4,13 +4,21 @@
 
 An unofficial browser port of **Elona Shooter Plus 1.3.0.4**, the Flash castle-defense game. Pick a hero, aim at the monsters and keep your castle standing. Between battles, buy weapons, recruit companions and spend your earnings in town.
 
+## Passing the baton
+
+I wanted to be able to play Elona Shooter in a browser again and share it with people who missed it too. We can do that now, so I’m happy to call my part done. I’m leaving this version here to play and download. For now, I’m stepping away from maintenance and pull request reviews.
+
+Seeing the Plus developers take an interest in the port has been a lovely way to pass the baton back. You can follow the new work in **[Sunbrella114514’s fork](https://github.com/Sunbrella114514/elona_shooter_plus_PLUS)**. Thank you to Noa and the Plus team for making a game I still want to play, and to everyone who helped me bring it back.
+
+PMajesty
+
 ## Credits
 
 **Elona Shooter is [Noa's game](https://www.kongregate.com/games/noanoa/elona-shooter).** Credit for the Plus release belongs to its original developers and contributors. The original artists, sound contributors, testers and links are listed in **Help → Credits** inside the game.
 
 I used Codex and Claude to vibe-port the game from Flash to TypeScript and Phaser. I claim no credit for the original game or its content. This port will always be free to play and will never be monetized.
 
-Published with the developer's permission. The [source is on GitHub](https://github.com/PMajesty/elona_shooter_plus_PLUS), and contributions and bug reports are welcome. The MIT license covers newly written port code only; original game content retains its existing terms. See [license scope](LICENSE.md).
+Published with the developer's permission. The MIT license covers newly written port code only. Original game content retains its existing terms. See [license scope](LICENSE.md).
 
 ## Start playing
 
