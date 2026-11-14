@@ -82,5 +82,6 @@ export function translateText(value: string | string[], selected = language, con
 export function t(value: string): string { return translateText(value) as string; }
 export function localizedFont(family: string): string {
   if (language === 'en') return family;
-  return /Menu/.test(family) ? 'ElonaRussianMenu' : /Impact|Bold|Hud/.test(family) ? 'ElonaRussianBold' : 'ElonaRussianUI';
+  // MoolBoran окон Clear/Begin содержит только латинские глифы; используется рукописный шрифт меню.
+  return /Menu|Banner/.test(family) ? 'ElonaRussianMenu' : /Impact|Bold|Hud/.test(family) ? 'ElonaRussianBold' : 'ElonaRussianUI';
 }

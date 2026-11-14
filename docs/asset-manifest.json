@@ -11,7 +11,7 @@
     "images": 176,
     "clips": 97,
     "sounds": 89,
-    "fonts": 6
+    "fonts": 7
   },
   "runtimeAdjustments": [
     "Static screens omit runtime text placeholders and separately rendered controls",

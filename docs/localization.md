@@ -60,6 +60,8 @@ composition, storage, deterministic-save and artwork-footprint checks.
 After building, run `node --experimental-strip-types web/scripts/localization-smoke.mjs`
 against the local preview. It uses an isolated muted browser and checks live
 switching, reload, New Game, combat/save/Continue, help, loot, skills, town and dialogs.
+It waits for `data-transition="idle"` before clicking or capturing, because
+windows slide and fade as in the original.
 `QA_LANGUAGE=ru` also enables Russian in the existing mobile smoke script.
 These checks do not modify the player's browser profile.
 

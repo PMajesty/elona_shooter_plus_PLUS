@@ -23,6 +23,8 @@ try {
  const canvas=page.locator('#playfield > canvas'), game=page.locator('#game');
  const data=key=>game.getAttribute('data-'+key);
  const rendered=()=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+ // Въезд и угасание окон, затемнение и размытие должны завершиться: оригинал игнорирует щелчки во время перехода.
+ const idle=()=>page.locator('#game[data-transition="idle"]').waitFor();
  const click=async(x,y)=>{await rendered();const b=await canvas.boundingBox();await page.mouse.click(b.x+x*b.width/620,b.y+y*b.height/380);await rendered()};
  const screen=async name=>page.locator(`#game[data-screen="${name}"]`).waitFor();
  const open=async()=>{await page.goto(url);await page.locator('.opening-movie, #game[data-screen="title"]').first().waitFor();if(await page.locator('.opening-movie').isVisible())await page.locator('.opening-movie').click();await page.locator('#game[data-title-buttons-ready="true"]').waitFor();};
@@ -31,15 +33,15 @@ try {
  const importSave=async(save,confirm=true)=>{
   const chooser=page.waitForEvent('filechooser');await page.keyboard.press('Control+Shift+o');
   await(await chooser).setFiles({name:'expanded-qa.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(save))});
-  await page.locator('#game[data-replace-adventure="import"]').waitFor();await click(confirm?260:365,240);
+  await page.locator('#game[data-replace-adventure="import"]').waitFor();await idle();await click(confirm?260:365,240);
  };
 
  const shots=[];
- const shot=async (name,keepPointer=false)=>{await rendered();if(!keepPointer)await page.mouse.move(10,10);const file=`.build/localization/qa-${name}.png`;await page.screenshot({path:file});shots.push(file);};
+ const shot=async (name,keepPointer=false)=>{await idle();await rendered();if(!keepPointer)await page.mouse.move(10,10);const file=`.build/localization/qa-${name}.png`;await page.screenshot({path:file});shots.push(file);};
  const toggle=async()=>{const before=await data('language');await page.locator('#language').click();assert.notEqual(await data('language'),before);await rendered();};
  const envelope=sim=>{const save=sim.toSave();Simulation.fromSave(save);return {format:'elona-shooter-browser',version:sim.state.version,appearance:0,simulation:save,profile:createProfile(sim.state.ruleset.id)};};
  const resultScrollCheck=async()=>{
-  await rendered();
+  await idle();await rendered();
   const box=await canvas.boundingBox(),scale=box.width/620;
   const region=(x,y,width,height)=>page.screenshot({clip:{x:box.x+x*scale,y:box.y+y*scale,width:width*scale,height:height*scale}});
   const outside=await region(316,289,170,38),inside=await region(316,140,170,135);
@@ -68,14 +70,14 @@ try {
  await toggle();assert.equal(await data('language'),'ru');await shot('title-ru-1x');
  await page.setViewportSize({width:1280,height:800});await shot('title');
  await open();assert.equal(await data('language'),'ru');assert.equal(await data('muted'),'true');
- await click(295,195);await screen('gene');await click(200,214);await shot('gene');
+ await click(295,195);await screen('gene');await idle();await click(200,214);await shot('gene');
  await toggle();await toggle();assert.equal(await data('hero-class'),'rogue');
- await click(460,315);await screen('mods');await shot('mods');await page.keyboard.press('Escape');await screen('gene');
- await click(310,315);await screen('battle');await shot('battle');await page.keyboard.press('Escape');
+ await click(460,315);await screen('mods');await shot('mods');await page.keyboard.press('Escape');await screen('gene');await idle();
+ await click(310,315);await screen('begin');await screen('battle');await shot('battle');await page.keyboard.press('Escape');
  const before=await exported();await toggle();await toggle();assert.deepEqual((await exported()).simulation,before.simulation);await shot('pause');
  await open();await click(295,249);await screen('battle');assert.deepEqual((await exported()).simulation,before.simulation);
  // Названия и справка меняются на месте, не оставляя удалённых слушателей текста.
- await open();await click(295,300);await page.locator('#game[data-help-page="4"]').waitFor();await toggle();await toggle();await toggle();await toggle();await shot('help4');
+ await open();await click(295,300);await page.locator('#game[data-help-page="4"]').waitFor();await idle();await toggle();await toggle();await toggle();await toggle();await shot('help4');
  const layout=JSON.parse(await readFile('web/public/assets/town-layout.json','utf8')).help;
  for(const n of [1,2,3]){const p=layout.pages[0].children[`help${n}`];await click(layout.position.x+p.x+20,layout.position.y+p.y+10);await page.locator(`#game[data-help-page="${n}"]`).waitFor();await shot('help'+n);}
  await page.keyboard.press('Escape');
@@ -95,7 +97,7 @@ try {
  const factory=new ItemFactory(()=>0.3),modified=factory.generate(1);modified.modMax=3;factory.enchant(modified,4,2);factory.enchant(modified,1,1);factory.enchant(modified,11,1);town.state.inventory[3]=modified;
  await importSave(envelope(town));await screen('town');
  for(const [name,x,y,tab] of [['inn',44,75,'mission'],['tower',44,135,'castle'],['barrack',44,194,'characters'],['equipment',75,218,'equipment'],['smithy',44,275,'shop'],['medals',44,326,'medals']]){await click(x,y);assert.equal(await data('town-tab'),tab);await shot(name);}
- await click(44,275);const box=await canvas.boundingBox();await page.mouse.move(box.x+338*box.width/620,box.y+250*box.height/380);await page.locator('#game[data-item-popup]').waitFor();await shot('item-popup',true);await toggle();await toggle();
+ await click(44,275);await idle();const box=await canvas.boundingBox();await page.mouse.move(box.x+338*box.width/620,box.y+250*box.height/380);await page.locator('#game[data-item-popup]').waitFor();await shot('item-popup',true);await toggle();await toggle();
  await click(44,194);await toggle();await toggle();assert.deepEqual((await exported()).simulation,town.toSave());
  assert.equal(JSON.parse(await data('options')).showAllyDamage,true);
  await page.keyboard.press('Escape');await page.locator('#game[data-paused="true"]').waitFor();
